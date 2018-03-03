@@ -45,5 +45,11 @@ build:
 after_build:
   - dotnet pack .\src\DotNetToolkit.Repository\DotNetToolkit.Repository.csproj --configuration Release
 
+#---------------------------------#
+#       tests configuration       #
+#---------------------------------#
+test_script:
+  - dotnet test .\test\DotNetToolkit.Repository.Test\DotNetToolkit.Repository.Test.csproj --configuration Release
+  
 artifacts:
   - path: '**\DotNetToolkit.Repository.*.nupkg'     # find all NuGet packages recursively
