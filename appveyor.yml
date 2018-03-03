@@ -1,0 +1,49 @@
+#---------------------------------#
+#      general configuration      #
+#---------------------------------#
+
+# version format
+version: '{build}'
+
+# Do not increment build number for pull requests (GitHub only)
+pull_requests:
+  do_not_increment_build_number: true
+
+branches:
+  only:
+  - master
+
+# Do not build on tags (GitHub only)
+skip_tags: true
+
+#---------------------------------#
+#    environment configuration    #
+#---------------------------------#
+cache:
+  - packages
+
+#---------------------------------#
+#       build configuration       #
+#---------------------------------#
+
+# build platform, i.e. x86, x64, Any CPU. This setting is optional.
+platform: Any CPU
+
+# build Configuration, i.e. Debug, Release, etc.
+configuration: Release
+
+os: Visual Studio 2017
+
+before_build:
+  - dotnet --info
+  - dotnet restore
+
+build:
+  parallel: true                                    # enable MSBuild parallel builds
+  project: DotNetToolkit.Repository.sln             # path to Visual Studio solution or project
+
+after_build:
+  - dotnet pack .\src\DotNetToolkit.Repository\DotNetToolkit.Repository.csproj --configuration Release
+
+artifacts:
+  - path: '**\DotNetToolkit.Repository.*.nupkg'     # find all NuGet packages recursively

@@ -1,0 +1,26 @@
+<Project>
+  <Import Project="..\version.props" />
+  
+  <PropertyGroup>
+    
+	<BuildNumber Condition=" '$(APPVEYOR_BUILD_NUMBER)' != '' ">$(APPVEYOR_BUILD_NUMBER)</BuildNumber>
+    <BuildNumber Condition=" '$(BUILD_NUMBER)' != '' ">$(BUILD_NUMBER)</BuildNumber>
+    <BuildNumber Condition=" '$(BuildNumber)' == '' ">0</BuildNumber>
+    
+	<Product>DotNetToolkit.Repository</Product>
+    <Description>.NET Development Toolkit</Description>
+    <Copyright>Copyright (c) 2018 Johelvis Guzman</Copyright>
+    <Authors>Johelvis Guzman</Authors>
+    <PackageIconUrl>https://raw.githubusercontent.com/johelvisguzman/DotNetToolkit.Repository/master/Toolkit.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/johelvisguzman/DotNetToolkit.Repository</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/johelvisguzman/DotNetToolkit.Repository/blob/master/LICENSE.md</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/johelvisguzman/DotNetToolkit.Repository</RepositoryUrl>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Key.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <VersionSuffix Condition="'$(VersionSuffix)'!='' AND '$(BuildNumber)' != ''">$(VersionSuffix)-$(BuildNumber)</VersionSuffix>
+	
+  </PropertyGroup>
+</Project>

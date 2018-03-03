@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\build\common.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>net451;netstandard1.3</TargetFrameworks>
+    <Description>A toolkit that provides a lightweight starter kit for using the Repository pattern.</Description>
+    <AssemblyName>DotNetToolkit.Repository</AssemblyName>
+    <RootNamespace>DotNetToolkit.Repository</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
+  </ItemGroup>
+
+</Project>
