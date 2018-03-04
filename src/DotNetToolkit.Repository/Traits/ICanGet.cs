@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Traits
 {
+    using FetchStrategies;
     using System;
     using System.Linq.Expressions;
 
@@ -18,12 +19,29 @@
         TEntity Get(TKey key);
 
         /// <summary>
+        /// Gets an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <return>The entity found.</return>
+        TEntity Get(TKey key, IFetchStrategy<TEntity> fetchStrategy);
+
+        /// <summary>
         /// Gets a specific projected entity result with the given primary key value in the repository.
         /// </summary>
         /// <param name="key">The value of the primary key for the entity to be found.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         TResult Get<TResult>(TKey key, Expression<Func<TEntity, TResult>> selector);
+
+        /// <summary>
+        /// Gets a specific projected entity result with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <param name="selector">A function to project each entity into a new form.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
+        TResult Get<TResult>(TKey key, Expression<Func<TEntity, TResult>> selector, IFetchStrategy<TEntity> fetchStrategy);
 
         /// <summary>
         /// Determines whether the repository contains an entity with the given primary key value
