@@ -3,7 +3,7 @@
     using Traits;
 
     /// <summary>
-    /// Represents a repository for the unit of work and repository pattern.
+    /// Represents a repository.
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <typeparam name="TKey">The type of the primary key.</typeparam>
