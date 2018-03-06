@@ -13,6 +13,15 @@
     /// </summary>
     public abstract class RepositoryBase<TEntity, TKey> : IRepository<TEntity, TKey> where TEntity : class
     {
+        #region Public Methods
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public abstract void Dispose();
+
+        #endregion
+
         #region Protected Methods
 
         /// <summary>
@@ -125,7 +134,7 @@
         /// <returns>The number of entities contained in the repository.</returns>
         public int Count()
         {
-            return Count((ISpecification<TEntity>)null);
+            return GetQuery().Count();
         }
 
         /// <summary>
@@ -306,9 +315,6 @@
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
-
-            if (fetchStrategy == null)
-                throw new ArgumentNullException(nameof(fetchStrategy));
 
             return GetQuery(key, fetchStrategy);
         }
