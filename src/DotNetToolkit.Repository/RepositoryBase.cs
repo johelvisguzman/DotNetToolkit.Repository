@@ -85,7 +85,7 @@
 
             return GetQuery(new Specification<TEntity>(predicate));
         }
-        
+
         /// <summary>
         /// Returns a specification for getting an entity by it's primary key.
         /// </summary>
@@ -116,7 +116,40 @@
         }
 
         #endregion
-        
+
+        #region Implementation of ICanAggregate<TEntity>
+
+        /// <summary>
+        /// Returns the number of entities contained in the repository.
+        /// </summary>
+        /// <returns>The number of entities contained in the repository.</returns>
+        public int Count()
+        {
+            return Count((ISpecification<TEntity>)null);
+        }
+
+        /// <summary>
+        /// Returns the number of entities that satisfies the criteria specified by the <paramref name="criteria" /> in the repository.
+        /// </summary>
+        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
+        /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="criteria" /> in the repository.</returns>
+        public int Count(ISpecification<TEntity> criteria)
+        {
+            return GetQuery(criteria).Count();
+        }
+
+        /// <summary>
+        /// Returns the number of entities that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
+        /// </summary>
+        /// <param name="predicate">A function to filter each entity.</param>
+        /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
+        public int Count(Expression<Func<TEntity, bool>> predicate)
+        {
+            return GetQuery(predicate == null ? null : new Specification<TEntity>(predicate)).Count();
+        }
+
+        #endregion
+
         #region Implementation of ICanAdd<in TEntity>
 
         /// <summary>
