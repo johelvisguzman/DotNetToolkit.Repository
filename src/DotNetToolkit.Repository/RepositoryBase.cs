@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository
 {
     using FetchStrategies;
+    using Helpers;
     using Specifications;
     using System;
     using System.Collections.Generic;
@@ -12,6 +13,15 @@
     /// </summary>
     public abstract class RepositoryBase<TEntity, TKey> : IRepository<TEntity, TKey> where TEntity : class
     {
+        #region Public Methods
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public abstract void Dispose();
+
+        #endregion
+
         #region Protected Methods
 
         /// <summary>
@@ -35,29 +45,117 @@
         protected abstract void SaveChanges();
 
         /// <summary>
-        /// A protected overridable method for getting an entity query with the given primary key value from the repository.
-        /// </summary>
-        protected abstract TEntity GetQuery(TKey key);
-
-        /// <summary>
-        /// A protected overridable method for getting an entity query with the given primary key value from the repository.
-        /// </summary>
-        protected abstract TEntity GetQuery(TKey key, IFetchStrategy<TEntity> fetchStrategy);
-
-        /// <summary>
         /// A protected overridable method for getting an entity query that supplies the specified fetching strategy from the repository.
         /// </summary>
-        protected abstract IQueryable<TEntity> GetQuery(IFetchStrategy<TEntity> fetchStrategy);
+        protected abstract IQueryable<TEntity> GetQuery(IFetchStrategy<TEntity> fetchStrategy = null);
 
         /// <summary>
-        /// A protected overridable method for getting an entity query that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// Returns the entity <see cref="System.Linq.IQueryable{TEntity}" />.
         /// </summary>
-        protected abstract IQueryable<TEntity> GetQuery(ISpecification<TEntity> criteria);
+        protected virtual IQueryable<TEntity> AsQueryable()
+        {
+            return GetQuery();
+        }
 
         /// <summary>
-        /// A protected overridable method for getting an entity query that satisfies the criteria specified by the <paramref name="predicate" /> from the repository.
+        /// Gets an entity query with the given primary key value from the repository.
         /// </summary>
-        protected abstract IQueryable<TEntity> GetQuery(Expression<Func<TEntity, bool>> predicate);
+        protected virtual TEntity GetQuery(TKey key, IFetchStrategy<TEntity> fetchStrategy)
+        {
+            return (TEntity)GetQuery(ByPrimaryKeySpecification(key, fetchStrategy));
+        }
+
+        /// <summary>
+        /// Gets an entity query with the given primary key value from the repository.
+        /// </summary>
+        protected virtual TEntity GetQuery(TKey key)
+        {
+            return Get(key, (IFetchStrategy<TEntity>)null);
+        }
+
+        /// <summary>
+        /// Gets an entity query that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// </summary>
+        protected virtual IQueryable<TEntity> GetQuery(ISpecification<TEntity> criteria)
+        {
+            if (criteria == null)
+                throw new ArgumentNullException(nameof(criteria));
+
+            return GetQuery(criteria.FetchStrategy);
+        }
+
+        /// <summary>
+        /// Gets an entity query that satisfies the criteria specified by the <paramref name="predicate" /> from the repository.
+        /// </summary>
+        protected virtual IQueryable<TEntity> GetQuery(Expression<Func<TEntity, bool>> predicate)
+        {
+            if (predicate == null)
+                throw new ArgumentNullException(nameof(predicate));
+
+            return GetQuery(new Specification<TEntity>(predicate));
+        }
+
+        /// <summary>
+        /// Returns a specification for getting an entity by it's primary key.
+        /// </summary>
+        /// <param name="key">The entity's key.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <returns>The new specification.</returns>
+        // https://github.com/SharpRepository/SharpRepository/blob/develop/SharpRepository.Repository/RepositoryBase.cs
+        protected virtual ISpecification<TEntity> ByPrimaryKeySpecification(TKey key, IFetchStrategy<TEntity> fetchStrategy = null)
+        {
+            var propInfo = ConventionHelper.GetPrimaryKeyPropertyInfo(GetType());
+            var parameter = Expression.Parameter(typeof(TEntity), "x");
+            var lambda = Expression.Lambda<Func<TEntity, bool>>(
+                    Expression.Equal(
+                        Expression.PropertyOrField(parameter, propInfo.Name),
+                        Expression.Constant(key)
+                    ),
+                    parameter
+                );
+
+            var spec = new Specification<TEntity>(lambda);
+
+            if (fetchStrategy != null)
+            {
+                spec.FetchStrategy = fetchStrategy;
+            }
+
+            return spec;
+        }
+
+        #endregion
+
+        #region Implementation of ICanAggregate<TEntity>
+
+        /// <summary>
+        /// Returns the number of entities contained in the repository.
+        /// </summary>
+        /// <returns>The number of entities contained in the repository.</returns>
+        public int Count()
+        {
+            return GetQuery().Count();
+        }
+
+        /// <summary>
+        /// Returns the number of entities that satisfies the criteria specified by the <paramref name="criteria" /> in the repository.
+        /// </summary>
+        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
+        /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="criteria" /> in the repository.</returns>
+        public int Count(ISpecification<TEntity> criteria)
+        {
+            return GetQuery(criteria).Count();
+        }
+
+        /// <summary>
+        /// Returns the number of entities that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
+        /// </summary>
+        /// <param name="predicate">A function to filter each entity.</param>
+        /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
+        public int Count(Expression<Func<TEntity, bool>> predicate)
+        {
+            return GetQuery(predicate == null ? null : new Specification<TEntity>(predicate)).Count();
+        }
 
         #endregion
 
@@ -217,9 +315,6 @@
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
-
-            if (fetchStrategy == null)
-                throw new ArgumentNullException(nameof(fetchStrategy));
 
             return GetQuery(key, fetchStrategy);
         }
@@ -438,6 +533,5 @@
         }
 
         #endregion
-
     }
 }

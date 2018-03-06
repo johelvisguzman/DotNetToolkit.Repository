@@ -44,12 +44,14 @@ build:
 
 after_build:
   - dotnet pack .\src\DotNetToolkit.Repository\DotNetToolkit.Repository.csproj --configuration Release
+  - dotnet pack .\src\DotNetToolkit.Repository.EntityFramework\DotNetToolkit.Repository.EntityFramework.csproj --configuration Release
 
 #---------------------------------#
 #       tests configuration       #
 #---------------------------------#
 test_script:
   - dotnet test .\test\DotNetToolkit.Repository.Test\DotNetToolkit.Repository.Test.csproj --configuration Release
+  - dotnet test .\test\DotNetToolkit.Repository.Integration.Test\DotNetToolkit.Repository.Integration.Test.csproj --configuration Release
   
 artifacts:
   - path: '**\DotNetToolkit.Repository.*.nupkg'     # find all NuGet packages recursively
