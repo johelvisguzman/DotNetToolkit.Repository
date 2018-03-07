@@ -12,4 +12,12 @@
         where TEntity : class
     {
     }
+
+    /// <summary>
+    /// Represents a repository with a default primary key value of type integer.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    public interface IRepository<TEntity> : IRepository<TEntity, int> where TEntity : class
+    {
+    }
 }
