@@ -2,6 +2,7 @@
 {
     using FetchStrategies;
     using Helpers;
+    using Queries;
     using Specifications;
     using System;
     using System.Collections.Generic;
@@ -62,13 +63,13 @@
         /// </summary>
         protected virtual TEntity GetQuery(TKey key, IFetchStrategy<TEntity> fetchStrategy)
         {
-            return (TEntity)GetQuery(ByPrimaryKeySpecification(key, fetchStrategy));
+            return GetQuery(ByPrimaryKeySpecification(key, fetchStrategy));
         }
 
         /// <summary>
         /// Gets an entity query with the given primary key value from the repository.
         /// </summary>
-        protected virtual TEntity GetQuery(TKey key)
+        protected TEntity GetQuery(TKey key)
         {
             return Get(key, (IFetchStrategy<TEntity>)null);
         }
@@ -76,23 +77,40 @@
         /// <summary>
         /// Gets an entity query that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected virtual IQueryable<TEntity> GetQuery(ISpecification<TEntity> criteria)
+        protected TEntity GetQuery(ISpecification<TEntity> criteria)
+        {
+            var query = GetQuery(criteria.FetchStrategy);
+
+            return criteria.SatisfyingEntityFrom(query);
+        }
+
+        /// <summary>
+        /// Gets an entity query that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// </summary>
+        protected IQueryable<TEntity> GetQuery(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
 
-            return GetQuery(criteria.FetchStrategy);
+            var query = GetQuery(criteria.FetchStrategy);
+
+            query = criteria.SatisfyingEntitiesFrom(query);
+
+            if (options != null)
+                query = options.Apply(query);
+
+            return query;
         }
 
         /// <summary>
         /// Gets an entity query that satisfies the criteria specified by the <paramref name="predicate" /> from the repository.
         /// </summary>
-        protected virtual IQueryable<TEntity> GetQuery(Expression<Func<TEntity, bool>> predicate)
+        protected IQueryable<TEntity> GetQuery(Expression<Func<TEntity, bool>> predicate, IQueryOptions<TEntity> options)
         {
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
-            return GetQuery(new Specification<TEntity>(predicate));
+            return GetQuery(new Specification<TEntity>(predicate), options);
         }
 
         /// <summary>
@@ -134,7 +152,7 @@
         /// <returns>The number of entities contained in the repository.</returns>
         public int Count()
         {
-            return GetQuery().Count();
+            return Count((ISpecification<TEntity>)null);
         }
 
         /// <summary>
@@ -144,7 +162,9 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="criteria" /> in the repository.</returns>
         public int Count(ISpecification<TEntity> criteria)
         {
-            return GetQuery(criteria).Count();
+            var predicate = criteria?.Predicate?.Compile();
+
+            return predicate == null ? GetQuery().Count() : GetQuery().Count(predicate);
         }
 
         /// <summary>
@@ -154,7 +174,7 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
         public int Count(Expression<Func<TEntity, bool>> predicate)
         {
-            return GetQuery(predicate == null ? null : new Specification<TEntity>(predicate)).Count();
+            return Count(predicate == null ? null : new Specification<TEntity>(predicate));
         }
 
         #endregion
@@ -390,26 +410,28 @@
         /// Finds the first entity in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
+        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The entity that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
-        public TEntity Find(Expression<Func<TEntity, bool>> predicate)
+        public TEntity Find(Expression<Func<TEntity, bool>> predicate, IQueryOptions<TEntity> options = null)
         {
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
-            return GetQuery(predicate).FirstOrDefault();
+            return GetQuery(predicate, options).FirstOrDefault();
         }
 
         /// <summary>
         /// Finds the first entity in the repository that satisfies the criteria specified by the <paramref name="criteria" /> in the repository.
         /// </summary>
         /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
+        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The entity that satisfied the criteria specified by the <paramref name="criteria" /> in the repository.</returns>
-        public TEntity Find(ISpecification<TEntity> criteria)
+        public TEntity Find(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options = null)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
 
-            return GetQuery(criteria).FirstOrDefault();
+            return GetQuery(criteria, options).FirstOrDefault();
         }
 
         /// <summary>
@@ -417,8 +439,9 @@
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
+        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public TResult Find<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector)
+        public TResult Find<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null)
         {
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
@@ -426,7 +449,7 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            return GetQuery(predicate).Select(selector).FirstOrDefault();
+            return GetQuery(predicate, options).Select(selector).FirstOrDefault();
         }
 
         /// <summary>
@@ -434,8 +457,9 @@
         /// </summary>
         /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
+        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public TResult Find<TResult>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TResult>> selector)
+        public TResult Find<TResult>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
@@ -443,33 +467,35 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            return GetQuery(criteria).Select(selector).FirstOrDefault();
+            return GetQuery(criteria, options).Select(selector).FirstOrDefault();
         }
 
         /// <summary>
         /// Finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
+        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
-        public IEnumerable<TEntity> FindAll(Expression<Func<TEntity, bool>> predicate)
+        public IEnumerable<TEntity> FindAll(Expression<Func<TEntity, bool>> predicate, IQueryOptions<TEntity> options = null)
         {
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
-            return GetQuery(predicate).ToList();
+            return GetQuery(predicate, options).ToList();
         }
 
         /// <summary>
         /// Finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="criteria" />.
         /// </summary>
         /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
+        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="criteria" />.</returns>
-        public IEnumerable<TEntity> FindAll(ISpecification<TEntity> criteria)
+        public IEnumerable<TEntity> FindAll(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options = null)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
 
-            return GetQuery(criteria).ToList();
+            return GetQuery(criteria, options).ToList();
         }
 
         /// <summary>
@@ -477,8 +503,9 @@
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
+        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
-        public IEnumerable<TResult> FindAll<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector)
+        public IEnumerable<TResult> FindAll<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null)
         {
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
@@ -486,7 +513,7 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            return GetQuery(predicate).Select(selector).ToList();
+            return GetQuery(predicate, options).Select(selector).ToList();
         }
 
         /// <summary>
@@ -494,8 +521,9 @@
         /// </summary>
         /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
+        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="criteria" />.</returns>
-        public IEnumerable<TResult> FindAll<TResult>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TResult>> selector)
+        public IEnumerable<TResult> FindAll<TResult>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
@@ -503,7 +531,7 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            return GetQuery(criteria).Select(selector).ToList();
+            return GetQuery(criteria, options).Select(selector).ToList();
         }
 
         /// <summary>
