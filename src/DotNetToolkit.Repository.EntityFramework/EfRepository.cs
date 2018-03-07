@@ -21,7 +21,7 @@
     /// <summary>
     /// Represents a repository for entity framework with a default primary key value of type integer.
     /// </summary>
-    public class EfRepository<TEntity> : EfRepositoryBase<TEntity, int> where TEntity : class
+    public class EfRepository<TEntity> : EfRepositoryBase<TEntity, int>, IRepository<TEntity> where TEntity : class
     {
         #region Constructors
 
