@@ -1,14 +1,20 @@
 ﻿namespace DotNetToolkit.Repository.EntityFramework
 {
     using FetchStrategies;
+    using Queries;
+    using Specifications;
     using System;
+    using System.Collections.Generic;
     using System.Data.Entity;
     using System.Linq;
+    using System.Linq.Expressions;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Represents a repository for entity framework.
     /// </summary>
-    public abstract class EfRepositoryBase<TEntity, TKey> : RepositoryBase<TEntity, TKey> where TEntity : class
+    public abstract class EfRepositoryBase<TEntity, TKey> : RepositoryAsyncBase<TEntity, TKey> where TEntity : class
     {
         #region Fields
 
@@ -116,9 +122,9 @@
         /// <summary>
         /// Gets an entity query with the given primary key value from the repository.
         /// </summary>
-        protected override TEntity GetQuery(TKey key, IFetchStrategy<TEntity> fetchStrategy)
+        protected override TEntity GetEntity(TKey key, IFetchStrategy<TEntity> fetchStrategy)
         {
-            return fetchStrategy == null ? DbSet.Find(key) : base.GetQuery(key, fetchStrategy);
+            return fetchStrategy == null ? DbSet.Find(key) : base.GetEntity(key, fetchStrategy);
         }
 
         /// <summary>
@@ -128,6 +134,95 @@
         {
             Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        #endregion
+
+        #region Overrides of RepositoryAsyncBase<TEntity,TKey>
+
+        /// <summary>
+        /// A protected asynchronous overridable method for saving changes made in the current unit of work in the repository.
+        /// </summary>
+        protected override Task SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+        {
+            return Context.SaveChangesAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Gets an entity query with the given primary key value from the repository.
+        /// </summary>
+        protected override Task<TEntity> GetEntityAsync(TKey key, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        {
+            var dbSet = (DbSet<TEntity>)DbSet;
+
+            return fetchStrategy == null ? dbSet.FindAsync(cancellationToken, key) : base.GetEntityAsync(key, fetchStrategy, cancellationToken);
+        }
+
+        /// <summary>
+        /// A protected asynchronous overridable method for getting an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// </summary>
+        protected override Task<TEntity> GetEntityAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        {
+            if (criteria == null)
+                throw new ArgumentNullException(nameof(criteria));
+
+            return GetQuery(criteria, options).FirstOrDefaultAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// A protected asynchronous overridable method for getting an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// </summary>
+        protected override Task<TResult> GetEntityAsync<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            if (criteria == null)
+                throw new ArgumentNullException(nameof(criteria));
+
+            return GetQuery(criteria, options).Select(selector).FirstOrDefaultAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// A protected asynchronous overridable method for getting a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// </summary>
+        protected override Task<List<TEntity>> GetEntitiesAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        {
+            if (criteria == null)
+                throw new ArgumentNullException(nameof(criteria));
+
+            return GetQuery(criteria, options).ToListAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// A protected asynchronous overridable method for getting a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// </summary>
+        protected override Task<List<TResult>> GetEntitiesAsync<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            if (criteria == null)
+                throw new ArgumentNullException(nameof(criteria));
+
+            return GetQuery(criteria, options).Select(selector).ToListAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// A protected asynchronous overridable method for getting a the number of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// </summary>
+        protected override Task<int> GetCountAsync(ISpecification<TEntity> criteria, CancellationToken cancellationToken = new CancellationToken())
+        {
+            var predicate = criteria?.Predicate;
+
+            return predicate == null ? GetQuery().CountAsync(cancellationToken) : GetQuery().CountAsync(predicate, cancellationToken);
+        }
+
+        /// <summary>
+        /// A protected asynchronous overridable method for determining whether the repository contains an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// </summary>
+        protected override Task<bool> GetExistAsync(ISpecification<TEntity> criteria, CancellationToken cancellationToken = new CancellationToken())
+        {
+            if (criteria == null)
+                throw new ArgumentNullException(nameof(criteria));
+
+            var predicate = criteria?.Predicate;
+
+            return predicate == null ? GetQuery().AnyAsync(cancellationToken) : GetQuery().AnyAsync(predicate, cancellationToken);
         }
 
         #endregion
