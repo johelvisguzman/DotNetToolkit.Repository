@@ -2,10 +2,12 @@
 {
     using FetchStrategies;
     using Helpers;
+    using Properties;
     using Queries;
     using Specifications;
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
 
@@ -59,32 +61,6 @@
         }
 
         /// <summary>
-        /// Gets an entity query with the given primary key value from the repository.
-        /// </summary>
-        protected virtual TEntity GetQuery(TKey key, IFetchStrategy<TEntity> fetchStrategy)
-        {
-            return GetQuery(ByPrimaryKeySpecification(key, fetchStrategy));
-        }
-
-        /// <summary>
-        /// Gets an entity query with the given primary key value from the repository.
-        /// </summary>
-        protected TEntity GetQuery(TKey key)
-        {
-            return Get(key, (IFetchStrategy<TEntity>)null);
-        }
-
-        /// <summary>
-        /// Gets an entity query that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
-        protected TEntity GetQuery(ISpecification<TEntity> criteria)
-        {
-            var query = GetQuery(criteria.FetchStrategy);
-
-            return criteria.SatisfyingEntityFrom(query);
-        }
-
-        /// <summary>
         /// Gets an entity query that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
         protected IQueryable<TEntity> GetQuery(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
@@ -103,14 +79,84 @@
         }
 
         /// <summary>
-        /// Gets an entity query that satisfies the criteria specified by the <paramref name="predicate" /> from the repository.
+        /// Gets an entity query with the given primary key value from the repository.
         /// </summary>
-        protected IQueryable<TEntity> GetQuery(Expression<Func<TEntity, bool>> predicate, IQueryOptions<TEntity> options)
+        protected virtual TEntity GetEntity(TKey key, IFetchStrategy<TEntity> fetchStrategy)
         {
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
+            return GetEntity(GetByPrimaryKeySpecification(key, fetchStrategy), (IQueryOptions<TEntity>)null);
+        }
 
-            return GetQuery(new Specification<TEntity>(predicate), options);
+        /// <summary>
+        /// Gets an entity query with the given primary key value from the repository.
+        /// </summary>
+        protected virtual TEntity GetEntity(TKey key)
+        {
+            return Get(key, (IFetchStrategy<TEntity>)null);
+        }
+
+        /// <summary>
+        /// Gets an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// </summary>
+        protected virtual TEntity GetEntity(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
+        {
+            if (criteria == null)
+                throw new ArgumentNullException(nameof(criteria));
+
+            return GetQuery(criteria, options).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// </summary>
+        protected virtual TResult GetEntity<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
+        {
+            if (criteria == null)
+                throw new ArgumentNullException(nameof(criteria));
+
+            return GetQuery(criteria, options).Select(selector).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// </summary>
+        protected virtual IEnumerable<TEntity> GetEntities(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
+        {
+            if (criteria == null)
+                throw new ArgumentNullException(nameof(criteria));
+
+            return GetQuery(criteria, options).ToList();
+        }
+
+        /// <summary>
+        /// Gets a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// </summary>
+        protected virtual IEnumerable<TResult> GetEntities<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
+        {
+            if (criteria == null)
+                throw new ArgumentNullException(nameof(criteria));
+
+            return GetQuery(criteria, options).Select(selector).ToList();
+        }
+
+        /// <summary>
+        /// Gets the number of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// </summary>
+        protected virtual int GetCount(ISpecification<TEntity> criteria)
+        {
+            var predicate = criteria?.Predicate?.Compile();
+
+            return predicate == null ? GetQuery().Count() : GetQuery().Count(predicate);
+        }
+
+        /// <summary>
+        /// Determining whether the repository contains an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// </summary>
+        protected virtual bool GetExist(ISpecification<TEntity> criteria)
+        {
+            if (criteria == null)
+                throw new ArgumentNullException(nameof(criteria));
+
+            return Find(criteria) != null;
         }
 
         /// <summary>
@@ -120,9 +166,9 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The new specification.</returns>
         // https://github.com/SharpRepository/SharpRepository/blob/develop/SharpRepository.Repository/RepositoryBase.cs
-        protected virtual ISpecification<TEntity> ByPrimaryKeySpecification(TKey key, IFetchStrategy<TEntity> fetchStrategy = null)
+        protected virtual ISpecification<TEntity> GetByPrimaryKeySpecification(TKey key, IFetchStrategy<TEntity> fetchStrategy = null)
         {
-            var propInfo = ConventionHelper.GetPrimaryKeyPropertyInfo(GetType());
+            var propInfo = ConventionHelper.GetPrimaryKeyPropertyInfo(typeof(TEntity));
             var parameter = Expression.Parameter(typeof(TEntity), "x");
             var lambda = Expression.Lambda<Func<TEntity, bool>>(
                     Expression.Equal(
@@ -162,9 +208,7 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="criteria" /> in the repository.</returns>
         public int Count(ISpecification<TEntity> criteria)
         {
-            var predicate = criteria?.Predicate?.Compile();
-
-            return predicate == null ? GetQuery().Count() : GetQuery().Count(predicate);
+            return GetCount(criteria);
         }
 
         /// <summary>
@@ -260,7 +304,7 @@
 
             var entity = Get(key);
             if (entity == null)
-                throw new InvalidOperationException($"No entity found in the repository with the '{key}' key.");
+                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
 
             DeleteItem(entity);
             SaveChanges();
@@ -322,7 +366,7 @@
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            return GetQuery(key);
+            return GetEntity(key);
         }
 
         /// <summary>
@@ -336,7 +380,7 @@
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            return GetQuery(key, fetchStrategy);
+            return GetEntity(key, fetchStrategy);
         }
 
         /// <summary>
@@ -353,13 +397,7 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            var result = GetQuery(key);
-            var selectFunc = selector.Compile();
-            var selectedResult = result == null
-                ? default(TResult)
-                : new[] { result }.AsEnumerable().Select(selectFunc).First();
-
-            return selectedResult;
+            return Get(key, selector, (IFetchStrategy<TEntity>)null);
         }
 
         /// <summary>
@@ -380,7 +418,7 @@
             if (fetchStrategy == null)
                 throw new ArgumentNullException(nameof(fetchStrategy));
 
-            var result = GetQuery(key, fetchStrategy);
+            var result = GetEntity(key, fetchStrategy);
             var selectFunc = selector.Compile();
             var selectedResult = result == null
                 ? default(TResult)
@@ -417,7 +455,7 @@
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
-            return GetQuery(predicate, options).FirstOrDefault();
+            return Find(new Specification<TEntity>(predicate), options);
         }
 
         /// <summary>
@@ -431,7 +469,7 @@
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
 
-            return GetQuery(criteria, options).FirstOrDefault();
+            return GetEntity(criteria, options);
         }
 
         /// <summary>
@@ -449,7 +487,7 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            return GetQuery(predicate, options).Select(selector).FirstOrDefault();
+            return Find(new Specification<TEntity>(predicate), selector, options);
         }
 
         /// <summary>
@@ -467,7 +505,7 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            return GetQuery(criteria, options).Select(selector).FirstOrDefault();
+            return GetEntity(criteria, options, selector);
         }
 
         /// <summary>
@@ -481,7 +519,7 @@
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
-            return GetQuery(predicate, options).ToList();
+            return FindAll(new Specification<TEntity>(predicate), options);
         }
 
         /// <summary>
@@ -495,7 +533,7 @@
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
 
-            return GetQuery(criteria, options).ToList();
+            return GetEntities(criteria, options);
         }
 
         /// <summary>
@@ -513,7 +551,7 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            return GetQuery(predicate, options).Select(selector).ToList();
+            return FindAll(new Specification<TEntity>(predicate), selector, options);
         }
 
         /// <summary>
@@ -531,7 +569,7 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            return GetQuery(criteria, options).Select(selector).ToList();
+            return GetEntities(criteria, options, selector);
         }
 
         /// <summary>
@@ -544,7 +582,7 @@
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
-            return Find(predicate) != null;
+            return Exists(new Specification<TEntity>(predicate));
         }
 
         /// <summary>
@@ -557,7 +595,7 @@
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
 
-            return Find(criteria) != null;
+            return GetExist(criteria);
         }
 
         #endregion
