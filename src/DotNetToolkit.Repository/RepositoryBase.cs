@@ -415,9 +415,6 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            if (fetchStrategy == null)
-                throw new ArgumentNullException(nameof(fetchStrategy));
-
             var result = GetEntity(key, fetchStrategy);
             var selectFunc = selector.Compile();
             var selectedResult = result == null
