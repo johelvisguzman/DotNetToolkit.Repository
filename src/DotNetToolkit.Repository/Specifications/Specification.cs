@@ -117,16 +117,6 @@
         public IFetchStrategy<T> FetchStrategy { get; set; }
 
         /// <summary>
-        /// Returns the entity that satisfied the criteria specified by the <see cref="ISpecification{T}.Predicate"/> from the query.
-        /// </summary>
-        /// <param name="query">The entity query.</param>
-        /// <returns>The entity that satisfied the criteria specified by the <see cref="ISpecification{T}.Predicate"/> from the query.</returns>
-        public virtual T SatisfyingEntityFrom(IQueryable<T> query)
-        {
-            return SatisfyingEntitiesFrom(query).FirstOrDefault();
-        }
-
-        /// <summary>
         /// Returns a collection of entities that satisfied the criteria specified by the <see cref="ISpecification{T}.Predicate"/> from the query.
         /// </summary>
         /// <param name="query">The entity query.</param>
