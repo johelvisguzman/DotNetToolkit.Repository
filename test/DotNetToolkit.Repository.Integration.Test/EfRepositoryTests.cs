@@ -2,12 +2,13 @@
 {
     using Data;
     using EntityFramework;
+    using FetchStrategies;
     using Queries;
     using Specifications;
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using FetchStrategies;
     using Xunit;
 
     public class EfRepositoryTests
@@ -912,14 +913,19 @@
                 int key = 1;
                 const string name = "Random Name";
 
+                var fetchStrategy = new FetchStrategy<Customer>();
+                fetchStrategy.Include(x => x.Address);
+
                 var entity = new Customer { Id = key, Name = name };
                 var repo = new EfRepository<Customer>(context);
 
                 Assert.Null(repo.Get(key));
+                Assert.Null(repo.Get(key, fetchStrategy));
 
                 repo.Add(entity);
 
                 Assert.NotNull(repo.Get(key));
+                Assert.NotNull(repo.Get(key, fetchStrategy));
             }
         }
 
@@ -931,14 +937,19 @@
                 int key = 1;
                 const string name = "Random Name";
 
+                var fetchStrategy = new FetchStrategy<Customer>();
+                fetchStrategy.Include(x => x.Address);
+
                 var entity = new Customer { Id = key, Name = name };
                 var repo = new EfRepository<Customer>(context);
 
                 Assert.Null(await repo.GetAsync(key));
+                Assert.Null(await repo.GetAsync(key, fetchStrategy));
 
                 await repo.AddAsync(entity);
 
                 Assert.NotNull(await repo.GetAsync(key));
+                Assert.NotNull(await repo.GetAsync(key, fetchStrategy));
             }
         }
 
