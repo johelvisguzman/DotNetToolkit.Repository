@@ -10,5 +10,12 @@
         public TestDbContext(DbConnection connection) : base(connection, true)
         {
         }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Customer>()
+                 .HasOptional(s => s.Address)
+                 .WithRequired(ad => ad.Customer);
+        }
     }
 }

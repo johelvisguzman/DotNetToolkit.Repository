@@ -2,10 +2,12 @@
 {
     using FetchStrategies;
     using Helpers;
+    using Properties;
     using Queries;
     using Specifications;
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
 
@@ -166,7 +168,7 @@
         // https://github.com/SharpRepository/SharpRepository/blob/develop/SharpRepository.Repository/RepositoryBase.cs
         protected virtual ISpecification<TEntity> GetByPrimaryKeySpecification(TKey key, IFetchStrategy<TEntity> fetchStrategy = null)
         {
-            var propInfo = ConventionHelper.GetPrimaryKeyPropertyInfo(GetType());
+            var propInfo = ConventionHelper.GetPrimaryKeyPropertyInfo(typeof(TEntity));
             var parameter = Expression.Parameter(typeof(TEntity), "x");
             var lambda = Expression.Lambda<Func<TEntity, bool>>(
                     Expression.Equal(
@@ -302,7 +304,7 @@
 
             var entity = Get(key);
             if (entity == null)
-                throw new InvalidOperationException($"No entity found in the repository with the '{key}' key.");
+                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
 
             DeleteItem(entity);
             SaveChanges();
