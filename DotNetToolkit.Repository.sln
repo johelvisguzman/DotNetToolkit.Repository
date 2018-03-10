@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.En
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Integration.Test", "test\DotNetToolkit.Repository.Integration.Test\DotNetToolkit.Repository.Integration.Test.csproj", "{2F99B66F-A347-4E8D-8ACA-5A34246A1FA6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetToolkit.Repository.InMemory", "src\DotNetToolkit.Repository.InMemory\DotNetToolkit.Repository.InMemory.csproj", "{715D2F11-3AAF-476E-9A6A-DCA6DEBD377E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,10 @@ Global
 		{2F99B66F-A347-4E8D-8ACA-5A34246A1FA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F99B66F-A347-4E8D-8ACA-5A34246A1FA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F99B66F-A347-4E8D-8ACA-5A34246A1FA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{715D2F11-3AAF-476E-9A6A-DCA6DEBD377E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{715D2F11-3AAF-476E-9A6A-DCA6DEBD377E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{715D2F11-3AAF-476E-9A6A-DCA6DEBD377E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{715D2F11-3AAF-476E-9A6A-DCA6DEBD377E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -46,6 +52,7 @@ Global
 		{EAE7B507-D908-4650-A301-C3341F005A51} = {DAB3DD1E-AD99-46C9-AC42-07E2F03D5A06}
 		{8DBCF7DE-532D-45DF-A6B8-5D89415C5B77} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{2F99B66F-A347-4E8D-8ACA-5A34246A1FA6} = {DAB3DD1E-AD99-46C9-AC42-07E2F03D5A06}
+		{715D2F11-3AAF-476E-9A6A-DCA6DEBD377E} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96973E0C-81D1-42DE-9F78-7103241B4E07}
