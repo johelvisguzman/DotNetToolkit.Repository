@@ -66,6 +66,33 @@
         }
 
         /// <summary>
+        /// Gets the entity's primary key value or it's default value which is null.
+        /// </summary>
+        /// <param name="obj">The object containing the property.</param>
+        /// <returns>The entity's primary key value or default.</returns>
+        /// <exception cref="System.InvalidOperationException">The instance of entity type requires a primary key to be defined.</exception>
+        public static object GetPrimaryKeyPropertyValueOrDefault(object obj)
+        {
+            if (obj == null)
+                throw new ArgumentNullException(nameof(obj));
+
+            var propertyInfo = GetPrimaryKeyPropertyInfo(obj.GetType());
+            var propertyType = propertyInfo.PropertyType;
+            var key = propertyInfo.GetValue(obj, null);
+
+            if (propertyType == typeof(Guid) && (Guid)key == default(Guid))
+                return null;
+
+            if (propertyType == typeof(string) && string.IsNullOrEmpty((string)key))
+                return null;
+
+            if (propertyType == typeof(int) && (int)key == default(int))
+                return null;
+
+            return key;
+        }
+
+        /// <summary>
         /// Gets the primary key name checks.
         /// </summary>
         /// <param name="entityType">The entity type to get the primary key from.</param>

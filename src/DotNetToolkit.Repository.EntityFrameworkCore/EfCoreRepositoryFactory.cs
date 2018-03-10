@@ -1,12 +1,12 @@
-﻿namespace DotNetToolkit.Repository.EntityFramework
+﻿namespace DotNetToolkit.Repository.EntityFrameworkCore
 {
+    using Microsoft.EntityFrameworkCore;
     using System;
-    using System.Data.Entity;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryFactory" />.
     /// </summary>
-    public class EfRepositoryFactory : IRepositoryFactory
+    public class EfCoreRepositoryFactory : IRepositoryFactory
     {
         #region Private Methods
 
@@ -37,7 +37,7 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity> Create<TEntity>(IRepositoryOptions options) where TEntity : class
         {
-            return new EfRepository<TEntity>(GetDbContext(options));
+            return new EfCoreRepository<TEntity>(GetDbContext(options));
         }
 
         /// <summary>
@@ -49,7 +49,7 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey> Create<TEntity, TKey>(IRepositoryOptions options) where TEntity : class
         {
-            return new EfRepository<TEntity, TKey>(GetDbContext(options));
+            return new EfCoreRepository<TEntity, TKey>(GetDbContext(options));
         }
 
         #endregion
