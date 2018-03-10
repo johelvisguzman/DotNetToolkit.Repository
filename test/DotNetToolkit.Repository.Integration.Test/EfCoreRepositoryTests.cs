@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
     using Data;
-    using EntityFramework;
+    using EntityFrameworkCore;
     using FetchStrategies;
     using Queries;
     using Specifications;
@@ -11,17 +11,17 @@
     using System.Threading.Tasks;
     using Xunit;
 
-    public class EfRepositoryTests
+    public class EfCoreRepositoryTests
     {
         [Fact]
         public void Add()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 const string name = "Random Name";
 
                 var entity = new Customer { Name = name };
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 Assert.False(repo.Exists(x => x.Name.Equals(name)));
 
@@ -34,12 +34,12 @@
         [Fact]
         public async Task Add_Async()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 const string name = "Random Name";
 
                 var entity = new Customer { Name = name };
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 Assert.False(await repo.ExistsAsync(x => x.Name.Equals(name)));
 
@@ -52,7 +52,7 @@
         [Fact]
         public void Add_Range()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 const string name = "Random Name";
 
@@ -62,7 +62,7 @@
                     new Customer { Name = name }
                 };
 
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 Assert.Equal(0, repo.Count());
 
@@ -75,7 +75,7 @@
         [Fact]
         public async Task Add_Range_Async()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 const string name = "Random Name";
 
@@ -85,7 +85,7 @@
                     new Customer { Name = name }
                 };
 
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 Assert.Equal(0, await repo.CountAsync());
 
@@ -98,12 +98,12 @@
         [Fact]
         public void Delete()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 const string name = "Random Name";
 
                 var entity = new Customer { Name = name };
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 repo.Add(entity);
 
@@ -120,12 +120,12 @@
         [Fact]
         public async Task Delete_Async()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 const string name = "Random Name";
 
                 var entity = new Customer { Name = name };
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 await repo.AddAsync(entity);
 
@@ -142,7 +142,7 @@
         [Fact]
         public void Delete_Range()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 const string name = "Random Name";
 
@@ -152,7 +152,7 @@
                     new Customer { Name = name }
                 };
 
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 repo.Add(entities);
 
@@ -169,7 +169,7 @@
         [Fact]
         public async Task Delete_Range_Async()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 const string name = "Random Name";
 
@@ -179,7 +179,7 @@
                     new Customer { Name = name }
                 };
 
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 await repo.AddAsync(entities);
 
@@ -196,13 +196,13 @@
         [Fact]
         public void Update()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 const string expectedName = "New Random Name";
                 const string name = "Random Name";
 
                 var entity = new Customer { Name = name };
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 repo.Add(entity);
 
@@ -219,13 +219,13 @@
         [Fact]
         public async Task Update_Async()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 const string expectedName = "New Random Name";
                 const string name = "Random Name";
 
                 var entity = new Customer { Name = name };
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 await repo.AddAsync(entity);
 
@@ -242,7 +242,7 @@
         [Fact]
         public void Update_Range()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 const string expectedName = "New Random Name";
                 const string name = "Random Name";
@@ -253,7 +253,7 @@
                     new Customer { Name = name }
                 };
 
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 repo.Add(entities);
 
@@ -273,7 +273,7 @@
         [Fact]
         public async Task Update_Range_Async()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 const string expectedName = "New Random Name";
                 const string name = "Random Name";
@@ -284,7 +284,7 @@
                     new Customer { Name = name }
                 };
 
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 await repo.AddAsync(entities);
 
@@ -304,13 +304,13 @@
         [Fact]
         public void Find()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 const string name = "Random Name";
 
                 var spec = new Specification<Customer>(x => x.Name.Equals(name));
                 var entity = new Customer { Name = name };
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 Assert.Null(repo.Find(x => x.Name.Equals(name)));
                 Assert.Null(repo.Find(spec));
@@ -329,13 +329,13 @@
         [Fact]
         public async Task Find_Async()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 const string name = "Random Name";
 
                 var spec = new Specification<Customer>(x => x.Name.Equals(name));
                 var entity = new Customer { Name = name };
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 Assert.Null(await repo.FindAsync(x => x.Name.Equals(name)));
                 Assert.Null(await repo.FindAsync(spec));
@@ -354,7 +354,7 @@
         [Fact]
         public void Find_With_Sorting_Options_Ascending()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 var entities = new List<Customer>
                 {
@@ -364,7 +364,7 @@
 
                 var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
                 var queryOptions = new SortingOptions<Customer, string>(x => x.Name, true);
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 Assert.Null(repo.Find(x => x.Name.Contains("Random Name"), queryOptions)?.Name);
                 Assert.Null(repo.Find(spec, queryOptions)?.Name);
@@ -383,7 +383,7 @@
         [Fact]
         public async Task Find_With_Sorting_Options_Ascending_Async()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 var entities = new List<Customer>
                 {
@@ -393,7 +393,7 @@
 
                 var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
                 var queryOptions = new SortingOptions<Customer, string>(x => x.Name, true);
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 Assert.Null((await repo.FindAsync(x => x.Name.Contains("Random Name"), queryOptions))?.Name);
                 Assert.Null((await repo.FindAsync(spec, queryOptions))?.Name);
@@ -412,7 +412,7 @@
         [Fact]
         public void Find_With_Sorting_Options_Descending()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 var entities = new List<Customer>
                 {
@@ -422,7 +422,7 @@
 
                 var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
                 var queryOptions = new SortingOptions<Customer, string>(x => x.Name);
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 Assert.Null(repo.Find(x => x.Name.Contains("Random Name"), queryOptions)?.Name);
                 Assert.Null(repo.Find(spec, queryOptions)?.Name);
@@ -441,7 +441,7 @@
         [Fact]
         public async Task Find_With_Sorting_Options_Descending_Async()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 var entities = new List<Customer>
                 {
@@ -451,7 +451,7 @@
 
                 var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
                 var queryOptions = new SortingOptions<Customer, string>(x => x.Name);
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 Assert.Null((await repo.FindAsync(x => x.Name.Contains("Random Name"), queryOptions))?.Name);
                 Assert.Null((await repo.FindAsync(spec, queryOptions))?.Name);
@@ -470,13 +470,13 @@
         [Fact]
         public void FindAll()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 const string name = "Random Name";
 
                 var spec = new Specification<Customer>(x => x.Name.Equals(name));
                 var entity = new Customer { Name = name };
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 Assert.Empty(repo.FindAll(x => x.Name.Equals(name)));
                 Assert.Empty(repo.FindAll(spec));
@@ -495,13 +495,13 @@
         [Fact]
         public async Task FindAll_Async()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 const string name = "Random Name";
 
                 var spec = new Specification<Customer>(x => x.Name.Equals(name));
                 var entity = new Customer { Name = name };
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 Assert.Empty(await repo.FindAllAsync(x => x.Name.Equals(name)));
                 Assert.Empty(await repo.FindAllAsync(spec));
@@ -520,7 +520,7 @@
         [Fact]
         public void FindAll_With_Sorting_Options_Ascending()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 var entities = new List<Customer>
                 {
@@ -530,7 +530,7 @@
 
                 var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
                 var queryOptions = new SortingOptions<Customer, string>(x => x.Name, true);
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 Assert.Null(repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions).FirstOrDefault()?.Name);
                 Assert.Null(repo.FindAll(spec, queryOptions).FirstOrDefault()?.Name);
@@ -549,7 +549,7 @@
         [Fact]
         public async Task FindAll_With_Sorting_Options_Ascending_Async()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 var entities = new List<Customer>
                 {
@@ -559,7 +559,7 @@
 
                 var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
                 var queryOptions = new SortingOptions<Customer, string>(x => x.Name, true);
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 Assert.Null((await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions)).FirstOrDefault()?.Name);
                 Assert.Null((await repo.FindAllAsync(spec, queryOptions)).FirstOrDefault()?.Name);
@@ -578,7 +578,7 @@
         [Fact]
         public void FindAll_With_Sorting_Options_Descending()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 var entities = new List<Customer>
                 {
@@ -588,7 +588,7 @@
 
                 var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
                 var queryOptions = new SortingOptions<Customer, string>(x => x.Name);
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 Assert.Null(repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions).FirstOrDefault()?.Name);
                 Assert.Null(repo.FindAll(spec, queryOptions).FirstOrDefault()?.Name);
@@ -607,7 +607,7 @@
         [Fact]
         public async Task FindAll_With_Sorting_Options_Descending_Async()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 var entities = new List<Customer>
                 {
@@ -617,7 +617,7 @@
 
                 var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
                 var queryOptions = new SortingOptions<Customer, string>(x => x.Name);
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 Assert.Null((await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions)).FirstOrDefault()?.Name);
                 Assert.Null((await repo.FindAllAsync(spec, queryOptions)).FirstOrDefault()?.Name);
@@ -636,7 +636,7 @@
         [Fact]
         public void FindAll_With_Paging_Options_Sort_Ascending()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 var entities = new List<Customer>();
 
@@ -645,7 +645,7 @@
                     entities.Add(new Customer { Name = "Random Name " + i });
                 }
 
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 repo.Add(entities);
 
@@ -704,7 +704,7 @@
         [Fact]
         public async Task FindAll_With_Paging_Options_Sort_Ascending_Async()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 var entities = new List<Customer>();
 
@@ -713,7 +713,7 @@
                     entities.Add(new Customer { Name = "Random Name " + i });
                 }
 
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 await repo.AddAsync(entities);
 
@@ -772,7 +772,7 @@
         [Fact]
         public void FindAll_With_Paging_Options_Sort_Descending()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 var entities = new List<Customer>();
 
@@ -781,7 +781,7 @@
                     entities.Add(new Customer { Name = "Random Name " + i });
                 }
 
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 repo.Add(entities);
 
@@ -840,7 +840,7 @@
         [Fact]
         public async Task FindAll_With_Paging_Options_Sort_Descending_Async()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 var entities = new List<Customer>();
 
@@ -849,7 +849,7 @@
                     entities.Add(new Customer { Name = "Random Name " + i });
                 }
 
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 await repo.AddAsync(entities);
 
@@ -908,7 +908,7 @@
         [Fact]
         public void Get()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 int key = 1;
                 const string name = "Random Name";
@@ -917,7 +917,7 @@
                 fetchStrategy.Include(x => x.Address);
 
                 var entity = new Customer { Id = key, Name = name };
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 Assert.Null(repo.Get(key));
                 Assert.Null(repo.Get(key, fetchStrategy));
@@ -932,7 +932,7 @@
         [Fact]
         public async Task Get_Async()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 int key = 1;
                 const string name = "Random Name";
@@ -941,7 +941,7 @@
                 fetchStrategy.Include(x => x.Address);
 
                 var entity = new Customer { Id = key, Name = name };
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 Assert.Null(await repo.GetAsync(key));
                 Assert.Null(await repo.GetAsync(key, fetchStrategy));
@@ -956,13 +956,13 @@
         [Fact]
         public void Count()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 const string name = "Random Name";
 
                 var spec = new Specification<Customer>(x => x.Name.Equals(name));
                 var entity = new Customer { Name = name };
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 Assert.Equal(0, repo.Count());
                 Assert.Equal(0, repo.Count(x => x.Name.Equals(name)));
@@ -979,13 +979,13 @@
         [Fact]
         public async Task Count_Async()
         {
-            using (var context = TestEfDbContextFactory.Create())
+            using (var context = new TestEfCoreDbContext(Guid.NewGuid().ToString()))
             {
                 const string name = "Random Name";
 
                 var spec = new Specification<Customer>(x => x.Name.Equals(name));
                 var entity = new Customer { Name = name };
-                var repo = new EfRepository<Customer>(context);
+                var repo = new EfCoreRepository<Customer>(context);
 
                 Assert.Equal(0, await repo.CountAsync());
                 Assert.Equal(0, await repo.CountAsync(x => x.Name.Equals(name)));

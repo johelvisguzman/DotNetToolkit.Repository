@@ -3,9 +3,9 @@
     using System.Data.Common;
     using System.IO;
 
-    public static class TestDbContextFactory
+    public static class TestEfDbContextFactory
     {
-        public static TestDbContext Create()
+        public static TestEfDbContext Create()
         {
             var currentFile = Path.GetTempFileName();
             var connectionString = $"Data Source={currentFile};Persist Security Info=False";
@@ -14,7 +14,7 @@
             conn.ConnectionString = connectionString;
             conn.Open();
 
-            var context = new TestDbContext(conn);
+            var context = new TestEfDbContext(conn);
 
             context.Database.CreateIfNotExists();
 

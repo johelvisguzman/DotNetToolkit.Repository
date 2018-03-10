@@ -1,20 +1,20 @@
-﻿namespace DotNetToolkit.Repository.EntityFramework
+﻿namespace DotNetToolkit.Repository.EntityFrameworkCore
 {
     using FetchStrategies;
+    using Microsoft.EntityFrameworkCore;
     using Queries;
     using Specifications;
     using System;
     using System.Collections.Generic;
-    using System.Data.Entity;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
-    /// Represents a repository for entity framework.
+    /// Represents a repository for entity framework core.
     /// </summary>
-    public abstract class EfRepositoryBase<TEntity, TKey> : RepositoryAsyncBase<TEntity, TKey> where TEntity : class
+    public abstract class EfCoreRepositoryBase<TEntity, TKey> : RepositoryAsyncBase<TEntity, TKey> where TEntity : class
     {
         #region Fields
 
@@ -39,10 +39,10 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EfRepositoryBase{TEntity, TKey}" /> class.
+        /// Initializes a new instance of the <see cref="EfCoreRepositoryBase{TEntity, TKey}" /> class.
         /// </summary>
         /// <param name="context">The database context.</param>
-        protected EfRepositoryBase(DbContext context)
+        protected EfCoreRepositoryBase(DbContext context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
@@ -153,7 +153,7 @@
         /// </summary>
         protected override Task<TEntity> GetEntityAsync(TKey key, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            return fetchStrategy == null ? DbSet.FindAsync(cancellationToken, key) : base.GetEntityAsync(key, fetchStrategy, cancellationToken);
+            return fetchStrategy == null ? DbSet.FindAsync(new object[] { key }, cancellationToken) : base.GetEntityAsync(key, fetchStrategy, cancellationToken);
         }
 
         /// <summary>
