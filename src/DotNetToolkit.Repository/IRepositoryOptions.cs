@@ -8,9 +8,9 @@
     public interface IRepositoryOptions
     {
         /// <summary>
-        /// Gets or sets the connection string.
+        /// Gets or sets the database context arguments.
         /// </summary>
-        string ConnectionString { get; set; }
+        object[] DbContextArgs { get; set; }
 
         /// <summary>
         /// Gets or sets the type of the database context.

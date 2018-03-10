@@ -1,10 +1,28 @@
 ﻿namespace DotNetToolkit.Repository.InMemory
 {
+    using System;
+    using System.Linq;
+
     /// <summary>
     /// An implementation of <see cref="IRepositoryFactory" />.
     /// </summary>
     public class InMemoryRepositoryFactory : IRepositoryFactory
     {
+        #region Private Methods
+
+        private string GetDatabaseName(IRepositoryOptions options)
+        {
+            var arg = options.DbContextArgs.FirstOrDefault();
+            var databaseName = arg as string;
+
+            if (arg != null && databaseName == null)
+                throw new ArgumentException($"The provided {nameof(options.DbContextArgs)} must be a valid string argument.");
+
+            return databaseName;
+        }
+
+        #endregion
+
         #region Implementation of IRepositoryFactory
 
         /// <summary>
@@ -15,7 +33,7 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity> Create<TEntity>(IRepositoryOptions options) where TEntity : class
         {
-            return new InMemoryRepository<TEntity>(options.ConnectionString);
+            return new InMemoryRepository<TEntity>(GetDatabaseName(options));
         }
 
         /// <summary>
@@ -27,7 +45,7 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey> Create<TEntity, TKey>(IRepositoryOptions options) where TEntity : class
         {
-            return new InMemoryRepository<TEntity, TKey>(options.ConnectionString);
+            return new InMemoryRepository<TEntity, TKey>(GetDatabaseName(options));
         }
 
         #endregion
