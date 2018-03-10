@@ -27,7 +27,7 @@
         /// <summary>
         /// Gets the entity set.
         /// </summary>
-        protected IDbSet<TEntity> DbSet { get; private set; }
+        protected DbSet<TEntity> DbSet { get; private set; }
 
         /// <summary>
         /// Gets the database context.
@@ -153,9 +153,7 @@
         /// </summary>
         protected override Task<TEntity> GetEntityAsync(TKey key, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            var dbSet = (DbSet<TEntity>)DbSet;
-
-            return fetchStrategy == null ? dbSet.FindAsync(cancellationToken, key) : base.GetEntityAsync(key, fetchStrategy, cancellationToken);
+            return fetchStrategy == null ? DbSet.FindAsync(cancellationToken, key) : base.GetEntityAsync(key, fetchStrategy, cancellationToken);
         }
 
         /// <summary>
