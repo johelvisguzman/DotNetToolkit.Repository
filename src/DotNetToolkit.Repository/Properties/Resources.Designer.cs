@@ -61,11 +61,29 @@ namespace DotNetToolkit.Repository.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot be null or empty..
+        /// </summary>
+        internal static string ArgumentCannotBeNullOrEmpty {
+            get {
+                return ResourceManager.GetString("ArgumentCannotBeNullOrEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No entity found in the repository with the &apos;{0}&apos; key..
         /// </summary>
         internal static string EntityKeyNotFound {
             get {
                 return ResourceManager.GetString("EntityKeyNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; cannot be added to the in-memory store because the key type &apos;{1}&apos; is an invalid primary key property type..
+        /// </summary>
+        internal static string EntityKeyValueTypeInvalid {
+            get {
+                return ResourceManager.GetString("EntityKeyValueTypeInvalid", resourceCulture);
             }
         }
         

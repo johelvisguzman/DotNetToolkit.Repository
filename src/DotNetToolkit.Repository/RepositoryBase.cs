@@ -10,6 +10,7 @@
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Reflection;
 
     /// <summary>
     /// An implementation of <see cref="IRepository{TEntity, TKey}" />.
@@ -186,6 +187,57 @@
             }
 
             return spec;
+        }
+
+        /// <summary>
+        /// Gets the primary key property information for the specified type.
+        /// </summary>
+        /// <param name="entityType">The entity type to get the primary key from.</param>
+        /// <returns>The primary key property info.</returns>
+        protected virtual PropertyInfo GetPrimaryKeyPropertyInfo(Type entityType)
+        {
+            return ConventionHelper.GetPrimaryKeyPropertyInfo(entityType);
+        }
+
+        /// <summary>
+        /// Gets the value of the specified object primary key property.
+        /// </summary>
+        /// <param name="obj">The object containing the property.</param>
+        /// <returns>The property value.</returns>
+        protected virtual object GetPrimaryKeyPropertyValue(object obj)
+        {
+            return ConventionHelper.GetPrimaryKeyPropertyValueOrDefault(obj);
+        }
+
+        /// <summary>
+        /// Sets a value for the specified object primary key property.
+        /// </summary>
+        /// <param name="obj">The object containing the property.</param>
+        /// <param name="value">The value to set for the property.</param>
+        protected virtual void SetPrimaryKeyPropertyValue(object obj, object value)
+        {
+            ConventionHelper.SetPrimaryKeyPropertyValue(obj, value);
+        }
+
+        /// <summary>
+        /// Generates a new primary id for the entity.
+        /// </summary>
+        /// <returns>The new generated primary id.</returns>
+        protected virtual object GeneratePrimaryKey(Type entityType)
+        {
+            var propertyInfo = GetPrimaryKeyPropertyInfo(entityType);
+            var propertyType = propertyInfo.PropertyType;
+
+            if (propertyType == typeof(Guid))
+                return Convert.ChangeType(Guid.NewGuid(), propertyType);
+
+            if (propertyType == typeof(string))
+                return Convert.ChangeType(Guid.NewGuid().ToString("N"), propertyType);
+
+            if (propertyType == typeof(int))
+                return Convert.ToInt32(GetQuery().Select(x => GetPrimaryKeyPropertyValue(x)).LastOrDefault()) + 1;
+
+            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeInvalid, entityType, propertyType));
         }
 
         #endregion

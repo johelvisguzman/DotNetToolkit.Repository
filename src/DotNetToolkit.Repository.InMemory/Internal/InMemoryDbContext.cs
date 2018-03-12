@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.InMemory.Internal
 {
-    using Helpers;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -61,7 +60,10 @@
             if (entitySet == null)
                 throw new ArgumentNullException(nameof(entitySet));
 
-            var key = ConventionHelper.GetPrimaryKeyPropertyValue(entitySet.Entity);
+            var key = entitySet.Key;
+            if (key == null)
+                return false;
+
             var context = GetContext(entitySet.Entity.GetType());
 
             return context.ContainsKey(key);
@@ -78,9 +80,7 @@
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            var context = GetContext(typeof(TEntity));
-
-            context.TryGetValue(key, out EntitySet entitySet);
+            GetContext(typeof(TEntity)).TryGetValue(key, out EntitySet entitySet);
 
             return entitySet;
         }
@@ -139,7 +139,7 @@
             if (entitySet == null)
                 throw new ArgumentNullException(nameof(entitySet));
 
-            var key = ConventionHelper.GetPrimaryKeyPropertyValue(entitySet.Entity);
+            var key = entitySet.Key;
             var context = GetContext(entitySet.Entity.GetType());
 
             return context.TryRemove(key, out EntitySet set);
@@ -162,7 +162,7 @@
                 .SingleOrDefault();
 
             if (key == null)
-                key = ConventionHelper.GetPrimaryKeyPropertyValueOrDefault(entitySet.Entity) ?? Guid.NewGuid();
+                key = entitySet.Key ?? "TempKey::" + Guid.NewGuid();
 
             var order = context.Values
                 .OrderByDescending(x => x.Order)
