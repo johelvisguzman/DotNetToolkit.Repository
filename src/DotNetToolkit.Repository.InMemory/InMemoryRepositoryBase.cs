@@ -2,8 +2,11 @@
 {
     using FetchStrategies;
     using Internal;
+    using Properties;
     using System;
+    using System.Globalization;
     using System.Linq;
+    using System.Reflection;
 
     /// <summary>
     /// Represents a repository for in-memory operations (for testing purposes).
@@ -12,7 +15,10 @@
     {
         #region Fields
 
-        private readonly InMemoryStore _store;
+        private const string DefaultDatabaseName = "DotNetToolkit.Repository.InMemory";
+
+        private readonly string _name;
+        private InMemoryDbContext _context;
         private bool _disposed;
 
         #endregion
@@ -25,7 +31,8 @@
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
         protected InMemoryRepositoryBase(string databaseName = null)
         {
-            _store = new InMemoryStore(databaseName);
+            _name = string.IsNullOrEmpty(databaseName) ? DefaultDatabaseName : databaseName;
+            _context = new InMemoryDbContext();
         }
 
         #endregion
@@ -42,13 +49,36 @@
 
             if (disposing)
             {
-                if (_store != null)
-                {
-                    _store.Dispose();
-                }
+                _context.Clear();
+                _context = null;
             }
 
             _disposed = true;
+        }
+
+        #endregion
+
+        #region	Private Methods
+
+        /// <summary>
+        /// Returns a deep copy of the specified object. This method does not require the object to be marked as serializable.
+        /// </summary>
+        /// <param name="obj">The object to be copy.</param>
+        /// <returns>The deep copy of the specified object.</returns>
+        private static object DeepCopy(object obj)
+        {
+            if (obj == null)
+                throw new ArgumentNullException(nameof(obj));
+
+            var newItem = (object)Activator.CreateInstance(obj.GetType());
+
+            foreach (var propInfo in obj.GetType().GetRuntimeProperties())
+            {
+                if (propInfo.CanWrite)
+                    propInfo.SetValue(newItem, propInfo.GetValue(obj, null), null);
+            }
+
+            return newItem;
         }
 
         #endregion
@@ -69,10 +99,7 @@
         /// </summary>
         protected override void AddItem(TEntity entity)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
-            _store.Add(entity);
+            _context.Add(new EntitySet(entity, GetPrimaryKeyPropertyValue(entity), EntityState.Added));
         }
 
         /// <summary>
@@ -80,10 +107,7 @@
         /// </summary>
         protected override void DeleteItem(TEntity entity)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
-            _store.Remove(entity);
+            _context.Add(new EntitySet(entity, GetPrimaryKeyPropertyValue(entity), EntityState.Removed));
         }
 
         /// <summary>
@@ -91,10 +115,7 @@
         /// </summary>
         protected override void UpdateItem(TEntity entity)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
-            _store.Update(entity);
+            _context.Add(new EntitySet(entity, GetPrimaryKeyPropertyValue(entity), EntityState.Modified));
         }
 
         /// <summary>
@@ -102,7 +123,40 @@
         /// </summary>
         protected override void SaveChanges()
         {
-            _store.SaveChanges();
+            var context = InMemoryDbStorage.Instance.GetScopedContext(_name);
+
+            foreach (var entitySet in _context.GetEntitySets())
+            {
+                var key = GetPrimaryKeyPropertyValue(entitySet.Entity);
+
+                if (entitySet.State == EntityState.Added)
+                {
+                    if (key == null)
+                    {
+                        key = GeneratePrimaryKey(entitySet.Entity.GetType());
+                        SetPrimaryKeyPropertyValue(entitySet.Entity, key);
+                    }
+                    else if (context.Contains(entitySet))
+                    {
+                        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
+                    }
+                }
+                else if (!context.Contains(entitySet))
+                {
+                    throw new InvalidOperationException(Resources.EntityNotFoundInStore);
+                }
+
+                if (entitySet.State == EntityState.Removed)
+                {
+                    context.Remove(entitySet);
+                }
+                else
+                {
+                    context.Add(new EntitySet(DeepCopy(entitySet.Entity), key, EntityState.Unchanged));
+                }
+            }
+
+            _context.Clear();
         }
 
         /// <summary>
@@ -110,7 +164,30 @@
         /// </summary>
         protected override IQueryable<TEntity> GetQuery(IFetchStrategy<TEntity> fetchStrategy = null)
         {
-            return _store.Query<TEntity>();
+            var context = InMemoryDbStorage.Instance.GetScopedContext(_name);
+
+            return context.GetEntitySets<TEntity>().AsQueryable().Select(x => (TEntity)x.Entity);
+        }
+
+        /// <summary>
+        /// Gets an entity query with the given primary key value from the repository.
+        /// </summary>
+        protected override TEntity GetEntity(TKey key, IFetchStrategy<TEntity> fetchStrategy)
+        {
+            if (fetchStrategy == null)
+            {
+                var propertyInfo = GetPrimaryKeyPropertyInfo(typeof(TEntity));
+
+                if (propertyInfo.PropertyType != key.GetType())
+                    throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeMismatch, key.GetType(), propertyInfo.PropertyType));
+
+                var context = InMemoryDbStorage.Instance.GetScopedContext(_name);
+                var entitySet = context.GetEntitySet<TEntity>(key);
+
+                return (TEntity)entitySet?.Entity;
+            }
+
+            return base.GetEntity(key, fetchStrategy);
         }
 
         #endregion
