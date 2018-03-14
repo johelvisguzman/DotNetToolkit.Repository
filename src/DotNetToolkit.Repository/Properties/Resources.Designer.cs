@@ -61,15 +61,6 @@ namespace DotNetToolkit.Repository.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot be null or empty..
-        /// </summary>
-        internal static string ArgumentCannotBeNullOrEmpty {
-            get {
-                return ResourceManager.GetString("ArgumentCannotBeNullOrEmpty", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to No entity found in the repository with the &apos;{0}&apos; key..
         /// </summary>
         internal static string EntityKeyNotFound {

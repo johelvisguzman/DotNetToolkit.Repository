@@ -1,9 +1,10 @@
 ﻿namespace DotNetToolkit.Repository.InMemory
 {
     using FetchStrategies;
-    using Internal;
     using Properties;
     using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
     using System.Reflection;
@@ -17,8 +18,9 @@
 
         private const string DefaultDatabaseName = "DotNetToolkit.Repository.InMemory";
 
+        private static readonly object _syncRoot = new object();
         private readonly string _name;
-        private InMemoryDbContext _context;
+        private ConcurrentDictionary<TKey, EntitySet<TEntity, TKey>> _context;
         private bool _disposed;
 
         #endregion
@@ -32,7 +34,7 @@
         protected InMemoryRepositoryBase(string databaseName = null)
         {
             _name = string.IsNullOrEmpty(databaseName) ? DefaultDatabaseName : databaseName;
-            _context = new InMemoryDbContext();
+            _context = new ConcurrentDictionary<TKey, EntitySet<TEntity, TKey>>();
         }
 
         #endregion
@@ -63,22 +65,40 @@
         /// <summary>
         /// Returns a deep copy of the specified object. This method does not require the object to be marked as serializable.
         /// </summary>
-        /// <param name="obj">The object to be copy.</param>
+        /// <param name="entity">The object to be copy.</param>
         /// <returns>The deep copy of the specified object.</returns>
-        private static object DeepCopy(object obj)
+        private static TEntity DeepCopy(TEntity entity)
         {
-            if (obj == null)
-                throw new ArgumentNullException(nameof(obj));
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
 
-            var newItem = (object)Activator.CreateInstance(obj.GetType());
+            var newItem = (TEntity)Activator.CreateInstance(typeof(TEntity));
 
-            foreach (var propInfo in obj.GetType().GetRuntimeProperties())
+            foreach (var propInfo in entity.GetType().GetRuntimeProperties())
             {
                 if (propInfo.CanWrite)
-                    propInfo.SetValue(newItem, propInfo.GetValue(obj, null), null);
+                    propInfo.SetValue(newItem, propInfo.GetValue(entity, null), null);
             }
 
             return newItem;
+        }
+
+        /// <summary>
+        /// Generates a new temporary primary id for the entity.
+        /// </summary>
+        /// <returns>The new generated primary id.</returns>
+        protected virtual TKey GenerateTemporaryPrimaryKey()
+        {
+            var propertyInfo = GetPrimaryKeyPropertyInfo();
+            var propertyType = propertyInfo.PropertyType;
+            if (propertyType == typeof(int))
+            {
+                var key = _context.OrderByDescending(x => x.Key).Select(x => x.Key).FirstOrDefault();
+
+                return (TKey)Convert.ChangeType(Convert.ToInt32(key) + 1, typeof(TKey));
+            }
+
+            return GeneratePrimaryKey();
         }
 
         #endregion
@@ -99,7 +119,23 @@
         /// </summary>
         protected override void AddItem(TEntity entity)
         {
-            _context.Add(new EntitySet(entity, GetPrimaryKeyPropertyValue(entity), EntityState.Added));
+            // Ensures the last entity of the same reference is updated by the current one added
+            var key = _context
+                .Where(x => x.Value.Entity.Equals(entity))
+                .Select(x => x.Key)
+                .SingleOrDefault();
+
+            if (key != null && key.Equals(default(TKey)))
+            {
+                key = GetPrimaryKey(entity);
+
+                if (key != null && key.Equals(default(TKey)))
+                {
+                    key = GenerateTemporaryPrimaryKey();
+                }
+            }
+
+            _context[key] = new EntitySet<TEntity, TKey>(entity, key, EntityState.Added);
         }
 
         /// <summary>
@@ -107,7 +143,14 @@
         /// </summary>
         protected override void DeleteItem(TEntity entity)
         {
-            _context.Add(new EntitySet(entity, GetPrimaryKeyPropertyValue(entity), EntityState.Removed));
+            var key = GetPrimaryKey(entity);
+
+            if (key != null && key.Equals(default(TKey)))
+            {
+                key = GenerateTemporaryPrimaryKey();
+            }
+
+            _context[key] = new EntitySet<TEntity, TKey>(entity, key, EntityState.Removed);
         }
 
         /// <summary>
@@ -115,7 +158,14 @@
         /// </summary>
         protected override void UpdateItem(TEntity entity)
         {
-            _context.Add(new EntitySet(entity, GetPrimaryKeyPropertyValue(entity), EntityState.Modified));
+            var key = GetPrimaryKey(entity);
+
+            if (key != null && key.Equals(default(TKey)))
+            {
+                key = GenerateTemporaryPrimaryKey();
+            }
+
+            _context[key] = new EntitySet<TEntity, TKey>(entity, key, EntityState.Modified);
         }
 
         /// <summary>
@@ -123,40 +173,44 @@
         /// </summary>
         protected override void SaveChanges()
         {
-            var context = InMemoryDbStorage.Instance.GetScopedContext(_name);
-
-            foreach (var entitySet in _context.GetEntitySets())
+            lock (_syncRoot)
             {
-                var key = GetPrimaryKeyPropertyValue(entitySet.Entity);
+                var context = InMemoryCache<TEntity, TKey>.Instance.GetContext(_name);
 
-                if (entitySet.State == EntityState.Added)
+                foreach (var entitySet in _context.Select(y => y.Value))
                 {
-                    if (key == null)
+                    var temporaryKey = entitySet.Key;
+                    var key = GetPrimaryKey(entitySet.Entity);
+
+                    if (entitySet.State == EntityState.Added)
                     {
-                        key = GeneratePrimaryKey(entitySet.Entity.GetType());
-                        SetPrimaryKeyPropertyValue(entitySet.Entity, key);
+                        if (key == null || key.Equals(default(TKey)))
+                        {
+                            key = GeneratePrimaryKey();
+                            SetPrimaryKey(entitySet.Entity, key);
+                        }
+                        else if (context.ContainsKey(temporaryKey))
+                        {
+                            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
+                        }
                     }
-                    else if (context.Contains(entitySet))
+                    else if (!context.ContainsKey(temporaryKey))
                     {
-                        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
+                        throw new InvalidOperationException(Resources.EntityNotFoundInStore);
                     }
-                }
-                else if (!context.Contains(entitySet))
-                {
-                    throw new InvalidOperationException(Resources.EntityNotFoundInStore);
+
+                    if (entitySet.State == EntityState.Removed)
+                    {
+                        context.Remove(temporaryKey);
+                    }
+                    else
+                    {
+                        context[key] = new EntitySet<TEntity, TKey>(DeepCopy(entitySet.Entity), key, EntityState.Unchanged);
+                    }
                 }
 
-                if (entitySet.State == EntityState.Removed)
-                {
-                    context.Remove(entitySet);
-                }
-                else
-                {
-                    context.Add(new EntitySet(DeepCopy(entitySet.Entity), key, EntityState.Unchanged));
-                }
+                _context.Clear();
             }
-
-            _context.Clear();
         }
 
         /// <summary>
@@ -164,9 +218,10 @@
         /// </summary>
         protected override IQueryable<TEntity> GetQuery(IFetchStrategy<TEntity> fetchStrategy = null)
         {
-            var context = InMemoryDbStorage.Instance.GetScopedContext(_name);
-
-            return context.GetEntitySets<TEntity>().AsQueryable().Select(x => (TEntity)x.Entity);
+            return InMemoryCache<TEntity, TKey>.Instance
+                .GetContext(_name)
+                .AsQueryable()
+                .Select(y => y.Value.Entity);
         }
 
         /// <summary>
@@ -174,20 +229,150 @@
         /// </summary>
         protected override TEntity GetEntity(TKey key, IFetchStrategy<TEntity> fetchStrategy)
         {
-            if (fetchStrategy == null)
+            var propertyInfo = GetPrimaryKeyPropertyInfo();
+            if (propertyInfo.PropertyType != key.GetType())
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeMismatch, key.GetType(), propertyInfo.PropertyType));
+
+            InMemoryCache<TEntity, TKey>.Instance
+                .GetContext(_name)
+                .TryGetValue(key, out EntitySet<TEntity, TKey> entitySet);
+
+            return entitySet?.Entity;
+        }
+
+        #endregion
+
+        #region Nested type: EntitySet<TEntity, TKey>
+
+        /// <summary>
+        /// Represents an internal entity set in the in-memory store, which holds the entity and it's state representing the operation that was performed at the time.
+        /// </summary>
+        private class EntitySet<TEntity, TKey> where TEntity : class
+        {
+            #region Constructors
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="EntitySet{TEntity, TKey}"/> class.
+            /// </summary>
+            /// <param name="entity">The entity.</param>
+            /// <param name="key">The entity primary key value.</param>
+            /// <param name="state">The state.</param>
+            public EntitySet(TEntity entity, TKey key, EntityState state)
             {
-                var propertyInfo = GetPrimaryKeyPropertyInfo(typeof(TEntity));
-
-                if (propertyInfo.PropertyType != key.GetType())
-                    throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeMismatch, key.GetType(), propertyInfo.PropertyType));
-
-                var context = InMemoryDbStorage.Instance.GetScopedContext(_name);
-                var entitySet = context.GetEntitySet<TEntity>(key);
-
-                return (TEntity)entitySet?.Entity;
+                Entity = entity;
+                Key = key;
+                State = state;
             }
 
-            return base.GetEntity(key, fetchStrategy);
+            #endregion
+
+            #region Properties
+
+            /// <summary>
+            /// Gets the entity.
+            /// </summary>
+            public TEntity Entity { get; }
+
+            /// <summary>
+            /// Gets the primary key value.
+            /// </summary>
+            public TKey Key { get; }
+
+            /// <summary>
+            /// Gets the state.
+            /// </summary>
+            public EntityState State { get; }
+
+            #endregion
+        }
+
+        #endregion
+
+        #region Nested type: EntityState
+
+        /// <summary>
+        /// Represents an internal state for an entity in the in-memory store.
+        /// </summary>
+        private enum EntityState
+        {
+            Added,
+            Removed,
+            Modified,
+            Unchanged
+        }
+
+        #endregion
+
+        #region Nested type: InMemoryCache<TEntity, TKey>
+
+        /// <summary>
+        /// Represents an internal thread safe database storage which will store any information for the in-memory
+        /// store that is needed through the life time of the application.
+        /// </summary>
+        private class InMemoryCache<TEntity, TKey> where TEntity : class
+        {
+            #region Fields
+
+            private static volatile InMemoryCache<TEntity, TKey> _instance;
+            private static readonly object _syncRoot = new object();
+            private readonly ConcurrentDictionary<string, SortedDictionary<TKey, EntitySet<TEntity, TKey>>> _storage;
+
+            #endregion
+
+            #region Constructors
+
+            /// <summary>
+            /// Prevents a default instance of the <see cref="InMemoryCache{TEntity, TKey}"/> class from being created.
+            /// </summary>
+            private InMemoryCache()
+            {
+                _storage = new ConcurrentDictionary<string, SortedDictionary<TKey, EntitySet<TEntity, TKey>>>();
+            }
+
+            #endregion
+
+            #region Properties
+
+            /// <summary>
+            /// Gets the instance.
+            /// </summary>
+            public static InMemoryCache<TEntity, TKey> Instance
+            {
+                get
+                {
+                    if (_instance == null)
+                    {
+                        lock (_syncRoot)
+                        {
+                            if (_instance == null)
+                                _instance = new InMemoryCache<TEntity, TKey>();
+                        }
+                    }
+
+                    return _instance;
+                }
+            }
+
+            #endregion
+
+            #region Public Methods
+
+            /// <summary>
+            /// Gets the scoped database context by the specified name.
+            /// </summary>
+            /// <param name="name">The database name.</param>
+            /// <returns>The scoped database context by the specified database name.</returns>
+            public SortedDictionary<TKey, EntitySet<TEntity, TKey>> GetContext(string name)
+            {
+                if (!_storage.ContainsKey(name))
+                {
+                    _storage[name] = new SortedDictionary<TKey, EntitySet<TEntity, TKey>>();
+                }
+
+                return _storage[name];
+            }
+
+            #endregion
         }
 
         #endregion

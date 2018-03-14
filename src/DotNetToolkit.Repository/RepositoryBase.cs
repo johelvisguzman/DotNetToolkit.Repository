@@ -192,52 +192,58 @@
         /// <summary>
         /// Gets the primary key property information for the specified type.
         /// </summary>
-        /// <param name="entityType">The entity type to get the primary key from.</param>
         /// <returns>The primary key property info.</returns>
-        protected virtual PropertyInfo GetPrimaryKeyPropertyInfo(Type entityType)
+        protected virtual PropertyInfo GetPrimaryKeyPropertyInfo()
         {
-            return ConventionHelper.GetPrimaryKeyPropertyInfo(entityType);
+            return ConventionHelper.GetPrimaryKeyPropertyInfo(typeof(TEntity));
         }
 
         /// <summary>
         /// Gets the value of the specified object primary key property.
         /// </summary>
-        /// <param name="obj">The object containing the property.</param>
+        /// <param name="entity">The entity containing the property.</param>
         /// <returns>The property value.</returns>
-        protected virtual object GetPrimaryKeyPropertyValue(object obj)
+        protected virtual TKey GetPrimaryKey(TEntity entity)
         {
-            return ConventionHelper.GetPrimaryKeyPropertyValueOrDefault(obj);
+            return (TKey)Convert.ChangeType(ConventionHelper.GetPrimaryKeyPropertyValue(entity), typeof(TKey));
         }
 
         /// <summary>
         /// Sets a value for the specified object primary key property.
         /// </summary>
-        /// <param name="obj">The object containing the property.</param>
-        /// <param name="value">The value to set for the property.</param>
-        protected virtual void SetPrimaryKeyPropertyValue(object obj, object value)
+        /// <param name="entity">The entity containing the property.</param>
+        /// <param name="key">The value to set for the primary key property.</param>
+        protected virtual void SetPrimaryKey(TEntity entity, TKey key)
         {
-            ConventionHelper.SetPrimaryKeyPropertyValue(obj, value);
+            ConventionHelper.SetPrimaryKeyPropertyValue(entity, key);
         }
 
         /// <summary>
         /// Generates a new primary id for the entity.
         /// </summary>
         /// <returns>The new generated primary id.</returns>
-        protected virtual object GeneratePrimaryKey(Type entityType)
+        protected virtual TKey GeneratePrimaryKey()
         {
-            var propertyInfo = GetPrimaryKeyPropertyInfo(entityType);
+            var propertyInfo = GetPrimaryKeyPropertyInfo();
             var propertyType = propertyInfo.PropertyType;
 
             if (propertyType == typeof(Guid))
-                return Convert.ChangeType(Guid.NewGuid(), propertyType);
+                return (TKey)Convert.ChangeType(Guid.NewGuid(), typeof(TKey));
 
             if (propertyType == typeof(string))
-                return Convert.ChangeType(Guid.NewGuid().ToString("N"), propertyType);
+                return (TKey)Convert.ChangeType(Guid.NewGuid().ToString("N"), typeof(TKey));
 
             if (propertyType == typeof(int))
-                return Convert.ToInt32(GetQuery().Select(x => GetPrimaryKeyPropertyValue(x)).LastOrDefault()) + 1;
+            {
+                var key = GetQuery()
+                    .OrderByDescending(x => GetPrimaryKey(x))
+                    .Select(x => GetPrimaryKey(x))
+                    .FirstOrDefault();
 
-            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeInvalid, entityType, propertyType));
+                return (TKey)Convert.ChangeType(Convert.ToInt32(key) + 1, typeof(TKey));
+            }
+
+            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeInvalid, typeof(TEntity), propertyType));
         }
 
         #endregion
