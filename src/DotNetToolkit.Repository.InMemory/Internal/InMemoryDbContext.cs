@@ -94,8 +94,8 @@
         {
             var context = GetContext(typeof(TEntity));
             var query = from item in context
-                        orderby item.Value.Order
-                        select item.Value;
+                orderby item.Value.Order
+                select item.Value;
 
             return query;
         }
@@ -107,9 +107,9 @@
         public IEnumerable<EntitySet> GetEntitySets()
         {
             var query = from c in _context
-                        from item in c.Value
-                        orderby item.Value.Order
-                        select item.Value;
+                from item in c.Value
+                orderby item.Value.Order
+                select item.Value;
 
             return query;
         }
@@ -122,8 +122,8 @@
         {
             var context = GetContext(entityType);
             var query = from item in context
-                        orderby item.Value.Order
-                        select item.Key;
+                orderby item.Value.Order
+                select item.Key;
 
             return query;
         }

@@ -172,12 +172,12 @@
             var propInfo = ConventionHelper.GetPrimaryKeyPropertyInfo(typeof(TEntity));
             var parameter = Expression.Parameter(typeof(TEntity), "x");
             var lambda = Expression.Lambda<Func<TEntity, bool>>(
-                    Expression.Equal(
-                        Expression.PropertyOrField(parameter, propInfo.Name),
-                        Expression.Constant(key)
-                    ),
-                    parameter
-                );
+                Expression.Equal(
+                    Expression.PropertyOrField(parameter, propInfo.Name),
+                    Expression.Constant(key)
+                ),
+                parameter
+            );
 
             var spec = new Specification<TEntity>(lambda);
 

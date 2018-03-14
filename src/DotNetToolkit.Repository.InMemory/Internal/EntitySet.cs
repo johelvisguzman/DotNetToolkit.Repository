@@ -11,7 +11,7 @@
         /// Initializes a new instance of the <see cref="EntitySet"/> class.
         /// </summary>
         /// <param name="entity">The entity.</param>
-		/// <param name="key">The primary key value.</param>
+        /// <param name="key">The primary key value.</param>
         /// <param name="state">The state.</param>
         public EntitySet(object entity, object key, EntityState state)
         {

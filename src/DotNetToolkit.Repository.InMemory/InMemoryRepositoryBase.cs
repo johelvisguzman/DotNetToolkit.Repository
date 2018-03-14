@@ -99,9 +99,6 @@
         /// </summary>
         protected override void AddItem(TEntity entity)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
             _context.Add(new EntitySet(entity, GetPrimaryKeyPropertyValue(entity), EntityState.Added));
         }
 
@@ -110,9 +107,6 @@
         /// </summary>
         protected override void DeleteItem(TEntity entity)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
             _context.Add(new EntitySet(entity, GetPrimaryKeyPropertyValue(entity), EntityState.Removed));
         }
 
@@ -121,9 +115,6 @@
         /// </summary>
         protected override void UpdateItem(TEntity entity)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
             _context.Add(new EntitySet(entity, GetPrimaryKeyPropertyValue(entity), EntityState.Modified));
         }
 
