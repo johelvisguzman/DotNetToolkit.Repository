@@ -10,8 +10,8 @@
 
 namespace DotNetToolkit.Repository.InMemory.Properties {
     using System.Reflection;
-
-
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -84,15 +84,6 @@ namespace DotNetToolkit.Repository.InMemory.Properties {
         internal static string EntityKeyValueTypeInvalid {
             get {
                 return ResourceManager.GetString("EntityKeyValueTypeInvalid", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The key value was of type &apos;{0}&apos;, which does not match the property type of &apos;{1}&apos;..
-        /// </summary>
-        internal static string EntityKeyValueTypeMismatch {
-            get {
-                return ResourceManager.GetString("EntityKeyValueTypeMismatch", resourceCulture);
             }
         }
         

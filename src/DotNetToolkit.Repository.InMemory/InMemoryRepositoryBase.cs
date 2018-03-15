@@ -229,10 +229,6 @@
         /// </summary>
         protected override TEntity GetEntity(TKey key, IFetchStrategy<TEntity> fetchStrategy)
         {
-            var propertyInfo = GetPrimaryKeyPropertyInfo();
-            if (propertyInfo.PropertyType != key.GetType())
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeMismatch, key.GetType(), propertyInfo.PropertyType));
-
             InMemoryCache<TEntity, TKey>.Instance
                 .GetContext(_name)
                 .TryGetValue(key, out EntitySet<TEntity, TKey> entitySet);
