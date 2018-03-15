@@ -117,10 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ArgumentCannotBeNullOrEmpty" xml:space="preserve">
-    <value>Cannot be null or empty.</value>
-    <comment>error when an argument is null or empty</comment>
-  </data>
   <data name="EntityKeyNotFound" xml:space="preserve">
     <value>No entity found in the repository with the '{0}' key.</value>
   </data>
@@ -129,12 +125,5 @@
   </data>
   <data name="EntityRequiresPrimaryKey" xml:space="preserve">
     <value>The instance of entity type '{0}' requires a primary key to be defined.</value>
-  </data>
-  <data name="ArgumentCannotBeNullOrEmpty" xml:space="preserve">
-    <value>Cannot be null or empty.</value>
-    <comment>error when an argument is null or empty</comment>
-  </data>
-  <data name="EntityKeyValueTypeInvalid" xml:space="preserve">
-    <value>The instance of entity type '{0}' cannot be added to the in-memory store because the key type '{1}' is an invalid primary key property type.</value>
   </data>
 </root>

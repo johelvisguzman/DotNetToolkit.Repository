@@ -124,6 +124,9 @@
   <data name="EntityAlreadyBeingTrackedInStore" xml:space="preserve">
     <value>The instance of entity type '{0}' cannot be added to the in-memory store because another instance of this type with the same key is already being tracked.</value>
   </data>
+  <data name="EntityKeyValueTypeInvalid" xml:space="preserve">
+    <value>The instance of entity type '{0}' cannot be added to the in-memory store because the key type '{1}' is an invalid primary key property type.</value>
+  </data>
   <data name="EntityKeyValueTypeMismatch" xml:space="preserve">
     <value>The key value was of type '{0}', which does not match the property type of '{1}'.</value>
   </data>
