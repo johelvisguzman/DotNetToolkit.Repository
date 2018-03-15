@@ -66,15 +66,22 @@
         /// </summary>
         protected IQueryable<TEntity> GetQuery(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
+            IQueryable<TEntity> query;
 
-            var query = GetQuery(criteria.FetchStrategy);
-
-            query = criteria.SatisfyingEntitiesFrom(query);
+            if (criteria != null)
+            {
+                query = GetQuery(criteria.FetchStrategy);
+                query = criteria.SatisfyingEntitiesFrom(query);
+            }
+            else
+            {
+                query = GetQuery();
+            }
 
             if (options != null)
+            {
                 query = options.Apply(query);
+            }
 
             return query;
         }
@@ -158,6 +165,17 @@
                 throw new ArgumentNullException(nameof(criteria));
 
             return Find(criteria) != null;
+        }
+
+        /// <summary>
+        /// Gets a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
+        /// </summary>
+        protected virtual Dictionary<TDictionaryKey, TElement> GetDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Func<TEntity, TDictionaryKey> keySelector, Func<TEntity, TElement> elementSelector, IQueryOptions<TEntity> options)
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            return GetQuery(criteria, options).ToDictionary(keySelector, elementSelector, EqualityComparer<TDictionaryKey>.Default);
         }
 
         /// <summary>
@@ -287,6 +305,134 @@
         public int Count(Expression<Func<TEntity, bool>> predicate)
         {
             return Count(predicate == null ? null : new Specification<TEntity>(predicate));
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
+        /// </summary>
+        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <returns>A new  <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(Func<TEntity, TDictionaryKey> keySelector)
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            return ToDictionary(keySelector, (IQueryOptions<TEntity>)null);
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
+        /// </summary>
+        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <returns>A new  <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(Func<TEntity, TDictionaryKey> keySelector, IQueryOptions<TEntity> options)
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            return ToDictionary((ISpecification<TEntity>)null, keySelector, options);
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElemen}" /> according to the specified <paramref name="keySelector" />, a comparer, and an element selector function..
+        /// </summary>
+        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
+        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
+        /// <returns>A new  <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(Func<TEntity, TDictionaryKey> keySelector, Func<TEntity, TElement> elementSelector)
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            return ToDictionary(keySelector, elementSelector, (IQueryOptions<TEntity>)null);
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElemen}" /> according to the specified <paramref name="keySelector" />, a comparer, and an element selector function..
+        /// </summary>
+        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
+        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <returns>A new  <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(Func<TEntity, TDictionaryKey> keySelector, Func<TEntity, TElement> elementSelector, IQueryOptions<TEntity> options)
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            return ToDictionary((ISpecification<TEntity>)null, keySelector, elementSelector, options);
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
+        /// </summary>
+        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
+        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <returns>A new  <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(ISpecification<TEntity> criteria, Func<TEntity, TDictionaryKey> keySelector)
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            return ToDictionary(criteria, keySelector, (IQueryOptions<TEntity>)null);
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
+        /// </summary>
+        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
+        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <returns>A new  <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(ISpecification<TEntity> criteria, Func<TEntity, TDictionaryKey> keySelector, IQueryOptions<TEntity> options)
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            return ToDictionary(criteria, keySelector, IdentityFunction<TEntity>.Instance, options);
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElemen}" /> according to the specified <paramref name="keySelector" />, a comparer, and an element selector function..
+        /// </summary>
+        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
+        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
+        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
+        /// <returns>A new  <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Func<TEntity, TDictionaryKey> keySelector, Func<TEntity, TElement> elementSelector)
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            return ToDictionary(criteria, keySelector, elementSelector, (IQueryOptions<TEntity>)null);
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElemen}" /> according to the specified <paramref name="keySelector" />, a comparer, and an element selector function..
+        /// </summary>
+        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
+        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
+        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <returns>A new  <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Func<TEntity, TDictionaryKey> keySelector, Func<TEntity, TElement> elementSelector, IQueryOptions<TEntity> options)
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            return GetDictionary(criteria, keySelector, elementSelector, options);
         }
 
         #endregion
@@ -669,6 +815,18 @@
                 throw new ArgumentNullException(nameof(criteria));
 
             return GetExist(criteria);
+        }
+
+        #endregion
+
+        #region Nested type: IdentityFunction<TElement>
+
+        protected class IdentityFunction<TElement>
+        {
+            public static Func<TElement, TElement> Instance
+            {
+                get { return x => x; }
+            }
         }
 
         #endregion
