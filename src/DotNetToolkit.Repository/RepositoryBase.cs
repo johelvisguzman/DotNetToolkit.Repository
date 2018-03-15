@@ -246,6 +246,16 @@
             throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeInvalid, typeof(TEntity), propertyType));
         }
 
+        /// <summary>
+        /// Throws if the entity key value type does not match the type of the property defined.
+        /// </summary>
+        protected void ThrowIfEntityKeyValueTypeMismatch()
+        {
+            var propertyInfo = GetPrimaryKeyPropertyInfo();
+            if (propertyInfo.PropertyType != typeof(TKey))
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeMismatch, typeof(TKey), propertyInfo.PropertyType));
+        }
+
         #endregion
 
         #region Implementation of ICanAggregate<TEntity>
@@ -424,6 +434,8 @@
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
+            ThrowIfEntityKeyValueTypeMismatch();
+
             return GetEntity(key);
         }
 
@@ -437,6 +449,8 @@
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
+
+            ThrowIfEntityKeyValueTypeMismatch();
 
             return GetEntity(key, fetchStrategy);
         }
@@ -455,6 +469,8 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
+            ThrowIfEntityKeyValueTypeMismatch();
+
             return Get(key, selector, (IFetchStrategy<TEntity>)null);
         }
 
@@ -472,6 +488,8 @@
 
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
+
+            ThrowIfEntityKeyValueTypeMismatch();
 
             var result = GetEntity(key, fetchStrategy);
             var selectFunc = selector.Compile();

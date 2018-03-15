@@ -1,10 +1,12 @@
 ﻿namespace DotNetToolkit.Repository
 {
     using FetchStrategies;
+    using Properties;
     using Queries;
     using Specifications;
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
@@ -214,7 +216,7 @@
 
             var entity = await GetAsync(key, cancellationToken);
             if (entity == null)
-                throw new InvalidOperationException($"No entity found in the repository with the '{key}' key.");
+                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
 
             DeleteItem(entity);
             await SaveChangesAsync(cancellationToken);
