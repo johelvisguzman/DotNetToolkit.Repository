@@ -54,14 +54,6 @@
         protected abstract IQueryable<TEntity> GetQuery(IFetchStrategy<TEntity> fetchStrategy = null);
 
         /// <summary>
-        /// Returns the entity <see cref="System.Linq.IQueryable{TEntity}" />.
-        /// </summary>
-        protected virtual IQueryable<TEntity> AsQueryable()
-        {
-            return GetQuery();
-        }
-
-        /// <summary>
         /// Gets an entity query that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
         protected IQueryable<TEntity> GetQuery(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
@@ -272,6 +264,18 @@
             var propertyInfo = GetPrimaryKeyPropertyInfo();
             if (propertyInfo.PropertyType != typeof(TKey))
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeMismatch, typeof(TKey), propertyInfo.PropertyType));
+        }
+
+        #endregion
+
+        #region Implementation of IRepositoryQueryable<out TEntity>
+
+        /// <summary>
+        /// Returns the entity <see cref="System.Linq.IQueryable{TEntity}" />.
+        /// </summary>
+        public virtual IQueryable<TEntity> AsQueryable()
+        {
+            return GetQuery();
         }
 
         #endregion
