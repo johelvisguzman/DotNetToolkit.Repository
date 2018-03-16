@@ -4,13 +4,13 @@
 
   <PropertyGroup>
     <TargetFrameworks>net451;netstandard1.3</TargetFrameworks>
-    <AssemblyName>DotNetToolkit.Repository.Json</AssemblyName>
-    <RootNamespace>DotNetToolkit.Repository.Json</RootNamespace>
-    <Description>A toolkit that provides a lightweight starter kit for using the Repository pattern for the JSON framework for .NET.</Description>
+    <AssemblyName>DotNetToolkit.Repository.Xml</AssemblyName>
+    <RootNamespace>DotNetToolkit.Repository.Xml</RootNamespace>
+    <Description>A toolkit that provides a lightweight starter kit for using the Repository pattern for storing entities in an xml formatted file.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+    <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>

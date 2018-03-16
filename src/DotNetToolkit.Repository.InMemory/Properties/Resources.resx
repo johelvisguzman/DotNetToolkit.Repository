@@ -130,4 +130,10 @@
   <data name="EntityNotFoundInStore" xml:space="preserve">
     <value>Attempted to update or delete an entity that does not exist in the in-memory store.</value>
   </data>
+  <data name="InvalidFileExtension" xml:space="preserve">
+    <value>The specified '{0}' file has an invalid extension. Please consider using '{1}'.</value>
+  </data>
+  <data name="InvalidFilePath" xml:space="preserve">
+    <value>The specified '{0}' file is not a valid path.</value>
+  </data>
 </root>
