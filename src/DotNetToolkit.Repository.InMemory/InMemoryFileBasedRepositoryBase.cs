@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
+    using System.Linq;
 
     /// <summary>
     /// Represents a file based repository for in-memory operations (for testing purposes).
@@ -126,7 +127,7 @@
                 // Puts from memory into the file
                 using (var writer = new StreamWriter(stream))
                 {
-                    var entities = GetQuery();
+                    var entities = GetQuery().ToList();
 
                     OnSaved(writer, entities);
                 }
