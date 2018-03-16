@@ -29,7 +29,7 @@
         /// <summary>
         /// Gets or sets the name of the database.
         /// </summary>
-        protected string DatabaseName { get; set; }
+        internal string DatabaseName { get; set; }
 
         #endregion
 
@@ -50,15 +50,6 @@
         #region Protected Methods
 
         /// <summary>
-        /// Ensures the in-memory store is completely deleted.
-        /// </summary>
-        protected void EnsureDeleted()
-        {
-            _context.Clear();
-            InMemoryCache<TEntity, TKey>.Instance.GetContext(DatabaseName).Clear();
-        }
-
-        /// <summary>
         /// Releases unmanaged and - optionally - managed resources.
         /// </summary>
         /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
@@ -73,6 +64,19 @@
             }
 
             _disposed = true;
+        }
+
+        #endregion
+
+        #region Internal Methods
+
+        /// <summary>
+        /// Ensures the in-memory store is completely deleted.
+        /// </summary>
+        internal void EnsureDeleted()
+        {
+            _context.Clear();
+            InMemoryCache<TEntity, TKey>.Instance.GetContext(DatabaseName).Clear();
         }
 
         #endregion
