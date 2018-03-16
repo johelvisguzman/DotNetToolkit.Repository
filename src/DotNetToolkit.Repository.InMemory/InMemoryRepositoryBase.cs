@@ -19,9 +19,17 @@
         private const string DefaultDatabaseName = "DotNetToolkit.Repository.InMemory";
 
         private static readonly object _syncRoot = new object();
-        private readonly string _name;
         private ConcurrentDictionary<TKey, EntitySet<TEntity, TKey>> _context;
         private bool _disposed;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets or sets the name of the database.
+        /// </summary>
+        protected string DatabaseName { get; set; }
 
         #endregion
 
@@ -33,13 +41,22 @@
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
         protected InMemoryRepositoryBase(string databaseName = null)
         {
-            _name = string.IsNullOrEmpty(databaseName) ? DefaultDatabaseName : databaseName;
+            DatabaseName = string.IsNullOrEmpty(databaseName) ? DefaultDatabaseName : databaseName;
             _context = new ConcurrentDictionary<TKey, EntitySet<TEntity, TKey>>();
         }
 
         #endregion
 
         #region Protected Methods
+
+        /// <summary>
+        /// Ensures the in-memory store is completely deleted.
+        /// </summary>
+        public void EnsureDeleted()
+        {
+            _context.Clear();
+            InMemoryCache<TEntity, TKey>.Instance.GetContext(DatabaseName).Clear();
+        }
 
         /// <summary>
         /// Releases unmanaged and - optionally - managed resources.
@@ -175,7 +192,7 @@
         {
             lock (_syncRoot)
             {
-                var context = InMemoryCache<TEntity, TKey>.Instance.GetContext(_name);
+                var context = InMemoryCache<TEntity, TKey>.Instance.GetContext(DatabaseName);
 
                 foreach (var entitySet in _context.Select(y => y.Value))
                 {
@@ -205,7 +222,7 @@
                     }
                     else
                     {
-                        context[key] = new EntitySet<TEntity, TKey>(DeepCopy(entitySet.Entity), key, EntityState.Unchanged);
+                        context[key] = DeepCopy(entitySet.Entity);
                     }
                 }
 
@@ -219,9 +236,9 @@
         protected override IQueryable<TEntity> GetQuery(IFetchStrategy<TEntity> fetchStrategy = null)
         {
             return InMemoryCache<TEntity, TKey>.Instance
-                .GetContext(_name)
+                .GetContext(DatabaseName)
                 .AsQueryable()
-                .Select(y => y.Value.Entity);
+                .Select(y => y.Value);
         }
 
         /// <summary>
@@ -230,10 +247,10 @@
         protected override TEntity GetEntity(TKey key, IFetchStrategy<TEntity> fetchStrategy)
         {
             InMemoryCache<TEntity, TKey>.Instance
-                .GetContext(_name)
-                .TryGetValue(key, out EntitySet<TEntity, TKey> entitySet);
+                .GetContext(DatabaseName)
+                .TryGetValue(key, out TEntity entity);
 
-            return entitySet?.Entity;
+            return entity;
         }
 
         #endregion
@@ -311,7 +328,7 @@
 
             private static volatile InMemoryCache<TEntity, TKey> _instance;
             private static readonly object _syncRoot = new object();
-            private readonly ConcurrentDictionary<string, SortedDictionary<TKey, EntitySet<TEntity, TKey>>> _storage;
+            private readonly ConcurrentDictionary<string, SortedDictionary<TKey, TEntity>> _storage;
 
             #endregion
 
@@ -322,7 +339,7 @@
             /// </summary>
             private InMemoryCache()
             {
-                _storage = new ConcurrentDictionary<string, SortedDictionary<TKey, EntitySet<TEntity, TKey>>>();
+                _storage = new ConcurrentDictionary<string, SortedDictionary<TKey, TEntity>>();
             }
 
             #endregion
@@ -358,11 +375,11 @@
             /// </summary>
             /// <param name="name">The database name.</param>
             /// <returns>The scoped database context by the specified database name.</returns>
-            public SortedDictionary<TKey, EntitySet<TEntity, TKey>> GetContext(string name)
+            public SortedDictionary<TKey, TEntity> GetContext(string name)
             {
                 if (!_storage.ContainsKey(name))
                 {
-                    _storage[name] = new SortedDictionary<TKey, EntitySet<TEntity, TKey>>();
+                    _storage[name] = new SortedDictionary<TKey, TEntity>();
                 }
 
                 return _storage[name];
