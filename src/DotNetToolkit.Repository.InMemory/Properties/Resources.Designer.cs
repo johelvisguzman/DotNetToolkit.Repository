@@ -10,8 +10,8 @@
 
 namespace DotNetToolkit.Repository.InMemory.Properties {
     using System.Reflection;
-    
-    
+
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -93,6 +93,24 @@ namespace DotNetToolkit.Repository.InMemory.Properties {
         internal static string EntityNotFoundInStore {
             get {
                 return ResourceManager.GetString("EntityNotFoundInStore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified &apos;{0}&apos; file has an invalid extension. Please consider using &apos;{1}&apos;..
+        /// </summary>
+        internal static string InvalidFileExtension {
+            get {
+                return ResourceManager.GetString("InvalidFileExtension", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified &apos;{0}&apos; file is not a valid path..
+        /// </summary>
+        internal static string InvalidFilePath {
+            get {
+                return ResourceManager.GetString("InvalidFilePath", resourceCulture);
             }
         }
     }

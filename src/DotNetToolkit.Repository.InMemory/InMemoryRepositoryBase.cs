@@ -52,7 +52,7 @@
         /// <summary>
         /// Ensures the in-memory store is completely deleted.
         /// </summary>
-        public void EnsureDeleted()
+        protected void EnsureDeleted()
         {
             _context.Clear();
             InMemoryCache<TEntity, TKey>.Instance.GetContext(DatabaseName).Clear();
