@@ -127,13 +127,13 @@
   <data name="EntityKeyValueTypeInvalid" xml:space="preserve">
     <value>The instance of entity type '{0}' cannot be added to the in-memory store because the key type '{1}' is an invalid primary key property type.</value>
   </data>
-  <data name="EntityKeyValueTypeMismatch" xml:space="preserve">
-    <value>The key value was of type '{0}', which does not match the property type of '{1}'.</value>
-  </data>
   <data name="EntityNotFoundInStore" xml:space="preserve">
     <value>Attempted to update or delete an entity that does not exist in the in-memory store.</value>
   </data>
-  <data name="EntityRequiresPrimaryKey" xml:space="preserve">
-    <value>The instance of entity type '{0}' requires a primary key to be defined.</value>
+  <data name="InvalidFileExtension" xml:space="preserve">
+    <value>The specified '{0}' file has an invalid extension. Please consider using '{1}'.</value>
+  </data>
+  <data name="InvalidFilePath" xml:space="preserve">
+    <value>The specified '{0}' file is not a valid path.</value>
   </data>
 </root>

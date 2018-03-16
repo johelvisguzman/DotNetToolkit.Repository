@@ -3,27 +3,56 @@
     using Data;
     using FetchStrategies;
     using InMemory;
+    using Json;
     using Queries;
     using Specifications;
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using Xunit;
 
-    public class InMemoryRepositoryTests
+    public class JsonRepositoryTests
     {
-        [Fact]
-        public void Add_With_Seeded_Id()
+        private static string GetTempFileName(string fileName = null)
         {
-            var repo = new InMemoryRepository<Customer>();
+            if (string.IsNullOrEmpty(fileName))
+                fileName = "TestData-" + Guid.NewGuid().ToString("N") + ".json";
 
-            const int expectedId = 9;
+            var path = Path.GetTempPath() + fileName;
 
-            var entity = new Customer { Id = expectedId, Name = "Random Name" };
+            if (File.Exists(path))
+                File.Delete(path);
 
-            repo.Add(entity);
+            return path;
+        }
 
-            Assert.NotNull(repo.Get(expectedId));
+        [Fact]
+        public void Creates_Temp_File_On_Construction()
+        {
+            var path = GetTempFileName();
+
+            if (File.Exists(path))
+                File.Delete(path);
+
+            Assert.True(!File.Exists(path));
+
+            var repo = new JsonRepository<Customer>(path);
+
+            Assert.True(File.Exists(path));
+        }
+
+        [Fact]
+        public void Generates_Temp_File_Name_When_Only_Directory_Is_Provided()
+        {
+            var generatedName = $"{typeof(Customer).Name}.json";
+            var path = GetTempFileName(generatedName);
+
+            Assert.True(!File.Exists(path));
+
+            var repo = new JsonRepository<Customer>(path);
+
+            Assert.True(File.Exists(path));
         }
 
         [Fact]
@@ -32,7 +61,7 @@
             const string name = "Random Name";
 
             var entity = new Customer { Name = name };
-            var repo = new InMemoryRepository<Customer>(Guid.NewGuid().ToString());
+            var repo = new JsonRepository<Customer>(GetTempFileName());
 
             Assert.False(repo.Exists(x => x.Name.Equals(name)));
 
@@ -52,7 +81,7 @@
                 new Customer { Name = name }
             };
 
-            var repo = new InMemoryRepository<Customer>(Guid.NewGuid().ToString());
+            var repo = new JsonRepository<Customer>(GetTempFileName());
 
             Assert.Equal(0, repo.Count());
 
@@ -67,7 +96,7 @@
             const string name = "Random Name";
 
             var entity = new Customer { Name = name };
-            var repo = new InMemoryRepository<Customer>(Guid.NewGuid().ToString());
+            var repo = new JsonRepository<Customer>(GetTempFileName());
 
             repo.Add(entity);
 
@@ -91,7 +120,7 @@
                 new Customer { Name = name }
             };
 
-            var repo = new InMemoryRepository<Customer>(Guid.NewGuid().ToString());
+            var repo = new JsonRepository<Customer>(GetTempFileName());
 
             repo.Add(entities);
 
@@ -111,7 +140,7 @@
             const string name = "Random Name";
 
             var entity = new Customer { Name = name };
-            var repo = new InMemoryRepository<Customer>(Guid.NewGuid().ToString());
+            var repo = new JsonRepository<Customer>(GetTempFileName());
 
             repo.Add(entity);
 
@@ -136,7 +165,7 @@
                 new Customer { Name = name }
             };
 
-            var repo = new InMemoryRepository<Customer>(Guid.NewGuid().ToString());
+            var repo = new JsonRepository<Customer>(GetTempFileName());
 
             repo.Add(entities);
 
@@ -159,7 +188,7 @@
 
             var spec = new Specification<Customer>(x => x.Name.Equals(name));
             var entity = new Customer { Name = name };
-            var repo = new InMemoryRepository<Customer>(Guid.NewGuid().ToString());
+            var repo = new JsonRepository<Customer>(GetTempFileName());
 
             Assert.Null(repo.Find(x => x.Name.Equals(name)));
             Assert.Null(repo.Find(spec));
@@ -185,7 +214,7 @@
 
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
             var queryOptions = new SortingOptions<Customer, string>(x => x.Name, true);
-            var repo = new InMemoryRepository<Customer>(Guid.NewGuid().ToString());
+            var repo = new JsonRepository<Customer>(GetTempFileName());
 
             Assert.Null(repo.Find(x => x.Name.Contains("Random Name"), queryOptions)?.Name);
             Assert.Null(repo.Find(spec, queryOptions)?.Name);
@@ -211,7 +240,7 @@
 
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
             var queryOptions = new SortingOptions<Customer, string>(x => x.Name);
-            var repo = new InMemoryRepository<Customer>(Guid.NewGuid().ToString());
+            var repo = new JsonRepository<Customer>(GetTempFileName());
 
             Assert.Null(repo.Find(x => x.Name.Contains("Random Name"), queryOptions)?.Name);
             Assert.Null(repo.Find(spec, queryOptions)?.Name);
@@ -233,7 +262,7 @@
 
             var spec = new Specification<Customer>(x => x.Name.Equals(name));
             var entity = new Customer { Name = name };
-            var repo = new InMemoryRepository<Customer>(Guid.NewGuid().ToString());
+            var repo = new JsonRepository<Customer>(GetTempFileName());
 
             Assert.Empty(repo.FindAll(x => x.Name.Equals(name)));
             Assert.Empty(repo.FindAll(spec));
@@ -259,7 +288,7 @@
 
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
             var queryOptions = new SortingOptions<Customer, string>(x => x.Name, true);
-            var repo = new InMemoryRepository<Customer>(Guid.NewGuid().ToString());
+            var repo = new JsonRepository<Customer>(GetTempFileName());
 
             Assert.Null(repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions).FirstOrDefault()?.Name);
             Assert.Null(repo.FindAll(spec, queryOptions).FirstOrDefault()?.Name);
@@ -285,7 +314,7 @@
 
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
             var queryOptions = new SortingOptions<Customer, string>(x => x.Name);
-            var repo = new InMemoryRepository<Customer>(Guid.NewGuid().ToString());
+            var repo = new JsonRepository<Customer>(GetTempFileName());
 
             Assert.Null(repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions).FirstOrDefault()?.Name);
             Assert.Null(repo.FindAll(spec, queryOptions).FirstOrDefault()?.Name);
@@ -310,7 +339,7 @@
                 entities.Add(new Customer { Name = "Random Name " + i });
             }
 
-            var repo = new InMemoryRepository<Customer>(Guid.NewGuid().ToString());
+            var repo = new JsonRepository<Customer>(GetTempFileName());
 
             repo.Add(entities);
 
@@ -376,7 +405,7 @@
                 entities.Add(new Customer { Name = "Random Name " + i });
             }
 
-            var repo = new InMemoryRepository<Customer>(Guid.NewGuid().ToString());
+            var repo = new JsonRepository<Customer>(GetTempFileName());
 
             repo.Add(entities);
 
@@ -441,7 +470,7 @@
             fetchStrategy.Include(x => x.Address);
 
             var entity = new Customer { Id = key, Name = name };
-            var repo = new InMemoryRepository<Customer>(Guid.NewGuid().ToString());
+            var repo = new JsonRepository<Customer>(GetTempFileName());
 
             Assert.Null(repo.Get(key));
             Assert.Null(repo.Get(key, fetchStrategy));
@@ -459,7 +488,7 @@
 
             var spec = new Specification<Customer>(x => x.Name.Equals(name));
             var entity = new Customer { Name = name };
-            var repo = new InMemoryRepository<Customer>(Guid.NewGuid().ToString());
+            var repo = new JsonRepository<Customer>(GetTempFileName());
 
             Assert.Equal(0, repo.Count());
             Assert.Equal(0, repo.Count(x => x.Name.Equals(name)));
@@ -475,9 +504,9 @@
         [Fact]
         public void Can_Scoped()
         {
-            var databaseName = Guid.NewGuid().ToString();
+            var path = GetTempFileName("TestData.json");
 
-            using (var repo = new InMemoryRepository<Customer>(databaseName))
+            using (var repo = new JsonRepository<Customer>(path))
             {
                 var entity = new Customer { Name = "Random Name" };
 
@@ -487,7 +516,7 @@
                 Assert.Equal(1, entity.Id);
             }
 
-            using (var repo = new InMemoryRepository<Customer>(databaseName))
+            using (var repo = new JsonRepository<Customer>(path))
             {
                 var entity = new Customer { Name = "Random Name" };
 
@@ -497,7 +526,7 @@
                 Assert.Equal(2, repo.Count(x => x.Name.Equals("Random Name")));
             }
 
-            using (var repo = new InMemoryRepository<Customer>(Guid.NewGuid().ToString()))
+            using (var repo = new JsonRepository<Customer>(GetTempFileName()))
             {
                 var entity = new Customer { Name = "Random Name" };
 
@@ -521,7 +550,7 @@
             expectedDictionary.Add(entity.Id, entity);
             expectedDictionaryByElementSelector.Add(entity.Id, entity.Name);
 
-            var repo = new InMemoryRepository<Customer>(Guid.NewGuid().ToString());
+            var repo = new JsonRepository<Customer>(GetTempFileName());
 
             Assert.False(expectedDictionary.All(x => repo.ToDictionary(y => y.Id).ContainsKey(x.Key)));
             Assert.False(expectedDictionary.All(x => repo.ToDictionary(spec, y => y.Id).ContainsKey(x.Key)));
@@ -550,7 +579,7 @@
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
             var expectedDictionary = entities.ToDictionary(x => x.Id);
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
-            var repo = new InMemoryRepository<Customer>(Guid.NewGuid().ToString());
+            var repo = new JsonRepository<Customer>(GetTempFileName());
 
             Assert.False(expectedDictionary.All(x => repo.ToDictionary(y => y.Id).ContainsKey(x.Key)));
             Assert.False(expectedDictionary.All(x => repo.ToDictionary(spec, y => y.Id).ContainsKey(x.Key)));
@@ -697,9 +726,27 @@
         }
 
         [Fact]
+        public void Throws_If_File_Path_Is_Invalid()
+        {
+            var path = "TestData";
+            var ex = Assert.Throws<InvalidOperationException>(() => new JsonRepository<Customer>(path));
+
+            Assert.Equal($"The specified '{path}.json' file is not a valid path.", ex.Message);
+        }
+
+        [Fact]
+        public void Throws_If_File_Extension_Is_Not_Json()
+        {
+            var path = GetTempFileName("TestData.txt");
+            var ex = Assert.Throws<InvalidOperationException>(() => new JsonRepository<Customer>(path));
+
+            Assert.Equal($"The specified '{path}' file has an invalid extension. Please consider using '.json'.", ex.Message);
+        }
+
+        [Fact]
         public void Throws_If_Add_With_No_Id_Defined_Entity()
         {
-            var repo = new InMemoryRepository<CustomerWithNoId>();
+            var repo = new JsonRepository<CustomerWithNoId>(GetTempFileName());
             var entity = new CustomerWithNoId { Name = "Random Name" };
 
             var ex = Assert.Throws<InvalidOperationException>(() => repo.Add(entity));
@@ -709,7 +756,7 @@
         [Fact]
         public void Throws_If_Delete_With_No_Id_Defined_Entity()
         {
-            var repo = new InMemoryRepository<CustomerWithNoId>();
+            var repo = new JsonRepository<CustomerWithNoId>(GetTempFileName());
             var entity = new CustomerWithNoId { Name = "Random Name" };
 
             var ex = Assert.Throws<InvalidOperationException>(() => repo.Delete(entity));
@@ -719,7 +766,7 @@
         [Fact]
         public void Throws_If_Update_With_No_Id_Defined_Entity()
         {
-            var repo = new InMemoryRepository<CustomerWithNoId>();
+            var repo = new JsonRepository<CustomerWithNoId>(GetTempFileName());
             var entity = new CustomerWithNoId { Name = "Random Name" };
 
             var ex = Assert.Throws<InvalidOperationException>(() => repo.Update(entity));
@@ -729,7 +776,7 @@
         [Fact]
         public void Throws_If_Delete_When_Entity_No_In_Store()
         {
-            var repo = new InMemoryRepository<Customer>();
+            var repo = new JsonRepository<Customer>(GetTempFileName());
             var entity = new Customer { Name = "Random Name" };
 
             var ex = Assert.Throws<InvalidOperationException>(() => repo.Delete(entity));
@@ -739,7 +786,7 @@
         [Fact]
         public void Throws_If_Update_When_Entity_No_In_Store()
         {
-            var repo = new InMemoryRepository<Customer>();
+            var repo = new JsonRepository<Customer>(GetTempFileName());
             var entity = new Customer { Name = "Random Name" };
 
             var ex = Assert.Throws<InvalidOperationException>(() => repo.Update(entity));
@@ -749,7 +796,7 @@
         [Fact]
         public void Throws_If_Adding_Entity_Of_Same_Type_With_Same_Primary_Key_Value()
         {
-            var repo = new InMemoryRepository<Customer>();
+            var repo = new JsonRepository<Customer>(GetTempFileName());
             var entity = new Customer { Name = "Random Name" };
 
             repo.Add(entity);

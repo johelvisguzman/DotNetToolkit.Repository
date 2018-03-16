@@ -88,15 +88,6 @@ namespace DotNetToolkit.Repository.InMemory.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The key value was of type &apos;{0}&apos;, which does not match the property type of &apos;{1}&apos;..
-        /// </summary>
-        internal static string EntityKeyValueTypeMismatch {
-            get {
-                return ResourceManager.GetString("EntityKeyValueTypeMismatch", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Attempted to update or delete an entity that does not exist in the in-memory store..
         /// </summary>
         internal static string EntityNotFoundInStore {
@@ -106,11 +97,20 @@ namespace DotNetToolkit.Repository.InMemory.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; requires a primary key to be defined..
+        ///   Looks up a localized string similar to The specified &apos;{0}&apos; file has an invalid extension. Please consider using &apos;{1}&apos;..
         /// </summary>
-        internal static string EntityRequiresPrimaryKey {
+        internal static string InvalidFileExtension {
             get {
-                return ResourceManager.GetString("EntityRequiresPrimaryKey", resourceCulture);
+                return ResourceManager.GetString("InvalidFileExtension", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified &apos;{0}&apos; file is not a valid path..
+        /// </summary>
+        internal static string InvalidFilePath {
+            get {
+                return ResourceManager.GetString("InvalidFilePath", resourceCulture);
             }
         }
     }
