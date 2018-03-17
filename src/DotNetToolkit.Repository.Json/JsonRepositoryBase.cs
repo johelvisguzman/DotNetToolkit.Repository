@@ -49,8 +49,7 @@
             var serializer = new JsonSerializer
             {
                 Formatting = Formatting.Indented,
-                ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                TypeNameHandling = TypeNameHandling.All
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
             };
 
             serializer.Serialize(writer, entities);
