@@ -79,6 +79,24 @@
             InMemoryCache<TEntity, TKey>.Instance.GetContext(DatabaseName).Clear();
         }
 
+        /// <summary>
+        /// Sets the time stamp.
+        /// </summary>
+        /// <param name="time">The time.</param>
+        internal void SetTimeStamp(DateTime time)
+        {
+            InMemoryCache<TEntity, TKey>.Instance.SetTimeStamp(DatabaseName, time);
+        }
+
+        /// <summary>
+        /// Gets the time stamp.
+        /// </summary>
+        /// <returns>The time stamp.</returns>
+        internal DateTime GetTimeStamp()
+        {
+            return InMemoryCache<TEntity, TKey>.Instance.GetTimeStamp(DatabaseName);
+        }
+
         #endregion
 
         #region	Private Methods
@@ -146,6 +164,8 @@
                 .Select(x => x.Key)
                 .SingleOrDefault();
 
+            var hasTemporaryKey = false;
+
             if (key != null && key.Equals(default(TKey)))
             {
                 key = GetPrimaryKey(entity);
@@ -153,10 +173,14 @@
                 if (key != null && key.Equals(default(TKey)))
                 {
                     key = GenerateTemporaryPrimaryKey();
+                    hasTemporaryKey = true;
                 }
             }
 
-            _context[key] = new EntitySet<TEntity, TKey>(entity, key, EntityState.Added);
+            _context[key] = new EntitySet<TEntity, TKey>(entity, key, EntityState.Added)
+            {
+                HasTemporaryKey = hasTemporaryKey
+            };
         }
 
         /// <summary>
@@ -165,13 +189,18 @@
         protected override void DeleteItem(TEntity entity)
         {
             var key = GetPrimaryKey(entity);
+            var hasTemporaryKey = false;
 
             if (key != null && key.Equals(default(TKey)))
             {
                 key = GenerateTemporaryPrimaryKey();
+                hasTemporaryKey = true;
             }
 
-            _context[key] = new EntitySet<TEntity, TKey>(entity, key, EntityState.Removed);
+            _context[key] = new EntitySet<TEntity, TKey>(entity, key, EntityState.Removed)
+            {
+                HasTemporaryKey = hasTemporaryKey
+            };
         }
 
         /// <summary>
@@ -180,13 +209,18 @@
         protected override void UpdateItem(TEntity entity)
         {
             var key = GetPrimaryKey(entity);
+            var hasTemporaryKey = false;
 
             if (key != null && key.Equals(default(TKey)))
             {
                 key = GenerateTemporaryPrimaryKey();
+                hasTemporaryKey = true;
             }
 
-            _context[key] = new EntitySet<TEntity, TKey>(entity, key, EntityState.Modified);
+            _context[key] = new EntitySet<TEntity, TKey>(entity, key, EntityState.Modified)
+            {
+                HasTemporaryKey = hasTemporaryKey
+            };
         }
 
         /// <summary>
@@ -200,35 +234,36 @@
 
                 foreach (var entitySet in _context.Select(y => y.Value))
                 {
-                    var temporaryKey = entitySet.Key;
-                    var key = GetPrimaryKey(entitySet.Entity);
+                    var key = entitySet.Key;
 
                     if (entitySet.State == EntityState.Added)
                     {
-                        if (key == null || key.Equals(default(TKey)))
+                        if (entitySet.HasTemporaryKey)
                         {
                             key = GeneratePrimaryKey();
                             SetPrimaryKey(entitySet.Entity, key);
                         }
-                        else if (context.ContainsKey(temporaryKey))
+                        else if (context.ContainsKey(key))
                         {
                             throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
                         }
                     }
-                    else if (!context.ContainsKey(temporaryKey))
+                    else if (!context.ContainsKey(key))
                     {
                         throw new InvalidOperationException(Resources.EntityNotFoundInStore);
                     }
 
                     if (entitySet.State == EntityState.Removed)
                     {
-                        context.Remove(temporaryKey);
+                        context.Remove(key);
                     }
                     else
                     {
                         context[key] = DeepCopy(entitySet.Entity);
                     }
                 }
+
+                SetTimeStamp(DateTime.Now);
 
                 _context.Clear();
             }
@@ -241,8 +276,8 @@
         {
             return InMemoryCache<TEntity, TKey>.Instance
                 .GetContext(DatabaseName)
-                .AsQueryable()
-                .Select(y => y.Value);
+                .Select(y => y.Value)
+                .AsQueryable();
         }
 
         /// <summary>
@@ -300,6 +335,11 @@
             /// </summary>
             public EntityState State { get; }
 
+            /// <summary>
+            /// Gets or sets a value indicating whether this instance has a temporary key.
+            /// </summary>
+            public bool HasTemporaryKey { get; set; }
+
             #endregion
         }
 
@@ -314,8 +354,7 @@
         {
             Added,
             Removed,
-            Modified,
-            Unchanged
+            Modified
         }
 
         #endregion
@@ -333,6 +372,7 @@
             private static volatile InMemoryCache<TEntity, TKey> _instance;
             private static readonly object _syncRoot = new object();
             private readonly ConcurrentDictionary<string, SortedDictionary<TKey, TEntity>> _storage;
+            private readonly ConcurrentDictionary<string, DateTime> _timestamp;
 
             #endregion
 
@@ -344,6 +384,7 @@
             private InMemoryCache()
             {
                 _storage = new ConcurrentDictionary<string, SortedDictionary<TKey, TEntity>>();
+                _timestamp = new ConcurrentDictionary<string, DateTime>();
             }
 
             #endregion
@@ -387,6 +428,28 @@
                 }
 
                 return _storage[name];
+            }
+
+            /// <summary>
+            /// Sets the time stamp.
+            /// </summary>
+            /// <param name="name">The database name.</param>
+            /// <param name="time">The time.</param>
+            public void SetTimeStamp(string name, DateTime time)
+            {
+                _timestamp[name] = time;
+            }
+
+            /// <summary>
+            /// Gets the time stamp.
+            /// </summary>
+            /// <param name="name">The database name.</param>
+            /// <returns>The time stamp.</returns>
+            public DateTime GetTimeStamp(string name)
+            {
+                _timestamp.TryGetValue(name, out DateTime time);
+
+                return time;
             }
 
             #endregion

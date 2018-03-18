@@ -92,21 +92,34 @@
             // Otherwise, try to get the data from the file
             else
             {
-                // Adds the data from the file into memory
-                using (var stream = new FileStream(DatabaseName, FileMode.Open, FileAccess.Read))
-                using (var reader = new StreamReader(stream))
+                // Checks to see when was the last time that the file was updated. If the TimeStamp and the lastWriteTime
+                // are the same, then it means that the file has only been updated by this repository; otherwise,
+                // something else updated it (maybe a manual edit). In which case, we need to re-upload the entities into memory
+                var lastWriteTime = File.GetLastWriteTime(DatabaseName);
+                var timetamp = GetTimeStamp();
+                if (!lastWriteTime.Equals(timetamp))
                 {
-                    var entities = OnLoaded(reader);
-
-                    EnsureDeleted();
-
-                    foreach (var entity in entities)
-                    {
-                        AddItem(entity);
-                    }
-
-                    base.SaveChanges();
+                    LoadChanges();
                 }
+            }
+        }
+
+        private void LoadChanges()
+        {
+            // Adds the data from the file into memory
+            using (var stream = new FileStream(DatabaseName, FileMode.Open, FileAccess.Read))
+            using (var reader = new StreamReader(stream))
+            {
+                var entities = OnLoaded(reader);
+
+                EnsureDeleted();
+
+                foreach (var entity in entities)
+                {
+                    AddItem(entity);
+                }
+
+                base.SaveChanges();
             }
         }
 
@@ -131,6 +144,8 @@
 
                     OnSaved(writer, entities);
                 }
+
+                SetTimeStamp(File.GetLastWriteTime(DatabaseName));
             }
         }
 
