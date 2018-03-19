@@ -162,23 +162,29 @@
         /// <summary>
         /// Gets a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected virtual Dictionary<TDictionaryKey, TElement> GetDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Func<TEntity, TDictionaryKey> keySelector, Func<TEntity, TElement> elementSelector, IQueryOptions<TEntity> options)
+        protected virtual Dictionary<TDictionaryKey, TElement> GetDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
-            return GetQuery(criteria, options).ToDictionary(keySelector, elementSelector, EqualityComparer<TDictionaryKey>.Default);
+            var keySelectFunc = keySelector.Compile();
+            var elementSelectorFunc = elementSelector.Compile();
+
+            return GetQuery(criteria, options).ToDictionary(keySelectFunc, elementSelectorFunc, EqualityComparer<TDictionaryKey>.Default);
         }
 
         /// <summary>
         /// Gets a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected virtual IEnumerable<IGrouping<TGroupKey, TElement>> GetGroupBy<TGroupKey, TElement>(ISpecification<TEntity> criteria, Func<TEntity, TGroupKey> keySelector, Func<TEntity, TElement> elementSelector, IQueryOptions<TEntity> options)
+        protected virtual IEnumerable<IGrouping<TGroupKey, TElement>> GetGroupBy<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
-            return GetQuery(criteria, options).AsEnumerable().GroupBy(keySelector, elementSelector, EqualityComparer<TGroupKey>.Default);
+            var keySelectFunc = keySelector.Compile();
+            var elementSelectorFunc = elementSelector.Compile();
+
+            return GetQuery(criteria, options).AsEnumerable().GroupBy(keySelectFunc, elementSelectorFunc, EqualityComparer<TGroupKey>.Default);
         }
 
         /// <summary>
@@ -329,7 +335,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>A new  <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(Func<TEntity, TDictionaryKey> keySelector, IQueryOptions<TEntity> options = null)
+        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector, IQueryOptions<TEntity> options = null)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -346,7 +352,7 @@
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>A new  <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(Func<TEntity, TDictionaryKey> keySelector, Func<TEntity, TElement> elementSelector, IQueryOptions<TEntity> options = null)
+        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -362,12 +368,12 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>A new  <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(ISpecification<TEntity> criteria, Func<TEntity, TDictionaryKey> keySelector, IQueryOptions<TEntity> options = null)
+        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, IQueryOptions<TEntity> options = null)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
-            return ToDictionary(criteria, keySelector, IdentityFunction<TEntity>.Instance, options);
+            return ToDictionary(criteria, keySelector, IdentityExpression<TEntity>.Instance, options);
         }
 
         /// <summary>
@@ -380,7 +386,7 @@
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>A new  <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Func<TEntity, TDictionaryKey> keySelector, Func<TEntity, TElement> elementSelector, IQueryOptions<TEntity> options = null)
+        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -395,7 +401,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>A new  <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TEntity>> GroupBy<TGroupKey>(Func<TEntity, TGroupKey> keySelector, IQueryOptions<TEntity> options = null)
+        public IEnumerable<IGrouping<TGroupKey, TEntity>> GroupBy<TGroupKey>(Expression<Func<TEntity, TGroupKey>> keySelector, IQueryOptions<TEntity> options = null)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -412,7 +418,7 @@
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>A new  <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TElement>> GroupBy<TGroupKey, TElement>(Func<TEntity, TGroupKey> keySelector, Func<TEntity, TElement> elementSelector, IQueryOptions<TEntity> options = null)
+        public IEnumerable<IGrouping<TGroupKey, TElement>> GroupBy<TGroupKey, TElement>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -428,12 +434,12 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>A new  <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TEntity>> GroupBy<TGroupKey>(ISpecification<TEntity> criteria, Func<TEntity, TGroupKey> keySelector, IQueryOptions<TEntity> options = null)
+        public IEnumerable<IGrouping<TGroupKey, TEntity>> GroupBy<TGroupKey>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, IQueryOptions<TEntity> options = null)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
-            return GroupBy(criteria, keySelector, IdentityFunction<TEntity>.Instance, options);
+            return GroupBy(criteria, keySelector, IdentityExpression<TEntity>.Instance, options);
         }
 
         /// <summary>
@@ -446,7 +452,7 @@
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>A new  <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TElement>> GroupBy<TGroupKey, TElement>(ISpecification<TEntity> criteria, Func<TEntity, TGroupKey> keySelector, Func<TEntity, TElement> elementSelector, IQueryOptions<TEntity> options = null)
+        public IEnumerable<IGrouping<TGroupKey, TElement>> GroupBy<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -837,12 +843,12 @@
         }
 
         #endregion
+        
+        #region Nested type: IdentityExpression<TElement>
 
-        #region Nested type: IdentityFunction<TElement>
-
-        protected class IdentityFunction<TElement>
+        protected class IdentityExpression<TElement>
         {
-            public static Func<TElement, TElement> Instance
+            public static Expression<Func<TElement, TElement>> Instance
             {
                 get { return x => x; }
             }

@@ -80,7 +80,7 @@
         /// <summary>
         /// A protected asynchronous overridable method for getting a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected abstract Task<Dictionary<TDictionaryKey, TElement>> GetDictionaryAsync<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Func<TEntity, TDictionaryKey> keySelector, Func<TEntity, TElement> elementSelector, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken());
+        protected abstract Task<Dictionary<TDictionaryKey, TElement>> GetDictionaryAsync<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken());
 
         #endregion
 
@@ -126,7 +126,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Task<Dictionary<TDictionaryKey, TEntity>> ToDictionaryAsync<TDictionaryKey>(Func<TEntity, TDictionaryKey> keySelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
+        public Task<Dictionary<TDictionaryKey, TEntity>> ToDictionaryAsync<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -144,7 +144,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TDictionaryKey, TElement>(Func<TEntity, TDictionaryKey> keySelector, Func<TEntity, TElement> elementSelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
+        public Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -161,12 +161,12 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Task<Dictionary<TDictionaryKey, TEntity>> ToDictionaryAsync<TDictionaryKey>(ISpecification<TEntity> criteria, Func<TEntity, TDictionaryKey> keySelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
+        public Task<Dictionary<TDictionaryKey, TEntity>> ToDictionaryAsync<TDictionaryKey>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
-            return ToDictionaryAsync(criteria, keySelector, IdentityFunction<TEntity>.Instance, options, cancellationToken);
+            return ToDictionaryAsync(criteria, keySelector, IdentityExpression<TEntity>.Instance, options, cancellationToken);
         }
 
         /// <summary>
@@ -180,7 +180,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Func<TEntity, TDictionaryKey> keySelector, Func<TEntity, TElement> elementSelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
+        public Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
