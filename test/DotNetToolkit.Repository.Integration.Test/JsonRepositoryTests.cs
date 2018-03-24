@@ -264,6 +264,7 @@
             var entity = new Customer { Name = name };
             var repo = new JsonRepository<Customer>(GetTempFileName());
 
+            Assert.Empty(repo.FindAll());
             Assert.Empty(repo.FindAll(x => x.Name.Equals(name)));
             Assert.Empty(repo.FindAll(spec));
             Assert.Empty(repo.FindAll<string>(x => x.Name.Equals(name), x => x.Name));
@@ -271,6 +272,7 @@
 
             repo.Add(entity);
 
+            Assert.Single(repo.FindAll());
             Assert.Single(repo.FindAll(x => x.Name.Equals(name)));
             Assert.Single(repo.FindAll(spec));
             Assert.Single(repo.FindAll<string>(x => x.Name.Equals(name), x => x.Name));

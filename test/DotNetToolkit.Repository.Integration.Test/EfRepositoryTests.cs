@@ -477,6 +477,7 @@
                 var entity = new Customer { Name = name };
                 var repo = new EfRepository<Customer>(context);
 
+                Assert.Empty(repo.FindAll());
                 Assert.Empty(repo.FindAll(x => x.Name.Equals(name)));
                 Assert.Empty(repo.FindAll(spec));
                 Assert.Empty(repo.FindAll<string>(x => x.Name.Equals(name), x => x.Name));
@@ -484,6 +485,7 @@
 
                 repo.Add(entity);
 
+                Assert.Single(repo.FindAll());
                 Assert.Single(repo.FindAll(x => x.Name.Equals(name)));
                 Assert.Single(repo.FindAll(spec));
                 Assert.Single(repo.FindAll<string>(x => x.Name.Equals(name), x => x.Name));
@@ -502,6 +504,7 @@
                 var entity = new Customer { Name = name };
                 var repo = new EfRepository<Customer>(context);
 
+                Assert.Empty(await repo.FindAllAsync());
                 Assert.Empty(await repo.FindAllAsync(x => x.Name.Equals(name)));
                 Assert.Empty(await repo.FindAllAsync(spec));
                 Assert.Empty(await repo.FindAllAsync<string>(x => x.Name.Equals(name), x => x.Name));
@@ -509,6 +512,7 @@
 
                 await repo.AddAsync(entity);
 
+                Assert.Single(await repo.FindAllAsync());
                 Assert.Single(await repo.FindAllAsync(x => x.Name.Equals(name)));
                 Assert.Single(await repo.FindAllAsync(spec));
                 Assert.Single(await repo.FindAllAsync<string>(x => x.Name.Equals(name), x => x.Name));
