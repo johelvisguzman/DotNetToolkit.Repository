@@ -56,7 +56,7 @@
         /// Asynchronously finds the collection of entities in the repository.
         /// </summary>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of entities in the repository.</returns>
-        Task<List<TEntity>> FindAllAsync(CancellationToken cancellationToken = default(CancellationToken));
+        Task<IEnumerable<TEntity>> FindAllAsync(CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Asynchronously finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
@@ -65,7 +65,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
-        Task<List<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task<IEnumerable<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Asynchronously finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="criteria" />.
@@ -74,7 +74,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of entities in the repository that satisfied the criteria specified by the <paramref name="criteria" />.</returns>
-        Task<List<TEntity>> FindAllAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task<IEnumerable<TEntity>> FindAllAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Asynchronously finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
@@ -84,7 +84,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
-        Task<List<TResult>> FindAllAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task<IEnumerable<TResult>> FindAllAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Asynchronously finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="criteria" />.
@@ -94,7 +94,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="criteria" />.</returns>
-        Task<List<TResult>> FindAllAsync<TResult>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task<IEnumerable<TResult>> FindAllAsync<TResult>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Asynchronously determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="predicate" />.
