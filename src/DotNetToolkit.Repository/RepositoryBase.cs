@@ -121,9 +121,6 @@
         /// </summary>
         protected virtual IEnumerable<TEntity> GetEntities(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
-
             return GetQuery(criteria, options).ToList();
         }
 
@@ -750,6 +747,15 @@
                 throw new ArgumentNullException(nameof(selector));
 
             return GetEntity(criteria, options, selector);
+        }
+
+        /// <summary>
+        /// Finds the collection of entities in the repository.
+        /// </summary>
+        /// <returns>The collection of entities in the repository.</returns>
+        public IEnumerable<TEntity> FindAll()
+        {
+            return GetEntities(null, null);
         }
 
         /// <summary>

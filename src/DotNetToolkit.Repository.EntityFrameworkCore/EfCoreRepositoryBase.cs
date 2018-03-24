@@ -183,9 +183,6 @@
         /// </summary>
         protected override Task<List<TEntity>> GetEntitiesAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
-
             return GetQuery(criteria, options).ToListAsync(cancellationToken);
         }
 

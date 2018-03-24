@@ -47,6 +47,12 @@
         TResult Find<TResult>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null);
 
         /// <summary>
+        /// Finds the collection of entities in the repository.
+        /// </summary>
+        /// <returns>The collection of entities in the repository.</returns>
+        IEnumerable<TEntity> FindAll();
+
+        /// <summary>
         /// Finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>

@@ -53,6 +53,12 @@
         Task<TResult> FindAsync<TResult>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
+        /// Asynchronously finds the collection of entities in the repository.
+        /// </summary>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of entities in the repository.</returns>
+        Task<List<TEntity>> FindAllAsync(CancellationToken cancellationToken = default(CancellationToken));
+
+        /// <summary>
         /// Asynchronously finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>

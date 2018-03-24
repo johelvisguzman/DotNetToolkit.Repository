@@ -509,6 +509,15 @@
         }
 
         /// <summary>
+        /// Asynchronously finds the collection of entities in the repository.
+        /// </summary>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of entities in the repository.</returns>
+        public Task<List<TEntity>> FindAllAsync(CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return GetEntitiesAsync(null, null, cancellationToken);
+        }
+
+        /// <summary>
         /// Asynchronously finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
