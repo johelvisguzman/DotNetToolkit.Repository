@@ -17,6 +17,18 @@
     /// </summary>
     public abstract class RepositoryBase<TEntity, TKey> : IRepository<TEntity, TKey> where TEntity : class
     {
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity,TKey}"/> class.
+        /// </summary>
+        protected RepositoryBase()
+        {
+            ThrowIfEntityKeyValueTypeMismatch();
+        }
+
+        #endregion
+
         #region Public Methods
 
         /// <summary>
@@ -602,8 +614,6 @@
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            ThrowIfEntityKeyValueTypeMismatch();
-
             return GetEntity(key);
         }
 
@@ -617,8 +627,6 @@
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
-
-            ThrowIfEntityKeyValueTypeMismatch();
 
             return GetEntity(key, fetchStrategy);
         }
@@ -637,8 +645,6 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            ThrowIfEntityKeyValueTypeMismatch();
-
             return Get(key, selector, (IFetchStrategy<TEntity>)null);
         }
 
@@ -656,8 +662,6 @@
 
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
-
-            ThrowIfEntityKeyValueTypeMismatch();
 
             var result = GetEntity(key, fetchStrategy);
             var selectFunc = selector.Compile();
