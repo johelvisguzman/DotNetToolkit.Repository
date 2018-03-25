@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Xml
 {
     using InMemory;
+    using Logging;
     using System.Collections.Generic;
     using System.IO;
     using System.Xml.Serialization;
@@ -17,6 +18,15 @@
         /// </summary>
         /// <param name="filePath">The file path.</param>
         protected XmlRepositoryBase(string filePath) : base(filePath)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="XmlRepositoryBase{TEntity, TKey}"/> class.
+        /// </summary>
+        /// <param name="filePath">The file path.</param>
+        /// <param name="logger">The logger.</param>
+        protected XmlRepositoryBase(string filePath, ILogger logger) : base(filePath, logger)
         {
         }
 

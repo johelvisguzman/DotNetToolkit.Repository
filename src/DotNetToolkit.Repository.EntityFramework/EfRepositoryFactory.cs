@@ -37,7 +37,7 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity> Create<TEntity>(IRepositoryOptions options) where TEntity : class
         {
-            return new EfRepository<TEntity>(GetDbContext(options));
+            return new EfRepository<TEntity>(GetDbContext(options), options.Logger);
         }
 
         /// <summary>
@@ -49,7 +49,7 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey> Create<TEntity, TKey>(IRepositoryOptions options) where TEntity : class
         {
-            return new EfRepository<TEntity, TKey>(GetDbContext(options));
+            return new EfRepository<TEntity, TKey>(GetDbContext(options), options.Logger);
         }
 
         #endregion

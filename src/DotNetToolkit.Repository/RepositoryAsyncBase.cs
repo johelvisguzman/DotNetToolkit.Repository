@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository
 {
     using FetchStrategies;
+    using Logging;
     using Properties;
     using Queries;
     using Specifications;
@@ -17,6 +18,25 @@
     /// </summary>
     public abstract class RepositoryAsyncBase<TEntity, TKey> : RepositoryBase<TEntity, TKey>, IRepositoryAsync<TEntity, TKey> where TEntity : class
     {
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryAsyncBase{TEntity, TKey}"/> class.
+        /// </summary>
+        protected RepositoryAsyncBase()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryAsyncBase{TEntity, TKey}"/> class.
+        /// </summary>
+        /// <param name="logger">The logger.</param>
+        protected RepositoryAsyncBase(ILogger logger) : base(logger)
+        {
+        }
+
+        #endregion
+
         #region Protected Methods
 
         /// <summary>
@@ -281,8 +301,12 @@
 
             cancellationToken.ThrowIfCancellationRequested();
 
+            Logger?.Write($"Adding {typeof(TEntity).Name} entity", entity);
+
             AddItem(entity);
             await SaveChangesAsync(cancellationToken);
+
+            Logger?.Write($"Added {typeof(TEntity).Name} entity", entity);
         }
 
         /// <summary>
@@ -298,12 +322,16 @@
 
             cancellationToken.ThrowIfCancellationRequested();
 
+            Logger?.Write($"Adding {typeof(TEntity).Name} entities", entities);
+
             foreach (var entity in entities)
             {
                 AddItem(entity);
             }
 
             await SaveChangesAsync(cancellationToken);
+
+            Logger?.Write($"Added {typeof(TEntity).Name} entities", entities);
         }
 
         #endregion
@@ -323,8 +351,12 @@
 
             cancellationToken.ThrowIfCancellationRequested();
 
+            Logger?.Write($"Updating {typeof(TEntity).Name} entity", entity);
+
             UpdateItem(entity);
             await SaveChangesAsync(cancellationToken);
+
+            Logger?.Write($"Updated {typeof(TEntity).Name} entity", entity);
         }
 
         /// <summary>
@@ -340,12 +372,16 @@
 
             cancellationToken.ThrowIfCancellationRequested();
 
+            Logger?.Write($"Updating {typeof(TEntity).Name} entities", entities);
+
             foreach (var entity in entities)
             {
                 UpdateItem(entity);
             }
 
             await SaveChangesAsync(cancellationToken);
+
+            Logger?.Write($"Updated {typeof(TEntity).Name} entities", entities);
         }
 
         #endregion
@@ -369,8 +405,7 @@
             if (entity == null)
                 throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
 
-            DeleteItem(entity);
-            await SaveChangesAsync(cancellationToken);
+            await DeleteAsync(entity, cancellationToken);
         }
 
         /// <summary>
@@ -386,8 +421,12 @@
 
             cancellationToken.ThrowIfCancellationRequested();
 
+            Logger?.Write($"Deleting {typeof(TEntity).Name} entity", entity);
+
             DeleteItem(entity);
             await SaveChangesAsync(cancellationToken);
+
+            Logger?.Write($"Deleted {typeof(TEntity).Name} entity", entity);
         }
 
         /// <summary>
@@ -417,12 +456,16 @@
 
             cancellationToken.ThrowIfCancellationRequested();
 
+            Logger?.Write($"Deleting {typeof(TEntity).Name} entities", entities);
+
             foreach (var entity in entities)
             {
                 DeleteItem(entity);
             }
 
             await SaveChangesAsync(cancellationToken);
+
+            Logger?.Write($"Deleted {typeof(TEntity).Name} entities", entities);
         }
 
         #endregion

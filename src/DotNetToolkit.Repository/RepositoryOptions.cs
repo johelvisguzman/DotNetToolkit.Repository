@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository
 {
     using System;
+    using Logging;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryOptions" />.
@@ -33,6 +34,11 @@
         /// Gets or sets the type of the database context.
         /// </summary>
         public Type DbContextType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the logger.
+        /// </summary>
+        public ILogger Logger { get; set; }
 
         #endregion
     }
