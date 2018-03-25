@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.InMemory
 {
+    using FetchStrategies;
     using Logging;
     using Properties;
     using System;
@@ -13,6 +14,12 @@
     /// </summary>
     public abstract class InMemoryFileBasedRepositoryBase<TEntity, TKey> : InMemoryRepositoryBase<TEntity, TKey> where TEntity : class
     {
+        #region Fields
+
+        private bool _saveChangesInProcess;
+
+        #endregion
+
         #region Properties
 
         /// <summary>
@@ -102,15 +109,24 @@
             // Otherwise, try to get the data from the file
             else
             {
-                // Checks to see when was the last time that the file was updated. If the TimeStamp and the lastWriteTime
-                // are the same, then it means that the file has only been updated by this repository; otherwise,
-                // something else updated it (maybe a manual edit). In which case, we need to re-upload the entities into memory
-                var lastWriteTime = File.GetLastWriteTime(DatabaseName);
-                var timetamp = GetTimeStamp();
-                if (!lastWriteTime.Equals(timetamp))
-                {
-                    LoadChanges();
-                }
+                LoadChangesOnFileChanged();
+            }
+        }
+
+        private void LoadChangesOnFileChanged()
+        {
+            // Don't do anything if we are currently saving changes, or if the file is empty
+            if (new FileInfo(DatabaseName).Length == 0)
+                return;
+
+            // Checks to see when was the last time that the file was updated. If the TimeStamp and the lastWriteTime
+            // are the same, then it means that the file has only been updated by this repository; otherwise,
+            // something else updated it (maybe a manual edit). In which case, we need to re-upload the entities into memory
+            var lastWriteTime = File.GetLastWriteTime(DatabaseName);
+            var timetamp = GetTimeStamp();
+            if (!lastWriteTime.Equals(timetamp))
+            {
+                LoadChanges();
             }
         }
 
@@ -120,9 +136,11 @@
             using (var stream = new FileStream(DatabaseName, FileMode.Open, FileAccess.Read))
             using (var reader = new StreamReader(stream))
             {
-                var entities = OnLoaded(reader);
-
                 EnsureDeleted();
+
+                var entities = OnLoaded(reader);
+                if (entities == null)
+                    return;
 
                 foreach (var entity in entities)
                 {
@@ -138,10 +156,35 @@
         #region Overrides of InMemoryRepositoryBase<TEntity,TKey>
 
         /// <summary>
+        /// A protected overridable method for getting an entity query that supplies the specified fetching strategy from the repository.
+        /// </summary>
+        protected override IQueryable<TEntity> GetQuery(IFetchStrategy<TEntity> fetchStrategy = null)
+        {
+            if (!_saveChangesInProcess)
+            {
+                LoadChangesOnFileChanged();
+            }
+
+            return base.GetQuery(fetchStrategy);
+        }
+
+        /// <summary>
+        /// Gets an entity query with the given primary key value from the repository.
+        /// </summary>
+        protected override TEntity GetEntity(TKey key, IFetchStrategy<TEntity> fetchStrategy)
+        {
+            LoadChangesOnFileChanged();
+
+            return base.GetEntity(key, fetchStrategy);
+        }
+
+        /// <summary>
         /// A protected overridable method for saving changes made in the current unit of work in the repository.
         /// </summary>
         protected override void SaveChanges()
         {
+            _saveChangesInProcess = true;
+
             using (var stream = new FileStream(DatabaseName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Delete))
             {
                 // Saves the data into memory
@@ -150,13 +193,15 @@
                 // Puts from memory into the file
                 using (var writer = new StreamWriter(stream))
                 {
-                    var entities = GetQuery().ToList();
+                    var entities = base.GetQuery().ToList();
 
                     OnSaved(writer, entities);
                 }
 
                 SetTimeStamp(File.GetLastWriteTime(DatabaseName));
             }
+
+            _saveChangesInProcess = false;
         }
 
         #endregion
