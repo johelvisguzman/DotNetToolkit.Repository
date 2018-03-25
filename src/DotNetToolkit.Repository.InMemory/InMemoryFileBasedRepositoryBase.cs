@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.InMemory
 {
+    using Logging;
     using Properties;
     using System;
     using System.Collections.Generic;
@@ -27,7 +28,16 @@
         /// Initializes a new instance of the <see cref="InMemoryFileBasedRepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
-        protected InMemoryFileBasedRepositoryBase(string filePath)
+        protected InMemoryFileBasedRepositoryBase(string filePath) : this(filePath, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryFileBasedRepositoryBase{TEntity, TKey}"/> class.
+        /// </summary>
+        /// <param name="filePath">The file path.</param>
+        /// <param name="logger">The logger.</param>
+        protected InMemoryFileBasedRepositoryBase(string filePath, ILogger logger) : base(logger)
         {
             OnInitialize(filePath);
         }

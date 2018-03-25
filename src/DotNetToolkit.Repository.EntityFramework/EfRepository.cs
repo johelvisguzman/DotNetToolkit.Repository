@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.EntityFramework
 {
+    using Logging;
     using System.Data.Entity;
 
     /// <summary>
@@ -14,6 +15,13 @@
         /// </summary>
         /// <param name="context">The database context.</param>
         public EfRepository(DbContext context) : base(context) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EfRepository{TEntity, TKey}" /> class.
+        /// </summary>
+        /// <param name="context">The database context.</param>
+        /// <param name="logger">The logger.</param>
+        public EfRepository(DbContext context, ILogger logger) : base(context, logger) { }
 
         #endregion
     }
@@ -30,6 +38,13 @@
         /// </summary>
         /// <param name="context">The database context.</param>
         public EfRepository(DbContext context) : base(context) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EfRepository{TEntity, TKey}" /> class.
+        /// </summary>
+        /// <param name="context">The database context.</param>
+        /// <param name="logger">The logger.</param>
+        public EfRepository(DbContext context, ILogger logger) : base(context, logger) { }
 
         #endregion
     }

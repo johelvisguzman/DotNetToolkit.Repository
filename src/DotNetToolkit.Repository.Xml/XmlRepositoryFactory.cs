@@ -33,7 +33,7 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity> Create<TEntity>(IRepositoryOptions options) where TEntity : class
         {
-            return new XmlRepository<TEntity>(GetFilePath(options));
+            return new XmlRepository<TEntity>(GetFilePath(options), options.Logger);
         }
 
         /// <summary>
@@ -45,7 +45,7 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey> Create<TEntity, TKey>(IRepositoryOptions options) where TEntity : class
         {
-            return new XmlRepository<TEntity, TKey>(GetFilePath(options));
+            return new XmlRepository<TEntity, TKey>(GetFilePath(options), options.Logger);
         }
 
         #endregion

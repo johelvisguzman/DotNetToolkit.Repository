@@ -1,5 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Json
 {
+    using Logging;
+
     /// <summary>
     /// Represents a repository for storing entities as an json formatted file.
     /// </summary>
@@ -11,7 +13,16 @@
         /// Initializes a new instance of the <see cref="JsonRepository{TEntity,TKey}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
-        public JsonRepository(string filePath = null) : base(filePath)
+        public JsonRepository(string filePath) : base(filePath)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonRepository{TEntity}"/> class.
+        /// </summary>
+        /// <param name="filePath">The file path.</param>
+        /// <param name="logger">The logger.</param>
+        public JsonRepository(string filePath, ILogger logger) : base(filePath, logger)
         {
         }
 
@@ -29,7 +40,16 @@
         /// Initializes a new instance of the <see cref="JsonRepository{TEntity}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
-        public JsonRepository(string filePath = null) : base(filePath)
+        public JsonRepository(string filePath) : base(filePath)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonRepository{TEntity}"/> class.
+        /// </summary>
+        /// <param name="filePath">The file path.</param>
+        /// <param name="logger">The logger.</param>
+        public JsonRepository(string filePath, ILogger logger) : base(filePath, logger)
         {
         }
 

@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.InMemory
 {
     using FetchStrategies;
+    using Logging;
     using Properties;
     using System;
     using System.Collections.Concurrent;
@@ -39,7 +40,24 @@
         /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity,TKey}"/> class.
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
-        protected InMemoryRepositoryBase(string databaseName = null)
+        protected InMemoryRepositoryBase(string databaseName = null) : this(databaseName, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity,TKey}"/> class.
+        /// </summary>
+        /// <param name="logger">The logger.</param>
+        protected InMemoryRepositoryBase(ILogger logger) : this(null, logger)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity,TKey}"/> class.
+        /// </summary>
+        /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
+        /// <param name="logger">The logger.</param>
+        protected InMemoryRepositoryBase(string databaseName, ILogger logger) : base(logger)
         {
             DatabaseName = string.IsNullOrEmpty(databaseName) ? DefaultDatabaseName : databaseName;
             _context = new ConcurrentDictionary<TKey, EntitySet<TEntity, TKey>>();

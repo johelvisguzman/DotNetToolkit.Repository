@@ -2,6 +2,7 @@
 {
     using FetchStrategies;
     using Helpers;
+    using Logging;
     using Properties;
     using Queries;
     using Specifications;
@@ -17,6 +18,15 @@
     /// </summary>
     public abstract class RepositoryBase<TEntity, TKey> : IRepository<TEntity, TKey> where TEntity : class
     {
+        #region Properties
+
+        /// <summary>
+        /// Gets the logger.
+        /// </summary>
+        protected ILogger Logger { get; }
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -25,6 +35,15 @@
         protected RepositoryBase()
         {
             ThrowIfEntityKeyValueTypeMismatch();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}"/> class.
+        /// </summary>
+        /// <param name="logger">The logger.</param>
+        protected RepositoryBase(ILogger logger) : this()
+        {
+            Logger = logger;
         }
 
         #endregion
@@ -482,8 +501,12 @@
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
+            Logger?.Write($"Adding {typeof(TEntity).Name} entity", entity);
+
             AddItem(entity);
             SaveChanges();
+
+            Logger?.Write($"Added {typeof(TEntity).Name} entity", entity);
         }
 
         /// <summary>
@@ -495,12 +518,16 @@
             if (entities == null)
                 throw new ArgumentNullException(nameof(entities));
 
+            Logger?.Write($"Adding {typeof(TEntity).Name} entities", entities);
+
             foreach (var entity in entities)
             {
                 AddItem(entity);
             }
 
             SaveChanges();
+
+            Logger?.Write($"Added {typeof(TEntity).Name} entities", entities);
         }
 
         #endregion
@@ -516,8 +543,12 @@
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
+            Logger?.Write($"Updating {typeof(TEntity).Name} entity", entity);
+
             UpdateItem(entity);
             SaveChanges();
+
+            Logger?.Write($"Updated {typeof(TEntity).Name} entity", entity);
         }
 
         /// <summary>
@@ -529,12 +560,16 @@
             if (entities == null)
                 throw new ArgumentNullException(nameof(entities));
 
+            Logger?.Write($"Updating {typeof(TEntity).Name} entities", entities);
+
             foreach (var entity in entities)
             {
                 UpdateItem(entity);
             }
 
             SaveChanges();
+
+            Logger?.Write($"Updated {typeof(TEntity).Name} entities", entities);
         }
 
         #endregion
@@ -554,8 +589,7 @@
             if (entity == null)
                 throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
 
-            DeleteItem(entity);
-            SaveChanges();
+            Delete(entity);
         }
 
         /// <summary>
@@ -567,8 +601,12 @@
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
+            Logger?.Write($"Deleting {typeof(TEntity).Name} entity", entity);
+
             DeleteItem(entity);
             SaveChanges();
+
+            Logger?.Write($"Deleted {typeof(TEntity).Name} entity", entity);
         }
 
         /// <summary>
@@ -592,12 +630,16 @@
             if (entities == null)
                 throw new ArgumentNullException(nameof(entities));
 
+            Logger?.Write($"Deleting {typeof(TEntity).Name} entities", entities);
+
             foreach (var entity in entities)
             {
                 DeleteItem(entity);
             }
 
             SaveChanges();
+
+            Logger?.Write($"Deleted {typeof(TEntity).Name} entities", entities);
         }
 
         #endregion
@@ -853,7 +895,7 @@
         }
 
         #endregion
-        
+
         #region Nested type: IdentityExpression<TElement>
 
         protected class IdentityExpression<TElement>
