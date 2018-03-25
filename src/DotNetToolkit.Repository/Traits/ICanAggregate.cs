@@ -39,7 +39,7 @@
         /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new  <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
         Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector, IQueryOptions<TEntity> options = null);
 
         /// <summary>
@@ -50,7 +50,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new  <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
         Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null);
 
         /// <summary>
@@ -60,7 +60,7 @@
         /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new  <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
         Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, IQueryOptions<TEntity> options = null);
         
         /// <summary>
@@ -72,7 +72,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new  <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
         Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null);
 
         /// <summary>
@@ -81,7 +81,7 @@
         /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new  <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
+        /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
         IEnumerable<IGrouping<TGroupKey, TEntity>> GroupBy<TGroupKey>(Expression<Func<TEntity, TGroupKey>> keySelector, IQueryOptions<TEntity> options = null);
         
         /// <summary>
@@ -92,7 +92,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new  <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
+        /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
         IEnumerable<IGrouping<TGroupKey, TElement>> GroupBy<TGroupKey, TElement>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null);
 
         /// <summary>
@@ -102,7 +102,7 @@
         /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new  <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
+        /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
         IEnumerable<IGrouping<TGroupKey, TEntity>> GroupBy<TGroupKey>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, IQueryOptions<TEntity> options = null);
 
         /// <summary>
@@ -114,7 +114,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new  <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
+        /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
         IEnumerable<IGrouping<TGroupKey, TElement>> GroupBy<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null);
     }
 }
