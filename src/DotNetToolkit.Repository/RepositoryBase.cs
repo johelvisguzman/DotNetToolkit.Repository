@@ -120,7 +120,7 @@
         /// <summary>
         /// Gets an entity query with the given primary key value from the repository.
         /// </summary>
-        protected virtual TEntity GetEntity(TKey key)
+        protected TEntity GetEntity(TKey key)
         {
             return Get(key, (IFetchStrategy<TEntity>)null);
         }
@@ -128,7 +128,7 @@
         /// <summary>
         /// Gets an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected virtual TEntity GetEntity(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
+        protected TEntity GetEntity(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
@@ -139,7 +139,7 @@
         /// <summary>
         /// Gets an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected virtual TResult GetEntity<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
+        protected TResult GetEntity<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
@@ -150,7 +150,7 @@
         /// <summary>
         /// Gets a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected virtual IEnumerable<TEntity> GetEntities(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
+        protected IEnumerable<TEntity> GetEntities(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
         {
             return GetQuery(criteria, options).ToList();
         }
@@ -158,7 +158,7 @@
         /// <summary>
         /// Gets a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected virtual IEnumerable<TResult> GetEntities<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
+        protected IEnumerable<TResult> GetEntities<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
@@ -169,7 +169,7 @@
         /// <summary>
         /// Gets the number of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected virtual int GetCount(ISpecification<TEntity> criteria)
+        protected int GetCount(ISpecification<TEntity> criteria)
         {
             var predicate = criteria?.Predicate?.Compile();
 
@@ -179,7 +179,7 @@
         /// <summary>
         /// Determining whether the repository contains an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected virtual bool GetExist(ISpecification<TEntity> criteria)
+        protected bool GetExist(ISpecification<TEntity> criteria)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
@@ -190,7 +190,7 @@
         /// <summary>
         /// Gets a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected virtual Dictionary<TDictionaryKey, TElement> GetDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options)
+        protected Dictionary<TDictionaryKey, TElement> GetDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -204,7 +204,7 @@
         /// <summary>
         /// Gets a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected virtual IEnumerable<IGrouping<TGroupKey, TElement>> GetGroupBy<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options)
+        protected IEnumerable<IGrouping<TGroupKey, TElement>> GetGroupBy<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -222,7 +222,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The new specification.</returns>
         // https://github.com/SharpRepository/SharpRepository/blob/develop/SharpRepository.Repository/RepositoryBase.cs
-        protected virtual ISpecification<TEntity> GetByPrimaryKeySpecification(TKey key, IFetchStrategy<TEntity> fetchStrategy = null)
+        protected ISpecification<TEntity> GetByPrimaryKeySpecification(TKey key, IFetchStrategy<TEntity> fetchStrategy = null)
         {
             var propInfo = ConventionHelper.GetPrimaryKeyPropertyInfo(typeof(TEntity));
             var parameter = Expression.Parameter(typeof(TEntity), "x");
@@ -248,7 +248,7 @@
         /// Gets the primary key property information for the specified type.
         /// </summary>
         /// <returns>The primary key property info.</returns>
-        protected virtual PropertyInfo GetPrimaryKeyPropertyInfo()
+        protected PropertyInfo GetPrimaryKeyPropertyInfo()
         {
             return ConventionHelper.GetPrimaryKeyPropertyInfo(typeof(TEntity));
         }
@@ -258,7 +258,7 @@
         /// </summary>
         /// <param name="entity">The entity containing the property.</param>
         /// <returns>The property value.</returns>
-        protected virtual TKey GetPrimaryKey(TEntity entity)
+        protected TKey GetPrimaryKey(TEntity entity)
         {
             return (TKey)Convert.ChangeType(ConventionHelper.GetPrimaryKeyPropertyValue(entity), typeof(TKey));
         }
@@ -268,7 +268,7 @@
         /// </summary>
         /// <param name="entity">The entity containing the property.</param>
         /// <param name="key">The value to set for the primary key property.</param>
-        protected virtual void SetPrimaryKey(TEntity entity, TKey key)
+        protected void SetPrimaryKey(TEntity entity, TKey key)
         {
             ConventionHelper.SetPrimaryKeyPropertyValue(entity, key);
         }
@@ -277,7 +277,7 @@
         /// Generates a new primary id for the entity.
         /// </summary>
         /// <returns>The new generated primary id.</returns>
-        protected virtual TKey GeneratePrimaryKey()
+        protected TKey GeneratePrimaryKey()
         {
             var propertyInfo = GetPrimaryKeyPropertyInfo();
             var propertyType = propertyInfo.PropertyType;

@@ -55,7 +55,7 @@
         /// <summary>
         /// Asynchronously gets an entity query with the given primary key value from the repository.
         /// </summary>
-        protected virtual Task<TResult> GetEntityAsync<TResult>(TKey key, IFetchStrategy<TEntity> fetchStrategy, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        protected Task<TResult> GetEntityAsync<TResult>(TKey key, IFetchStrategy<TEntity> fetchStrategy, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             return GetEntityAsync(GetByPrimaryKeySpecification(key, fetchStrategy), (IQueryOptions<TEntity>)null, selector, cancellationToken);
         }
@@ -63,7 +63,7 @@
         /// <summary>
         /// Asynchronously gets an entity query with the given primary key value from the repository.
         /// </summary>
-        protected virtual Task<TEntity> GetEntityAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
+        protected Task<TEntity> GetEntityAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
             return GetAsync(key, (IFetchStrategy<TEntity>)null, cancellationToken);
         }
