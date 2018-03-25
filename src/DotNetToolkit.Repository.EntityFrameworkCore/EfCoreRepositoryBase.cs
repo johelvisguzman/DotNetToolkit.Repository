@@ -234,6 +234,17 @@
             return GetQuery(criteria, options).ToDictionaryAsync(keySelectFunc, elementSelectorFunc, EqualityComparer<TDictionaryKey>.Default, cancellationToken);
         }
 
+        /// <summary>
+        /// A protected asynchronous overridable method for getting a new <see cref="IGrouping{TGroupKey, TElemen}" /> according to the specified <paramref name="keySelector" />, an element selector.
+        /// </summary>
+        protected override async Task<IEnumerable<IGrouping<TGroupKey, TElement>>> GetGroupByAsync<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            return await GetQuery(criteria, options).GroupBy(keySelector, elementSelector, EqualityComparer<TGroupKey>.Default).ToListAsync(cancellationToken);
+        }
+
         #endregion
     }
 }

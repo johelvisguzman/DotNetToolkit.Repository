@@ -7,6 +7,7 @@
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
@@ -81,6 +82,11 @@
         /// A protected asynchronous overridable method for getting a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
         protected abstract Task<Dictionary<TDictionaryKey, TElement>> GetDictionaryAsync<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken());
+
+        /// <summary>
+        /// A protected asynchronous overridable method for getting a new <see cref="IGrouping{TGroupKey, TElemen}" /> according to the specified <paramref name="keySelector" />, an element selector.
+        /// </summary>
+        protected abstract Task<IEnumerable<IGrouping<TGroupKey, TElement>>> GetGroupByAsync<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken());
 
         #endregion
 
@@ -186,6 +192,76 @@
                 throw new ArgumentNullException(nameof(keySelector));
 
             return GetDictionaryAsync(criteria, keySelector, elementSelector, options, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously returns a new <see cref="IGrouping{TKey,TElement}" /> according to the specified <paramref name="keySelector" />.
+        /// </summary>
+        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
+        public Task<IEnumerable<IGrouping<TGroupKey, TEntity>>> GroupByAsync<TGroupKey>(Expression<Func<TEntity, TGroupKey>> keySelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            return GroupByAsync((ISpecification<TEntity>)null, keySelector, options, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously returns a new <see cref="IGrouping{TGroupKey, TElemen}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
+        /// </summary>
+        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
+        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
+        public Task<IEnumerable<IGrouping<TGroupKey, TElement>>> GroupByAsync<TGroupKey, TElement>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            return GroupByAsync((ISpecification<TEntity>)null, keySelector, elementSelector, options, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously returns a new <see cref="IGrouping{TGroupKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
+        /// </summary>
+        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
+        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
+        public Task<IEnumerable<IGrouping<TGroupKey, TEntity>>> GroupByAsync<TGroupKey>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            return GroupByAsync(criteria, keySelector, IdentityExpression<TEntity>.Instance, options, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously returns a new <see cref="IGrouping{TGroupKey, TElemen}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
+        /// </summary>
+        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
+        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
+        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
+        public Task<IEnumerable<IGrouping<TGroupKey, TElement>>> GroupByAsync<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            return GetGroupByAsync(criteria, keySelector, elementSelector, options, cancellationToken);
         }
 
         #endregion
