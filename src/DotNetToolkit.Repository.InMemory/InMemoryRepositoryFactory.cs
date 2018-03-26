@@ -33,7 +33,7 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity> Create<TEntity>(IRepositoryOptions options) where TEntity : class
         {
-            return new InMemoryRepository<TEntity>(GetDatabaseName(options));
+            return new InMemoryRepository<TEntity>(GetDatabaseName(options), options.Logger);
         }
 
         /// <summary>
@@ -45,7 +45,7 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey> Create<TEntity, TKey>(IRepositoryOptions options) where TEntity : class
         {
-            return new InMemoryRepository<TEntity, TKey>(GetDatabaseName(options));
+            return new InMemoryRepository<TEntity, TKey>(GetDatabaseName(options), options.Logger);
         }
 
         #endregion
