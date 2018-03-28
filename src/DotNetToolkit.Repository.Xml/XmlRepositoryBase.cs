@@ -9,7 +9,7 @@
     /// <summary>
     /// Represents a repository for storing entities as an xml formatted file.
     /// </summary>
-    public abstract class XmlRepositoryBase<TEntity, TKey> : InMemoryFileBasedRepositoryBase<TEntity, TKey> where TEntity : class
+    public abstract class XmlRepositoryBase<TEntity, TKey> : InMemoryRepositoryFileBase<TEntity, TKey> where TEntity : class
     {
         #region Constructors
 

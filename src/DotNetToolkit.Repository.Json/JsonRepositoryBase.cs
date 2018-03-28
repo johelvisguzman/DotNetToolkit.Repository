@@ -10,7 +10,7 @@
     /// <summary>
     /// Represents a repository for storing entities as an json formatted file.
     /// </summary>
-    public abstract class JsonRepositoryBase<TEntity, TKey> : InMemoryFileBasedRepositoryBase<TEntity, TKey> where TEntity : class
+    public abstract class JsonRepositoryBase<TEntity, TKey> : InMemoryRepositoryFileBase<TEntity, TKey> where TEntity : class
     {
         #region Constructors
 
