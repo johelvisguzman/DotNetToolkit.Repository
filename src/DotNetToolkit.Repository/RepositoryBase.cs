@@ -169,7 +169,7 @@
         /// <summary>
         /// Gets the number of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected int GetCount(ISpecification<TEntity> criteria)
+        protected virtual int GetCount(ISpecification<TEntity> criteria)
         {
             var predicate = criteria?.Predicate?.Compile();
 
@@ -179,7 +179,7 @@
         /// <summary>
         /// Determining whether the repository contains an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected bool GetExist(ISpecification<TEntity> criteria)
+        protected virtual bool GetExist(ISpecification<TEntity> criteria)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
@@ -190,7 +190,7 @@
         /// <summary>
         /// Gets a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected Dictionary<TDictionaryKey, TElement> GetDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options)
+        protected virtual Dictionary<TDictionaryKey, TElement> GetDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -204,7 +204,7 @@
         /// <summary>
         /// Gets a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected IEnumerable<IGrouping<TGroupKey, TElement>> GetGroupBy<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options)
+        protected virtual IEnumerable<IGrouping<TGroupKey, TElement>> GetGroupBy<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -222,7 +222,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The new specification.</returns>
         // https://github.com/SharpRepository/SharpRepository/blob/develop/SharpRepository.Repository/RepositoryBase.cs
-        protected ISpecification<TEntity> GetByPrimaryKeySpecification(TKey key, IFetchStrategy<TEntity> fetchStrategy = null)
+        protected virtual ISpecification<TEntity> GetByPrimaryKeySpecification(TKey key, IFetchStrategy<TEntity> fetchStrategy = null)
         {
             var propInfo = ConventionHelper.GetPrimaryKeyPropertyInfo(typeof(TEntity));
             var parameter = Expression.Parameter(typeof(TEntity), "x");
@@ -248,7 +248,7 @@
         /// Gets the primary key property information for the specified type.
         /// </summary>
         /// <returns>The primary key property info.</returns>
-        protected PropertyInfo GetPrimaryKeyPropertyInfo()
+        protected virtual PropertyInfo GetPrimaryKeyPropertyInfo()
         {
             return ConventionHelper.GetPrimaryKeyPropertyInfo(typeof(TEntity));
         }
@@ -258,7 +258,7 @@
         /// </summary>
         /// <param name="entity">The entity containing the property.</param>
         /// <returns>The property value.</returns>
-        protected TKey GetPrimaryKey(TEntity entity)
+        protected virtual TKey GetPrimaryKey(TEntity entity)
         {
             return (TKey)Convert.ChangeType(ConventionHelper.GetPrimaryKeyPropertyValue(entity), typeof(TKey));
         }
@@ -268,7 +268,7 @@
         /// </summary>
         /// <param name="entity">The entity containing the property.</param>
         /// <param name="key">The value to set for the primary key property.</param>
-        protected void SetPrimaryKey(TEntity entity, TKey key)
+        protected virtual void SetPrimaryKey(TEntity entity, TKey key)
         {
             ConventionHelper.SetPrimaryKeyPropertyValue(entity, key);
         }
@@ -277,7 +277,7 @@
         /// Generates a new primary id for the entity.
         /// </summary>
         /// <returns>The new generated primary id.</returns>
-        protected TKey GeneratePrimaryKey()
+        protected virtual TKey GeneratePrimaryKey()
         {
             var propertyInfo = GetPrimaryKeyPropertyInfo();
             var propertyType = propertyInfo.PropertyType;
@@ -304,7 +304,7 @@
         /// <summary>
         /// Throws if the entity key value type does not match the type of the property defined.
         /// </summary>
-        protected void ThrowIfEntityKeyValueTypeMismatch()
+        protected virtual void ThrowIfEntityKeyValueTypeMismatch()
         {
             var propertyInfo = GetPrimaryKeyPropertyInfo();
             if (propertyInfo.PropertyType != typeof(TKey))
