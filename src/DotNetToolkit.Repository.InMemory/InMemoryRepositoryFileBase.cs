@@ -12,7 +12,7 @@
     /// <summary>
     /// Represents a file based repository for in-memory operations (for testing purposes).
     /// </summary>
-    public abstract class InMemoryFileBasedRepositoryBase<TEntity, TKey> : InMemoryRepositoryBase<TEntity, TKey> where TEntity : class
+    public abstract class InMemoryRepositoryFileBase<TEntity, TKey> : InMemoryRepositoryBase<TEntity, TKey> where TEntity : class
     {
         #region Fields
 
@@ -32,19 +32,19 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryFileBasedRepositoryBase{TEntity, TKey}"/> class.
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryFileBase{TEntity,TKey}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
-        protected InMemoryFileBasedRepositoryBase(string filePath) : this(filePath, null)
+        protected InMemoryRepositoryFileBase(string filePath) : this(filePath, null)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryFileBasedRepositoryBase{TEntity, TKey}"/> class.
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryFileBase{TEntity,TKey}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
         /// <param name="logger">The logger.</param>
-        protected InMemoryFileBasedRepositoryBase(string filePath, ILogger logger) : base(logger)
+        protected InMemoryRepositoryFileBase(string filePath, ILogger logger) : base(logger)
         {
             OnInitialize(filePath);
         }
