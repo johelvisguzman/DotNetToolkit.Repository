@@ -1,9 +1,9 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
     using Data;
-    using Json;
     using System;
     using System.IO;
+    using System.Reflection;
     using Xunit;
 
     public class InMemoryFiledBaseRepositoryTests : TestBase
@@ -32,17 +32,18 @@
             ForAllRepositoriesInMemoryFileBased(TestThrowsIfFileExtensionIsNotValid);
         }
 
-        private static string GetFileExtension(Type type)
+        private static string GetFileExtension(IRepository<Customer> repo)
         {
-            if (type == typeof(JsonRepository<Customer>))
-                return ".json";
+            var protectedFileExtensionPropertyInfo = repo.GetType().BaseType?.GetProperty("FileExtension", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (protectedFileExtensionPropertyInfo == null)
+                throw new InvalidOperationException($"Unable to find a 'FileExtension' property for the specified '{repo.GetType()}' repository type.");
 
-            return ".xml";
+            return (string)protectedFileExtensionPropertyInfo.GetValue(repo);
         }
 
         private static void TestCreatesTempFileOnConstruction(IRepository<Customer> repo)
         {
-            var path = GetTempFileName(Guid.NewGuid().ToString("N") + GetFileExtension(repo.GetType()));
+            var path = GetTempFileName(Guid.NewGuid().ToString("N") + GetFileExtension(repo));
 
             Assert.True(!File.Exists(path));
 
@@ -53,7 +54,7 @@
 
         private static void TestGeneratesTempFileNameWhenOnlyDirectoryIsProvided(IRepository<Customer> repo)
         {
-            var path = GetTempFileName($"{typeof(Customer).Name}" + GetFileExtension(repo.GetType()));
+            var path = GetTempFileName($"{typeof(Customer).Name}" + GetFileExtension(repo));
 
             Assert.True(!File.Exists(path));
 
@@ -67,7 +68,7 @@
             var path = "TestData";
             var ex = Assert.Throws<InvalidOperationException>(() => CreateRepositoryInstanceOfType(repo.GetType(), path));
 
-            Assert.Equal($"The specified '{path}{GetFileExtension(repo.GetType())}' file is not a valid path.", ex.Message);
+            Assert.Equal($"The specified '{path}{GetFileExtension(repo)}' file is not a valid path.", ex.Message);
         }
 
         private static void TestThrowsIfFileExtensionIsNotValid(IRepository<Customer> repo)
@@ -75,7 +76,7 @@
             var path = GetTempFileName("TestData.tmp");
             var ex = Assert.Throws<InvalidOperationException>(() => CreateRepositoryInstanceOfType(repo.GetType(), path));
 
-            Assert.Equal($"The specified '{path}' file has an invalid extension. Please consider using '{GetFileExtension(repo.GetType())}'.", ex.Message);
+            Assert.Equal($"The specified '{path}' file has an invalid extension. Please consider using '{GetFileExtension(repo)}'.", ex.Message);
         }
     }
 }

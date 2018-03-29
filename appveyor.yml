@@ -50,6 +50,7 @@ after_build:
   - dotnet pack .\src\DotNetToolkit.Repository.EntityFrameworkCore\DotNetToolkit.Repository.EntityFrameworkCore.csproj --configuration Release
   - dotnet pack .\src\DotNetToolkit.Repository.Json\DotNetToolkit.Repository.Json.csproj --configuration Release
   - dotnet pack .\src\DotNetToolkit.Repository.Xml\DotNetToolkit.Repository.Xml.csproj --configuration Release
+  - dotnet pack .\src\DotNetToolkit.Repository.Csv\DotNetToolkit.Repository.Csv.csproj --configuration Release
 
 #---------------------------------#
 #       tests configuration       #
