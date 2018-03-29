@@ -1,15 +1,10 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Data
 {
-    using EntityFramework;
-    using EntityFrameworkCore;
-    using InMemory;
-    using Json;
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-    using Xml;
 
     public abstract class TestBase
     {
@@ -23,9 +18,9 @@
             GetRepositories().OfType<IRepositoryAsync<Customer>>().ToList().ForEach(async repo => await action(repo));
         }
 
-        protected static void ForAllRepositoriesInMemory(Action<InMemoryRepository<Customer>> action)
+        protected static void ForAllRepositoriesInMemory(Action<InMemory.InMemoryRepository<Customer>> action)
         {
-            GetRepositories().OfType<InMemoryRepository<Customer>>().ToList().ForEach(action);
+            GetRepositories().OfType<InMemory.InMemoryRepository<Customer>>().ToList().ForEach(action);
         }
 
         protected static void ForAllRepositoriesInMemoryFileBased(Action<IRepository<Customer>> action)
@@ -59,8 +54,9 @@
         {
             return new List<IRepository<Customer>>
             {
-                new JsonRepository<Customer>(GetTempFileName(Guid.NewGuid().ToString("N") + ".json")),
-                new XmlRepository<Customer>(GetTempFileName(Guid.NewGuid().ToString("N") + ".xml"))
+                new Json.JsonRepository<Customer>(GetTempFileName(Guid.NewGuid().ToString("N") + ".json")),
+                new Xml.XmlRepository<Customer>(GetTempFileName(Guid.NewGuid().ToString("N") + ".xml")),
+                new Csv.CsvRepository<Customer>(GetTempFileName(Guid.NewGuid().ToString("N") + ".csv"))
             };
         }
 
@@ -68,8 +64,8 @@
         {
             return new List<IRepository<Customer>>
             {
-                new EfRepository<Customer>(TestEfDbContextFactory.Create()),
-                new EfCoreRepository<Customer>(new TestEfCoreDbContext(Guid.NewGuid().ToString())),
+                new EntityFramework.EfRepository<Customer>(TestEfDbContextFactory.Create()),
+                new EntityFrameworkCore.EfCoreRepository<Customer>(new TestEfCoreDbContext(Guid.NewGuid().ToString())),
             };
         }
 
@@ -77,7 +73,7 @@
         {
             var repos = new List<IRepository<Customer>>
             {
-                new InMemoryRepository<Customer>(Guid.NewGuid().ToString()),
+                new InMemory.InMemoryRepository<Customer>(Guid.NewGuid().ToString()),
             };
 
             repos.AddRange(GetEfRepositories());

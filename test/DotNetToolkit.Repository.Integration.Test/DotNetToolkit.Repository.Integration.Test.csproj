@@ -26,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Csv\DotNetToolkit.Repository.Csv.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.EntityFrameworkCore\DotNetToolkit.Repository.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.EntityFramework\DotNetToolkit.Repository.EntityFramework.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.InMemory\DotNetToolkit.Repository.InMemory.csproj" />
