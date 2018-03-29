@@ -3,7 +3,7 @@
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net451;netstandard1.3</TargetFrameworks>
+    <TargetFrameworks>net451;netstandard1.3;netstandard2.0</TargetFrameworks>
     <Description>A toolkit that provides a lightweight starter kit for using an in-memory Repository pattern (for testing purposes only).</Description>
     <AssemblyName>DotNetToolkit.Repository.InMemory</AssemblyName>
     <RootNamespace>DotNetToolkit.Repository.InMemory</RootNamespace>

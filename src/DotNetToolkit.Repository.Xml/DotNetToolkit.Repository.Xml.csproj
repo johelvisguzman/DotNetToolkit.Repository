@@ -3,7 +3,7 @@
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net451;netstandard1.3</TargetFrameworks>
+    <TargetFrameworks>net451;netstandard1.3;netstandard2.0</TargetFrameworks>
     <AssemblyName>DotNetToolkit.Repository.Xml</AssemblyName>
     <RootNamespace>DotNetToolkit.Repository.Xml</RootNamespace>
     <Description>A toolkit that provides a lightweight starter kit for using the Repository pattern for storing entities in an xml formatted file.</Description>
