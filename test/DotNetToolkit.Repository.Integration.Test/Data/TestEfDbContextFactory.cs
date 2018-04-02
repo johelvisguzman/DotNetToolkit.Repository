@@ -14,11 +14,7 @@
             conn.ConnectionString = connectionString;
             conn.Open();
 
-            var context = new TestEfDbContext(conn);
-
-            context.Database.CreateIfNotExists();
-
-            return context;
+            return new TestEfDbContext(conn);
         }
     }
 }

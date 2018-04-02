@@ -60,23 +60,18 @@
             };
         }
 
-        private static List<IRepository<Customer>> GetEfRepositories()
-        {
-            return new List<IRepository<Customer>>
-            {
-                new EntityFramework.EfRepository<Customer>(TestEfDbContextFactory.Create()),
-                new EntityFrameworkCore.EfCoreRepository<Customer>(new TestEfCoreDbContext(Guid.NewGuid().ToString())),
-            };
-        }
-
         private static List<IRepository<Customer>> GetRepositories()
         {
+            var adoNet = TestAdoNetConnectionStringFactory.Create();
+
             var repos = new List<IRepository<Customer>>
             {
                 new InMemory.InMemoryRepository<Customer>(Guid.NewGuid().ToString()),
+                new EntityFramework.EfRepository<Customer>(TestEfDbContextFactory.Create()),
+                new EntityFrameworkCore.EfCoreRepository<Customer>(new TestEfCoreDbContext(Guid.NewGuid().ToString())),
+                new AdoNet.AdoNetRepository<Customer>(adoNet.Item1, adoNet.Item2)
             };
 
-            repos.AddRange(GetEfRepositories());
             repos.AddRange(GetInMemoryFileBasedRepositories());
 
             return repos;

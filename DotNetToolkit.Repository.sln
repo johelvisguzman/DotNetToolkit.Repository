@@ -25,6 +25,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Xm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetToolkit.Repository.Csv", "src\DotNetToolkit.Repository.Csv\DotNetToolkit.Repository.Csv.csproj", "{AE291CF3-4753-4454-9A7B-DE6137A76C4C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetToolkit.Repository.AdoNet", "src\DotNetToolkit.Repository.AdoNet\DotNetToolkit.Repository.AdoNet.csproj", "{77973BF2-E352-43C9-8CF2-99E01142B2A8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,6 +69,10 @@ Global
 		{AE291CF3-4753-4454-9A7B-DE6137A76C4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE291CF3-4753-4454-9A7B-DE6137A76C4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE291CF3-4753-4454-9A7B-DE6137A76C4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77973BF2-E352-43C9-8CF2-99E01142B2A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77973BF2-E352-43C9-8CF2-99E01142B2A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77973BF2-E352-43C9-8CF2-99E01142B2A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77973BF2-E352-43C9-8CF2-99E01142B2A8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -81,6 +87,7 @@ Global
 		{B71EA207-390A-4AB0-BFC8-44BA124FC35B} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{BB858B77-5CE8-4301-9FB6-343FFF5B7E63} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{AE291CF3-4753-4454-9A7B-DE6137A76C4C} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
+		{77973BF2-E352-43C9-8CF2-99E01142B2A8} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96973E0C-81D1-42DE-9F78-7103241B4E07}
