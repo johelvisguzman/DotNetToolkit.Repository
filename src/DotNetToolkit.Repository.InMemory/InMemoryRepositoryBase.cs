@@ -97,24 +97,6 @@
             InMemoryCache<TEntity, TKey>.Instance.GetContext(DatabaseName).Clear();
         }
 
-        /// <summary>
-        /// Sets the time stamp.
-        /// </summary>
-        /// <param name="time">The time.</param>
-        internal void SetTimeStamp(DateTime time)
-        {
-            InMemoryCache<TEntity, TKey>.Instance.SetTimeStamp(DatabaseName, time);
-        }
-
-        /// <summary>
-        /// Gets the time stamp.
-        /// </summary>
-        /// <returns>The time stamp.</returns>
-        internal DateTime GetTimeStamp()
-        {
-            return InMemoryCache<TEntity, TKey>.Instance.GetTimeStamp(DatabaseName);
-        }
-
         #endregion
 
         #region	Private Methods
@@ -281,8 +263,6 @@
                     }
                 }
 
-                SetTimeStamp(DateTime.Now);
-
                 _context.Clear();
             }
         }
@@ -390,7 +370,6 @@
             private static volatile InMemoryCache<TEntity, TKey> _instance;
             private static readonly object _syncRoot = new object();
             private readonly ConcurrentDictionary<string, SortedDictionary<TKey, TEntity>> _storage;
-            private readonly ConcurrentDictionary<string, DateTime> _timestamp;
 
             #endregion
 
@@ -402,7 +381,6 @@
             private InMemoryCache()
             {
                 _storage = new ConcurrentDictionary<string, SortedDictionary<TKey, TEntity>>();
-                _timestamp = new ConcurrentDictionary<string, DateTime>();
             }
 
             #endregion
@@ -446,28 +424,6 @@
                 }
 
                 return _storage[name];
-            }
-
-            /// <summary>
-            /// Sets the time stamp.
-            /// </summary>
-            /// <param name="name">The database name.</param>
-            /// <param name="time">The time.</param>
-            public void SetTimeStamp(string name, DateTime time)
-            {
-                _timestamp[name] = time;
-            }
-
-            /// <summary>
-            /// Gets the time stamp.
-            /// </summary>
-            /// <param name="name">The database name.</param>
-            /// <returns>The time stamp.</returns>
-            public DateTime GetTimeStamp(string name)
-            {
-                _timestamp.TryGetValue(name, out DateTime time);
-
-                return time;
             }
 
             #endregion
