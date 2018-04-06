@@ -4,6 +4,7 @@
     using Logging;
     using Properties;
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
@@ -123,7 +124,7 @@
             // are the same, then it means that the file has only been updated by this repository; otherwise,
             // something else updated it (maybe a manual edit). In which case, we need to re-upload the entities into memory
             var lastWriteTime = File.GetLastWriteTime(DatabaseName);
-            var timetamp = GetTimeStamp();
+            var timetamp = InMemoryCache.Instance.GetTimeStamp(DatabaseName);
             if (!lastWriteTime.Equals(timetamp))
             {
                 LoadChanges();
@@ -198,10 +199,91 @@
                     OnSaved(writer, entities);
                 }
 
-                SetTimeStamp(File.GetLastWriteTime(DatabaseName));
+                InMemoryCache.Instance.SetTimeStamp(DatabaseName, File.GetLastWriteTime(DatabaseName));
             }
 
             _saveChangesInProcess = false;
+        }
+
+        #endregion
+
+        #region Nested type: InMemoryCache
+
+        /// <summary>
+        /// Represents an internal thread safe database storage which will store any information for the in-memory
+        /// store that is needed through the life time of the application.
+        /// </summary>
+        private class InMemoryCache
+        {
+            #region Fields
+
+            private static volatile InMemoryCache _instance;
+            private static readonly object _syncRoot = new object();
+            private readonly ConcurrentDictionary<string, DateTime> _timestamp;
+
+            #endregion
+
+            #region Constructors
+
+            /// <summary>
+            /// Prevents a default instance of the <see cref="InMemoryCache"/> class from being created.
+            /// </summary>
+            private InMemoryCache()
+            {
+                _timestamp = new ConcurrentDictionary<string, DateTime>();
+            }
+
+            #endregion
+
+            #region Properties
+
+            /// <summary>
+            /// Gets the instance.
+            /// </summary>
+            public static InMemoryCache Instance
+            {
+                get
+                {
+                    if (_instance == null)
+                    {
+                        lock (_syncRoot)
+                        {
+                            if (_instance == null)
+                                _instance = new InMemoryCache();
+                        }
+                    }
+
+                    return _instance;
+                }
+            }
+
+            #endregion
+
+            #region Public Methods
+
+            /// <summary>
+            /// Sets the time stamp.
+            /// </summary>
+            /// <param name="name">The database name.</param>
+            /// <param name="time">The time.</param>
+            public void SetTimeStamp(string name, DateTime time)
+            {
+                _timestamp[name] = time;
+            }
+
+            /// <summary>
+            /// Gets the time stamp.
+            /// </summary>
+            /// <param name="name">The database name.</param>
+            /// <returns>The time stamp.</returns>
+            public DateTime GetTimeStamp(string name)
+            {
+                _timestamp.TryGetValue(name, out DateTime time);
+
+                return time;
+            }
+
+            #endregion
         }
 
         #endregion
