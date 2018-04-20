@@ -32,7 +32,7 @@
             ForAllRepositoriesInMemoryFileBased(TestThrowsIfFileExtensionIsNotValid);
         }
 
-        private static string GetFileExtension(IRepository<Customer> repo)
+        private static string GetFileExtension(IRepository<Customer, int> repo)
         {
             var protectedFileExtensionPropertyInfo = repo.GetType().BaseType?.GetProperty("FileExtension", BindingFlags.NonPublic | BindingFlags.Instance);
             if (protectedFileExtensionPropertyInfo == null)
@@ -41,7 +41,7 @@
             return (string)protectedFileExtensionPropertyInfo.GetValue(repo);
         }
 
-        private static void TestCreatesTempFileOnConstruction(IRepository<Customer> repo)
+        private static void TestCreatesTempFileOnConstruction(IRepository<Customer, int> repo)
         {
             var path = GetTempFileName(Guid.NewGuid().ToString("N") + GetFileExtension(repo));
 
@@ -52,7 +52,7 @@
             Assert.True(File.Exists(path));
         }
 
-        private static void TestGeneratesTempFileNameWhenOnlyDirectoryIsProvided(IRepository<Customer> repo)
+        private static void TestGeneratesTempFileNameWhenOnlyDirectoryIsProvided(IRepository<Customer, int> repo)
         {
             var path = GetTempFileName($"{typeof(Customer).Name}" + GetFileExtension(repo));
 
@@ -63,7 +63,7 @@
             Assert.True(File.Exists(path));
         }
 
-        private static void TestThrowsIfFilePathIsInvalid(IRepository<Customer> repo)
+        private static void TestThrowsIfFilePathIsInvalid(IRepository<Customer, int> repo)
         {
             var path = "TestData";
             var ex = Assert.Throws<InvalidOperationException>(() => CreateRepositoryInstanceOfType(repo.GetType(), path));
@@ -71,7 +71,7 @@
             Assert.Equal($"The specified '{path}{GetFileExtension(repo)}' file is not a valid path.", ex.Message);
         }
 
-        private static void TestThrowsIfFileExtensionIsNotValid(IRepository<Customer> repo)
+        private static void TestThrowsIfFileExtensionIsNotValid(IRepository<Customer, int> repo)
         {
             var path = GetTempFileName("TestData.tmp");
             var ex = Assert.Throws<InvalidOperationException>(() => CreateRepositoryInstanceOfType(repo.GetType(), path));

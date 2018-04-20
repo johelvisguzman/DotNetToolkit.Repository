@@ -37,7 +37,7 @@
             ForAllRepositoriesInMemory(TestThrowsIfAddingEntityOfSameTypeWithSamePrimaryKeyValue);
         }
 
-        private static void TestCanScoped(IRepository<Customer> repo)
+        private static void TestCanScoped(IRepository<Customer, int> repo)
         {
             var databaseName = Guid.NewGuid().ToString();
 
@@ -72,7 +72,7 @@
             }
         }
 
-        private static void TestAddWithSeededId(IRepository<Customer> repo)
+        private static void TestAddWithSeededId(IRepository<Customer, int> repo)
         {
             const int expectedId = 9;
 
@@ -83,7 +83,7 @@
             Assert.NotNull(repo.Get(expectedId));
         }
 
-        private static void TestThrowsIfDeleteWhenEntityNoInStore(IRepository<Customer> repo)
+        private static void TestThrowsIfDeleteWhenEntityNoInStore(IRepository<Customer, int> repo)
         {
             var entity = new Customer { Name = "Random Name" };
 
@@ -91,7 +91,7 @@
             Assert.Equal("Attempted to update or delete an entity that does not exist in the in-memory store.", ex.Message);
         }
 
-        private static void TestThrowsIfUpdateWhenEntityNoInStore(IRepository<Customer> repo)
+        private static void TestThrowsIfUpdateWhenEntityNoInStore(IRepository<Customer, int> repo)
         {
             var entity = new Customer { Name = "Random Name" };
 
@@ -99,7 +99,7 @@
             Assert.Equal("Attempted to update or delete an entity that does not exist in the in-memory store.", ex.Message);
         }
 
-        private static void TestThrowsIfAddingEntityOfSameTypeWithSamePrimaryKeyValue(IRepository<Customer> repo)
+        private static void TestThrowsIfAddingEntityOfSameTypeWithSamePrimaryKeyValue(IRepository<Customer, int> repo)
         {
             var entity = new Customer { Name = "Random Name" };
 

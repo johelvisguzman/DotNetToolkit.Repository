@@ -299,7 +299,7 @@
             ForAllRepositoriesAsync(TestGroupByWithPagingOptionsSortDescendingAsync);
         }
 
-        private static void TestAdd(IRepository<Customer> repo)
+        private static void TestAdd(IRepository<Customer, int> repo)
         {
             const string name = "Random Name";
 
@@ -312,7 +312,7 @@
             Assert.True(repo.Exists(x => x.Name.Equals(name)));
         }
 
-        private static void TestAddRange(IRepository<Customer> repo)
+        private static void TestAddRange(IRepository<Customer, int> repo)
         {
             const string name = "Random Name";
 
@@ -329,7 +329,7 @@
             Assert.Equal(2, repo.Count());
         }
 
-        private static void TestUpdate(IRepository<Customer> repo)
+        private static void TestUpdate(IRepository<Customer, int> repo)
         {
             const string expectedName = "New Random Name";
             const string name = "Random Name";
@@ -347,7 +347,7 @@
             Assert.True(repo.Exists(x => x.Name.Equals(expectedName)));
         }
 
-        private static void TestUpdateRange(IRepository<Customer> repo)
+        private static void TestUpdateRange(IRepository<Customer, int> repo)
         {
             const string expectedName = "New Random Name";
             const string name = "Random Name";
@@ -372,7 +372,7 @@
             Assert.Equal(2, repo.Count(x => x.Name.Equals(expectedName)));
         }
 
-        private static void TestDelete(IRepository<Customer> repo)
+        private static void TestDelete(IRepository<Customer, int> repo)
         {
             const string name = "Random Name";
 
@@ -389,7 +389,7 @@
             Assert.False(repo.Exists(x => x.Name.Equals(name)));
         }
 
-        private static void TestDeleteRange(IRepository<Customer> repo)
+        private static void TestDeleteRange(IRepository<Customer, int> repo)
         {
             const string name = "Random Name";
 
@@ -410,7 +410,7 @@
             Assert.Equal(0, repo.Count());
         }
 
-        private static void TestFind(IRepository<Customer> repo)
+        private static void TestFind(IRepository<Customer, int> repo)
         {
             const string name = "Random Name";
 
@@ -430,7 +430,7 @@
             Assert.Equal(name, repo.Find<string>(spec, x => x.Name));
         }
 
-        private static void TestFindWithSortingOptionsDescending(IRepository<Customer> repo)
+        private static void TestFindWithSortingOptionsDescending(IRepository<Customer, int> repo)
         {
             var entities = new List<Customer>
             {
@@ -454,7 +454,7 @@
             Assert.Equal("Random Name 2", repo.Find<string>(spec, x => x.Name, queryOptions));
         }
 
-        private static void TestFindWithSortingOptionsAscending(IRepository<Customer> repo)
+        private static void TestFindWithSortingOptionsAscending(IRepository<Customer, int> repo)
         {
             var entities = new List<Customer>
             {
@@ -478,7 +478,7 @@
             Assert.Equal("Random Name 1", repo.Find<string>(spec, x => x.Name, queryOptions));
         }
 
-        private static void TestFindAll(IRepository<Customer> repo)
+        private static void TestFindAll(IRepository<Customer, int> repo)
         {
             const string name = "Random Name";
 
@@ -500,7 +500,7 @@
             Assert.Single(repo.FindAll<string>(spec, x => x.Name));
         }
 
-        private static void TestFindAllWithSortingOptionsAscending(IRepository<Customer> repo)
+        private static void TestFindAllWithSortingOptionsAscending(IRepository<Customer, int> repo)
         {
             var entities = new List<Customer>
             {
@@ -524,7 +524,7 @@
             Assert.Equal("Random Name 2", repo.FindAll<string>(spec, x => x.Name, queryOptions).First());
         }
 
-        private static void TestFindAllWithSortingOptionsDescending(IRepository<Customer> repo)
+        private static void TestFindAllWithSortingOptionsDescending(IRepository<Customer, int> repo)
         {
             var entities = new List<Customer>
             {
@@ -548,7 +548,7 @@
             Assert.Equal("Random Name 1", repo.FindAll<string>(spec, x => x.Name, queryOptions).First());
         }
 
-        private static void TestFindAllWithPagingOptionsSortAscending(IRepository<Customer> repo)
+        private static void TestFindAllWithPagingOptionsSortAscending(IRepository<Customer, int> repo)
         {
             var entities = new List<Customer>();
 
@@ -610,7 +610,7 @@
             Assert.Equal("Random Name 20", entitiesInDb.ElementAt(0).Name);
         }
 
-        private static void TestFindAllWithPagingOptionsSortDescending(IRepository<Customer> repo)
+        private static void TestFindAllWithPagingOptionsSortDescending(IRepository<Customer, int> repo)
         {
             var entities = new List<Customer>();
 
@@ -672,7 +672,7 @@
             Assert.Equal("Random Name 0", entitiesInDb.ElementAt(0).Name);
         }
 
-        private static void TestGet(IRepository<Customer> repo)
+        private static void TestGet(IRepository<Customer, int> repo)
         {
             int key = 1;
             const string name = "Random Name";
@@ -691,7 +691,7 @@
             Assert.NotNull(repo.Get(key, fetchStrategy));
         }
 
-        private static void TestCount(IRepository<Customer> repo)
+        private static void TestCount(IRepository<Customer, int> repo)
         {
             const string name = "Random Name";
 
@@ -709,7 +709,7 @@
             Assert.Equal(1, repo.Count(spec));
         }
 
-        private static void TestToDictionary(IRepository<Customer> repo)
+        private static void TestToDictionary(IRepository<Customer, int> repo)
         {
             const string name = "Random Name";
 
@@ -734,7 +734,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(spec, y => y.Id, y => y.Name).Contains(x)));
         }
 
-        private static void TestToDictionaryWithPagingOptionsSortAscending(IRepository<Customer> repo)
+        private static void TestToDictionaryWithPagingOptionsSortAscending(IRepository<Customer, int> repo)
         {
             var entities = new List<Customer>();
 
@@ -892,7 +892,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(spec, y => y.Id, y => y.Name).Contains(x)));
         }
 
-        private static void TestToDictionaryWithPagingOptionsSortDescending(IRepository<Customer> repo)
+        private static void TestToDictionaryWithPagingOptionsSortDescending(IRepository<Customer, int> repo)
         {
             var entities = new List<Customer>();
 
@@ -1050,7 +1050,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(spec, y => y.Id, y => y.Name).Contains(x)));
         }
 
-        private static void TestGroupBy(IRepository<Customer> repo)
+        private static void TestGroupBy(IRepository<Customer, int> repo)
         {
             const string name = "Random Name";
 
@@ -1076,7 +1076,7 @@
             Assert.True(expectedGroupByElementSelector.All(x => repo.GroupBy(spec, y => y.Id, y => y.Name).Select(y => y.Key).Contains(x.Key)));
         }
 
-        private static void TestGroupByWithSortingOptionsAscending(IRepository<Customer> repo)
+        private static void TestGroupByWithSortingOptionsAscending(IRepository<Customer, int> repo)
         {
             var entities = new List<Customer>
             {
@@ -1095,7 +1095,7 @@
             Assert.Equal("Random Name 2", repo.GroupBy(spec, y => y.Name, x => x.Name, queryOptions).First().Key);
         }
 
-        private static void TestGroupByWithSortingOptionsDescending(IRepository<Customer> repo)
+        private static void TestGroupByWithSortingOptionsDescending(IRepository<Customer, int> repo)
         {
             var entities = new List<Customer>
             {
@@ -1114,7 +1114,7 @@
             Assert.Equal("Random Name 1", repo.GroupBy(spec, y => y.Name, x => x.Name, queryOptions).First().Key);
         }
 
-        private static void TestGroupByWithPagingOptionsSortAscending(IRepository<Customer> repo)
+        private static void TestGroupByWithPagingOptionsSortAscending(IRepository<Customer, int> repo)
         {
             var entities = new List<Customer>();
 
@@ -1176,7 +1176,7 @@
             Assert.Equal("Random Name 20", entitiesInDb.ElementAt(0).Key);
         }
 
-        private static void TestGroupByWithPagingOptionsSortDescending(IRepository<Customer> repo)
+        private static void TestGroupByWithPagingOptionsSortDescending(IRepository<Customer, int> repo)
         {
             var entities = new List<Customer>();
 
@@ -1238,7 +1238,7 @@
             Assert.Equal("Random Name 0", entitiesInDb.ElementAt(0).Key);
         }
 
-        private static async Task TestAddAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestAddAsync(IRepositoryAsync<Customer, int> repo)
         {
             const string name = "Random Name";
 
@@ -1251,7 +1251,7 @@
             Assert.True(await repo.ExistsAsync(x => x.Name.Equals(name)));
         }
 
-        private static async Task TestAddRangeAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestAddRangeAsync(IRepositoryAsync<Customer, int> repo)
         {
             const string name = "Random Name";
 
@@ -1268,7 +1268,7 @@
             Assert.Equal(2, await repo.CountAsync());
         }
 
-        private static async Task TestUpdateAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestUpdateAsync(IRepositoryAsync<Customer, int> repo)
         {
             const string expectedName = "New Random Name";
             const string name = "Random Name";
@@ -1286,7 +1286,7 @@
             Assert.True(await repo.ExistsAsync(x => x.Name.Equals(expectedName)));
         }
 
-        private static async Task TestUpdateRangeAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestUpdateRangeAsync(IRepositoryAsync<Customer, int> repo)
         {
             const string expectedName = "New Random Name";
             const string name = "Random Name";
@@ -1311,7 +1311,7 @@
             Assert.Equal(2, await repo.CountAsync(x => x.Name.Equals(expectedName)));
         }
 
-        private static async Task TestDeleteAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestDeleteAsync(IRepositoryAsync<Customer, int> repo)
         {
             const string name = "Random Name";
 
@@ -1328,7 +1328,7 @@
             Assert.False(await repo.ExistsAsync(x => x.Name.Equals(name)));
         }
 
-        private static async Task TestDeleteRangeAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestDeleteRangeAsync(IRepositoryAsync<Customer, int> repo)
         {
             const string name = "Random Name";
 
@@ -1349,7 +1349,7 @@
             Assert.Equal(0, await repo.CountAsync());
         }
 
-        private static async Task TestFindAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestFindAsync(IRepositoryAsync<Customer, int> repo)
         {
             const string name = "Random Name";
 
@@ -1369,7 +1369,7 @@
             Assert.Equal(name, await repo.FindAsync<string>(spec, x => x.Name));
         }
 
-        private static async Task TestFindWithSortingOptionsAscendingAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestFindWithSortingOptionsAscendingAsync(IRepositoryAsync<Customer, int> repo)
         {
             var entities = new List<Customer>
             {
@@ -1393,7 +1393,7 @@
             Assert.Equal("Random Name 2", await repo.FindAsync<string>(spec, x => x.Name, queryOptions));
         }
 
-        private static async Task TestFindWithSortingOptionsExecuteForAllRepositoriesAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestFindWithSortingOptionsExecuteForAllRepositoriesAsync(IRepositoryAsync<Customer, int> repo)
         {
             var entities = new List<Customer>
             {
@@ -1417,7 +1417,7 @@
             Assert.Equal("Random Name 2", await repo.FindAsync<string>(spec, x => x.Name, queryOptions));
         }
 
-        private static async Task TestFindAllAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestFindAllAsync(IRepositoryAsync<Customer, int> repo)
         {
             const string name = "Random Name";
 
@@ -1439,7 +1439,7 @@
             Assert.Single(await repo.FindAllAsync<string>(spec, x => x.Name));
         }
 
-        private static async Task TestFindAllWithSortingOptionsAscendingAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestFindAllWithSortingOptionsAscendingAsync(IRepositoryAsync<Customer, int> repo)
         {
             var entities = new List<Customer>
             {
@@ -1463,7 +1463,7 @@
             Assert.Equal("Random Name 2", (await repo.FindAllAsync<string>(spec, x => x.Name, queryOptions)).First());
         }
 
-        private static async Task TestFindAllWithSortingOptionsDescendingAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestFindAllWithSortingOptionsDescendingAsync(IRepositoryAsync<Customer, int> repo)
         {
             var entities = new List<Customer>
             {
@@ -1487,7 +1487,7 @@
             Assert.Equal("Random Name 2", (await repo.FindAllAsync<string>(spec, x => x.Name, queryOptions)).First());
         }
 
-        private static async Task TestFindAllWithPagingOptionsSortAscendingAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestFindAllWithPagingOptionsSortAscendingAsync(IRepositoryAsync<Customer, int> repo)
         {
             var entities = new List<Customer>();
 
@@ -1549,7 +1549,7 @@
             Assert.Equal("Random Name 20", entitiesInDb.ElementAt(0).Name);
         }
 
-        private static async Task TestFindAllWithPagingOptionsSortDescendingAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestFindAllWithPagingOptionsSortDescendingAsync(IRepositoryAsync<Customer, int> repo)
         {
             var entities = new List<Customer>();
 
@@ -1611,7 +1611,7 @@
             Assert.Equal("Random Name 0", entitiesInDb.ElementAt(0).Name);
         }
 
-        private static async Task TestGetAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestGetAsync(IRepositoryAsync<Customer, int> repo)
         {
             int key = 1;
             const string name = "Random Name";
@@ -1630,7 +1630,7 @@
             Assert.NotNull(await repo.GetAsync(key, fetchStrategy));
         }
 
-        private static async Task TestCountAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestCountAsync(IRepositoryAsync<Customer, int> repo)
         {
             const string name = "Random Name";
 
@@ -1648,7 +1648,7 @@
             Assert.Equal(1, await repo.CountAsync(spec));
         }
 
-        private static async Task TestToDictionaryAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestToDictionaryAsync(IRepositoryAsync<Customer, int> repo)
         {
             const string name = "Random Name";
 
@@ -1673,7 +1673,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionaryAsync(spec, y => y.Id, y => y.Name).Result.Contains(x)));
         }
 
-        private static async Task TestToDictionaryWithPagingOptionsSortDescendingAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestToDictionaryWithPagingOptionsSortDescendingAsync(IRepositoryAsync<Customer, int> repo)
         {
             var entities = new List<Customer>();
 
@@ -1831,7 +1831,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(spec, y => y.Id, y => y.Name).Contains(x)));
         }
 
-        private static async Task TestToDictionaryWithPagingOptionsSortAscendingAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestToDictionaryWithPagingOptionsSortAscendingAsync(IRepositoryAsync<Customer, int> repo)
         {
             var entities = new List<Customer>();
 
@@ -1989,7 +1989,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionaryAsync(spec, y => y.Id, y => y.Name).Result.Contains(x)));
         }
 
-        private static async Task TestGroupByAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestGroupByAsync(IRepositoryAsync<Customer, int> repo)
         {
             const string name = "Random Name";
 
@@ -2015,7 +2015,7 @@
             Assert.True(expectedGroupByElementSelector.All(x => repo.GroupByAsync(spec, y => y.Id, y => y.Name).Result.Select(y => y.Key).Contains(x.Key)));
         }
 
-        private static async Task TestGroupByWithSortingOptionsAscendingAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestGroupByWithSortingOptionsAscendingAsync(IRepositoryAsync<Customer, int> repo)
         {
             var entities = new List<Customer>
             {
@@ -2034,7 +2034,7 @@
             Assert.Equal("Random Name 2", repo.GroupByAsync(spec, y => y.Name, x => x.Name, queryOptions).Result.First().Key);
         }
 
-        private static async Task TestGroupByWithSortingOptionsDescendingAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestGroupByWithSortingOptionsDescendingAsync(IRepositoryAsync<Customer, int> repo)
         {
             var entities = new List<Customer>
             {
@@ -2053,7 +2053,7 @@
             Assert.Equal("Random Name 1", repo.GroupByAsync(spec, y => y.Name, x => x.Name, queryOptions).Result.First().Key);
         }
 
-        private static async Task TestGroupByWithPagingOptionsSortAscendingAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestGroupByWithPagingOptionsSortAscendingAsync(IRepositoryAsync<Customer, int> repo)
         {
             var entities = new List<Customer>();
 
@@ -2115,7 +2115,7 @@
             Assert.Equal("Random Name 20", entitiesInDb.ElementAt(0).Key);
         }
 
-        private static async Task TestGroupByWithPagingOptionsSortDescendingAsync(IRepositoryAsync<Customer> repo)
+        private static async Task TestGroupByWithPagingOptionsSortDescendingAsync(IRepositoryAsync<Customer, int> repo)
         {
             var entities = new List<Customer>();
 
