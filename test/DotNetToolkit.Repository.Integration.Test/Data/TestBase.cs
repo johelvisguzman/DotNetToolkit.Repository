@@ -8,31 +8,37 @@
 
     public abstract class TestBase
     {
-        protected static void ForAllRepositories(Action<IRepository<Customer>> action)
+        protected static void ForAllRepositories(Action<IRepository<Customer, int>> action)
         {
             GetRepositories().ForEach(action);
         }
 
-        protected static void ForAllRepositoriesAsync(Func<IRepositoryAsync<Customer>, Task> action)
+        protected static void ForAllRepositoriesAsync(Func<IRepositoryAsync<Customer, int>, Task> action)
         {
-            GetRepositories().OfType<IRepositoryAsync<Customer>>().ToList().ForEach(async repo => await action(repo));
+            foreach (var repo in GetRepositories())
+            {
+                if (repo.GetType().IsSubClassOfGeneric(typeof(IRepositoryAsync<,>)))
+                {
+                    action((IRepositoryAsync<Customer, int>)repo);
+                }
+            }
         }
 
-        protected static void ForAllRepositoriesInMemory(Action<InMemory.InMemoryRepository<Customer>> action)
+        protected static void ForAllRepositoriesInMemory(Action<InMemory.InMemoryRepository<Customer, int>> action)
         {
-            GetRepositories().OfType<InMemory.InMemoryRepository<Customer>>().ToList().ForEach(action);
+            GetRepositories().OfType<InMemory.InMemoryRepository<Customer, int>>().ToList().ForEach(action);
         }
 
-        protected static void ForAllRepositoriesInMemoryFileBased(Action<IRepository<Customer>> action)
+        protected static void ForAllRepositoriesInMemoryFileBased(Action<IRepository<Customer, int>> action)
         {
             GetInMemoryFileBasedRepositories().ForEach(action);
         }
 
-        protected static IRepository<Customer> CreateRepositoryInstanceOfType(Type type, object arg)
+        protected static IRepository<Customer, int> CreateRepositoryInstanceOfType(Type type, object arg)
         {
             try
             {
-                return (IRepository<Customer>)Activator.CreateInstance(type, arg);
+                return (IRepository<Customer, int>)Activator.CreateInstance(type, arg);
             }
             catch (Exception ex)
             {
@@ -50,9 +56,9 @@
             return path;
         }
 
-        private static List<IRepository<Customer>> GetInMemoryFileBasedRepositories()
+        private static List<IRepository<Customer, int>> GetInMemoryFileBasedRepositories()
         {
-            return new List<IRepository<Customer>>
+            return new List<IRepository<Customer, int>>
             {
                 new Json.JsonRepository<Customer>(GetTempFileName(Guid.NewGuid().ToString("N") + ".json")),
                 new Xml.XmlRepository<Customer>(GetTempFileName(Guid.NewGuid().ToString("N") + ".xml")),
@@ -60,11 +66,11 @@
             };
         }
 
-        private static List<IRepository<Customer>> GetRepositories()
+        private static List<IRepository<Customer, int>> GetRepositories()
         {
             var adoNet = TestAdoNetConnectionStringFactory.Create();
 
-            var repos = new List<IRepository<Customer>>
+            var repos = new List<IRepository<Customer, int>>
             {
                 new InMemory.InMemoryRepository<Customer>(Guid.NewGuid().ToString()),
                 new EntityFramework.EfRepository<Customer>(TestEfDbContextFactory.Create()),
