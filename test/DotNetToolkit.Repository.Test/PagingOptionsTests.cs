@@ -9,7 +9,7 @@
     public class PagingOptionsTests
     {
         [Fact]
-        public void Page_With_Sort__Ascending()
+        public void Page_With_Sort_Ascending()
         {
             var entities = new List<Customer>();
 

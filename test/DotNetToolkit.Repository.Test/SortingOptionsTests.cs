@@ -26,6 +26,23 @@
         }
 
         [Fact]
+        public void Descending_PrimaryKey_Sort()
+        {
+            var entities = new List<Customer>();
+            for (var i = 10; i >= 1; i--)
+            {
+                entities.Add(new Customer { Name = "Random Name " + i, Id = i });
+            }
+
+            var sortingOptions = new SortingOptions<Customer>();
+            var queryable = sortingOptions.Apply(entities.AsQueryable());
+
+            Assert.Equal("Random Name 1", queryable.First().Name);
+
+            Assert.Equal(10, queryable.Count());
+        }
+
+        [Fact]
         public void Ascending_Sort()
         {
             var entities = new List<Customer>();
@@ -38,6 +55,23 @@
             var queryable = sortingOptions.Apply(entities.AsQueryable());
 
             Assert.Equal("Random Name 9", queryable.First().Name);
+
+            Assert.Equal(10, queryable.Count());
+        }
+
+        [Fact]
+        public void Ascending_PrimaryKey_Sort()
+        {
+            var entities = new List<Customer>();
+            for (var i = 10; i >= 1; i--)
+            {
+                entities.Add(new Customer { Name = "Random Name " + i, Id = i });
+            }
+
+            var sortingOptions = new SortingOptions<Customer>(true);
+            var queryable = sortingOptions.Apply(entities.AsQueryable());
+
+            Assert.Equal("Random Name 10", queryable.First().Name);
 
             Assert.Equal(10, queryable.Count());
         }

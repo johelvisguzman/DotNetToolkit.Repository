@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Specifications
 {
     using FetchStrategies;
+    using Helpers;
     using System;
     using System.Collections.Generic;
     using System.Linq;
