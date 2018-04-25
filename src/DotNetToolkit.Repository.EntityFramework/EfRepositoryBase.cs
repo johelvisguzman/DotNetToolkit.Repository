@@ -185,6 +185,9 @@
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
 
+            if (selector == null)
+                throw new ArgumentNullException(nameof(selector));
+
             return GetQuery(criteria, options).Select(selector).FirstOrDefaultAsync(cancellationToken);
         }
 
@@ -203,6 +206,9 @@
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
+
+            if (selector == null)
+                throw new ArgumentNullException(nameof(selector));
 
             return await GetQuery(criteria, options).Select(selector).ToListAsync(cancellationToken);
         }

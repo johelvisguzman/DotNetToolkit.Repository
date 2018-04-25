@@ -6,18 +6,12 @@
     using System.Linq.Expressions;
 
     /// <summary>
-    /// Represents a sorting option.
+    /// An implementation of <see cref="ISortingOptions{T}" />.
     /// </summary>
     /// <typeparam name="T">The entity type of the repository.</typeparam>
     /// <typeparam name="TSortKey">The type of the property that is being sorted.</typeparam>
-    public class SortingOptions<T, TSortKey> : IQueryOptions<T>
+    public class SortingOptions<T, TSortKey> : ISortingOptions<T>
     {
-        #region Fields
-
-        private readonly Expression<Func<T, TSortKey>> _sortingExpression;
-
-        #endregion
-
         #region Properties
 
         /// <summary>
@@ -27,6 +21,14 @@
         /// <c>true</c> if this sorting option is descending; otherwise, <c>false</c>.
         /// </value>
         public bool IsDescending { get; set; }
+
+        /// <summary>
+        /// Gets the sorting property path.
+        /// </summary>
+        /// <value>
+        /// The sorting property path.
+        /// </value>
+        public string SortingPropertyPath { get; }
 
         #endregion
 
@@ -42,7 +44,7 @@
             if (sorting == null)
                 throw new ArgumentNullException(nameof(sorting));
 
-            _sortingExpression = sorting;
+            SortingPropertyPath = ExpressionHelper.GetPropertyPath(sorting);
             IsDescending = isDescending;
         }
 
@@ -58,8 +60,8 @@
         public virtual IQueryable<T> Apply(IQueryable<T> query)
         {
             query = IsDescending
-                ? query.OrderByDescending(_sortingExpression)
-                : query.OrderBy(_sortingExpression);
+                ? query.OrderByDescending(SortingPropertyPath)
+                : query.OrderBy(SortingPropertyPath);
 
             return query;
         }
@@ -68,17 +70,11 @@
     }
 
     /// <summary>
-    /// Represents a sorting option.
+    /// An implementation of <see cref="ISortingOptions{T}" />.
     /// </summary>
     /// <typeparam name="T">The entity type of the repository.</typeparam>
-    public class SortingOptions<T> : IQueryOptions<T>
+    public class SortingOptions<T> : ISortingOptions<T>
     {
-        #region Fields
-
-        private readonly string _sorting;
-
-        #endregion
-
         #region Properties
 
         /// <summary>
@@ -88,6 +84,14 @@
         /// <c>true</c> if this sorting option is descending; otherwise, <c>false</c>.
         /// </value>
         public bool IsDescending { get; set; }
+
+        /// <summary>
+        /// Gets the sorting property path.
+        /// </summary>
+        /// <value>
+        /// The sorting property path.
+        /// </value>
+        public string SortingPropertyPath { get; }
 
         #endregion
 
@@ -100,7 +104,7 @@
         /// <param name="isDescending">if set to <c>true</c> use descending order; otherwise, use ascending.</param>
         public SortingOptions(string sorting, bool isDescending = false)
         {
-            _sorting = sorting;
+            SortingPropertyPath = sorting;
             IsDescending = isDescending;
         }
 
@@ -123,11 +127,11 @@
         /// <returns>The new query with the defined options applied.</returns>
         public virtual IQueryable<T> Apply(IQueryable<T> query)
         {
-            if (!string.IsNullOrEmpty(_sorting))
+            if (!string.IsNullOrEmpty(SortingPropertyPath))
             {
                 query = IsDescending
-                        ? query.OrderByDescending(_sorting)
-                        : query.OrderBy(_sorting);
+                    ? query.OrderByDescending(SortingPropertyPath)
+                    : query.OrderBy(SortingPropertyPath);
             }
             else
             {
