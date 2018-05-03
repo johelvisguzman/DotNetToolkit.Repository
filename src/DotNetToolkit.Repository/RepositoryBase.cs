@@ -128,7 +128,7 @@
         /// <summary>
         /// Gets an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected TEntity GetEntity(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
+        protected virtual TEntity GetEntity(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
@@ -139,10 +139,13 @@
         /// <summary>
         /// Gets an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected TResult GetEntity<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
+        protected virtual TResult GetEntity<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
+
+            if (selector == null)
+                throw new ArgumentNullException(nameof(selector));
 
             return GetQuery(criteria, options).Select(selector).FirstOrDefault();
         }
@@ -150,7 +153,7 @@
         /// <summary>
         /// Gets a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected IEnumerable<TEntity> GetEntities(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
+        protected virtual IEnumerable<TEntity> GetEntities(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
         {
             return GetQuery(criteria, options).ToList();
         }
@@ -158,10 +161,13 @@
         /// <summary>
         /// Gets a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected IEnumerable<TResult> GetEntities<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
+        protected virtual IEnumerable<TResult> GetEntities<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
+
+            if (selector == null)
+                throw new ArgumentNullException(nameof(selector));
 
             return GetQuery(criteria, options).Select(selector).ToList();
         }

@@ -11,9 +11,10 @@
     using System.Linq;
     using System.Reflection;
 
-    // https://weblog.west-wind.com/posts/2017/Nov/27/Working-around-the-lack-of-dynamic-DbProviderFactory-loading-in-NET-Core
-    internal static class DbProviderFactoryHelper
+    internal static class DbProviderFactories
     {
+        #region Private Methods
+
         private static Type GetTypeFromName(string typeName)
         {
             return GetTypeFromName(typeName, null);
@@ -95,7 +96,7 @@
             return null;
         }
 
-        public static object GetStaticProperty(string typeName, string property)
+        private static object GetStaticProperty(string typeName, string property)
         {
             var type = GetTypeFromName(typeName);
 
@@ -107,7 +108,7 @@
             return type.GetRuntimeProperty(property).GetValue(null, null);
         }
 
-        public static DbProviderFactory GetDbProviderFactory(string dbProviderFactoryTypename, string assemblyName)
+        private static DbProviderFactory GetFactory(string dbProviderFactoryTypename, string assemblyName)
         {
             var instance = GetStaticProperty(dbProviderFactoryTypename, "Instance");
             if (instance == null)
@@ -123,7 +124,7 @@
             return instance as DbProviderFactory;
         }
 
-        public static DbProviderFactory GetDbProviderFactory(DataAccessProviderTypes type)
+        private static DbProviderFactory GetFactory(DataAccessProviderTypes type)
         {
             if (type == DataAccessProviderTypes.SqlServer)
                 return SqlClientFactory.Instance; // this library has a ref to SqlClient so this works
@@ -131,44 +132,55 @@
             if (type == DataAccessProviderTypes.SqLite)
             {
 #if NETFULL
-                return GetDbProviderFactory("System.Data.SQLite.SQLiteFactory", "System.Data.SQLite");
+                return GetFactory("System.Data.SQLite.SQLiteFactory", "System.Data.SQLite");
 #else
-                return GetDbProviderFactory("Microsoft.Data.Sqlite.SqliteFactory", "Microsoft.Data.Sqlite");
+                return GetFactory("Microsoft.Data.Sqlite.SqliteFactory", "Microsoft.Data.Sqlite");
 #endif
             }
             if (type == DataAccessProviderTypes.MySql)
-                return GetDbProviderFactory("MySql.Data.MySqlClient.MySqlClientFactory", "MySql.Data");
+                return GetFactory("MySql.Data.MySqlClient.MySqlClientFactory", "MySql.Data");
             if (type == DataAccessProviderTypes.PostgreSql)
-                return GetDbProviderFactory("Npgsql.NpgsqlFactory", "Npgsql");
+                return GetFactory("Npgsql.NpgsqlFactory", "Npgsql");
 #if NETFULL
             if (type == DataAccessProviderTypes.OleDb)
                 return System.Data.OleDb.OleDbFactory.Instance;
             if (type == DataAccessProviderTypes.SqlServerCompact)
-                return DbProviderFactories.GetFactory("System.Data.SqlServerCe.4.0");
+                return System.Data.Common.DbProviderFactories.GetFactory("System.Data.SqlServerCe.4.0");
 #endif
 
             throw new NotSupportedException(string.Format(Resources.UnsupportedProviderFactory, type.ToString()));
         }
 
-        public static DbProviderFactory GetDbProviderFactory(string providerName)
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Returns an instance of a DbProviderFactory.
+        /// </summary>
+        /// <param name="providerName">Invariant name of a provider.</param>
+        /// <returns>An instance of a DbProviderFactory for a specified provider name.</returns>
+        public static DbProviderFactory GetFactory(string providerName)
         {
 #if NETFULL
-            return DbProviderFactories.GetFactory(providerName);
+            return System.Data.Common.DbProviderFactories.GetFactory(providerName);
 #else
             var providername = providerName.ToLower();
 
             if (providerName == "system.data.sqlclient")
-                return GetDbProviderFactory(DataAccessProviderTypes.SqlServer);
+                return GetFactory(DataAccessProviderTypes.SqlServer);
             if (providerName == "system.data.sqlite" || providerName == "microsoft.data.sqlite")
-                return GetDbProviderFactory(DataAccessProviderTypes.SqLite);
+                return GetFactory(DataAccessProviderTypes.SqLite);
             if (providerName == "mysql.data.mysqlclient" || providername == "mysql.data")
-                return GetDbProviderFactory(DataAccessProviderTypes.MySql);
+                return GetFactory(DataAccessProviderTypes.MySql);
             if (providerName == "npgsql")
-                return GetDbProviderFactory(DataAccessProviderTypes.PostgreSql);
+                return GetFactory(DataAccessProviderTypes.PostgreSql);
 
             throw new NotSupportedException(string.Format(Resources.UnsupportedProviderFactory, providerName));
 #endif
         }
+
+        #endregion
     }
 
     internal enum DataAccessProviderTypes

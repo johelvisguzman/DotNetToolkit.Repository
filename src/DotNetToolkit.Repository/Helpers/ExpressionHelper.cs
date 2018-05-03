@@ -58,37 +58,62 @@
             return Expression.Lambda(delegateType, body, param);
         }
 
-        internal static void CollectRelationalMembers(Expression exp, IList<PropertyInfo> members)
+        /// <summary>
+        /// Returns the value of the property for the specified expression.
+        /// </summary>
+        /// <param name="exp">The expression.</param>
+        /// <returns>The value of the property for the specified expression</returns>
+        public static object GetPropertyValue(Expression exp)
         {
-            switch (exp.NodeType)
-            {
-                case ExpressionType.Lambda:
-                    CollectRelationalMembers(((LambdaExpression)exp).Body, members);
-                    break;
-                case ExpressionType.MemberAccess:
-                    var mexp = (MemberExpression)exp;
-                    CollectRelationalMembers(mexp.Expression, members);
-                    members.Add((PropertyInfo)mexp.Member);
+            var objectMember = Expression.Convert(exp, typeof(object));
+            var getterLambda = Expression.Lambda<Func<object>>(objectMember);
+            var getter = getterLambda.Compile();
 
-                    break;
-                case ExpressionType.Call:
-                    var cexp = (MethodCallExpression)exp;
-
-                    if (cexp.Method.IsStatic == false)
-                        throw new InvalidOperationException("Invalid type of expression.");
-
-                    foreach (var arg in cexp.Arguments)
-                        CollectRelationalMembers(arg, members);
-
-                    break;
-                case ExpressionType.Parameter:
-                    return;
-                default:
-                    throw new InvalidOperationException("Invalid type of expression.");
-            }
+            return getter();
         }
 
-        internal static MemberExpression GetMemberExpression(Expression expression)
+        /// <summary>
+        /// Returns the name of the property for the specified expression.
+        /// </summary>
+        /// <param name="exp">The expression.</param>
+        /// <returns>The name of the property for the specified expression</returns>
+        public static string GetPropertyName(Expression exp)
+        {
+            if (exp == null)
+                throw new ArgumentNullException(nameof(exp));
+
+            return GetMemberExpression(exp)?.Member.Name;
+        }
+
+        /// <summary>
+        /// Gets the property path.
+        /// </summary>
+        /// <param name="exp">The exp.</param>
+        /// <returns>The property path built from the specified expression</returns>
+        public static string GetPropertyPath(Expression exp)
+        {
+            if (exp == null)
+                throw new ArgumentNullException(nameof(exp));
+
+            var stack = new Stack<string>();
+
+            var me = GetMemberExpression(exp);
+
+            while (me != null)
+            {
+                stack.Push(me.Member.Name);
+                me = me.Expression as MemberExpression;
+            }
+
+            return string.Join(".", stack.ToArray());
+        }
+
+        /// <summary>
+        /// Gets the member expression.
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        /// <returns>The member expression.</returns>
+        public static MemberExpression GetMemberExpression(Expression expression)
         {
             switch (expression)
             {
@@ -123,6 +148,36 @@
             }
 
             return null;
+        }
+
+        internal static void CollectRelationalMembers(Expression exp, IList<PropertyInfo> members)
+        {
+            switch (exp.NodeType)
+            {
+                case ExpressionType.Lambda:
+                    CollectRelationalMembers(((LambdaExpression)exp).Body, members);
+                    break;
+                case ExpressionType.MemberAccess:
+                    var mexp = (MemberExpression)exp;
+                    CollectRelationalMembers(mexp.Expression, members);
+                    members.Add((PropertyInfo)mexp.Member);
+
+                    break;
+                case ExpressionType.Call:
+                    var cexp = (MethodCallExpression)exp;
+
+                    if (cexp.Method.IsStatic == false)
+                        throw new InvalidOperationException("Invalid type of expression.");
+
+                    foreach (var arg in cexp.Arguments)
+                        CollectRelationalMembers(arg, members);
+
+                    break;
+                case ExpressionType.Parameter:
+                    return;
+                default:
+                    throw new InvalidOperationException("Invalid type of expression.");
+            }
         }
 
         private static Expression<T> Compose<T>(this Expression<T> first, Expression<T> second, Func<Expression, Expression, Expression> merge)

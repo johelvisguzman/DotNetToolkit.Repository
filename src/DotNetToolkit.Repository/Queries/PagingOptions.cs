@@ -5,11 +5,11 @@
     using System.Linq.Expressions;
 
     /// <summary>
-    /// Represents a paging option.
+    /// An implementation of <see cref="IPagingOptions{T}" />.
     /// </summary>
     /// <typeparam name="T">The entity type of the repository.</typeparam>
     /// <typeparam name="TSortKey">The type of the property that is being sorted.</typeparam>
-    public class PagingOptions<T, TSortKey> : SortingOptions<T, TSortKey>
+    public class PagingOptions<T, TSortKey> : SortingOptions<T, TSortKey>, IPagingOptions<T>
     {
         #region Fields
 
@@ -50,11 +50,6 @@
                 _pageIndex = value;
             }
         }
-
-        /// <summary>
-        /// Gets the page count.
-        /// </summary>
-        public int PageCount { get; private set; }
 
         #endregion
 
@@ -96,13 +91,6 @@
         /// <returns>The new query with the defined options applied.</returns>
         public override IQueryable<T> Apply(IQueryable<T> query)
         {
-            var pageCount = (int)Math.Ceiling(query.Count() / (decimal)PageSize);
-
-            if (PageIndex > pageCount)
-                throw new ArgumentOutOfRangeException(nameof(PageIndex), "Cannot be greater than the total number of pages.");
-
-            PageCount = pageCount;
-
             query = base.Apply(query);
 
             return query.Skip((PageIndex - 1) * PageSize).Take(PageSize);
@@ -112,10 +100,10 @@
     }
 
     /// <summary>
-    /// Represents a paging option.
+    /// An implementation of <see cref="IPagingOptions{T}" />.
     /// </summary>
     /// <typeparam name="T">The entity type of the repository.</typeparam>
-    public class PagingOptions<T> : SortingOptions<T>
+    public class PagingOptions<T> : SortingOptions<T>, IPagingOptions<T>
     {
         #region Fields
 
@@ -156,11 +144,6 @@
                 _pageIndex = value;
             }
         }
-
-        /// <summary>
-        /// Gets the page count.
-        /// </summary>
-        public int PageCount { get; private set; }
 
         #endregion
 
@@ -219,13 +202,6 @@
         /// <returns>The new query with the defined options applied.</returns>
         public override IQueryable<T> Apply(IQueryable<T> query)
         {
-            var pageCount = (int)Math.Ceiling(query.Count() / (decimal)PageSize);
-
-            if (PageIndex > pageCount)
-                throw new ArgumentOutOfRangeException(nameof(PageIndex), "Cannot be greater than the total number of pages.");
-
-            PageCount = pageCount;
-
             query = base.Apply(query);
 
             return query.Skip((PageIndex - 1) * PageSize).Take(PageSize);

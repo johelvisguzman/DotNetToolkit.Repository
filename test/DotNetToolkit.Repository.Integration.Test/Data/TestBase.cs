@@ -68,14 +68,14 @@
 
         private static List<IRepository<Customer, int>> GetRepositories()
         {
-            var adoNet = TestAdoNetConnectionStringFactory.Create();
+            TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
 
             var repos = new List<IRepository<Customer, int>>
             {
                 new InMemory.InMemoryRepository<Customer>(Guid.NewGuid().ToString()),
                 new EntityFramework.EfRepository<Customer>(TestEfDbContextFactory.Create()),
                 new EntityFrameworkCore.EfCoreRepository<Customer>(new TestEfCoreDbContext(Guid.NewGuid().ToString())),
-                new AdoNet.AdoNetRepository<Customer>(adoNet.Item1, adoNet.Item2)
+                new AdoNet.AdoNetRepository<Customer>(providerName, connectionString)
             };
 
             repos.AddRange(GetInMemoryFileBasedRepositories());
