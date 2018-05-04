@@ -50,12 +50,12 @@
         /// <summary>
         /// Gets the name of the identity property.
         /// </summary>
-        protected PropertyInfo SqlIdentityProperty { get; private set; }
+        protected PropertyInfo SqlIdentityPropertyInfo { get; private set; }
 
         /// <summary>
         /// Gets the SQL properties.
         /// </summary>
-        protected Dictionary<string, PropertyInfo> SqlProperties { get; private set; }
+        protected Dictionary<string, PropertyInfo> SqlPropertiesMapping { get; private set; }
 
         /// <summary>
         /// Gets the name of the table.
@@ -1301,12 +1301,13 @@
 
         private void Initialize()
         {
-            SqlProperties = typeof(TEntity)
+            SqlPropertiesMapping = typeof(TEntity)
                 .GetRuntimeProperties()
-                .Where(x => x.PropertyType.Namespace == "System")
-                .ToDictionary(x => x.Name, x => x);
+                .Where(x => x.IsPrimitive() && x.IsMapped())
+                .OrderBy(x => x.GetColumnOrder())
+                .ToDictionary(ConventionHelper.GetColumnName, x => x);
 
-            TableName = $"{typeof(TEntity).Name}";
+            TableName = typeof(TEntity).GetTableName();
 
             DataRow autoIncrementDataRow = null;
 
@@ -1326,8 +1327,14 @@
 
                 if (autoIncrementDataRow != null)
                 {
+                    var columnName = (string)autoIncrementDataRow["ColumnName"];
+
+                    SqlIdentityPropertyInfo = SqlPropertiesMapping.FirstOrDefault(x => x.Key.Equals(columnName)).Value;
+
+                    if (SqlIdentityPropertyInfo == null)
+                        throw new InvalidOperationException(string.Format(Resources.InvalidColumnName, columnName));
+
                     IsIdentity = true;
-                    SqlIdentityProperty = SqlProperties.Select(x => x.Value).First(x => x.Name.Equals((string)autoIncrementDataRow["ColumnName"]));
                 }
             }
         }
@@ -1338,19 +1345,18 @@
             var cfg = new DbSqlSelectStatementConfig();
 
             var mainTableType = typeof(TEntity);
-            var mainTableAlias = cfg.GenerateTableAlias(mainTableType, TableName);
+            var mainTableAlias = cfg.GenerateTableAlias(mainTableType);
             var mainTableProperties = mainTableType.GetRuntimeProperties();
-            var mainTablePrimaryKeyName = GetPrimaryKeyPropertyInfo().Name;
-
-            const string systemNameSpace = "System";
+            var mainTablePrimaryKeyName = typeof(TEntity).GetPrimaryKeyPropertyInfo().GetColumnName();
 
             // Default select
             var selectSql = string.Join(",\n\t",
-                SqlProperties.Select(x =>
+                SqlPropertiesMapping.Select(x =>
                 {
-                    cfg.GenerateColumnAlias(TableName, x.Key);
+                    var colAlias = cfg.GenerateColumnAlias(x.Value);
+                    var colName = x.Value.GetColumnName();
 
-                    return $"[{mainTableAlias}].[{x.Key}] AS [{x.Key}]";
+                    return $"[{mainTableAlias}].[{colName}] AS [{colAlias}]";
                 }));
 
             // Check to see if we can automatically include some navigation properties (this seems to be the behavior of entity framework as well).
@@ -1360,15 +1366,9 @@
                 // Assumes we want to perform a join when the navigation property from the primary table has also a navigation property of
                 // the same type as the primary table
                 // Only do a join when the primary table has a foreign key property for the join table
-                var paths = (
-                    from pi in mainTableProperties.Where(x => x.PropertyType.Namespace != systemNameSpace)
-                    let jointTableType = pi.PropertyType
-                    let joinTableProperties = jointTableType.GetRuntimeProperties()
-                    where joinTableProperties.Any(x => x.PropertyType == mainTableType)
-                    let joinTableForeignKeyName = joinTableProperties.SingleOrDefault(x => x.Name == $"{TableName}{mainTablePrimaryKeyName}")?.Name
-                    where !string.IsNullOrEmpty(joinTableForeignKeyName)
-                    select pi.Name
-                    )
+                var paths = mainTableProperties
+                    .Where(x => x.IsComplex() && !string.IsNullOrEmpty(x.PropertyType.GetForeignKeyName(mainTableType)))
+                    .Select(x => x.Name)
                     .ToList();
 
                 if (paths.Count > 0)
@@ -1394,39 +1394,34 @@
                 foreach (var path in fetchStrategy.IncludePaths)
                 {
                     var joinTablePropertyInfo = mainTableProperties.Single(x => x.Name.Equals(path));
-                    var jointTableType = joinTablePropertyInfo.PropertyType;
-                    var joinTableProperties = jointTableType.GetRuntimeProperties();
+                    var joinTableType = joinTablePropertyInfo.PropertyType;
+                    var joinTableForeignKeyName = joinTableType.GetForeignKeyName(mainTableType);
 
-                    // Assumes we want to perform a join when the navigation property from the primary table has also a navigation property of
-                    // the same type as the primary table
-                    if (joinTableProperties.Any(x => x.PropertyType == mainTableType))
+                    // Only do a join when the primary table has a foreign key property for the join table
+                    if (!string.IsNullOrEmpty(joinTableForeignKeyName))
                     {
-                        var joinTableForeignKeyName = joinTableProperties.SingleOrDefault(x => x.Name == $"{TableName}{mainTablePrimaryKeyName}")?.Name;
+                        var joinTableProperties = joinTableType.GetRuntimeProperties();
+                        var joinTableName = joinTableType.GetTableName();
+                        var joinTableAlias = cfg.GenerateTableAlias(joinTableType);
+                        var joinTableColumnNames = string.Join(",\n\t",
+                            joinTableProperties
+                                .Where(x => x.IsPrimitive())
+                                .Select(x =>
+                                {
+                                    var colAlias = cfg.GenerateColumnAlias(x);
+                                    var colName = x.GetColumnName();
 
-                        // Only do a join when the primary table has a foreign key property for the join table
-                        if (!string.IsNullOrEmpty(joinTableForeignKeyName))
-                        {
-                            var joinTableName = $"{joinTablePropertyInfo.PropertyType.Name}";
-                            var joinTableAlias = cfg.GenerateTableAlias(joinTablePropertyInfo.PropertyType, joinTableName);
-                            var joinTableColumnNames = string.Join(",\n\t",
-                                joinTableProperties
-                                    .Where(x => x.PropertyType.Namespace == systemNameSpace)
-                                    .Select(x =>
-                                    {
-                                        var colAlias = cfg.GenerateColumnAlias(joinTableName, x.Name);
-
-                                        return $"[{joinTableAlias}].[{x.Name}] AS [{colAlias}]";
-                                    }));
+                                    return $"[{joinTableAlias}].[{colName}] AS [{colAlias}]";
+                                }));
 
 
-                            sb.Append(",\n\t");
-                            sb.Append(joinTableColumnNames);
+                        sb.Append(",\n\t");
+                        sb.Append(joinTableColumnNames);
 
-                            joinStatementSb.Append("\n");
-                            joinStatementSb.Append($"LEFT OUTER JOIN [{joinTableName}] AS [{joinTableAlias}] ON [{mainTableAlias}].[{mainTablePrimaryKeyName}] = [{joinTableAlias}].[{joinTableForeignKeyName}]");
+                        joinStatementSb.Append("\n");
+                        joinStatementSb.Append($"LEFT OUTER JOIN [{joinTableName}] AS [{joinTableAlias}] ON [{mainTableAlias}].[{mainTablePrimaryKeyName}] = [{joinTableAlias}].[{joinTableForeignKeyName}]");
 
-                            cfg.JoinTablePropertiesMapping.Add(jointTableType, joinTableProperties.ToDictionary(x => x.Name, x => x));
-                        }
+                        cfg.JoinTablePropertiesMapping.Add(joinTableType, joinTableProperties.ToDictionary(x => x.GetColumnName(), x => x));
                     }
                 }
 
@@ -1480,8 +1475,8 @@
                     var tableType = ExpressionHelper.GetMemberExpression(lambda).Expression.Type;
                     var tableName = config.GetTableName(tableType);
                     var tableAlias = config.GetTableAlias(tableName);
-                    var sortingPropertyName = ExpressionHelper.GetPropertyName(lambda);
-                    var columnAlias = config.GetColumnAlias(tableName, sortingPropertyName);
+                    var sortingPropertyInfo = ExpressionHelper.GetPropertyInfo(lambda);
+                    var columnAlias = config.GetColumnAlias(sortingPropertyInfo);
 
                     sb.Append("\n");
                     sb.Append(sortingOptions.IsDescending ? $"ORDER BY [{tableAlias}].[{columnAlias}] DESC" : $"ORDER BY [{tableAlias}].[{columnAlias}] ASC");
@@ -1502,7 +1497,8 @@
 
         private void PrepareEntitySetStatement(EntitySet entitySet, out string sql, out Dictionary<string, object> parameters)
         {
-            var properties = IsIdentity ? SqlProperties.Where(x => !x.Key.Equals(SqlIdentityProperty.Name)) : SqlProperties;
+            var primeryKeyColumnName = SqlIdentityPropertyInfo.GetColumnName();
+            var properties = IsIdentity ? SqlPropertiesMapping.Where(x => !x.Key.Equals(primeryKeyColumnName)) : SqlPropertiesMapping;
 
             parameters = new Dictionary<string, object>();
             sql = string.Empty;
@@ -1511,42 +1507,46 @@
             {
                 case EntityState.Added:
                     {
-                        var columnNames = string.Join(", ", properties.Select(x => x.Key)).TrimEnd();
-                        var values = string.Join(",\n\t", properties.Select(x => $"@{x.Key}"));
+                        var columnNames = string.Join(", ", properties.Select(x => x.Value.GetColumnName())).TrimEnd();
+                        var values = string.Join(", ", properties.Select(x => $"@{x.Value.GetColumnName()}")).TrimEnd();
 
                         sql = $"INSERT INTO [{TableName}] ({columnNames})\nVALUES ({values})";
 
                         foreach (var pi in properties)
                         {
-                            parameters.Add($"@{pi.Key}", pi.Value.GetValue(entitySet.Entity, null));
+                            parameters.Add($"@{pi.Value.GetColumnName()}", pi.Value.GetValue(entitySet.Entity, null));
                         }
 
                         if (IsIdentity)
-                            parameters.Add($"@{SqlIdentityProperty.Name}", SqlIdentityProperty.GetValue(entitySet.Entity, null));
+                            parameters.Add($"@{primeryKeyColumnName}", SqlIdentityPropertyInfo.GetValue(entitySet.Entity, null));
 
                         break;
                     }
                 case EntityState.Removed:
                     {
-                        sql = $"DELETE FROM [{TableName}]\nWHERE {SqlIdentityProperty.Name} = @{SqlIdentityProperty.Name}";
+                        sql = $"DELETE FROM [{TableName}]\nWHERE {primeryKeyColumnName} = @{primeryKeyColumnName}";
 
-                        parameters.Add($"@{SqlIdentityProperty.Name}", SqlIdentityProperty.GetValue(entitySet.Entity, null));
+                        parameters.Add($"@{primeryKeyColumnName}", SqlIdentityPropertyInfo.GetValue(entitySet.Entity, null));
 
                         break;
                     }
                 case EntityState.Modified:
                     {
-                        var values = string.Join(",\n\t", properties.Select(x => x.Key + " = " + $"@{x.Key}"));
+                        var values = string.Join(",\n\t", properties.Select(x =>
+                        {
+                            var columnName = x.Value.GetColumnName();
+                            return columnName + " = " + $"@{columnName}";
+                        }));
 
-                        sql = $"UPDATE [{TableName}]\nSET {values}\nWHERE {SqlIdentityProperty.Name} = @{SqlIdentityProperty.Name}";
+                        sql = $"UPDATE [{TableName}]\nSET {values}\nWHERE {primeryKeyColumnName} = @{primeryKeyColumnName}";
 
                         foreach (var pi in properties)
                         {
-                            parameters.Add($"@{pi.Key}", pi.Value.GetValue(entitySet.Entity, null));
+                            parameters.Add($"@{pi.Value.GetColumnName()}", pi.Value.GetValue(entitySet.Entity, null));
                         }
 
                         if (IsIdentity)
-                            parameters.Add($"@{SqlIdentityProperty.Name}", SqlIdentityProperty.GetValue(entitySet.Entity, null));
+                            parameters.Add($"@{primeryKeyColumnName}", SqlIdentityPropertyInfo.GetValue(entitySet.Entity, null));
 
                         break;
                     }
@@ -1573,9 +1573,9 @@
                 if (value == DBNull.Value)
                     value = null;
 
-                if (SqlProperties.ContainsKey(name) && !r.IsDBNull(r.GetOrdinal(name)))
+                if (SqlPropertiesMapping.ContainsKey(name) && !r.IsDBNull(r.GetOrdinal(name)))
                 {
-                    SqlProperties[name].SetValue(entity, value);
+                    SqlPropertiesMapping[name].SetValue(entity, value);
                 }
                 else if (joinTableInstances != null)
                 {
@@ -1672,7 +1672,7 @@
                     {
                         var key = ExecuteScalar<TKey>(connection, "SELECT @@IDENTITY");
 
-                        SetPrimaryKey(entitySet.Entity, key);
+                        entitySet.Entity.SetPrimaryKeyPropertyValue(key);
                     }
                 }
 
@@ -1853,7 +1853,7 @@
                     {
                         var key = await ExecuteScalarAsync<TKey>(connection, "SELECT @@IDENTITY", null, cancellationToken);
 
-                        SetPrimaryKey(entitySet.Entity, key);
+                        entitySet.Entity.SetPrimaryKeyPropertyValue(key);
                     }
                 }
 

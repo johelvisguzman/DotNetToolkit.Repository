@@ -109,6 +109,19 @@
         }
 
         /// <summary>
+        /// Gets the property information.
+        /// </summary>
+        /// <param name="exp">The exp.</param>
+        /// <returns>The property info from the specified expression</returns>
+        public static PropertyInfo GetPropertyInfo(Expression exp)
+        {
+            if (exp == null)
+                throw new ArgumentNullException(nameof(exp));
+
+            return (PropertyInfo)GetMemberExpression(exp)?.Member;
+        }
+
+        /// <summary>
         /// Gets the member expression.
         /// </summary>
         /// <param name="expression">The expression.</param>

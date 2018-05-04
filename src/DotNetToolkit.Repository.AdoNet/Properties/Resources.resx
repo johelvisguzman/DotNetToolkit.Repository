@@ -126,4 +126,7 @@
   <data name="ArgumentCannotBeNullOrEmptyString" xml:space="preserve">
     <value>Cannot be null or an empty string.</value>
   </data>
+  <data name="InvalidColumnName" xml:space="preserve">
+    <value>The column name {0} is not valid.</value>
+  </data>
 </root>

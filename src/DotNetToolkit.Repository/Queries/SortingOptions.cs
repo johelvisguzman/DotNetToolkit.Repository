@@ -135,7 +135,7 @@
             }
             else
             {
-                var primaryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfo(typeof(T));
+                var primaryKeyPropertyInfo = typeof(T).GetPrimaryKeyPropertyInfo();
                 var primaryKeyPropertyName = primaryKeyPropertyInfo.Name;
 
                 query = IsDescending

@@ -9,7 +9,6 @@
 //------------------------------------------------------------------------------
 
 namespace DotNetToolkit.Repository.AdoNet.Properties {
-    using System;
     using System.Reflection;
 
 
@@ -67,6 +66,15 @@ namespace DotNetToolkit.Repository.AdoNet.Properties {
         internal static string ArgumentCannotBeNullOrEmptyString {
             get {
                 return ResourceManager.GetString("ArgumentCannotBeNullOrEmptyString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The column name {0} is not valid..
+        /// </summary>
+        internal static string InvalidColumnName {
+            get {
+                return ResourceManager.GetString("InvalidColumnName", resourceCulture);
             }
         }
         

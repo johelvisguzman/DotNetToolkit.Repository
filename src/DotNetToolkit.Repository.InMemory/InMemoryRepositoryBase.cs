@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.InMemory
 {
     using FetchStrategies;
+    using Helpers;
     using Logging;
     using Properties;
     using System;
@@ -128,7 +129,7 @@
         /// <returns>The new generated primary id.</returns>
         protected virtual TKey GenerateTemporaryPrimaryKey()
         {
-            var propertyInfo = GetPrimaryKeyPropertyInfo();
+            var propertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<TEntity>();
             var propertyType = propertyInfo.PropertyType;
             if (propertyType == typeof(int))
             {
@@ -168,7 +169,7 @@
 
             if (key != null && key.Equals(default(TKey)))
             {
-                key = GetPrimaryKey(entity);
+                key = entity.GetPrimaryKeyPropertyValue<TKey>();
 
                 if (key != null && key.Equals(default(TKey)))
                 {
@@ -188,7 +189,7 @@
         /// </summary>
         protected override void DeleteItem(TEntity entity)
         {
-            var key = GetPrimaryKey(entity);
+            var key = entity.GetPrimaryKeyPropertyValue<TKey>();
             var hasTemporaryKey = false;
 
             if (key != null && key.Equals(default(TKey)))
@@ -208,7 +209,7 @@
         /// </summary>
         protected override void UpdateItem(TEntity entity)
         {
-            var key = GetPrimaryKey(entity);
+            var key = entity.GetPrimaryKeyPropertyValue<TKey>();
             var hasTemporaryKey = false;
 
             if (key != null && key.Equals(default(TKey)))
@@ -241,7 +242,7 @@
                         if (entitySet.HasTemporaryKey)
                         {
                             key = GeneratePrimaryKey();
-                            SetPrimaryKey(entitySet.Entity, key);
+                            entitySet.Entity.SetPrimaryKeyPropertyValue(key);
                         }
                         else if (context.ContainsKey(key))
                         {

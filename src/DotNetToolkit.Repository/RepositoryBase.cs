@@ -11,7 +11,6 @@
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
-    using System.Reflection;
 
     /// <summary>
     /// An implementation of <see cref="IRepository{TEntity, TKey}" />.
@@ -230,7 +229,7 @@
         // https://github.com/SharpRepository/SharpRepository/blob/develop/SharpRepository.Repository/RepositoryBase.cs
         protected virtual ISpecification<TEntity> GetByPrimaryKeySpecification(TKey key, IFetchStrategy<TEntity> fetchStrategy = null)
         {
-            var propInfo = ConventionHelper.GetPrimaryKeyPropertyInfo(typeof(TEntity));
+            var propInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<TEntity>();
             var parameter = Expression.Parameter(typeof(TEntity), "x");
             var lambda = Expression.Lambda<Func<TEntity, bool>>(
                 Expression.Equal(
@@ -251,41 +250,12 @@
         }
 
         /// <summary>
-        /// Gets the primary key property information for the specified type.
-        /// </summary>
-        /// <returns>The primary key property info.</returns>
-        protected virtual PropertyInfo GetPrimaryKeyPropertyInfo()
-        {
-            return ConventionHelper.GetPrimaryKeyPropertyInfo(typeof(TEntity));
-        }
-
-        /// <summary>
-        /// Gets the value of the specified object primary key property.
-        /// </summary>
-        /// <param name="entity">The entity containing the property.</param>
-        /// <returns>The property value.</returns>
-        protected virtual TKey GetPrimaryKey(TEntity entity)
-        {
-            return (TKey)Convert.ChangeType(ConventionHelper.GetPrimaryKeyPropertyValue(entity), typeof(TKey));
-        }
-
-        /// <summary>
-        /// Sets a value for the specified object primary key property.
-        /// </summary>
-        /// <param name="entity">The entity containing the property.</param>
-        /// <param name="key">The value to set for the primary key property.</param>
-        protected virtual void SetPrimaryKey(TEntity entity, TKey key)
-        {
-            ConventionHelper.SetPrimaryKeyPropertyValue(entity, key);
-        }
-
-        /// <summary>
         /// Generates a new primary id for the entity.
         /// </summary>
         /// <returns>The new generated primary id.</returns>
         protected virtual TKey GeneratePrimaryKey()
         {
-            var propertyInfo = GetPrimaryKeyPropertyInfo();
+            var propertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<TEntity>();
             var propertyType = propertyInfo.PropertyType;
 
             if (propertyType == typeof(Guid))
@@ -297,8 +267,8 @@
             if (propertyType == typeof(int))
             {
                 var key = GetQuery()
-                    .OrderByDescending(x => GetPrimaryKey(x))
-                    .Select(x => GetPrimaryKey(x))
+                    .OrderByDescending(x => x.GetPrimaryKeyPropertyValue<TKey>())
+                    .Select(x => x.GetPrimaryKeyPropertyValue<TKey>())
                     .FirstOrDefault();
 
                 return (TKey)Convert.ChangeType(Convert.ToInt32(key) + 1, typeof(TKey));
@@ -312,7 +282,7 @@
         /// </summary>
         protected virtual void ThrowIfEntityKeyValueTypeMismatch()
         {
-            var propertyInfo = GetPrimaryKeyPropertyInfo();
+            var propertyInfo = typeof(TEntity).GetPrimaryKeyPropertyInfo();
             if (propertyInfo.PropertyType != typeof(TKey))
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeMismatch, typeof(TKey), propertyInfo.PropertyType));
         }
