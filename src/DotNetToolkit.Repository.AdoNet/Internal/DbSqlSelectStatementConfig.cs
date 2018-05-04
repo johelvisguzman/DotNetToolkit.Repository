@@ -1,5 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
+    using Helpers;
+    using Properties;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -42,9 +44,10 @@
 
         #region Public Methods
 
-        public string GenerateTableAlias(Type tableType, string tableName)
+        public string GenerateTableAlias(Type tableType)
         {
             var tableAlias = $"Extent{_tableAliasCount++}";
+            var tableName = tableType.GetTableName();
 
             _tableAliasMapping.Add(tableName, tableAlias);
             _tableNameAndTypeMapping.Add(tableName, tableType);
@@ -54,9 +57,11 @@
             return tableAlias;
         }
 
-        public string GenerateColumnAlias(string tableName, string columnName)
+        public string GenerateColumnAlias(PropertyInfo pi)
         {
+            var columnName = pi.GetColumnName();
             var columnAlias = columnName;
+            var tableName = pi.DeclaringType.GetTableName();
 
             if (_columnAliasMappingCount.TryGetValue(columnName, out int columnAliasCount))
             {
@@ -94,9 +99,16 @@
             return _tableTypeAndNameMapping[tableType];
         }
 
-        public string GetColumnAlias(string tableName, string columnName)
+        public string GetColumnAlias(PropertyInfo pi)
         {
-            return _tableColumnAliasMapping[tableName][columnName];
+            var columnName = pi.GetColumnName();
+            var tableName = pi.DeclaringType.GetTableName();
+            var columnMapping = _tableColumnAliasMapping[tableName];
+
+            if (!columnMapping.ContainsKey(columnName))
+                throw new InvalidOperationException(string.Format(Resources.InvalidColumnName, columnName));
+
+            return columnMapping[columnName];
         }
 
         public string GetColumnName(string columnAlias)

@@ -34,7 +34,7 @@
                 {
                     command.CommandType = CommandType.Text;
                     command.Connection = connection;
-                    command.CommandText = @"CREATE TABLE Customer (
+                    command.CommandText = @"CREATE TABLE Customers (
                                             Id int IDENTITY PRIMARY KEY,
                                             Name nvarchar (100),
                                             AddressId int)";
@@ -46,7 +46,7 @@
                 {
                     command.CommandType = CommandType.Text;
                     command.Connection = connection;
-                    command.CommandText = @"CREATE TABLE CustomerAddress (
+                    command.CommandText = @"CREATE TABLE CustomerAddresses (
                                             Id int IDENTITY PRIMARY KEY,
                                             Street nvarchar (100),
                                             City nvarchar (100),

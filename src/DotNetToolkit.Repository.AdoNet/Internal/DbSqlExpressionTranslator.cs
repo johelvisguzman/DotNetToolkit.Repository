@@ -98,12 +98,12 @@
                     variableExpression = secondExpression;
                 }
 
-                var property = ExpressionHelper.GetPropertyName(variableExpression);
+                var propertyInfo = ExpressionHelper.GetPropertyInfo(variableExpression);
                 var value = ExpressionHelper.GetPropertyValue(constantExpression);
                 var tableType = ExpressionHelper.GetMemberExpression(variableExpression).Expression.Type;
                 var tableName = _config.GetTableName(tableType);
                 var tableAlias = _config.GetTableAlias(tableName);
-                var columnAlias = _config.GetColumnAlias(tableName, property);
+                var columnAlias = _config.GetColumnAlias(propertyInfo);
 
                 _sb.Append($"[{tableAlias}].[{columnAlias}]");
 
@@ -129,12 +129,12 @@
         {
             var variableExpression = node.Left;
             var constantExpression = node.Right as ConstantExpression;
-            var property = ExpressionHelper.GetPropertyName(variableExpression);
+            var propertyInfo = ExpressionHelper.GetPropertyInfo(variableExpression);
             var value = ExpressionHelper.GetPropertyValue(constantExpression);
             var tableType = ExpressionHelper.GetMemberExpression(variableExpression).Expression.Type;
             var tableName = _config.GetTableName(tableType);
             var tableAlias = _config.GetTableAlias(tableName);
-            var columnAlias = _config.GetColumnAlias(tableName, property);
+            var columnAlias = _config.GetColumnAlias(propertyInfo);
 
             _sb.Append($"[{tableAlias}].[{columnAlias}]");
 
