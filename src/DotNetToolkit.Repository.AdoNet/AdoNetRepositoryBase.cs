@@ -269,6 +269,32 @@
         }
 
         /// <summary>
+        /// Executes the query, and returns a new <see cref="DataTable " />.
+        /// </summary>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <returns>A new <see cref="DataTable" />.</returns>
+        public DataTable ExecuteDataTable(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
+        {
+            using (var connection = CreateConnection())
+            {
+                return ExecuteDataTable(connection, cmdText, cmdType, parameters);
+            }
+        }
+
+        /// <summary>
+        /// Executes the query, and returns a new <see cref="DataTable " />.
+        /// </summary>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <returns>A new <see cref="DataTable" />.</returns>
+        public DataTable ExecuteDataTable(string cmdText, Dictionary<string, object> parameters = null)
+        {
+            return ExecuteDataTable(cmdText, CommandType.Text, parameters);
+        }
+
+        /// <summary>
         /// Executes the query, and returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keyProjector" />, and <paramref name="elementProjector" />.
         /// </summary>
         /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
@@ -942,6 +968,42 @@
         protected IEnumerable<T> ExecuteList<T>(DbConnection connection, string cmdText, Func<DbDataReader, T> projector)
         {
             return ExecuteList<T>(connection, cmdText, CommandType.Text, projector);
+        }
+
+        /// <summary>
+        /// Executes the query, and returns a new <see cref="DataTable " />.
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <returns>A new <see cref="DataTable" />.</returns>
+        protected virtual DataTable ExecuteDataTable(DbConnection connection, string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
+        {
+            using (var adapter = Factory.CreateDataAdapter())
+            {
+                var command = CreateCommand(connection, cmdText, cmdType, parameters);
+
+                adapter.SelectCommand = command;
+
+                var table = new DataTable();
+
+                adapter.Fill(table);
+
+                return table;
+            }
+        }
+
+        /// <summary>
+        /// Executes the query, and returns a new <see cref="DataTable " />.
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <returns>A new <see cref="DataTable" />.</returns>
+        protected DataTable ExecuteDataTable(DbConnection connection, string cmdText, Dictionary<string, object> parameters = null)
+        {
+            return ExecuteDataTable(connection, cmdText, CommandType.Text, parameters);
         }
 
         /// <summary>
