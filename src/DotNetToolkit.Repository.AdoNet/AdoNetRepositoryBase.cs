@@ -1780,6 +1780,31 @@
         }
 
         /// <summary>
+        /// A protected overridable method for determining whether the repository contains an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// </summary>
+        protected override bool GetExist(ISpecification<TEntity> criteria)
+        {
+            if (criteria == null)
+                throw new ArgumentNullException(nameof(criteria));
+
+            PrepareSelectStatement(criteria, (IQueryOptions<TEntity>)null, out DbSqlSelectStatementConfig config);
+
+            using (var reader = ExecuteReader(config.Sql, config.Parameters))
+            {
+                var hasRows = false;
+
+                while (reader.Read())
+                {
+                    hasRows = true;
+
+                    break;
+                }
+
+                return hasRows;
+            }
+        }
+
+        /// <summary>
         /// Gets a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
         protected override Dictionary<TDictionaryKey, TElement> GetDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options)
@@ -1965,7 +1990,16 @@
 
             using (var reader = await ExecuteReaderAsync(config.Sql, config.Parameters, cancellationToken))
             {
-                return reader.HasRows;
+                var hasRows = false;
+
+                while (await reader.ReadAsync(cancellationToken))
+                {
+                    hasRows = true;
+
+                    break;
+                }
+
+                return hasRows;
             }
         }
 

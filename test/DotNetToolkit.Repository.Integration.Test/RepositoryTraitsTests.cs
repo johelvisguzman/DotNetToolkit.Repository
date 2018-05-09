@@ -108,6 +108,12 @@
         }
 
         [Fact]
+        public void Exists()
+        {
+            ForAllRepositories(TestExists);
+        }
+
+        [Fact]
         public void ToDictionary()
         {
             ForAllRepositories(TestToDictionary);
@@ -249,6 +255,12 @@
         public void CountAsync()
         {
             ForAllRepositoriesAsync(TestCountAsync);
+        }
+
+        [Fact]
+        public void ExistsAsync()
+        {
+            ForAllRepositoriesAsync(TestExistsAsync);
         }
 
         [Fact]
@@ -709,6 +721,22 @@
             Assert.Equal(1, repo.Count(spec));
         }
 
+        private static void TestExists(IRepository<Customer, int> repo)
+        {
+            const string name = "Random Name";
+
+            var spec = new Specification<Customer>(x => x.Name.Equals(name));
+            var entity = new Customer { Name = name };
+
+            Assert.False(repo.Exists(x => x.Name.Equals(name)));
+            Assert.False(repo.Exists(spec));
+
+            repo.Add(entity);
+
+            Assert.True(repo.Exists(x => x.Name.Equals(name)));
+            Assert.True(repo.Exists(spec));
+        }
+
         private static void TestToDictionary(IRepository<Customer, int> repo)
         {
             const string name = "Random Name";
@@ -1059,7 +1087,7 @@
             {
                 new Customer {Name = name}
             };
-            
+
             var expectedGroup = entities.GroupBy(y => y.Id);
             var expectedGroupByElementSelector = entities.GroupBy(y => y.Id, y => y.Name);
 
@@ -1646,6 +1674,22 @@
             Assert.Equal(1, await repo.CountAsync());
             Assert.Equal(1, await repo.CountAsync(x => x.Name.Equals(name)));
             Assert.Equal(1, await repo.CountAsync(spec));
+        }
+
+        private static async Task TestExistsAsync(IRepositoryAsync<Customer, int> repo)
+        {
+            const string name = "Random Name";
+
+            var spec = new Specification<Customer>(x => x.Name.Equals(name));
+            var entity = new Customer { Name = name };
+
+            Assert.False(await repo.ExistsAsync(x => x.Name.Equals(name)));
+            Assert.False(await repo.ExistsAsync(spec));
+
+            repo.Add(entity);
+
+            Assert.True(await repo.ExistsAsync(x => x.Name.Equals(name)));
+            Assert.True(await repo.ExistsAsync(spec));
         }
 
         private static async Task TestToDictionaryAsync(IRepositoryAsync<Customer, int> repo)
