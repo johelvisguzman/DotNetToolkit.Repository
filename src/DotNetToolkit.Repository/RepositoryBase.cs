@@ -162,9 +162,6 @@
         /// </summary>
         protected virtual IEnumerable<TResult> GetEntities<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
-
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
@@ -806,6 +803,20 @@
                 throw new ArgumentNullException(nameof(criteria));
 
             return GetEntities(criteria, options);
+        }
+
+        /// <summary>
+        /// Finds the collection of projected entity results in the repository.
+        /// </summary>
+        /// <param name="selector">A function to project each entity into a new form.</param>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <returns>The collection of projected entity results in the repository.</returns>
+        public IEnumerable<TResult> FindAll<TResult>(Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null)
+        {
+            if (selector == null)
+                throw new ArgumentNullException(nameof(selector));
+
+            return GetEntities((ISpecification<TEntity>)null, options, selector);
         }
 
         /// <summary>

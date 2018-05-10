@@ -501,6 +501,7 @@
             Assert.Empty(repo.FindAll(x => x.Name.Equals(name)));
             Assert.Empty(repo.FindAll(spec));
             Assert.Empty(repo.FindAll<string>(x => x.Name.Equals(name), x => x.Name));
+            Assert.Empty(repo.FindAll<string>(x => x.Name));
             Assert.Empty(repo.FindAll<string>(spec, x => x.Name));
 
             repo.Add(entity);
@@ -509,6 +510,7 @@
             Assert.Single(repo.FindAll(x => x.Name.Equals(name)));
             Assert.Single(repo.FindAll(spec));
             Assert.Single(repo.FindAll<string>(x => x.Name.Equals(name), x => x.Name));
+            Assert.Single(repo.FindAll<string>(x => x.Name));
             Assert.Single(repo.FindAll<string>(spec, x => x.Name));
         }
 
@@ -1456,6 +1458,7 @@
             Assert.Empty(await repo.FindAllAsync(x => x.Name.Equals(name)));
             Assert.Empty(await repo.FindAllAsync(spec));
             Assert.Empty(await repo.FindAllAsync<string>(x => x.Name.Equals(name), x => x.Name));
+            Assert.Empty(await repo.FindAllAsync<string>(x => x.Name));
             Assert.Empty(await repo.FindAllAsync<string>(spec, x => x.Name));
 
             await repo.AddAsync(entity);
@@ -1464,6 +1467,7 @@
             Assert.Single(await repo.FindAllAsync(x => x.Name.Equals(name)));
             Assert.Single(await repo.FindAllAsync(spec));
             Assert.Single(await repo.FindAllAsync<string>(x => x.Name.Equals(name), x => x.Name));
+            Assert.Single(await repo.FindAllAsync<string>(x => x.Name));
             Assert.Single(await repo.FindAllAsync<string>(spec, x => x.Name));
         }
 
