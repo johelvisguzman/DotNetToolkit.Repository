@@ -535,9 +535,6 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            if (fetchStrategy == null)
-                throw new ArgumentNullException(nameof(fetchStrategy));
-
             return GetEntityAsync(key, fetchStrategy, selector, cancellationToken);
         }
 

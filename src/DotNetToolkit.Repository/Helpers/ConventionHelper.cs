@@ -143,11 +143,12 @@
         /// <param name="sourceType">The source type.</param>
         /// <param name="foreignType">The foreign type to match.</param>
         /// <returns>The name of the foreign key.</returns>
-        public static string GetForeignKeyName(this Type sourceType, Type foreignType)
+        public static PropertyInfo GetForeignKeyPropertyInfo(this Type sourceType, Type foreignType)
         {
             var properties = sourceType.GetRuntimeProperties().Where(x => x.IsMapped());
             var foreignPropertyInfo = properties.SingleOrDefault(x => x.PropertyType == foreignType);
-            var foreignKeyName = string.Empty;
+
+            PropertyInfo propertyInfo = null;
 
             if (foreignPropertyInfo != null)
             {
@@ -155,33 +156,30 @@
                 if (propertyInfosWithForeignKeys.Any())
                 {
                     // Try to find by checking on the foreign key property
-                    foreignKeyName = propertyInfosWithForeignKeys
+                    propertyInfo = propertyInfosWithForeignKeys
                         .Where(x => x.IsPrimitive())
-                        .SingleOrDefault(x => x.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(foreignPropertyInfo.Name))
-                        ?.GetColumnName();
+                        .SingleOrDefault(x => x.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(foreignPropertyInfo.Name));
 
                     // Try to find by checking on the navigation property
-                    if (string.IsNullOrEmpty(foreignKeyName))
+                    if (propertyInfo == null)
                     {
-                        foreignKeyName = properties
+                        propertyInfo = properties
                             .Where(x => x.IsPrimitive())
-                            .SingleOrDefault(x => foreignPropertyInfo.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(x.GetColumnName()))
-                            ?.GetColumnName();
+                            .SingleOrDefault(x => foreignPropertyInfo.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(x.GetColumnName()));
                     }
                 }
 
                 // Try to find by naming convention
-                if (string.IsNullOrEmpty(foreignKeyName))
+                if (propertyInfo == null)
                 {
                     var foreignPrimaryKeyName = foreignType.GetPrimaryKeyPropertyInfo().GetColumnName();
 
-                    foreignKeyName = properties
-                        .SingleOrDefault(x => x.Name == $"{foreignType.Name}{foreignPrimaryKeyName}")
-                        ?.GetColumnName();
+                    propertyInfo = properties
+                        .SingleOrDefault(x => x.Name == $"{foreignPropertyInfo.Name}{foreignPrimaryKeyName}");
                 }
             }
 
-            return foreignKeyName;
+            return propertyInfo;
         }
 
         /// <summary>

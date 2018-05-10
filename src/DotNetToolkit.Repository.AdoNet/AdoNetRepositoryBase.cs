@@ -269,6 +269,32 @@
         }
 
         /// <summary>
+        /// Executes the query, and returns a new <see cref="DataTable " />.
+        /// </summary>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <returns>A new <see cref="DataTable" />.</returns>
+        public DataTable ExecuteDataTable(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
+        {
+            using (var connection = CreateConnection())
+            {
+                return ExecuteDataTable(connection, cmdText, cmdType, parameters);
+            }
+        }
+
+        /// <summary>
+        /// Executes the query, and returns a new <see cref="DataTable " />.
+        /// </summary>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <returns>A new <see cref="DataTable" />.</returns>
+        public DataTable ExecuteDataTable(string cmdText, Dictionary<string, object> parameters = null)
+        {
+            return ExecuteDataTable(cmdText, CommandType.Text, parameters);
+        }
+
+        /// <summary>
         /// Executes the query, and returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keyProjector" />, and <paramref name="elementProjector" />.
         /// </summary>
         /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
@@ -945,6 +971,42 @@
         }
 
         /// <summary>
+        /// Executes the query, and returns a new <see cref="DataTable " />.
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <returns>A new <see cref="DataTable" />.</returns>
+        protected virtual DataTable ExecuteDataTable(DbConnection connection, string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
+        {
+            using (var adapter = Factory.CreateDataAdapter())
+            {
+                var command = CreateCommand(connection, cmdText, cmdType, parameters);
+
+                adapter.SelectCommand = command;
+
+                var table = new DataTable();
+
+                adapter.Fill(table);
+
+                return table;
+            }
+        }
+
+        /// <summary>
+        /// Executes the query, and returns a new <see cref="DataTable " />.
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <returns>A new <see cref="DataTable" />.</returns>
+        protected DataTable ExecuteDataTable(DbConnection connection, string cmdText, Dictionary<string, object> parameters = null)
+        {
+            return ExecuteDataTable(connection, cmdText, CommandType.Text, parameters);
+        }
+
+        /// <summary>
         /// Executes the query, and returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keyProjector" />, and <paramref name="elementProjector" />.
         /// </summary>
         /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
@@ -1350,7 +1412,7 @@
             var mainTablePrimaryKeyName = typeof(TEntity).GetPrimaryKeyPropertyInfo().GetColumnName();
 
             // Default select
-            var selectSql = string.Join(",\n\t",
+            var columns = string.Join(",\n\t",
                 SqlPropertiesMapping.Select(x =>
                 {
                     var colAlias = cfg.GenerateColumnAlias(x.Value);
@@ -1367,7 +1429,7 @@
                 // the same type as the primary table
                 // Only do a join when the primary table has a foreign key property for the join table
                 var paths = mainTableProperties
-                    .Where(x => x.IsComplex() && !string.IsNullOrEmpty(x.PropertyType.GetForeignKeyName(mainTableType)))
+                    .Where(x => x.IsComplex() && !string.IsNullOrEmpty(x.PropertyType.GetPrimaryKeyPropertyInfo()?.GetColumnName()))
                     .Select(x => x.Name)
                     .ToList();
 
@@ -1389,13 +1451,13 @@
             {
                 var joinStatementSb = new StringBuilder();
 
-                sb.Append($"SELECT\n\t{selectSql}");
+                sb.Append($"SELECT\n\t{columns}");
 
                 foreach (var path in fetchStrategy.IncludePaths)
                 {
                     var joinTablePropertyInfo = mainTableProperties.Single(x => x.Name.Equals(path));
                     var joinTableType = joinTablePropertyInfo.PropertyType;
-                    var joinTableForeignKeyName = joinTableType.GetForeignKeyName(mainTableType);
+                    var joinTableForeignKeyName = joinTableType.GetForeignKeyPropertyInfo(mainTableType)?.GetColumnName();
 
                     // Only do a join when the primary table has a foreign key property for the join table
                     if (!string.IsNullOrEmpty(joinTableForeignKeyName))
@@ -1430,7 +1492,7 @@
             }
             else
             {
-                sb.Append($"SELECT\n\t{selectSql}\nFROM [{TableName}] AS [{mainTableAlias}]");
+                sb.Append($"SELECT\n\t{columns}\nFROM [{TableName}] AS [{mainTableAlias}]");
             }
 
             cfg.Sql = sb.ToString();
@@ -1780,6 +1842,31 @@
         }
 
         /// <summary>
+        /// A protected overridable method for determining whether the repository contains an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// </summary>
+        protected override bool GetExist(ISpecification<TEntity> criteria)
+        {
+            if (criteria == null)
+                throw new ArgumentNullException(nameof(criteria));
+
+            PrepareSelectStatement(criteria, (IQueryOptions<TEntity>)null, out DbSqlSelectStatementConfig config);
+
+            using (var reader = ExecuteReader(config.Sql, config.Parameters))
+            {
+                var hasRows = false;
+
+                while (reader.Read())
+                {
+                    hasRows = true;
+
+                    break;
+                }
+
+                return hasRows;
+            }
+        }
+
+        /// <summary>
         /// Gets a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
         protected override Dictionary<TDictionaryKey, TElement> GetDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options)
@@ -1965,7 +2052,16 @@
 
             using (var reader = await ExecuteReaderAsync(config.Sql, config.Parameters, cancellationToken))
             {
-                return reader.HasRows;
+                var hasRows = false;
+
+                while (await reader.ReadAsync(cancellationToken))
+                {
+                    hasRows = true;
+
+                    break;
+                }
+
+                return hasRows;
             }
         }
 
