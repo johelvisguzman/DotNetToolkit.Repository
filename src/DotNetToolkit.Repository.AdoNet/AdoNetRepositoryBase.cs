@@ -1412,7 +1412,7 @@
             var mainTablePrimaryKeyName = typeof(TEntity).GetPrimaryKeyPropertyInfo().GetColumnName();
 
             // Default select
-            var selectSql = string.Join(",\n\t",
+            var columns = string.Join(",\n\t",
                 SqlPropertiesMapping.Select(x =>
                 {
                     var colAlias = cfg.GenerateColumnAlias(x.Value);
@@ -1429,7 +1429,7 @@
                 // the same type as the primary table
                 // Only do a join when the primary table has a foreign key property for the join table
                 var paths = mainTableProperties
-                    .Where(x => x.IsComplex() && !string.IsNullOrEmpty(x.PropertyType.GetForeignKeyName(mainTableType)))
+                    .Where(x => x.IsComplex() && !string.IsNullOrEmpty(x.PropertyType.GetPrimaryKeyPropertyInfo()?.GetColumnName()))
                     .Select(x => x.Name)
                     .ToList();
 
@@ -1451,13 +1451,13 @@
             {
                 var joinStatementSb = new StringBuilder();
 
-                sb.Append($"SELECT\n\t{selectSql}");
+                sb.Append($"SELECT\n\t{columns}");
 
                 foreach (var path in fetchStrategy.IncludePaths)
                 {
                     var joinTablePropertyInfo = mainTableProperties.Single(x => x.Name.Equals(path));
                     var joinTableType = joinTablePropertyInfo.PropertyType;
-                    var joinTableForeignKeyName = joinTableType.GetForeignKeyName(mainTableType);
+                    var joinTableForeignKeyName = joinTableType.GetForeignKeyPropertyInfo(mainTableType)?.GetColumnName();
 
                     // Only do a join when the primary table has a foreign key property for the join table
                     if (!string.IsNullOrEmpty(joinTableForeignKeyName))
@@ -1492,7 +1492,7 @@
             }
             else
             {
-                sb.Append($"SELECT\n\t{selectSql}\nFROM [{TableName}] AS [{mainTableAlias}]");
+                sb.Append($"SELECT\n\t{columns}\nFROM [{TableName}] AS [{mainTableAlias}]");
             }
 
             cfg.Sql = sb.ToString();
