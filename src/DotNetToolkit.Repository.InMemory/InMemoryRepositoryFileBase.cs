@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.InMemory
 {
     using FetchStrategies;
+    using Helpers;
     using Logging;
     using Properties;
     using System;
@@ -81,7 +82,7 @@
                 if (!fileName.EndsWith(@"\"))
                     fileName += @"\";
 
-                fileName += $"{GetType().Name}{FileExtension}";
+                fileName += $"{typeof(TEntity).GetTableName()}{FileExtension}";
             }
             else
             {
