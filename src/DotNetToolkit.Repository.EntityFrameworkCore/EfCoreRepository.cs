@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.EntityFrameworkCore
 {
+    using Logging;
     using Microsoft.EntityFrameworkCore;
 
     /// <summary>
@@ -14,6 +15,13 @@
         /// </summary>
         /// <param name="context">The database context.</param>
         public EfCoreRepository(DbContext context) : base(context) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EfCoreRepository{TEntity, TKey}" /> class.
+        /// </summary>
+        /// <param name="context">The database context.</param>
+        /// <param name="logger">The logger.</param>
+        public EfCoreRepository(DbContext context, ILogger logger) : base(context, logger) { }
 
         #endregion
     }
@@ -30,6 +38,13 @@
         /// </summary>
         /// <param name="context">The database context.</param>
         public EfCoreRepository(DbContext context) : base(context) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EfCoreRepository{TEntity, TKey}" /> class.
+        /// </summary>
+        /// <param name="context">The database context.</param>
+        /// <param name="logger">The logger.</param>
+        public EfCoreRepository(DbContext context, ILogger logger) : base(context, logger) { }
 
         #endregion
     }

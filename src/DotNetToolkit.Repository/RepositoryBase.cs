@@ -2,6 +2,7 @@
 {
     using FetchStrategies;
     using Helpers;
+    using Logging;
     using Properties;
     using Queries;
     using Specifications;
@@ -10,13 +11,42 @@
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
-    using System.Reflection;
 
     /// <summary>
     /// An implementation of <see cref="IRepository{TEntity, TKey}" />.
     /// </summary>
     public abstract class RepositoryBase<TEntity, TKey> : IRepository<TEntity, TKey> where TEntity : class
     {
+        #region Properties
+
+        /// <summary>
+        /// Gets the logger.
+        /// </summary>
+        protected ILogger Logger { get; }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity,TKey}"/> class.
+        /// </summary>
+        protected RepositoryBase()
+        {
+            ThrowIfEntityKeyValueTypeMismatch();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}"/> class.
+        /// </summary>
+        /// <param name="logger">The logger.</param>
+        protected RepositoryBase(ILogger logger) : this()
+        {
+            Logger = logger;
+        }
+
+        #endregion
+
         #region Public Methods
 
         /// <summary>
@@ -89,7 +119,7 @@
         /// <summary>
         /// Gets an entity query with the given primary key value from the repository.
         /// </summary>
-        protected virtual TEntity GetEntity(TKey key)
+        protected TEntity GetEntity(TKey key)
         {
             return Get(key, (IFetchStrategy<TEntity>)null);
         }
@@ -113,6 +143,9 @@
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
 
+            if (selector == null)
+                throw new ArgumentNullException(nameof(selector));
+
             return GetQuery(criteria, options).Select(selector).FirstOrDefault();
         }
 
@@ -121,9 +154,6 @@
         /// </summary>
         protected virtual IEnumerable<TEntity> GetEntities(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
-
             return GetQuery(criteria, options).ToList();
         }
 
@@ -132,8 +162,8 @@
         /// </summary>
         protected virtual IEnumerable<TResult> GetEntities<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
+            if (selector == null)
+                throw new ArgumentNullException(nameof(selector));
 
             return GetQuery(criteria, options).Select(selector).ToList();
         }
@@ -162,23 +192,29 @@
         /// <summary>
         /// Gets a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected virtual Dictionary<TDictionaryKey, TElement> GetDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Func<TEntity, TDictionaryKey> keySelector, Func<TEntity, TElement> elementSelector, IQueryOptions<TEntity> options)
+        protected virtual Dictionary<TDictionaryKey, TElement> GetDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
-            return GetQuery(criteria, options).ToDictionary(keySelector, elementSelector, EqualityComparer<TDictionaryKey>.Default);
+            var keySelectFunc = keySelector.Compile();
+            var elementSelectorFunc = elementSelector.Compile();
+
+            return GetQuery(criteria, options).ToDictionary(keySelectFunc, elementSelectorFunc, EqualityComparer<TDictionaryKey>.Default);
         }
 
         /// <summary>
         /// Gets a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected virtual IEnumerable<IGrouping<TGroupKey, TElement>> GetGroupBy<TGroupKey, TElement>(ISpecification<TEntity> criteria, Func<TEntity, TGroupKey> keySelector, Func<TEntity, TElement> elementSelector, IQueryOptions<TEntity> options)
+        protected virtual IEnumerable<IGrouping<TGroupKey, TElement>> GetGroupBy<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
-            return GetQuery(criteria, options).AsEnumerable().GroupBy(keySelector, elementSelector, EqualityComparer<TGroupKey>.Default);
+            var keySelectFunc = keySelector.Compile();
+            var elementSelectorFunc = elementSelector.Compile();
+
+            return GetQuery(criteria, options).AsEnumerable().GroupBy(keySelectFunc, elementSelectorFunc, EqualityComparer<TGroupKey>.Default);
         }
 
         /// <summary>
@@ -190,7 +226,7 @@
         // https://github.com/SharpRepository/SharpRepository/blob/develop/SharpRepository.Repository/RepositoryBase.cs
         protected virtual ISpecification<TEntity> GetByPrimaryKeySpecification(TKey key, IFetchStrategy<TEntity> fetchStrategy = null)
         {
-            var propInfo = ConventionHelper.GetPrimaryKeyPropertyInfo(typeof(TEntity));
+            var propInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<TEntity>();
             var parameter = Expression.Parameter(typeof(TEntity), "x");
             var lambda = Expression.Lambda<Func<TEntity, bool>>(
                 Expression.Equal(
@@ -211,41 +247,12 @@
         }
 
         /// <summary>
-        /// Gets the primary key property information for the specified type.
-        /// </summary>
-        /// <returns>The primary key property info.</returns>
-        protected virtual PropertyInfo GetPrimaryKeyPropertyInfo()
-        {
-            return ConventionHelper.GetPrimaryKeyPropertyInfo(typeof(TEntity));
-        }
-
-        /// <summary>
-        /// Gets the value of the specified object primary key property.
-        /// </summary>
-        /// <param name="entity">The entity containing the property.</param>
-        /// <returns>The property value.</returns>
-        protected virtual TKey GetPrimaryKey(TEntity entity)
-        {
-            return (TKey)Convert.ChangeType(ConventionHelper.GetPrimaryKeyPropertyValue(entity), typeof(TKey));
-        }
-
-        /// <summary>
-        /// Sets a value for the specified object primary key property.
-        /// </summary>
-        /// <param name="entity">The entity containing the property.</param>
-        /// <param name="key">The value to set for the primary key property.</param>
-        protected virtual void SetPrimaryKey(TEntity entity, TKey key)
-        {
-            ConventionHelper.SetPrimaryKeyPropertyValue(entity, key);
-        }
-
-        /// <summary>
         /// Generates a new primary id for the entity.
         /// </summary>
         /// <returns>The new generated primary id.</returns>
         protected virtual TKey GeneratePrimaryKey()
         {
-            var propertyInfo = GetPrimaryKeyPropertyInfo();
+            var propertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<TEntity>();
             var propertyType = propertyInfo.PropertyType;
 
             if (propertyType == typeof(Guid))
@@ -257,8 +264,8 @@
             if (propertyType == typeof(int))
             {
                 var key = GetQuery()
-                    .OrderByDescending(x => GetPrimaryKey(x))
-                    .Select(x => GetPrimaryKey(x))
+                    .OrderByDescending(x => x.GetPrimaryKeyPropertyValue<TKey>())
+                    .Select(x => x.GetPrimaryKeyPropertyValue<TKey>())
                     .FirstOrDefault();
 
                 return (TKey)Convert.ChangeType(Convert.ToInt32(key) + 1, typeof(TKey));
@@ -270,9 +277,9 @@
         /// <summary>
         /// Throws if the entity key value type does not match the type of the property defined.
         /// </summary>
-        protected void ThrowIfEntityKeyValueTypeMismatch()
+        protected virtual void ThrowIfEntityKeyValueTypeMismatch()
         {
-            var propertyInfo = GetPrimaryKeyPropertyInfo();
+            var propertyInfo = typeof(TEntity).GetPrimaryKeyPropertyInfo();
             if (propertyInfo.PropertyType != typeof(TKey))
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeMismatch, typeof(TKey), propertyInfo.PropertyType));
         }
@@ -328,8 +335,8 @@
         /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new  <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(Func<TEntity, TDictionaryKey> keySelector, IQueryOptions<TEntity> options = null)
+        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector, IQueryOptions<TEntity> options = null)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -345,8 +352,8 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new  <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(Func<TEntity, TDictionaryKey> keySelector, Func<TEntity, TElement> elementSelector, IQueryOptions<TEntity> options = null)
+        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -361,13 +368,13 @@
         /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new  <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(ISpecification<TEntity> criteria, Func<TEntity, TDictionaryKey> keySelector, IQueryOptions<TEntity> options = null)
+        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, IQueryOptions<TEntity> options = null)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
-            return ToDictionary(criteria, keySelector, IdentityFunction<TEntity>.Instance, options);
+            return ToDictionary(criteria, keySelector, IdentityExpression<TEntity>.Instance, options);
         }
 
         /// <summary>
@@ -379,8 +386,8 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new  <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Func<TEntity, TDictionaryKey> keySelector, Func<TEntity, TElement> elementSelector, IQueryOptions<TEntity> options = null)
+        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -394,8 +401,8 @@
         /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new  <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TEntity>> GroupBy<TGroupKey>(Func<TEntity, TGroupKey> keySelector, IQueryOptions<TEntity> options = null)
+        /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
+        public IEnumerable<IGrouping<TGroupKey, TEntity>> GroupBy<TGroupKey>(Expression<Func<TEntity, TGroupKey>> keySelector, IQueryOptions<TEntity> options = null)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -411,8 +418,8 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new  <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TElement>> GroupBy<TGroupKey, TElement>(Func<TEntity, TGroupKey> keySelector, Func<TEntity, TElement> elementSelector, IQueryOptions<TEntity> options = null)
+        /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
+        public IEnumerable<IGrouping<TGroupKey, TElement>> GroupBy<TGroupKey, TElement>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -427,13 +434,13 @@
         /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new  <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TEntity>> GroupBy<TGroupKey>(ISpecification<TEntity> criteria, Func<TEntity, TGroupKey> keySelector, IQueryOptions<TEntity> options = null)
+        /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
+        public IEnumerable<IGrouping<TGroupKey, TEntity>> GroupBy<TGroupKey>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, IQueryOptions<TEntity> options = null)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
-            return GroupBy(criteria, keySelector, IdentityFunction<TEntity>.Instance, options);
+            return GroupBy(criteria, keySelector, IdentityExpression<TEntity>.Instance, options);
         }
 
         /// <summary>
@@ -445,8 +452,8 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new  <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TElement>> GroupBy<TGroupKey, TElement>(ISpecification<TEntity> criteria, Func<TEntity, TGroupKey> keySelector, Func<TEntity, TElement> elementSelector, IQueryOptions<TEntity> options = null)
+        /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
+        public IEnumerable<IGrouping<TGroupKey, TElement>> GroupBy<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -467,8 +474,12 @@
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
+            Logger?.Write($"Adding {typeof(TEntity).Name} entity", entity);
+
             AddItem(entity);
             SaveChanges();
+
+            Logger?.Write($"Added {typeof(TEntity).Name} entity", entity);
         }
 
         /// <summary>
@@ -480,12 +491,16 @@
             if (entities == null)
                 throw new ArgumentNullException(nameof(entities));
 
+            Logger?.Write($"Adding {typeof(TEntity).Name} entities", entities);
+
             foreach (var entity in entities)
             {
                 AddItem(entity);
             }
 
             SaveChanges();
+
+            Logger?.Write($"Added {typeof(TEntity).Name} entities", entities);
         }
 
         #endregion
@@ -501,8 +516,12 @@
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
+            Logger?.Write($"Updating {typeof(TEntity).Name} entity", entity);
+
             UpdateItem(entity);
             SaveChanges();
+
+            Logger?.Write($"Updated {typeof(TEntity).Name} entity", entity);
         }
 
         /// <summary>
@@ -514,12 +533,16 @@
             if (entities == null)
                 throw new ArgumentNullException(nameof(entities));
 
+            Logger?.Write($"Updating {typeof(TEntity).Name} entities", entities);
+
             foreach (var entity in entities)
             {
                 UpdateItem(entity);
             }
 
             SaveChanges();
+
+            Logger?.Write($"Updated {typeof(TEntity).Name} entities", entities);
         }
 
         #endregion
@@ -539,8 +562,7 @@
             if (entity == null)
                 throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
 
-            DeleteItem(entity);
-            SaveChanges();
+            Delete(entity);
         }
 
         /// <summary>
@@ -552,8 +574,12 @@
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
+            Logger?.Write($"Deleting {typeof(TEntity).Name} entity", entity);
+
             DeleteItem(entity);
             SaveChanges();
+
+            Logger?.Write($"Deleted {typeof(TEntity).Name} entity", entity);
         }
 
         /// <summary>
@@ -577,12 +603,16 @@
             if (entities == null)
                 throw new ArgumentNullException(nameof(entities));
 
+            Logger?.Write($"Deleting {typeof(TEntity).Name} entities", entities);
+
             foreach (var entity in entities)
             {
                 DeleteItem(entity);
             }
 
             SaveChanges();
+
+            Logger?.Write($"Deleted {typeof(TEntity).Name} entities", entities);
         }
 
         #endregion
@@ -599,8 +629,6 @@
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            ThrowIfEntityKeyValueTypeMismatch();
-
             return GetEntity(key);
         }
 
@@ -614,8 +642,6 @@
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
-
-            ThrowIfEntityKeyValueTypeMismatch();
 
             return GetEntity(key, fetchStrategy);
         }
@@ -634,8 +660,6 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            ThrowIfEntityKeyValueTypeMismatch();
-
             return Get(key, selector, (IFetchStrategy<TEntity>)null);
         }
 
@@ -653,8 +677,6 @@
 
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
-
-            ThrowIfEntityKeyValueTypeMismatch();
 
             var result = GetEntity(key, fetchStrategy);
             var selectFunc = selector.Compile();
@@ -747,6 +769,15 @@
         }
 
         /// <summary>
+        /// Finds the collection of entities in the repository.
+        /// </summary>
+        /// <returns>The collection of entities in the repository.</returns>
+        public IEnumerable<TEntity> FindAll()
+        {
+            return GetEntities(null, null);
+        }
+
+        /// <summary>
         /// Finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
@@ -772,6 +803,20 @@
                 throw new ArgumentNullException(nameof(criteria));
 
             return GetEntities(criteria, options);
+        }
+
+        /// <summary>
+        /// Finds the collection of projected entity results in the repository.
+        /// </summary>
+        /// <param name="selector">A function to project each entity into a new form.</param>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <returns>The collection of projected entity results in the repository.</returns>
+        public IEnumerable<TResult> FindAll<TResult>(Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null)
+        {
+            if (selector == null)
+                throw new ArgumentNullException(nameof(selector));
+
+            return GetEntities((ISpecification<TEntity>)null, options, selector);
         }
 
         /// <summary>
@@ -838,11 +883,11 @@
 
         #endregion
 
-        #region Nested type: IdentityFunction<TElement>
+        #region Nested type: IdentityExpression<TElement>
 
-        protected class IdentityFunction<TElement>
+        protected class IdentityExpression<TElement>
         {
-            public static Func<TElement, TElement> Instance
+            public static Expression<Func<TElement, TElement>> Instance
             {
                 get { return x => x; }
             }

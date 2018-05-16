@@ -1,6 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.InMemory
 {
     using FetchStrategies;
+    using Helpers;
+    using Logging;
     using Properties;
     using System;
     using System.Collections.Concurrent;
@@ -19,7 +21,7 @@
         private const string DefaultDatabaseName = "DotNetToolkit.Repository.InMemory";
 
         private static readonly object _syncRoot = new object();
-        private ConcurrentDictionary<TKey, EntitySet<TEntity, TKey>> _context;
+        private ConcurrentDictionary<TKey, EntitySet> _items;
         private bool _disposed;
 
         #endregion
@@ -39,10 +41,27 @@
         /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity,TKey}"/> class.
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
-        protected InMemoryRepositoryBase(string databaseName = null)
+        protected InMemoryRepositoryBase(string databaseName = null) : this(databaseName, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity,TKey}"/> class.
+        /// </summary>
+        /// <param name="logger">The logger.</param>
+        protected InMemoryRepositoryBase(ILogger logger) : this(null, logger)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity,TKey}"/> class.
+        /// </summary>
+        /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
+        /// <param name="logger">The logger.</param>
+        protected InMemoryRepositoryBase(string databaseName, ILogger logger) : base(logger)
         {
             DatabaseName = string.IsNullOrEmpty(databaseName) ? DefaultDatabaseName : databaseName;
-            _context = new ConcurrentDictionary<TKey, EntitySet<TEntity, TKey>>();
+            _items = new ConcurrentDictionary<TKey, EntitySet>();
         }
 
         #endregion
@@ -59,8 +78,8 @@
 
             if (disposing)
             {
-                _context.Clear();
-                _context = null;
+                _items.Clear();
+                _items = null;
             }
 
             _disposed = true;
@@ -75,26 +94,8 @@
         /// </summary>
         internal void EnsureDeleted()
         {
-            _context.Clear();
+            _items.Clear();
             InMemoryCache<TEntity, TKey>.Instance.GetContext(DatabaseName).Clear();
-        }
-
-        /// <summary>
-        /// Sets the time stamp.
-        /// </summary>
-        /// <param name="time">The time.</param>
-        internal void SetTimeStamp(DateTime time)
-        {
-            InMemoryCache<TEntity, TKey>.Instance.SetTimeStamp(DatabaseName, time);
-        }
-
-        /// <summary>
-        /// Gets the time stamp.
-        /// </summary>
-        /// <returns>The time stamp.</returns>
-        internal DateTime GetTimeStamp()
-        {
-            return InMemoryCache<TEntity, TKey>.Instance.GetTimeStamp(DatabaseName);
         }
 
         #endregion
@@ -128,11 +129,11 @@
         /// <returns>The new generated primary id.</returns>
         protected virtual TKey GenerateTemporaryPrimaryKey()
         {
-            var propertyInfo = GetPrimaryKeyPropertyInfo();
+            var propertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<TEntity>();
             var propertyType = propertyInfo.PropertyType;
             if (propertyType == typeof(int))
             {
-                var key = _context.OrderByDescending(x => x.Key).Select(x => x.Key).FirstOrDefault();
+                var key = _items.OrderByDescending(x => x.Key).Select(x => x.Key).FirstOrDefault();
 
                 return (TKey)Convert.ChangeType(Convert.ToInt32(key) + 1, typeof(TKey));
             }
@@ -159,7 +160,7 @@
         protected override void AddItem(TEntity entity)
         {
             // Ensures the last entity of the same reference is updated by the current one added
-            var key = _context
+            var key = _items
                 .Where(x => x.Value.Entity.Equals(entity))
                 .Select(x => x.Key)
                 .SingleOrDefault();
@@ -168,7 +169,7 @@
 
             if (key != null && key.Equals(default(TKey)))
             {
-                key = GetPrimaryKey(entity);
+                key = entity.GetPrimaryKeyPropertyValue<TKey>();
 
                 if (key != null && key.Equals(default(TKey)))
                 {
@@ -177,7 +178,7 @@
                 }
             }
 
-            _context[key] = new EntitySet<TEntity, TKey>(entity, key, EntityState.Added)
+            _items[key] = new EntitySet(entity, key, EntityState.Added)
             {
                 HasTemporaryKey = hasTemporaryKey
             };
@@ -188,7 +189,7 @@
         /// </summary>
         protected override void DeleteItem(TEntity entity)
         {
-            var key = GetPrimaryKey(entity);
+            var key = entity.GetPrimaryKeyPropertyValue<TKey>();
             var hasTemporaryKey = false;
 
             if (key != null && key.Equals(default(TKey)))
@@ -197,7 +198,7 @@
                 hasTemporaryKey = true;
             }
 
-            _context[key] = new EntitySet<TEntity, TKey>(entity, key, EntityState.Removed)
+            _items[key] = new EntitySet(entity, key, EntityState.Removed)
             {
                 HasTemporaryKey = hasTemporaryKey
             };
@@ -208,7 +209,7 @@
         /// </summary>
         protected override void UpdateItem(TEntity entity)
         {
-            var key = GetPrimaryKey(entity);
+            var key = entity.GetPrimaryKeyPropertyValue<TKey>();
             var hasTemporaryKey = false;
 
             if (key != null && key.Equals(default(TKey)))
@@ -217,7 +218,7 @@
                 hasTemporaryKey = true;
             }
 
-            _context[key] = new EntitySet<TEntity, TKey>(entity, key, EntityState.Modified)
+            _items[key] = new EntitySet(entity, key, EntityState.Modified)
             {
                 HasTemporaryKey = hasTemporaryKey
             };
@@ -232,7 +233,7 @@
             {
                 var context = InMemoryCache<TEntity, TKey>.Instance.GetContext(DatabaseName);
 
-                foreach (var entitySet in _context.Select(y => y.Value))
+                foreach (var entitySet in _items.Select(y => y.Value))
                 {
                     var key = entitySet.Key;
 
@@ -241,7 +242,7 @@
                         if (entitySet.HasTemporaryKey)
                         {
                             key = GeneratePrimaryKey();
-                            SetPrimaryKey(entitySet.Entity, key);
+                            entitySet.Entity.SetPrimaryKeyPropertyValue(key);
                         }
                         else if (context.ContainsKey(key))
                         {
@@ -263,9 +264,7 @@
                     }
                 }
 
-                SetTimeStamp(DateTime.Now);
-
-                _context.Clear();
+                _items.Clear();
             }
         }
 
@@ -294,17 +293,17 @@
 
         #endregion
 
-        #region Nested type: EntitySet<TEntity, TKey>
+        #region Nested type: EntitySet
 
         /// <summary>
         /// Represents an internal entity set in the in-memory store, which holds the entity and it's state representing the operation that was performed at the time.
         /// </summary>
-        private class EntitySet<TEntity, TKey> where TEntity : class
+        private class EntitySet
         {
             #region Constructors
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="EntitySet{TEntity, TKey}"/> class.
+            /// Initializes a new instance of the <see cref="EntitySet"/> class.
             /// </summary>
             /// <param name="entity">The entity.</param>
             /// <param name="key">The entity primary key value.</param>
@@ -372,7 +371,6 @@
             private static volatile InMemoryCache<TEntity, TKey> _instance;
             private static readonly object _syncRoot = new object();
             private readonly ConcurrentDictionary<string, SortedDictionary<TKey, TEntity>> _storage;
-            private readonly ConcurrentDictionary<string, DateTime> _timestamp;
 
             #endregion
 
@@ -384,7 +382,6 @@
             private InMemoryCache()
             {
                 _storage = new ConcurrentDictionary<string, SortedDictionary<TKey, TEntity>>();
-                _timestamp = new ConcurrentDictionary<string, DateTime>();
             }
 
             #endregion
@@ -428,28 +425,6 @@
                 }
 
                 return _storage[name];
-            }
-
-            /// <summary>
-            /// Sets the time stamp.
-            /// </summary>
-            /// <param name="name">The database name.</param>
-            /// <param name="time">The time.</param>
-            public void SetTimeStamp(string name, DateTime time)
-            {
-                _timestamp[name] = time;
-            }
-
-            /// <summary>
-            /// Gets the time stamp.
-            /// </summary>
-            /// <param name="name">The database name.</param>
-            /// <returns>The time stamp.</returns>
-            public DateTime GetTimeStamp(string name)
-            {
-                _timestamp.TryGetValue(name, out DateTime time);
-
-                return time;
             }
 
             #endregion

@@ -1,0 +1,348 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:mahControls="http://metro.mahapps.com/winfx/xaml/controls"
+                    xmlns:mahIconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+                    xmlns:mahConverters="http://metro.mahapps.com/winfx/xaml/shared"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Resources -->
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/Blue.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <!-- Static Control Variables -->
+    <Thickness x:Key="ControlMargin">0 5 5 0</Thickness>
+    <GridLength x:Key="FormLabelWidth">115</GridLength>
+    <GridLength x:Key="FormFieldWidth">400</GridLength>
+
+    <!-- Converters -->
+    <mahConverters:ToUpperConverter x:Key="ToUpperCase" />
+    <mahConverters:ToLowerConverter x:Key="ToLowerCase" />
+    <BooleanToVisibilityConverter x:Key="ToVisibilityConverter" />
+
+    <!-- Colors -->
+    <SolidColorBrush x:Key="FlatPeterRiverColorBrush" Color="#3498db" />
+    <SolidColorBrush x:Key="FlatAlizarinColorBrush" Color="#e74c3c" />
+    <SolidColorBrush x:Key="FlatTurquoiseColorBrush" Color="#1abc9c" />
+    <SolidColorBrush x:Key="FlatMidnightBlueColorBrush" Color="#2c3e50" />
+    
+    <!-- Styles -->
+    <Style x:Key="FormTextBlockHeaderStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource BlackColorBrush}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="Margin" Value="0 0 0 10" />
+        <Setter Property="Text">
+            <Setter.Value>
+                <MultiBinding StringFormat="{}{0} / {1}">
+                    <Binding Path="DisplayName" />
+                    <Binding Path="Id" />
+                </MultiBinding>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Id}" Value="0">
+                <Setter Property="Text" Value="{Binding DisplayName}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="MultiLineTextBoxStyle" TargetType="{x:Type TextBox}" BasedOn="{StaticResource {x:Type TextBox}}">
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="AcceptsReturn" Value="True" />
+        <Setter Property="Margin" Value="{DynamicResource ControlMargin}" />
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        <Setter Property="mahControls:TextBoxHelper.IsSpellCheckContextMenuEnabled" Value="True" />
+        <Setter Property="SpellCheck.IsEnabled" Value="True" />
+        <Setter Property="Language" Value="en-US" />
+        <Setter Property="Height" Value="80" />
+    </Style>
+
+    <Style x:Key="DataGridStyle" TargetType="{x:Type DataGrid}" BasedOn="{StaticResource {x:Type DataGrid}}">
+        <Setter Property="SelectionMode" Value="Single" />
+        <Setter Property="CanUserAddRows" Value="False" />
+        <Setter Property="CanUserResizeRows" Value="False" />
+        <Setter Property="CanUserResizeColumns" Value="True" />
+        <Setter Property="AutoGenerateColumns" Value="False" />
+        <Setter Property="EnableRowVirtualization" Value="True" />
+        <Setter Property="EnableColumnVirtualization" Value="True" />
+        <Setter Property="VirtualizingStackPanel.IsVirtualizing" Value="True" />
+        <Setter Property="IsReadOnly" Value="True" />
+        <Setter Property="Margin" Value="0 10 0 0" />
+    </Style>
+
+    <Style x:Key="AddButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="mahControls:ControlsHelper.CornerRadius" Value="3 0 0 3" />
+        <Setter Property="Margin" Value="0 0 -1 0" />
+        <Setter Property="BorderThickness" Value="1 1 0 1" />
+        <Setter Property="ToolTip" Value="Add" />
+        <Setter Property="Foreground" Value="{DynamicResource FlatPeterRiverColorBrush}" />
+        <Setter Property="ContentTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <mahIconPacks:PackIconModern Width="20" Height="20" Kind="Add" />
+                        <Label HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5 0 0 0" Content="ADD" />
+                    </StackPanel>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="DeleteButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="mahControls:ControlsHelper.CornerRadius" Value="0" />
+        <Setter Property="BorderThickness" Value="1 1 0 1" />
+        <Setter Property="ToolTip" Value="Delete" />
+        <Setter Property="Foreground" Value="{DynamicResource FlatAlizarinColorBrush}" />
+        <Setter Property="ContentTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <mahIconPacks:PackIconModern Width="20" Height="20" Kind="Delete" />
+                        <Label HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5 0 0 0" Content="DELETE" />
+                    </StackPanel>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="EditButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Margin" Value="-1 0 0 0" />
+        <Setter Property="mahControls:ControlsHelper.CornerRadius" Value="0 3 3 0" />
+        <Setter Property="ToolTip" Value="Edit" />
+        <Setter Property="Foreground" Value="{DynamicResource FlatTurquoiseColorBrush}" />
+        <Setter Property="ContentTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <mahIconPacks:PackIconModern Width="20" Height="20" Kind="Edit" />
+                        <Label HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5 0 0 0" Content="EDIT" />
+                    </StackPanel>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="DataGridCell" BasedOn="{StaticResource MetroDataGridCell}">
+        <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self},Path=Content.Text}"/>
+    </Style>
+
+    <Style x:Key="NavigateAzureToggleButtonStyle" TargetType="{x:Type ToggleButton}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Margin" Value="0,2,20,0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        <Setter Property="MinWidth" Value="5" />
+        <Setter Property="MinHeight" Value="5" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Label x:Name="Label" FontSize="15" Margin="{TemplateBinding Margin}" FontWeight="SemiBold">
+                        <ContentPresenter Content="{TemplateBinding Content, Converter={StaticResource ToUpperCase}}" RecognizesAccessKey="True" />
+                    </Label>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Label" Property="Foreground">
+                                <Setter.Value>
+                                    <SolidColorBrush Color="{DynamicResource AccentColor}" />
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="False">
+                            <Setter TargetName="Label" Property="Foreground">
+                                <Setter.Value>
+                                    <SolidColorBrush Color="{DynamicResource Gray2}" />
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                        <Trigger SourceName="Label" Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Label" Property="Foreground">
+                                <Setter.Value>
+                                    <SolidColorBrush Color="{DynamicResource AccentColor}" />
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="NavigatePreviousButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource MetroCircleButtonStyle}">
+        <Setter Property="Height" Value="48" />
+        <Setter Property="Width" Value="48" />
+        <Setter Property="ToolTip" Value="Back" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{StaticResource AccentColorBrush}" />
+        <Setter Property="ContentTemplate">
+            <Setter.Value>
+                <ItemContainerTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <mahIconPacks:PackIconModern Width="20" Height="20" Kind="NavigatePrevious" />
+                    </StackPanel>
+                </ItemContainerTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="AzureTabItemStyle" TargetType="{x:Type TabItem}">
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentColorBrush}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabItem">
+                    <StackPanel>
+                        <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}"
+                                Padding="12,2,24,2" 
+                                BorderThickness="0,0,0,4" 
+                                Margin="2,2,2,0"
+                                SnapsToDevicePixels="True">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <SolidColorBrush Color="{DynamicResource Gray8}" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Border.Style>
+                            <Label x:Name="root" FontSize="15">
+                                <Label.Style>
+                                    <Style TargetType="Label">
+                                        <Setter Property="Foreground">
+                                            <Setter.Value>
+                                                <SolidColorBrush Color="{DynamicResource BlackColor}" />
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </Label.Style>
+                                <ContentPresenter Content="{TemplateBinding Header, Converter={StaticResource ToLowerCase}}" ContentSource="Header" RecognizesAccessKey="True" />
+                            </Label>
+                        </Border>
+                        <Canvas Height="10" Width="20" x:Name="arrow" Margin="25,0,0,0"
+                                HorizontalAlignment="Left" SnapsToDevicePixels="True">
+                            <Path Data="M 0 0 H 20 L 10 10 Z"
+                                  StrokeThickness="0"
+                                  Fill="{DynamicResource AccentColorBrush}" />
+                        </Canvas>
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="true">
+                            <Setter TargetName="root" Property="Foreground">
+                                <Setter.Value>
+                                    <SolidColorBrush Color="{DynamicResource WhiteColor}" />
+                                </Setter.Value>
+                            </Setter>
+                            <Setter TargetName="border" Property="Background">
+                                <Setter.Value>
+                                    <SolidColorBrush Color="{DynamicResource AccentColor}" />
+                                </Setter.Value>
+                            </Setter>
+                            <Setter TargetName="border" Property="BorderBrush">
+                                <Setter.Value>
+                                    <SolidColorBrush Color="{DynamicResource AccentColor}" />
+                                </Setter.Value>
+                            </Setter>
+                            <Setter TargetName="arrow" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="false">
+                            <Setter  TargetName="root" Property="Foreground">
+                                <Setter.Value>
+                                    <SolidColorBrush Color="{DynamicResource BlackColor}" />
+                                </Setter.Value>
+                            </Setter>
+                            <Setter TargetName="arrow" Property="Visibility" Value="Hidden" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="root" Property="Foreground">
+                                <Setter.Value>
+                                    <SolidColorBrush Color="{DynamicResource WhiteColor}" />
+                                </Setter.Value>
+                            </Setter>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource AccentColorBrush}"></Setter>
+                            <Setter TargetName="border" Property="Background">
+                                <Setter.Value>
+                                    <SolidColorBrush Color="{DynamicResource AccentColor}" />
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="NavigateListBoxItemStyle" TargetType="{x:Type ListBoxItem}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="5, 1" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    </Style>
+
+    <DataTemplate x:Key="NavigateListBoxItemTemplate">
+        <RadioButton Margin="0" Content="{Binding DisplayName}" Style="{StaticResource NavigateAzureToggleButtonStyle}" IsChecked="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" />
+    </DataTemplate>
+
+    <Style x:Key="NavigateListBoxStyle" TargetType="{x:Type ListBox}">
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="ItemContainerStyle" Value="{StaticResource NavigateListBoxItemStyle}" />
+        <Setter Property="ItemTemplate" Value="{StaticResource NavigateListBoxItemTemplate}" />
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel IsItemsHost="True" Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="GridFormStyle" TargetType="Grid">
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="Margin" Value="5" />
+        <Style.Resources>
+            <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Setter Property="HorizontalAlignment" Value="Right" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+                <Setter Property="TextAlignment" Value="Right" />
+                <Setter Property="Margin" Value="0 0 5 0" />
+            </Style>
+            <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                <Setter Property="Margin" Value="{DynamicResource ControlMargin}" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                <Setter Property="Margin" Value="{DynamicResource ControlMargin}" />
+                <Setter Property="VerticalAlignment" Value="Top" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+            </Style>
+            <Style TargetType="DatePicker" BasedOn="{StaticResource {x:Type DatePicker}}">
+                <Setter Property="Margin" Value="{DynamicResource ControlMargin}" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+            <Style TargetType="TabControl" BasedOn="{StaticResource {x:Type TabControl}}">
+                <Setter Property="ItemContainerStyle" Value="{StaticResource AzureTabItemStyle}" />
+            </Style>
+        </Style.Resources>
+    </Style>
+
+    <Style x:Key="WindowStyle" TargetType="{x:Type mahControls:MetroWindow}" BasedOn="{StaticResource {x:Type mahControls:MetroWindow}}">
+        <Setter Property="TitleCharacterCasing" Value="Normal" />
+        <Setter Property="WindowTitleBrush" Value="{DynamicResource FlatMidnightBlueColorBrush}" />
+        <Setter Property="NonActiveGlowBrush" Value="{DynamicResource FlatAlizarinColorBrush}" />
+        <Setter Property="GlowBrush" Value="{DynamicResource AccentColorBrush}" />
+        <Setter Property="WindowTransitionsEnabled" Value="False" />
+    </Style>
+
+</ResourceDictionary>

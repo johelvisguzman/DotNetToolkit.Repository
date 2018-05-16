@@ -1,12 +1,14 @@
 ﻿namespace DotNetToolkit.Repository
 {
     using FetchStrategies;
+    using Logging;
     using Properties;
     using Queries;
     using Specifications;
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
@@ -16,6 +18,25 @@
     /// </summary>
     public abstract class RepositoryAsyncBase<TEntity, TKey> : RepositoryBase<TEntity, TKey>, IRepositoryAsync<TEntity, TKey> where TEntity : class
     {
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryAsyncBase{TEntity, TKey}"/> class.
+        /// </summary>
+        protected RepositoryAsyncBase()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryAsyncBase{TEntity, TKey}"/> class.
+        /// </summary>
+        /// <param name="logger">The logger.</param>
+        protected RepositoryAsyncBase(ILogger logger) : base(logger)
+        {
+        }
+
+        #endregion
+
         #region Protected Methods
 
         /// <summary>
@@ -34,7 +55,7 @@
         /// <summary>
         /// Asynchronously gets an entity query with the given primary key value from the repository.
         /// </summary>
-        protected virtual Task<TResult> GetEntityAsync<TResult>(TKey key, IFetchStrategy<TEntity> fetchStrategy, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        protected Task<TResult> GetEntityAsync<TResult>(TKey key, IFetchStrategy<TEntity> fetchStrategy, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             return GetEntityAsync(GetByPrimaryKeySpecification(key, fetchStrategy), (IQueryOptions<TEntity>)null, selector, cancellationToken);
         }
@@ -42,7 +63,7 @@
         /// <summary>
         /// Asynchronously gets an entity query with the given primary key value from the repository.
         /// </summary>
-        protected virtual Task<TEntity> GetEntityAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
+        protected Task<TEntity> GetEntityAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
             return GetAsync(key, (IFetchStrategy<TEntity>)null, cancellationToken);
         }
@@ -60,12 +81,12 @@
         /// <summary>
         /// A protected asynchronous overridable method for getting a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected abstract Task<List<TEntity>> GetEntitiesAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken());
+        protected abstract Task<IEnumerable<TEntity>> GetEntitiesAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken());
 
         /// <summary>
         /// A protected asynchronous overridable method for getting a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected abstract Task<List<TResult>> GetEntitiesAsync<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken());
+        protected abstract Task<IEnumerable<TResult>> GetEntitiesAsync<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken());
 
         /// <summary>
         /// A protected asynchronous overridable method for getting the number of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
@@ -80,7 +101,12 @@
         /// <summary>
         /// A protected asynchronous overridable method for getting a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected abstract Task<Dictionary<TDictionaryKey, TElement>> GetDictionaryAsync<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Func<TEntity, TDictionaryKey> keySelector, Func<TEntity, TElement> elementSelector, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken());
+        protected abstract Task<Dictionary<TDictionaryKey, TElement>> GetDictionaryAsync<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken());
+
+        /// <summary>
+        /// A protected asynchronous overridable method for getting a new <see cref="IGrouping{TGroupKey, TElemen}" /> according to the specified <paramref name="keySelector" />, an element selector.
+        /// </summary>
+        protected abstract Task<IEnumerable<IGrouping<TGroupKey, TElement>>> GetGroupByAsync<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken());
 
         #endregion
 
@@ -126,7 +152,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Task<Dictionary<TDictionaryKey, TEntity>> ToDictionaryAsync<TDictionaryKey>(Func<TEntity, TDictionaryKey> keySelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
+        public Task<Dictionary<TDictionaryKey, TEntity>> ToDictionaryAsync<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -144,7 +170,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TDictionaryKey, TElement>(Func<TEntity, TDictionaryKey> keySelector, Func<TEntity, TElement> elementSelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
+        public Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -161,12 +187,12 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Task<Dictionary<TDictionaryKey, TEntity>> ToDictionaryAsync<TDictionaryKey>(ISpecification<TEntity> criteria, Func<TEntity, TDictionaryKey> keySelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
+        public Task<Dictionary<TDictionaryKey, TEntity>> ToDictionaryAsync<TDictionaryKey>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
-            return ToDictionaryAsync(criteria, keySelector, IdentityFunction<TEntity>.Instance, options, cancellationToken);
+            return ToDictionaryAsync(criteria, keySelector, IdentityExpression<TEntity>.Instance, options, cancellationToken);
         }
 
         /// <summary>
@@ -180,12 +206,82 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Func<TEntity, TDictionaryKey> keySelector, Func<TEntity, TElement> elementSelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
+        public Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
             return GetDictionaryAsync(criteria, keySelector, elementSelector, options, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously returns a new <see cref="IGrouping{TKey,TElement}" /> according to the specified <paramref name="keySelector" />.
+        /// </summary>
+        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
+        public Task<IEnumerable<IGrouping<TGroupKey, TEntity>>> GroupByAsync<TGroupKey>(Expression<Func<TEntity, TGroupKey>> keySelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            return GroupByAsync((ISpecification<TEntity>)null, keySelector, options, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously returns a new <see cref="IGrouping{TGroupKey, TElemen}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
+        /// </summary>
+        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
+        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
+        public Task<IEnumerable<IGrouping<TGroupKey, TElement>>> GroupByAsync<TGroupKey, TElement>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            return GroupByAsync((ISpecification<TEntity>)null, keySelector, elementSelector, options, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously returns a new <see cref="IGrouping{TGroupKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
+        /// </summary>
+        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
+        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
+        public Task<IEnumerable<IGrouping<TGroupKey, TEntity>>> GroupByAsync<TGroupKey>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            return GroupByAsync(criteria, keySelector, IdentityExpression<TEntity>.Instance, options, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously returns a new <see cref="IGrouping{TGroupKey, TElemen}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
+        /// </summary>
+        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
+        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
+        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
+        public Task<IEnumerable<IGrouping<TGroupKey, TElement>>> GroupByAsync<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            return GetGroupByAsync(criteria, keySelector, elementSelector, options, cancellationToken);
         }
 
         #endregion
@@ -205,8 +301,12 @@
 
             cancellationToken.ThrowIfCancellationRequested();
 
+            Logger?.Write($"Adding {typeof(TEntity).Name} entity", entity);
+
             AddItem(entity);
             await SaveChangesAsync(cancellationToken);
+
+            Logger?.Write($"Added {typeof(TEntity).Name} entity", entity);
         }
 
         /// <summary>
@@ -222,12 +322,16 @@
 
             cancellationToken.ThrowIfCancellationRequested();
 
+            Logger?.Write($"Adding {typeof(TEntity).Name} entities", entities);
+
             foreach (var entity in entities)
             {
                 AddItem(entity);
             }
 
             await SaveChangesAsync(cancellationToken);
+
+            Logger?.Write($"Added {typeof(TEntity).Name} entities", entities);
         }
 
         #endregion
@@ -247,8 +351,12 @@
 
             cancellationToken.ThrowIfCancellationRequested();
 
+            Logger?.Write($"Updating {typeof(TEntity).Name} entity", entity);
+
             UpdateItem(entity);
             await SaveChangesAsync(cancellationToken);
+
+            Logger?.Write($"Updated {typeof(TEntity).Name} entity", entity);
         }
 
         /// <summary>
@@ -264,12 +372,16 @@
 
             cancellationToken.ThrowIfCancellationRequested();
 
+            Logger?.Write($"Updating {typeof(TEntity).Name} entities", entities);
+
             foreach (var entity in entities)
             {
                 UpdateItem(entity);
             }
 
             await SaveChangesAsync(cancellationToken);
+
+            Logger?.Write($"Updated {typeof(TEntity).Name} entities", entities);
         }
 
         #endregion
@@ -293,8 +405,7 @@
             if (entity == null)
                 throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
 
-            DeleteItem(entity);
-            await SaveChangesAsync(cancellationToken);
+            await DeleteAsync(entity, cancellationToken);
         }
 
         /// <summary>
@@ -310,8 +421,12 @@
 
             cancellationToken.ThrowIfCancellationRequested();
 
+            Logger?.Write($"Deleting {typeof(TEntity).Name} entity", entity);
+
             DeleteItem(entity);
             await SaveChangesAsync(cancellationToken);
+
+            Logger?.Write($"Deleted {typeof(TEntity).Name} entity", entity);
         }
 
         /// <summary>
@@ -341,12 +456,16 @@
 
             cancellationToken.ThrowIfCancellationRequested();
 
+            Logger?.Write($"Deleting {typeof(TEntity).Name} entities", entities);
+
             foreach (var entity in entities)
             {
                 DeleteItem(entity);
             }
 
             await SaveChangesAsync(cancellationToken);
+
+            Logger?.Write($"Deleted {typeof(TEntity).Name} entities", entities);
         }
 
         #endregion
@@ -415,9 +534,6 @@
 
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
-
-            if (fetchStrategy == null)
-                throw new ArgumentNullException(nameof(fetchStrategy));
 
             return GetEntityAsync(key, fetchStrategy, selector, cancellationToken);
         }
@@ -509,13 +625,22 @@
         }
 
         /// <summary>
+        /// Asynchronously finds the collection of entities in the repository.
+        /// </summary>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of entities in the repository.</returns>
+        public Task<IEnumerable<TEntity>> FindAllAsync(CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return GetEntitiesAsync(null, null, cancellationToken);
+        }
+
+        /// <summary>
         /// Asynchronously finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
-        public Task<List<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
+        public Task<IEnumerable<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
@@ -530,12 +655,27 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of entities in the repository that satisfied the criteria specified by the <paramref name="criteria" />.</returns>
-        public Task<List<TEntity>> FindAllAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
+        public Task<IEnumerable<TEntity>> FindAllAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
 
             return GetEntitiesAsync(criteria, options, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously finds the collection of projected entity results in the repository.
+        /// </summary>
+        /// <param name="selector">A function to project each entity into a new form.</param>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository.</returns>
+        public Task<IEnumerable<TResult>> FindAllAsync<TResult>(Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
+        {
+            if (selector == null)
+                throw new ArgumentNullException(nameof(selector));
+
+            return GetEntitiesAsync((ISpecification<TEntity>)null, options, selector, cancellationToken);
         }
 
         /// <summary>
@@ -546,7 +686,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
-        public Task<List<TResult>> FindAllAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
+        public Task<IEnumerable<TResult>> FindAllAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
@@ -565,7 +705,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="criteria" />.</returns>
-        public Task<List<TResult>> FindAllAsync<TResult>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
+        public Task<IEnumerable<TResult>> FindAllAsync<TResult>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));

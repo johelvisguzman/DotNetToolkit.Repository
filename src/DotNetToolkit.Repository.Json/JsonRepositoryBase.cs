@@ -5,11 +5,12 @@
     using Newtonsoft.Json.Serialization;
     using System.Collections.Generic;
     using System.IO;
+    using Logging;
 
     /// <summary>
     /// Represents a repository for storing entities as an json formatted file.
     /// </summary>
-    public abstract class JsonRepositoryBase<TEntity, TKey> : InMemoryFileBasedRepositoryBase<TEntity, TKey> where TEntity : class
+    public abstract class JsonRepositoryBase<TEntity, TKey> : InMemoryRepositoryFileBase<TEntity, TKey> where TEntity : class
     {
         #region Constructors
 
@@ -18,6 +19,15 @@
         /// </summary>
         /// <param name="filePath">The file path.</param>
         protected JsonRepositoryBase(string filePath) : base(filePath)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonRepositoryBase{TEntity, TKey}"/> class.
+        /// </summary>
+        /// <param name="filePath">The file path.</param>
+        /// <param name="logger">The logger.</param>
+        protected JsonRepositoryBase(string filePath, ILogger logger) : base(filePath, logger)
         {
         }
 

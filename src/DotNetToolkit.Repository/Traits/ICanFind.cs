@@ -18,7 +18,7 @@
         /// <param name="predicate">A function to filter each entity.</param>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>The entity that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
-		TEntity Find(Expression<Func<TEntity, bool>> predicate, IQueryOptions<TEntity> options = null);
+        TEntity Find(Expression<Func<TEntity, bool>> predicate, IQueryOptions<TEntity> options = null);
 
         /// <summary>
         /// Finds the first entity in the repository that satisfies the criteria specified by the <paramref name="criteria" /> in the repository.
@@ -47,6 +47,12 @@
         TResult Find<TResult>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null);
 
         /// <summary>
+        /// Finds the collection of entities in the repository.
+        /// </summary>
+        /// <returns>The collection of entities in the repository.</returns>
+        IEnumerable<TEntity> FindAll();
+
+        /// <summary>
         /// Finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
@@ -61,6 +67,14 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="criteria" />.</returns>
         IEnumerable<TEntity> FindAll(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options = null);
+
+        /// <summary>
+        /// Finds the collection of projected entity results in the repository.
+        /// </summary>
+        /// <param name="selector">A function to project each entity into a new form.</param>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <returns>The collection of projected entity results in the repository.</returns>
+        IEnumerable<TResult> FindAll<TResult>(Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null);
 
         /// <summary>
         /// Finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
