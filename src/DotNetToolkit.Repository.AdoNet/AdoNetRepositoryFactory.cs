@@ -7,10 +7,42 @@
     /// </summary>
     public class AdoNetRepositoryFactory : IRepositoryFactory
     {
+        #region Fields
+
+        private readonly IRepositoryOptions _options;
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryFactory"/> class.
+        /// </summary>
+        public AdoNetRepositoryFactory()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryFactory"/> class.
+        /// </summary>
+        /// <param name="options">The options.</param>
+        public AdoNetRepositoryFactory(IRepositoryOptions options)
+        {
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
+
+            _options = options;
+        }
+
+        #endregion
+
         #region Private Methods
 
         private Tuple<string, string> GetProviderAndConnectionString(IRepositoryOptions options)
         {
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
+
             var arg1 = options.DbContextArgs[0];
             var provider = arg1 as string;
 
@@ -29,6 +61,33 @@
         #endregion
 
         #region Implementation of IRepositoryFactory
+
+        /// <summary>
+        /// Creates a new repository for the specified entity type.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <returns>The new repository.</returns>
+        public IRepository<TEntity> Create<TEntity>() where TEntity : class
+        {
+            if (_options == null)
+                throw new InvalidOperationException("No options have been provided.");
+
+            return Create<TEntity>(_options);
+        }
+
+        /// <summary>
+        /// Creates a new repository for the specified entity and primary key type.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <typeparam name="TKey">The type of the key primary key value.</typeparam>
+        /// <returns>The new repository.</returns>
+        public IRepository<TEntity, TKey> Create<TEntity, TKey>() where TEntity : class
+        {
+            if (_options == null)
+                throw new InvalidOperationException("No options have been provided.");
+
+            return Create<TEntity, TKey>(_options);
+        }
 
         /// <summary>
         /// Creates a new repository for the specified entity type.
