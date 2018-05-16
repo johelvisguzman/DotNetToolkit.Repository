@@ -1,0 +1,32 @@
+﻿<UserControl x:Class="DotNetToolkit.Repository.Wpf.Demo.Views.CustomerWorkspaceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:DotNetToolkit.Repository.Wpf.Demo.ViewModels"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance viewModels:CustomerWorkspaceViewModel, d:IsDesignTimeCreatable=False}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Margin="{StaticResource ControlMargin}" HorizontalAlignment="Left" Orientation="Horizontal">
+            <Button Command="{Binding AddCommand}" Style="{DynamicResource AddButtonStyle}" />
+            <Button Command="{Binding DeleteCommand}" CommandParameter="{Binding ElementName=DataGrid, Path=SelectedItem}" Style="{DynamicResource DeleteButtonStyle}" />
+            <Button Command="{Binding EditCommand}" CommandParameter="{Binding ElementName=DataGrid, Path=SelectedItem}" Style="{DynamicResource EditButtonStyle}" />
+        </StackPanel>
+        <DataGrid x:Name="DataGrid" Grid.Row="1" ItemsSource="{Binding Customers}" Style="{StaticResource DataGridStyle}">
+            <DataGrid.InputBindings>
+                <MouseBinding Gesture="LeftDoubleClick" Command="{Binding EditCommand}" CommandParameter="{Binding ElementName=DataGrid, Path=SelectedItem}" />
+                <KeyBinding Key="Delete" Command="{Binding DeleteCommand}" CommandParameter="{Binding ElementName=DataGrid, Path=SelectedItem}" />
+            </DataGrid.InputBindings>
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Id}" Header="Id" />
+                <DataGridTextColumn Binding="{Binding Date, StringFormat=d}" Header="Date" />
+                <DataGridTextColumn Binding="{Binding Name}" Header="Name" />
+                <DataGridTextColumn Binding="{Binding Notes}" Header="Notes" Width="200*" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

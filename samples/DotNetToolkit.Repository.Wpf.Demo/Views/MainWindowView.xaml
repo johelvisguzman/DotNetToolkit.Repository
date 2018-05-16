@@ -1,0 +1,38 @@
+﻿<mahControls:MetroWindow x:Class="DotNetToolkit.Repository.Wpf.Demo.Views.MainWindowView"
+                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                         xmlns:mahControls="http://metro.mahapps.com/winfx/xaml/controls"
+                         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                         xmlns:viewModels="clr-namespace:DotNetToolkit.Repository.Wpf.Demo.ViewModels"
+                         xmlns:mvvm="clr-namespace:DotNetToolkit.Wpf.Mvvm;assembly=DotNetToolkit.Wpf"
+                         mvvm:ViewModelLocator.AutoWireViewModel="True"
+                         Style="{DynamicResource WindowStyle}"
+                         Title="DotNetToolkit.Repository.Wpf.Demo"
+                         WindowStartupLocation="CenterScreen"
+                         mc:Ignorable="d"
+                         d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel, d:IsDesignTimeCreatable=False}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10 10 0 0">
+            <Button Style="{StaticResource NavigatePreviousButtonStyle}" Command="{Binding Navigator.NavigateBackCommand}" />
+            <ListBox x:Name="ListBox" ItemsSource="{Binding Workspaces}" SelectedItem="{Binding ActiveItem, Mode=OneWay}" Style="{StaticResource NavigateListBoxStyle}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="SelectionChanged">
+                        <i:InvokeCommandAction Command="{Binding Navigator.NavigateToCommand}" CommandParameter="{Binding ElementName=ListBox, Path=SelectedItem}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ListBox>
+        </StackPanel>
+        <Grid Grid.Row="1">
+            <ContentControl Margin="10" mvvm:ViewLocator.LocateFor="{Binding ActiveItem}" />
+        </Grid>
+    </Grid>
+</mahControls:MetroWindow>
+
+
+

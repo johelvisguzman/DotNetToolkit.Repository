@@ -1,0 +1,43 @@
+﻿<UserControl x:Class="DotNetToolkit.Repository.Wpf.Demo.Views.CustomerFormView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:DotNetToolkit.Repository.Wpf.Demo.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance viewModels:CustomerFormViewModel, d:IsDesignTimeCreatable=False}">
+    <Grid Style="{StaticResource GridFormStyle}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Style="{StaticResource FormTextBlockHeaderStyle}" />
+        <TabControl Grid.Row="1">
+            <TabItem Header="PRIMARY INFORMATION" BorderBrush="{StaticResource FlatPeterRiverColorBrush}">
+                <AdornerDecorator>
+                    <ScrollViewer>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="{StaticResource FormLabelWidth}" />
+                                <ColumnDefinition Width="{StaticResource FormFieldWidth}" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Name" />
+                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Name}" />
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Date" />
+                            <DatePicker Grid.Row="1" Grid.Column="1" SelectedDate="{Binding Date}" />
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Notes" />
+                            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Notes}" Style="{StaticResource MultiLineTextBoxStyle}" />
+                            <Button Grid.Row="3" Grid.Column="1" Content="SUBMIT" Margin="0 10" Width="100" Command="{Binding SubmitCommand}" />
+                        </Grid>
+                    </ScrollViewer>
+                </AdornerDecorator>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>
