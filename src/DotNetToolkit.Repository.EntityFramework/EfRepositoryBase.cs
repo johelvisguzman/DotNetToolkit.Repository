@@ -86,7 +86,7 @@
 
         #endregion
 
-        #region Overrides of RepositoryBase<TEntity,TKey>
+        #region Overrides of RepositoryBase<TEntity, TKey>
 
         /// <summary>
         /// A protected overridable method for adding the specified <paramref name="entity" /> into the repository.
@@ -148,7 +148,7 @@
 
         #endregion
 
-        #region Overrides of RepositoryAsyncBase<TEntity,TKey>
+        #region Overrides of RepositoryAsyncBase<TEntity, TKey>
 
         /// <summary>
         /// A protected asynchronous overridable method for saving changes made in the current unit of work in the repository.

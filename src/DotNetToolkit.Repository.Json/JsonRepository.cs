@@ -10,7 +10,7 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="JsonRepository{TEntity,TKey}"/> class.
+        /// Initializes a new instance of the <see cref="JsonRepository{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
         public JsonRepository(string filePath) : base(filePath)
@@ -18,7 +18,7 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="JsonRepository{TEntity}"/> class.
+        /// Initializes a new instance of the <see cref="JsonRepository{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
         /// <param name="logger">The logger.</param>

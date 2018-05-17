@@ -12,9 +12,22 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity, TKey}" /> class.
         /// </summary>
+        /// <param name="connectionString">The connection string.</param>
+        public AdoNetRepository(string connectionString) : base(connectionString) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity, TKey}" /> class.
+        /// </summary>
         /// <param name="providerName">The name of the provider.</param>
         /// <param name="connectionString">The connection string.</param>
         public AdoNetRepository(string providerName, string connectionString) : base(providerName, connectionString) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity, TKey}" /> class.
+        /// </summary>
+        /// <param name="connectionString">The connection string.</param>
+        /// <param name="logger">The logger.</param>
+        public AdoNetRepository(string connectionString, ILogger logger) : base(connectionString, logger) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity, TKey}" /> class.
@@ -35,14 +48,27 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity, TKey}" /> class.
+        /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity}" /> class.
+        /// </summary>
+        /// <param name="connectionString">The connection string.</param>
+        public AdoNetRepository(string connectionString) : base(connectionString) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity}" /> class.
         /// </summary>
         /// <param name="providerName">The name of the provider.</param>
         /// <param name="connectionString">The connection string.</param>
         public AdoNetRepository(string providerName, string connectionString) : base(providerName, connectionString) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity, TKey}" /> class.
+        /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity}" /> class.
+        /// </summary>
+        /// <param name="connectionString">The connection string.</param>
+        /// <param name="logger">The logger.</param>
+        public AdoNetRepository(string connectionString, ILogger logger) : base(connectionString, logger) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity}" /> class.
         /// </summary>
         /// <param name="providerName">The name of the provider.</param>
         /// <param name="connectionString">The connection string.</param>

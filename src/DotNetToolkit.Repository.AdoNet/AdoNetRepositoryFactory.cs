@@ -38,24 +38,38 @@
 
         #region Private Methods
 
-        private Tuple<string, string> GetProviderAndConnectionString(IRepositoryFactoryOptions options)
+        private void GetProviderAndConnectionString(IRepositoryFactoryOptions options, out string providerName, out string connectionString)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            var arg1 = options.DbContextArgs[0];
-            var provider = arg1 as string;
+            if (options.DbContextArgs == null || options.DbContextArgs.Length == 0)
+                throw new InvalidOperationException($"The repository options must provide a '{nameof(options.DbContextArgs)}'.");
 
-            if (arg1 != null && provider == null)
-                throw new ArgumentException($"The provided {nameof(options.DbContextArgs)} must be a valid string argument.");
+            if (options.DbContextArgs.Length == 1)
+            {
+                var arg1 = options.DbContextArgs[0];
+                connectionString = arg1 as string;
 
-            var arg2 = options.DbContextArgs[1];
-            var connectionString = arg1 as string;
+                if (arg1 != null && connectionString == null)
+                    throw new ArgumentException($"The provided '{nameof(options.DbContextArgs)}' must be a valid string argument to be used as a connection string.");
 
-            if (arg2 != null && connectionString == null)
-                throw new ArgumentException($"The connection string {nameof(options.DbContextArgs)} must be a valid string argument.");
+                providerName = null;
+            }
+            else
+            {
+                var arg1 = options.DbContextArgs[0];
+                providerName = arg1 as string;
 
-            return Tuple.Create<string, string>(provider, connectionString);
+                if (arg1 != null && providerName == null)
+                    throw new ArgumentException($"The provided '{nameof(options.DbContextArgs)}' must be a valid string argument to be used as a provider name.");
+
+                var arg2 = options.DbContextArgs[1];
+                connectionString = arg1 as string;
+
+                if (arg2 != null && connectionString == null)
+                    throw new ArgumentException($"The provided '{nameof(options.DbContextArgs)}' must be a valid string argument to be used as a connection string.");
+            }
         }
 
         #endregion
@@ -97,8 +111,11 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity> Create<TEntity>(IRepositoryFactoryOptions options) where TEntity : class
         {
-            var t = GetProviderAndConnectionString(options);
-            return new AdoNetRepository<TEntity>(t.Item1, t.Item2, options.Logger);
+            GetProviderAndConnectionString(options, out string providerName, out string connectionString);
+
+            return string.IsNullOrEmpty(providerName)
+                ? new AdoNetRepository<TEntity>(connectionString, options.Logger)
+                : new AdoNetRepository<TEntity>(providerName, connectionString, options.Logger);
         }
 
         /// <summary>
@@ -110,8 +127,11 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey> Create<TEntity, TKey>(IRepositoryFactoryOptions options) where TEntity : class
         {
-            var t = GetProviderAndConnectionString(options);
-            return new AdoNetRepository<TEntity, TKey>(t.Item1, t.Item2, options.Logger);
+            GetProviderAndConnectionString(options, out string providerName, out string connectionString);
+
+            return string.IsNullOrEmpty(providerName)
+                ? new AdoNetRepository<TEntity, TKey>(connectionString, options.Logger)
+                : new AdoNetRepository<TEntity, TKey>(providerName, connectionString, options.Logger);
         }
 
         #endregion

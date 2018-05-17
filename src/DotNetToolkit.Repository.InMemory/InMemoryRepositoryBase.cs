@@ -38,7 +38,7 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity,TKey}"/> class.
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
         protected InMemoryRepositoryBase(string databaseName = null) : this(databaseName, null)
@@ -46,7 +46,7 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity,TKey}"/> class.
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="logger">The logger.</param>
         protected InMemoryRepositoryBase(ILogger logger) : this(null, logger)
@@ -54,7 +54,7 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity,TKey}"/> class.
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
         /// <param name="logger">The logger.</param>
@@ -143,7 +143,7 @@
 
         #endregion
 
-        #region Overrides of RepositoryBase<TEntity,TKey>
+        #region Overrides of RepositoryBase<TEntity, TKey>
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
