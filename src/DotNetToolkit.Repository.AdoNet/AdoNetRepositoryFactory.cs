@@ -9,7 +9,7 @@
     {
         #region Fields
 
-        private readonly IRepositoryOptions _options;
+        private readonly IRepositoryFactoryOptions _options;
 
         #endregion
 
@@ -26,7 +26,7 @@
         /// Initializes a new instance of the <see cref="AdoNetRepositoryFactory"/> class.
         /// </summary>
         /// <param name="options">The options.</param>
-        public AdoNetRepositoryFactory(IRepositoryOptions options)
+        public AdoNetRepositoryFactory(IRepositoryFactoryOptions options)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -38,7 +38,7 @@
 
         #region Private Methods
 
-        private Tuple<string, string> GetProviderAndConnectionString(IRepositoryOptions options)
+        private Tuple<string, string> GetProviderAndConnectionString(IRepositoryFactoryOptions options)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -95,7 +95,7 @@
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="options">The options.</param>
         /// <returns>The new repository.</returns>
-        public IRepository<TEntity> Create<TEntity>(IRepositoryOptions options) where TEntity : class
+        public IRepository<TEntity> Create<TEntity>(IRepositoryFactoryOptions options) where TEntity : class
         {
             var t = GetProviderAndConnectionString(options);
             return new AdoNetRepository<TEntity>(t.Item1, t.Item2, options.Logger);
@@ -108,7 +108,7 @@
         /// <typeparam name="TKey">The type of the key primary key value.</typeparam>
         /// <param name="options">The options.</param>
         /// <returns>The new repository.</returns>
-        public IRepository<TEntity, TKey> Create<TEntity, TKey>(IRepositoryOptions options) where TEntity : class
+        public IRepository<TEntity, TKey> Create<TEntity, TKey>(IRepositoryFactoryOptions options) where TEntity : class
         {
             var t = GetProviderAndConnectionString(options);
             return new AdoNetRepository<TEntity, TKey>(t.Item1, t.Item2, options.Logger);

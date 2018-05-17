@@ -10,7 +10,7 @@
     {
         #region Fields
 
-        private readonly IRepositoryOptions _options;
+        private readonly IRepositoryFactoryOptions _options;
 
         #endregion
 
@@ -27,7 +27,7 @@
         /// Initializes a new instance of the <see cref="EfRepositoryFactory"/> class.
         /// </summary>
         /// <param name="options">The options.</param>
-        public EfRepositoryFactory(IRepositoryOptions options)
+        public EfRepositoryFactory(IRepositoryFactoryOptions options)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -39,7 +39,7 @@
 
         #region Private Methods
 
-        private static DbContext GetDbContext(IRepositoryOptions options)
+        private static DbContext GetDbContext(IRepositoryFactoryOptions options)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -94,7 +94,7 @@
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="options">The options.</param>
         /// <returns>The new repository.</returns>
-        public IRepository<TEntity> Create<TEntity>(IRepositoryOptions options) where TEntity : class
+        public IRepository<TEntity> Create<TEntity>(IRepositoryFactoryOptions options) where TEntity : class
         {
             return new EfRepository<TEntity>(GetDbContext(options), options.Logger);
         }
@@ -106,7 +106,7 @@
         /// <typeparam name="TKey">The type of the key primary key value.</typeparam>
         /// <param name="options">The options.</param>
         /// <returns>The new repository.</returns>
-        public IRepository<TEntity, TKey> Create<TEntity, TKey>(IRepositoryOptions options) where TEntity : class
+        public IRepository<TEntity, TKey> Create<TEntity, TKey>(IRepositoryFactoryOptions options) where TEntity : class
         {
             return new EfRepository<TEntity, TKey>(GetDbContext(options), options.Logger);
         }
