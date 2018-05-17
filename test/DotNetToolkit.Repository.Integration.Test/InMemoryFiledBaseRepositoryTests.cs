@@ -51,6 +51,8 @@
             repo = CreateRepositoryInstanceOfType(repo.GetType(), path);
 
             Assert.True(File.Exists(path));
+
+            File.Delete(path);
         }
 
         private static void TestGeneratesTempFileNameWhenOnlyDirectoryIsProvided(IRepository<Customer, int> repo)
@@ -64,6 +66,8 @@
             repo = CreateRepositoryInstanceOfType(repo.GetType(), dir);
 
             Assert.True(File.Exists(path));
+
+            File.Delete(path);
         }
 
         private static void TestThrowsIfFilePathIsInvalid(IRepository<Customer, int> repo)
