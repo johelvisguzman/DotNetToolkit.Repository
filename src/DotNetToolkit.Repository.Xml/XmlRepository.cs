@@ -10,7 +10,7 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="XmlRepository{TEntity,TKey}"/> class.
+        /// Initializes a new instance of the <see cref="XmlRepository{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
         public XmlRepository(string filePath) : base(filePath)
@@ -18,7 +18,7 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="XmlRepository{TEntity}"/> class.
+        /// Initializes a new instance of the <see cref="XmlRepository{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
         /// <param name="logger">The logger.</param>

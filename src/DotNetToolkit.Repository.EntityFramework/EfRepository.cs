@@ -40,7 +40,7 @@
         public EfRepository(DbContext context) : base(context) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EfRepository{TEntity, TKey}" /> class.
+        /// Initializes a new instance of the <see cref="EfRepository{TEntity}" /> class.
         /// </summary>
         /// <param name="context">The database context.</param>
         /// <param name="logger">The logger.</param>

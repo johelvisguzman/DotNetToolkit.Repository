@@ -48,7 +48,7 @@
             var databaseName = arg as string;
 
             if (arg != null && databaseName == null)
-                throw new ArgumentException($"The provided {nameof(options.DbContextArgs)} must be a valid string argument.");
+                throw new ArgumentException($"The provided '{nameof(options.DbContextArgs)}' must be a valid string argument.");
 
             return databaseName;
         }

@@ -45,7 +45,7 @@
                 throw new ArgumentNullException(nameof(options));
 
             if (options.DbContextType == null)
-                throw new InvalidOperationException($"The repository options must provide a {nameof(options.DbContextType)}.");
+                throw new InvalidOperationException($"The repository options must provide a '{nameof(options.DbContextType)}'.");
 
             DbContext context;
 

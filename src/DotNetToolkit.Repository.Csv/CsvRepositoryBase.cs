@@ -32,7 +32,7 @@
 
         #endregion
 
-        #region Overrides of InMemoryRepositoryFileBase<TEntity,TKey>
+        #region Overrides of InMemoryRepositoryFileBase<TEntity, TKey>
 
         /// <summary>
         /// Gets the file extension.

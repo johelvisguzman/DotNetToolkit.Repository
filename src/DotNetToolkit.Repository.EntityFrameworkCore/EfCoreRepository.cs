@@ -40,7 +40,7 @@
         public EfCoreRepository(DbContext context) : base(context) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EfCoreRepository{TEntity, TKey}" /> class.
+        /// Initializes a new instance of the <see cref="EfCoreRepository{TEntity}" /> class.
         /// </summary>
         /// <param name="context">The database context.</param>
         /// <param name="logger">The logger.</param>

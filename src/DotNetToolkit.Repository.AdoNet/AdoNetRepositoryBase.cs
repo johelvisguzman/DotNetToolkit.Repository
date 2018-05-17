@@ -10,6 +10,7 @@
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Configuration;
     using System.Data;
     using System.Data.Common;
     using System.Linq;
@@ -69,11 +70,34 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="AdoNetRepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
+        /// <param name="connectionString">The connection string.</param>
+        /// <param name="logger">The logger.</param>
+        protected AdoNetRepositoryBase(string connectionString, ILogger logger = null) : base(logger)
+        {
+            if (string.IsNullOrEmpty(connectionString))
+                throw new ArgumentException(Resources.ArgumentCannotBeNullOrEmptyString, nameof(connectionString));
+
+            var ccs = ConfigurationManager.ConnectionStrings[connectionString];
+            if (ccs == null)
+                throw new ArgumentException(Resources.ConnectionStringDoestNotExistInConfigFile);
+
+            Factory = Internal.DbProviderFactories.GetFactory(ccs.ProviderName);
+            ConnectionString = connectionString;
+
+            Initialize();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryBase{TEntity, TKey}"/> class.
+        /// </summary>
         /// <param name="providerName">The name of the provider.</param>
         /// <param name="connectionString">The connection string.</param>
         /// <param name="logger">The logger.</param>
         protected AdoNetRepositoryBase(string providerName, string connectionString, ILogger logger = null) : base(logger)
         {
+            if (string.IsNullOrEmpty(providerName))
+                throw new ArgumentException(Resources.ArgumentCannotBeNullOrEmptyString, nameof(providerName));
+
             if (string.IsNullOrEmpty(connectionString))
                 throw new ArgumentException(Resources.ArgumentCannotBeNullOrEmptyString, nameof(connectionString));
 
@@ -1686,7 +1710,7 @@
 
         #endregion
 
-        #region Overrides of RepositoryBase<TEntity,TKey>
+        #region Overrides of RepositoryBase<TEntity, TKey>
 
         /// <summary>
         /// A protected overridable method for adding the specified <paramref name="entity" /> into the repository.
@@ -1916,7 +1940,7 @@
 
         #endregion
 
-        #region Overrides of RepositoryAsyncBase<TEntity,TKey>
+        #region Overrides of RepositoryAsyncBase<TEntity, TKey>
 
         /// <summary>
         /// A protected asynchronous overridable method for saving changes made in the current unit of work in the repository.
