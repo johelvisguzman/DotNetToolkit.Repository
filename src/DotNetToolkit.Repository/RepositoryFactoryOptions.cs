@@ -4,18 +4,18 @@
     using Logging;
 
     /// <summary>
-    /// An implementation of <see cref="IRepositoryOptions" />.
+    /// An implementation of <see cref="IRepositoryFactoryOptions" />.
     /// </summary>
-    public class RepositoryOptions : IRepositoryOptions
+    public class RepositoryFactoryOptions : IRepositoryFactoryOptions
     {
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryOptions"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryFactoryOptions"/> class.
         /// </summary>
         /// <param name="dbContextType">The type of the database context.</param>
         /// <param name="dbContextArgs">The database context arguments.</param>
-        public RepositoryOptions(Type dbContextType, params object[] dbContextArgs)
+        public RepositoryFactoryOptions(Type dbContextType, params object[] dbContextArgs)
         {
             DbContextType = dbContextType;
             DbContextArgs = dbContextArgs;
@@ -23,7 +23,7 @@
 
         #endregion
 
-        #region Implementation of IRepositoryOptions
+        #region Implementation of IRepositoryFactoryOptions
 
         /// <summary>
         /// Gets or sets the database context arguments.

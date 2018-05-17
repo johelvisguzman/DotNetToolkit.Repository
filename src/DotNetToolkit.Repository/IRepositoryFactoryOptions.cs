@@ -6,7 +6,7 @@
     /// <summary>
     /// Represents a repository option for creating new repositories.
     /// </summary>
-    public interface IRepositoryOptions
+    public interface IRepositoryFactoryOptions
     {
         /// <summary>
         /// Gets or sets the database context arguments.
