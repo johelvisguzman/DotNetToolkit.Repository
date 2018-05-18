@@ -16,22 +16,22 @@
     /// <summary>
     /// An implementation of <see cref="IRepositoryAsync{TEntity, TKey}" />.
     /// </summary>
-    public abstract class RepositoryAsyncBase<TEntity, TKey> : RepositoryBase<TEntity, TKey>, IRepositoryAsync<TEntity, TKey> where TEntity : class
+    public abstract class RepositoryBaseAsync<TEntity, TKey> : RepositoryBase<TEntity, TKey>, IRepositoryAsync<TEntity, TKey> where TEntity : class
     {
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryAsyncBase{TEntity, TKey}"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity, TKey}"/> class.
         /// </summary>
-        protected RepositoryAsyncBase()
+        protected RepositoryBaseAsync()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryAsyncBase{TEntity, TKey}"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="logger">The logger.</param>
-        protected RepositoryAsyncBase(ILogger logger) : base(logger)
+        protected RepositoryBaseAsync(ILogger logger) : base(logger)
         {
         }
 
