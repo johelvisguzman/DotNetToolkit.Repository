@@ -23,7 +23,7 @@
     /// <summary>
     /// Represents a repository for ado.net.
     /// </summary>
-    public abstract class AdoNetRepositoryBase<TEntity, TKey> : RepositoryAsyncBase<TEntity, TKey> where TEntity : class
+    public abstract class AdoNetRepositoryBase<TEntity, TKey> : RepositoryBaseAsync<TEntity, TKey> where TEntity : class
     {
         #region Fields
 
@@ -1940,7 +1940,7 @@
 
         #endregion
 
-        #region Overrides of RepositoryAsyncBase<TEntity, TKey>
+        #region Overrides of RepositoryBaseAsync<TEntity, TKey>
 
         /// <summary>
         /// A protected asynchronous overridable method for saving changes made in the current unit of work in the repository.
