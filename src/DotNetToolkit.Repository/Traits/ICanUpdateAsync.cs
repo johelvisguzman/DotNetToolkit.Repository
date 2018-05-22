@@ -8,7 +8,8 @@
     /// Represents an asynchronous trait for updating items in a repository.
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    public interface ICanUpdateAsync<in TEntity> where TEntity : class
+    /// <seealso cref="DotNetToolkit.Repository.Traits.ICanUpdate{TEntity}" />
+    public interface ICanUpdateAsync<in TEntity> : ICanUpdate<TEntity> where TEntity : class
     {
         /// <summary>
         /// Asynchronously updates the specified <paramref name="entity" /> in the repository.

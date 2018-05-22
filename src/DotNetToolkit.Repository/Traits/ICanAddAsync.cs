@@ -8,7 +8,8 @@
     /// Represents an asynchronous trait for adding items to a repository.
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    public interface ICanAddAsync<in TEntity> where TEntity : class
+    /// <seealso cref="DotNetToolkit.Repository.Traits.ICanAdd{TEntity}" />
+    public interface ICanAddAsync<in TEntity> : ICanAdd<TEntity> where TEntity : class
     {
         /// <summary>
         /// Asynchronously adds the specified <paramref name="entity" /> into the repository.
