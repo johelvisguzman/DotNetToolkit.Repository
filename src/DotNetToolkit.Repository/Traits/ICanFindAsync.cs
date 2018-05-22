@@ -12,7 +12,8 @@
     /// Represents a trait for finding items in a repository.
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    public interface ICanFindAsync<TEntity> where TEntity : class
+    /// <seealso cref="DotNetToolkit.Repository.Traits.ICanFind{TEntity}" />
+    public interface ICanFindAsync<TEntity> : ICanFind<TEntity> where TEntity : class
     {
         /// <summary>
         /// Asynchronously finds the first entity in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.

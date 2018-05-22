@@ -13,6 +13,7 @@
     /// Represents an asynchronous trait for aggregating items from a repository.
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    /// <seealso cref="DotNetToolkit.Repository.Traits.ICanAggregate{TEntity}" />
     public interface ICanAggregateAsync<TEntity> : ICanAggregate<TEntity> where TEntity : class
     {
         /// <summary>
