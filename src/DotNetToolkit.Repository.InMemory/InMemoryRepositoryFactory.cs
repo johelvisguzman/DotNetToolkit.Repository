@@ -1,7 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.InMemory
 {
+    using Logging;
     using System;
-    using System.Linq;
+    using System.Collections.Generic;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryFactory" />.
@@ -10,7 +11,10 @@
     {
         #region Fields
 
-        private readonly IRepositoryFactoryOptions _options;
+        private const string DatabaseNameKey = "databaseName";
+        private const string LoggerKey = "logger";
+
+        private readonly Dictionary<string, object> _options;
 
         #endregion
 
@@ -27,7 +31,7 @@
         /// Initializes a new instance of the <see cref="InMemoryRepositoryFactory"/> class.
         /// </summary>
         /// <param name="options">The options.</param>
-        public InMemoryRepositoryFactory(IRepositoryFactoryOptions options)
+        public InMemoryRepositoryFactory(Dictionary<string, object> options)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -39,18 +43,35 @@
 
         #region Private Methods
 
-        private string GetDatabaseName(IRepositoryFactoryOptions options)
+        private static void GetOptions(Dictionary<string, object> options, out string databaseName, out ILogger logger)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            var arg = options.DbContextArgs.FirstOrDefault();
-            var databaseName = arg as string;
+            if (options.Count == 0)
+                throw new InvalidOperationException("The options dictionary does not contain any items.");
 
-            if (arg != null && databaseName == null)
-                throw new ArgumentException($"The provided '{nameof(options.DbContextArgs)}' must be a valid string argument to be used as a database name.");
+            object value = null;
+            databaseName = null;
+            logger = null;
 
-            return databaseName;
+            if (options.ContainsKey(DatabaseNameKey))
+            {
+                value = options[DatabaseNameKey];
+                databaseName = value as string;
+
+                if (value != null && databaseName == null)
+                    throw new ArgumentException($"The option value for the specified '{DatabaseNameKey}' key must be a valid '{typeof(string).Name}' type.");
+            }
+
+            if (options.ContainsKey(LoggerKey))
+            {
+                value = options[LoggerKey];
+                logger = value as ILogger;
+
+                if (value != null && logger == null)
+                    throw new ArgumentException($"The option value for the specified '{LoggerKey}' key must be a valid '{typeof(ILogger).Name}' type.");
+            }
         }
 
         #endregion
@@ -64,9 +85,6 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity> Create<TEntity>() where TEntity : class
         {
-            if (_options == null)
-                throw new InvalidOperationException("No options have been provided.");
-
             return Create<TEntity>(_options);
         }
 
@@ -78,9 +96,6 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey> Create<TEntity, TKey>() where TEntity : class
         {
-            if (_options == null)
-                throw new InvalidOperationException("No options have been provided.");
-
             return Create<TEntity, TKey>(_options);
         }
 
@@ -90,9 +105,14 @@
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="options">The options.</param>
         /// <returns>The new repository.</returns>
-        public IRepository<TEntity> Create<TEntity>(IRepositoryFactoryOptions options) where TEntity : class
+        public IRepository<TEntity> Create<TEntity>(Dictionary<string, object> options) where TEntity : class
         {
-            return new InMemoryRepository<TEntity>(GetDatabaseName(options), options.Logger);
+            if (options == null)
+                return new InMemoryRepository<TEntity>();
+
+            GetOptions(options, out string databaseName, out ILogger logger);
+
+            return new InMemoryRepository<TEntity>(databaseName, logger);
         }
 
         /// <summary>
@@ -102,9 +122,14 @@
         /// <typeparam name="TKey">The type of the key primary key value.</typeparam>
         /// <param name="options">The options.</param>
         /// <returns>The new repository.</returns>
-        public IRepository<TEntity, TKey> Create<TEntity, TKey>(IRepositoryFactoryOptions options) where TEntity : class
+        public IRepository<TEntity, TKey> Create<TEntity, TKey>(Dictionary<string, object> options) where TEntity : class
         {
-            return new InMemoryRepository<TEntity, TKey>(GetDatabaseName(options), options.Logger);
+            if (options == null)
+                return new InMemoryRepository<TEntity, TKey>();
+
+            GetOptions(options, out string databaseName, out ILogger logger);
+
+            return new InMemoryRepository<TEntity, TKey>(databaseName, logger);
         }
 
         #endregion

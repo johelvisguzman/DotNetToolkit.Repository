@@ -1,7 +1,9 @@
 ﻿namespace DotNetToolkit.Repository.EntityFrameworkCore
 {
+    using Logging;
     using Microsoft.EntityFrameworkCore;
     using System;
+    using System.Collections.Generic;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryFactory" />.
@@ -10,7 +12,11 @@
     {
         #region Fields
 
-        private readonly IRepositoryFactoryOptions _options;
+        private const string DbContextTypeKey = "dbContextType";
+        private const string DbContextOptionsKey = "dbContextOptions";
+        private const string LoggerKey = "logger";
+
+        private readonly Dictionary<string, object> _options;
 
         #endregion
 
@@ -27,7 +33,7 @@
         /// Initializes a new instance of the <see cref="EfCoreRepositoryFactory"/> class.
         /// </summary>
         /// <param name="options">The options.</param>
-        public EfCoreRepositoryFactory(IRepositoryFactoryOptions options)
+        public EfCoreRepositoryFactory(Dictionary<string, object> options)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -39,22 +45,55 @@
 
         #region Private Methods
 
-        private static DbContext GetDbContext(IRepositoryFactoryOptions options)
+        private static void GetOptions(Dictionary<string, object> options, out DbContext context, out ILogger logger)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            if (options.DbContextType == null)
-                throw new InvalidOperationException($"The repository options must provide a '{nameof(options.DbContextType)}'.");
+            if (options.Count == 0)
+                throw new InvalidOperationException("The options dictionary does not contain any items.");
 
-            DbContext context;
+            object value = null;
+            DbContextOptions dbContextOptions = null;
+            Type contextType = null;
+            context = null;
+            logger = null;
 
-            if (options.DbContextArgs == null)
-                context = (DbContext)Activator.CreateInstance(options.DbContextType);
+            if (options.ContainsKey(DbContextTypeKey))
+            {
+                value = options[DbContextTypeKey];
+                contextType = value as Type;
+
+                if (value != null && contextType == null)
+                    throw new ArgumentException($"The option value for the specified '{DbContextTypeKey}' key must be a valid '{typeof(Type).Name}' type.");
+            }
             else
-                context = (DbContext)Activator.CreateInstance(options.DbContextType, options.DbContextArgs);
+            {
+                throw new InvalidOperationException($"The '{DbContextTypeKey}' option is missing from the options dictionary.");
+            }
 
-            return context;
+            if (options.ContainsKey(DbContextOptionsKey))
+            {
+                value = options[DbContextOptionsKey];
+                dbContextOptions = value as DbContextOptions;
+
+                if (value != null && dbContextOptions == null)
+                    throw new ArgumentException($"The option value for the specified '{DbContextOptionsKey}' key must be a valid '{typeof(DbContextOptions).Name}' type.");
+            }
+
+            if (options.ContainsKey(LoggerKey))
+            {
+                value = options[LoggerKey];
+                logger = value as ILogger;
+
+                if (value != null && logger == null)
+                    throw new ArgumentException($"The option value for the specified '{LoggerKey}' key must be a valid '{typeof(ILogger).Name}' type.");
+            }
+
+            if (dbContextOptions == null)
+                context = (DbContext)Activator.CreateInstance(contextType);
+            else
+                context = (DbContext)Activator.CreateInstance(contextType, dbContextOptions);
         }
 
         #endregion
@@ -94,9 +133,11 @@
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="options">The options.</param>
         /// <returns>The new repository.</returns>
-        public IRepository<TEntity> Create<TEntity>(IRepositoryFactoryOptions options) where TEntity : class
+        public IRepository<TEntity> Create<TEntity>(Dictionary<string, object> options) where TEntity : class
         {
-            return new EfCoreRepository<TEntity>(GetDbContext(options), options.Logger);
+            GetOptions(options, out DbContext context, out ILogger logger);
+
+            return new EfCoreRepository<TEntity>(context, logger);
         }
 
         /// <summary>
@@ -106,9 +147,11 @@
         /// <typeparam name="TKey">The type of the key primary key value.</typeparam>
         /// <param name="options">The options.</param>
         /// <returns>The new repository.</returns>
-        public IRepository<TEntity, TKey> Create<TEntity, TKey>(IRepositoryFactoryOptions options) where TEntity : class
+        public IRepository<TEntity, TKey> Create<TEntity, TKey>(Dictionary<string, object> options) where TEntity : class
         {
-            return new EfCoreRepository<TEntity, TKey>(GetDbContext(options), options.Logger);
+            GetOptions(options, out DbContext context, out ILogger logger);
+
+            return new EfCoreRepository<TEntity, TKey>(context, logger);
         }
 
         #endregion

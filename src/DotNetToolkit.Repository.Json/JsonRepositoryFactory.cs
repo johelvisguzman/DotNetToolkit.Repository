@@ -1,7 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.Json
 {
+    using Logging;
     using System;
-    using System.Linq;
+    using System.Collections.Generic;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryFactory" />.
@@ -10,7 +11,10 @@
     {
         #region Fields
 
-        private readonly IRepositoryFactoryOptions _options;
+        private const string FilePathOptionKey = "path";
+        private const string LoggerKey = "logger";
+
+        private readonly Dictionary<string, object> _options;
 
         #endregion
 
@@ -27,7 +31,7 @@
         /// Initializes a new instance of the <see cref="JsonRepositoryFactory"/> class.
         /// </summary>
         /// <param name="options">The options.</param>
-        public JsonRepositoryFactory(IRepositoryFactoryOptions options)
+        public JsonRepositoryFactory(Dictionary<string, object> options)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -39,18 +43,39 @@
 
         #region Private Methods
 
-        private string GetFilePath(IRepositoryFactoryOptions options)
+        private static void GetOptions(Dictionary<string, object> options, out string path, out ILogger logger)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            var arg = options.DbContextArgs.FirstOrDefault();
-            var databaseName = arg as string;
+            if (options.Count == 0)
+                throw new InvalidOperationException("The options dictionary does not contain any items.");
 
-            if (arg != null && databaseName == null)
-                throw new ArgumentException($"The provided '{nameof(options.DbContextArgs)}' must be a valid string argument.");
+            object value = null;
+            path = null;
+            logger = null;
 
-            return databaseName;
+            if (options.ContainsKey(FilePathOptionKey))
+            {
+                value = options[FilePathOptionKey];
+                path = value as string;
+
+                if (value != null && path == null)
+                    throw new ArgumentException($"The option value for the specified '{FilePathOptionKey}' key must be a valid '{typeof(string).Name}' type.");
+            }
+            else
+            {
+                throw new InvalidOperationException($"The '{FilePathOptionKey}' option is missing from the options dictionary.");
+            }
+
+            if (options.ContainsKey(LoggerKey))
+            {
+                value = options[LoggerKey];
+                logger = value as ILogger;
+
+                if (value != null && logger == null)
+                    throw new ArgumentException($"The option value for the specified '{LoggerKey}' key must be a valid '{typeof(ILogger).Name}' type.");
+            }
         }
 
         #endregion
@@ -90,9 +115,11 @@
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="options">The options.</param>
         /// <returns>The new repository.</returns>
-        public IRepository<TEntity> Create<TEntity>(IRepositoryFactoryOptions options) where TEntity : class
+        public IRepository<TEntity> Create<TEntity>(Dictionary<string, object> options) where TEntity : class
         {
-            return new JsonRepository<TEntity>(GetFilePath(options), options.Logger);
+            GetOptions(options, out string path, out ILogger logger);
+
+            return new JsonRepository<TEntity>(path, logger);
         }
 
         /// <summary>
@@ -102,9 +129,11 @@
         /// <typeparam name="TKey">The type of the key primary key value.</typeparam>
         /// <param name="options">The options.</param>
         /// <returns>The new repository.</returns>
-        public IRepository<TEntity, TKey> Create<TEntity, TKey>(IRepositoryFactoryOptions options) where TEntity : class
+        public IRepository<TEntity, TKey> Create<TEntity, TKey>(Dictionary<string, object> options) where TEntity : class
         {
-            return new JsonRepository<TEntity, TKey>(GetFilePath(options), options.Logger);
+            GetOptions(options, out string path, out ILogger logger);
+
+            return new JsonRepository<TEntity, TKey>(path, logger);
         }
 
         #endregion

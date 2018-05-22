@@ -1,6 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet
 {
+    using Logging;
     using System;
+    using System.Collections.Generic;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryFactory" />.
@@ -9,7 +11,11 @@
     {
         #region Fields
 
-        private readonly IRepositoryFactoryOptions _options;
+        private const string ProviderNameKey = "providerName";
+        private const string ConnectionStringKey = "connectionString";
+        private const string LoggerKey = "logger";
+
+        private readonly Dictionary<string, object> _options;
 
         #endregion
 
@@ -26,7 +32,7 @@
         /// Initializes a new instance of the <see cref="AdoNetRepositoryFactory"/> class.
         /// </summary>
         /// <param name="options">The options.</param>
-        public AdoNetRepositoryFactory(IRepositoryFactoryOptions options)
+        public AdoNetRepositoryFactory(Dictionary<string, object> options)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -38,37 +44,48 @@
 
         #region Private Methods
 
-        private void GetProviderAndConnectionString(IRepositoryFactoryOptions options, out string providerName, out string connectionString)
+        private static void GetOptions(Dictionary<string, object> options, out string providerName, out string connectionString, out ILogger logger)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            if (options.DbContextArgs == null || options.DbContextArgs.Length == 0)
-                throw new InvalidOperationException($"The repository options must provide a '{nameof(options.DbContextArgs)}'.");
+            if (options.Count == 0)
+                throw new InvalidOperationException("The options dictionary does not contain any items.");
 
-            if (options.DbContextArgs.Length == 1)
+            object value = null;
+            providerName = null;
+            connectionString = null;
+            logger = null;
+
+            if (options.ContainsKey(ProviderNameKey))
             {
-                var arg1 = options.DbContextArgs[0];
-                connectionString = arg1 as string;
+                value = options[ProviderNameKey];
+                providerName = value as string;
 
-                if (arg1 != null && connectionString == null)
-                    throw new ArgumentException($"The provided '{nameof(options.DbContextArgs)}' must be a valid string argument to be used as a connection string.");
+                if (value != null && providerName == null)
+                    throw new ArgumentException($"The option value for the specified '{ProviderNameKey}' key must be a valid '{typeof(string).Name}' type.");
+            }
 
-                providerName = null;
+            if (options.ContainsKey(ConnectionStringKey))
+            {
+                value = options[ConnectionStringKey];
+                connectionString = value as string;
+
+                if (value != null && connectionString == null)
+                    throw new ArgumentException($"The option value for the specified '{ConnectionStringKey}' key must be a valid '{typeof(string).Name}' type.");
             }
             else
             {
-                var arg1 = options.DbContextArgs[0];
-                providerName = arg1 as string;
+                throw new InvalidOperationException($"The '{ConnectionStringKey}' option is missing from the options dictionary.");
+            }
 
-                if (arg1 != null && providerName == null)
-                    throw new ArgumentException($"The provided '{nameof(options.DbContextArgs)}' must be a valid string argument to be used as a provider name.");
+            if (options.ContainsKey(LoggerKey))
+            {
+                value = options[LoggerKey];
+                logger = value as ILogger;
 
-                var arg2 = options.DbContextArgs[1];
-                connectionString = arg1 as string;
-
-                if (arg2 != null && connectionString == null)
-                    throw new ArgumentException($"The provided '{nameof(options.DbContextArgs)}' must be a valid string argument to be used as a connection string.");
+                if (value != null && logger == null)
+                    throw new ArgumentException($"The option value for the specified '{LoggerKey}' key must be a valid '{typeof(ILogger).Name}' type.");
             }
         }
 
@@ -109,13 +126,13 @@
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="options">The options.</param>
         /// <returns>The new repository.</returns>
-        public IRepository<TEntity> Create<TEntity>(IRepositoryFactoryOptions options) where TEntity : class
+        public IRepository<TEntity> Create<TEntity>(Dictionary<string, object> options) where TEntity : class
         {
-            GetProviderAndConnectionString(options, out string providerName, out string connectionString);
+            GetOptions(options, out string providerName, out string connectionString, out ILogger logger);
 
             return string.IsNullOrEmpty(providerName)
-                ? new AdoNetRepository<TEntity>(connectionString, options.Logger)
-                : new AdoNetRepository<TEntity>(providerName, connectionString, options.Logger);
+                ? new AdoNetRepository<TEntity>(connectionString, logger)
+                : new AdoNetRepository<TEntity>(providerName, connectionString, logger);
         }
 
         /// <summary>
@@ -125,13 +142,13 @@
         /// <typeparam name="TKey">The type of the key primary key value.</typeparam>
         /// <param name="options">The options.</param>
         /// <returns>The new repository.</returns>
-        public IRepository<TEntity, TKey> Create<TEntity, TKey>(IRepositoryFactoryOptions options) where TEntity : class
+        public IRepository<TEntity, TKey> Create<TEntity, TKey>(Dictionary<string, object> options) where TEntity : class
         {
-            GetProviderAndConnectionString(options, out string providerName, out string connectionString);
+            GetOptions(options, out string providerName, out string connectionString, out ILogger logger);
 
             return string.IsNullOrEmpty(providerName)
-                ? new AdoNetRepository<TEntity, TKey>(connectionString, options.Logger)
-                : new AdoNetRepository<TEntity, TKey>(providerName, connectionString, options.Logger);
+                ? new AdoNetRepository<TEntity, TKey>(connectionString, logger)
+                : new AdoNetRepository<TEntity, TKey>(providerName, connectionString, logger);
         }
 
         #endregion
