@@ -60,6 +60,9 @@
             if (entityType == null)
                 throw new ArgumentNullException(nameof(entityType));
 
+            if (InMemoryCache.Instance.PrimaryKeyMapping.ContainsKey(entityType))
+                return InMemoryCache.Instance.PrimaryKeyMapping[entityType];
+
             var propertyInfo = entityType
                 .GetRuntimeProperties()
                 .Where(x => x.IsMapped())
@@ -74,6 +77,8 @@
 
                 if (propertyInfo != null && propertyInfo.IsMapped())
                 {
+                    InMemoryCache.Instance.PrimaryKeyMapping[entityType] = propertyInfo;
+
                     return propertyInfo;
                 }
             }
@@ -97,10 +102,15 @@
         /// <returns>The name of the table.</returns>
         public static string GetTableName(this Type entityType)
         {
+            if (InMemoryCache.Instance.TableNameMapping.ContainsKey(entityType))
+                return InMemoryCache.Instance.TableNameMapping[entityType];
+
             var tableName = entityType.GetTypeInfo().GetCustomAttribute<TableAttribute>()?.Name;
 
             if (string.IsNullOrEmpty(tableName))
                 tableName = PluralizationHelper.Pluralize(entityType.Name);
+
+            InMemoryCache.Instance.TableNameMapping[entityType] = tableName;
 
             return tableName;
         }
@@ -145,6 +155,11 @@
         /// <returns>The name of the foreign key.</returns>
         public static PropertyInfo GetForeignKeyPropertyInfo(this Type sourceType, Type foreignType)
         {
+            var tupleKey = Tuple.Create(sourceType, foreignType);
+
+            if (InMemoryCache.Instance.ForeignKeyMapping.ContainsKey(tupleKey))
+                return InMemoryCache.Instance.ForeignKeyMapping[tupleKey];
+
             var properties = sourceType.GetRuntimeProperties().Where(x => x.IsMapped());
             var foreignPropertyInfo = properties.SingleOrDefault(x => x.PropertyType == foreignType);
 
@@ -178,6 +193,8 @@
                         .SingleOrDefault(x => x.Name == $"{foreignPropertyInfo.Name}{foreignPrimaryKeyName}");
                 }
             }
+
+            InMemoryCache.Instance.ForeignKeyMapping[tupleKey] = propertyInfo;
 
             return propertyInfo;
         }
