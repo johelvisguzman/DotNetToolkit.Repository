@@ -264,8 +264,8 @@
             if (propertyType == typeof(int))
             {
                 var key = GetQuery()
-                    .OrderByDescending(x => x.GetPrimaryKeyPropertyValue<TKey>())
                     .Select(x => x.GetPrimaryKeyPropertyValue<TKey>())
+                    .OrderByDescending(x => x)
                     .FirstOrDefault();
 
                 return (TKey)Convert.ChangeType(Convert.ToInt32(key) + 1, typeof(TKey));
