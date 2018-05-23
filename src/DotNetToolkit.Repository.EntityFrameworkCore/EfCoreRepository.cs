@@ -1,7 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.EntityFrameworkCore
 {
-    using Logging;
+    using Interceptors;
     using Microsoft.EntityFrameworkCore;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Represents a repository for entity framework core.
@@ -20,8 +21,8 @@
         /// Initializes a new instance of the <see cref="EfCoreRepository{TEntity, TKey}" /> class.
         /// </summary>
         /// <param name="context">The database context.</param>
-        /// <param name="logger">The logger.</param>
-        public EfCoreRepository(DbContext context, ILogger logger) : base(context, logger) { }
+        /// <param name="interceptors">The interceptors.</param>
+        public EfCoreRepository(DbContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
 
         #endregion
     }
@@ -43,8 +44,8 @@
         /// Initializes a new instance of the <see cref="EfCoreRepository{TEntity}" /> class.
         /// </summary>
         /// <param name="context">The database context.</param>
-        /// <param name="logger">The logger.</param>
-        public EfCoreRepository(DbContext context, ILogger logger) : base(context, logger) { }
+        /// <param name="interceptors">The interceptors.</param>
+        public EfCoreRepository(DbContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
 
         #endregion
     }

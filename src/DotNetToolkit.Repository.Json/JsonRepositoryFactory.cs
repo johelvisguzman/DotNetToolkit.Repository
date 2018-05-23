@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Json
 {
-    using Logging;
+    using Interceptors;
     using System;
     using System.Collections.Generic;
 
@@ -12,7 +12,7 @@
         #region Fields
 
         private const string FilePathOptionKey = "path";
-        private const string LoggerKey = "logger";
+        private const string InterceptorsKey = "interceptors";
 
         private readonly Dictionary<string, object> _options;
 
@@ -43,7 +43,7 @@
 
         #region Private Methods
 
-        private static void GetOptions(Dictionary<string, object> options, out string path, out ILogger logger)
+        private static void GetOptions(Dictionary<string, object> options, out string path, out IEnumerable<IRepositoryInterceptor> interceptors)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -53,7 +53,7 @@
 
             object value = null;
             path = null;
-            logger = null;
+            interceptors = null;
 
             if (options.ContainsKey(FilePathOptionKey))
             {
@@ -61,20 +61,20 @@
                 path = value as string;
 
                 if (value != null && path == null)
-                    throw new ArgumentException($"The option value for the specified '{FilePathOptionKey}' key must be a valid '{typeof(string).Name}' type.");
+                    throw new ArgumentException($"The option value for the specified '{FilePathOptionKey}' key must be a valid 'System.String' type.");
             }
             else
             {
                 throw new InvalidOperationException($"The '{FilePathOptionKey}' option is missing from the options dictionary.");
             }
 
-            if (options.ContainsKey(LoggerKey))
+            if (options.ContainsKey(InterceptorsKey))
             {
-                value = options[LoggerKey];
-                logger = value as ILogger;
+                value = options[InterceptorsKey];
+                interceptors = value as IEnumerable<IRepositoryInterceptor>;
 
-                if (value != null && logger == null)
-                    throw new ArgumentException($"The option value for the specified '{LoggerKey}' key must be a valid '{typeof(ILogger).Name}' type.");
+                if (value != null && interceptors == null)
+                    throw new ArgumentException($"The option value for the specified '{InterceptorsKey}' key must be a valid 'System.Collections.Generic.IEnumerable<DotNetToolkit.Repository.IRepositoryInterceptor>' type.");
             }
         }
 
@@ -117,9 +117,9 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity> Create<TEntity>(Dictionary<string, object> options) where TEntity : class
         {
-            GetOptions(options, out string path, out ILogger logger);
+            GetOptions(options, out string path, out IEnumerable<IRepositoryInterceptor> interceptors);
 
-            return new JsonRepository<TEntity>(path, logger);
+            return new JsonRepository<TEntity>(path, interceptors);
         }
 
         /// <summary>
@@ -131,9 +131,9 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey> Create<TEntity, TKey>(Dictionary<string, object> options) where TEntity : class
         {
-            GetOptions(options, out string path, out ILogger logger);
+            GetOptions(options, out string path, out IEnumerable<IRepositoryInterceptor> interceptors);
 
-            return new JsonRepository<TEntity, TKey>(path, logger);
+            return new JsonRepository<TEntity, TKey>(path, interceptors);
         }
 
         #endregion

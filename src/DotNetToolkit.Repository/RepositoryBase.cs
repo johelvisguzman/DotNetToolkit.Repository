@@ -2,7 +2,7 @@
 {
     using FetchStrategies;
     using Helpers;
-    using Logging;
+    using Interceptors;
     using Properties;
     using Queries;
     using Specifications;
@@ -17,12 +17,9 @@
     /// </summary>
     public abstract class RepositoryBase<TEntity, TKey> : IRepository<TEntity, TKey> where TEntity : class
     {
-        #region Properties
+        #region Fields
 
-        /// <summary>
-        /// Gets the logger.
-        /// </summary>
-        protected ILogger Logger { get; }
+        private readonly IEnumerable<IRepositoryInterceptor> _interceptors;
 
         #endregion
 
@@ -39,10 +36,10 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
-        /// <param name="logger">The logger.</param>
-        protected RepositoryBase(ILogger logger) : this()
+        /// <param name="interceptors">The interceptors.</param>
+        protected RepositoryBase(IEnumerable<IRepositoryInterceptor> interceptors)
         {
-            Logger = logger;
+            _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
         }
 
         #endregion
@@ -53,6 +50,61 @@
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
         public abstract void Dispose();
+
+        #endregion
+
+        #region Internal Methods
+
+        internal void InterceptAddItem(TEntity entity)
+        {
+            Intercept(x => x.AddExecuting(entity));
+
+            AddItem(entity);
+
+            Intercept(x => x.AddExecuted(entity));
+        }
+
+        internal void InterceptAddItem(IEnumerable<TEntity> entities)
+        {
+            foreach (var entity in entities)
+            {
+                InterceptAddItem(entity);
+            }
+        }
+
+        internal void InterceptUpdateItem(TEntity entity)
+        {
+            Intercept(x => x.UpdateExecuting(entity));
+
+            UpdateItem(entity);
+
+            Intercept(x => x.UpdateExecuted(entity));
+        }
+
+        internal void InterceptUpdateItem(IEnumerable<TEntity> entities)
+        {
+            foreach (var entity in entities)
+            {
+                InterceptUpdateItem(entity);
+            }
+        }
+
+        internal void InterceptDeleteItem(TEntity entity)
+        {
+            Intercept(x => x.DeleteExecuting(entity));
+
+            DeleteItem(entity);
+
+            Intercept(x => x.DeleteExecuted(entity));
+        }
+
+        internal void InterceptDeleteItem(IEnumerable<TEntity> entities)
+        {
+            foreach (var entity in entities)
+            {
+                InterceptDeleteItem(entity);
+            }
+        }
 
         #endregion
 
@@ -284,6 +336,18 @@
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeMismatch, typeof(TKey), propertyInfo.PropertyType));
         }
 
+        /// <summary>
+        /// Executes the specified interceptor activity.
+        /// </summary>
+        /// <param name="action">The action to be executed.</param>
+        protected void Intercept(Action<IRepositoryInterceptor> action)
+        {
+            foreach (var interceptor in _interceptors)
+            {
+                action(interceptor);
+            }
+        }
+
         #endregion
 
         #region Implementation of IRepositoryQueryable<out TEntity>
@@ -293,7 +357,16 @@
         /// </summary>
         public virtual IQueryable<TEntity> AsQueryable()
         {
-            return GetQuery();
+            try
+            {
+                return GetQuery();
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         #endregion
@@ -316,7 +389,16 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="criteria" /> in the repository.</returns>
         public int Count(ISpecification<TEntity> criteria)
         {
-            return GetCount(criteria);
+            try
+            {
+                return GetCount(criteria);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -338,9 +420,6 @@
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
         public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector, IQueryOptions<TEntity> options = null)
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
             return ToDictionary((ISpecification<TEntity>)null, keySelector, options);
         }
 
@@ -355,9 +434,6 @@
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
         public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null)
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
             return ToDictionary((ISpecification<TEntity>)null, keySelector, elementSelector, options);
         }
 
@@ -371,9 +447,6 @@
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
         public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, IQueryOptions<TEntity> options = null)
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
             return ToDictionary(criteria, keySelector, IdentityExpression<TEntity>.Instance, options);
         }
 
@@ -389,10 +462,19 @@
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
         public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null)
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
+            try
+            {
+                if (keySelector == null)
+                    throw new ArgumentNullException(nameof(keySelector));
 
-            return GetDictionary(criteria, keySelector, elementSelector, options);
+                return GetDictionary(criteria, keySelector, elementSelector, options);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -404,9 +486,6 @@
         /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
         public IEnumerable<IGrouping<TGroupKey, TEntity>> GroupBy<TGroupKey>(Expression<Func<TEntity, TGroupKey>> keySelector, IQueryOptions<TEntity> options = null)
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
             return GroupBy((ISpecification<TEntity>)null, keySelector, options);
         }
 
@@ -421,9 +500,6 @@
         /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
         public IEnumerable<IGrouping<TGroupKey, TElement>> GroupBy<TGroupKey, TElement>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null)
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
             return GroupBy((ISpecification<TEntity>)null, keySelector, elementSelector, options);
         }
 
@@ -437,9 +513,6 @@
         /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
         public IEnumerable<IGrouping<TGroupKey, TEntity>> GroupBy<TGroupKey>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, IQueryOptions<TEntity> options = null)
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
             return GroupBy(criteria, keySelector, IdentityExpression<TEntity>.Instance, options);
         }
 
@@ -455,10 +528,19 @@
         /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
         public IEnumerable<IGrouping<TGroupKey, TElement>> GroupBy<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null)
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
+            try
+            {
+                if (keySelector == null)
+                    throw new ArgumentNullException(nameof(keySelector));
 
-            return GetGroupBy(criteria, keySelector, elementSelector, options);
+                return GetGroupBy(criteria, keySelector, elementSelector, options);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         #endregion
@@ -471,15 +553,21 @@
         /// <param name="entity">The entity to add.</param>
         public void Add(TEntity entity)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
+            try
+            {
+                if (entity == null)
+                    throw new ArgumentNullException(nameof(entity));
 
-            Logger?.Write($"Adding {typeof(TEntity).Name} entity", entity);
+                InterceptAddItem(entity);
 
-            AddItem(entity);
-            SaveChanges();
+                SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
 
-            Logger?.Write($"Added {typeof(TEntity).Name} entity", entity);
+                throw;
+            }
         }
 
         /// <summary>
@@ -488,19 +576,21 @@
         /// <param name="entities">The collection of entities to add.</param>
         public void Add(IEnumerable<TEntity> entities)
         {
-            if (entities == null)
-                throw new ArgumentNullException(nameof(entities));
-
-            Logger?.Write($"Adding {typeof(TEntity).Name} entities", entities);
-
-            foreach (var entity in entities)
+            try
             {
-                AddItem(entity);
+                if (entities == null)
+                    throw new ArgumentNullException(nameof(entities));
+
+                InterceptAddItem(entities);
+
+                SaveChanges();
             }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
 
-            SaveChanges();
-
-            Logger?.Write($"Added {typeof(TEntity).Name} entities", entities);
+                throw;
+            }
         }
 
         #endregion
@@ -513,15 +603,21 @@
         /// <param name="entity">The entity to update.</param>
         public void Update(TEntity entity)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
+            try
+            {
+                if (entity == null)
+                    throw new ArgumentNullException(nameof(entity));
 
-            Logger?.Write($"Updating {typeof(TEntity).Name} entity", entity);
+                InterceptUpdateItem(entity);
 
-            UpdateItem(entity);
-            SaveChanges();
+                SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
 
-            Logger?.Write($"Updated {typeof(TEntity).Name} entity", entity);
+                throw;
+            }
         }
 
         /// <summary>
@@ -530,19 +626,21 @@
         /// <param name="entities">The collection of entities to update.</param>
         public void Update(IEnumerable<TEntity> entities)
         {
-            if (entities == null)
-                throw new ArgumentNullException(nameof(entities));
-
-            Logger?.Write($"Updating {typeof(TEntity).Name} entities", entities);
-
-            foreach (var entity in entities)
+            try
             {
-                UpdateItem(entity);
+                if (entities == null)
+                    throw new ArgumentNullException(nameof(entities));
+
+                InterceptUpdateItem(entities);
+
+                SaveChanges();
             }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
 
-            SaveChanges();
-
-            Logger?.Write($"Updated {typeof(TEntity).Name} entities", entities);
+                throw;
+            }
         }
 
         #endregion
@@ -555,12 +653,16 @@
         /// <param name="key">The value of the primary key used to match entities against.</param>
         public void Delete(TKey key)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
             var entity = Get(key);
+
             if (entity == null)
-                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
+            {
+                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
+
+                Intercept(x => x.Error(ex));
+
+                throw ex;
+            }
 
             Delete(entity);
         }
@@ -571,15 +673,21 @@
         /// <param name="entity">The entity to delete.</param>
         public void Delete(TEntity entity)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
+            try
+            {
+                if (entity == null)
+                    throw new ArgumentNullException(nameof(entity));
 
-            Logger?.Write($"Deleting {typeof(TEntity).Name} entity", entity);
+                InterceptDeleteItem(entity);
 
-            DeleteItem(entity);
-            SaveChanges();
+                SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
 
-            Logger?.Write($"Deleted {typeof(TEntity).Name} entity", entity);
+                throw;
+            }
         }
 
         /// <summary>
@@ -588,9 +696,6 @@
         /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
         public void Delete(ISpecification<TEntity> criteria)
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
-
             Delete(FindAll(criteria));
         }
 
@@ -600,19 +705,21 @@
         /// <param name="entities">The collection of entities to delete.</param>
         public void Delete(IEnumerable<TEntity> entities)
         {
-            if (entities == null)
-                throw new ArgumentNullException(nameof(entities));
-
-            Logger?.Write($"Deleting {typeof(TEntity).Name} entities", entities);
-
-            foreach (var entity in entities)
+            try
             {
-                DeleteItem(entity);
+                if (entities == null)
+                    throw new ArgumentNullException(nameof(entities));
+
+                InterceptDeleteItem(entities);
+
+                SaveChanges();
             }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
 
-            SaveChanges();
-
-            Logger?.Write($"Deleted {typeof(TEntity).Name} entities", entities);
+                throw;
+            }
         }
 
         #endregion
@@ -626,10 +733,19 @@
         /// <return>The entity found.</return>
         public TEntity Get(TKey key)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            try
+            {
+                if (key == null)
+                    throw new ArgumentNullException(nameof(key));
 
-            return GetEntity(key);
+                return GetEntity(key);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -640,10 +756,19 @@
         /// <return>The entity found.</return>
         public TEntity Get(TKey key, IFetchStrategy<TEntity> fetchStrategy)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            try
+            {
+                if (key == null)
+                    throw new ArgumentNullException(nameof(key));
 
-            return GetEntity(key, fetchStrategy);
+                return GetEntity(key, fetchStrategy);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -654,12 +779,6 @@
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public TResult Get<TResult>(TKey key, Expression<Func<TEntity, TResult>> selector)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
-
             return Get(key, selector, (IFetchStrategy<TEntity>)null);
         }
 
@@ -672,19 +791,28 @@
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public TResult Get<TResult>(TKey key, Expression<Func<TEntity, TResult>> selector, IFetchStrategy<TEntity> fetchStrategy)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            try
+            {
+                if (key == null)
+                    throw new ArgumentNullException(nameof(key));
 
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
+                if (selector == null)
+                    throw new ArgumentNullException(nameof(selector));
 
-            var result = GetEntity(key, fetchStrategy);
-            var selectFunc = selector.Compile();
-            var selectedResult = result == null
-                ? default(TResult)
-                : new[] { result }.AsEnumerable().Select(selectFunc).First();
+                var result = GetEntity(key, fetchStrategy);
+                var selectFunc = selector.Compile();
+                var selectedResult = result == null
+                    ? default(TResult)
+                    : new[] { result }.AsEnumerable().Select(selectFunc).First();
 
-            return selectedResult;
+                return selectedResult;
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -694,9 +822,6 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public bool Exists(TKey key)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
             return Get(key) != null;
         }
 
@@ -713,7 +838,13 @@
         public TEntity Find(Expression<Func<TEntity, bool>> predicate, IQueryOptions<TEntity> options = null)
         {
             if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
+            {
+                var ex = new ArgumentNullException(nameof(predicate));
+
+                Intercept(x => x.Error(ex));
+
+                throw ex;
+            }
 
             return Find(new Specification<TEntity>(predicate), options);
         }
@@ -726,10 +857,19 @@
         /// <returns>The entity that satisfied the criteria specified by the <paramref name="criteria" /> in the repository.</returns>
         public TEntity Find(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options = null)
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
+            try
+            {
+                if (criteria == null)
+                    throw new ArgumentNullException(nameof(criteria));
 
-            return GetEntity(criteria, options);
+                return GetEntity(criteria, options);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -742,10 +882,13 @@
         public TResult Find<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null)
         {
             if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
+            {
+                var ex = new ArgumentNullException(nameof(predicate));
 
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
+                Intercept(x => x.Error(ex));
+
+                throw ex;
+            }
 
             return Find(new Specification<TEntity>(predicate), selector, options);
         }
@@ -759,13 +902,22 @@
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public TResult Find<TResult>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null)
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
+            try
+            {
+                if (criteria == null)
+                    throw new ArgumentNullException(nameof(criteria));
 
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
+                if (selector == null)
+                    throw new ArgumentNullException(nameof(selector));
 
-            return GetEntity(criteria, options, selector);
+                return GetEntity(criteria, options, selector);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -774,7 +926,16 @@
         /// <returns>The collection of entities in the repository.</returns>
         public IEnumerable<TEntity> FindAll()
         {
-            return GetEntities(null, null);
+            try
+            {
+                return GetEntities(null, null);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -786,7 +947,13 @@
         public IEnumerable<TEntity> FindAll(Expression<Func<TEntity, bool>> predicate, IQueryOptions<TEntity> options = null)
         {
             if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
+            {
+                var ex = new ArgumentNullException(nameof(predicate));
+
+                Intercept(x => x.Error(ex));
+
+                throw ex;
+            }
 
             return FindAll(new Specification<TEntity>(predicate), options);
         }
@@ -799,10 +966,19 @@
         /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="criteria" />.</returns>
         public IEnumerable<TEntity> FindAll(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options = null)
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
+            try
+            {
+                if (criteria == null)
+                    throw new ArgumentNullException(nameof(criteria));
 
-            return GetEntities(criteria, options);
+                return GetEntities(criteria, options);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -813,10 +989,19 @@
         /// <returns>The collection of projected entity results in the repository.</returns>
         public IEnumerable<TResult> FindAll<TResult>(Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null)
         {
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
+            try
+            {
+                if (selector == null)
+                    throw new ArgumentNullException(nameof(selector));
 
-            return GetEntities((ISpecification<TEntity>)null, options, selector);
+                return GetEntities((ISpecification<TEntity>)null, options, selector);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -829,10 +1014,13 @@
         public IEnumerable<TResult> FindAll<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null)
         {
             if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
+            {
+                var ex = new ArgumentNullException(nameof(predicate));
 
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
+                Intercept(x => x.Error(ex));
+
+                throw ex;
+            }
 
             return FindAll(new Specification<TEntity>(predicate), selector, options);
         }
@@ -846,13 +1034,22 @@
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="criteria" />.</returns>
         public IEnumerable<TResult> FindAll<TResult>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null)
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
+            try
+            {
+                if (criteria == null)
+                    throw new ArgumentNullException(nameof(criteria));
 
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
+                if (selector == null)
+                    throw new ArgumentNullException(nameof(selector));
 
-            return GetEntities(criteria, options, selector);
+                return GetEntities(criteria, options, selector);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -863,7 +1060,13 @@
         public bool Exists(Expression<Func<TEntity, bool>> predicate)
         {
             if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
+            {
+                var ex = new ArgumentNullException(nameof(predicate));
+
+                Intercept(x => x.Error(ex));
+
+                throw ex;
+            }
 
             return Exists(new Specification<TEntity>(predicate));
         }
@@ -875,10 +1078,19 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
         public bool Exists(ISpecification<TEntity> criteria)
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
+            try
+            {
+                if (criteria == null)
+                    throw new ArgumentNullException(nameof(criteria));
 
-            return GetExist(criteria);
+                return GetExist(criteria);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         #endregion

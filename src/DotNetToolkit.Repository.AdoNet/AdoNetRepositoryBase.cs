@@ -2,8 +2,8 @@
 {
     using FetchStrategies;
     using Helpers;
+    using Interceptors;
     using Internal;
-    using Logging;
     using Properties;
     using Queries;
     using Specifications;
@@ -71,8 +71,8 @@
         /// Initializes a new instance of the <see cref="AdoNetRepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="connectionString">The connection string.</param>
-        /// <param name="logger">The logger.</param>
-        protected AdoNetRepositoryBase(string connectionString, ILogger logger = null) : base(logger)
+        /// <param name="interceptors">The interceptors.</param>
+        protected AdoNetRepositoryBase(string connectionString, IEnumerable<IRepositoryInterceptor> interceptors = null) : base(interceptors)
         {
             if (string.IsNullOrEmpty(connectionString))
                 throw new ArgumentException(Resources.ArgumentCannotBeNullOrEmptyString, nameof(connectionString));
@@ -92,8 +92,8 @@
         /// </summary>
         /// <param name="providerName">The name of the provider.</param>
         /// <param name="connectionString">The connection string.</param>
-        /// <param name="logger">The logger.</param>
-        protected AdoNetRepositoryBase(string providerName, string connectionString, ILogger logger = null) : base(logger)
+        /// <param name="interceptors">The interceptors.</param>
+        protected AdoNetRepositoryBase(string providerName, string connectionString, IEnumerable<IRepositoryInterceptor> interceptors = null) : base(interceptors)
         {
             if (string.IsNullOrEmpty(providerName))
                 throw new ArgumentException(Resources.ArgumentCannotBeNullOrEmptyString, nameof(providerName));

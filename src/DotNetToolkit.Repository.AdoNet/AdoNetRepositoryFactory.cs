@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet
 {
-    using Logging;
+    using Interceptors;
     using System;
     using System.Collections.Generic;
 
@@ -13,7 +13,7 @@
 
         private const string ProviderNameKey = "providerName";
         private const string ConnectionStringKey = "connectionString";
-        private const string LoggerKey = "logger";
+        private const string InterceptorsKey = "interceptors";
 
         private readonly Dictionary<string, object> _options;
 
@@ -44,7 +44,7 @@
 
         #region Private Methods
 
-        private static void GetOptions(Dictionary<string, object> options, out string providerName, out string connectionString, out ILogger logger)
+        private static void GetOptions(Dictionary<string, object> options, out string providerName, out string connectionString, out IEnumerable<IRepositoryInterceptor> interceptors)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -55,7 +55,7 @@
             object value = null;
             providerName = null;
             connectionString = null;
-            logger = null;
+            interceptors = null;
 
             if (options.ContainsKey(ProviderNameKey))
             {
@@ -63,7 +63,7 @@
                 providerName = value as string;
 
                 if (value != null && providerName == null)
-                    throw new ArgumentException($"The option value for the specified '{ProviderNameKey}' key must be a valid '{typeof(string).Name}' type.");
+                    throw new ArgumentException($"The option value for the specified '{ProviderNameKey}' key must be a valid 'System.String' type.");
             }
 
             if (options.ContainsKey(ConnectionStringKey))
@@ -72,20 +72,20 @@
                 connectionString = value as string;
 
                 if (value != null && connectionString == null)
-                    throw new ArgumentException($"The option value for the specified '{ConnectionStringKey}' key must be a valid '{typeof(string).Name}' type.");
+                    throw new ArgumentException($"The option value for the specified '{ConnectionStringKey}' key must be a valid 'System.String' type.");
             }
             else
             {
                 throw new InvalidOperationException($"The '{ConnectionStringKey}' option is missing from the options dictionary.");
             }
 
-            if (options.ContainsKey(LoggerKey))
+            if (options.ContainsKey(InterceptorsKey))
             {
-                value = options[LoggerKey];
-                logger = value as ILogger;
+                value = options[InterceptorsKey];
+                interceptors = value as IEnumerable<IRepositoryInterceptor>;
 
-                if (value != null && logger == null)
-                    throw new ArgumentException($"The option value for the specified '{LoggerKey}' key must be a valid '{typeof(ILogger).Name}' type.");
+                if (value != null && interceptors == null)
+                    throw new ArgumentException($"The option value for the specified '{InterceptorsKey}' key must be a valid 'System.Collections.Generic.IEnumerable<DotNetToolkit.Repository.IRepositoryInterceptor>' type.");
             }
         }
 
@@ -128,11 +128,11 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity> Create<TEntity>(Dictionary<string, object> options) where TEntity : class
         {
-            GetOptions(options, out string providerName, out string connectionString, out ILogger logger);
+            GetOptions(options, out string providerName, out string connectionString, out IEnumerable<IRepositoryInterceptor> interceptors);
 
             return string.IsNullOrEmpty(providerName)
-                ? new AdoNetRepository<TEntity>(connectionString, logger)
-                : new AdoNetRepository<TEntity>(providerName, connectionString, logger);
+                ? new AdoNetRepository<TEntity>(connectionString, interceptors)
+                : new AdoNetRepository<TEntity>(providerName, connectionString, interceptors);
         }
 
         /// <summary>
@@ -144,11 +144,11 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey> Create<TEntity, TKey>(Dictionary<string, object> options) where TEntity : class
         {
-            GetOptions(options, out string providerName, out string connectionString, out ILogger logger);
+            GetOptions(options, out string providerName, out string connectionString, out IEnumerable<IRepositoryInterceptor> interceptors);
 
             return string.IsNullOrEmpty(providerName)
-                ? new AdoNetRepository<TEntity, TKey>(connectionString, logger)
-                : new AdoNetRepository<TEntity, TKey>(providerName, connectionString, logger);
+                ? new AdoNetRepository<TEntity, TKey>(connectionString, interceptors)
+                : new AdoNetRepository<TEntity, TKey>(providerName, connectionString, interceptors);
         }
 
         #endregion

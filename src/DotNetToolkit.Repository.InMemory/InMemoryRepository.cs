@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.InMemory
 {
-    using Logging;
+    using Interceptors;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Represents a repository for in-memory operations (for testing purposes).
@@ -20,8 +21,8 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey}"/> class.
         /// </summary>
-        /// <param name="logger">The logger.</param>
-        public InMemoryRepository(ILogger logger) : base(logger)
+        /// <param name="interceptors">The interceptors.</param>
+        public InMemoryRepository(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
         {
         }
 
@@ -29,8 +30,8 @@
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
-        /// <param name="logger">The logger.</param>
-        public InMemoryRepository(string databaseName, ILogger logger) : base(databaseName, logger)
+        /// <param name="interceptors">The interceptors.</param>
+        public InMemoryRepository(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors) : base(databaseName, interceptors)
         {
         }
 
@@ -55,8 +56,8 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity}"/> class.
         /// </summary>
-        /// <param name="logger">The logger.</param>
-        public InMemoryRepository(ILogger logger) : base(logger)
+        /// <param name="interceptors">The interceptors.</param>
+        public InMemoryRepository(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
         {
         }
 
@@ -64,8 +65,8 @@
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity}"/> class.
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
-        /// <param name="logger">The logger.</param>
-        public InMemoryRepository(string databaseName, ILogger logger) : base(databaseName, logger)
+        /// <param name="interceptors">The interceptors.</param>
+        public InMemoryRepository(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors) : base(databaseName, interceptors)
         {
         }
 
