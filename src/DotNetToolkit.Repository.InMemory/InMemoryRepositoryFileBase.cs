@@ -2,7 +2,7 @@
 {
     using FetchStrategies;
     using Helpers;
-    using Logging;
+    using Interceptors;
     using Properties;
     using System;
     using System.Collections.Concurrent;
@@ -45,8 +45,8 @@
         /// Initializes a new instance of the <see cref="InMemoryRepositoryFileBase{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
-        /// <param name="logger">The logger.</param>
-        protected InMemoryRepositoryFileBase(string filePath, ILogger logger) : base(logger)
+        /// <param name="interceptors">The interceptors.</param>
+        protected InMemoryRepositoryFileBase(string filePath, IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
         {
             OnInitialize(filePath);
         }

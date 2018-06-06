@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.InMemory
 {
-    using Logging;
+    using Interceptors;
     using System;
     using System.Collections.Generic;
 
@@ -12,7 +12,7 @@
         #region Fields
 
         private const string DatabaseNameKey = "databaseName";
-        private const string LoggerKey = "logger";
+        private const string InterceptorsKey = "interceptors";
 
         private readonly Dictionary<string, object> _options;
 
@@ -43,7 +43,7 @@
 
         #region Private Methods
 
-        private static void GetOptions(Dictionary<string, object> options, out string databaseName, out ILogger logger)
+        private static void GetOptions(Dictionary<string, object> options, out string databaseName, out IEnumerable<IRepositoryInterceptor> interceptors)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -53,7 +53,7 @@
 
             object value = null;
             databaseName = null;
-            logger = null;
+            interceptors = null;
 
             if (options.ContainsKey(DatabaseNameKey))
             {
@@ -61,16 +61,16 @@
                 databaseName = value as string;
 
                 if (value != null && databaseName == null)
-                    throw new ArgumentException($"The option value for the specified '{DatabaseNameKey}' key must be a valid '{typeof(string).Name}' type.");
+                    throw new ArgumentException($"The option value for the specified '{DatabaseNameKey}' key must be a valid 'System.String' type.");
             }
 
-            if (options.ContainsKey(LoggerKey))
+            if (options.ContainsKey(InterceptorsKey))
             {
-                value = options[LoggerKey];
-                logger = value as ILogger;
+                value = options[InterceptorsKey];
+                interceptors = value as IEnumerable<IRepositoryInterceptor>;
 
-                if (value != null && logger == null)
-                    throw new ArgumentException($"The option value for the specified '{LoggerKey}' key must be a valid '{typeof(ILogger).Name}' type.");
+                if (value != null && interceptors == null)
+                    throw new ArgumentException($"The option value for the specified '{InterceptorsKey}' key must be a valid 'System.Collections.Generic.IEnumerable<DotNetToolkit.Repository.IRepositoryInterceptor>' type.");
             }
         }
 
@@ -110,9 +110,9 @@
             if (options == null)
                 return new InMemoryRepository<TEntity>();
 
-            GetOptions(options, out string databaseName, out ILogger logger);
+            GetOptions(options, out string databaseName, out IEnumerable<IRepositoryInterceptor> interceptors);
 
-            return new InMemoryRepository<TEntity>(databaseName, logger);
+            return new InMemoryRepository<TEntity>(databaseName, interceptors);
         }
 
         /// <summary>
@@ -127,9 +127,9 @@
             if (options == null)
                 return new InMemoryRepository<TEntity, TKey>();
 
-            GetOptions(options, out string databaseName, out ILogger logger);
+            GetOptions(options, out string databaseName, out IEnumerable<IRepositoryInterceptor> interceptors);
 
-            return new InMemoryRepository<TEntity, TKey>(databaseName, logger);
+            return new InMemoryRepository<TEntity, TKey>(databaseName, interceptors);
         }
 
         #endregion

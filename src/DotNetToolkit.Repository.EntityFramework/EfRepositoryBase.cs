@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.EntityFramework
 {
     using FetchStrategies;
-    using Logging;
+    using Interceptors;
     using Queries;
     using Specifications;
     using System;
@@ -51,8 +51,8 @@
         /// Initializes a new instance of the <see cref="EfRepositoryBase{TEntity, TKey}" /> class.
         /// </summary>
         /// <param name="context">The database context.</param>
-        /// <param name="logger">The logger.</param>
-        protected EfRepositoryBase(DbContext context, ILogger logger) : base(logger)
+        /// <param name="interceptors">The interceptors.</param>
+        protected EfRepositoryBase(DbContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));

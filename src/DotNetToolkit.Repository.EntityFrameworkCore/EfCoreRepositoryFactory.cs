@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.EntityFrameworkCore
 {
-    using Logging;
+    using Interceptors;
     using Microsoft.EntityFrameworkCore;
     using System;
     using System.Collections.Generic;
@@ -14,7 +14,7 @@
 
         private const string DbContextTypeKey = "dbContextType";
         private const string DbContextOptionsKey = "dbContextOptions";
-        private const string LoggerKey = "logger";
+        private const string InterceptorsKey = "interceptors";
 
         private readonly Dictionary<string, object> _options;
 
@@ -45,7 +45,7 @@
 
         #region Private Methods
 
-        private static void GetOptions(Dictionary<string, object> options, out DbContext context, out ILogger logger)
+        private static void GetOptions(Dictionary<string, object> options, out DbContext context, out IEnumerable<IRepositoryInterceptor> interceptors)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -57,7 +57,7 @@
             DbContextOptions dbContextOptions = null;
             Type contextType = null;
             context = null;
-            logger = null;
+            interceptors = null;
 
             if (options.ContainsKey(DbContextTypeKey))
             {
@@ -65,7 +65,7 @@
                 contextType = value as Type;
 
                 if (value != null && contextType == null)
-                    throw new ArgumentException($"The option value for the specified '{DbContextTypeKey}' key must be a valid '{typeof(Type).Name}' type.");
+                    throw new ArgumentException($"The option value for the specified '{DbContextTypeKey}' key must be a valid 'System.Type' type.");
             }
             else
             {
@@ -78,16 +78,16 @@
                 dbContextOptions = value as DbContextOptions;
 
                 if (value != null && dbContextOptions == null)
-                    throw new ArgumentException($"The option value for the specified '{DbContextOptionsKey}' key must be a valid '{typeof(DbContextOptions).Name}' type.");
+                    throw new ArgumentException($"The option value for the specified '{DbContextOptionsKey}' key must be a valid 'Microsoft.EntityFrameworkCore.DbContextOptions' type.");
             }
 
-            if (options.ContainsKey(LoggerKey))
+            if (options.ContainsKey(InterceptorsKey))
             {
-                value = options[LoggerKey];
-                logger = value as ILogger;
+                value = options[InterceptorsKey];
+                interceptors = value as IEnumerable<IRepositoryInterceptor>;
 
-                if (value != null && logger == null)
-                    throw new ArgumentException($"The option value for the specified '{LoggerKey}' key must be a valid '{typeof(ILogger).Name}' type.");
+                if (value != null && interceptors == null)
+                    throw new ArgumentException($"The option value for the specified '{InterceptorsKey}' key must be a valid 'System.Collections.Generic.IEnumerable<DotNetToolkit.Repository.IRepositoryInterceptor>' type.");
             }
 
             if (dbContextOptions == null)
@@ -135,9 +135,9 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity> Create<TEntity>(Dictionary<string, object> options) where TEntity : class
         {
-            GetOptions(options, out DbContext context, out ILogger logger);
+            GetOptions(options, out DbContext context, out IEnumerable<IRepositoryInterceptor> interceptors);
 
-            return new EfCoreRepository<TEntity>(context, logger);
+            return new EfCoreRepository<TEntity>(context, interceptors);
         }
 
         /// <summary>
@@ -149,9 +149,9 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey> Create<TEntity, TKey>(Dictionary<string, object> options) where TEntity : class
         {
-            GetOptions(options, out DbContext context, out ILogger logger);
+            GetOptions(options, out DbContext context, out IEnumerable<IRepositoryInterceptor> interceptors);
 
-            return new EfCoreRepository<TEntity, TKey>(context, logger);
+            return new EfCoreRepository<TEntity, TKey>(context, interceptors);
         }
 
         #endregion

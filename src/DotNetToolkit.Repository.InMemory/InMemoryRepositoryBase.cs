@@ -2,7 +2,7 @@
 {
     using FetchStrategies;
     using Helpers;
-    using Logging;
+    using Interceptors;
     using Properties;
     using System;
     using System.Collections.Concurrent;
@@ -48,8 +48,8 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
-        /// <param name="logger">The logger.</param>
-        protected InMemoryRepositoryBase(ILogger logger) : this(null, logger)
+        /// <param name="interceptors">The interceptors.</param>
+        protected InMemoryRepositoryBase(IEnumerable<IRepositoryInterceptor> interceptors) : this(null, interceptors)
         {
         }
 
@@ -57,8 +57,8 @@
         /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
-        /// <param name="logger">The logger.</param>
-        protected InMemoryRepositoryBase(string databaseName, ILogger logger) : base(logger)
+        /// <param name="interceptors">The interceptors.</param>
+        protected InMemoryRepositoryBase(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
         {
             DatabaseName = string.IsNullOrEmpty(databaseName) ? DefaultDatabaseName : databaseName;
             _items = new ConcurrentDictionary<TKey, EntitySet>();

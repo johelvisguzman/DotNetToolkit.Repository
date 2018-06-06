@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Xml
 {
-    using Logging;
+    using Interceptors;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Represents a repository for storing entities as an xml formatted file.
@@ -21,8 +22,8 @@
         /// Initializes a new instance of the <see cref="XmlRepository{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
-        /// <param name="logger">The logger.</param>
-        public XmlRepository(string filePath, ILogger logger) : base(filePath, logger)
+        /// <param name="interceptors">The interceptors.</param>
+        public XmlRepository(string filePath, IEnumerable<IRepositoryInterceptor> interceptors) : base(filePath, interceptors)
         {
         }
 
@@ -48,8 +49,8 @@
         /// Initializes a new instance of the <see cref="XmlRepository{TEntity}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
-        /// <param name="logger">The logger.</param>
-        public XmlRepository(string filePath, ILogger logger) : base(filePath, logger)
+        /// <param name="interceptors">The interceptors.</param>
+        public XmlRepository(string filePath, IEnumerable<IRepositoryInterceptor> interceptors) : base(filePath, interceptors)
         {
         }
 
