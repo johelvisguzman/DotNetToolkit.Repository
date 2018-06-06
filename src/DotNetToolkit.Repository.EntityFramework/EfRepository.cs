@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.EntityFramework
 {
-    using Logging;
+    using Interceptors;
+    using System.Collections.Generic;
     using System.Data.Entity;
 
     /// <summary>
@@ -20,8 +21,8 @@
         /// Initializes a new instance of the <see cref="EfRepository{TEntity, TKey}" /> class.
         /// </summary>
         /// <param name="context">The database context.</param>
-        /// <param name="logger">The logger.</param>
-        public EfRepository(DbContext context, ILogger logger) : base(context, logger) { }
+        /// <param name="interceptors">The interceptors.</param>
+        public EfRepository(DbContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
 
         #endregion
     }
@@ -29,7 +30,7 @@
     /// <summary>
     /// Represents a repository for entity framework with a default primary key value of type integer.
     /// </summary>
-    public class EfRepository<TEntity> : EfRepositoryBase<TEntity, int>, IRepository<TEntity> where TEntity : class
+    public class EfRepository<TEntity> : EfRepositoryBase<TEntity, int>, IRepositoryAsync<TEntity> where TEntity : class
     {
         #region Constructors
 
@@ -40,11 +41,11 @@
         public EfRepository(DbContext context) : base(context) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EfRepository{TEntity, TKey}" /> class.
+        /// Initializes a new instance of the <see cref="EfRepository{TEntity}" /> class.
         /// </summary>
         /// <param name="context">The database context.</param>
-        /// <param name="logger">The logger.</param>
-        public EfRepository(DbContext context, ILogger logger) : base(context, logger) { }
+        /// <param name="interceptors">The interceptors.</param>
+        public EfRepository(DbContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
 
         #endregion
     }

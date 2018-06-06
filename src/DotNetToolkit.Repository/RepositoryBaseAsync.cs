@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository
 {
     using FetchStrategies;
-    using Logging;
+    using Interceptors;
     using Properties;
     using Queries;
     using Specifications;
@@ -16,22 +16,22 @@
     /// <summary>
     /// An implementation of <see cref="IRepositoryAsync{TEntity, TKey}" />.
     /// </summary>
-    public abstract class RepositoryAsyncBase<TEntity, TKey> : RepositoryBase<TEntity, TKey>, IRepositoryAsync<TEntity, TKey> where TEntity : class
+    public abstract class RepositoryBaseAsync<TEntity, TKey> : RepositoryBase<TEntity, TKey>, IRepositoryAsync<TEntity, TKey> where TEntity : class
     {
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryAsyncBase{TEntity, TKey}"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity, TKey}"/> class.
         /// </summary>
-        protected RepositoryAsyncBase()
+        protected RepositoryBaseAsync()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryAsyncBase{TEntity, TKey}"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity, TKey}"/> class.
         /// </summary>
-        /// <param name="logger">The logger.</param>
-        protected RepositoryAsyncBase(ILogger logger) : base(logger)
+        /// <param name="interceptors">The interceptors.</param>
+        protected RepositoryBaseAsync(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
         {
         }
 
@@ -69,20 +69,26 @@
         }
 
         /// <summary>
-        /// A protected asynchronous overridable method for getting an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// Asynchronously gets a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected abstract Task<TEntity> GetEntityAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken());
+        protected Task<IEnumerable<TEntity>> GetEntitiesAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return GetEntitiesAsync<TEntity>(criteria, options, IdentityExpression<TEntity>.Instance, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously gets an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// </summary>
+        protected Task<TEntity> GetEntityAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return GetEntityAsync<TEntity>(criteria, options, IdentityExpression<TEntity>.Instance, cancellationToken);
+        }
 
         /// <summary>
         /// A protected asynchronous overridable method for getting an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
         protected abstract Task<TResult> GetEntityAsync<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken());
-
-        /// <summary>
-        /// A protected asynchronous overridable method for getting a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
-        protected abstract Task<IEnumerable<TEntity>> GetEntitiesAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken());
-
+        
         /// <summary>
         /// A protected asynchronous overridable method for getting a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
@@ -130,7 +136,16 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="criteria" /> in the repository..</returns>
         public Task<int> CountAsync(ISpecification<TEntity> criteria, CancellationToken cancellationToken = new CancellationToken())
         {
-            return GetCountAsync(criteria, cancellationToken);
+            try
+            {
+                return GetCountAsync(criteria, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -141,7 +156,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="predicate" /> in the repository..</returns>
         public Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
-            return CountAsync(new Specification<TEntity>(predicate), cancellationToken);
+            return CountAsync(predicate == null ? null : new Specification<TEntity>(predicate), cancellationToken);
         }
 
         /// <summary>
@@ -154,9 +169,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
         public Task<Dictionary<TDictionaryKey, TEntity>> ToDictionaryAsync<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
             return ToDictionaryAsync((ISpecification<TEntity>)null, keySelector, options, cancellationToken);
         }
 
@@ -172,9 +184,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
         public Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
             return ToDictionaryAsync((ISpecification<TEntity>)null, keySelector, elementSelector, options, cancellationToken);
         }
 
@@ -189,9 +198,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
         public Task<Dictionary<TDictionaryKey, TEntity>> ToDictionaryAsync<TDictionaryKey>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
             return ToDictionaryAsync(criteria, keySelector, IdentityExpression<TEntity>.Instance, options, cancellationToken);
         }
 
@@ -208,10 +214,19 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
         public Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
+            try
+            {
+                if (keySelector == null)
+                    throw new ArgumentNullException(nameof(keySelector));
 
-            return GetDictionaryAsync(criteria, keySelector, elementSelector, options, cancellationToken);
+                return GetDictionaryAsync(criteria, keySelector, elementSelector, options, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -224,9 +239,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
         public Task<IEnumerable<IGrouping<TGroupKey, TEntity>>> GroupByAsync<TGroupKey>(Expression<Func<TEntity, TGroupKey>> keySelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
             return GroupByAsync((ISpecification<TEntity>)null, keySelector, options, cancellationToken);
         }
 
@@ -242,9 +254,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
         public Task<IEnumerable<IGrouping<TGroupKey, TElement>>> GroupByAsync<TGroupKey, TElement>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
             return GroupByAsync((ISpecification<TEntity>)null, keySelector, elementSelector, options, cancellationToken);
         }
 
@@ -259,9 +268,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
         public Task<IEnumerable<IGrouping<TGroupKey, TEntity>>> GroupByAsync<TGroupKey>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
             return GroupByAsync(criteria, keySelector, IdentityExpression<TEntity>.Instance, options, cancellationToken);
         }
 
@@ -278,10 +284,19 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
         public Task<IEnumerable<IGrouping<TGroupKey, TElement>>> GroupByAsync<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
+            try
+            {
+                if (keySelector == null)
+                    throw new ArgumentNullException(nameof(keySelector));
 
-            return GetGroupByAsync(criteria, keySelector, elementSelector, options, cancellationToken);
+                return GetGroupByAsync(criteria, keySelector, elementSelector, options, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         #endregion
@@ -296,17 +311,23 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task AddAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
+            try
+            {
+                if (entity == null)
+                    throw new ArgumentNullException(nameof(entity));
 
-            cancellationToken.ThrowIfCancellationRequested();
+                cancellationToken.ThrowIfCancellationRequested();
 
-            Logger?.Write($"Adding {typeof(TEntity).Name} entity", entity);
+                InterceptAddItem(entity);
 
-            AddItem(entity);
-            await SaveChangesAsync(cancellationToken);
+                await SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
 
-            Logger?.Write($"Added {typeof(TEntity).Name} entity", entity);
+                throw;
+            }
         }
 
         /// <summary>
@@ -317,21 +338,23 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task AddAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (entities == null)
-                throw new ArgumentNullException(nameof(entities));
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            Logger?.Write($"Adding {typeof(TEntity).Name} entities", entities);
-
-            foreach (var entity in entities)
+            try
             {
-                AddItem(entity);
+                if (entities == null)
+                    throw new ArgumentNullException(nameof(entities));
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                InterceptAddItem(entities);
+
+                await SaveChangesAsync(cancellationToken);
             }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
 
-            await SaveChangesAsync(cancellationToken);
-
-            Logger?.Write($"Added {typeof(TEntity).Name} entities", entities);
+                throw;
+            }
         }
 
         #endregion
@@ -346,17 +369,23 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
+            try
+            {
+                if (entity == null)
+                    throw new ArgumentNullException(nameof(entity));
 
-            cancellationToken.ThrowIfCancellationRequested();
+                cancellationToken.ThrowIfCancellationRequested();
 
-            Logger?.Write($"Updating {typeof(TEntity).Name} entity", entity);
+                InterceptUpdateItem(entity);
 
-            UpdateItem(entity);
-            await SaveChangesAsync(cancellationToken);
+                await SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
 
-            Logger?.Write($"Updated {typeof(TEntity).Name} entity", entity);
+                throw;
+            }
         }
 
         /// <summary>
@@ -367,21 +396,23 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task UpdateAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (entities == null)
-                throw new ArgumentNullException(nameof(entities));
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            Logger?.Write($"Updating {typeof(TEntity).Name} entities", entities);
-
-            foreach (var entity in entities)
+            try
             {
-                UpdateItem(entity);
+                if (entities == null)
+                    throw new ArgumentNullException(nameof(entities));
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                InterceptUpdateItem(entities);
+
+                await SaveChangesAsync(cancellationToken);
             }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
 
-            await SaveChangesAsync(cancellationToken);
-
-            Logger?.Write($"Updated {typeof(TEntity).Name} entities", entities);
+                throw;
+            }
         }
 
         #endregion
@@ -396,14 +427,18 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
             cancellationToken.ThrowIfCancellationRequested();
 
             var entity = await GetAsync(key, cancellationToken);
+
             if (entity == null)
-                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
+            {
+                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
+
+                Intercept(x => x.Error(ex));
+
+                throw ex;
+            }
 
             await DeleteAsync(entity, cancellationToken);
         }
@@ -416,17 +451,23 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
+            try
+            {
+                if (entity == null)
+                    throw new ArgumentNullException(nameof(entity));
 
-            cancellationToken.ThrowIfCancellationRequested();
+                cancellationToken.ThrowIfCancellationRequested();
 
-            Logger?.Write($"Deleting {typeof(TEntity).Name} entity", entity);
+                InterceptDeleteItem(entity);
 
-            DeleteItem(entity);
-            await SaveChangesAsync(cancellationToken);
+                await SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
 
-            Logger?.Write($"Deleted {typeof(TEntity).Name} entity", entity);
+                throw;
+            }
         }
 
         /// <summary>
@@ -437,9 +478,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync(ISpecification<TEntity> criteria, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
-
             await DeleteAsync(await FindAllAsync(criteria, (IQueryOptions<TEntity>)null, cancellationToken), cancellationToken);
         }
 
@@ -451,21 +489,23 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (entities == null)
-                throw new ArgumentNullException(nameof(entities));
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            Logger?.Write($"Deleting {typeof(TEntity).Name} entities", entities);
-
-            foreach (var entity in entities)
+            try
             {
-                DeleteItem(entity);
+                if (entities == null)
+                    throw new ArgumentNullException(nameof(entities));
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                InterceptDeleteItem(entities);
+
+                await SaveChangesAsync(cancellationToken);
             }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
 
-            await SaveChangesAsync(cancellationToken);
-
-            Logger?.Write($"Deleted {typeof(TEntity).Name} entities", entities);
+                throw;
+            }
         }
 
         #endregion
@@ -480,10 +520,19 @@
         /// <return>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</return>
         public Task<TEntity> GetAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            try
+            {
+                if (key == null)
+                    throw new ArgumentNullException(nameof(key));
 
-            return GetEntityAsync(key, cancellationToken);
+                return GetEntityAsync(key, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -495,10 +544,19 @@
         /// <return>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</return>
         public Task<TEntity> GetAsync(TKey key, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            try
+            {
+                if (key == null)
+                    throw new ArgumentNullException(nameof(key));
 
-            return GetEntityAsync(key, fetchStrategy, cancellationToken);
+                return GetEntityAsync(key, fetchStrategy, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -510,12 +568,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public Task<TResult> GetAsync<TResult>(TKey key, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
-
             return GetAsync(key, selector, (IFetchStrategy<TEntity>)null, cancellationToken);
         }
 
@@ -529,13 +581,22 @@
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public Task<TResult> GetAsync<TResult>(TKey key, Expression<Func<TEntity, TResult>> selector, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            try
+            {
+                if (key == null)
+                    throw new ArgumentNullException(nameof(key));
 
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
+                if (selector == null)
+                    throw new ArgumentNullException(nameof(selector));
 
-            return GetEntityAsync(key, fetchStrategy, selector, cancellationToken);
+                return GetEntityAsync(key, fetchStrategy, selector, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -546,10 +607,19 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public Task<bool> ExistsAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            try
+            {
+                if (key == null)
+                    throw new ArgumentNullException(nameof(key));
 
-            return GetExistAsync(GetByPrimaryKeySpecification(key, (IFetchStrategy<TEntity>)null), cancellationToken);
+                return GetExistAsync(GetByPrimaryKeySpecification(key, (IFetchStrategy<TEntity>)null), cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         #endregion
@@ -566,7 +636,13 @@
         public Task<TEntity> FindAsync(Expression<Func<TEntity, bool>> predicate, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
             if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
+            {
+                var ex = new ArgumentNullException(nameof(predicate));
+
+                Intercept(x => x.Error(ex));
+
+                throw ex;
+            }
 
             return FindAsync(new Specification<TEntity>(predicate), options, cancellationToken);
         }
@@ -580,10 +656,19 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity that satisfied the criteria specified by the <paramref name="criteria" /> in the repository.</returns>
         public Task<TEntity> FindAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
+            try
+            {
+                if (criteria == null)
+                    throw new ArgumentNullException(nameof(criteria));
 
-            return GetEntityAsync(criteria, options, cancellationToken);
+                return GetEntityAsync(criteria, options, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -597,10 +682,13 @@
         public Task<TResult> FindAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
             if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
+            {
+                var ex = new ArgumentNullException(nameof(predicate));
 
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
+                Intercept(x => x.Error(ex));
+
+                throw ex;
+            }
 
             return FindAsync(new Specification<TEntity>(predicate), selector, options, cancellationToken);
         }
@@ -615,13 +703,22 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public Task<TResult> FindAsync<TResult>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
+            try
+            {
+                if (criteria == null)
+                    throw new ArgumentNullException(nameof(criteria));
 
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
+                if (selector == null)
+                    throw new ArgumentNullException(nameof(selector));
 
-            return GetEntityAsync(criteria, options, selector, cancellationToken);
+                return GetEntityAsync(criteria, options, selector, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -630,7 +727,16 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of entities in the repository.</returns>
         public Task<IEnumerable<TEntity>> FindAllAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            return GetEntitiesAsync(null, null, cancellationToken);
+            try
+            {
+                return GetEntitiesAsync(null, null, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -643,7 +749,13 @@
         public Task<IEnumerable<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
             if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
+            {
+                var ex = new ArgumentNullException(nameof(predicate));
+
+                Intercept(x => x.Error(ex));
+
+                throw ex;
+            }
 
             return FindAllAsync(new Specification<TEntity>(predicate), options, cancellationToken);
         }
@@ -657,10 +769,19 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of entities in the repository that satisfied the criteria specified by the <paramref name="criteria" />.</returns>
         public Task<IEnumerable<TEntity>> FindAllAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
+            try
+            {
+                if (criteria == null)
+                    throw new ArgumentNullException(nameof(criteria));
 
-            return GetEntitiesAsync(criteria, options, cancellationToken);
+                return GetEntitiesAsync(criteria, options, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -672,10 +793,19 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository.</returns>
         public Task<IEnumerable<TResult>> FindAllAsync<TResult>(Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
+            try
+            {
+                if (selector == null)
+                    throw new ArgumentNullException(nameof(selector));
 
-            return GetEntitiesAsync((ISpecification<TEntity>)null, options, selector, cancellationToken);
+                return GetEntitiesAsync((ISpecification<TEntity>)null, options, selector, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -689,10 +819,13 @@
         public Task<IEnumerable<TResult>> FindAllAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
             if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
+            {
+                var ex = new ArgumentNullException(nameof(predicate));
 
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
+                Intercept(x => x.Error(ex));
+
+                throw ex;
+            }
 
             return FindAllAsync(new Specification<TEntity>(predicate), selector, options, cancellationToken);
         }
@@ -707,13 +840,22 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="criteria" />.</returns>
         public Task<IEnumerable<TResult>> FindAllAsync<TResult>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
+            try
+            {
+                if (criteria == null)
+                    throw new ArgumentNullException(nameof(criteria));
 
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
+                if (selector == null)
+                    throw new ArgumentNullException(nameof(selector));
 
-            return GetEntitiesAsync(criteria, options, selector, cancellationToken);
+                return GetEntitiesAsync(criteria, options, selector, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -725,7 +867,13 @@
         public Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
             if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
+            {
+                var ex = new ArgumentNullException(nameof(predicate));
+
+                Intercept(x => x.Error(ex));
+
+                throw ex;
+            }
 
             return ExistsAsync(new Specification<TEntity>(predicate), cancellationToken);
         }
@@ -738,10 +886,19 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
         public Task<bool> ExistsAsync(ISpecification<TEntity> criteria, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
+            try
+            {
+                if (criteria == null)
+                    throw new ArgumentNullException(nameof(criteria));
 
-            return GetExistAsync(criteria, cancellationToken);
+                return GetExistAsync(criteria, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         #endregion

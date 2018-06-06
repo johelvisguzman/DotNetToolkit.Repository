@@ -9,9 +9,9 @@
 //------------------------------------------------------------------------------
 
 namespace DotNetToolkit.Repository.AdoNet.Properties {
-    using System.Reflection;
-
-
+    using System;
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -39,7 +39,7 @@ namespace DotNetToolkit.Repository.AdoNet.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DotNetToolkit.Repository.AdoNet.Properties.Resources", typeof(Resources).GetTypeInfo().Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DotNetToolkit.Repository.AdoNet.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -66,6 +66,15 @@ namespace DotNetToolkit.Repository.AdoNet.Properties {
         internal static string ArgumentCannotBeNullOrEmptyString {
             get {
                 return ResourceManager.GetString("ArgumentCannotBeNullOrEmptyString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The connection string does not exist in your configuration file..
+        /// </summary>
+        internal static string ConnectionStringDoestNotExistInConfigFile {
+            get {
+                return ResourceManager.GetString("ConnectionStringDoestNotExistInConfigFile", resourceCulture);
             }
         }
         

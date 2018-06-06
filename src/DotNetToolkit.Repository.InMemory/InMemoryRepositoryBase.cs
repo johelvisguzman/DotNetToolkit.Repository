@@ -2,7 +2,7 @@
 {
     using FetchStrategies;
     using Helpers;
-    using Logging;
+    using Interceptors;
     using Properties;
     using System;
     using System.Collections.Concurrent;
@@ -38,7 +38,7 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity,TKey}"/> class.
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
         protected InMemoryRepositoryBase(string databaseName = null) : this(databaseName, null)
@@ -46,19 +46,19 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity,TKey}"/> class.
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
-        /// <param name="logger">The logger.</param>
-        protected InMemoryRepositoryBase(ILogger logger) : this(null, logger)
+        /// <param name="interceptors">The interceptors.</param>
+        protected InMemoryRepositoryBase(IEnumerable<IRepositoryInterceptor> interceptors) : this(null, interceptors)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity,TKey}"/> class.
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
-        /// <param name="logger">The logger.</param>
-        protected InMemoryRepositoryBase(string databaseName, ILogger logger) : base(logger)
+        /// <param name="interceptors">The interceptors.</param>
+        protected InMemoryRepositoryBase(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
         {
             DatabaseName = string.IsNullOrEmpty(databaseName) ? DefaultDatabaseName : databaseName;
             _items = new ConcurrentDictionary<TKey, EntitySet>();
@@ -95,7 +95,7 @@
         internal void EnsureDeleted()
         {
             _items.Clear();
-            InMemoryCache<TEntity, TKey>.Instance.GetContext(DatabaseName).Clear();
+            InMemoryCache.Instance.GetContext(DatabaseName).Clear();
         }
 
         #endregion
@@ -143,7 +143,7 @@
 
         #endregion
 
-        #region Overrides of RepositoryBase<TEntity,TKey>
+        #region Overrides of RepositoryBase<TEntity, TKey>
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
@@ -231,7 +231,7 @@
         {
             lock (_syncRoot)
             {
-                var context = InMemoryCache<TEntity, TKey>.Instance.GetContext(DatabaseName);
+                var context = InMemoryCache.Instance.GetContext(DatabaseName);
 
                 foreach (var entitySet in _items.Select(y => y.Value))
                 {
@@ -273,7 +273,7 @@
         /// </summary>
         protected override IQueryable<TEntity> GetQuery(IFetchStrategy<TEntity> fetchStrategy = null)
         {
-            return InMemoryCache<TEntity, TKey>.Instance
+            return InMemoryCache.Instance
                 .GetContext(DatabaseName)
                 .Select(y => y.Value)
                 .AsQueryable();
@@ -284,7 +284,7 @@
         /// </summary>
         protected override TEntity GetEntity(TKey key, IFetchStrategy<TEntity> fetchStrategy)
         {
-            InMemoryCache<TEntity, TKey>.Instance
+            InMemoryCache.Instance
                 .GetContext(DatabaseName)
                 .TryGetValue(key, out TEntity entity);
 
@@ -358,17 +358,17 @@
 
         #endregion
 
-        #region Nested type: InMemoryCache<TEntity, TKey>
+        #region Nested type: InMemoryCache
 
         /// <summary>
         /// Represents an internal thread safe database storage which will store any information for the in-memory
         /// store that is needed through the life time of the application.
         /// </summary>
-        private class InMemoryCache<TEntity, TKey> where TEntity : class
+        private class InMemoryCache
         {
             #region Fields
 
-            private static volatile InMemoryCache<TEntity, TKey> _instance;
+            private static volatile InMemoryCache _instance;
             private static readonly object _syncRoot = new object();
             private readonly ConcurrentDictionary<string, SortedDictionary<TKey, TEntity>> _storage;
 
@@ -377,7 +377,7 @@
             #region Constructors
 
             /// <summary>
-            /// Prevents a default instance of the <see cref="InMemoryCache{TEntity, TKey}"/> class from being created.
+            /// Prevents a default instance of the <see cref="InMemoryCache"/> class from being created.
             /// </summary>
             private InMemoryCache()
             {
@@ -391,7 +391,7 @@
             /// <summary>
             /// Gets the instance.
             /// </summary>
-            public static InMemoryCache<TEntity, TKey> Instance
+            public static InMemoryCache Instance
             {
                 get
                 {
@@ -400,7 +400,7 @@
                         lock (_syncRoot)
                         {
                             if (_instance == null)
-                                _instance = new InMemoryCache<TEntity, TKey>();
+                                _instance = new InMemoryCache();
                         }
                     }
 

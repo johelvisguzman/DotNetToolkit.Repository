@@ -14,6 +14,12 @@
 
         #endregion
 
+        #region Events
+
+        public event EventHandler Submitted;
+
+        #endregion
+
         #region Properties
 
         public bool IsDirty
@@ -42,7 +48,7 @@
 
         #endregion
 
-        #region Implementation of IValidatable
+        #region Public Methods
 
         public virtual async Task<bool> ValidateAsync()
         {
@@ -58,6 +64,18 @@
             }
 
             return result.IsValid;
+        }
+
+        #endregion
+
+        #region Protected Methods
+
+        protected async void OnSubmitAsync()
+        {
+            if (await ValidateAsync())
+            {
+                Submitted?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         #endregion

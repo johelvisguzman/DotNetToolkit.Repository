@@ -82,7 +82,7 @@
 
         #endregion
 
-        #region Overrides of SortingOptions<TEntity,TKey>
+        #region Overrides of SortingOptions<TEntity, TKey>
 
         /// <summary>
         /// Applies the current options to the specified query.
@@ -193,7 +193,7 @@
 
         #endregion
 
-        #region Overrides of SortingOptions<TEntity,TKey>
+        #region Overrides of SortingOptions<TEntity, TKey>
 
         /// <summary>
         /// Applies the current options to the specified query.

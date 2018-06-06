@@ -1,7 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.EntityFrameworkCore
 {
-    using Logging;
+    using Interceptors;
     using Microsoft.EntityFrameworkCore;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Represents a repository for entity framework core.
@@ -20,8 +21,8 @@
         /// Initializes a new instance of the <see cref="EfCoreRepository{TEntity, TKey}" /> class.
         /// </summary>
         /// <param name="context">The database context.</param>
-        /// <param name="logger">The logger.</param>
-        public EfCoreRepository(DbContext context, ILogger logger) : base(context, logger) { }
+        /// <param name="interceptors">The interceptors.</param>
+        public EfCoreRepository(DbContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
 
         #endregion
     }
@@ -29,7 +30,7 @@
     /// <summary>
     /// Represents a repository for entity framework core with a default primary key value of type integer.
     /// </summary>
-    public class EfCoreRepository<TEntity> : EfCoreRepositoryBase<TEntity, int>, IRepository<TEntity> where TEntity : class
+    public class EfCoreRepository<TEntity> : EfCoreRepositoryBase<TEntity, int>, IRepositoryAsync<TEntity> where TEntity : class
     {
         #region Constructors
 
@@ -40,11 +41,11 @@
         public EfCoreRepository(DbContext context) : base(context) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EfCoreRepository{TEntity, TKey}" /> class.
+        /// Initializes a new instance of the <see cref="EfCoreRepository{TEntity}" /> class.
         /// </summary>
         /// <param name="context">The database context.</param>
-        /// <param name="logger">The logger.</param>
-        public EfCoreRepository(DbContext context, ILogger logger) : base(context, logger) { }
+        /// <param name="interceptors">The interceptors.</param>
+        public EfCoreRepository(DbContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
 
         #endregion
     }

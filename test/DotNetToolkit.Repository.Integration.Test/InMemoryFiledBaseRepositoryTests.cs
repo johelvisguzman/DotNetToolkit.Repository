@@ -4,6 +4,7 @@
     using System;
     using System.IO;
     using System.Reflection;
+    using Helpers;
     using Xunit;
 
     public class InMemoryFiledBaseRepositoryTests : TestBase
@@ -50,17 +51,23 @@
             repo = CreateRepositoryInstanceOfType(repo.GetType(), path);
 
             Assert.True(File.Exists(path));
+
+            File.Delete(path);
         }
 
         private static void TestGeneratesTempFileNameWhenOnlyDirectoryIsProvided(IRepository<Customer, int> repo)
         {
-            var path = GetTempFileName($"{typeof(Customer).Name}" + GetFileExtension(repo));
+            var dir = GetTempFileName(string.Empty);
+            var defaultGeneratedPathName = typeof(Customer).GetTableName() + GetFileExtension(repo);
+            var path = dir + defaultGeneratedPathName;
 
             Assert.True(!File.Exists(path));
 
-            repo = CreateRepositoryInstanceOfType(repo.GetType(), path);
+            repo = CreateRepositoryInstanceOfType(repo.GetType(), dir);
 
             Assert.True(File.Exists(path));
+
+            File.Delete(path);
         }
 
         private static void TestThrowsIfFilePathIsInvalid(IRepository<Customer, int> repo)

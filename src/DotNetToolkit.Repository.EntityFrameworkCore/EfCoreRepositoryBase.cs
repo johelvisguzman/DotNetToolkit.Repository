@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.EntityFrameworkCore
 {
     using FetchStrategies;
-    using Logging;
+    using Interceptors;
     using Microsoft.EntityFrameworkCore;
     using Queries;
     using Specifications;
@@ -15,7 +15,7 @@
     /// <summary>
     /// Represents a repository for entity framework core.
     /// </summary>
-    public abstract class EfCoreRepositoryBase<TEntity, TKey> : RepositoryAsyncBase<TEntity, TKey> where TEntity : class
+    public abstract class EfCoreRepositoryBase<TEntity, TKey> : RepositoryBaseAsync<TEntity, TKey> where TEntity : class
     {
         #region Fields
 
@@ -51,8 +51,8 @@
         /// Initializes a new instance of the <see cref="EfCoreRepositoryBase{TEntity, TKey}" /> class.
         /// </summary>
         /// <param name="context">The database context.</param>
-        /// <param name="logger">The logger.</param>
-        protected EfCoreRepositoryBase(DbContext context, ILogger logger) : base(logger)
+        /// <param name="interceptors">The interceptors.</param>
+        protected EfCoreRepositoryBase(DbContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
@@ -86,7 +86,7 @@
 
         #endregion
 
-        #region Overrides of RepositoryBase<TEntity,TKey>
+        #region Overrides of RepositoryBase<TEntity, TKey>
 
         /// <summary>
         /// A protected overridable method for adding the specified <paramref name="entity" /> into the repository.
@@ -148,7 +148,7 @@
 
         #endregion
 
-        #region Overrides of RepositoryAsyncBase<TEntity,TKey>
+        #region Overrides of RepositoryBaseAsync<TEntity, TKey>
 
         /// <summary>
         /// A protected asynchronous overridable method for saving changes made in the current unit of work in the repository.
@@ -169,17 +169,6 @@
         /// <summary>
         /// A protected asynchronous overridable method for getting an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected override Task<TEntity> GetEntityAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
-        {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
-
-            return GetQuery(criteria, options).FirstOrDefaultAsync(cancellationToken);
-        }
-
-        /// <summary>
-        /// A protected asynchronous overridable method for getting an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
         protected override Task<TResult> GetEntityAsync<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             if (criteria == null)
@@ -194,19 +183,8 @@
         /// <summary>
         /// A protected asynchronous overridable method for getting a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected override async Task<IEnumerable<TEntity>> GetEntitiesAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return await GetQuery(criteria, options).ToListAsync(cancellationToken);
-        }
-
-        /// <summary>
-        /// A protected asynchronous overridable method for getting a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
         protected override async Task<IEnumerable<TResult>> GetEntitiesAsync<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
-
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 

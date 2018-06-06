@@ -2,14 +2,15 @@
 {
     using FetchStrategies;
     using Helpers;
+    using Interceptors;
     using Internal;
-    using Logging;
     using Properties;
     using Queries;
     using Specifications;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Configuration;
     using System.Data;
     using System.Data.Common;
     using System.Linq;
@@ -22,7 +23,7 @@
     /// <summary>
     /// Represents a repository for ado.net.
     /// </summary>
-    public abstract class AdoNetRepositoryBase<TEntity, TKey> : RepositoryAsyncBase<TEntity, TKey> where TEntity : class
+    public abstract class AdoNetRepositoryBase<TEntity, TKey> : RepositoryBaseAsync<TEntity, TKey> where TEntity : class
     {
         #region Fields
 
@@ -69,11 +70,34 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="AdoNetRepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
+        /// <param name="connectionString">The connection string.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        protected AdoNetRepositoryBase(string connectionString, IEnumerable<IRepositoryInterceptor> interceptors = null) : base(interceptors)
+        {
+            if (string.IsNullOrEmpty(connectionString))
+                throw new ArgumentException(Resources.ArgumentCannotBeNullOrEmptyString, nameof(connectionString));
+
+            var ccs = ConfigurationManager.ConnectionStrings[connectionString];
+            if (ccs == null)
+                throw new ArgumentException(Resources.ConnectionStringDoestNotExistInConfigFile);
+
+            Factory = Internal.DbProviderFactories.GetFactory(ccs.ProviderName);
+            ConnectionString = connectionString;
+
+            Initialize();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryBase{TEntity, TKey}"/> class.
+        /// </summary>
         /// <param name="providerName">The name of the provider.</param>
         /// <param name="connectionString">The connection string.</param>
-        /// <param name="logger">The logger.</param>
-        protected AdoNetRepositoryBase(string providerName, string connectionString, ILogger logger = null) : base(logger)
+        /// <param name="interceptors">The interceptors.</param>
+        protected AdoNetRepositoryBase(string providerName, string connectionString, IEnumerable<IRepositoryInterceptor> interceptors = null) : base(interceptors)
         {
+            if (string.IsNullOrEmpty(providerName))
+                throw new ArgumentException(Resources.ArgumentCannotBeNullOrEmptyString, nameof(providerName));
+
             if (string.IsNullOrEmpty(connectionString))
                 throw new ArgumentException(Resources.ArgumentCannotBeNullOrEmptyString, nameof(connectionString));
 
@@ -1686,7 +1710,7 @@
 
         #endregion
 
-        #region Overrides of RepositoryBase<TEntity,TKey>
+        #region Overrides of RepositoryBase<TEntity, TKey>
 
         /// <summary>
         /// A protected overridable method for adding the specified <paramref name="entity" /> into the repository.
@@ -1772,19 +1796,6 @@
         /// <summary>
         /// Gets an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected override TEntity GetEntity(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
-        {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
-
-            PrepareSelectStatement(criteria, options, out DbSqlSelectStatementConfig config);
-
-            return ExecuteObject<TEntity>(config.Sql, config.Parameters, r => AutoMap(r, config));
-        }
-
-        /// <summary>
-        /// Gets an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
         protected override TResult GetEntity<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
             if (criteria == null)
@@ -1796,16 +1807,6 @@
             PrepareSelectStatement(criteria, options, out DbSqlSelectStatementConfig config);
 
             return ExecuteObject<TResult>(config.Sql, config.Parameters, r => AutoMap<TResult>(r, selector, config));
-        }
-
-        /// <summary>
-        /// Gets a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
-        protected override IEnumerable<TEntity> GetEntities(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
-        {
-            PrepareSelectStatement(criteria, options, out DbSqlSelectStatementConfig config);
-
-            return ExecuteList<TEntity>(config.Sql, config.Parameters, r => AutoMap(r, config));
         }
 
         /// <summary>
@@ -1916,7 +1917,7 @@
 
         #endregion
 
-        #region Overrides of RepositoryAsyncBase<TEntity,TKey>
+        #region Overrides of RepositoryBaseAsync<TEntity, TKey>
 
         /// <summary>
         /// A protected asynchronous overridable method for saving changes made in the current unit of work in the repository.
@@ -1968,19 +1969,6 @@
         /// <summary>
         /// A protected asynchronous overridable method for getting an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected override Task<TEntity> GetEntityAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
-        {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
-
-            PrepareSelectStatement(criteria, options, out DbSqlSelectStatementConfig config);
-
-            return ExecuteObjectAsync<TEntity>(config.Sql, config.Parameters, r => AutoMap(r, config), cancellationToken);
-        }
-
-        /// <summary>
-        /// A protected asynchronous overridable method for getting an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
         protected override Task<TResult> GetEntityAsync<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             if (criteria == null)
@@ -1997,21 +1985,8 @@
         /// <summary>
         /// A protected asynchronous overridable method for getting a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected override Task<IEnumerable<TEntity>> GetEntitiesAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
-        {
-            PrepareSelectStatement(criteria, options, out DbSqlSelectStatementConfig config);
-
-            return ExecuteListAsync<TEntity>(config.Sql, config.Parameters, r => AutoMap(r, config), cancellationToken);
-        }
-
-        /// <summary>
-        /// A protected asynchronous overridable method for getting a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
         protected override Task<IEnumerable<TResult>> GetEntitiesAsync<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
-
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 

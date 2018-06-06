@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Json
 {
-    using Logging;
+    using Interceptors;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Represents a repository for storing entities as an json formatted file.
@@ -10,7 +11,7 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="JsonRepository{TEntity,TKey}"/> class.
+        /// Initializes a new instance of the <see cref="JsonRepository{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
         public JsonRepository(string filePath) : base(filePath)
@@ -18,11 +19,11 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="JsonRepository{TEntity}"/> class.
+        /// Initializes a new instance of the <see cref="JsonRepository{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
-        /// <param name="logger">The logger.</param>
-        public JsonRepository(string filePath, ILogger logger) : base(filePath, logger)
+        /// <param name="interceptors">The interceptors.</param>
+        public JsonRepository(string filePath, IEnumerable<IRepositoryInterceptor> interceptors) : base(filePath, interceptors)
         {
         }
 
@@ -48,8 +49,8 @@
         /// Initializes a new instance of the <see cref="JsonRepository{TEntity}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
-        /// <param name="logger">The logger.</param>
-        public JsonRepository(string filePath, ILogger logger) : base(filePath, logger)
+        /// <param name="interceptors">The interceptors.</param>
+        public JsonRepository(string filePath, IEnumerable<IRepositoryInterceptor> interceptors) : base(filePath, interceptors)
         {
         }
 

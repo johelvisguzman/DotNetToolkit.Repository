@@ -10,7 +10,8 @@
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <typeparam name="TKey">The type of the primary key.</typeparam>
-    public interface ICanDeleteAsync<TEntity, in TKey> where TEntity : class
+    /// <seealso cref="DotNetToolkit.Repository.Traits.ICanDelete{TEntity, TKey}" />
+    public interface ICanDeleteAsync<TEntity, in TKey> : ICanDelete<TEntity, TKey> where TEntity : class
     {
         /// <summary>
         /// Asynchronously deletes an entity with the given primary key value in the repository.

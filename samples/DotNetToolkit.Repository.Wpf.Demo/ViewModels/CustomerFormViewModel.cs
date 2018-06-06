@@ -47,29 +47,11 @@
 
         #endregion
 
-        #region Events
-
-        public event EventHandler Submitted;
-
-        #endregion
-
         #region Constructors
 
         public CustomerFormViewModel()
         {
-            SubmitCommand = new RelayCommand(OnSubmit);
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        private async void OnSubmit()
-        {
-            if (await ValidateAsync())
-            {
-                Submitted?.Invoke(this, EventArgs.Empty);
-            }
+            SubmitCommand = new RelayCommand(OnSubmitAsync);
         }
 
         #endregion

@@ -1,7 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.InMemory
 {
     using FetchStrategies;
-    using Logging;
+    using Helpers;
+    using Interceptors;
     using Properties;
     using System;
     using System.Collections.Concurrent;
@@ -33,7 +34,7 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryRepositoryFileBase{TEntity,TKey}"/> class.
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryFileBase{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
         protected InMemoryRepositoryFileBase(string filePath) : this(filePath, null)
@@ -41,11 +42,11 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryRepositoryFileBase{TEntity,TKey}"/> class.
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryFileBase{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
-        /// <param name="logger">The logger.</param>
-        protected InMemoryRepositoryFileBase(string filePath, ILogger logger) : base(logger)
+        /// <param name="interceptors">The interceptors.</param>
+        protected InMemoryRepositoryFileBase(string filePath, IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
         {
             OnInitialize(filePath);
         }
@@ -81,7 +82,7 @@
                 if (!fileName.EndsWith(@"\"))
                     fileName += @"\";
 
-                fileName += $"{GetType().Name}{FileExtension}";
+                fileName += $"{typeof(TEntity).GetTableName()}{FileExtension}";
             }
             else
             {
@@ -154,7 +155,7 @@
 
         #endregion
 
-        #region Overrides of InMemoryRepositoryBase<TEntity,TKey>
+        #region Overrides of InMemoryRepositoryBase<TEntity, TKey>
 
         /// <summary>
         /// A protected overridable method for getting an entity query that supplies the specified fetching strategy from the repository.

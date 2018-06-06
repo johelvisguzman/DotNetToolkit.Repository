@@ -11,7 +11,8 @@
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <typeparam name="TKey">The type of the primary key.</typeparam>
-    public interface ICanGetAsync<TEntity, in TKey> where TEntity : class
+    /// <seealso cref="DotNetToolkit.Repository.Traits.ICanGet{TEntity, TKey}" />
+    public interface ICanGetAsync<TEntity, in TKey> : ICanGet<TEntity, TKey> where TEntity : class
     {
         /// <summary>
         /// Asynchronously gets an entity with the given primary key value in the repository.
