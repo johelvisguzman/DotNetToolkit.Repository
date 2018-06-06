@@ -44,7 +44,7 @@
     /// <summary>
     /// Represents a repository for entity framework with a default primary key value of type integer.
     /// </summary>
-    public class AdoNetRepository<TEntity> : AdoNetRepositoryBase<TEntity, int>, IRepository<TEntity> where TEntity : class
+    public class AdoNetRepository<TEntity> : AdoNetRepositoryBase<TEntity, int>, IRepositoryAsync<TEntity> where TEntity : class
     {
         #region Constructors
 
