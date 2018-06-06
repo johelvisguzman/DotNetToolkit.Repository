@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Xml
 {
+    using Factories;
     using Interceptors;
     using System;
     using System.Collections.Generic;

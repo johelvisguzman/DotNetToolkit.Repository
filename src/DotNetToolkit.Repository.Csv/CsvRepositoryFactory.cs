@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Csv
 {
+    using Factories;
     using Interceptors;
     using System;
     using System.Collections.Generic;
