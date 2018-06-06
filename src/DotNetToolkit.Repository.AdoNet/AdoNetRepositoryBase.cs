@@ -1555,9 +1555,9 @@
             // Append options (paging, sorting)
             if (options != null)
             {
-                if (options is ISortingOptions<TEntity> sortingOptions)
+                if (!string.IsNullOrEmpty(options.SortingProperty))
                 {
-                    var lambda = ExpressionHelper.GetExpression<TEntity>(sortingOptions.SortingPropertyPath);
+                    var lambda = ExpressionHelper.GetExpression<TEntity>(options.SortingProperty);
                     var tableType = ExpressionHelper.GetMemberExpression(lambda).Expression.Type;
                     var tableName = config.GetTableName(tableType);
                     var tableAlias = config.GetTableAlias(tableName);
@@ -1565,15 +1565,15 @@
                     var columnAlias = config.GetColumnAlias(sortingPropertyInfo);
 
                     sb.Append("\n");
-                    sb.Append(sortingOptions.IsDescending ? $"ORDER BY [{tableAlias}].[{columnAlias}] DESC" : $"ORDER BY [{tableAlias}].[{columnAlias}] ASC");
+                    sb.Append(options.IsDescendingSorting ? $"ORDER BY [{tableAlias}].[{columnAlias}] DESC" : $"ORDER BY [{tableAlias}].[{columnAlias}] ASC");
                 }
 
-                if (options is IPagingOptions<TEntity> pagingOptions)
+                if (options.PageSize != -1)
                 {
                     sb.Append("\n");
-                    sb.Append($"OFFSET {pagingOptions.PageSize} * ({pagingOptions.PageIndex} - 1) ROWS");
+                    sb.Append($"OFFSET {options.PageSize} * ({options.PageIndex} - 1) ROWS");
                     sb.Append("\n");
-                    sb.Append($"FETCH NEXT {pagingOptions.PageSize} ROWS ONLY");
+                    sb.Append($"FETCH NEXT {options.PageSize} ROWS ONLY");
                 }
             }
 

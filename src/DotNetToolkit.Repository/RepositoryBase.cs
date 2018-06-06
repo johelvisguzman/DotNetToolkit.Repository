@@ -154,7 +154,26 @@
 
             if (options != null)
             {
-                query = options.Apply(query);
+                if (!string.IsNullOrEmpty(options.SortingProperty))
+                {
+                    query = options.IsDescendingSorting
+                        ? query.OrderByDescending(options.SortingProperty)
+                        : query.OrderBy(options.SortingProperty);
+                }
+                else
+                {
+                    var primaryKeyPropertyInfo = typeof(TEntity).GetPrimaryKeyPropertyInfo();
+                    var primaryKeyPropertyName = primaryKeyPropertyInfo.Name;
+
+                    query = options.IsDescendingSorting
+                        ? query.OrderByDescending(primaryKeyPropertyName)
+                        : query.OrderBy(primaryKeyPropertyName);
+                }
+
+                if (options.PageSize != -1)
+                {
+                    query = query.Skip((options.PageIndex - 1) * options.PageSize).Take(options.PageSize);
+                }
             }
 
             return query;
