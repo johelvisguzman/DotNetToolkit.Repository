@@ -5,7 +5,6 @@
     using System;
     using System.Collections.Generic;
     using System.Data.Entity;
-    using System.Data.Entity.Infrastructure;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryFactoryAsync" />.
@@ -15,7 +14,6 @@
         #region Fields
 
         private const string DbContextTypeKey = "dbContextType";
-        private const string DbCompiledModelKey = "dbCompiledModel";
         private const string ConnectionStringKey = "connectionString";
         private const string InterceptorsKey = "interceptors";
 
@@ -59,7 +57,6 @@
             object value = null;
             string connectionString = null;
             Type contextType = null;
-            DbCompiledModel model = null;
             context = null;
             interceptors = null;
 
@@ -89,15 +86,6 @@
                 throw new InvalidOperationException($"The '{ConnectionStringKey}' option is missing from the options dictionary.");
             }
 
-            if (options.ContainsKey(DbCompiledModelKey))
-            {
-                value = options[DbCompiledModelKey];
-                model = value as DbCompiledModel;
-
-                if (value != null && model == null)
-                    throw new ArgumentException($"The option value for the specified '{DbCompiledModelKey}' key must be a valid 'System.Data.Entity.Infrastructure.DbCompiledModel' type.");
-            }
-
             if (options.ContainsKey(InterceptorsKey))
             {
                 value = options[InterceptorsKey];
@@ -107,10 +95,10 @@
                     throw new ArgumentException($"The option value for the specified '{InterceptorsKey}' key must be a valid 'System.Collections.Generic.IEnumerable<DotNetToolkit.Repository.IRepositoryInterceptor>' type.");
             }
 
-            if (model == null)
+            if (!string.IsNullOrEmpty(connectionString))
                 context = (DbContext)Activator.CreateInstance(contextType, connectionString);
             else
-                context = (DbContext)Activator.CreateInstance(contextType, connectionString, model);
+                context = (DbContext)Activator.CreateInstance(contextType);
         }
 
         #endregion
