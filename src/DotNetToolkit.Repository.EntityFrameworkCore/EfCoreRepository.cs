@@ -30,7 +30,7 @@
     /// <summary>
     /// Represents a repository for entity framework core with a default primary key value of type integer.
     /// </summary>
-    public class EfCoreRepository<TEntity> : EfCoreRepositoryBase<TEntity, int>, IRepository<TEntity> where TEntity : class
+    public class EfCoreRepository<TEntity> : EfCoreRepositoryBase<TEntity, int>, IRepositoryAsync<TEntity> where TEntity : class
     {
         #region Constructors
 
