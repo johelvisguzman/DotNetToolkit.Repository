@@ -179,12 +179,9 @@
         /// <summary>
         /// Gets an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected virtual TEntity GetEntity(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
+        protected TEntity GetEntity(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
-
-            return GetQuery(criteria, options).FirstOrDefault();
+            return GetEntity<TEntity>(criteria, options, IdentityExpression<TEntity>.Instance);
         }
 
         /// <summary>
@@ -204,9 +201,9 @@
         /// <summary>
         /// Gets a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected virtual IEnumerable<TEntity> GetEntities(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
+        protected IEnumerable<TEntity> GetEntities(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
         {
-            return GetQuery(criteria, options).ToList();
+            return GetEntities<TEntity>(criteria, options, IdentityExpression<TEntity>.Instance);
         }
 
         /// <summary>

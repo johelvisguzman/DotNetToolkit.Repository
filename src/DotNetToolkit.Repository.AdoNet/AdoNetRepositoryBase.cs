@@ -1796,19 +1796,6 @@
         /// <summary>
         /// Gets an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected override TEntity GetEntity(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
-        {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
-
-            PrepareSelectStatement(criteria, options, out DbSqlSelectStatementConfig config);
-
-            return ExecuteObject<TEntity>(config.Sql, config.Parameters, r => AutoMap(r, config));
-        }
-
-        /// <summary>
-        /// Gets an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
         protected override TResult GetEntity<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
             if (criteria == null)
@@ -1820,16 +1807,6 @@
             PrepareSelectStatement(criteria, options, out DbSqlSelectStatementConfig config);
 
             return ExecuteObject<TResult>(config.Sql, config.Parameters, r => AutoMap<TResult>(r, selector, config));
-        }
-
-        /// <summary>
-        /// Gets a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
-        protected override IEnumerable<TEntity> GetEntities(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
-        {
-            PrepareSelectStatement(criteria, options, out DbSqlSelectStatementConfig config);
-
-            return ExecuteList<TEntity>(config.Sql, config.Parameters, r => AutoMap(r, config));
         }
 
         /// <summary>
@@ -1992,19 +1969,6 @@
         /// <summary>
         /// A protected asynchronous overridable method for getting an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected override Task<TEntity> GetEntityAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
-        {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
-
-            PrepareSelectStatement(criteria, options, out DbSqlSelectStatementConfig config);
-
-            return ExecuteObjectAsync<TEntity>(config.Sql, config.Parameters, r => AutoMap(r, config), cancellationToken);
-        }
-
-        /// <summary>
-        /// A protected asynchronous overridable method for getting an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
         protected override Task<TResult> GetEntityAsync<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             if (criteria == null)
@@ -2021,21 +1985,8 @@
         /// <summary>
         /// A protected asynchronous overridable method for getting a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected override Task<IEnumerable<TEntity>> GetEntitiesAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
-        {
-            PrepareSelectStatement(criteria, options, out DbSqlSelectStatementConfig config);
-
-            return ExecuteListAsync<TEntity>(config.Sql, config.Parameters, r => AutoMap(r, config), cancellationToken);
-        }
-
-        /// <summary>
-        /// A protected asynchronous overridable method for getting a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
         protected override Task<IEnumerable<TResult>> GetEntitiesAsync<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
-
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
