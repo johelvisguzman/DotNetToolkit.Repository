@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository
+﻿namespace DotNetToolkit.Repository.Factories
 {
     using System.Collections.Generic;
 

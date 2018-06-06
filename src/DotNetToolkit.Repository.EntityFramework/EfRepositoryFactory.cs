@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.EntityFramework
 {
+    using Factories;
     using Interceptors;
     using System;
     using System.Collections.Generic;
@@ -7,9 +8,9 @@
     using System.Data.Entity.Infrastructure;
 
     /// <summary>
-    /// An implementation of <see cref="IRepositoryFactory" />.
+    /// An implementation of <see cref="IRepositoryFactoryAsync" />.
     /// </summary>
-    public class EfRepositoryFactory : IRepositoryFactory
+    public class EfRepositoryFactory : IRepositoryFactoryAsync
     {
         #region Fields
 
@@ -123,10 +124,7 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity> Create<TEntity>() where TEntity : class
         {
-            if (_options == null)
-                throw new InvalidOperationException("No options have been provided.");
-
-            return Create<TEntity>(_options);
+            return CreateAsync<TEntity>();
         }
 
         /// <summary>
@@ -137,10 +135,7 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey> Create<TEntity, TKey>() where TEntity : class
         {
-            if (_options == null)
-                throw new InvalidOperationException("No options have been provided.");
-
-            return Create<TEntity, TKey>(_options);
+            return CreateAsync<TEntity, TKey>();
         }
 
         /// <summary>
@@ -151,9 +146,7 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity> Create<TEntity>(Dictionary<string, object> options) where TEntity : class
         {
-            GetOptions(options, out DbContext context, out IEnumerable<IRepositoryInterceptor> interceptors);
-
-            return new EfRepository<TEntity>(context, interceptors);
+            return CreateAsync<TEntity>(options);
         }
 
         /// <summary>
@@ -164,6 +157,62 @@
         /// <param name="options">The options.</param>
         /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey> Create<TEntity, TKey>(Dictionary<string, object> options) where TEntity : class
+        {
+            return CreateAsync<TEntity, TKey>(options);
+        }
+
+        #endregion
+
+        #region Implementation of IRepositoryFactoryAsync
+
+        /// <summary>
+        /// Creates a new asynchronous repository for the specified entity type.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <returns>The new asynchronous repository.</returns>
+        public IRepositoryAsync<TEntity> CreateAsync<TEntity>() where TEntity : class
+        {
+            if (_options == null)
+                throw new InvalidOperationException("No options have been provided.");
+
+            return CreateAsync<TEntity>(_options);
+        }
+
+        /// <summary>
+        /// Creates a new asynchronous repository for the specified entity and primary key type.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <typeparam name="TKey">The type of the key primary key value.</typeparam>
+        /// <returns>The new asynchronous repository.</returns>
+        public IRepositoryAsync<TEntity, TKey> CreateAsync<TEntity, TKey>() where TEntity : class
+        {
+            if (_options == null)
+                throw new InvalidOperationException("No options have been provided.");
+
+            return CreateAsync<TEntity, TKey>(_options);
+        }
+
+        /// <summary>
+        /// Creates a new asynchronous repository for the specified entity type.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="options">The options.</param>
+        /// <returns>The new asynchronous repository.</returns>
+        public IRepositoryAsync<TEntity> CreateAsync<TEntity>(Dictionary<string, object> options) where TEntity : class
+        {
+            GetOptions(options, out DbContext context, out IEnumerable<IRepositoryInterceptor> interceptors);
+
+            return new EfRepository<TEntity>(context, interceptors);
+        }
+
+        /// <summary>
+        /// Creates a new asynchronous repository for the specified entity and primary key type.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <typeparam name="TKey">The type of the key primary key value.</typeparam>
+        /// <param name="options">The options.</param>
+        /// <returns>The new asynchronous repository.</returns>
+        public IRepositoryAsync<TEntity, TKey> CreateAsync<TEntity, TKey>(Dictionary<string, object> options) where TEntity : class
         {
             GetOptions(options, out DbContext context, out IEnumerable<IRepositoryInterceptor> interceptors);
 

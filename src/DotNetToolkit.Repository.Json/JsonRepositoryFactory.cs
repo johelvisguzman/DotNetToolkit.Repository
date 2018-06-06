@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Json
 {
+    using Factories;
     using Interceptors;
     using System;
     using System.Collections.Generic;
