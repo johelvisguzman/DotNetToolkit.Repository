@@ -69,20 +69,26 @@
         }
 
         /// <summary>
-        /// A protected asynchronous overridable method for getting an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// Asynchronously gets a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected abstract Task<TEntity> GetEntityAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken());
+        protected Task<IEnumerable<TEntity>> GetEntitiesAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return GetEntitiesAsync<TEntity>(criteria, options, IdentityExpression<TEntity>.Instance, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously gets an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// </summary>
+        protected Task<TEntity> GetEntityAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return GetEntityAsync<TEntity>(criteria, options, IdentityExpression<TEntity>.Instance, cancellationToken);
+        }
 
         /// <summary>
         /// A protected asynchronous overridable method for getting an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
         protected abstract Task<TResult> GetEntityAsync<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken());
-
-        /// <summary>
-        /// A protected asynchronous overridable method for getting a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
-        protected abstract Task<IEnumerable<TEntity>> GetEntitiesAsync(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken());
-
+        
         /// <summary>
         /// A protected asynchronous overridable method for getting a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
