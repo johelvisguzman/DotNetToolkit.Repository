@@ -920,12 +920,13 @@
         /// <summary>
         /// Finds the collection of entities in the repository.
         /// </summary>
+        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The collection of entities in the repository.</returns>
-        public IEnumerable<TEntity> FindAll()
+        public IEnumerable<TEntity> FindAll(IQueryOptions<TEntity> options = null)
         {
             try
             {
-                return GetEntities(null, null);
+                return GetEntities(null, options);
             }
             catch (Exception ex)
             {
