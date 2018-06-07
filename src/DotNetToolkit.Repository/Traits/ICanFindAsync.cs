@@ -56,8 +56,10 @@
         /// <summary>
         /// Asynchronously finds the collection of entities in the repository.
         /// </summary>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of entities in the repository.</returns>
-        Task<IEnumerable<TEntity>> FindAllAsync(CancellationToken cancellationToken = default(CancellationToken));
+        Task<IEnumerable<TEntity>> FindAllAsync(IQueryOptions<TEntity> options = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Asynchronously finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.

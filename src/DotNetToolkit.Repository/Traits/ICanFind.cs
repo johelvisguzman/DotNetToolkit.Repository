@@ -49,8 +49,9 @@
         /// <summary>
         /// Finds the collection of entities in the repository.
         /// </summary>
+        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The collection of entities in the repository.</returns>
-        IEnumerable<TEntity> FindAll();
+        IEnumerable<TEntity> FindAll(IQueryOptions<TEntity> options = null);
 
         /// <summary>
         /// Finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
