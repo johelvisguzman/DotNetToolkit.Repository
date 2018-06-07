@@ -1555,25 +1555,42 @@
             // Append options (paging, sorting)
             if (options != null)
             {
-                if (options is ISortingOptions<TEntity> sortingOptions)
+                var sortings = options.SortingPropertiesMapping.ToDictionary(x => x.Key, x => x.Value);
+
+                if (!sortings.Any())
                 {
-                    var lambda = ExpressionHelper.GetExpression<TEntity>(sortingOptions.SortingPropertyPath);
+                    // Sorts on the Id key by default if no sorting is provided
+                    var primaryKeyPropertyInfo = typeof(TEntity).GetPrimaryKeyPropertyInfo();
+                    var primaryKeyPropertyName = primaryKeyPropertyInfo.Name;
+
+                    sortings.Add(primaryKeyPropertyName, false);
+                }
+
+                sb.Append("\n");
+                sb.Append("ORDER BY ");
+
+                foreach (var sorting in sortings)
+                {
+                    var isSortingDecending = sorting.Value;
+                    var sortingProperty = sorting.Key;
+                    var lambda = ExpressionHelper.GetExpression<TEntity>(sortingProperty);
                     var tableType = ExpressionHelper.GetMemberExpression(lambda).Expression.Type;
                     var tableName = config.GetTableName(tableType);
                     var tableAlias = config.GetTableAlias(tableName);
                     var sortingPropertyInfo = ExpressionHelper.GetPropertyInfo(lambda);
                     var columnAlias = config.GetColumnAlias(sortingPropertyInfo);
 
-                    sb.Append("\n");
-                    sb.Append(sortingOptions.IsDescending ? $"ORDER BY [{tableAlias}].[{columnAlias}] DESC" : $"ORDER BY [{tableAlias}].[{columnAlias}] ASC");
+                    sb.Append($"[{tableAlias}].[{columnAlias}] {(isSortingDecending ? "DESC" : "ASC")}, ");
                 }
 
-                if (options is IPagingOptions<TEntity> pagingOptions)
+                sb.Remove(sb.Length - 2, 2);
+
+                if (options.PageSize != -1)
                 {
                     sb.Append("\n");
-                    sb.Append($"OFFSET {pagingOptions.PageSize} * ({pagingOptions.PageIndex} - 1) ROWS");
+                    sb.Append($"OFFSET {options.PageSize} * ({options.PageIndex} - 1) ROWS");
                     sb.Append("\n");
-                    sb.Append($"FETCH NEXT {pagingOptions.PageSize} ROWS ONLY");
+                    sb.Append($"FETCH NEXT {options.PageSize} ROWS ONLY");
                 }
             }
 

@@ -1,11 +1,13 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
+    using System;
     using Data;
     using FetchStrategies;
     using Queries;
     using Specifications;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Xunit;
 
@@ -207,12 +209,6 @@
         public void FindWithSortingOptionsAscendingAsync()
         {
             ForAllRepositoriesAsync(TestFindWithSortingOptionsAscendingAsync);
-        }
-
-        [Fact]
-        public void FindWithSortingOptionsExecuteForAllRepositoriesAsync()
-        {
-            ForAllRepositoriesAsync(TestFindWithSortingOptionsExecuteForAllRepositoriesAsync);
         }
 
         [Fact]
@@ -451,7 +447,7 @@
             };
 
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
-            var queryOptions = new SortingOptions<Customer, string>(x => x.Name, true);
+            var queryOptions = new QueryOptions<Customer>().SortByDescending(x => x.Name);
 
             Assert.Null(repo.Find(x => x.Name.Contains("Random Name"), queryOptions)?.Name);
             Assert.Null(repo.Find(spec, queryOptions)?.Name);
@@ -475,7 +471,7 @@
             };
 
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
-            var queryOptions = new SortingOptions<Customer, string>(x => x.Name);
+            var queryOptions = new QueryOptions<Customer>().SortBy(x => x.Name);
 
             Assert.Null(repo.Find(x => x.Name.Contains("Random Name"), queryOptions)?.Name);
             Assert.Null(repo.Find(spec, queryOptions)?.Name);
@@ -514,16 +510,17 @@
             Assert.Single(repo.FindAll<string>(spec, x => x.Name));
         }
 
-        private static void TestFindAllWithSortingOptionsAscending(IRepository<Customer, int> repo)
+        private static void TestFindAllWithSortingOptionsDescending(IRepository<Customer, int> repo)
         {
             var entities = new List<Customer>
             {
-                new Customer { Name = "Random Name 2" },
-                new Customer { Name = "Random Name 1" }
+                new Customer { Id = 1, Name = "Random Name 2" },
+                new Customer { Id = 2, Name = "Random Name 1" },
+                new Customer { Id = 3, Name = "Random Name 2" }
             };
 
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
-            var queryOptions = new SortingOptions<Customer, string>(x => x.Name, true);
+            var queryOptions = new QueryOptions<Customer>().SortByDescending(x => x.Name);
 
             Assert.Null(repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions).FirstOrDefault()?.Name);
             Assert.Null(repo.FindAll(spec, queryOptions).FirstOrDefault()?.Name);
@@ -536,9 +533,26 @@
             Assert.Equal("Random Name 2", repo.FindAll(spec, queryOptions).First().Name);
             Assert.Equal("Random Name 2", repo.FindAll<string>(x => x.Name.Contains("Random Name"), x => x.Name, queryOptions).First());
             Assert.Equal("Random Name 2", repo.FindAll<string>(spec, x => x.Name, queryOptions).First());
+
+            Assert.Equal(1, repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions).First().Id);
+            Assert.Equal(1, repo.FindAll(spec, queryOptions).First().Id);
+            Assert.Equal(1, repo.FindAll<int>(x => x.Name.Contains("Random Name"), x => x.Id, queryOptions).First());
+            Assert.Equal(1, repo.FindAll<int>(spec, x => x.Id, queryOptions).First());
+
+            queryOptions = new QueryOptions<Customer>().SortByDescending(x => x.Name).ThenSortByDescending(x => x.Id);
+
+            Assert.Equal("Random Name 2", repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions).First().Name);
+            Assert.Equal("Random Name 2", repo.FindAll(spec, queryOptions).First().Name);
+            Assert.Equal("Random Name 2", repo.FindAll<string>(x => x.Name.Contains("Random Name"), x => x.Name, queryOptions).First());
+            Assert.Equal("Random Name 2", repo.FindAll<string>(spec, x => x.Name, queryOptions).First());
+
+            Assert.Equal(3, repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions).First().Id);
+            Assert.Equal(3, repo.FindAll(spec, queryOptions).First().Id);
+            Assert.Equal(3, repo.FindAll<int>(x => x.Name.Contains("Random Name"), x => x.Id, queryOptions).First());
+            Assert.Equal(3, repo.FindAll<int>(spec, x => x.Id, queryOptions).First());
         }
 
-        private static void TestFindAllWithSortingOptionsDescending(IRepository<Customer, int> repo)
+        private static void TestFindAllWithSortingOptionsAscending(IRepository<Customer, int> repo)
         {
             var entities = new List<Customer>
             {
@@ -547,7 +561,7 @@
             };
 
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
-            var queryOptions = new SortingOptions<Customer, string>(x => x.Name);
+            var queryOptions = new QueryOptions<Customer>().SortBy(x => x.Name);
 
             Assert.Null(repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions).FirstOrDefault()?.Name);
             Assert.Null(repo.FindAll(spec, queryOptions).FirstOrDefault()?.Name);
@@ -555,6 +569,13 @@
             Assert.Null(repo.FindAll<string>(spec, x => x.Name, queryOptions).FirstOrDefault());
 
             repo.Add(entities);
+
+            Assert.Equal("Random Name 1", repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions).First().Name);
+            Assert.Equal("Random Name 1", repo.FindAll(spec, queryOptions).First().Name);
+            Assert.Equal("Random Name 1", repo.FindAll<string>(x => x.Name.Contains("Random Name"), x => x.Name, queryOptions).First());
+            Assert.Equal("Random Name 1", repo.FindAll<string>(spec, x => x.Name, queryOptions).First());
+
+            queryOptions = new QueryOptions<Customer>().SortBy(x => x.Name).ThenSortBy(x => x.Id);
 
             Assert.Equal("Random Name 1", repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions).First().Name);
             Assert.Equal("Random Name 1", repo.FindAll(spec, queryOptions).First().Name);
@@ -573,7 +594,7 @@
 
             repo.Add(entities);
 
-            var queryOptions = new PagingOptions<Customer, int>(1, 5, x => x.Id);
+            var queryOptions = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
             var entitiesInDb = repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions);
 
             Assert.Equal(5, entitiesInDb.Count());
@@ -583,7 +604,7 @@
             Assert.Equal("Random Name 3", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 4", entitiesInDb.ElementAt(4).Name);
 
-            queryOptions.PageIndex = 2;
+            queryOptions = queryOptions.Page(2);
 
             entitiesInDb = repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions);
 
@@ -594,7 +615,7 @@
             Assert.Equal("Random Name 8", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 9", entitiesInDb.ElementAt(4).Name);
 
-            queryOptions.PageIndex = 3;
+            queryOptions = queryOptions.Page(3);
 
             entitiesInDb = repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions);
 
@@ -605,7 +626,7 @@
             Assert.Equal("Random Name 13", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 14", entitiesInDb.ElementAt(4).Name);
 
-            queryOptions.PageIndex = 4;
+            queryOptions = queryOptions.Page(4);
 
             entitiesInDb = repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions);
 
@@ -616,7 +637,7 @@
             Assert.Equal("Random Name 18", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 19", entitiesInDb.ElementAt(4).Name);
 
-            queryOptions.PageIndex = 5;
+            queryOptions = queryOptions.Page(5);
 
             entitiesInDb = repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions);
 
@@ -635,7 +656,7 @@
 
             repo.Add(entities);
 
-            var queryOptions = new PagingOptions<Customer, int>(1, 5, x => x.Id, true);
+            var queryOptions = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
             var entitiesInDb = repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions);
 
             Assert.Equal(5, entitiesInDb.Count());
@@ -645,7 +666,7 @@
             Assert.Equal("Random Name 17", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 16", entitiesInDb.ElementAt(4).Name);
 
-            queryOptions.PageIndex = 2;
+            queryOptions = queryOptions.Page(2);
 
             entitiesInDb = repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions);
 
@@ -656,7 +677,7 @@
             Assert.Equal("Random Name 12", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 11", entitiesInDb.ElementAt(4).Name);
 
-            queryOptions.PageIndex = 3;
+            queryOptions = queryOptions.Page(3);
 
             entitiesInDb = repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions);
 
@@ -667,7 +688,7 @@
             Assert.Equal("Random Name 7", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 6", entitiesInDb.ElementAt(4).Name);
 
-            queryOptions.PageIndex = 4;
+            queryOptions = queryOptions.Page(4);
 
             entitiesInDb = repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions);
 
@@ -678,7 +699,7 @@
             Assert.Equal("Random Name 2", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 1", entitiesInDb.ElementAt(4).Name);
 
-            queryOptions.PageIndex = 5;
+            queryOptions = queryOptions.Page(5);
 
             entitiesInDb = repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions);
 
@@ -773,7 +794,7 @@
                 entities.Add(new Customer { Id = i + 1, Name = "Random Name " + i });
             }
 
-            var queryOptions = new PagingOptions<Customer, int>(1, 5, x => x.Id);
+            var queryOptions = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
             var expectedDictionary = entities.ToDictionary(x => x.Id);
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
@@ -813,7 +834,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(y => y.Id, y => y.Name).Contains(x)));
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(spec, y => y.Id, y => y.Name).Contains(x)));
 
-            queryOptions.PageIndex = 2;
+            queryOptions = queryOptions.Page(2);
 
             entitiesInDb = repo.ToDictionary(x => x.Id, queryOptions);
 
@@ -843,7 +864,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(y => y.Id, y => y.Name).Contains(x)));
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(spec, y => y.Id, y => y.Name).Contains(x)));
 
-            queryOptions.PageIndex = 3;
+            queryOptions = queryOptions.Page(3);
 
             entitiesInDb = repo.ToDictionary(x => x.Id, queryOptions);
 
@@ -873,7 +894,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(y => y.Id, y => y.Name).Contains(x)));
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(spec, y => y.Id, y => y.Name).Contains(x)));
 
-            queryOptions.PageIndex = 4;
+            queryOptions = queryOptions.Page(4);
 
             entitiesInDb = repo.ToDictionary(x => x.Id, queryOptions);
 
@@ -903,7 +924,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(y => y.Id, y => y.Name).Contains(x)));
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(spec, y => y.Id, y => y.Name).Contains(x)));
 
-            queryOptions.PageIndex = 5;
+            queryOptions = queryOptions.Page(5);
 
             entitiesInDb = repo.ToDictionary(x => x.Id, queryOptions);
 
@@ -931,7 +952,7 @@
                 entities.Add(new Customer { Id = i + 1, Name = "Random Name " + i });
             }
 
-            var queryOptions = new PagingOptions<Customer, int>(1, 5, x => x.Id, true);
+            var queryOptions = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
             var expectedDictionary = entities.ToDictionary(x => x.Id);
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
@@ -971,7 +992,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(y => y.Id, y => y.Name).Contains(x)));
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(spec, y => y.Id, y => y.Name).Contains(x)));
 
-            queryOptions.PageIndex = 2;
+            queryOptions = queryOptions.Page(2);
 
             entitiesInDb = repo.ToDictionary(x => x.Id, queryOptions);
 
@@ -1001,7 +1022,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(y => y.Id, y => y.Name).Contains(x)));
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(spec, y => y.Id, y => y.Name).Contains(x)));
 
-            queryOptions.PageIndex = 3;
+            queryOptions = queryOptions.Page(3);
 
             entitiesInDb = repo.ToDictionary(x => x.Id, queryOptions);
 
@@ -1031,7 +1052,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(y => y.Id, y => y.Name).Contains(x)));
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(spec, y => y.Id, y => y.Name).Contains(x)));
 
-            queryOptions.PageIndex = 4;
+            queryOptions = queryOptions.Page(4);
 
             entitiesInDb = repo.ToDictionary(x => x.Id, queryOptions);
 
@@ -1061,7 +1082,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(y => y.Id, y => y.Name).Contains(x)));
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(spec, y => y.Id, y => y.Name).Contains(x)));
 
-            queryOptions.PageIndex = 5;
+            queryOptions = queryOptions.Page(5);
 
             entitiesInDb = repo.ToDictionary(x => x.Id, queryOptions);
 
@@ -1115,7 +1136,7 @@
             };
 
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
-            var queryOptions = new SortingOptions<Customer, string>(x => x.Name, true);
+            var queryOptions = new QueryOptions<Customer>().SortByDescending(x => x.Name);
 
             repo.Add(entities);
 
@@ -1134,7 +1155,7 @@
             };
 
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
-            var queryOptions = new SortingOptions<Customer, string>(x => x.Name);
+            var queryOptions = new QueryOptions<Customer>().SortBy(x => x.Name);
 
             repo.Add(entities);
 
@@ -1155,7 +1176,7 @@
 
             repo.Add(entities);
 
-            var queryOptions = new PagingOptions<Customer, int>(1, 5, x => x.Id);
+            var queryOptions = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
             var entitiesInDb = repo.GroupBy(y => y.Name, queryOptions);
 
             Assert.Equal(5, entitiesInDb.Count());
@@ -1165,7 +1186,7 @@
             Assert.Equal("Random Name 3", entitiesInDb.ElementAt(3).Key);
             Assert.Equal("Random Name 4", entitiesInDb.ElementAt(4).Key);
 
-            queryOptions.PageIndex = 2;
+            queryOptions = queryOptions.Page(2);
 
             entitiesInDb = repo.GroupBy(y => y.Name, queryOptions);
 
@@ -1176,7 +1197,7 @@
             Assert.Equal("Random Name 8", entitiesInDb.ElementAt(3).Key);
             Assert.Equal("Random Name 9", entitiesInDb.ElementAt(4).Key);
 
-            queryOptions.PageIndex = 3;
+            queryOptions = queryOptions.Page(3);
 
             entitiesInDb = repo.GroupBy(y => y.Name, queryOptions);
 
@@ -1187,7 +1208,7 @@
             Assert.Equal("Random Name 13", entitiesInDb.ElementAt(3).Key);
             Assert.Equal("Random Name 14", entitiesInDb.ElementAt(4).Key);
 
-            queryOptions.PageIndex = 4;
+            queryOptions = queryOptions.Page(4);
 
             entitiesInDb = repo.GroupBy(y => y.Name, queryOptions);
 
@@ -1198,7 +1219,7 @@
             Assert.Equal("Random Name 18", entitiesInDb.ElementAt(3).Key);
             Assert.Equal("Random Name 19", entitiesInDb.ElementAt(4).Key);
 
-            queryOptions.PageIndex = 5;
+            queryOptions = queryOptions.Page(5);
 
             entitiesInDb = repo.GroupBy(y => y.Name, queryOptions);
 
@@ -1217,7 +1238,7 @@
 
             repo.Add(entities);
 
-            var queryOptions = new PagingOptions<Customer, int>(1, 5, x => x.Id, true);
+            var queryOptions = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
             var entitiesInDb = repo.GroupBy(y => y.Name, queryOptions);
 
             Assert.Equal(5, entitiesInDb.Count());
@@ -1227,7 +1248,7 @@
             Assert.Equal("Random Name 17", entitiesInDb.ElementAt(3).Key);
             Assert.Equal("Random Name 16", entitiesInDb.ElementAt(4).Key);
 
-            queryOptions.PageIndex = 2;
+            queryOptions = queryOptions.Page(2);
 
             entitiesInDb = repo.GroupBy(y => y.Name, queryOptions);
 
@@ -1238,7 +1259,7 @@
             Assert.Equal("Random Name 12", entitiesInDb.ElementAt(3).Key);
             Assert.Equal("Random Name 11", entitiesInDb.ElementAt(4).Key);
 
-            queryOptions.PageIndex = 3;
+            queryOptions = queryOptions.Page(3);
 
             entitiesInDb = repo.GroupBy(y => y.Name, queryOptions);
 
@@ -1249,7 +1270,7 @@
             Assert.Equal("Random Name 7", entitiesInDb.ElementAt(3).Key);
             Assert.Equal("Random Name 6", entitiesInDb.ElementAt(4).Key);
 
-            queryOptions.PageIndex = 4;
+            queryOptions = queryOptions.Page(4);
 
             entitiesInDb = repo.GroupBy(y => y.Name, queryOptions);
 
@@ -1260,7 +1281,7 @@
             Assert.Equal("Random Name 2", entitiesInDb.ElementAt(3).Key);
             Assert.Equal("Random Name 1", entitiesInDb.ElementAt(4).Key);
 
-            queryOptions.PageIndex = 5;
+            queryOptions = queryOptions.Page(5);
 
             entitiesInDb = repo.GroupBy(y => y.Name, queryOptions);
 
@@ -1408,31 +1429,7 @@
             };
 
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
-            var queryOptions = new SortingOptions<Customer, string>(x => x.Name, true);
-
-            Assert.Null((await repo.FindAsync(x => x.Name.Contains("Random Name"), queryOptions))?.Name);
-            Assert.Null((await repo.FindAsync(spec, queryOptions))?.Name);
-            Assert.Null(await repo.FindAsync<string>(x => x.Name.Contains("Random Name"), x => x.Name, queryOptions));
-            Assert.Null(await repo.FindAsync<string>(spec, x => x.Name, queryOptions));
-
-            await repo.AddAsync(entities);
-
-            Assert.Equal("Random Name 2", (await repo.FindAsync(x => x.Name.Contains("Random Name"), queryOptions)).Name);
-            Assert.Equal("Random Name 2", (await repo.FindAsync(spec, queryOptions)).Name);
-            Assert.Equal("Random Name 2", await repo.FindAsync<string>(x => x.Name.Contains("Random Name"), x => x.Name, queryOptions));
-            Assert.Equal("Random Name 2", await repo.FindAsync<string>(spec, x => x.Name, queryOptions));
-        }
-
-        private static async Task TestFindWithSortingOptionsExecuteForAllRepositoriesAsync(IRepositoryAsync<Customer, int> repo)
-        {
-            var entities = new List<Customer>
-            {
-                new Customer { Name = "Random Name 2" },
-                new Customer { Name = "Random Name 1" }
-            };
-
-            var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
-            var queryOptions = new SortingOptions<Customer, string>(x => x.Name);
+            var queryOptions = new QueryOptions<Customer>().SortByDescending(x => x.Name);
 
             Assert.Null((await repo.FindAsync(x => x.Name.Contains("Random Name"), queryOptions))?.Name);
             Assert.Null((await repo.FindAsync(spec, queryOptions))?.Name);
@@ -1471,16 +1468,17 @@
             Assert.Single(await repo.FindAllAsync<string>(spec, x => x.Name));
         }
 
-        private static async Task TestFindAllWithSortingOptionsAscendingAsync(IRepositoryAsync<Customer, int> repo)
+        private static async Task TestFindAllWithSortingOptionsDescendingAsync(IRepositoryAsync<Customer, int> repo)
         {
             var entities = new List<Customer>
             {
-                new Customer { Name = "Random Name 2" },
-                new Customer { Name = "Random Name 1" }
+                new Customer { Id = 1, Name = "Random Name 2" },
+                new Customer { Id = 2, Name = "Random Name 1" },
+                new Customer { Id = 3, Name = "Random Name 2" }
             };
 
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
-            var queryOptions = new SortingOptions<Customer, string>(x => x.Name, true);
+            var queryOptions = new QueryOptions<Customer>().SortByDescending(x => x.Name);
 
             Assert.Null((await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions)).FirstOrDefault()?.Name);
             Assert.Null((await repo.FindAllAsync(spec, queryOptions)).FirstOrDefault()?.Name);
@@ -1493,9 +1491,26 @@
             Assert.Equal("Random Name 2", (await repo.FindAllAsync(spec, queryOptions)).First().Name);
             Assert.Equal("Random Name 2", (await repo.FindAllAsync<string>(x => x.Name.Contains("Random Name"), x => x.Name, queryOptions)).First());
             Assert.Equal("Random Name 2", (await repo.FindAllAsync<string>(spec, x => x.Name, queryOptions)).First());
+
+            Assert.Equal(1, (await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions)).First().Id);
+            Assert.Equal(1, (await repo.FindAllAsync(spec, queryOptions)).First().Id);
+            Assert.Equal(1, (await repo.FindAllAsync<int>(x => x.Name.Contains("Random Name"), x => x.Id, queryOptions)).First());
+            Assert.Equal(1, (await repo.FindAllAsync<int>(spec, x => x.Id, queryOptions)).First());
+
+            queryOptions = new QueryOptions<Customer>().SortByDescending(x => x.Name).ThenSortByDescending(x => x.Id);
+
+            Assert.Equal("Random Name 2", (await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions)).First().Name);
+            Assert.Equal("Random Name 2", (await repo.FindAllAsync(spec, queryOptions)).First().Name);
+            Assert.Equal("Random Name 2", (await repo.FindAllAsync<string>(x => x.Name.Contains("Random Name"), x => x.Name, queryOptions)).First());
+            Assert.Equal("Random Name 2", (await repo.FindAllAsync<string>(spec, x => x.Name, queryOptions)).First());
+
+            Assert.Equal(3, (await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions)).First().Id);
+            Assert.Equal(3, (await repo.FindAllAsync(spec, queryOptions)).First().Id);
+            Assert.Equal(3, (await repo.FindAllAsync<int>(x => x.Name.Contains("Random Name"), x => x.Id, queryOptions)).First());
+            Assert.Equal(3, (await repo.FindAllAsync<int>(spec, x => x.Id, queryOptions)).First());
         }
 
-        private static async Task TestFindAllWithSortingOptionsDescendingAsync(IRepositoryAsync<Customer, int> repo)
+        private static async Task TestFindAllWithSortingOptionsAscendingAsync(IRepositoryAsync<Customer, int> repo)
         {
             var entities = new List<Customer>
             {
@@ -1504,7 +1519,7 @@
             };
 
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
-            var queryOptions = new SortingOptions<Customer, string>(x => x.Name);
+            var queryOptions = new QueryOptions<Customer>().SortBy(x => x.Name);
 
             Assert.Null((await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions)).FirstOrDefault()?.Name);
             Assert.Null((await repo.FindAllAsync(spec, queryOptions)).FirstOrDefault()?.Name);
@@ -1512,6 +1527,13 @@
             Assert.Null((await repo.FindAllAsync<string>(spec, x => x.Name, queryOptions)).FirstOrDefault());
 
             await repo.AddAsync(entities);
+
+            Assert.Equal("Random Name 2", (await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions)).First().Name);
+            Assert.Equal("Random Name 2", (await repo.FindAllAsync(spec, queryOptions)).First().Name);
+            Assert.Equal("Random Name 2", (await repo.FindAllAsync<string>(x => x.Name.Contains("Random Name"), x => x.Name, queryOptions)).First());
+            Assert.Equal("Random Name 2", (await repo.FindAllAsync<string>(spec, x => x.Name, queryOptions)).First());
+
+            queryOptions = new QueryOptions<Customer>().SortBy(x => x.Name).ThenSortBy(x => x.Id);
 
             Assert.Equal("Random Name 2", (await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions)).First().Name);
             Assert.Equal("Random Name 2", (await repo.FindAllAsync(spec, queryOptions)).First().Name);
@@ -1530,7 +1552,7 @@
 
             await repo.AddAsync(entities);
 
-            var queryOptions = new PagingOptions<Customer, int>(1, 5, x => x.Id);
+            var queryOptions = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
             var entitiesInDb = await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions);
 
             Assert.Equal(5, entitiesInDb.Count());
@@ -1540,7 +1562,7 @@
             Assert.Equal("Random Name 3", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 4", entitiesInDb.ElementAt(4).Name);
 
-            queryOptions.PageIndex = 2;
+            queryOptions = queryOptions.Page(2);
 
             entitiesInDb = await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions);
 
@@ -1551,7 +1573,7 @@
             Assert.Equal("Random Name 8", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 9", entitiesInDb.ElementAt(4).Name);
 
-            queryOptions.PageIndex = 3;
+            queryOptions = queryOptions.Page(3);
 
             entitiesInDb = await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions);
 
@@ -1562,7 +1584,7 @@
             Assert.Equal("Random Name 13", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 14", entitiesInDb.ElementAt(4).Name);
 
-            queryOptions.PageIndex = 4;
+            queryOptions = queryOptions.Page(4);
 
             entitiesInDb = await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions);
 
@@ -1573,7 +1595,7 @@
             Assert.Equal("Random Name 18", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 19", entitiesInDb.ElementAt(4).Name);
 
-            queryOptions.PageIndex = 5;
+            queryOptions = queryOptions.Page(5);
 
             entitiesInDb = await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions);
 
@@ -1592,7 +1614,7 @@
 
             await repo.AddAsync(entities);
 
-            var queryOptions = new PagingOptions<Customer, int>(1, 5, x => x.Id, true);
+            var queryOptions = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
             var entitiesInDb = await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions);
 
             Assert.Equal(5, entitiesInDb.Count());
@@ -1602,7 +1624,7 @@
             Assert.Equal("Random Name 17", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 16", entitiesInDb.ElementAt(4).Name);
 
-            queryOptions.PageIndex = 2;
+            queryOptions = queryOptions.Page(2);
 
             entitiesInDb = await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions);
 
@@ -1613,7 +1635,7 @@
             Assert.Equal("Random Name 12", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 11", entitiesInDb.ElementAt(4).Name);
 
-            queryOptions.PageIndex = 3;
+            queryOptions = queryOptions.Page(3);
 
             entitiesInDb = await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions);
 
@@ -1624,7 +1646,7 @@
             Assert.Equal("Random Name 7", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 6", entitiesInDb.ElementAt(4).Name);
 
-            queryOptions.PageIndex = 4;
+            queryOptions = queryOptions.Page(4);
 
             entitiesInDb = await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions);
 
@@ -1635,7 +1657,7 @@
             Assert.Equal("Random Name 2", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 1", entitiesInDb.ElementAt(4).Name);
 
-            queryOptions.PageIndex = 5;
+            queryOptions = queryOptions.Page(5);
 
             entitiesInDb = await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions);
 
@@ -1730,7 +1752,7 @@
                 entities.Add(new Customer { Id = i + 1, Name = "Random Name " + i });
             }
 
-            var queryOptions = new PagingOptions<Customer, int>(1, 5, x => x.Id, true);
+            var queryOptions = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
             var expectedDictionary = entities.ToDictionary(x => x.Id);
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
@@ -1770,7 +1792,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(y => y.Id, y => y.Name).Contains(x)));
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(spec, y => y.Id, y => y.Name).Contains(x)));
 
-            queryOptions.PageIndex = 2;
+            queryOptions = queryOptions.Page(2);
 
             entitiesInDb = await repo.ToDictionaryAsync(x => x.Id, queryOptions);
 
@@ -1800,7 +1822,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(y => y.Id, y => y.Name).Contains(x)));
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(spec, y => y.Id, y => y.Name).Contains(x)));
 
-            queryOptions.PageIndex = 3;
+            queryOptions = queryOptions.Page(3);
 
             entitiesInDb = await repo.ToDictionaryAsync(x => x.Id, queryOptions);
 
@@ -1830,7 +1852,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(y => y.Id, y => y.Name).Contains(x)));
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(spec, y => y.Id, y => y.Name).Contains(x)));
 
-            queryOptions.PageIndex = 4;
+            queryOptions = queryOptions.Page(4);
 
             entitiesInDb = await repo.ToDictionaryAsync(x => x.Id, queryOptions);
 
@@ -1860,7 +1882,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(y => y.Id, y => y.Name).Contains(x)));
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionary(spec, y => y.Id, y => y.Name).Contains(x)));
 
-            queryOptions.PageIndex = 5;
+            queryOptions = queryOptions.Page(5);
 
             entitiesInDb = await repo.ToDictionaryAsync(x => x.Id, queryOptions);
 
@@ -1888,7 +1910,7 @@
                 entities.Add(new Customer { Id = i + 1, Name = "Random Name " + i });
             }
 
-            var queryOptions = new PagingOptions<Customer, int>(1, 5, x => x.Id);
+            var queryOptions = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
             var expectedDictionary = entities.ToDictionary(x => x.Id);
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
@@ -1928,7 +1950,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionaryAsync(y => y.Id, y => y.Name).Result.Contains(x)));
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionaryAsync(spec, y => y.Id, y => y.Name).Result.Contains(x)));
 
-            queryOptions.PageIndex = 2;
+            queryOptions = queryOptions.Page(2);
 
             entitiesInDb = await repo.ToDictionaryAsync(x => x.Id, queryOptions);
 
@@ -1958,7 +1980,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionaryAsync(y => y.Id, y => y.Name).Result.Contains(x)));
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionaryAsync(spec, y => y.Id, y => y.Name).Result.Contains(x)));
 
-            queryOptions.PageIndex = 3;
+            queryOptions = queryOptions.Page(3);
 
             entitiesInDb = await repo.ToDictionaryAsync(x => x.Id, queryOptions);
 
@@ -1988,7 +2010,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionaryAsync(y => y.Id, y => y.Name).Result.Contains(x)));
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionaryAsync(spec, y => y.Id, y => y.Name).Result.Contains(x)));
 
-            queryOptions.PageIndex = 4;
+            queryOptions = queryOptions.Page(4);
 
             entitiesInDb = await repo.ToDictionaryAsync(x => x.Id, queryOptions);
 
@@ -2018,7 +2040,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionaryAsync(y => y.Id, y => y.Name).Result.Contains(x)));
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionaryAsync(spec, y => y.Id, y => y.Name).Result.Contains(x)));
 
-            queryOptions.PageIndex = 5;
+            queryOptions = queryOptions.Page(5);
 
             entitiesInDb = await repo.ToDictionaryAsync(x => x.Id, queryOptions);
 
@@ -2072,7 +2094,7 @@
             };
 
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
-            var queryOptions = new SortingOptions<Customer, string>(x => x.Name, true);
+            var queryOptions = new QueryOptions<Customer>().SortByDescending(x => x.Name);
 
             await repo.AddAsync(entities);
 
@@ -2091,7 +2113,7 @@
             };
 
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
-            var queryOptions = new SortingOptions<Customer, string>(x => x.Name);
+            var queryOptions = new QueryOptions<Customer>().SortBy(x => x.Name);
 
             await repo.AddAsync(entities);
 
@@ -2112,7 +2134,7 @@
 
             await repo.AddAsync(entities);
 
-            var queryOptions = new PagingOptions<Customer, int>(1, 5, x => x.Id);
+            var queryOptions = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
             var entitiesInDb = await repo.GroupByAsync(y => y.Name, queryOptions);
 
             Assert.Equal(5, entitiesInDb.Count());
@@ -2122,7 +2144,7 @@
             Assert.Equal("Random Name 3", entitiesInDb.ElementAt(3).Key);
             Assert.Equal("Random Name 4", entitiesInDb.ElementAt(4).Key);
 
-            queryOptions.PageIndex = 2;
+            queryOptions = queryOptions.Page(2);
 
             entitiesInDb = await repo.GroupByAsync(y => y.Name, queryOptions);
 
@@ -2133,7 +2155,7 @@
             Assert.Equal("Random Name 8", entitiesInDb.ElementAt(3).Key);
             Assert.Equal("Random Name 9", entitiesInDb.ElementAt(4).Key);
 
-            queryOptions.PageIndex = 3;
+            queryOptions = queryOptions.Page(3);
 
             entitiesInDb = await repo.GroupByAsync(y => y.Name, queryOptions);
 
@@ -2144,7 +2166,7 @@
             Assert.Equal("Random Name 13", entitiesInDb.ElementAt(3).Key);
             Assert.Equal("Random Name 14", entitiesInDb.ElementAt(4).Key);
 
-            queryOptions.PageIndex = 4;
+            queryOptions = queryOptions.Page(4);
 
             entitiesInDb = await repo.GroupByAsync(y => y.Name, queryOptions);
 
@@ -2155,7 +2177,7 @@
             Assert.Equal("Random Name 18", entitiesInDb.ElementAt(3).Key);
             Assert.Equal("Random Name 19", entitiesInDb.ElementAt(4).Key);
 
-            queryOptions.PageIndex = 5;
+            queryOptions = queryOptions.Page(5);
 
             entitiesInDb = await repo.GroupByAsync(y => y.Name, queryOptions);
 
@@ -2174,7 +2196,7 @@
 
             await repo.AddAsync(entities);
 
-            var queryOptions = new PagingOptions<Customer, int>(1, 5, x => x.Id, true);
+            var queryOptions = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
             var entitiesInDb = await repo.GroupByAsync(y => y.Name, queryOptions);
 
             Assert.Equal(5, entitiesInDb.Count());
@@ -2184,7 +2206,7 @@
             Assert.Equal("Random Name 17", entitiesInDb.ElementAt(3).Key);
             Assert.Equal("Random Name 16", entitiesInDb.ElementAt(4).Key);
 
-            queryOptions.PageIndex = 2;
+            queryOptions = queryOptions.Page(2);
 
             entitiesInDb = await repo.GroupByAsync(y => y.Name, queryOptions);
 
@@ -2195,7 +2217,7 @@
             Assert.Equal("Random Name 12", entitiesInDb.ElementAt(3).Key);
             Assert.Equal("Random Name 11", entitiesInDb.ElementAt(4).Key);
 
-            queryOptions.PageIndex = 3;
+            queryOptions = queryOptions.Page(3);
 
             entitiesInDb = await repo.GroupByAsync(y => y.Name, queryOptions);
 
@@ -2206,7 +2228,7 @@
             Assert.Equal("Random Name 7", entitiesInDb.ElementAt(3).Key);
             Assert.Equal("Random Name 6", entitiesInDb.ElementAt(4).Key);
 
-            queryOptions.PageIndex = 4;
+            queryOptions = queryOptions.Page(4);
 
             entitiesInDb = await repo.GroupByAsync(y => y.Name, queryOptions);
 
@@ -2217,7 +2239,7 @@
             Assert.Equal("Random Name 2", entitiesInDb.ElementAt(3).Key);
             Assert.Equal("Random Name 1", entitiesInDb.ElementAt(4).Key);
 
-            queryOptions.PageIndex = 5;
+            queryOptions = queryOptions.Page(5);
 
             entitiesInDb = await repo.GroupByAsync(y => y.Name, queryOptions);
 
