@@ -1,11 +1,60 @@
 ﻿namespace DotNetToolkit.Repository.Helpers
 {
+    using Queries;
     using System;
     using System.Linq;
     using System.Reflection;
 
     internal static class QueryableHelpers
     {
+        public static IQueryable<T> Apply<T>(this IQueryOptions<T> options, IQueryable<T> query) where T : class
+        {
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
+
+            if (query == null)
+                throw new ArgumentNullException(nameof(query));
+
+            if (options.SortingPropertiesMapping.Any())
+            {
+                var primarySorting = options.SortingPropertiesMapping.ElementAt(0);
+                var isPrimarySortingDecending = primarySorting.Value;
+                var primarySortingProperty = primarySorting.Key;
+
+                var sortedQuery = isPrimarySortingDecending
+                    ? query.OrderByDescending(primarySortingProperty)
+                    : query.OrderBy(primarySortingProperty);
+
+                for (var i = 1; i < options.SortingPropertiesMapping.Count; i++)
+                {
+                    var sorting = options.SortingPropertiesMapping.ElementAt(i);
+                    var isSortingDecending = sorting.Value;
+                    var sortingProperty = sorting.Key;
+
+                    sortedQuery = isSortingDecending
+                        ? sortedQuery.ThenByDescending(sortingProperty)
+                        : sortedQuery.ThenBy(sortingProperty);
+                }
+
+                query = sortedQuery;
+            }
+            else
+            {
+                // Sorts on the Id key by default if no sorting is provided
+                var primaryKeyPropertyInfo = typeof(T).GetPrimaryKeyPropertyInfo();
+                var primaryKeyPropertyName = primaryKeyPropertyInfo.Name;
+
+                query = query.OrderBy(primaryKeyPropertyName);
+            }
+
+            if (options.PageSize != -1)
+            {
+                query = query.Skip((options.PageIndex - 1) * options.PageSize).Take(options.PageSize);
+            }
+
+            return query;
+        }
+
         private static IOrderedQueryable<T> ApplyOrder<T>(IQueryable<T> source, string propertyName, string methodName)
         {
             if (source == null)
@@ -34,6 +83,16 @@
         public static IOrderedQueryable<T> OrderByDescending<T>(this IQueryable<T> source, string propertyName)
         {
             return ApplyOrder<T>(source, propertyName, "OrderByDescending");
+        }
+
+        public static IOrderedQueryable<T> ThenBy<T>(this IOrderedQueryable<T> source, string propertyName)
+        {
+            return ApplyOrder<T>(source, propertyName, "ThenBy");
+        }
+
+        public static IOrderedQueryable<T> ThenByDescending<T>(this IOrderedQueryable<T> source, string propertyName)
+        {
+            return ApplyOrder<T>(source, propertyName, "ThenByDescending");
         }
     }
 }

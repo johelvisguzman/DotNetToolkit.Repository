@@ -1555,18 +1555,35 @@
             // Append options (paging, sorting)
             if (options != null)
             {
-                if (!string.IsNullOrEmpty(options.SortingProperty))
+                var sortings = options.SortingPropertiesMapping.ToDictionary(x => x.Key, x => x.Value);
+
+                if (!sortings.Any())
                 {
-                    var lambda = ExpressionHelper.GetExpression<TEntity>(options.SortingProperty);
+                    // Sorts on the Id key by default if no sorting is provided
+                    var primaryKeyPropertyInfo = typeof(TEntity).GetPrimaryKeyPropertyInfo();
+                    var primaryKeyPropertyName = primaryKeyPropertyInfo.Name;
+
+                    sortings.Add(primaryKeyPropertyName, false);
+                }
+
+                sb.Append("\n");
+                sb.Append("ORDER BY ");
+
+                foreach (var sorting in sortings)
+                {
+                    var isSortingDecending = sorting.Value;
+                    var sortingProperty = sorting.Key;
+                    var lambda = ExpressionHelper.GetExpression<TEntity>(sortingProperty);
                     var tableType = ExpressionHelper.GetMemberExpression(lambda).Expression.Type;
                     var tableName = config.GetTableName(tableType);
                     var tableAlias = config.GetTableAlias(tableName);
                     var sortingPropertyInfo = ExpressionHelper.GetPropertyInfo(lambda);
                     var columnAlias = config.GetColumnAlias(sortingPropertyInfo);
 
-                    sb.Append("\n");
-                    sb.Append(options.IsDescendingSorting ? $"ORDER BY [{tableAlias}].[{columnAlias}] DESC" : $"ORDER BY [{tableAlias}].[{columnAlias}] ASC");
+                    sb.Append($"[{tableAlias}].[{columnAlias}] {(isSortingDecending ? "DESC" : "ASC")}, ");
                 }
+
+                sb.Remove(sb.Length - 2, 2);
 
                 if (options.PageSize != -1)
                 {

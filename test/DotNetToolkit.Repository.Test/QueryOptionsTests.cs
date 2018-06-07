@@ -1,8 +1,9 @@
 ﻿namespace DotNetToolkit.Repository.Test
 {
-    using System;
     using Data;
     using Queries;
+    using System;
+    using System.Linq;
     using Xunit;
 
     public class QueryOptionsTests
@@ -49,33 +50,87 @@
         {
             IQueryOptions<Customer> options = new QueryOptions<Customer>();
 
-            Assert.Null(options.SortingProperty);
-            Assert.False(options.IsDescendingSorting);
+            Assert.Empty(options.SortingPropertiesMapping);
 
             options = options.SortBy(x => x.Id);
 
-            Assert.Equal("Id", options.SortingProperty);
-            Assert.False(options.IsDescendingSorting);
+            Assert.Equal(1, options.SortingPropertiesMapping.Count);
+            Assert.Equal("Id", options.SortingPropertiesMapping.ElementAt(0).Key);
+            Assert.False(options.SortingPropertiesMapping.ElementAt(0).Value);
 
             options = options.SortBy("Id");
 
-            Assert.Equal("Id", options.SortingProperty);
-            Assert.False(options.IsDescendingSorting);
+            Assert.Equal(1, options.SortingPropertiesMapping.Count);
+            Assert.Equal("Id", options.SortingPropertiesMapping.ElementAt(0).Key);
+            Assert.False(options.SortingPropertiesMapping.ElementAt(0).Value);
         }
 
         [Fact]
         public void SortByDescending()
         {
-            IQueryOptions<Customer>  options = new QueryOptions<Customer>()
-                .SortByDescending(x => x.Id);
+            IQueryOptions<Customer> options = new QueryOptions<Customer>();
 
-            Assert.Equal("Id", options.SortingProperty);
-            Assert.True(options.IsDescendingSorting);
+            Assert.Empty(options.SortingPropertiesMapping);
+
+            options = options.SortByDescending(x => x.Id);
+
+            Assert.Equal(1, options.SortingPropertiesMapping.Count);
+            Assert.Equal("Id", options.SortingPropertiesMapping.ElementAt(0).Key);
+            Assert.True(options.SortingPropertiesMapping.ElementAt(0).Value);
 
             options = options.SortByDescending("Id");
 
-            Assert.Equal("Id", options.SortingProperty);
-            Assert.True(options.IsDescendingSorting);
+            Assert.Equal(1, options.SortingPropertiesMapping.Count);
+            Assert.Equal("Id", options.SortingPropertiesMapping.ElementAt(0).Key);
+            Assert.True(options.SortingPropertiesMapping.ElementAt(0).Value);
+        }
+
+        [Fact]
+        public void SortThenBy()
+        {
+            IQueryOptions<Customer> options = new QueryOptions<Customer>();
+
+            var ex = Assert.Throws<InvalidOperationException>(() => options.ThenSortBy("Name"));
+            Assert.Equal("Cannot perform sorting action. A primary sorting will need to be applied first.", ex.Message);
+
+            ex = Assert.Throws<InvalidOperationException>(() => options.ThenSortBy(x => x.Name));
+            Assert.Equal("Cannot perform sorting action. A primary sorting will need to be applied first.", ex.Message);
+
+            options = options.SortBy(x => x.Id).ThenSortBy(x => x.Name);
+
+            Assert.Equal(2, options.SortingPropertiesMapping.Count);
+            Assert.Equal("Name", options.SortingPropertiesMapping.ElementAt(1).Key);
+            Assert.False(options.SortingPropertiesMapping.ElementAt(1).Value);
+
+            options = options.SortBy("Id").ThenSortBy("Name");
+
+            Assert.Equal(2, options.SortingPropertiesMapping.Count);
+            Assert.Equal("Name", options.SortingPropertiesMapping.ElementAt(1).Key);
+            Assert.False(options.SortingPropertiesMapping.ElementAt(1).Value);
+        }
+
+        [Fact]
+        public void SortThenByDescending()
+        {
+            IQueryOptions<Customer> options = new QueryOptions<Customer>();
+
+            var ex = Assert.Throws<InvalidOperationException>(() => options.ThenSortByDescending("Name"));
+            Assert.Equal("Cannot perform sorting action. A primary sorting will need to be applied first.", ex.Message);
+
+            ex = Assert.Throws<InvalidOperationException>(() => options.ThenSortByDescending(x => x.Name));
+            Assert.Equal("Cannot perform sorting action. A primary sorting will need to be applied first.", ex.Message);
+
+            options = options.SortByDescending(x => x.Id).ThenSortByDescending(x => x.Name);
+
+            Assert.Equal(2, options.SortingPropertiesMapping.Count);
+            Assert.Equal("Name", options.SortingPropertiesMapping.ElementAt(1).Key);
+            Assert.True(options.SortingPropertiesMapping.ElementAt(1).Value);
+
+            options = options.SortByDescending("Id").ThenSortByDescending("Name");
+
+            Assert.Equal(2, options.SortingPropertiesMapping.Count);
+            Assert.Equal("Name", options.SortingPropertiesMapping.ElementAt(1).Key);
+            Assert.True(options.SortingPropertiesMapping.ElementAt(1).Value);
         }
     }
 }

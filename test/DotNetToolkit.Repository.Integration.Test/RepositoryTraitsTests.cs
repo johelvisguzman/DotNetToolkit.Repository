@@ -1,11 +1,13 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
+    using System;
     using Data;
     using FetchStrategies;
     using Queries;
     using Specifications;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Xunit;
 
@@ -207,12 +209,6 @@
         public void FindWithSortingOptionsAscendingAsync()
         {
             ForAllRepositoriesAsync(TestFindWithSortingOptionsAscendingAsync);
-        }
-
-        [Fact]
-        public void FindWithSortingOptionsExecuteForAllRepositoriesAsync()
-        {
-            ForAllRepositoriesAsync(TestFindWithSortingOptionsExecuteForAllRepositoriesAsync);
         }
 
         [Fact]
@@ -514,12 +510,13 @@
             Assert.Single(repo.FindAll<string>(spec, x => x.Name));
         }
 
-        private static void TestFindAllWithSortingOptionsAscending(IRepository<Customer, int> repo)
+        private static void TestFindAllWithSortingOptionsDescending(IRepository<Customer, int> repo)
         {
             var entities = new List<Customer>
             {
-                new Customer { Name = "Random Name 2" },
-                new Customer { Name = "Random Name 1" }
+                new Customer { Id = 1, Name = "Random Name 2" },
+                new Customer { Id = 2, Name = "Random Name 1" },
+                new Customer { Id = 3, Name = "Random Name 2" }
             };
 
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
@@ -536,9 +533,26 @@
             Assert.Equal("Random Name 2", repo.FindAll(spec, queryOptions).First().Name);
             Assert.Equal("Random Name 2", repo.FindAll<string>(x => x.Name.Contains("Random Name"), x => x.Name, queryOptions).First());
             Assert.Equal("Random Name 2", repo.FindAll<string>(spec, x => x.Name, queryOptions).First());
+
+            Assert.Equal(1, repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions).First().Id);
+            Assert.Equal(1, repo.FindAll(spec, queryOptions).First().Id);
+            Assert.Equal(1, repo.FindAll<int>(x => x.Name.Contains("Random Name"), x => x.Id, queryOptions).First());
+            Assert.Equal(1, repo.FindAll<int>(spec, x => x.Id, queryOptions).First());
+
+            queryOptions = new QueryOptions<Customer>().SortByDescending(x => x.Name).ThenSortByDescending(x => x.Id);
+
+            Assert.Equal("Random Name 2", repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions).First().Name);
+            Assert.Equal("Random Name 2", repo.FindAll(spec, queryOptions).First().Name);
+            Assert.Equal("Random Name 2", repo.FindAll<string>(x => x.Name.Contains("Random Name"), x => x.Name, queryOptions).First());
+            Assert.Equal("Random Name 2", repo.FindAll<string>(spec, x => x.Name, queryOptions).First());
+
+            Assert.Equal(3, repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions).First().Id);
+            Assert.Equal(3, repo.FindAll(spec, queryOptions).First().Id);
+            Assert.Equal(3, repo.FindAll<int>(x => x.Name.Contains("Random Name"), x => x.Id, queryOptions).First());
+            Assert.Equal(3, repo.FindAll<int>(spec, x => x.Id, queryOptions).First());
         }
 
-        private static void TestFindAllWithSortingOptionsDescending(IRepository<Customer, int> repo)
+        private static void TestFindAllWithSortingOptionsAscending(IRepository<Customer, int> repo)
         {
             var entities = new List<Customer>
             {
@@ -555,6 +569,13 @@
             Assert.Null(repo.FindAll<string>(spec, x => x.Name, queryOptions).FirstOrDefault());
 
             repo.Add(entities);
+
+            Assert.Equal("Random Name 1", repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions).First().Name);
+            Assert.Equal("Random Name 1", repo.FindAll(spec, queryOptions).First().Name);
+            Assert.Equal("Random Name 1", repo.FindAll<string>(x => x.Name.Contains("Random Name"), x => x.Name, queryOptions).First());
+            Assert.Equal("Random Name 1", repo.FindAll<string>(spec, x => x.Name, queryOptions).First());
+
+            queryOptions = new QueryOptions<Customer>().SortBy(x => x.Name).ThenSortBy(x => x.Id);
 
             Assert.Equal("Random Name 1", repo.FindAll(x => x.Name.Contains("Random Name"), queryOptions).First().Name);
             Assert.Equal("Random Name 1", repo.FindAll(spec, queryOptions).First().Name);
@@ -1423,30 +1444,6 @@
             Assert.Equal("Random Name 2", await repo.FindAsync<string>(spec, x => x.Name, queryOptions));
         }
 
-        private static async Task TestFindWithSortingOptionsExecuteForAllRepositoriesAsync(IRepositoryAsync<Customer, int> repo)
-        {
-            var entities = new List<Customer>
-            {
-                new Customer { Name = "Random Name 2" },
-                new Customer { Name = "Random Name 1" }
-            };
-
-            var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
-            var queryOptions = new QueryOptions<Customer>().SortBy(x => x.Name);
-
-            Assert.Null((await repo.FindAsync(x => x.Name.Contains("Random Name"), queryOptions))?.Name);
-            Assert.Null((await repo.FindAsync(spec, queryOptions))?.Name);
-            Assert.Null(await repo.FindAsync<string>(x => x.Name.Contains("Random Name"), x => x.Name, queryOptions));
-            Assert.Null(await repo.FindAsync<string>(spec, x => x.Name, queryOptions));
-
-            await repo.AddAsync(entities);
-
-            Assert.Equal("Random Name 2", (await repo.FindAsync(x => x.Name.Contains("Random Name"), queryOptions)).Name);
-            Assert.Equal("Random Name 2", (await repo.FindAsync(spec, queryOptions)).Name);
-            Assert.Equal("Random Name 2", await repo.FindAsync<string>(x => x.Name.Contains("Random Name"), x => x.Name, queryOptions));
-            Assert.Equal("Random Name 2", await repo.FindAsync<string>(spec, x => x.Name, queryOptions));
-        }
-
         private static async Task TestFindAllAsync(IRepositoryAsync<Customer, int> repo)
         {
             const string name = "Random Name";
@@ -1471,12 +1468,13 @@
             Assert.Single(await repo.FindAllAsync<string>(spec, x => x.Name));
         }
 
-        private static async Task TestFindAllWithSortingOptionsAscendingAsync(IRepositoryAsync<Customer, int> repo)
+        private static async Task TestFindAllWithSortingOptionsDescendingAsync(IRepositoryAsync<Customer, int> repo)
         {
             var entities = new List<Customer>
             {
-                new Customer { Name = "Random Name 2" },
-                new Customer { Name = "Random Name 1" }
+                new Customer { Id = 1, Name = "Random Name 2" },
+                new Customer { Id = 2, Name = "Random Name 1" },
+                new Customer { Id = 3, Name = "Random Name 2" }
             };
 
             var spec = new Specification<Customer>(x => x.Name.Contains("Random Name"));
@@ -1493,9 +1491,26 @@
             Assert.Equal("Random Name 2", (await repo.FindAllAsync(spec, queryOptions)).First().Name);
             Assert.Equal("Random Name 2", (await repo.FindAllAsync<string>(x => x.Name.Contains("Random Name"), x => x.Name, queryOptions)).First());
             Assert.Equal("Random Name 2", (await repo.FindAllAsync<string>(spec, x => x.Name, queryOptions)).First());
+
+            Assert.Equal(1, (await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions)).First().Id);
+            Assert.Equal(1, (await repo.FindAllAsync(spec, queryOptions)).First().Id);
+            Assert.Equal(1, (await repo.FindAllAsync<int>(x => x.Name.Contains("Random Name"), x => x.Id, queryOptions)).First());
+            Assert.Equal(1, (await repo.FindAllAsync<int>(spec, x => x.Id, queryOptions)).First());
+
+            queryOptions = new QueryOptions<Customer>().SortByDescending(x => x.Name).ThenSortByDescending(x => x.Id);
+
+            Assert.Equal("Random Name 2", (await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions)).First().Name);
+            Assert.Equal("Random Name 2", (await repo.FindAllAsync(spec, queryOptions)).First().Name);
+            Assert.Equal("Random Name 2", (await repo.FindAllAsync<string>(x => x.Name.Contains("Random Name"), x => x.Name, queryOptions)).First());
+            Assert.Equal("Random Name 2", (await repo.FindAllAsync<string>(spec, x => x.Name, queryOptions)).First());
+
+            Assert.Equal(3, (await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions)).First().Id);
+            Assert.Equal(3, (await repo.FindAllAsync(spec, queryOptions)).First().Id);
+            Assert.Equal(3, (await repo.FindAllAsync<int>(x => x.Name.Contains("Random Name"), x => x.Id, queryOptions)).First());
+            Assert.Equal(3, (await repo.FindAllAsync<int>(spec, x => x.Id, queryOptions)).First());
         }
 
-        private static async Task TestFindAllWithSortingOptionsDescendingAsync(IRepositoryAsync<Customer, int> repo)
+        private static async Task TestFindAllWithSortingOptionsAscendingAsync(IRepositoryAsync<Customer, int> repo)
         {
             var entities = new List<Customer>
             {
@@ -1512,6 +1527,13 @@
             Assert.Null((await repo.FindAllAsync<string>(spec, x => x.Name, queryOptions)).FirstOrDefault());
 
             await repo.AddAsync(entities);
+
+            Assert.Equal("Random Name 2", (await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions)).First().Name);
+            Assert.Equal("Random Name 2", (await repo.FindAllAsync(spec, queryOptions)).First().Name);
+            Assert.Equal("Random Name 2", (await repo.FindAllAsync<string>(x => x.Name.Contains("Random Name"), x => x.Name, queryOptions)).First());
+            Assert.Equal("Random Name 2", (await repo.FindAllAsync<string>(spec, x => x.Name, queryOptions)).First());
+
+            queryOptions = new QueryOptions<Customer>().SortBy(x => x.Name).ThenSortBy(x => x.Id);
 
             Assert.Equal("Random Name 2", (await repo.FindAllAsync(x => x.Name.Contains("Random Name"), queryOptions)).First().Name);
             Assert.Equal("Random Name 2", (await repo.FindAllAsync(spec, queryOptions)).First().Name);

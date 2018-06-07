@@ -2,6 +2,7 @@
 {
     using Helpers;
     using System;
+    using System.Collections.Generic;
     using System.Linq.Expressions;
 
     /// <summary>
@@ -26,6 +27,8 @@
         {
             PageSize = -1;
             PageIndex = -1;
+
+            SortingPropertiesMapping = new Dictionary<string, bool>();
         }
 
         #endregion
@@ -43,14 +46,9 @@
         public int PageIndex { get; private set; }
 
         /// <summary>
-        /// Gets the sorting property path.
+        /// Gets a collection of sorting property paths.
         /// </summary>
-        public string SortingProperty { get; private set; }
-
-        /// <summary>
-        /// Gets a value indicating whether this sorting option is descending.
-        /// </summary>
-        public bool IsDescendingSorting { get; private set; }
+        public IDictionary<string, bool> SortingPropertiesMapping { get; }
 
         /// <summary>
         /// Applies a ascending sort order according to the specified property name.
@@ -62,8 +60,30 @@
             if (propertyName == null)
                 throw new ArgumentNullException(nameof(propertyName));
 
-            IsDescendingSorting = false;
-            SortingProperty = propertyName;
+            // Check if a primary sorting has been applied already
+            if (SortingPropertiesMapping.Count > 0)
+                return this;
+
+            SortingPropertiesMapping.Add(propertyName, false);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Applies a secondary ascending sort order according to the specified property name.
+        /// </summary>
+        /// <param name="propertyName">The name of the property.</param>
+        /// <returns>The current instance.</returns>
+        public IQueryOptions<T> ThenSortBy(string propertyName)
+        {
+            if (propertyName == null)
+                throw new ArgumentNullException(nameof(propertyName));
+
+            if (SortingPropertiesMapping.Count == 0)
+                throw new InvalidOperationException("Cannot perform sorting action. A primary sorting will need to be applied first.");
+
+            if (!SortingPropertiesMapping.ContainsKey(propertyName))
+                SortingPropertiesMapping.Add(propertyName, false);
 
             return this;
         }
@@ -78,8 +98,30 @@
             if (propertyName == null)
                 throw new ArgumentNullException(nameof(propertyName));
 
-            IsDescendingSorting = true;
-            SortingProperty = propertyName;
+            // Check if a primary sorting has been applied already
+            if (SortingPropertiesMapping.Count > 0)
+                return this;
+
+            SortingPropertiesMapping.Add(propertyName, true);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Applies a secondary descending sort order according to the specified property name.
+        /// </summary>
+        /// <param name="propertyName">The name of the property.</param>
+        /// <returns>The current instance.</returns>
+        public IQueryOptions<T> ThenSortByDescending(string propertyName)
+        {
+            if (propertyName == null)
+                throw new ArgumentNullException(nameof(propertyName));
+
+            if (SortingPropertiesMapping.Count == 0)
+                throw new InvalidOperationException("Cannot perform sorting action. A primary sorting will need to be applied first.");
+
+            if (!SortingPropertiesMapping.ContainsKey(propertyName))
+                SortingPropertiesMapping.Add(propertyName, true);
 
             return this;
         }
@@ -98,6 +140,19 @@
         }
 
         /// <summary>
+        /// Applies a primary descending sort order according to the specified property name.
+        /// </summary>
+        /// <param name="property">The sorting property expression.</param>
+        /// <returns>The current instance.</returns>
+        public IQueryOptions<T> ThenSortBy(Expression<Func<T, object>> property)
+        {
+            if (property == null)
+                throw new ArgumentNullException(nameof(property));
+
+            return ThenSortBy(ExpressionHelper.GetPropertyPath(property));
+        }
+
+        /// <summary>
         /// Applies a descending sort order according to the specified property name.
         /// </summary>
         /// <param name="property">The sorting property expression.</param>
@@ -108,6 +163,19 @@
                 throw new ArgumentNullException(nameof(property));
 
             return SortByDescending(ExpressionHelper.GetPropertyPath(property));
+        }
+
+        /// <summary>
+        /// Applies a secondary descending sort order according to the specified property name.
+        /// </summary>
+        /// <param name="property">The sorting property expression.</param>
+        /// <returns>The current instance.</returns>
+        public IQueryOptions<T> ThenSortByDescending(Expression<Func<T, object>> property)
+        {
+            if (property == null)
+                throw new ArgumentNullException(nameof(property));
+
+            return ThenSortByDescending(ExpressionHelper.GetPropertyPath(property));
         }
 
         /// <summary>
