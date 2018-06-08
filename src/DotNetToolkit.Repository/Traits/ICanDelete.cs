@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Traits
 {
-    using Specifications;
+    using Queries;
     using System.Collections.Generic;
 
     /// <summary>
@@ -23,10 +23,10 @@
         void Delete(TEntity entity);
 
         /// <summary>
-        /// Deletes all entities in the repository that satisfied the criteria specified by the <paramref name="criteria" />.
+        /// Deletes all entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
         /// </summary>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
-        void Delete(ISpecification<TEntity> criteria);
+        /// <param name="options">The options to apply to the query.</param>
+        void Delete(IQueryOptions<TEntity> options);
 
         /// <summary>
         /// Deletes the specified <paramref name="entities" /> collection into the repository.

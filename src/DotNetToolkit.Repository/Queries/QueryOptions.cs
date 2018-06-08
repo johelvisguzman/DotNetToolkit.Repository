@@ -1,6 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.Queries
 {
+    using FetchStrategies;
     using Helpers;
+    using Specifications;
     using System;
     using System.Collections.Generic;
     using System.Linq.Expressions;
@@ -209,6 +211,89 @@
 
             return Page(pageIndex, pageSize);
         }
+
+        /// <summary>
+        /// Applies a criteria that is used for matching entities against.
+        /// </summary>
+        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
+        /// <returns>The current instance.</returns>
+        public IQueryOptions<T> SatisfyBy(ISpecification<T> criteria)
+        {
+            if (criteria == null)
+                throw new ArgumentNullException(nameof(criteria));
+
+            Specification = criteria;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Applies a criteria that is used for matching entities against.
+        /// </summary>
+        /// <param name="predicate">A function to filter each entity.</param>
+        /// <returns>The current instance.</returns>
+        public IQueryOptions<T> SatisfyBy(Expression<Func<T, bool>> predicate)
+        {
+            if (predicate == null)
+                throw new ArgumentNullException(nameof(predicate));
+
+            return SatisfyBy(new Specification<T>(predicate));
+        }
+
+        /// <summary>
+        /// Applies the fetch strategy which defines the child objects that should be retrieved when loading the entity.
+        /// </summary>
+        /// <param name="fetchStrategy">The fetch strategy.</param>
+        /// <returns>The current instance.</returns>
+        public IQueryOptions<T> Fetch(IFetchStrategy<T> fetchStrategy)
+        {
+            if (fetchStrategy == null)
+                throw new ArgumentNullException(nameof(fetchStrategy));
+
+            FetchStrategy = fetchStrategy;
+
+            return this;
+        }
+        
+        /// <summary>
+        /// Specifies the related objects to include in the query results.
+        /// </summary>
+        /// <param name="path">The dot-separated list of related objects to return in the query results.</param>
+        /// <returns>The current instance.</returns>
+        public IQueryOptions<T> Fetch(string path)
+        {
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
+
+            var fetchStrategy = FetchStrategy ?? new FetchStrategy<T>();
+
+            fetchStrategy.Include(path);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Specifies the related objects to include in the query results.
+        /// </summary>
+        /// <param name="path">A lambda expression representing the path to include.</param>
+        /// <returns>The current instance.</returns>
+        public IQueryOptions<T> Fetch(Expression<Func<T, object>> path)
+        {
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
+
+            return Fetch(path.ToIncludeString());
+        }
+
+        /// <summary>
+        /// Gets the fetch strategy which defines the child objects that should be retrieved when loading the entity.
+        /// </summary>
+        public IFetchStrategy<T> FetchStrategy { get; private set; }
+
+        /// <summary>
+        /// Gets the specification.
+        /// </summary>
+        public ISpecification<T> Specification { get; private set; }
 
         #endregion
     }

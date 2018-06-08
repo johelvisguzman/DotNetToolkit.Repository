@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Specifications
 {
-    using FetchStrategies;
     using System;
     using System.Linq;
     using System.Linq.Expressions;
@@ -16,12 +15,7 @@
         /// Gets the function to test the entity and determine if it satisfies the specified criteria.
         /// </summary>
         Expression<Func<T, bool>> Predicate { get; }
-
-        /// <summary>
-        /// Gets or Sets the fetch strategy which defines the child objects that should be retrieved when loading the entity.
-        /// </summary>
-        IFetchStrategy<T> FetchStrategy { get; set; }
-
+        
         /// <summary>
         /// Returns a collection of entities that satisfied the criteria specified by the <see cref="Predicate"/> from the query.
         /// </summary>

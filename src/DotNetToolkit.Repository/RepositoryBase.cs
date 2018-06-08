@@ -136,28 +136,11 @@
         protected abstract IQueryable<TEntity> GetQuery(IFetchStrategy<TEntity> fetchStrategy = null);
 
         /// <summary>
-        /// Gets an entity query that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// Gets an entity query that satisfies the criteria specified by the <paramref name="options" /> from the repository.
         /// </summary>
-        protected IQueryable<TEntity> GetQuery(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
+        protected IQueryable<TEntity> GetQuery(IQueryOptions<TEntity> options)
         {
-            IQueryable<TEntity> query;
-
-            if (criteria != null)
-            {
-                query = GetQuery(criteria.FetchStrategy);
-                query = criteria.SatisfyingEntitiesFrom(query);
-            }
-            else
-            {
-                query = GetQuery();
-            }
-
-            if (options != null)
-            {
-                query = options.Apply(query);
-            }
-
-            return query;
+            return options != null ? options.Apply(GetQuery(options.FetchStrategy)) : GetQuery();
         }
 
         /// <summary>
@@ -165,115 +148,96 @@
         /// </summary>
         protected virtual TEntity GetEntity(TKey key, IFetchStrategy<TEntity> fetchStrategy)
         {
-            return GetEntity(GetByPrimaryKeySpecification(key, fetchStrategy), (IQueryOptions<TEntity>)null);
+            var options = new QueryOptions<TEntity>().SatisfyBy(GetByPrimaryKeySpecification(key));
+
+            if (fetchStrategy != null)
+                options.Fetch(fetchStrategy);
+
+            return GetEntity<TEntity>(options, IdentityExpression<TEntity>.Instance);
         }
 
         /// <summary>
-        /// Gets an entity query with the given primary key value from the repository.
+        /// Gets an entity that satisfies the criteria specified by the <paramref name="options" /> from the repository.
         /// </summary>
-        protected TEntity GetEntity(TKey key)
+        protected virtual TResult GetEntity<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
-            return Get(key, (IFetchStrategy<TEntity>)null);
-        }
-
-        /// <summary>
-        /// Gets an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
-        protected TEntity GetEntity(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
-        {
-            return GetEntity<TEntity>(criteria, options, IdentityExpression<TEntity>.Instance);
-        }
-
-        /// <summary>
-        /// Gets an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
-        protected virtual TResult GetEntity<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
-        {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
 
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            return GetQuery(criteria, options).Select(selector).FirstOrDefault();
+            return GetQuery(options).Select(selector).FirstOrDefault();
         }
 
         /// <summary>
-        /// Gets a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// Gets a collection of entities that satisfies the criteria specified by the <paramref name="options" /> from the repository.
         /// </summary>
-        protected IEnumerable<TEntity> GetEntities(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
-        {
-            return GetEntities<TEntity>(criteria, options, IdentityExpression<TEntity>.Instance);
-        }
-
-        /// <summary>
-        /// Gets a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
-        protected virtual IEnumerable<TResult> GetEntities<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
+        protected virtual IEnumerable<TResult> GetEntities<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            return GetQuery(criteria, options).Select(selector).ToList();
+            return GetQuery(options).Select(selector).ToList();
         }
 
         /// <summary>
-        /// Gets the number of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// Gets the number of entities that satisfies the criteria specified by the <paramref name="options" /> from the repository.
         /// </summary>
-        protected virtual int GetCount(ISpecification<TEntity> criteria)
+        protected virtual int GetCount(IQueryOptions<TEntity> options)
         {
-            var predicate = criteria?.Predicate?.Compile();
-
-            return predicate == null ? GetQuery().Count() : GetQuery().Count(predicate);
+            return GetQuery(options).Count();
         }
 
         /// <summary>
-        /// Determining whether the repository contains an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// Determining whether the repository contains an entity that satisfies the criteria specified by the <paramref name="options" /> from the repository.
         /// </summary>
-        protected virtual bool GetExist(ISpecification<TEntity> criteria)
+        protected virtual bool GetExist(IQueryOptions<TEntity> options)
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
-
-            return Find(criteria) != null;
+            return GetQuery(options).Any();
         }
 
         /// <summary>
         /// Gets a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected virtual Dictionary<TDictionaryKey, TElement> GetDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options)
+        protected virtual Dictionary<TDictionaryKey, TElement> GetDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
+            if (elementSelector == null)
+                throw new ArgumentNullException(nameof(elementSelector));
+
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            return GetQuery(criteria, options).ToDictionary(keySelectFunc, elementSelectorFunc, EqualityComparer<TDictionaryKey>.Default);
+            return GetQuery(options).ToDictionary(keySelectFunc, elementSelectorFunc, EqualityComparer<TDictionaryKey>.Default);
         }
 
         /// <summary>
         /// Gets a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected virtual IEnumerable<IGrouping<TGroupKey, TElement>> GetGroupBy<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options)
+        protected virtual IEnumerable<IGrouping<TGroupKey, TElement>> GetGroupBy<TGroupKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
+            if (elementSelector == null)
+                throw new ArgumentNullException(nameof(elementSelector));
+
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            return GetQuery(criteria, options).AsEnumerable().GroupBy(keySelectFunc, elementSelectorFunc, EqualityComparer<TGroupKey>.Default);
+            return GetQuery(options).AsEnumerable().GroupBy(keySelectFunc, elementSelectorFunc, EqualityComparer<TGroupKey>.Default);
         }
 
         /// <summary>
         /// Returns a specification for getting an entity by it's primary key.
         /// </summary>
         /// <param name="key">The entity's key.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The new specification.</returns>
         // https://github.com/SharpRepository/SharpRepository/blob/develop/SharpRepository.Repository/RepositoryBase.cs
-        protected virtual ISpecification<TEntity> GetByPrimaryKeySpecification(TKey key, IFetchStrategy<TEntity> fetchStrategy = null)
+        protected virtual ISpecification<TEntity> GetByPrimaryKeySpecification(TKey key)
         {
             var propInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<TEntity>();
             var parameter = Expression.Parameter(typeof(TEntity), "x");
@@ -285,14 +249,7 @@
                 parameter
             );
 
-            var spec = new Specification<TEntity>(lambda);
-
-            if (fetchStrategy != null)
-            {
-                spec.FetchStrategy = fetchStrategy;
-            }
-
-            return spec;
+            return new Specification<TEntity>(lambda);
         }
 
         /// <summary>
@@ -345,6 +302,26 @@
             }
         }
 
+        /// <summary>
+        /// Intercepts any errors that occurred while performing the specified action.
+        /// </summary>
+        /// <typeparam name="T">The type of the result returned by the specified action.</typeparam>
+        /// <param name="action">The action.</param>
+        /// <returns>The result of the performed action.</returns>
+        protected T InterceptError<T>(Func<T> action)
+        {
+            try
+            {
+                return action();
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
+        }
+
         #endregion
 
         #region Implementation of IRepositoryQueryable<out TEntity>
@@ -354,16 +331,7 @@
         /// </summary>
         public virtual IQueryable<TEntity> AsQueryable()
         {
-            try
-            {
-                return GetQuery();
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return InterceptError<IQueryable<TEntity>>(() => GetQuery());
         }
 
         #endregion
@@ -376,26 +344,7 @@
         /// <returns>The number of entities contained in the repository.</returns>
         public int Count()
         {
-            return Count((ISpecification<TEntity>)null);
-        }
-
-        /// <summary>
-        /// Returns the number of entities that satisfies the criteria specified by the <paramref name="criteria" /> in the repository.
-        /// </summary>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
-        /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="criteria" /> in the repository.</returns>
-        public int Count(ISpecification<TEntity> criteria)
-        {
-            try
-            {
-                return GetCount(criteria);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return Count((IQueryOptions<TEntity>)null);
         }
 
         /// <summary>
@@ -405,7 +354,17 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
         public int Count(Expression<Func<TEntity, bool>> predicate)
         {
-            return Count(predicate == null ? null : new Specification<TEntity>(predicate));
+            return Count(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)));
+        }
+
+        /// <summary>
+        /// Returns the number of entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
+        /// </summary>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        public int Count(IQueryOptions<TEntity> options)
+        {
+            return InterceptError<int>(() => GetCount(options));
         }
 
         /// <summary>
@@ -413,58 +372,57 @@
         /// </summary>
         /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="options">The options to apply to the query.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector, IQueryOptions<TEntity> options = null)
+        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector)
         {
-            return ToDictionary((ISpecification<TEntity>)null, keySelector, options);
-        }
-
-        /// <summary>
-        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElemen}" /> according to the specified <paramref name="keySelector" />, a comparer, and an element selector function..
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null)
-        {
-            return ToDictionary((ISpecification<TEntity>)null, keySelector, elementSelector, options);
+            return ToDictionary<TDictionaryKey>((IQueryOptions<TEntity>)null, keySelector);
         }
 
         /// <summary>
         /// Returns a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
         /// </summary>
         /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, IQueryOptions<TEntity> options = null)
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector)
         {
-            return ToDictionary(criteria, keySelector, IdentityExpression<TEntity>.Instance, options);
+            return ToDictionary<TDictionaryKey, TEntity>(options, keySelector, IdentityExpression<TEntity>.Instance);
         }
 
         /// <summary>
-        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElemen}" /> according to the specified <paramref name="keySelector" />, a comparer, and an element selector function..
+        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElemen}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
         /// </summary>
         /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
         /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
-        /// <param name="options">The options to apply to the query.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null)
+        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
+        {
+            return ToDictionary<TDictionaryKey, TElement>((IQueryOptions<TEntity>)null, keySelector, elementSelector);
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElemen}" /> according to the specified <paramref name="keySelector" />, and an element selector function with entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
+        /// </summary>
+        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
+        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
+        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
             try
             {
                 if (keySelector == null)
                     throw new ArgumentNullException(nameof(keySelector));
 
-                return GetDictionary(criteria, keySelector, elementSelector, options);
+                if (elementSelector == null)
+                    throw new ArgumentNullException(nameof(elementSelector));
+
+                return GetDictionary<TDictionaryKey, TElement>(options, keySelector, elementSelector);
             }
             catch (Exception ex)
             {
@@ -479,38 +437,22 @@
         /// </summary>
         /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="options">The options to apply to the query.</param>
         /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TEntity>> GroupBy<TGroupKey>(Expression<Func<TEntity, TGroupKey>> keySelector, IQueryOptions<TEntity> options = null)
+        public IEnumerable<IGrouping<TGroupKey, TEntity>> GroupBy<TGroupKey>(Expression<Func<TEntity, TGroupKey>> keySelector)
         {
-            return GroupBy((ISpecification<TEntity>)null, keySelector, options);
-        }
-
-        /// <summary>
-        /// Returns a new <see cref="IGrouping{TGroupKey, TElemen}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TElement>> GroupBy<TGroupKey, TElement>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null)
-        {
-            return GroupBy((ISpecification<TEntity>)null, keySelector, elementSelector, options);
+            return GroupBy<TGroupKey>((IQueryOptions<TEntity>)null, keySelector);
         }
 
         /// <summary>
         /// Returns a new <see cref="IGrouping{TGroupKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
         /// </summary>
         /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TEntity>> GroupBy<TGroupKey>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, IQueryOptions<TEntity> options = null)
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        public IEnumerable<IGrouping<TGroupKey, TEntity>> GroupBy<TGroupKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector)
         {
-            return GroupBy(criteria, keySelector, IdentityExpression<TEntity>.Instance, options);
+            return GroupBy<TGroupKey, TEntity>(options, keySelector, IdentityExpression<TEntity>.Instance);
         }
 
         /// <summary>
@@ -518,19 +460,34 @@
         /// </summary>
         /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
         /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
-        /// <param name="options">The options to apply to the query.</param>
         /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TElement>> GroupBy<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null)
+        public IEnumerable<IGrouping<TGroupKey, TElement>> GroupBy<TGroupKey, TElement>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
+        {
+            return GroupBy<TGroupKey, TElement>((IQueryOptions<TEntity>)null, keySelector, elementSelector);
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="IGrouping{TGroupKey, TElemen}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
+        /// </summary>
+        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
+        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
+        /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        public IEnumerable<IGrouping<TGroupKey, TElement>> GroupBy<TGroupKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
             try
             {
                 if (keySelector == null)
                     throw new ArgumentNullException(nameof(keySelector));
 
-                return GetGroupBy(criteria, keySelector, elementSelector, options);
+                if (elementSelector == null)
+                    throw new ArgumentNullException(nameof(elementSelector));
+
+                return GetGroupBy<TGroupKey, TElement>(options, keySelector, elementSelector);
             }
             catch (Exception ex)
             {
@@ -688,12 +645,12 @@
         }
 
         /// <summary>
-        /// Deletes all entities in the repository that satisfied the criteria specified by the <paramref name="criteria" />.
+        /// Deletes all entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
         /// </summary>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
-        public void Delete(ISpecification<TEntity> criteria)
+        /// <param name="options">The options to apply to the query.</param>
+        public void Delete(IQueryOptions<TEntity> options)
         {
-            Delete(FindAll(criteria));
+            Delete(FindAll(options));
         }
 
         /// <summary>
@@ -730,19 +687,7 @@
         /// <return>The entity found.</return>
         public TEntity Get(TKey key)
         {
-            try
-            {
-                if (key == null)
-                    throw new ArgumentNullException(nameof(key));
-
-                return GetEntity(key);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return Get<TEntity>(key, IdentityExpression<TEntity>.Instance);
         }
 
         /// <summary>
@@ -753,19 +698,7 @@
         /// <return>The entity found.</return>
         public TEntity Get(TKey key, IFetchStrategy<TEntity> fetchStrategy)
         {
-            try
-            {
-                if (key == null)
-                    throw new ArgumentNullException(nameof(key));
-
-                return GetEntity(key, fetchStrategy);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return Get<TEntity>(key, IdentityExpression<TEntity>.Instance, fetchStrategy);
         }
 
         /// <summary>
@@ -776,7 +709,7 @@
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public TResult Get<TResult>(TKey key, Expression<Func<TEntity, TResult>> selector)
         {
-            return Get(key, selector, (IFetchStrategy<TEntity>)null);
+            return Get<TResult>(key, selector, (IFetchStrategy<TEntity>)null);
         }
 
         /// <summary>
@@ -796,13 +729,12 @@
                 if (selector == null)
                     throw new ArgumentNullException(nameof(selector));
 
-                var result = GetEntity(key, fetchStrategy);
-                var selectFunc = selector.Compile();
-                var selectedResult = result == null
-                    ? default(TResult)
-                    : new[] { result }.AsEnumerable().Select(selectFunc).First();
+                var options = new QueryOptions<TEntity>().SatisfyBy(GetByPrimaryKeySpecification(key));
 
-                return selectedResult;
+                if (fetchStrategy != null)
+                    options.Fetch(fetchStrategy);
+
+                return GetEntity<TResult>(options, selector);
             }
             catch (Exception ex)
             {
@@ -830,43 +762,20 @@
         /// Finds the first entity in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The entity that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
-        public TEntity Find(Expression<Func<TEntity, bool>> predicate, IQueryOptions<TEntity> options = null)
+        public TEntity Find(Expression<Func<TEntity, bool>> predicate)
         {
-            if (predicate == null)
-            {
-                var ex = new ArgumentNullException(nameof(predicate));
-
-                Intercept(x => x.Error(ex));
-
-                throw ex;
-            }
-
-            return Find(new Specification<TEntity>(predicate), options);
+            return Find<TEntity>(predicate, IdentityExpression<TEntity>.Instance);
         }
 
         /// <summary>
-        /// Finds the first entity in the repository that satisfies the criteria specified by the <paramref name="criteria" /> in the repository.
+        /// Finds the first entity in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.
         /// </summary>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>The entity that satisfied the criteria specified by the <paramref name="criteria" /> in the repository.</returns>
-        public TEntity Find(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options = null)
+        /// <returns>The entity that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        public TEntity Find(IQueryOptions<TEntity> options)
         {
-            try
-            {
-                if (criteria == null)
-                    throw new ArgumentNullException(nameof(criteria));
-
-                return GetEntity(criteria, options);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return Find<TEntity>(options, IdentityExpression<TEntity>.Instance);
         }
 
         /// <summary>
@@ -874,40 +783,29 @@
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public TResult Find<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null)
+        public TResult Find<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector)
         {
-            if (predicate == null)
-            {
-                var ex = new ArgumentNullException(nameof(predicate));
-
-                Intercept(x => x.Error(ex));
-
-                throw ex;
-            }
-
-            return Find(new Specification<TEntity>(predicate), selector, options);
+            return Find<TResult>(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)), selector);
         }
 
         /// <summary>
-        /// Finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="criteria" /> in the repository.
+        /// Finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.
         /// </summary>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="options">The options to apply to the query.</param>
+        /// <param name="selector">A function to project each entity into a new form.</param>
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public TResult Find<TResult>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null)
+        public TResult Find<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
             try
             {
-                if (criteria == null)
-                    throw new ArgumentNullException(nameof(criteria));
+                if (options == null)
+                    throw new ArgumentNullException(nameof(options));
 
                 if (selector == null)
                     throw new ArgumentNullException(nameof(selector));
 
-                return GetEntity(criteria, options, selector);
+                return GetEntity<TResult>(options, selector);
             }
             catch (Exception ex)
             {
@@ -920,86 +818,40 @@
         /// <summary>
         /// Finds the collection of entities in the repository.
         /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The collection of entities in the repository.</returns>
-        public IEnumerable<TEntity> FindAll(IQueryOptions<TEntity> options = null)
+        public IEnumerable<TEntity> FindAll()
         {
-            try
-            {
-                return GetEntities(null, options);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return FindAll<TEntity>(IdentityExpression<TEntity>.Instance);
         }
 
         /// <summary>
         /// Finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
-        public IEnumerable<TEntity> FindAll(Expression<Func<TEntity, bool>> predicate, IQueryOptions<TEntity> options = null)
+        public IEnumerable<TEntity> FindAll(Expression<Func<TEntity, bool>> predicate)
         {
-            if (predicate == null)
-            {
-                var ex = new ArgumentNullException(nameof(predicate));
-
-                Intercept(x => x.Error(ex));
-
-                throw ex;
-            }
-
-            return FindAll(new Specification<TEntity>(predicate), options);
+            return FindAll<TEntity>(predicate, IdentityExpression<TEntity>.Instance);
         }
 
         /// <summary>
-        /// Finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="criteria" />.
+        /// Finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
         /// </summary>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="criteria" />.</returns>
-        public IEnumerable<TEntity> FindAll(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options = null)
+        /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
+        public IEnumerable<TEntity> FindAll(IQueryOptions<TEntity> options)
         {
-            try
-            {
-                if (criteria == null)
-                    throw new ArgumentNullException(nameof(criteria));
-
-                return GetEntities(criteria, options);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return FindAll<TEntity>(options, IdentityExpression<TEntity>.Instance);
         }
 
         /// <summary>
         /// Finds the collection of projected entity results in the repository.
         /// </summary>
         /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The collection of projected entity results in the repository.</returns>
-        public IEnumerable<TResult> FindAll<TResult>(Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null)
+        public IEnumerable<TResult> FindAll<TResult>(Expression<Func<TEntity, TResult>> selector)
         {
-            try
-            {
-                if (selector == null)
-                    throw new ArgumentNullException(nameof(selector));
-
-                return GetEntities((ISpecification<TEntity>)null, options, selector);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return FindAll<TResult>((IQueryOptions<TEntity>)null, selector);
         }
 
         /// <summary>
@@ -1007,40 +859,26 @@
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
-        public IEnumerable<TResult> FindAll<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null)
+        public IEnumerable<TResult> FindAll<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector)
         {
-            if (predicate == null)
-            {
-                var ex = new ArgumentNullException(nameof(predicate));
-
-                Intercept(x => x.Error(ex));
-
-                throw ex;
-            }
-
-            return FindAll(new Specification<TEntity>(predicate), selector, options);
+            return FindAll<TResult>(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)), selector);
         }
 
         /// <summary>
-        /// Finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="criteria" />.
+        /// Finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.
         /// </summary>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="criteria" />.</returns>
-        public IEnumerable<TResult> FindAll<TResult>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null)
+        /// <param name="selector">A function to project each entity into a new form.</param>
+        /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
+        public IEnumerable<TResult> FindAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
             try
             {
-                if (criteria == null)
-                    throw new ArgumentNullException(nameof(criteria));
-
                 if (selector == null)
                     throw new ArgumentNullException(nameof(selector));
 
-                return GetEntities(criteria, options, selector);
+                return GetEntities<TResult>(options, selector);
             }
             catch (Exception ex)
             {
@@ -1057,31 +895,22 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified predicate; otherwise, <c>false</c>.</returns>
         public bool Exists(Expression<Func<TEntity, bool>> predicate)
         {
-            if (predicate == null)
-            {
-                var ex = new ArgumentNullException(nameof(predicate));
-
-                Intercept(x => x.Error(ex));
-
-                throw ex;
-            }
-
-            return Exists(new Specification<TEntity>(predicate));
+            return Exists(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)));
         }
 
         /// <summary>
-        /// Determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="criteria" />.
+        /// Determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="options" />.
         /// </summary>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
+        /// <param name="options">The options to apply to the query.</param>
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
-        public bool Exists(ISpecification<TEntity> criteria)
+        public bool Exists(IQueryOptions<TEntity> options)
         {
             try
             {
-                if (criteria == null)
-                    throw new ArgumentNullException(nameof(criteria));
+                if (options == null)
+                    throw new ArgumentNullException(nameof(options));
 
-                return GetExist(criteria);
+                return GetExist(options);
             }
             catch (Exception ex)
             {

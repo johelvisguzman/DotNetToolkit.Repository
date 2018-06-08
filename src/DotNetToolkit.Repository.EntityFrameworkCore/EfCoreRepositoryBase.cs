@@ -4,7 +4,6 @@
     using Interceptors;
     using Microsoft.EntityFrameworkCore;
     using Queries;
-    using Specifications;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -167,76 +166,75 @@
         }
 
         /// <summary>
-        /// A protected asynchronous overridable method for getting an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// A protected asynchronous overridable method for getting an entity that satisfies the criteria specified by the <paramref name="options" /> from the repository.
         /// </summary>
-        protected override Task<TResult> GetEntityAsync<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        protected override Task<TResult> GetEntityAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
 
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            return GetQuery(criteria, options).Select(selector).FirstOrDefaultAsync(cancellationToken);
+            return GetQuery(options).Select(selector).FirstOrDefaultAsync(cancellationToken);
         }
 
         /// <summary>
-        /// A protected asynchronous overridable method for getting a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// A protected asynchronous overridable method for getting a collection of entities that satisfies the criteria specified by the <paramref name="options" /> from the repository.
         /// </summary>
-        protected override async Task<IEnumerable<TResult>> GetEntitiesAsync<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        protected override async Task<IEnumerable<TResult>> GetEntitiesAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            return await GetQuery(criteria, options).Select(selector).ToListAsync(cancellationToken);
+            return await GetQuery(options).Select(selector).ToListAsync(cancellationToken);
         }
 
         /// <summary>
-        /// A protected asynchronous overridable method for getting a the number of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// A protected asynchronous overridable method for getting a the number of entities that satisfies the criteria specified by the <paramref name="options" /> from the repository.
         /// </summary>
-        protected override Task<int> GetCountAsync(ISpecification<TEntity> criteria, CancellationToken cancellationToken = new CancellationToken())
+        protected override Task<int> GetCountAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            var predicate = criteria?.Predicate;
-
-            return predicate == null ? GetQuery().CountAsync(cancellationToken) : GetQuery().CountAsync(predicate, cancellationToken);
+            return GetQuery(options).CountAsync(cancellationToken);
         }
 
         /// <summary>
-        /// A protected asynchronous overridable method for determining whether the repository contains an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// A protected asynchronous overridable method for determining whether the repository contains an entity that satisfies the criteria specified by the <paramref name="options" /> from the repository.
         /// </summary>
-        protected override Task<bool> GetExistAsync(ISpecification<TEntity> criteria, CancellationToken cancellationToken = new CancellationToken())
+        protected override Task<bool> GetExistAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
-
-            var predicate = criteria?.Predicate;
-
-            return predicate == null ? GetQuery().AnyAsync(cancellationToken) : GetQuery().AnyAsync(predicate, cancellationToken);
+            return GetQuery(options).AnyAsync(cancellationToken);
         }
 
         /// <summary>
         /// A protected asynchronous overridable method for getting a new <see cref="IDictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected override Task<Dictionary<TDictionaryKey, TElement>> GetDictionaryAsync<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        protected override Task<Dictionary<TDictionaryKey, TElement>> GetDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
+            if (elementSelector == null)
+                throw new ArgumentNullException(nameof(elementSelector));
+
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            return GetQuery(criteria, options).ToDictionaryAsync(keySelectFunc, elementSelectorFunc, EqualityComparer<TDictionaryKey>.Default, cancellationToken);
+            return GetQuery(options).ToDictionaryAsync(keySelectFunc, elementSelectorFunc, EqualityComparer<TDictionaryKey>.Default, cancellationToken);
         }
 
         /// <summary>
         /// A protected asynchronous overridable method for getting a new <see cref="IGrouping{TGroupKey, TElemen}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected override async Task<IEnumerable<IGrouping<TGroupKey, TElement>>> GetGroupByAsync<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        protected override async Task<IEnumerable<IGrouping<TGroupKey, TElement>>> GetGroupByAsync<TGroupKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
-            return await GetQuery(criteria, options).GroupBy(keySelector, elementSelector, EqualityComparer<TGroupKey>.Default).ToListAsync(cancellationToken);
+            if (elementSelector == null)
+                throw new ArgumentNullException(nameof(elementSelector));
+
+            return await GetQuery(options).GroupBy(keySelector, elementSelector, EqualityComparer<TGroupKey>.Default).ToListAsync(cancellationToken);
         }
 
         #endregion
