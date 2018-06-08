@@ -1,9 +1,12 @@
 ﻿namespace DotNetToolkit.Repository.Test
 {
     using Data;
+    using FetchStrategies;
     using Queries;
+    using Specifications;
     using System;
     using System.Linq;
+    using System.Linq.Expressions;
     using Xunit;
 
     public class QueryOptionsTests
@@ -131,6 +134,54 @@
             Assert.Equal(2, options.SortingPropertiesMapping.Count);
             Assert.Equal("Name", options.SortingPropertiesMapping.ElementAt(1).Key);
             Assert.True(options.SortingPropertiesMapping.ElementAt(1).Value);
+        }
+
+        [Fact]
+        public void SatisfyBy()
+        {
+            Expression<Func<Customer, bool>> predicate = x => true;
+
+            var spec = new Specification<Customer>(predicate);
+
+            Assert.Null(new QueryOptions<Customer>().Specification);
+            Assert.Equal(spec, new QueryOptions<Customer>().SatisfyBy(spec).Specification);
+            Assert.Equal(predicate, new QueryOptions<Customer>().SatisfyBy(predicate).Specification.Predicate);
+        }
+
+        [Fact]
+        public void FetchPropertyNames()
+        {
+            var fetchStrategy = new FetchStrategy<Customer>();
+
+            var options = new QueryOptions<Customer>()
+                .Fetch(fetchStrategy)
+                .Fetch("Address")
+                .Fetch("Phone")
+                .Fetch("Phone.Customer");
+
+            Assert.Equal(fetchStrategy, options.FetchStrategy);
+
+            Assert.Contains("Address", fetchStrategy.IncludePaths);
+            Assert.Contains("Phone", fetchStrategy.IncludePaths);
+            Assert.Contains("Phone.Customer", fetchStrategy.IncludePaths);
+        }
+
+        [Fact]
+        public void FetchProperties()
+        {
+            var fetchStrategy = new FetchStrategy<Customer>();
+
+            var options = new QueryOptions<Customer>()
+                .Fetch(fetchStrategy)
+                .Fetch(x => x.Address)
+                .Fetch(x => x.Phone)
+                .Fetch(x => x.Phone.Customer);
+
+            Assert.Equal(fetchStrategy, options.FetchStrategy);
+
+            Assert.Contains("Address", fetchStrategy.IncludePaths);
+            Assert.Contains("Phone", fetchStrategy.IncludePaths);
+            Assert.Contains("Phone.Customer", fetchStrategy.IncludePaths);
         }
     }
 }

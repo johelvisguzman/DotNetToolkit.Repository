@@ -1,9 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Specifications
 {
-    using FetchStrategies;
     using Helpers;
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
 
@@ -21,7 +19,6 @@
         public Specification(Expression<Func<T, bool>> predicate)
         {
             Predicate = predicate;
-            FetchStrategy = new FetchStrategy<T>();
         }
 
         #endregion
@@ -33,7 +30,7 @@
         /// </summary>    
         public ISpecification<T> And(Specification<T> specification)
         {
-            return GetSpecification(Predicate.And(specification.Predicate), GetFetchStrategy(specification.FetchStrategy));
+            return new Specification<T>(Predicate.And(specification.Predicate));
         }
 
         /// <summary>    
@@ -41,7 +38,7 @@
         /// </summary>    
         public ISpecification<T> And(Expression<Func<T, bool>> predicate)
         {
-            return GetSpecification(Predicate.And(predicate), FetchStrategy);
+            return new Specification<T>(Predicate.And(predicate));
         }
 
         /// <summary>    
@@ -49,7 +46,7 @@
         /// </summary>    
         public ISpecification<T> Or(Specification<T> specification)
         {
-            return GetSpecification(Predicate.Or(specification.Predicate), GetFetchStrategy(specification.FetchStrategy));
+            return new Specification<T>(Predicate.Or(specification.Predicate));
         }
 
         /// <summary>    
@@ -57,7 +54,7 @@
         /// </summary>    
         public ISpecification<T> Or(Expression<Func<T, bool>> predicate)
         {
-            return GetSpecification(Predicate.Or(predicate), FetchStrategy);
+            return new Specification<T>(Predicate.Or(predicate));
         }
 
         /// <summary>    
@@ -65,43 +62,8 @@
         /// </summary>    
         public ISpecification<T> Not()
         {
-            return GetSpecification(Predicate.Not());
+            return new Specification<T>(Predicate.Not());
         }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// Gets a new specification using the specificied predicate.
-        /// </summary>
-        protected virtual Specification<T> GetSpecification(Expression<Func<T, bool>> predicate, IFetchStrategy<T> strategy = null)
-        {
-            var specification = new Specification<T>(predicate);
-            if (strategy != null)
-                specification.FetchStrategy = strategy;
-
-            return specification;
-        }
-
-        /// <summary>
-        /// Gets a new fetch strategy using the specificied strategy.
-        /// </summary>
-        protected virtual IFetchStrategy<T> GetFetchStrategy(IFetchStrategy<T> strategy)
-        {
-            var thisPaths = FetchStrategy != null ? FetchStrategy.IncludePaths : new List<string>();
-            var paramPaths = strategy != null ? strategy.IncludePaths : new List<string>();
-            var includePaths = thisPaths.Union(paramPaths);
-
-            var newStrategy = new FetchStrategy<T>();
-            foreach (var includePath in includePaths)
-            {
-                newStrategy.Include(includePath);
-            }
-
-            return newStrategy;
-        }
-
 
         #endregion
 
@@ -111,11 +73,6 @@
         /// Gets the function to test the entity and determine if it satisfies the specified criteria.
         /// </summary>
         public Expression<Func<T, bool>> Predicate { get; }
-
-        /// <summary>
-        /// Gets or Sets the fetch strategy which defines the child objects that should be retrieved when loading the entity.
-        /// </summary>
-        public IFetchStrategy<T> FetchStrategy { get; set; }
 
         /// <summary>
         /// Returns a collection of entities that satisfied the criteria specified by the <see cref="ISpecification{T}.Predicate"/> from the query.

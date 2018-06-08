@@ -2,7 +2,7 @@
 {
     using AdoNet;
     using FetchStrategies;
-    using Specifications;
+    using Queries;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
@@ -169,10 +169,7 @@
 
             const string name = "Random Name";
 
-            var spec = new Specification<Customer>(x => x.Name.Equals(name))
-            {
-                FetchStrategy = new FetchStrategy<Customer>()
-            };
+            var options = new QueryOptions<Customer>();
 
             var entity = new Customer
             {
@@ -197,9 +194,9 @@
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(address, customerRepo.Find(x => x.Name.Equals(name)).Address);
-            TestCustomerAddress(address, customerRepo.Find(spec).Address);
+            TestCustomerAddress(address, customerRepo.Find(options).Address);
             TestCustomerAddress(address, customerRepo.Find<CustomerAddress>(x => x.Name.Equals(name), x => x.Address));
-            TestCustomerAddress(address, customerRepo.Find<CustomerAddress>(spec, x => x.Address));
+            TestCustomerAddress(address, customerRepo.Find<CustomerAddress>(options, x => x.Address));
         }
 
         [Fact]
@@ -214,10 +211,7 @@
 
             const string name = "Random Name";
 
-            var spec = new Specification<Customer>(x => x.Name.Equals(name))
-            {
-                FetchStrategy = new FetchStrategy<Customer>()
-            };
+            var options = new QueryOptions<Customer>();
 
             var entity = new Customer
             {
@@ -242,9 +236,9 @@
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(address, (await customerRepo.FindAsync(x => x.Name.Equals(name))).Address);
-            TestCustomerAddress(address, (await customerRepo.FindAsync(spec)).Address);
+            TestCustomerAddress(address, (await customerRepo.FindAsync(options)).Address);
             TestCustomerAddress(address, await customerRepo.FindAsync<CustomerAddress>(x => x.Name.Equals(name), x => x.Address));
-            TestCustomerAddress(address, await customerRepo.FindAsync<CustomerAddress>(spec, x => x.Address));
+            TestCustomerAddress(address, await customerRepo.FindAsync<CustomerAddress>(options, x => x.Address));
         }
 
         [Fact]
@@ -259,10 +253,7 @@
 
             const string name = "Random Name";
 
-            var spec = new Specification<Customer>(x => x.Name.Equals(name))
-            {
-                FetchStrategy = new FetchStrategy<Customer>()
-            };
+            var options = new QueryOptions<Customer>();
 
             var entity = new Customer
             {
@@ -288,9 +279,9 @@
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(address, customerRepo.FindAll()?.FirstOrDefault()?.Address);
             TestCustomerAddress(address, customerRepo.FindAll(x => x.Name.Equals(name))?.FirstOrDefault()?.Address);
-            TestCustomerAddress(address, customerRepo.FindAll(spec)?.FirstOrDefault()?.Address);
+            TestCustomerAddress(address, customerRepo.FindAll(options)?.FirstOrDefault()?.Address);
             TestCustomerAddress(address, customerRepo.FindAll<CustomerAddress>(x => x.Name.Equals(name), x => x.Address)?.FirstOrDefault());
-            TestCustomerAddress(address, customerRepo.FindAll<CustomerAddress>(spec, x => x.Address)?.FirstOrDefault());
+            TestCustomerAddress(address, customerRepo.FindAll<CustomerAddress>(options, x => x.Address)?.FirstOrDefault());
         }
 
         [Fact]
@@ -305,10 +296,7 @@
 
             const string name = "Random Name";
 
-            var spec = new Specification<Customer>(x => x.Name.Equals(name))
-            {
-                FetchStrategy = new FetchStrategy<Customer>()
-            };
+            var options = new QueryOptions<Customer>();
 
             var entity = new Customer
             {
@@ -334,9 +322,9 @@
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(address, (await customerRepo.FindAllAsync())?.FirstOrDefault()?.Address);
             TestCustomerAddress(address, (await customerRepo.FindAllAsync(x => x.Name.Equals(name)))?.FirstOrDefault()?.Address);
-            TestCustomerAddress(address, (await customerRepo.FindAllAsync(spec))?.FirstOrDefault()?.Address);
+            TestCustomerAddress(address, (await customerRepo.FindAllAsync(options))?.FirstOrDefault()?.Address);
             TestCustomerAddress(address, (await customerRepo.FindAllAsync<CustomerAddress>(x => x.Name.Equals(name), x => x.Address))?.FirstOrDefault());
-            TestCustomerAddress(address, (await customerRepo.FindAllAsync<CustomerAddress>(spec, x => x.Address))?.FirstOrDefault());
+            TestCustomerAddress(address, (await customerRepo.FindAllAsync<CustomerAddress>(options, x => x.Address))?.FirstOrDefault());
         }
 
         [Fact]
@@ -351,10 +339,7 @@
 
             const string street = "Street";
 
-            var spec = new Specification<Customer>(x => x.Address.Street.Equals(street))
-            {
-                FetchStrategy = new FetchStrategy<Customer>()
-            };
+            var options = new QueryOptions<Customer>();
 
             var entity = new Customer
             {
@@ -377,7 +362,7 @@
 
             addressRepo.Add(address);
 
-            Assert.True(customerRepo.Exists(spec));
+            Assert.True(customerRepo.Exists(options));
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             Assert.True(customerRepo.Exists(x => x.Address.Street.Equals(street)));
@@ -395,10 +380,7 @@
 
             const string street = "Street";
 
-            var spec = new Specification<Customer>(x => x.Address.Street.Equals(street))
-            {
-                FetchStrategy = new FetchStrategy<Customer>()
-            };
+            var options = new QueryOptions<Customer>();
 
             var entity = new Customer
             {
@@ -421,7 +403,7 @@
 
             await addressRepo.AddAsync(address);
 
-            Assert.True(await customerRepo.ExistsAsync(spec));
+            Assert.True(await customerRepo.ExistsAsync(options));
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             Assert.True(await customerRepo.ExistsAsync(x => x.Address.Street.Equals(street)));

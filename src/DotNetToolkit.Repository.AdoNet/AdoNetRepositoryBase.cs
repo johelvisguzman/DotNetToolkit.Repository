@@ -6,7 +6,6 @@
     using Internal;
     using Properties;
     using Queries;
-    using Specifications;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -1524,37 +1523,37 @@
             config = cfg;
         }
 
-        private void PrepareSelectStatement(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, out DbSqlSelectStatementConfig config)
+        private void PrepareSelectStatement(IQueryOptions<TEntity> options, out DbSqlSelectStatementConfig config)
         {
             var parameters = new Dictionary<string, object>();
             var sb = new StringBuilder();
 
             // Append initial select statement
-            PrepareSelectStatement(criteria?.FetchStrategy, out config);
+            PrepareSelectStatement(options?.FetchStrategy, out config);
 
             sb.Append(config.Sql);
 
-            // Append where statement
-            if (criteria != null)
-            {
-                new DbSqlExpressionTranslator().Translate(
-                    criteria.Predicate,
-                    config,
-                    out string whereSql,
-                    out Dictionary<string, object> whereParameters);
-
-                sb.Append("\n");
-                sb.Append(whereSql);
-
-                foreach (var item in whereParameters)
-                {
-                    parameters.Add(item.Key, item.Value);
-                }
-            }
-
-            // Append options (paging, sorting)
             if (options != null)
             {
+                // Append where statement
+                if (options.Specification != null)
+                {
+                    new DbSqlExpressionTranslator().Translate(
+                        options.Specification.Predicate,
+                        config,
+                        out string whereSql,
+                        out Dictionary<string, object> whereParameters);
+
+                    sb.Append("\n");
+                    sb.Append(whereSql);
+
+                    foreach (var item in whereParameters)
+                    {
+                        parameters.Add(item.Key, item.Value);
+                    }
+                }
+
+                // Append options (paging, sorting)
                 var sortings = options.SortingPropertiesMapping.ToDictionary(x => x.Key, x => x.Value);
 
                 if (!sortings.Any())
@@ -1802,26 +1801,28 @@
         /// </summary>
         protected override TEntity GetEntity(TKey key, IFetchStrategy<TEntity> fetchStrategy)
         {
-            PrepareSelectStatement(
-                GetByPrimaryKeySpecification(key, fetchStrategy),
-                (IQueryOptions<TEntity>)null,
-                out DbSqlSelectStatementConfig config);
+            var options = new QueryOptions<TEntity>().SatisfyBy(GetByPrimaryKeySpecification(key));
+
+            if (fetchStrategy != null)
+                options.Fetch(fetchStrategy);
+
+            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
 
             return ExecuteObject<TEntity>(config.Sql, config.Parameters, r => AutoMap(r, config));
         }
 
         /// <summary>
-        /// Gets an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// Gets an entity that satisfies the criteria specified by the <paramref name="options" /> from the repository.
         /// </summary>
-        protected override TResult GetEntity<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
+        protected override TResult GetEntity<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
 
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            PrepareSelectStatement(criteria, options, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
 
             return ExecuteObject<TResult>(config.Sql, config.Parameters, r => AutoMap<TResult>(r, selector, config));
         }
@@ -1829,22 +1830,22 @@
         /// <summary>
         /// Gets a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
         /// </summary>
-        protected override IEnumerable<TResult> GetEntities<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
+        protected override IEnumerable<TResult> GetEntities<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            PrepareSelectStatement(criteria, options, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
 
             return ExecuteList<TResult>(config.Sql, config.Parameters, r => AutoMap<TResult>(r, selector, config));
         }
 
         /// <summary>
-        /// Gets the number of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// Gets the number of entities that satisfies the criteria specified by the <paramref name="options" /> from the repository.
         /// </summary>
-        protected override int GetCount(ISpecification<TEntity> criteria)
+        protected override int GetCount(IQueryOptions<TEntity> options)
         {
-            PrepareSelectStatement(criteria, (IQueryOptions<TEntity>)null, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
 
             using (var reader = ExecuteReader(config.Sql, config.Parameters))
             {
@@ -1860,14 +1861,14 @@
         }
 
         /// <summary>
-        /// A protected overridable method for determining whether the repository contains an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// A protected overridable method for determining whether the repository contains an entity that satisfies the criteria specified by the <paramref name="options" /> from the repository.
         /// </summary>
-        protected override bool GetExist(ISpecification<TEntity> criteria)
+        protected override bool GetExist(IQueryOptions<TEntity> options)
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
 
-            PrepareSelectStatement(criteria, (IQueryOptions<TEntity>)null, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
 
             using (var reader = ExecuteReader(config.Sql, config.Parameters))
             {
@@ -1887,12 +1888,12 @@
         /// <summary>
         /// Gets a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected override Dictionary<TDictionaryKey, TElement> GetDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options)
+        protected override Dictionary<TDictionaryKey, TElement> GetDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
-            PrepareSelectStatement(criteria, options, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
 
             return ExecuteDictionary<TDictionaryKey, TElement>(
                 config.Sql,
@@ -1904,12 +1905,12 @@
         /// <summary>
         /// Gets a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected override IEnumerable<IGrouping<TGroupKey, TElement>> GetGroupBy<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options)
+        protected override IEnumerable<IGrouping<TGroupKey, TElement>> GetGroupBy<TGroupKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
-            PrepareSelectStatement(criteria, options, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
 
             return ExecuteGroup<TGroupKey, TElement>(
                 config.Sql,
@@ -1975,49 +1976,51 @@
         /// </summary>
         protected override Task<TEntity> GetEntityAsync(TKey key, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            PrepareSelectStatement(
-                GetByPrimaryKeySpecification(key, fetchStrategy),
-                (IQueryOptions<TEntity>)null,
-                out DbSqlSelectStatementConfig config);
+            var options = new QueryOptions<TEntity>().SatisfyBy(GetByPrimaryKeySpecification(key));
+
+            if (fetchStrategy != null)
+                options.Fetch(fetchStrategy);
+
+            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
 
             return ExecuteObjectAsync<TEntity>(config.Sql, config.Parameters, r => AutoMap(r, config), cancellationToken);
         }
 
         /// <summary>
-        /// A protected asynchronous overridable method for getting an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// A protected asynchronous overridable method for getting an entity that satisfies the criteria specified by the <paramref name="options" /> from the repository.
         /// </summary>
-        protected override Task<TResult> GetEntityAsync<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        protected override Task<TResult> GetEntityAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
 
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            PrepareSelectStatement(criteria, options, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
 
             return ExecuteObjectAsync<TResult>(config.Sql, config.Parameters, r => AutoMap<TResult>(r, selector, config), cancellationToken);
         }
 
         /// <summary>
-        /// A protected asynchronous overridable method for getting a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// A protected asynchronous overridable method for getting a collection of entities that satisfies the criteria specified by the <paramref name="options" /> from the repository.
         /// </summary>
-        protected override Task<IEnumerable<TResult>> GetEntitiesAsync<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        protected override Task<IEnumerable<TResult>> GetEntitiesAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            PrepareSelectStatement(criteria, options, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
 
             return ExecuteListAsync<TResult>(config.Sql, config.Parameters, r => AutoMap<TResult>(r, selector, config), cancellationToken);
         }
 
         /// <summary>
-        /// A protected asynchronous overridable method for getting a the number of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// A protected asynchronous overridable method for getting a the number of entities that satisfies the criteria specified by the <paramref name="options" /> from the repository.
         /// </summary>
-        protected override async Task<int> GetCountAsync(ISpecification<TEntity> criteria, CancellationToken cancellationToken = new CancellationToken())
+        protected override async Task<int> GetCountAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            PrepareSelectStatement(criteria, (IQueryOptions<TEntity>)null, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
 
             using (var reader = await ExecuteReaderAsync(config.Sql, config.Parameters, cancellationToken))
             {
@@ -2033,14 +2036,14 @@
         }
 
         /// <summary>
-        /// A protected asynchronous overridable method for determining whether the repository contains an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// A protected asynchronous overridable method for determining whether the repository contains an entity that satisfies the criteria specified by the <paramref name="options" /> from the repository.
         /// </summary>
-        protected override async Task<bool> GetExistAsync(ISpecification<TEntity> criteria, CancellationToken cancellationToken = new CancellationToken())
+        protected override async Task<bool> GetExistAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
 
-            PrepareSelectStatement(criteria, (IQueryOptions<TEntity>)null, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
 
             using (var reader = await ExecuteReaderAsync(config.Sql, config.Parameters, cancellationToken))
             {
@@ -2060,12 +2063,15 @@
         /// <summary>
         /// A protected asynchronous overridable method for getting a new <see cref="IDictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected override Task<Dictionary<TDictionaryKey, TElement>> GetDictionaryAsync<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        protected override Task<Dictionary<TDictionaryKey, TElement>> GetDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
-            PrepareSelectStatement(criteria, options, out DbSqlSelectStatementConfig config);
+            if (elementSelector == null)
+                throw new ArgumentNullException(nameof(elementSelector));
+
+            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
 
             return ExecuteDictionaryAsync<TDictionaryKey, TElement>(
                 config.Sql,
@@ -2078,12 +2084,15 @@
         /// <summary>
         /// A protected asynchronous overridable method for getting a new <see cref="IGrouping{TGroupKey, TElemen}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected override Task<IEnumerable<IGrouping<TGroupKey, TElement>>> GetGroupByAsync<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        protected override Task<IEnumerable<IGrouping<TGroupKey, TElement>>> GetGroupByAsync<TGroupKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
-            PrepareSelectStatement(criteria, options, out DbSqlSelectStatementConfig config);
+            if (elementSelector == null)
+                throw new ArgumentNullException(nameof(elementSelector));
+
+            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
 
             return ExecuteGroupAsync<TGroupKey, TElement>(
                 config.Sql,
