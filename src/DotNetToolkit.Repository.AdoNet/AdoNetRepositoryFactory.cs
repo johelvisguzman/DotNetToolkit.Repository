@@ -2,8 +2,8 @@
 {
     using Factories;
     using Interceptors;
-    using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryFactoryAsync" />.
@@ -12,11 +12,9 @@
     {
         #region Fields
 
-        private const string ProviderNameKey = "providerName";
-        private const string ConnectionStringKey = "connectionString";
-        private const string InterceptorsKey = "interceptors";
-
-        private readonly Dictionary<string, object> _options;
+        private readonly string _connectionString;
+        private readonly string _providerName;
+        private readonly IEnumerable<IRepositoryInterceptor> _interceptors;
 
         #endregion
 
@@ -25,69 +23,25 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="AdoNetRepositoryFactory"/> class.
         /// </summary>
-        public AdoNetRepositoryFactory()
+        /// <param name="connectionString">The connection string.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        public AdoNetRepositoryFactory(string connectionString, IEnumerable<IRepositoryInterceptor> interceptors = null)
         {
+            _connectionString = connectionString;
+            _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdoNetRepositoryFactory"/> class.
         /// </summary>
-        /// <param name="options">The options.</param>
-        public AdoNetRepositoryFactory(Dictionary<string, object> options)
+        /// <param name="providerName">Name of the provider.</param>
+        /// <param name="connectionString">The connection string.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        public AdoNetRepositoryFactory(string providerName, string connectionString, IEnumerable<IRepositoryInterceptor> interceptors = null)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            _options = options;
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        private static void GetOptions(Dictionary<string, object> options, out string providerName, out string connectionString, out IEnumerable<IRepositoryInterceptor> interceptors)
-        {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            if (options.Count == 0)
-                throw new InvalidOperationException("The options dictionary does not contain any items.");
-
-            object value = null;
-            providerName = null;
-            connectionString = null;
-            interceptors = null;
-
-            if (options.ContainsKey(ProviderNameKey))
-            {
-                value = options[ProviderNameKey];
-                providerName = value as string;
-
-                if (value != null && providerName == null)
-                    throw new ArgumentException($"The option value for the specified '{ProviderNameKey}' key must be a valid 'System.String' type.");
-            }
-
-            if (options.ContainsKey(ConnectionStringKey))
-            {
-                value = options[ConnectionStringKey];
-                connectionString = value as string;
-
-                if (value != null && connectionString == null)
-                    throw new ArgumentException($"The option value for the specified '{ConnectionStringKey}' key must be a valid 'System.String' type.");
-            }
-            else
-            {
-                throw new InvalidOperationException($"The '{ConnectionStringKey}' option is missing from the options dictionary.");
-            }
-
-            if (options.ContainsKey(InterceptorsKey))
-            {
-                value = options[InterceptorsKey];
-                interceptors = value as IEnumerable<IRepositoryInterceptor>;
-
-                if (value != null && interceptors == null)
-                    throw new ArgumentException($"The option value for the specified '{InterceptorsKey}' key must be a valid 'System.Collections.Generic.IEnumerable<DotNetToolkit.Repository.IRepositoryInterceptor>' type.");
-            }
+            _connectionString = connectionString;
+            _providerName = providerName;
+            _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
         }
 
         #endregion
@@ -115,29 +69,6 @@
             return CreateAsync<TEntity, TKey>();
         }
 
-        /// <summary>
-        /// Creates a new repository for the specified entity type.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <param name="options">The options.</param>
-        /// <returns>The new repository.</returns>
-        public IRepository<TEntity> Create<TEntity>(Dictionary<string, object> options) where TEntity : class
-        {
-            return CreateAsync<TEntity>(options);
-        }
-
-        /// <summary>
-        /// Creates a new repository for the specified entity and primary key type.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <typeparam name="TKey">The type of the key primary key value.</typeparam>
-        /// <param name="options">The options.</param>
-        /// <returns>The new repository.</returns>
-        public IRepository<TEntity, TKey> Create<TEntity, TKey>(Dictionary<string, object> options) where TEntity : class
-        {
-            return CreateAsync<TEntity, TKey>(options);
-        }
-
         #endregion
 
         #region Implementation of IRepositoryFactoryAsync
@@ -149,10 +80,9 @@
         /// <returns>The new asynchronous repository.</returns>
         public IRepositoryAsync<TEntity> CreateAsync<TEntity>() where TEntity : class
         {
-            if (_options == null)
-                throw new InvalidOperationException("No options have been provided.");
-
-            return CreateAsync<TEntity>(_options);
+            return string.IsNullOrEmpty(_providerName)
+                ? new AdoNetRepository<TEntity>(_connectionString, _interceptors)
+                : new AdoNetRepository<TEntity>(_providerName, _connectionString, _interceptors);
         }
 
         /// <summary>
@@ -163,41 +93,9 @@
         /// <returns>The new asynchronous repository.</returns>
         public IRepositoryAsync<TEntity, TKey> CreateAsync<TEntity, TKey>() where TEntity : class
         {
-            if (_options == null)
-                throw new InvalidOperationException("No options have been provided.");
-
-            return CreateAsync<TEntity, TKey>(_options);
-        }
-
-        /// <summary>
-        /// Creates a new asynchronous repository for the specified entity type.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <param name="options">The options.</param>
-        /// <returns>The new asynchronous repository.</returns>
-        public IRepositoryAsync<TEntity> CreateAsync<TEntity>(Dictionary<string, object> options) where TEntity : class
-        {
-            GetOptions(options, out string providerName, out string connectionString, out IEnumerable<IRepositoryInterceptor> interceptors);
-
-            return string.IsNullOrEmpty(providerName)
-                ? new AdoNetRepository<TEntity>(connectionString, interceptors)
-                : new AdoNetRepository<TEntity>(providerName, connectionString, interceptors);
-        }
-
-        /// <summary>
-        /// Creates a new asynchronous repository for the specified entity and primary key type.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <typeparam name="TKey">The type of the key primary key value.</typeparam>
-        /// <param name="options">The options.</param>
-        /// <returns>The new asynchronous repository.</returns>
-        public IRepositoryAsync<TEntity, TKey> CreateAsync<TEntity, TKey>(Dictionary<string, object> options) where TEntity : class
-        {
-            GetOptions(options, out string providerName, out string connectionString, out IEnumerable<IRepositoryInterceptor> interceptors);
-
-            return string.IsNullOrEmpty(providerName)
-                ? new AdoNetRepository<TEntity, TKey>(connectionString, interceptors)
-                : new AdoNetRepository<TEntity, TKey>(providerName, connectionString, interceptors);
+            return string.IsNullOrEmpty(_providerName)
+                ? new AdoNetRepository<TEntity, TKey>(_connectionString, _interceptors)
+                : new AdoNetRepository<TEntity, TKey>(_providerName, _connectionString, _interceptors);
         }
 
         #endregion
