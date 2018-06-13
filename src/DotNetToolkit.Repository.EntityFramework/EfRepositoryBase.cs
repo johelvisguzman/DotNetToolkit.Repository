@@ -62,13 +62,13 @@
 
         #endregion
 
-        #region Protected Methods
+        #region Overrides of RepositoryBase<TEntity, TKey>
 
         /// <summary>
         /// Releases unmanaged and - optionally - managed resources.
         /// </summary>
         /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
-        protected virtual void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             if (_disposed) return;
 
@@ -82,10 +82,6 @@
 
             _disposed = true;
         }
-
-        #endregion
-
-        #region Overrides of RepositoryBase<TEntity, TKey>
 
         /// <summary>
         /// A protected overridable method for adding the specified <paramref name="entity" /> into the repository.
@@ -134,15 +130,6 @@
         protected override TEntity GetEntity(TKey key, IFetchStrategy<TEntity> fetchStrategy)
         {
             return fetchStrategy == null ? DbSet.Find(key) : base.GetEntity(key, fetchStrategy);
-        }
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public override void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         #endregion

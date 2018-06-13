@@ -26,6 +26,8 @@
     {
         #region Fields
 
+        private bool _disposed;
+
         private BlockingCollection<EntitySet> _items = new BlockingCollection<EntitySet>();
 
         #endregion
@@ -1729,6 +1731,28 @@
         #region Overrides of RepositoryBase<TEntity, TKey>
 
         /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+
+            if (disposing)
+            {
+                // Clears the collection
+                while (_items.Count > 0)
+                {
+                    _items.TryTake(out _);
+                }
+
+                _items = null;
+            }
+
+            _disposed = true;
+        }
+
+        /// <summary>
         /// A protected overridable method for adding the specified <paramref name="entity" /> into the repository.
         /// </summary>
         protected override void AddItem(TEntity entity)
@@ -1917,20 +1941,6 @@
                 config.Parameters,
                 r => AutoMap<TGroupKey>(r, keySelector, config),
                 r => AutoMap<TElement>(r, elementSelector, config));
-        }
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public override void Dispose()
-        {
-            // Clears the collection
-            while (_items.Count > 0)
-            {
-                _items.TryTake(out _);
-            }
-
-            _items = null;
         }
 
         #endregion

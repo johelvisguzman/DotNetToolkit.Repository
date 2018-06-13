@@ -66,27 +66,6 @@
 
         #endregion
 
-        #region Protected Methods
-
-        /// <summary>
-        /// Releases unmanaged and - optionally - managed resources.
-        /// </summary>
-        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposed) return;
-
-            if (disposing)
-            {
-                _items.Clear();
-                _items = null;
-            }
-
-            _disposed = true;
-        }
-
-        #endregion
-
         #region Internal Methods
 
         /// <summary>
@@ -146,12 +125,20 @@
         #region Overrides of RepositoryBase<TEntity, TKey>
 
         /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// Releases unmanaged and - optionally - managed resources.
         /// </summary>
-        public override void Dispose()
+        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        protected override void Dispose(bool disposing)
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            if (_disposed) return;
+
+            if (disposing)
+            {
+                _items.Clear();
+                _items = null;
+            }
+
+            _disposed = true;
         }
 
         /// <summary>
