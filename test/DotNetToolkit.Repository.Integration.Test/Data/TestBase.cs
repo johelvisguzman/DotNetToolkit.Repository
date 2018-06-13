@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Data
 {
+    using Factories;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -32,6 +33,11 @@
         protected static void ForAllRepositoriesInMemoryFileBased(Action<IRepository<Customer, int>> action)
         {
             GetInMemoryFileBasedRepositories().ForEach(action);
+        }
+
+        protected static void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory> action)
+        {
+            GetAllUnitOfWorkFactories().ForEach(action);
         }
 
         protected static IRepository<Customer, int> CreateRepositoryInstanceOfType(Type type, object arg)
@@ -81,6 +87,19 @@
             repos.AddRange(GetInMemoryFileBasedRepositories());
 
             return repos;
+        }
+
+        private static List<IUnitOfWorkFactory> GetAllUnitOfWorkFactories()
+        {
+            TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+
+            var uows = new List<IUnitOfWorkFactory>
+            {
+                new EntityFramework.EfUnitOfWorkFactory(TestEfDbContextFactory.Create),
+                new AdoNet.AdoNetUnitOfWorkFactory(providerName, connectionString)
+            };
+
+            return uows;
         }
     }
 }

@@ -2,7 +2,9 @@
 {
     using Factories;
     using Interceptors;
+    using System;
     using System.Collections.Generic;
+    using System.Data.Common;
     using System.Linq;
 
     /// <summary>
@@ -12,6 +14,7 @@
     {
         #region Fields
 
+        private readonly DbTransaction _transaction;
         private readonly string _connectionString;
         private readonly string _providerName;
         private readonly IEnumerable<IRepositoryInterceptor> _interceptors;
@@ -27,6 +30,9 @@
         /// <param name="interceptors">The interceptors.</param>
         public AdoNetRepositoryFactory(string connectionString, IEnumerable<IRepositoryInterceptor> interceptors = null)
         {
+            if (connectionString == null)
+                throw new ArgumentNullException(nameof(connectionString));
+
             _connectionString = connectionString;
             _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
         }
@@ -39,8 +45,26 @@
         /// <param name="interceptors">The interceptors.</param>
         public AdoNetRepositoryFactory(string providerName, string connectionString, IEnumerable<IRepositoryInterceptor> interceptors = null)
         {
+            if (providerName == null)
+                throw new ArgumentNullException(nameof(providerName));
+
+            if (connectionString == null)
+                throw new ArgumentNullException(nameof(connectionString));
+
             _connectionString = connectionString;
             _providerName = providerName;
+            _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryFactory"/> class.
+        /// </summary>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        public AdoNetRepositoryFactory(DbTransaction transaction, IEnumerable<IRepositoryInterceptor> interceptors = null)
+        {
+            _transaction = transaction;
+            _connectionString = _transaction.Connection.ConnectionString;
             _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
         }
 
@@ -80,6 +104,9 @@
         /// <returns>The new asynchronous repository.</returns>
         public IRepositoryAsync<TEntity> CreateAsync<TEntity>() where TEntity : class
         {
+            if (_transaction != null)
+                return new AdoNetRepository<TEntity>(_transaction, _interceptors);
+
             return string.IsNullOrEmpty(_providerName)
                 ? new AdoNetRepository<TEntity>(_connectionString, _interceptors)
                 : new AdoNetRepository<TEntity>(_providerName, _connectionString, _interceptors);
@@ -93,6 +120,9 @@
         /// <returns>The new asynchronous repository.</returns>
         public IRepositoryAsync<TEntity, TKey> CreateAsync<TEntity, TKey>() where TEntity : class
         {
+            if (_transaction != null)
+                return new AdoNetRepository<TEntity, TKey>(_transaction, _interceptors);
+
             return string.IsNullOrEmpty(_providerName)
                 ? new AdoNetRepository<TEntity, TKey>(_connectionString, _interceptors)
                 : new AdoNetRepository<TEntity, TKey>(_providerName, _connectionString, _interceptors);

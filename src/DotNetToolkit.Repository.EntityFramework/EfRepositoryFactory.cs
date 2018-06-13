@@ -26,7 +26,6 @@
         /// </summary>
         /// <param name="dbContextFactory">The database context factory.</param>
         /// <param name="interceptors">The interceptors.</param>
-        /// <exception cref="ArgumentNullException">dbContextFactory</exception>
         public EfRepositoryFactory(Func<DbContext> dbContextFactory, IEnumerable<IRepositoryInterceptor> interceptors = null)
         {
             if (dbContextFactory == null)
