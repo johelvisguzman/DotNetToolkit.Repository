@@ -9,42 +9,44 @@
 
     public abstract class TestBase
     {
-        protected static void ForAllRepositories(Action<IRepository<Customer, int>> action)
+        protected static void ForAllRepositories(Action<IRepositoryFactory> action)
         {
-            GetRepositories().ForEach(action);
+            GetRepositoryFactories().ForEach(action);
         }
 
-        protected static void ForAllRepositoriesAsync(Func<IRepositoryAsync<Customer, int>, Task> action)
+        protected static void ForAllRepositoriesAsync(Func<IRepositoryFactoryAsync, Task> action)
         {
-            foreach (var repo in GetRepositories())
+            foreach (var repo in GetRepositoryFactories())
             {
-                if (repo.GetType().IsSubClassOfGeneric(typeof(IRepositoryAsync<,>)))
+                var repoAsync = repo as IRepositoryFactoryAsync;
+
+                if (repoAsync != null)
                 {
-                    action((IRepositoryAsync<Customer, int>)repo);
+                    action(repoAsync);
                 }
             }
         }
 
         protected static void ForAllRepositoriesInMemory(Action<InMemory.InMemoryRepository<Customer, int>> action)
         {
-            GetRepositories().OfType<InMemory.InMemoryRepository<Customer, int>>().ToList().ForEach(action);
+            GetRepositoryFactories().OfType<InMemory.InMemoryRepository<Customer, int>>().ToList().ForEach(action);
         }
 
-        protected static void ForAllRepositoriesInMemoryFileBased(Action<IRepository<Customer, int>> action)
+        protected static void ForAllRepositoriesInMemoryFileBased(Action<IRepositoryFactory> action)
         {
-            GetInMemoryFileBasedRepositories().ForEach(action);
+            GetInMemoryFileBasedRepositoryFactories().ForEach(action);
         }
 
         protected static void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory> action)
         {
-            GetAllUnitOfWorkFactories().ForEach(action);
+            GetUnitOfWorkFactories().ForEach(action);
         }
 
-        protected static IRepository<Customer, int> CreateRepositoryInstanceOfType(Type type, object arg)
+        protected static IRepository<Customer> CreateRepositoryInstanceOfType(Type type, object arg)
         {
             try
             {
-                return (IRepository<Customer, int>)Activator.CreateInstance(type, arg);
+                return (IRepository<Customer>)Activator.CreateInstance(type, arg);
             }
             catch (Exception ex)
             {
@@ -62,34 +64,37 @@
             return path;
         }
 
-        private static List<IRepository<Customer, int>> GetInMemoryFileBasedRepositories()
+        private static List<IRepositoryFactory> GetInMemoryFileBasedRepositoryFactories()
         {
-            return new List<IRepository<Customer, int>>
+            return new List<IRepositoryFactory>
             {
-                new Json.JsonRepository<Customer>(GetTempFileName(Guid.NewGuid().ToString("N") + ".json")),
-                new Xml.XmlRepository<Customer>(GetTempFileName(Guid.NewGuid().ToString("N") + ".xml")),
-                new Csv.CsvRepository<Customer>(GetTempFileName(Guid.NewGuid().ToString("N") + ".csv"))
+                new Json.JsonRepositoryFactory(GetTempFileName(Guid.NewGuid().ToString("N") + ".json")),
+                new Xml.XmlRepositoryFactory(GetTempFileName(Guid.NewGuid().ToString("N") + ".xml")),
+                new Csv.CsvRepositoryFactory(GetTempFileName(Guid.NewGuid().ToString("N") + ".csv"))
             };
         }
 
-        private static List<IRepository<Customer, int>> GetRepositories()
+        private static List<IRepositoryFactory> GetRepositoryFactories()
         {
             TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
 
-            var repos = new List<IRepository<Customer, int>>
+            var efCoreContext = new TestEfCoreDbContext(Guid.NewGuid().ToString());
+            var efContext = TestEfDbContextFactory.Create();
+
+            var repos = new List<IRepositoryFactory>
             {
-                new InMemory.InMemoryRepository<Customer>(Guid.NewGuid().ToString()),
-                new EntityFramework.EfRepository<Customer>(TestEfDbContextFactory.Create()),
-                new EntityFrameworkCore.EfCoreRepository<Customer>(new TestEfCoreDbContext(Guid.NewGuid().ToString())),
-                new AdoNet.AdoNetRepository<Customer>(providerName, connectionString)
+                new InMemory.InMemoryRepositoryFactory(Guid.NewGuid().ToString()),
+                new EntityFramework.EfRepositoryFactory(() => efContext),
+                new EntityFrameworkCore.EfCoreRepositoryFactory(() => efCoreContext),
+                new AdoNet.AdoNetRepositoryFactory(providerName, connectionString)
             };
 
-            repos.AddRange(GetInMemoryFileBasedRepositories());
+            repos.AddRange(GetInMemoryFileBasedRepositoryFactories());
 
             return repos;
         }
 
-        private static List<IUnitOfWorkFactory> GetAllUnitOfWorkFactories()
+        private static List<IUnitOfWorkFactory> GetUnitOfWorkFactories()
         {
             TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
 
