@@ -20,7 +20,6 @@
 
         private const string DefaultDatabaseName = "DotNetToolkit.Repository.InMemory";
 
-        private static readonly object _syncRoot = new object();
         private ConcurrentDictionary<TKey, EntitySet> _items;
         private bool _disposed;
 
@@ -154,10 +153,12 @@
 
             var hasTemporaryKey = false;
 
+            // Check if it is null or default
             if (key != null && key.Equals(default(TKey)))
             {
                 key = entity.GetPrimaryKeyPropertyValue<TKey>();
 
+                // Check if it is null or default
                 if (key != null && key.Equals(default(TKey)))
                 {
                     key = GenerateTemporaryPrimaryKey();
@@ -179,6 +180,7 @@
             var key = entity.GetPrimaryKeyPropertyValue<TKey>();
             var hasTemporaryKey = false;
 
+            // Check if it is null or default
             if (key != null && key.Equals(default(TKey)))
             {
                 key = GenerateTemporaryPrimaryKey();
@@ -199,6 +201,7 @@
             var key = entity.GetPrimaryKeyPropertyValue<TKey>();
             var hasTemporaryKey = false;
 
+            // Check if it is null or default
             if (key != null && key.Equals(default(TKey)))
             {
                 key = GenerateTemporaryPrimaryKey();
@@ -216,43 +219,40 @@
         /// </summary>
         protected override void SaveChanges()
         {
-            lock (_syncRoot)
+            var context = InMemoryCache.Instance.GetContext(DatabaseName);
+
+            foreach (var entitySet in _items.Select(y => y.Value))
             {
-                var context = InMemoryCache.Instance.GetContext(DatabaseName);
+                var key = entitySet.Key;
 
-                foreach (var entitySet in _items.Select(y => y.Value))
+                if (entitySet.State == EntityState.Added)
                 {
-                    var key = entitySet.Key;
-
-                    if (entitySet.State == EntityState.Added)
+                    if (entitySet.HasTemporaryKey)
                     {
-                        if (entitySet.HasTemporaryKey)
-                        {
-                            key = GeneratePrimaryKey();
-                            entitySet.Entity.SetPrimaryKeyPropertyValue(key);
-                        }
-                        else if (context.ContainsKey(key))
-                        {
-                            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
-                        }
+                        key = GeneratePrimaryKey();
+                        entitySet.Entity.SetPrimaryKeyPropertyValue(key);
                     }
-                    else if (!context.ContainsKey(key))
+                    else if (context.ContainsKey(key))
                     {
-                        throw new InvalidOperationException(Resources.EntityNotFoundInStore);
-                    }
-
-                    if (entitySet.State == EntityState.Removed)
-                    {
-                        context.Remove(key);
-                    }
-                    else
-                    {
-                        context[key] = DeepCopy(entitySet.Entity);
+                        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
                     }
                 }
+                else if (!context.ContainsKey(key))
+                {
+                    throw new InvalidOperationException(Resources.EntityNotFoundInStore);
+                }
 
-                _items.Clear();
+                if (entitySet.State == EntityState.Removed)
+                {
+                    context.TryRemove(key, out TEntity entity);
+                }
+                else
+                {
+                    context[key] = DeepCopy(entitySet.Entity);
+                }
             }
+
+            _items.Clear();
         }
 
         /// <summary>
@@ -357,7 +357,7 @@
 
             private static volatile InMemoryCache _instance;
             private static readonly object _syncRoot = new object();
-            private readonly ConcurrentDictionary<string, SortedDictionary<TKey, TEntity>> _storage;
+            private readonly ConcurrentDictionary<string, ConcurrentDictionary<TKey, TEntity>> _storage;
 
             #endregion
 
@@ -368,7 +368,7 @@
             /// </summary>
             private InMemoryCache()
             {
-                _storage = new ConcurrentDictionary<string, SortedDictionary<TKey, TEntity>>();
+                _storage = new ConcurrentDictionary<string, ConcurrentDictionary<TKey, TEntity>>();
             }
 
             #endregion
@@ -404,11 +404,11 @@
             /// </summary>
             /// <param name="name">The database name.</param>
             /// <returns>The scoped database context by the specified database name.</returns>
-            public SortedDictionary<TKey, TEntity> GetContext(string name)
+            public ConcurrentDictionary<TKey, TEntity> GetContext(string name)
             {
                 if (!_storage.ContainsKey(name))
                 {
-                    _storage[name] = new SortedDictionary<TKey, TEntity>();
+                    _storage[name] = new ConcurrentDictionary<TKey, TEntity>();
                 }
 
                 return _storage[name];
