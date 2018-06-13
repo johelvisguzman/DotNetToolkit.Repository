@@ -26,21 +26,16 @@
     {
         #region Fields
 
+        private bool _disposed;
+
         private BlockingCollection<EntitySet> _items = new BlockingCollection<EntitySet>();
+
+        private readonly DbProviderFactory _factory;
+        private readonly string _connectionString;
 
         #endregion
 
         #region Properties
-
-        /// <summary>
-        /// Gets the factory.
-        /// </summary>
-        protected DbProviderFactory Factory { get; }
-
-        /// <summary>
-        /// Gets the connection string.
-        /// </summary>
-        protected string ConnectionString { get; }
 
         /// <summary>
         /// Gets a value indicating whether this instance is identity.
@@ -62,6 +57,11 @@
         /// </summary>
         protected string TableName { get; private set; }
 
+        /// <summary>
+        /// Gets the current transaction.
+        /// </summary>
+        protected DbTransaction CurrentTransaction { get; }
+
         #endregion
 
         #region Constructors
@@ -73,15 +73,15 @@
         /// <param name="interceptors">The interceptors.</param>
         protected AdoNetRepositoryBase(string connectionString, IEnumerable<IRepositoryInterceptor> interceptors = null) : base(interceptors)
         {
-            if (string.IsNullOrEmpty(connectionString))
-                throw new ArgumentException(Resources.ArgumentCannotBeNullOrEmptyString, nameof(connectionString));
+            if (connectionString == null)
+                throw new ArgumentNullException(nameof(connectionString));
 
             var ccs = ConfigurationManager.ConnectionStrings[connectionString];
             if (ccs == null)
                 throw new ArgumentException(Resources.ConnectionStringDoestNotExistInConfigFile);
 
-            Factory = Internal.DbProviderFactories.GetFactory(ccs.ProviderName);
-            ConnectionString = connectionString;
+            _factory = Internal.DbProviderFactories.GetFactory(ccs.ProviderName);
+            _connectionString = connectionString;
 
             Initialize();
         }
@@ -94,14 +94,30 @@
         /// <param name="interceptors">The interceptors.</param>
         protected AdoNetRepositoryBase(string providerName, string connectionString, IEnumerable<IRepositoryInterceptor> interceptors = null) : base(interceptors)
         {
-            if (string.IsNullOrEmpty(providerName))
-                throw new ArgumentException(Resources.ArgumentCannotBeNullOrEmptyString, nameof(providerName));
+            if (providerName == null)
+                throw new ArgumentNullException(nameof(providerName));
 
-            if (string.IsNullOrEmpty(connectionString))
-                throw new ArgumentException(Resources.ArgumentCannotBeNullOrEmptyString, nameof(connectionString));
+            if (connectionString == null)
+                throw new ArgumentNullException(nameof(connectionString));
 
-            Factory = Internal.DbProviderFactories.GetFactory(providerName);
-            ConnectionString = connectionString;
+            _factory = Internal.DbProviderFactories.GetFactory(providerName);
+            _connectionString = connectionString;
+
+            Initialize();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryBase{TEntity, TKey}"/> class.
+        /// </summary>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        protected AdoNetRepositoryBase(DbTransaction transaction, IEnumerable<IRepositoryInterceptor> interceptors = null) : base(interceptors)
+        {
+            if (transaction == null)
+                throw new ArgumentNullException(nameof(transaction));
+
+            CurrentTransaction = transaction;
+            _connectionString = CurrentTransaction.Connection.ConnectionString;
 
             Initialize();
         }
@@ -119,6 +135,9 @@
         /// <returns>The number of rows affected.</returns>
         public int ExecuteNonQuery(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
         {
+            if (CurrentTransaction != null)
+                return ExecuteNonQuery(CurrentTransaction, cmdText, cmdType, parameters);
+
             using (var connection = CreateConnection())
             {
                 return ExecuteNonQuery(connection, cmdText, cmdType, parameters);
@@ -145,7 +164,9 @@
         /// <returns>A <see cref="System.Data.SqlClient.SqlDataReader" /> object.</returns>
         public DbDataReader ExecuteReader(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
         {
-            return ExecuteReader(CreateConnection(), cmdText, cmdType, parameters);
+            return CurrentTransaction != null
+                ? ExecuteReader(CurrentTransaction, cmdText, cmdType, parameters)
+                : ExecuteReader(CreateConnection(), cmdText, cmdType, parameters);
         }
 
         /// <summary>
@@ -169,6 +190,9 @@
         /// <returns>The first column of the first row in the result set returned by the query.</returns>
         public T ExecuteScalar<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
         {
+            if (CurrentTransaction != null)
+                return ExecuteScalar<T>(CurrentTransaction, cmdText, cmdType, parameters);
+
             using (var connection = CreateConnection())
             {
                 return ExecuteScalar<T>(connection, cmdText, cmdType, parameters);
@@ -198,7 +222,9 @@
         /// <returns>A list which each entity has been projected into a new form.</returns>
         public T ExecuteObject<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
         {
-            return ExecuteObject<T>(CreateConnection(), cmdText, cmdType, parameters, projector);
+            return CurrentTransaction != null
+                ? ExecuteObject<T>(CurrentTransaction, cmdText, cmdType, parameters, projector)
+                : ExecuteObject<T>(CreateConnection(), cmdText, cmdType, parameters, projector);
         }
 
         /// <summary>
@@ -250,7 +276,9 @@
         /// <returns>A list which each entity has been projected into a new form.</returns>
         public IEnumerable<T> ExecuteList<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
         {
-            return ExecuteList<T>(CreateConnection(), cmdText, cmdType, parameters, projector);
+            return CurrentTransaction != null
+                ? ExecuteList<T>(CurrentTransaction, cmdText, cmdType, parameters, projector)
+                : ExecuteList<T>(CreateConnection(), cmdText, cmdType, parameters, projector);
         }
 
         /// <summary>
@@ -300,6 +328,9 @@
         /// <returns>A new <see cref="DataTable" />.</returns>
         public DataTable ExecuteDataTable(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
         {
+            if (CurrentTransaction != null)
+                return ExecuteDataTable(CurrentTransaction, cmdText, cmdType, parameters);
+
             using (var connection = CreateConnection())
             {
                 return ExecuteDataTable(connection, cmdText, cmdType, parameters);
@@ -330,7 +361,9 @@
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
         public Dictionary<TDictionaryKey, TElement> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, TDictionaryKey> keyProjector, Func<DbDataReader, TElement> elementProjector)
         {
-            return ExecuteDictionary<TDictionaryKey, TElement>(CreateConnection(), cmdText, cmdType, parameters, keyProjector, elementProjector);
+            return CurrentTransaction != null
+                ? ExecuteDictionary<TDictionaryKey, TElement>(CurrentTransaction, cmdText, cmdType, parameters, keyProjector, elementProjector)
+                : ExecuteDictionary<TDictionaryKey, TElement>(CreateConnection(), cmdText, cmdType, parameters, keyProjector, elementProjector);
         }
 
         /// <summary>
@@ -375,7 +408,9 @@
         /// <returns>A new <see cref="IGrouping{TGroupKey, TElement}" /> that contains keys and values.</returns>
         public IEnumerable<IGrouping<TGroupKey, TElement>> ExecuteGroup<TGroupKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, TGroupKey> keyProjector, Func<DbDataReader, TElement> elementProjector)
         {
-            return ExecuteGroup<TGroupKey, TElement>(CreateConnection(), cmdText, cmdType, parameters, keyProjector, elementProjector);
+            return CurrentTransaction != null
+                ? ExecuteGroup<TGroupKey, TElement>(CurrentTransaction, cmdText, cmdType, parameters, keyProjector, elementProjector)
+                : ExecuteGroup<TGroupKey, TElement>(CreateConnection(), cmdText, cmdType, parameters, keyProjector, elementProjector);
         }
 
         /// <summary>
@@ -417,6 +452,9 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
         public Task<int> ExecuteNonQueryAsync(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
         {
+            if (CurrentTransaction != null)
+                return ExecuteNonQueryAsync(CurrentTransaction, cmdText, cmdType, parameters, cancellationToken);
+
             using (var connection = CreateConnection())
             {
                 return ExecuteNonQueryAsync(connection, cmdText, cmdType, parameters, cancellationToken);
@@ -445,7 +483,9 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a <see cref="System.Data.SqlClient.SqlDataReader" /> object.</returns>
         public Task<DbDataReader> ExecuteReaderAsync(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
         {
-            return ExecuteReaderAsync(CreateConnection(), cmdText, cmdType, parameters, cancellationToken);
+            return CurrentTransaction != null
+                ? ExecuteReaderAsync(CurrentTransaction, cmdText, cmdType, parameters, cancellationToken)
+                : ExecuteReaderAsync(CreateConnection(), cmdText, cmdType, parameters, cancellationToken);
         }
 
         /// <summary>
@@ -471,6 +511,9 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the first column of the first row in the result set returned by the query.</returns>
         public Task<T> ExecuteScalarAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
         {
+            if (CurrentTransaction != null)
+                return ExecuteScalarAsync<T>(CurrentTransaction, cmdText, cmdType, parameters, cancellationToken);
+
             using (var connection = CreateConnection())
             {
                 return ExecuteScalarAsync<T>(connection, cmdText, cmdType, parameters, cancellationToken);
@@ -502,7 +545,9 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
         public Task<T> ExecuteObjectAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return ExecuteObjectAsync<T>(CreateConnection(), cmdText, cmdType, parameters, projector, cancellationToken);
+            return CurrentTransaction != null
+                ? ExecuteObjectAsync<T>(CurrentTransaction, cmdText, cmdType, parameters, projector, cancellationToken)
+                : ExecuteObjectAsync<T>(CreateConnection(), cmdText, cmdType, parameters, projector, cancellationToken);
         }
 
         /// <summary>
@@ -558,7 +603,9 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
         public Task<IEnumerable<T>> ExecuteListAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return ExecuteListAsync<T>(CreateConnection(), cmdText, cmdType, parameters, projector, cancellationToken);
+            return CurrentTransaction != null
+                ? ExecuteListAsync<T>(CurrentTransaction, cmdText, cmdType, parameters, projector, cancellationToken)
+                : ExecuteListAsync<T>(CreateConnection(), cmdText, cmdType, parameters, projector, cancellationToken);
         }
 
         /// <summary>
@@ -616,7 +663,9 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
         public Task<Dictionary<TDictionaryKey, TElement>> ExecuteDictionaryAsync<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, TDictionaryKey> keyProjector, Func<DbDataReader, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return ExecuteDictionaryAsync<TDictionaryKey, TElement>(CreateConnection(), cmdText, cmdType, parameters, keyProjector, elementProjector, cancellationToken);
+            return CurrentTransaction != null
+                ? ExecuteDictionaryAsync<TDictionaryKey, TElement>(CurrentTransaction, cmdText, cmdType, parameters, keyProjector, elementProjector, cancellationToken)
+                : ExecuteDictionaryAsync<TDictionaryKey, TElement>(CreateConnection(), cmdText, cmdType, parameters, keyProjector, elementProjector, cancellationToken);
         }
 
         /// <summary>
@@ -664,7 +713,9 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TElement}" /> that contains keys and values.</returns>
         public Task<IEnumerable<IGrouping<TGroupKey, TElement>>> ExecuteGroupAsync<TGroupKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, TGroupKey> keyProjector, Func<DbDataReader, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return ExecuteGroupAsync<TGroupKey, TElement>(CreateConnection(), cmdText, cmdType, parameters, keyProjector, elementProjector, cancellationToken);
+            return CurrentTransaction != null
+                ? ExecuteGroupAsync<TGroupKey, TElement>(CurrentTransaction, cmdText, cmdType, parameters, keyProjector, elementProjector, cancellationToken)
+                : ExecuteGroupAsync<TGroupKey, TElement>(CreateConnection(), cmdText, cmdType, parameters, keyProjector, elementProjector, cancellationToken);
         }
 
         /// <summary>
@@ -708,9 +759,12 @@
         /// <returns>The connection.</returns>
         protected virtual DbConnection CreateConnection()
         {
-            var connection = Factory.CreateConnection();
+            if (CurrentTransaction != null)
+                throw new InvalidOperationException("Unable to create a new connection. A transaction has already been started.");
 
-            connection.ConnectionString = ConnectionString;
+            var connection = _factory.CreateConnection();
+
+            connection.ConnectionString = _connectionString;
 
             return connection;
         }
@@ -725,43 +779,46 @@
         /// <returns>The new command.</returns>
         protected virtual DbCommand CreateCommand(DbConnection connection, string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
         {
-            var command = Factory.CreateCommand();
+            if (CurrentTransaction != null)
+                throw new InvalidOperationException("Unable to create a new command. A transaction has already been started. Please use the CreateCommand method with a transaction argument.");
 
-            command.CommandText = cmdText;
+            var command = _factory.CreateCommand();
+
             command.Connection = connection;
+            command.CommandText = cmdText;
             command.CommandType = cmdType;
-
-            if (parameters != null && parameters.Count > 0)
-            {
-                command.Parameters.Clear();
-
-                foreach (var item in parameters)
-                {
-                    command.Parameters.Add(CreateParameter(item.Key, item.Value));
-                }
-
-            }
+            command.AddParmeters(parameters);
 
             return command;
         }
 
         /// <summary>
-        /// Creates a parameter.
+        /// Creates a command.
         /// </summary>
-        /// <param name="name">The name.</param>
-        /// <param name="value">The value.</param>
-        /// <returns>The new parameter.</returns>
-        protected virtual DbParameter CreateParameter(string name, object value)
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <returns>The new command.</returns>
+        protected virtual DbCommand CreateCommand(DbTransaction transaction, string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
         {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentException(Resources.ArgumentCannotBeNullOrEmptyString, nameof(name));
+            var connection = transaction.Connection;
+            var command = connection.CreateCommand();
 
-            var parameter = Factory.CreateParameter();
+            try
+            {
+                command.Transaction = transaction;
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
 
-            parameter.Value = value ?? DBNull.Value;
-            parameter.ParameterName = name;
+            command.CommandText = cmdText;
+            command.CommandType = cmdType;
+            command.AddParmeters(parameters);
 
-            return parameter;
+            return command;
         }
 
         /// <summary>
@@ -784,6 +841,27 @@
         }
 
         /// <summary>
+        /// Executes a SQL statement against a transaction.
+        /// </summary>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <returns>The number of rows affected.</returns>
+        protected int ExecuteNonQuery(DbTransaction transaction, string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
+        {
+            using (var command = CreateCommand(transaction, cmdText, cmdType, parameters))
+            {
+                var connection = transaction.Connection;
+
+                if (connection.State == ConnectionState.Closed)
+                    connection.Open();
+
+                return command.ExecuteNonQuery();
+            }
+        }
+
+        /// <summary>
         /// Executes a SQL statement against a connection.
         /// </summary>
         /// <param name="connection">The connection.</param>
@@ -796,6 +874,18 @@
         }
 
         /// <summary>
+        /// Executes a SQL statement against a transaction.
+        /// </summary>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <returns>The number of rows affected.</returns>
+        protected int ExecuteNonQuery(DbTransaction transaction, string cmdText, Dictionary<string, object> parameters = null)
+        {
+            return ExecuteNonQuery(transaction, cmdText, CommandType.Text, parameters);
+        }
+
+        /// <summary>
         /// Sends the <see cref="System.Data.SqlClient.SqlCommand.CommandText" /> to the <see cref="System.Data.SqlClient.SqlCommand.Connection" /> and builds a <see cref="System.Data.SqlClient.SqlDataReader "/>.
         /// </summary>
         /// <param name="connection">The connection.</param>
@@ -805,12 +895,32 @@
         /// <returns>A <see cref="System.Data.SqlClient.SqlDataReader" /> object.</returns>
         protected virtual DbDataReader ExecuteReader(DbConnection connection, string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
         {
+            var command = CreateCommand(connection, cmdText, cmdType, parameters);
+
             if (connection.State == ConnectionState.Closed)
                 connection.Open();
 
-            var command = CreateCommand(connection, cmdText, cmdType, parameters);
-
             return command.ExecuteReader(CommandBehavior.CloseConnection);
+        }
+
+        /// <summary>
+        /// Sends the <see cref="System.Data.SqlClient.SqlCommand.CommandText" /> to the <see cref="System.Data.Common.DbTransaction" /> and builds a <see cref="System.Data.SqlClient.SqlDataReader "/>.
+        /// </summary>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <returns>A <see cref="System.Data.SqlClient.SqlDataReader" /> object.</returns>
+        protected virtual DbDataReader ExecuteReader(DbTransaction transaction, string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
+        {
+            var command = CreateCommand(transaction, cmdText, cmdType, parameters);
+
+            var connection = transaction.Connection;
+
+            if (connection.State == ConnectionState.Closed)
+                connection.Open();
+
+            return command.ExecuteReader(CommandBehavior.Default);
         }
 
         /// <summary>
@@ -823,6 +933,18 @@
         protected DbDataReader ExecuteReader(DbConnection connection, string cmdText, Dictionary<string, object> parameters = null)
         {
             return ExecuteReader(connection, cmdText, CommandType.Text, parameters);
+        }
+
+        /// <summary>
+        /// Sends the <see cref="System.Data.SqlClient.SqlCommand.CommandText" /> to the <see cref="System.Data.Common.DbTransaction" /> and builds a <see cref="System.Data.SqlClient.SqlDataReader "/>.
+        /// </summary>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <returns>A <see cref="System.Data.SqlClient.SqlDataReader" /> object.</returns>
+        protected DbDataReader ExecuteReader(DbTransaction transaction, string cmdText, Dictionary<string, object> parameters = null)
+        {
+            return ExecuteReader(transaction, cmdText, CommandType.Text, parameters);
         }
 
         /// <summary>
@@ -857,6 +979,36 @@
         /// Executes the query, and returns the first column of the first row in the result set returned by the query. Additional columns or rows are ignored.
         /// </summary>
         /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <returns>The first column of the first row in the result set returned by the query.</returns>
+        protected virtual T ExecuteScalar<T>(DbTransaction transaction, string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
+        {
+            using (var command = CreateCommand(transaction, cmdText, cmdType, parameters))
+            {
+                var connection = transaction.Connection;
+
+                if (connection.State == ConnectionState.Closed)
+                    connection.Open();
+
+                var result = command.ExecuteScalar();
+
+                if (result == null || result is DBNull)
+                    return default(T);
+
+                if (result is T)
+                    return (T)result;
+
+                return (T)Convert.ChangeType(result, typeof(T));
+            }
+        }
+
+        /// <summary>
+        /// Executes the query, and returns the first column of the first row in the result set returned by the query. Additional columns or rows are ignored.
+        /// </summary>
+        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
         /// <param name="connection">The connection.</param>
         /// <param name="cmdText">The command text.</param>
         /// <param name="parameters">The command parameters</param>
@@ -864,6 +1016,19 @@
         protected T ExecuteScalar<T>(DbConnection connection, string cmdText, Dictionary<string, object> parameters = null)
         {
             return ExecuteScalar<T>(connection, cmdText, CommandType.Text, parameters);
+        }
+
+        /// <summary>
+        /// Executes the query, and returns the first column of the first row in the result set returned by the query. Additional columns or rows are ignored.
+        /// </summary>
+        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <returns>The first column of the first row in the result set returned by the query.</returns>
+        protected T ExecuteScalar<T>(DbTransaction transaction, string cmdText, Dictionary<string, object> parameters = null)
+        {
+            return ExecuteScalar<T>(transaction, cmdText, CommandType.Text, parameters);
         }
 
         /// <summary>
@@ -888,6 +1053,24 @@
         /// Executes the query, and returns an object which has been projected into a new form.
         /// </summary>
         /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        protected virtual T ExecuteObject<T>(DbTransaction transaction, string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
+        {
+            using (var reader = ExecuteReader(transaction, cmdText, cmdType, parameters))
+            {
+                return reader.Read() ? projector(reader) : default(T);
+            }
+        }
+
+        /// <summary>
+        /// Executes the query, and returns an object which has been projected into a new form.
+        /// </summary>
+        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
         /// <param name="connection">The connection.</param>
         /// <param name="cmdText">The command text.</param>
         /// <param name="parameters">The command parameters</param>
@@ -898,6 +1081,19 @@
             return ExecuteObject<T>(connection, cmdText, CommandType.Text, parameters, projector);
         }
 
+        /// <summary>
+        /// Executes the query, and returns an object which has been projected into a new form.
+        /// </summary>
+        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        protected T ExecuteObject<T>(DbTransaction transaction, string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
+        {
+            return ExecuteObject<T>(transaction, cmdText, CommandType.Text, parameters, projector);
+        }
 
         /// <summary>
         /// Executes the query, and returns an object which has been projected into a new form.
@@ -913,6 +1109,19 @@
             return ExecuteObject<T>(connection, cmdText, cmdType, null, projector);
         }
 
+        /// <summary>
+        /// Executes the query, and returns an object which has been projected into a new form.
+        /// </summary>
+        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        protected T ExecuteObject<T>(DbTransaction transaction, string cmdText, CommandType cmdType, Func<DbDataReader, T> projector)
+        {
+            return ExecuteObject<T>(transaction, cmdText, cmdType, null, projector);
+        }
 
         /// <summary>
         /// Executes the query, and returns an object which has been projected into a new form.
@@ -925,6 +1134,19 @@
         protected T ExecuteObject<T>(DbConnection connection, string cmdText, Func<DbDataReader, T> projector)
         {
             return ExecuteObject<T>(connection, cmdText, CommandType.Text, projector);
+        }
+
+        /// <summary>
+        /// Executes the query, and returns an object which has been projected into a new form.
+        /// </summary>
+        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        protected T ExecuteObject<T>(DbTransaction transaction, string cmdText, Func<DbDataReader, T> projector)
+        {
+            return ExecuteObject<T>(transaction, cmdText, CommandType.Text, projector);
         }
 
         /// <summary>
@@ -956,6 +1178,31 @@
         /// Executes the query, and returns a list which each entity has been projected into a new form.
         /// </summary>
         /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        protected virtual IEnumerable<T> ExecuteList<T>(DbTransaction transaction, string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
+        {
+            using (var reader = ExecuteReader(transaction, cmdText, cmdType, parameters))
+            {
+                var list = new List<T>();
+
+                while (reader.Read())
+                {
+                    list.Add(projector(reader));
+                }
+
+                return list;
+            }
+        }
+
+        /// <summary>
+        /// Executes the query, and returns a list which each entity has been projected into a new form.
+        /// </summary>
+        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
         /// <param name="connection">The connection.</param>
         /// <param name="cmdText">The command text.</param>
         /// <param name="parameters">The command parameters</param>
@@ -964,6 +1211,20 @@
         protected IEnumerable<T> ExecuteList<T>(DbConnection connection, string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
         {
             return ExecuteList<T>(connection, cmdText, CommandType.Text, parameters, projector);
+        }
+
+        /// <summary>
+        /// Executes the query, and returns a list which each entity has been projected into a new form.
+        /// </summary>
+        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        protected IEnumerable<T> ExecuteList<T>(DbTransaction transaction, string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
+        {
+            return ExecuteList<T>(transaction, cmdText, CommandType.Text, parameters, projector);
         }
 
         /// <summary>
@@ -984,6 +1245,20 @@
         /// Executes the query, and returns a list which each entity has been projected into a new form.
         /// </summary>
         /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        protected IEnumerable<T> ExecuteList<T>(DbTransaction transaction, string cmdText, CommandType cmdType, Func<DbDataReader, T> projector)
+        {
+            return ExecuteList<T>(transaction, cmdText, cmdType, null, projector);
+        }
+
+        /// <summary>
+        /// Executes the query, and returns a list which each entity has been projected into a new form.
+        /// </summary>
+        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
         /// <param name="connection">The connection.</param>
         /// <param name="cmdText">The command text.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
@@ -991,6 +1266,19 @@
         protected IEnumerable<T> ExecuteList<T>(DbConnection connection, string cmdText, Func<DbDataReader, T> projector)
         {
             return ExecuteList<T>(connection, cmdText, CommandType.Text, projector);
+        }
+
+        /// <summary>
+        /// Executes the query, and returns a list which each entity has been projected into a new form.
+        /// </summary>
+        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        protected IEnumerable<T> ExecuteList<T>(DbTransaction transaction, string cmdText, Func<DbDataReader, T> projector)
+        {
+            return ExecuteList<T>(transaction, cmdText, CommandType.Text, projector);
         }
 
         /// <summary>
@@ -1003,9 +1291,33 @@
         /// <returns>A new <see cref="DataTable" />.</returns>
         protected virtual DataTable ExecuteDataTable(DbConnection connection, string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
         {
-            using (var adapter = Factory.CreateDataAdapter())
+            using (var adapter = _factory.CreateDataAdapter())
             {
                 var command = CreateCommand(connection, cmdText, cmdType, parameters);
+
+                adapter.SelectCommand = command;
+
+                var table = new DataTable();
+
+                adapter.Fill(table);
+
+                return table;
+            }
+        }
+
+        /// <summary>
+        /// Executes the query, and returns a new <see cref="DataTable " />.
+        /// </summary>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <returns>A new <see cref="DataTable" />.</returns>
+        protected virtual DataTable ExecuteDataTable(DbTransaction transaction, string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
+        {
+            using (var adapter = _factory.CreateDataAdapter())
+            {
+                var command = CreateCommand(transaction, cmdText, cmdType, parameters);
 
                 adapter.SelectCommand = command;
 
@@ -1030,6 +1342,18 @@
         }
 
         /// <summary>
+        /// Executes the query, and returns a new <see cref="DataTable " />.
+        /// </summary>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <returns>A new <see cref="DataTable" />.</returns>
+        protected DataTable ExecuteDataTable(DbTransaction transaction, string cmdText, Dictionary<string, object> parameters = null)
+        {
+            return ExecuteDataTable(transaction, cmdText, CommandType.Text, parameters);
+        }
+
+        /// <summary>
         /// Executes the query, and returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keyProjector" />, and <paramref name="elementProjector" />.
         /// </summary>
         /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
@@ -1044,6 +1368,33 @@
         protected virtual Dictionary<TDictionaryKey, TElement> ExecuteDictionary<TDictionaryKey, TElement>(DbConnection connection, string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, TDictionaryKey> keyProjector, Func<DbDataReader, TElement> elementProjector)
         {
             using (var reader = ExecuteReader(connection, cmdText, cmdType, parameters))
+            {
+                var dict = new Dictionary<TDictionaryKey, TElement>();
+
+                while (reader.Read())
+                {
+                    dict.Add(keyProjector(reader), elementProjector(reader));
+                }
+
+                return dict;
+            }
+        }
+
+        /// <summary>
+        /// Executes the query, and returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keyProjector" />, and <paramref name="elementProjector" />.
+        /// </summary>
+        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
+        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <param name="keyProjector">A function to extract a key from each entity.</param>
+        /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
+        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        protected virtual Dictionary<TDictionaryKey, TElement> ExecuteDictionary<TDictionaryKey, TElement>(DbTransaction transaction, string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, TDictionaryKey> keyProjector, Func<DbDataReader, TElement> elementProjector)
+        {
+            using (var reader = ExecuteReader(transaction, cmdText, cmdType, parameters))
             {
                 var dict = new Dictionary<TDictionaryKey, TElement>();
 
@@ -1084,6 +1435,33 @@
         }
 
         /// <summary>
+        /// Executes the query, and returns a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keyProjector" />, and <paramref name="elementProjector" />.
+        /// </summary>
+        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
+        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <param name="keyProjector">A function to extract a key from each entity.</param>
+        /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
+        /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
+        protected virtual IEnumerable<IGrouping<TGroupKey, TElement>> ExecuteGroup<TGroupKey, TElement>(DbTransaction transaction, string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, TGroupKey> keyProjector, Func<DbDataReader, TElement> elementProjector)
+        {
+            using (var reader = ExecuteReader(transaction, cmdText, cmdType, parameters))
+            {
+                var dict = new Dictionary<TGroupKey, TElement>();
+
+                while (reader.Read())
+                {
+                    dict.Add(keyProjector(reader), elementProjector(reader));
+                }
+
+                return dict.GroupBy(x => x.Key, x => x.Value);
+            }
+        }
+
+        /// <summary>
         /// Asynchronously executes a SQL statement against a connection.
         /// </summary>
         /// <param name="connection">The connection.</param>
@@ -1106,6 +1484,28 @@
         /// <summary>
         /// Asynchronously executes a SQL statement against a connection.
         /// </summary>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
+        protected virtual Task<int> ExecuteNonQueryAsync(DbTransaction transaction, string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var command = CreateCommand(transaction, cmdText, cmdType, parameters))
+            {
+                var connection = transaction.Connection;
+
+                if (connection.State == ConnectionState.Closed)
+                    connection.Open();
+
+                return command.ExecuteNonQueryAsync(cancellationToken);
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously executes a SQL statement against a connection.
+        /// </summary>
         /// <param name="connection">The connection.</param>
         /// <param name="cmdText">The command text.</param>
         /// <param name="parameters">The command parameters</param>
@@ -1114,6 +1514,19 @@
         protected Task<int> ExecuteNonQueryAsync(DbConnection connection, string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteNonQueryAsync(connection, cmdText, CommandType.Text, parameters, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously executes a SQL statement against a connection.
+        /// </summary>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
+        protected Task<int> ExecuteNonQueryAsync(DbTransaction transaction, string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteNonQueryAsync(transaction, cmdText, CommandType.Text, parameters, cancellationToken);
         }
 
         /// <summary>
@@ -1136,6 +1549,27 @@
         }
 
         /// <summary>
+        /// Asynchronously sends the <see cref="System.Data.SqlClient.SqlCommand.CommandText" /> to the <see cref="System.Data.Common.DbTransaction" /> and builds a <see cref="System.Data.SqlClient.SqlDataReader "/>.
+        /// </summary>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a <see cref="System.Data.SqlClient.SqlDataReader" /> object.</returns>
+        protected virtual Task<DbDataReader> ExecuteReaderAsync(DbTransaction transaction, string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        {
+            var command = CreateCommand(transaction, cmdText, cmdType, parameters);
+
+            var connection = transaction.Connection;
+
+            if (connection.State == ConnectionState.Closed)
+                connection.Open();
+
+            return command.ExecuteReaderAsync(CommandBehavior.Default, cancellationToken);
+        }
+
+        /// <summary>
         /// Asynchronously sends the <see cref="System.Data.SqlClient.SqlCommand.CommandText" /> to the <see cref="System.Data.SqlClient.SqlCommand.Connection" /> and builds a <see cref="System.Data.SqlClient.SqlDataReader "/>.
         /// </summary>
         /// <param name="connection">The connection.</param>
@@ -1146,6 +1580,19 @@
         protected Task<DbDataReader> ExecuteReaderAsync(DbConnection connection, string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteReaderAsync(connection, cmdText, CommandType.Text, parameters, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously sends the <see cref="System.Data.SqlClient.SqlCommand.CommandText" /> to the <see cref="System.Data.Common.DbTransaction" /> and builds a <see cref="System.Data.SqlClient.SqlDataReader "/>.
+        /// </summary>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a <see cref="System.Data.SqlClient.SqlDataReader" /> object.</returns>
+        protected Task<DbDataReader> ExecuteReaderAsync(DbTransaction transaction, string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteReaderAsync(transaction, cmdText, CommandType.Text, parameters, cancellationToken);
         }
 
         /// <summary>
@@ -1181,6 +1628,37 @@
         /// Asynchronously executes the query, and returns the first column of the first row in the result set returned by the query. Additional columns or rows are ignored.
         /// </summary>
         /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the first column of the first row in the result set returned by the query.</returns>
+        protected virtual async Task<T> ExecuteScalarAsync<T>(DbTransaction transaction, string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var command = CreateCommand(transaction, cmdText, cmdType, parameters))
+            {
+                var connection = transaction.Connection;
+
+                if (connection.State == ConnectionState.Closed)
+                    await connection.OpenAsync(cancellationToken);
+
+                var result = await command.ExecuteScalarAsync(cancellationToken);
+
+                if (result == null || result is DBNull)
+                    return default(T);
+
+                if (result is T)
+                    return (T)result;
+
+                return (T)Convert.ChangeType(result, typeof(T));
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously executes the query, and returns the first column of the first row in the result set returned by the query. Additional columns or rows are ignored.
+        /// </summary>
+        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
         /// <param name="connection">The connection.</param>
         /// <param name="cmdText">The command text.</param>
         /// <param name="parameters">The command parameters</param>
@@ -1189,6 +1667,20 @@
         protected Task<T> ExecuteScalarAsync<T>(DbConnection connection, string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteScalarAsync<T>(connection, cmdText, CommandType.Text, parameters, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously executes the query, and returns the first column of the first row in the result set returned by the query. Additional columns or rows are ignored.
+        /// </summary>
+        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the first column of the first row in the result set returned by the query.</returns>
+        protected Task<T> ExecuteScalarAsync<T>(DbTransaction transaction, string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteScalarAsync<T>(transaction, cmdText, CommandType.Text, parameters, cancellationToken);
         }
 
         /// <summary>
@@ -1214,6 +1706,25 @@
         /// Asynchronously executes the query, and returns an object which has been projected into a new form.
         /// </summary>
         /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
+        protected virtual async Task<T> ExecuteObjectAsync<T>(DbTransaction transaction, string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var reader = await ExecuteReaderAsync(transaction, cmdText, cmdType, parameters, cancellationToken))
+            {
+                return await reader.ReadAsync(cancellationToken) ? projector(reader) : default(T);
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously executes the query, and returns an object which has been projected into a new form.
+        /// </summary>
+        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
         /// <param name="connection">The connection.</param>
         /// <param name="cmdText">The command text.</param>
         /// <param name="parameters">The command parameters</param>
@@ -1223,6 +1734,21 @@
         protected Task<T> ExecuteObjectAsync<T>(DbConnection connection, string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteObjectAsync<T>(connection, cmdText, CommandType.Text, parameters, projector, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously executes the query, and returns an object which has been projected into a new form.
+        /// </summary>
+        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
+        protected Task<T> ExecuteObjectAsync<T>(DbTransaction transaction, string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteObjectAsync<T>(transaction, cmdText, CommandType.Text, parameters, projector, cancellationToken);
         }
 
         /// <summary>
@@ -1244,6 +1770,21 @@
         /// Asynchronously executes the query, and returns an object which has been projected into a new form.
         /// </summary>
         /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
+        protected Task<T> ExecuteObjectAsync<T>(DbTransaction transaction, string cmdText, CommandType cmdType, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteObjectAsync<T>(transaction, cmdText, cmdType, null, projector, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously executes the query, and returns an object which has been projected into a new form.
+        /// </summary>
+        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
         /// <param name="connection">The connection.</param>
         /// <param name="cmdText">The command text.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
@@ -1252,6 +1793,20 @@
         protected Task<T> ExecuteObjectAsync<T>(DbConnection connection, string cmdText, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteObjectAsync<T>(connection, cmdText, CommandType.Text, projector, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously executes the query, and returns an object which has been projected into a new form.
+        /// </summary>
+        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
+        protected Task<T> ExecuteObjectAsync<T>(DbTransaction transaction, string cmdText, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteObjectAsync<T>(transaction, cmdText, CommandType.Text, projector, cancellationToken);
         }
 
         /// <summary>
@@ -1284,6 +1839,32 @@
         /// Asynchronously executes the query, and returns a list which each entity has been projected into a new form.
         /// </summary>
         /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
+        protected virtual async Task<IEnumerable<T>> ExecuteListAsync<T>(DbTransaction transaction, string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var reader = await ExecuteReaderAsync(transaction, cmdText, cmdType, parameters, cancellationToken))
+            {
+                var list = new List<T>();
+
+                while (await reader.ReadAsync(cancellationToken))
+                {
+                    list.Add(projector(reader));
+                }
+
+                return list;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously executes the query, and returns a list which each entity has been projected into a new form.
+        /// </summary>
+        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
         /// <param name="connection">The connection.</param>
         /// <param name="cmdText">The command text.</param>
         /// <param name="parameters">The command parameters</param>
@@ -1293,6 +1874,21 @@
         protected Task<IEnumerable<T>> ExecuteListAsync<T>(DbConnection connection, string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteListAsync<T>(connection, cmdText, CommandType.Text, parameters, projector, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously executes the query, and returns a list which each entity has been projected into a new form.
+        /// </summary>
+        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
+        protected Task<IEnumerable<T>> ExecuteListAsync<T>(DbTransaction transaction, string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteListAsync<T>(transaction, cmdText, CommandType.Text, parameters, projector, cancellationToken);
         }
 
         /// <summary>
@@ -1314,6 +1910,21 @@
         /// Asynchronously executes the query, and returns a list which each entity has been projected into a new form.
         /// </summary>
         /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
+        protected Task<IEnumerable<T>> ExecuteListAsync<T>(DbTransaction transaction, string cmdText, CommandType cmdType, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteListAsync<T>(transaction, cmdText, cmdType, null, projector, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously executes the query, and returns a list which each entity has been projected into a new form.
+        /// </summary>
+        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
         /// <param name="connection">The connection.</param>
         /// <param name="cmdText">The command text.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
@@ -1322,6 +1933,20 @@
         protected Task<IEnumerable<T>> ExecuteListAsync<T>(DbConnection connection, string cmdText, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteListAsync<T>(connection, cmdText, CommandType.Text, projector, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously executes the query, and returns a list which each entity has been projected into a new form.
+        /// </summary>
+        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
+        protected Task<IEnumerable<T>> ExecuteListAsync<T>(DbTransaction transaction, string cmdText, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteListAsync<T>(transaction, cmdText, CommandType.Text, projector, cancellationToken);
         }
 
         /// <summary>
@@ -1353,6 +1978,34 @@
         }
 
         /// <summary>
+        /// Asynchronously executes the query, and returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keyProjector" />, and <paramref name="elementProjector" />.
+        /// </summary>
+        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
+        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <param name="keyProjector">A function to extract a key from each entity.</param>
+        /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        protected virtual async Task<Dictionary<TDictionaryKey, TElement>> ExecuteDictionaryAsync<TDictionaryKey, TElement>(DbTransaction transaction, string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, TDictionaryKey> keyProjector, Func<DbDataReader, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var reader = await ExecuteReaderAsync(transaction, cmdText, cmdType, parameters, cancellationToken))
+            {
+                var dict = new Dictionary<TDictionaryKey, TElement>();
+
+                while (await reader.ReadAsync(cancellationToken))
+                {
+                    dict.Add(keyProjector(reader), elementProjector(reader));
+                }
+
+                return dict;
+            }
+        }
+
+        /// <summary>
         /// Asynchronously executes the query, and returns a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keyProjector" />, and <paramref name="elementProjector" />.
         /// </summary>
         /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
@@ -1368,6 +2021,34 @@
         protected virtual async Task<IEnumerable<IGrouping<TGroupKey, TElement>>> ExecuteGroupAsync<TGroupKey, TElement>(DbConnection connection, string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, TGroupKey> keyProjector, Func<DbDataReader, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var reader = await ExecuteReaderAsync(connection, cmdText, cmdType, parameters, cancellationToken))
+            {
+                var dict = new Dictionary<TGroupKey, TElement>();
+
+                while (await reader.ReadAsync(cancellationToken))
+                {
+                    dict.Add(keyProjector(reader), elementProjector(reader));
+                }
+
+                return dict.GroupBy(x => x.Key, x => x.Value);
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously executes the query, and returns a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keyProjector" />, and <paramref name="elementProjector" />.
+        /// </summary>
+        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
+        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type</param>
+        /// <param name="parameters">The command parameters</param>
+        /// <param name="keyProjector">A function to extract a key from each entity.</param>
+        /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
+        protected virtual async Task<IEnumerable<IGrouping<TGroupKey, TElement>>> ExecuteGroupAsync<TGroupKey, TElement>(DbTransaction transaction, string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, TGroupKey> keyProjector, Func<DbDataReader, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var reader = await ExecuteReaderAsync(transaction, cmdText, cmdType, parameters, cancellationToken))
             {
                 var dict = new Dictionary<TGroupKey, TElement>();
 
@@ -1729,6 +2410,28 @@
         #region Overrides of RepositoryBase<TEntity, TKey>
 
         /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+
+            if (disposing)
+            {
+                // Clears the collection
+                while (_items.Count > 0)
+                {
+                    _items.TryTake(out _);
+                }
+
+                _items = null;
+            }
+
+            _disposed = true;
+        }
+
+        /// <summary>
         /// A protected overridable method for adding the specified <paramref name="entity" /> into the repository.
         /// </summary>
         protected override void AddItem(TEntity entity)
@@ -1757,32 +2460,36 @@
         /// </summary>
         protected override void SaveChanges()
         {
-            using (var connection = CreateConnection())
-            {
+            var connection = CurrentTransaction != null ? CurrentTransaction.Connection : CreateConnection();
+
+            if (connection.State == ConnectionState.Closed)
                 connection.Open();
 
-                foreach (var entitySet in _items)
+            foreach (var entitySet in _items)
+            {
+                PrepareEntitySetStatement(
+                    entitySet,
+                    out string sql,
+                    out Dictionary<string, object> parameters);
+
+                var result = CurrentTransaction != null
+                    ? ExecuteNonQuery(CurrentTransaction, sql, parameters)
+                    : ExecuteNonQuery(connection, sql, parameters);
+
+                if (entitySet.State == EntityState.Added && IsIdentity)
                 {
-                    PrepareEntitySetStatement(
-                        entitySet,
-                        out string sql,
-                        out Dictionary<string, object> parameters);
+                    var key = CurrentTransaction != null
+                        ? ExecuteScalar<TKey>(CurrentTransaction, "SELECT @@IDENTITY")
+                        : ExecuteScalar<TKey>(connection, "SELECT @@IDENTITY");
 
-                    ExecuteNonQuery(connection, sql, parameters);
-
-                    if (entitySet.State == EntityState.Added && IsIdentity)
-                    {
-                        var key = ExecuteScalar<TKey>(connection, "SELECT @@IDENTITY");
-
-                        entitySet.Entity.SetPrimaryKeyPropertyValue(key);
-                    }
+                    entitySet.Entity.SetPrimaryKeyPropertyValue(key);
                 }
+            }
 
-                // Clears the collection
-                while (_items.Count > 0)
-                {
-                    _items.TryTake(out _);
-                }
+            // Clears the collection
+            while (_items.Count > 0)
+            {
+                _items.TryTake(out _);
             }
         }
 
@@ -1828,7 +2535,7 @@
         }
 
         /// <summary>
-        /// Gets a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
+        /// Gets a collection of entities that satisfies the criteria specified by the <paramref name="options" /> from the repository.
         /// </summary>
         protected override IEnumerable<TResult> GetEntities<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
@@ -1919,20 +2626,6 @@
                 r => AutoMap<TElement>(r, elementSelector, config));
         }
 
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public override void Dispose()
-        {
-            // Clears the collection
-            while (_items.Count > 0)
-            {
-                _items.TryTake(out _);
-            }
-
-            _items = null;
-        }
-
         #endregion
 
         #region Overrides of RepositoryBaseAsync<TEntity, TKey>
@@ -1942,32 +2635,36 @@
         /// </summary>
         protected override async Task SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
-            using (var connection = CreateConnection())
+            var connection = CurrentTransaction != null ? CurrentTransaction.Connection : CreateConnection();
+
+            if (connection.State == ConnectionState.Closed)
+                connection.Open();
+
+            foreach (var entitySet in _items)
             {
-                await connection.OpenAsync(cancellationToken);
+                PrepareEntitySetStatement(
+                    entitySet,
+                    out string sql,
+                    out Dictionary<string, object> parameters);
 
-                foreach (var entitySet in _items)
+                var result = CurrentTransaction != null
+                    ? await ExecuteNonQueryAsync(CurrentTransaction, sql, parameters, cancellationToken)
+                    : await ExecuteNonQueryAsync(connection, sql, parameters, cancellationToken);
+
+                if (entitySet.State == EntityState.Added && IsIdentity)
                 {
-                    PrepareEntitySetStatement(
-                        entitySet,
-                        out string sql,
-                        out Dictionary<string, object> parameters);
+                    var key = CurrentTransaction != null
+                        ? await ExecuteScalarAsync<TKey>(CurrentTransaction, "SELECT @@IDENTITY", null, cancellationToken)
+                        : await ExecuteScalarAsync<TKey>(connection, "SELECT @@IDENTITY", null, cancellationToken);
 
-                    await ExecuteNonQueryAsync(connection, sql, parameters, cancellationToken);
-
-                    if (entitySet.State == EntityState.Added && IsIdentity)
-                    {
-                        var key = await ExecuteScalarAsync<TKey>(connection, "SELECT @@IDENTITY", null, cancellationToken);
-
-                        entitySet.Entity.SetPrimaryKeyPropertyValue(key);
-                    }
+                    entitySet.Entity.SetPrimaryKeyPropertyValue(key);
                 }
+            }
 
-                // Clears the collection
-                while (_items.Count > 0)
-                {
-                    _items.TryTake(out _);
-                }
+            // Clears the collection
+            while (_items.Count > 0)
+            {
+                _items.TryTake(out _);
             }
         }
 

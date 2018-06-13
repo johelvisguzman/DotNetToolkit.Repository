@@ -1,10 +1,11 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
     using Data;
+    using Factories;
+    using Helpers;
     using System;
     using System.IO;
     using System.Reflection;
-    using Helpers;
     using Xunit;
 
     public class InMemoryFiledBaseRepositoryTests : TestBase
@@ -42,8 +43,9 @@
             return (string)protectedFileExtensionPropertyInfo.GetValue(repo);
         }
 
-        private static void TestCreatesTempFileOnConstruction(IRepository<Customer, int> repo)
+        private static void TestCreatesTempFileOnConstruction(IRepositoryFactory repoFactory)
         {
+            var repo = repoFactory.Create<Customer>();
             var path = GetTempFileName(Guid.NewGuid().ToString("N") + GetFileExtension(repo));
 
             Assert.True(!File.Exists(path));
@@ -55,8 +57,9 @@
             File.Delete(path);
         }
 
-        private static void TestGeneratesTempFileNameWhenOnlyDirectoryIsProvided(IRepository<Customer, int> repo)
+        private static void TestGeneratesTempFileNameWhenOnlyDirectoryIsProvided(IRepositoryFactory repoFactory)
         {
+            var repo = repoFactory.Create<Customer>();
             var dir = GetTempFileName(string.Empty);
             var defaultGeneratedPathName = typeof(Customer).GetTableName() + GetFileExtension(repo);
             var path = dir + defaultGeneratedPathName;
@@ -70,16 +73,18 @@
             File.Delete(path);
         }
 
-        private static void TestThrowsIfFilePathIsInvalid(IRepository<Customer, int> repo)
+        private static void TestThrowsIfFilePathIsInvalid(IRepositoryFactory repoFactory)
         {
+            var repo = repoFactory.Create<Customer>();
             var path = "TestData";
             var ex = Assert.Throws<InvalidOperationException>(() => CreateRepositoryInstanceOfType(repo.GetType(), path));
 
             Assert.Equal($"The specified '{path}{GetFileExtension(repo)}' file is not a valid path.", ex.Message);
         }
 
-        private static void TestThrowsIfFileExtensionIsNotValid(IRepository<Customer, int> repo)
+        private static void TestThrowsIfFileExtensionIsNotValid(IRepositoryFactory repoFactory)
         {
+            var repo = repoFactory.Create<Customer>();
             var path = GetTempFileName("TestData.tmp");
             var ex = Assert.Throws<InvalidOperationException>(() => CreateRepositoryInstanceOfType(repo.GetType(), path));
 
