@@ -1,5 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Factories
 {
+    using Transactions;
+
     /// <summary>
     /// Represents an asynchronous unit of work factory.
     /// </summary>

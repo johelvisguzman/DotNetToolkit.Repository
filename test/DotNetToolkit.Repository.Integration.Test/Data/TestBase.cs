@@ -9,12 +9,12 @@
 
     public abstract class TestBase
     {
-        protected static void ForAllRepositories(Action<IRepositoryFactory> action)
+        protected static void ForAllRepositoryFactories(Action<IRepositoryFactory> action)
         {
             GetRepositoryFactories().ForEach(action);
         }
 
-        protected static void ForAllRepositoriesAsync(Func<IRepositoryFactoryAsync, Task> action)
+        protected static void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactoryAsync, Task> action)
         {
             foreach (var repo in GetRepositoryFactories())
             {
@@ -32,7 +32,7 @@
             GetRepositoryFactories().OfType<InMemory.InMemoryRepository<Customer, int>>().ToList().ForEach(action);
         }
 
-        protected static void ForAllRepositoriesInMemoryFileBased(Action<IRepositoryFactory> action)
+        protected static void ForAllRepositoryFactoriesInMemoryFileBased(Action<IRepositoryFactory> action)
         {
             GetInMemoryFileBasedRepositoryFactories().ForEach(action);
         }
@@ -40,6 +40,19 @@
         protected static void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory> action)
         {
             GetUnitOfWorkFactories().ForEach(action);
+        }
+
+        protected static void ForAllUnitOfWorkFactoriesAsync(Func<IUnitOfWorkFactoryAsync, Task> action)
+        {
+            foreach (var uowFactory in GetUnitOfWorkFactories())
+            {
+                var uowFactoryAsync = uowFactory as IUnitOfWorkFactoryAsync;
+
+                if (uowFactoryAsync != null)
+                {
+                    action(uowFactoryAsync);
+                }
+            }
         }
 
         protected static IRepository<Customer> CreateRepositoryInstanceOfType(Type type, object arg)

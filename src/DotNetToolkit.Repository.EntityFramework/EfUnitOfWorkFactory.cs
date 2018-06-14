@@ -6,6 +6,7 @@
     using System.Collections.Generic;
     using System.Data.Entity;
     using System.Linq;
+    using Transactions;
 
     /// <summary>
     /// An implementation of <see cref="IUnitOfWorkFactoryAsync" />.
