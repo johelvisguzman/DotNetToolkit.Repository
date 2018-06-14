@@ -19,8 +19,6 @@
         /// </summary>
         /// <param name="obj">The object containing the property.</param>
         /// <returns>The property value.</returns>
-        /// <exception cref="System.ArgumentNullException"><paramref name="obj" /> is <c>null</c>.</exception>
-        /// <exception cref="System.InvalidOperationException">Primary key could not be found for the entity type.</exception>
         public static T GetPrimaryKeyPropertyValue<T>(this object obj)
         {
             if (obj == null)
@@ -45,7 +43,9 @@
                 throw new ArgumentNullException(nameof(obj));
 
             var propertyInfo = obj.GetType().GetPrimaryKeyPropertyInfo();
-            propertyInfo.SetValue(obj, value, null);
+            var convertedValue = Convert.ChangeType(value, propertyInfo.PropertyType);
+
+            propertyInfo.SetValue(obj, convertedValue, null);
         }
 
         /// <summary>
@@ -53,8 +53,6 @@
         /// </summary>
         /// <param name="entityType">The entity type to get the primary key from.</param>
         /// <returns>The primary key property info.</returns>
-        /// <exception cref="System.ArgumentNullException"><paramref name="entityType" /> is <c>null</c>.</exception>
-        /// <exception cref="System.InvalidOperationException">The instance of entity type requires a primary key to be defined.</exception>
         public static PropertyInfo GetPrimaryKeyPropertyInfo(this Type entityType)
         {
             if (entityType == null)
