@@ -63,6 +63,9 @@
         /// <param name="interceptors">The interceptors.</param>
         public AdoNetRepositoryFactory(DbTransaction transaction, IEnumerable<IRepositoryInterceptor> interceptors = null)
         {
+            if (transaction == null)
+                throw new ArgumentNullException(nameof(transaction));
+
             _transaction = transaction;
             _connectionString = _transaction.Connection.ConnectionString;
             _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();

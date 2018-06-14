@@ -24,6 +24,16 @@
 
         #endregion
 
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UnitOfWorkBaseAsync"/> class.
+        /// </summary>
+        /// <param name="transactionManager">The transaction.</param>
+        protected UnitOfWorkBaseAsync(ITransactionManager transactionManager) : base(transactionManager) { }
+
+        #endregion
+
         #region Protected Methods
 
         /// <summary>
@@ -34,7 +44,7 @@
         protected virtual IRepositoryAsync<TEntity, object> GetRepositoryAsync<TEntity>() where TEntity : class
         {
             if (Factory == null)
-                throw new InvalidOperationException("The repository factory has not been specified.");
+                throw new InvalidOperationException("A repository factory has not been specified.");
 
             if (_repositories.ContainsKey(typeof(TEntity)))
                 return _repositories[typeof(TEntity)] as IRepositoryAsync<TEntity, object>;
