@@ -16,6 +16,7 @@
         #region Fields
 
         internal readonly Dictionary<Type, object> _repositories;
+        private bool _disposed;
 
         #endregion
 
@@ -24,7 +25,12 @@
         /// <summary>
         /// Gets or sets the repository factory.
         /// </summary>
-        protected IRepositoryFactory Factory { get; set;  }
+        protected IRepositoryFactory Factory { get; set; }
+
+        /// <summary>
+        /// Gets the transaction manager.
+        /// </summary>
+        protected ITransactionManager TransactionManager { get; private set; }
 
         #endregion
 
@@ -33,8 +39,15 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="UnitOfWorkBase"/> class.
         /// </summary>
-        protected UnitOfWorkBase()
+        /// <param name="transactionManager">The transaction.</param>
+        /// <exception cref="ArgumentNullException">transaction</exception>
+        protected UnitOfWorkBase(ITransactionManager transactionManager)
         {
+            if (transactionManager == null)
+                throw new ArgumentNullException(nameof(transactionManager));
+
+            TransactionManager = transactionManager;
+
             _repositories = new Dictionary<Type, object>();
         }
 
@@ -46,7 +59,22 @@
         /// Releases unmanaged and - optionally - managed resources.
         /// </summary>
         /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
-        protected abstract void Dispose(bool disposing);
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+
+            if (disposing)
+            {
+                if (TransactionManager != null)
+                {
+                    TransactionManager.Rollback();
+                    TransactionManager.Dispose();
+                    TransactionManager = null;
+                }
+            }
+
+            _disposed = true;
+        }
 
         /// <summary>
         /// Gets the repository.
@@ -56,7 +84,7 @@
         protected virtual IRepository<TEntity, object> GetRepository<TEntity>() where TEntity : class
         {
             if (Factory == null)
-                throw new InvalidOperationException("The repository factory has not been specified.");
+                throw new InvalidOperationException("A repository factory has not been specified.");
 
             if (_repositories.ContainsKey(typeof(TEntity)))
                 return _repositories[typeof(TEntity)] as IRepository<TEntity, object>;
@@ -75,7 +103,14 @@
         /// <summary>
         /// Commits all changes made in this unit of work.
         /// </summary>
-        public abstract void Commit();
+        public virtual void Commit()
+        {
+            if (TransactionManager == null)
+                throw new InvalidOperationException("The transaction has already been committed or disposed.");
+
+            TransactionManager.Commit();
+            TransactionManager = null;
+        }
 
         #endregion
 
