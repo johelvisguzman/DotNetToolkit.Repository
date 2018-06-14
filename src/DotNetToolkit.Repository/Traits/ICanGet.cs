@@ -51,3 +51,67 @@
         bool Exists(TKey key);
     }
 }
+
+namespace DotNetToolkit.Repository.Transactions.Traits
+{
+    using FetchStrategies;
+    using System;
+    using System.Linq.Expressions;
+
+    /// <summary>
+    /// Represents a trait for getting items from a unit of work repository.
+    /// </summary>
+    public interface ICanGet
+    {
+        /// <summary>
+        /// Gets an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <typeparam name="TKey">The type of the primary key.</typeparam>
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <return>The entity found.</return>
+        TEntity Get<TEntity, TKey>(TKey key) where TEntity : class;
+
+        /// <summary>
+        /// Gets an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <typeparam name="TKey">The type of the primary key.</typeparam>
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <return>The entity found.</return>
+        TEntity Get<TEntity, TKey>(TKey key, IFetchStrategy<TEntity> fetchStrategy) where TEntity : class;
+
+        /// <summary>
+        /// Gets a specific projected entity result with the given primary key value in the repository.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <typeparam name="TKey">The type of the primary key.</typeparam>
+        /// <typeparam name="TResult">The type of the projected result.</typeparam>
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <param name="selector">A function to project each entity into a new form.</param>
+        /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
+        TResult Get<TEntity, TKey, TResult>(TKey key, Expression<Func<TEntity, TResult>> selector) where TEntity : class;
+
+        /// <summary>
+        /// Gets a specific projected entity result with the given primary key value in the repository.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <typeparam name="TKey">The type of the primary key.</typeparam>
+        /// <typeparam name="TResult">The type of the projected result.</typeparam>
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <param name="selector">A function to project each entity into a new form.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
+        TResult Get<TEntity, TKey, TResult>(TKey key, Expression<Func<TEntity, TResult>> selector, IFetchStrategy<TEntity> fetchStrategy) where TEntity : class;
+
+        /// <summary>
+        /// Determines whether the repository contains an entity with the given primary key value
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <typeparam name="TKey">The type of the primary key.</typeparam>
+        /// <param name="key">The value of the primary key used to match entities against.</param>
+        /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        bool Exists<TEntity, TKey>(TKey key) where TEntity : class;
+    }
+}

@@ -13,25 +13,25 @@
         [Fact]
         public void CreatesTempFileOnConstruction()
         {
-            ForAllRepositoriesInMemoryFileBased(TestCreatesTempFileOnConstruction);
+            ForAllRepositoryFactoriesInMemoryFileBased(TestCreatesTempFileOnConstruction);
         }
 
         [Fact]
         public void GeneratesTempFileNameWhenOnlyDirectoryIsProvided()
         {
-            ForAllRepositoriesInMemoryFileBased(TestGeneratesTempFileNameWhenOnlyDirectoryIsProvided);
+            ForAllRepositoryFactoriesInMemoryFileBased(TestGeneratesTempFileNameWhenOnlyDirectoryIsProvided);
         }
 
         [Fact]
         public void ThrowsIfFilePathIsInvalid()
         {
-            ForAllRepositoriesInMemoryFileBased(TestThrowsIfFilePathIsInvalid);
+            ForAllRepositoryFactoriesInMemoryFileBased(TestThrowsIfFilePathIsInvalid);
         }
 
         [Fact]
         public void ThrowsIfFileExtensionIsNotValid()
         {
-            ForAllRepositoriesInMemoryFileBased(TestThrowsIfFileExtensionIsNotValid);
+            ForAllRepositoryFactoriesInMemoryFileBased(TestThrowsIfFileExtensionIsNotValid);
         }
 
         private static string GetFileExtension(IRepository<Customer, int> repo)
