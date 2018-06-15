@@ -27,18 +27,11 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         Task UpdateAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default(CancellationToken));
     }
-}
-
-namespace DotNetToolkit.Repository.Transactions.Traits
-{
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
 
     /// <summary>
-    /// Represents a trait for updating items in a unit of work repository.
+    /// Represents a trait for updating items in a repository.
     /// </summary>
-    /// <seealso cref="DotNetToolkit.Repository.Transactions.Traits.ICanUpdate" />
+    /// <seealso cref="DotNetToolkit.Repository.Traits.ICanUpdate" />
     public interface ICanUpdateAsync : ICanUpdate
     {
         /// <summary>

@@ -45,19 +45,11 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         Task DeleteAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default(CancellationToken));
     }
-}
-
-namespace DotNetToolkit.Repository.Transactions.Traits
-{
-    using Queries;
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
 
     /// <summary>
-    /// Represents a trait for deleting items from a unit of work repository.
+    /// Represents a trait for deleting items from a repository.
     /// </summary>
-    /// <seealso cref="DotNetToolkit.Repository.Transactions.Traits.ICanDelete" />
+    /// <seealso cref="DotNetToolkit.Repository.Traits.ICanDelete" />
     public interface ICanDeleteAsync : ICanDelete
     {
         /// <summary>

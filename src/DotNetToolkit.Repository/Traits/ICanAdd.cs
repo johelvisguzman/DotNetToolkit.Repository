@@ -20,14 +20,9 @@
         /// <param name="entities">The collection of entities to add.</param>
         void Add(IEnumerable<TEntity> entities);
     }
-}
-
-namespace DotNetToolkit.Repository.Transactions.Traits
-{
-    using System.Collections.Generic;
 
     /// <summary>
-    /// Represents a trait for adding items to a unit of work repository.
+    /// Represents a trait for adding items to a repository.
     /// </summary>
     public interface ICanAdd
     {

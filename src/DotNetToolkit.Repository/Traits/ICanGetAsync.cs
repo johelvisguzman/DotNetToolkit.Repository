@@ -58,20 +58,11 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         Task<bool> ExistsAsync(TKey key, CancellationToken cancellationToken = default(CancellationToken));
     }
-}
-
-namespace DotNetToolkit.Repository.Transactions.Traits
-{
-    using FetchStrategies;
-    using System;
-    using System.Linq.Expressions;
-    using System.Threading;
-    using System.Threading.Tasks;
 
     /// <summary>
-    /// Represents a trait for getting items from a unit of work repository.
+    /// Represents a trait for getting items from a repository.
     /// </summary>
-    /// <seealso cref="DotNetToolkit.Repository.Transactions.Traits.ICanGet" />
+    /// <seealso cref="DotNetToolkit.Repository.Traits.ICanGet" />
     public interface ICanGetAsync : ICanGet
     {
         /// <summary>
