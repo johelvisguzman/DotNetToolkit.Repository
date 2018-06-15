@@ -2,6 +2,7 @@
 {
     using Factories;
     using Interceptors;
+    using System;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -41,7 +42,7 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity> Create<TEntity>() where TEntity : class
         {
-            return new XmlRepository<TEntity>(_path, _interceptors);
+            return CreateInstance<XmlRepository<TEntity>>();
         }
 
         /// <summary>
@@ -52,7 +53,22 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey> Create<TEntity, TKey>() where TEntity : class
         {
-            return new XmlRepository<TEntity, TKey>(_path, _interceptors);
+            return CreateInstance<XmlRepository<TEntity, TKey>>();
+        }
+
+        /// <summary>
+        /// Creates a new repository for the specified type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>The new repository.</returns>
+        public T CreateInstance<T>() where T : class
+        {
+            var args = new List<object> { _path };
+
+            if (_interceptors.Any())
+                args.Add(_interceptors);
+
+            return (T)Activator.CreateInstance(typeof(T), args.ToArray());
         }
 
         #endregion

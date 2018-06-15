@@ -69,6 +69,26 @@
             return CreateAsync();
         }
 
+        /// <summary>
+        /// Creates a new repository for the specified type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>The new repository.</returns>
+        public T CreateInstance<T>() where T : class
+        {
+            var args = new List<object>();
+
+            if (!string.IsNullOrEmpty(_providerName))
+                args.Add(_providerName);
+
+            args.Add(_connectionString);
+
+            if (_interceptors.Any())
+                args.Add(_interceptors);
+
+            return (T)Activator.CreateInstance(typeof(T), args.ToArray());
+        }
+
         #endregion
 
         #region Implementation of IUnitOfWorkFactoryAsync
@@ -79,9 +99,7 @@
         /// <returns>The new asynchronous unit of work.</returns>
         public IUnitOfWorkAsync CreateAsync()
         {
-            return string.IsNullOrEmpty(_providerName)
-                ? new AdoNetUnitOfWork(_connectionString, _interceptors)
-                : new AdoNetUnitOfWork(_providerName, _connectionString, _interceptors);
+            return CreateInstance<AdoNetUnitOfWork>();
         }
 
         #endregion

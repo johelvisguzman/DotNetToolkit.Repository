@@ -60,6 +60,21 @@
             return CreateAsync<TEntity, TKey>();
         }
 
+        /// <summary>
+        /// Creates a new repository for the specified type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>The new repository.</returns>
+        public T CreateInstance<T>() where T : class
+        {
+            var args = new List<object> { _dbContextFactory() };
+
+            if (_interceptors.Any())
+                args.Add(_interceptors);
+
+            return (T)Activator.CreateInstance(typeof(T), args.ToArray());
+        }
+
         #endregion
 
         #region Implementation of IRepositoryFactoryAsync
@@ -71,7 +86,7 @@
         /// <returns>The new asynchronous repository.</returns>
         public IRepositoryAsync<TEntity> CreateAsync<TEntity>() where TEntity : class
         {
-            return new EfRepository<TEntity>(_dbContextFactory(), _interceptors);
+            return CreateInstance<EfRepository<TEntity>>();
         }
 
         /// <summary>
@@ -82,7 +97,7 @@
         /// <returns>The new asynchronous repository.</returns>
         public IRepositoryAsync<TEntity, TKey> CreateAsync<TEntity, TKey>() where TEntity : class
         {
-            return new EfRepository<TEntity, TKey>(_dbContextFactory(), _interceptors);
+            return CreateInstance<EfRepository<TEntity, TKey>>();
         }
 
         #endregion
