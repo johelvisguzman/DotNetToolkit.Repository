@@ -61,7 +61,7 @@
         {
             var repo = repoFactory.Create<Customer>();
             var dir = GetTempFileName(string.Empty);
-            var defaultGeneratedPathName = typeof(Customer).GetTableName() + GetFileExtension(repo);
+            var defaultGeneratedPathName = ConventionHelper.GetTableName<Customer>() + GetFileExtension(repo);
             var path = dir + defaultGeneratedPathName;
 
             Assert.True(!File.Exists(path));

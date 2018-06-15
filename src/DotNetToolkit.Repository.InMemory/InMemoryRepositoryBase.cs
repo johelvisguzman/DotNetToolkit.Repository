@@ -157,7 +157,7 @@
             // Check if it is null or default
             if (key != null && key.Equals(default(TKey)))
             {
-                key = entity.GetPrimaryKeyPropertyValue<TKey>();
+                key = ConventionHelper.GetPrimaryKeyPropertyValue<TKey>(entity);
 
                 // Check if it is null or default
                 if (key != null && key.Equals(default(TKey)))
@@ -178,7 +178,7 @@
         /// </summary>
         protected override void DeleteItem(TEntity entity)
         {
-            var key = entity.GetPrimaryKeyPropertyValue<TKey>();
+            var key = ConventionHelper.GetPrimaryKeyPropertyValue<TKey>(entity);
             var hasTemporaryKey = false;
 
             // Check if it is null or default
@@ -199,7 +199,7 @@
         /// </summary>
         protected override void UpdateItem(TEntity entity)
         {
-            var key = entity.GetPrimaryKeyPropertyValue<TKey>();
+            var key = ConventionHelper.GetPrimaryKeyPropertyValue<TKey>(entity);
             var hasTemporaryKey = false;
 
             // Check if it is null or default
@@ -231,7 +231,7 @@
                     if (entitySet.HasTemporaryKey)
                     {
                         key = GeneratePrimaryKey();
-                        entitySet.Entity.SetPrimaryKeyPropertyValue(key);
+                        ConventionHelper.SetPrimaryKeyPropertyValue(entitySet.Entity, key);
                     }
                     else if (context.ContainsKey(key))
                     {

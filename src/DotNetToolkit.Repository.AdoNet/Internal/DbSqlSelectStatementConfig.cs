@@ -47,7 +47,7 @@
         public string GenerateTableAlias(Type tableType)
         {
             var tableAlias = $"Extent{_tableAliasCount++}";
-            var tableName = tableType.GetTableName();
+            var tableName = ConventionHelper.GetTableName(tableType);
 
             _tableAliasMapping.Add(tableName, tableAlias);
             _tableNameAndTypeMapping.Add(tableName, tableType);
@@ -59,9 +59,9 @@
 
         public string GenerateColumnAlias(PropertyInfo pi)
         {
-            var columnName = pi.GetColumnName();
+            var columnName = ConventionHelper.GetColumnName(pi);
             var columnAlias = columnName;
-            var tableName = pi.DeclaringType.GetTableName();
+            var tableName = ConventionHelper.GetTableName(pi.DeclaringType);
 
             if (_columnAliasMappingCount.TryGetValue(columnName, out int columnAliasCount))
             {
@@ -101,8 +101,8 @@
 
         public string GetColumnAlias(PropertyInfo pi)
         {
-            var columnName = pi.GetColumnName();
-            var tableName = pi.DeclaringType.GetTableName();
+            var columnName = ConventionHelper.GetColumnName(pi);
+            var tableName = ConventionHelper.GetTableName(pi.DeclaringType);
             var columnMapping = _tableColumnAliasMapping[tableName];
 
             if (!columnMapping.ContainsKey(columnName))
