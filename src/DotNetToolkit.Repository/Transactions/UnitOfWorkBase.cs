@@ -229,31 +229,6 @@
         }
 
         /// <summary>
-        /// Returns a new <see cref="IGrouping{TGroupKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TEntity>> GroupBy<TEntity, TGroupKey>(Expression<Func<TEntity, TGroupKey>> keySelector) where TEntity : class
-        {
-            return GetRepository<TEntity>().GroupBy<TGroupKey>(keySelector);
-        }
-
-        /// <summary>
-        /// Returns a new <see cref="IGrouping{TGroupKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TEntity>> GroupBy<TEntity, TGroupKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector) where TEntity : class
-        {
-            return GetRepository<TEntity>().GroupBy<TGroupKey>(options, keySelector);
-        }
-
-        /// <summary>
         /// Returns a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
