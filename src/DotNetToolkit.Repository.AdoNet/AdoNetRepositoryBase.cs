@@ -70,8 +70,14 @@
         /// Initializes a new instance of the <see cref="AdoNetRepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="connectionString">The connection string.</param>
+        protected AdoNetRepositoryBase(string connectionString) : this(connectionString, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryBase{TEntity, TKey}"/> class.
+        /// </summary>
+        /// <param name="connectionString">The connection string.</param>
         /// <param name="interceptors">The interceptors.</param>
-        protected AdoNetRepositoryBase(string connectionString, IEnumerable<IRepositoryInterceptor> interceptors = null) : base(interceptors)
+        protected AdoNetRepositoryBase(string connectionString, IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
         {
             if (connectionString == null)
                 throw new ArgumentNullException(nameof(connectionString));
@@ -91,8 +97,15 @@
         /// </summary>
         /// <param name="providerName">The name of the provider.</param>
         /// <param name="connectionString">The connection string.</param>
+        protected AdoNetRepositoryBase(string providerName, string connectionString) : this(providerName, connectionString, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryBase{TEntity, TKey}"/> class.
+        /// </summary>
+        /// <param name="providerName">The name of the provider.</param>
+        /// <param name="connectionString">The connection string.</param>
         /// <param name="interceptors">The interceptors.</param>
-        protected AdoNetRepositoryBase(string providerName, string connectionString, IEnumerable<IRepositoryInterceptor> interceptors = null) : base(interceptors)
+        protected AdoNetRepositoryBase(string providerName, string connectionString, IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
         {
             if (providerName == null)
                 throw new ArgumentNullException(nameof(providerName));
@@ -110,8 +123,14 @@
         /// Initializes a new instance of the <see cref="AdoNetRepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="transaction">The transaction.</param>
+        protected AdoNetRepositoryBase(DbTransaction transaction) : this(transaction, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryBase{TEntity, TKey}"/> class.
+        /// </summary>
+        /// <param name="transaction">The transaction.</param>
         /// <param name="interceptors">The interceptors.</param>
-        protected AdoNetRepositoryBase(DbTransaction transaction, IEnumerable<IRepositoryInterceptor> interceptors = null) : base(interceptors)
+        protected AdoNetRepositoryBase(DbTransaction transaction, IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
         {
             if (transaction == null)
                 throw new ArgumentNullException(nameof(transaction));

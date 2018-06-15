@@ -27,8 +27,14 @@
         /// Initializes a new instance of the <see cref="EfUnitOfWorkFactory"/> class.
         /// </summary>
         /// <param name="dbContextFactory">The database context factory.</param>
+        public EfUnitOfWorkFactory(Func<DbContext> dbContextFactory) : this(dbContextFactory, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EfUnitOfWorkFactory"/> class.
+        /// </summary>
+        /// <param name="dbContextFactory">The database context factory.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public EfUnitOfWorkFactory(Func<DbContext> dbContextFactory, IEnumerable<IRepositoryInterceptor> interceptors = null)
+        public EfUnitOfWorkFactory(Func<DbContext> dbContextFactory, IEnumerable<IRepositoryInterceptor> interceptors)
         {
             if (dbContextFactory == null)
                 throw new ArgumentNullException(nameof(dbContextFactory));
@@ -50,6 +56,21 @@
             return CreateAsync();
         }
 
+        /// <summary>
+        /// Creates a new repository for the specified type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>The new repository.</returns>
+        public T CreateInstance<T>() where T : class
+        {
+            var args = new List<object> { _dbContextFactory() };
+
+            if (_interceptors.Any())
+                args.Add(_interceptors);
+
+            return (T)Activator.CreateInstance(typeof(T), args.ToArray());
+        }
+
         #endregion
 
         #region Implementation of IUnitOfWorkFactoryAsync
@@ -60,7 +81,7 @@
         /// <returns>The new asynchronous unit of work.</returns>
         public IUnitOfWorkAsync CreateAsync()
         {
-            return new EfUnitOfWork(_dbContextFactory(), _interceptors);
+            return CreateInstance<EfUnitOfWork>();
         }
 
         #endregion

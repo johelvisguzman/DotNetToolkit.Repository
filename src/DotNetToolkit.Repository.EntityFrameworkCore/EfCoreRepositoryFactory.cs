@@ -25,9 +25,14 @@
         /// Initializes a new instance of the <see cref="EfCoreRepositoryFactory"/> class.
         /// </summary>
         /// <param name="dbContextFactory">The database context factory.</param>
+        public EfCoreRepositoryFactory(Func<DbContext> dbContextFactory) : this(dbContextFactory, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EfCoreRepositoryFactory"/> class.
+        /// </summary>
+        /// <param name="dbContextFactory">The database context factory.</param>
         /// <param name="interceptors">The interceptors.</param>
-        /// <exception cref="ArgumentNullException">dbContextFactory</exception>
-        public EfCoreRepositoryFactory(Func<DbContext> dbContextFactory, IEnumerable<IRepositoryInterceptor> interceptors = null)
+        public EfCoreRepositoryFactory(Func<DbContext> dbContextFactory, IEnumerable<IRepositoryInterceptor> interceptors)
         {
             if (dbContextFactory == null)
                 throw new ArgumentNullException(nameof(dbContextFactory));
@@ -61,6 +66,21 @@
             return CreateAsync<TEntity, TKey>();
         }
 
+        /// <summary>
+        /// Creates a new repository for the specified type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>The new repository.</returns>
+        public T CreateInstance<T>() where T : class
+        {
+            var args = new List<object> { _dbContextFactory() };
+
+            if (_interceptors.Any())
+                args.Add(_interceptors);
+
+            return (T)Activator.CreateInstance(typeof(T), args.ToArray());
+        }
+
         #endregion
 
         #region Implementation of IRepositoryFactoryAsync
@@ -72,7 +92,7 @@
         /// <returns>The new asynchronous repository.</returns>
         public IRepositoryAsync<TEntity> CreateAsync<TEntity>() where TEntity : class
         {
-            return new EfCoreRepository<TEntity>(_dbContextFactory(), _interceptors);
+            return CreateInstance<EfCoreRepository<TEntity>>();
         }
 
         /// <summary>
@@ -83,7 +103,7 @@
         /// <returns>The new asynchronous repository.</returns>
         public IRepositoryAsync<TEntity, TKey> CreateAsync<TEntity, TKey>() where TEntity : class
         {
-            return new EfCoreRepository<TEntity, TKey>(_dbContextFactory(), _interceptors);
+            return CreateInstance<EfCoreRepository<TEntity, TKey>>();
         }
 
         #endregion

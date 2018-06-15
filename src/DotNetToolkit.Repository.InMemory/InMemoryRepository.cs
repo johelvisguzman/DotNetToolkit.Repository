@@ -13,27 +13,26 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey}"/> class.
         /// </summary>
-        /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
-        public InMemoryRepository(string databaseName = null) : base(databaseName)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey}"/> class.
-        /// </summary>
-        /// <param name="interceptors">The interceptors.</param>
-        public InMemoryRepository(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
-        {
-        }
+        public InMemoryRepository() { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
+        public InMemoryRepository(string databaseName) : base(databaseName) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey}"/> class.
+        /// </summary>
         /// <param name="interceptors">The interceptors.</param>
-        public InMemoryRepository(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors) : base(databaseName, interceptors)
-        {
-        }
+        public InMemoryRepository(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey}"/> class.
+        /// </summary>
+        /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        public InMemoryRepository(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors) : base(databaseName, interceptors) { }
 
         #endregion
     }
@@ -48,27 +47,26 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity}"/> class.
         /// </summary>
-        /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
-        public InMemoryRepository(string databaseName = null) : base(databaseName)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity}"/> class.
-        /// </summary>
-        /// <param name="interceptors">The interceptors.</param>
-        public InMemoryRepository(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
-        {
-        }
+        public InMemoryRepository() { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity}"/> class.
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
+        public InMemoryRepository(string databaseName) : base(databaseName) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity}"/> class.
+        /// </summary>
         /// <param name="interceptors">The interceptors.</param>
-        public InMemoryRepository(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors) : base(databaseName, interceptors)
-        {
-        }
+        public InMemoryRepository(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity}"/> class.
+        /// </summary>
+        /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        public InMemoryRepository(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors) : base(databaseName, interceptors) { }
 
         #endregion
     }

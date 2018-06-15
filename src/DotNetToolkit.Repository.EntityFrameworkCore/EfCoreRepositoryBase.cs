@@ -42,9 +42,7 @@
         /// Initializes a new instance of the <see cref="EfCoreRepositoryBase{TEntity, TKey}" /> class.
         /// </summary>
         /// <param name="context">The database context.</param>
-        protected EfCoreRepositoryBase(DbContext context) : this(context, null)
-        {
-        }
+        protected EfCoreRepositoryBase(DbContext context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EfCoreRepositoryBase{TEntity, TKey}" /> class.

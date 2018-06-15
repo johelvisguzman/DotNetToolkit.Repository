@@ -27,8 +27,14 @@
         /// Initializes a new instance of the <see cref="AdoNetUnitOfWorkFactory"/> class.
         /// </summary>
         /// <param name="connectionString">The connection string.</param>
+        public AdoNetUnitOfWorkFactory(string connectionString) : this(connectionString, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetUnitOfWorkFactory"/> class.
+        /// </summary>
+        /// <param name="connectionString">The connection string.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public AdoNetUnitOfWorkFactory(string connectionString, IEnumerable<IRepositoryInterceptor> interceptors = null)
+        public AdoNetUnitOfWorkFactory(string connectionString, IEnumerable<IRepositoryInterceptor> interceptors)
         {
             if (connectionString == null)
                 throw new ArgumentNullException(nameof(connectionString));
@@ -42,8 +48,15 @@
         /// </summary>
         /// <param name="providerName">Name of the provider.</param>
         /// <param name="connectionString">The connection string.</param>
+        public AdoNetUnitOfWorkFactory(string providerName, string connectionString) : this(providerName, connectionString, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetUnitOfWorkFactory"/> class.
+        /// </summary>
+        /// <param name="providerName">Name of the provider.</param>
+        /// <param name="connectionString">The connection string.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public AdoNetUnitOfWorkFactory(string providerName, string connectionString, IEnumerable<IRepositoryInterceptor> interceptors = null)
+        public AdoNetUnitOfWorkFactory(string providerName, string connectionString, IEnumerable<IRepositoryInterceptor> interceptors)
         {
             if (providerName == null)
                 throw new ArgumentNullException(nameof(providerName));
@@ -69,6 +82,26 @@
             return CreateAsync();
         }
 
+        /// <summary>
+        /// Creates a new repository for the specified type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>The new repository.</returns>
+        public T CreateInstance<T>() where T : class
+        {
+            var args = new List<object>();
+
+            if (!string.IsNullOrEmpty(_providerName))
+                args.Add(_providerName);
+
+            args.Add(_connectionString);
+
+            if (_interceptors.Any())
+                args.Add(_interceptors);
+
+            return (T)Activator.CreateInstance(typeof(T), args.ToArray());
+        }
+
         #endregion
 
         #region Implementation of IUnitOfWorkFactoryAsync
@@ -79,9 +112,7 @@
         /// <returns>The new asynchronous unit of work.</returns>
         public IUnitOfWorkAsync CreateAsync()
         {
-            return string.IsNullOrEmpty(_providerName)
-                ? new AdoNetUnitOfWork(_connectionString, _interceptors)
-                : new AdoNetUnitOfWork(_providerName, _connectionString, _interceptors);
+            return CreateInstance<AdoNetUnitOfWork>();
         }
 
         #endregion

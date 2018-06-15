@@ -20,6 +20,13 @@
             CreateDatabase(provider, connectionString);
         }
 
+        public static string Create()
+        {
+            Create(out string provider, out string connectionString);
+
+            return connectionString;
+        }
+
         private static void CreateDatabase(string provider, string connectionString)
         {
             new SqlCeEngine(connectionString).CreateDatabase();

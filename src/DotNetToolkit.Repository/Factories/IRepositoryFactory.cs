@@ -19,5 +19,11 @@
         /// <typeparam name="TKey">The type of the key primary key value.</typeparam>
         /// <returns>The new repository.</returns>
         IRepository<TEntity, TKey> Create<TEntity, TKey>() where TEntity : class;
+
+        /// <summary>
+        /// Creates a new repository for the specified type.
+        /// </summary>
+        /// <returns>The new repository.</returns>
+        T CreateInstance<T>() where T : class;
     }
 }

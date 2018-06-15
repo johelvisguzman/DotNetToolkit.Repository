@@ -96,6 +96,33 @@
             return CreateAsync<TEntity, TKey>();
         }
 
+        /// <summary>
+        /// Creates a new repository for the specified type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>The new repository.</returns>
+        public T CreateInstance<T>() where T : class
+        {
+            var args = new List<object>();
+
+            if (_transaction != null)
+            {
+                args.Add(_transaction);
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(_providerName))
+                    args.Add(_providerName);
+
+                args.Add(_connectionString);
+            }
+
+            if (_interceptors.Any())
+                args.Add(_interceptors);
+
+            return (T)Activator.CreateInstance(typeof(T), args.ToArray());
+        }
+
         #endregion
 
         #region Implementation of IRepositoryFactoryAsync
@@ -107,12 +134,7 @@
         /// <returns>The new asynchronous repository.</returns>
         public IRepositoryAsync<TEntity> CreateAsync<TEntity>() where TEntity : class
         {
-            if (_transaction != null)
-                return new AdoNetRepository<TEntity>(_transaction, _interceptors);
-
-            return string.IsNullOrEmpty(_providerName)
-                ? new AdoNetRepository<TEntity>(_connectionString, _interceptors)
-                : new AdoNetRepository<TEntity>(_providerName, _connectionString, _interceptors);
+            return CreateInstance<AdoNetRepository<TEntity>>();
         }
 
         /// <summary>
@@ -123,12 +145,7 @@
         /// <returns>The new asynchronous repository.</returns>
         public IRepositoryAsync<TEntity, TKey> CreateAsync<TEntity, TKey>() where TEntity : class
         {
-            if (_transaction != null)
-                return new AdoNetRepository<TEntity, TKey>(_transaction, _interceptors);
-
-            return string.IsNullOrEmpty(_providerName)
-                ? new AdoNetRepository<TEntity, TKey>(_connectionString, _interceptors)
-                : new AdoNetRepository<TEntity, TKey>(_providerName, _connectionString, _interceptors);
+            return CreateInstance<AdoNetRepository<TEntity, TKey>>();
         }
 
         #endregion
