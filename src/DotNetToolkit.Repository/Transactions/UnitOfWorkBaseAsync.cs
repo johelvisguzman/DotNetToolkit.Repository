@@ -167,33 +167,6 @@
         }
 
         /// <summary>
-        /// Asynchronously returns a new <see cref="IGrouping{TGroupKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        public Task<IEnumerable<IGrouping<TGroupKey, TEntity>>> GroupByAsync<TEntity, TGroupKey>(Expression<Func<TEntity, TGroupKey>> keySelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
-        {
-            return GetRepositoryAsync<TEntity>().GroupByAsync<TGroupKey>(keySelector, cancellationToken);
-        }
-
-        /// <summary>
-        /// Asynchronously returns a new <see cref="IGrouping{TGroupKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public Task<IEnumerable<IGrouping<TGroupKey, TEntity>>> GroupByAsync<TEntity, TGroupKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
-        {
-            return GetRepositoryAsync<TEntity>().GroupByAsync<TGroupKey>(options, keySelector, cancellationToken);
-        }
-
-        /// <summary>
         /// Asynchronously returns a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>

@@ -1155,15 +1155,11 @@
             var expectedGroup = entities.GroupBy(y => y.Id);
             var expectedGroupByElementSelector = entities.GroupBy(y => y.Id, y => y.Name);
 
-            Assert.False(expectedGroup.All(x => repo.GroupBy(y => y.Id).Select(y => y.Key).Contains(x.Key)));
-            Assert.False(expectedGroup.All(x => repo.GroupBy(options, y => y.Id).Select(y => y.Key).Contains(x.Key)));
             Assert.False(expectedGroupByElementSelector.All(x => repo.GroupBy(y => y.Id, y => y.Key).Contains(x.Key)));
             Assert.False(expectedGroupByElementSelector.All(x => repo.GroupBy(options, y => y.Id, y => y.Key).Contains(x.Key)));
 
             repo.Add(entities);
 
-            Assert.True(expectedGroup.All(x => repo.GroupBy(y => y.Id).Select(y => y.Key).Contains(x.Key)));
-            Assert.True(expectedGroup.All(x => repo.GroupBy(options, y => y.Id).Select(y => y.Key).Contains(x.Key)));
             Assert.True(expectedGroupByElementSelector.All(x => repo.GroupBy(y => y.Id, y => y.Key).Contains(x.Key)));
             Assert.True(expectedGroupByElementSelector.All(x => repo.GroupBy(options, y => y.Id, y => y.Key).Contains(x.Key)));
         }
@@ -1182,8 +1178,6 @@
 
             repo.Add(entities);
 
-            Assert.Equal("Random Name 2", repo.GroupBy(options, y => y.Name).First().Key);
-            Assert.Equal("Random Name 2", repo.GroupBy(y => y.Name).First().Key);
             Assert.Equal("Random Name 2", repo.GroupBy(options, y => y.Name, x => x.Key).First());
             Assert.Equal("Random Name 2", repo.GroupBy(y => y.Name, x => x.Key).First());
         }
@@ -1202,8 +1196,6 @@
 
             repo.Add(entities);
 
-            Assert.Equal("Random Name 2", repo.GroupBy(y => y.Name).First().Key);
-            Assert.Equal("Random Name 1", repo.GroupBy(options, y => y.Name).First().Key);
             Assert.Equal("Random Name 2", repo.GroupBy(y => y.Name, x => x.Key).First());
             Assert.Equal("Random Name 1", repo.GroupBy(options, y => y.Name, x => x.Key).First());
         }
@@ -1222,7 +1214,7 @@
             repo.Add(entities);
 
             var options = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
-            var entitiesInDb = repo.GroupBy(options, y => y.Name);
+            var entitiesInDb = repo.GroupBy(options, y => y.Name, y => y);
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 0", entitiesInDb.ElementAt(0).Key);
@@ -1233,7 +1225,7 @@
 
             options = options.Page(2);
 
-            entitiesInDb = repo.GroupBy(options, y => y.Name);
+            entitiesInDb = repo.GroupBy(options, y => y.Name, y => y);
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 5", entitiesInDb.ElementAt(0).Key);
@@ -1244,7 +1236,7 @@
 
             options = options.Page(3);
 
-            entitiesInDb = repo.GroupBy(options, y => y.Name);
+            entitiesInDb = repo.GroupBy(options, y => y.Name, y => y);
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 10", entitiesInDb.ElementAt(0).Key);
@@ -1255,7 +1247,7 @@
 
             options = options.Page(4);
 
-            entitiesInDb = repo.GroupBy(options, y => y.Name);
+            entitiesInDb = repo.GroupBy(options, y => y.Name, y => y);
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 15", entitiesInDb.ElementAt(0).Key);
@@ -1266,7 +1258,7 @@
 
             options = options.Page(5);
 
-            entitiesInDb = repo.GroupBy(options, y => y.Name);
+            entitiesInDb = repo.GroupBy(options, y => y.Name, y => y);
 
             Assert.Single(entitiesInDb);
             Assert.Equal("Random Name 20", entitiesInDb.ElementAt(0).Key);
@@ -1286,7 +1278,7 @@
             repo.Add(entities);
 
             var options = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
-            var entitiesInDb = repo.GroupBy(options, y => y.Name);
+            var entitiesInDb = repo.GroupBy(options, y => y.Name, y => y);
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 20", entitiesInDb.ElementAt(0).Key);
@@ -1297,7 +1289,7 @@
 
             options = options.Page(2);
 
-            entitiesInDb = repo.GroupBy(options, y => y.Name);
+            entitiesInDb = repo.GroupBy(options, y => y.Name, y => y);
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 15", entitiesInDb.ElementAt(0).Key);
@@ -1308,7 +1300,7 @@
 
             options = options.Page(3);
 
-            entitiesInDb = repo.GroupBy(options, y => y.Name);
+            entitiesInDb = repo.GroupBy(options, y => y.Name, y => y);
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 10", entitiesInDb.ElementAt(0).Key);
@@ -1319,7 +1311,7 @@
 
             options = options.Page(4);
 
-            entitiesInDb = repo.GroupBy(options, y => y.Name);
+            entitiesInDb = repo.GroupBy(options, y => y.Name, y => y);
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 5", entitiesInDb.ElementAt(0).Key);
@@ -1330,7 +1322,7 @@
 
             options = options.Page(5);
 
-            entitiesInDb = repo.GroupBy(options, y => y.Name);
+            entitiesInDb = repo.GroupBy(options, y => y.Name, y => y);
 
             Assert.Single(entitiesInDb);
             Assert.Equal("Random Name 0", entitiesInDb.ElementAt(0).Key);
@@ -2180,15 +2172,11 @@
             var expectedGroup = entities.GroupBy(y => y.Id);
             var expectedGroupByElementSelector = entities.GroupBy(y => y.Id, y => y.Name);
 
-            Assert.False(expectedGroup.All(x => repo.GroupByAsync(y => y.Id).Result.Select(y => y.Key).Contains(x.Key)));
-            Assert.False(expectedGroup.All(x => repo.GroupByAsync(options, y => y.Id).Result.Select(y => y.Key).Contains(x.Key)));
             Assert.False(expectedGroupByElementSelector.All(x => repo.GroupByAsync(y => y.Id, y => y.Key).Result.Contains(x.Key)));
             Assert.False(expectedGroupByElementSelector.All(x => repo.GroupByAsync(options, y => y.Id, y => y.Key).Result.Contains(x.Key)));
 
             await repo.AddAsync(entities);
 
-            Assert.True(expectedGroup.All(x => repo.GroupByAsync(y => y.Id).Result.Select(y => y.Key).Contains(x.Key)));
-            Assert.True(expectedGroup.All(x => repo.GroupByAsync(options, y => y.Id).Result.Select(y => y.Key).Contains(x.Key)));
             Assert.True(expectedGroupByElementSelector.All(x => repo.GroupByAsync(y => y.Id, y => y.Key).Result.Contains(x.Key)));
             Assert.True(expectedGroupByElementSelector.All(x => repo.GroupByAsync(options, y => y.Id, y => y.Key).Result.Contains(x.Key)));
         }
@@ -2207,8 +2195,6 @@
 
             await repo.AddAsync(entities);
 
-            Assert.Equal("Random Name 2", (await repo.GroupByAsync(options, y => y.Name)).First().Key);
-            Assert.Equal("Random Name 2", (await repo.GroupByAsync(y => y.Name)).First().Key);
             Assert.Equal("Random Name 2", (await repo.GroupByAsync(options, y => y.Name, x => x.Key)).First());
             Assert.Equal("Random Name 2", (await repo.GroupByAsync(y => y.Name, x => x.Key)).First());
         }
@@ -2227,8 +2213,6 @@
 
             await repo.AddAsync(entities);
 
-            Assert.Equal("Random Name 2", (await repo.GroupByAsync(y => y.Name)).First().Key);
-            Assert.Equal("Random Name 1", (await repo.GroupByAsync(options, y => y.Name)).First().Key);
             Assert.Equal("Random Name 2", (await repo.GroupByAsync(y => y.Name, x => x.Key)).First());
             Assert.Equal("Random Name 1", (await repo.GroupByAsync(options, y => y.Name, x => x.Key)).First());
         }
@@ -2247,7 +2231,7 @@
             await repo.AddAsync(entities);
 
             var options = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
-            var entitiesInDb = await repo.GroupByAsync(options, y => y.Name);
+            var entitiesInDb = await repo.GroupByAsync(options, y => y.Name, y => y);
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 0", entitiesInDb.ElementAt(0).Key);
@@ -2258,7 +2242,7 @@
 
             options = options.Page(2);
 
-            entitiesInDb = await repo.GroupByAsync(options, y => y.Name);
+            entitiesInDb = await repo.GroupByAsync(options, y => y.Name, y => y);
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 5", entitiesInDb.ElementAt(0).Key);
@@ -2269,7 +2253,7 @@
 
             options = options.Page(3);
 
-            entitiesInDb = await repo.GroupByAsync(options, y => y.Name);
+            entitiesInDb = await repo.GroupByAsync(options, y => y.Name, y => y);
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 10", entitiesInDb.ElementAt(0).Key);
@@ -2280,7 +2264,7 @@
 
             options = options.Page(4);
 
-            entitiesInDb = await repo.GroupByAsync(options, y => y.Name);
+            entitiesInDb = await repo.GroupByAsync(options, y => y.Name, y => y);
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 15", entitiesInDb.ElementAt(0).Key);
@@ -2291,7 +2275,7 @@
 
             options = options.Page(5);
 
-            entitiesInDb = await repo.GroupByAsync(options, y => y.Name);
+            entitiesInDb = await repo.GroupByAsync(options, y => y.Name, y => y);
 
             Assert.Single(entitiesInDb);
             Assert.Equal("Random Name 20", entitiesInDb.ElementAt(0).Key);
@@ -2311,7 +2295,7 @@
             await repo.AddAsync(entities);
 
             var options = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
-            var entitiesInDb = await repo.GroupByAsync(options, y => y.Name);
+            var entitiesInDb = await repo.GroupByAsync(options, y => y.Name, y => y);
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 20", entitiesInDb.ElementAt(0).Key);
@@ -2322,7 +2306,7 @@
 
             options = options.Page(2);
 
-            entitiesInDb = await repo.GroupByAsync(options, y => y.Name);
+            entitiesInDb = await repo.GroupByAsync(options, y => y.Name, y => y);
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 15", entitiesInDb.ElementAt(0).Key);
@@ -2333,7 +2317,7 @@
 
             options = options.Page(3);
 
-            entitiesInDb = await repo.GroupByAsync(options, y => y.Name);
+            entitiesInDb = await repo.GroupByAsync(options, y => y.Name, y => y);
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 10", entitiesInDb.ElementAt(0).Key);
@@ -2344,7 +2328,7 @@
 
             options = options.Page(4);
 
-            entitiesInDb = await repo.GroupByAsync(options, y => y.Name);
+            entitiesInDb = await repo.GroupByAsync(options, y => y.Name, y => y);
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 5", entitiesInDb.ElementAt(0).Key);
@@ -2355,7 +2339,7 @@
 
             options = options.Page(5);
 
-            entitiesInDb = await repo.GroupByAsync(options, y => y.Name);
+            entitiesInDb = await repo.GroupByAsync(options, y => y.Name, y => y);
 
             Assert.Single(entitiesInDb);
             Assert.Equal("Random Name 0", entitiesInDb.ElementAt(0).Key);
