@@ -209,17 +209,17 @@
         }
 
         /// <summary>
-        /// A protected asynchronous overridable method for getting a new <see cref="IGrouping{TGroupKey, TElemen}" /> according to the specified <paramref name="keySelector" />, an element selector.
+        /// A protected asynchronous overridable method for getting a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected override async Task<IEnumerable<IGrouping<TGroupKey, TElement>>> GetGroupByAsync<TGroupKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
+        protected override async Task<IEnumerable<TResult>> GetGroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
-            if (elementSelector == null)
-                throw new ArgumentNullException(nameof(elementSelector));
+            if (resultSelector == null)
+                throw new ArgumentNullException(nameof(resultSelector));
 
-            return await GetQuery(options).GroupBy(keySelector, elementSelector, EqualityComparer<TGroupKey>.Default).ToListAsync(cancellationToken);
+            return await GetQuery(options).GroupBy(keySelector, EqualityComparer<TGroupKey>.Default).Select(resultSelector).ToListAsync(cancellationToken);
         }
 
         #endregion

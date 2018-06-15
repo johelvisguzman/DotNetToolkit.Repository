@@ -415,53 +415,6 @@
         }
 
         /// <summary>
-        /// Executes the query, and returns a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keyProjector" />, and <paramref name="elementProjector" />.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type</param>
-        /// <param name="parameters">The command parameters</param>
-        /// <param name="keyProjector">A function to extract a key from each entity.</param>
-        /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
-        /// <returns>A new <see cref="IGrouping{TGroupKey, TElement}" /> that contains keys and values.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TElement>> ExecuteGroup<TGroupKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, TGroupKey> keyProjector, Func<DbDataReader, TElement> elementProjector)
-        {
-            return CurrentTransaction != null
-                ? ExecuteGroup<TGroupKey, TElement>(CurrentTransaction, cmdText, cmdType, parameters, keyProjector, elementProjector)
-                : ExecuteGroup<TGroupKey, TElement>(CreateConnection(), cmdText, cmdType, parameters, keyProjector, elementProjector);
-        }
-
-        /// <summary>
-        /// Executes the query, and returns a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keyProjector" />, and <paramref name="elementProjector" />.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="parameters">The command parameters</param>
-        /// <param name="keyProjector">A function to extract a key from each entity.</param>
-        /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
-        /// <returns>A new <see cref="IGrouping{TGroupKey, TElement}" /> that contains keys and values.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TElement>> ExecuteGroup<TGroupKey, TElement>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, TGroupKey> keyProjector, Func<DbDataReader, TElement> elementProjector)
-        {
-            return ExecuteGroup<TGroupKey, TElement>(cmdText, CommandType.Text, parameters, keyProjector, elementProjector);
-        }
-
-        /// <summary>
-        /// Executes the query, and returns a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keyProjector" />, and <paramref name="elementProjector" />.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="keyProjector">A function to extract a key from each entity.</param>
-        /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
-        /// <returns>A new <see cref="IGrouping{TGroupKey, TElement}" /> that contains keys and values.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TElement>> ExecuteGroup<TGroupKey, TElement>(string cmdText, Func<DbDataReader, TGroupKey> keyProjector, Func<DbDataReader, TElement> elementProjector)
-        {
-            return ExecuteGroup<TGroupKey, TElement>(cmdText, null, keyProjector, elementProjector);
-        }
-
-        /// <summary>
         /// Asynchronously executes a SQL statement against a connection.
         /// </summary>
         /// <param name="cmdText">The command text.</param>
@@ -716,56 +669,6 @@
         public Task<Dictionary<TDictionaryKey, TElement>> ExecuteDictionaryAsync<TDictionaryKey, TElement>(string cmdText, Func<DbDataReader, TDictionaryKey> keyProjector, Func<DbDataReader, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteDictionaryAsync<TDictionaryKey, TElement>(cmdText, null, keyProjector, elementProjector, cancellationToken);
-        }
-
-        /// <summary>
-        /// Asynchronously executes the query, and returns a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keyProjector" />, and <paramref name="elementProjector" />.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type</param>
-        /// <param name="parameters">The command parameters</param>
-        /// <param name="keyProjector">A function to extract a key from each entity.</param>
-        /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TElement}" /> that contains keys and values.</returns>
-        public Task<IEnumerable<IGrouping<TGroupKey, TElement>>> ExecuteGroupAsync<TGroupKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, TGroupKey> keyProjector, Func<DbDataReader, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return CurrentTransaction != null
-                ? ExecuteGroupAsync<TGroupKey, TElement>(CurrentTransaction, cmdText, cmdType, parameters, keyProjector, elementProjector, cancellationToken)
-                : ExecuteGroupAsync<TGroupKey, TElement>(CreateConnection(), cmdText, cmdType, parameters, keyProjector, elementProjector, cancellationToken);
-        }
-
-        /// <summary>
-        /// Asynchronously executes the query, and returns a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keyProjector" />, and <paramref name="elementProjector" />.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="parameters">The command parameters</param>
-        /// <param name="keyProjector">A function to extract a key from each entity.</param>
-        /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TElement}" /> that contains keys and values.</returns>
-        public Task<IEnumerable<IGrouping<TGroupKey, TElement>>> ExecuteGroupAsync<TGroupKey, TElement>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, TGroupKey> keyProjector, Func<DbDataReader, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return ExecuteGroupAsync<TGroupKey, TElement>(cmdText, CommandType.Text, parameters, keyProjector, elementProjector, cancellationToken);
-        }
-
-        /// <summary>
-        /// Asynchronously executes the query, and returns a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keyProjector" />, and <paramref name="elementProjector" />.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="keyProjector">A function to extract a key from each entity.</param>
-        /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TElement}" /> that contains keys and values.</returns>
-        public Task<IEnumerable<IGrouping<TGroupKey, TElement>>> ExecuteGroupAsync<TGroupKey, TElement>(string cmdText, Func<DbDataReader, TGroupKey> keyProjector, Func<DbDataReader, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return ExecuteGroupAsync<TGroupKey, TElement>(cmdText, null, keyProjector, elementProjector, cancellationToken);
         }
 
         #endregion
@@ -1427,60 +1330,6 @@
         }
 
         /// <summary>
-        /// Executes the query, and returns a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keyProjector" />, and <paramref name="elementProjector" />.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="connection">The connection.</param>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type</param>
-        /// <param name="parameters">The command parameters</param>
-        /// <param name="keyProjector">A function to extract a key from each entity.</param>
-        /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
-        /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        protected virtual IEnumerable<IGrouping<TGroupKey, TElement>> ExecuteGroup<TGroupKey, TElement>(DbConnection connection, string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, TGroupKey> keyProjector, Func<DbDataReader, TElement> elementProjector)
-        {
-            using (var reader = ExecuteReader(connection, cmdText, cmdType, parameters))
-            {
-                var dict = new Dictionary<TGroupKey, TElement>();
-
-                while (reader.Read())
-                {
-                    dict.Add(keyProjector(reader), elementProjector(reader));
-                }
-
-                return dict.GroupBy(x => x.Key, x => x.Value);
-            }
-        }
-
-        /// <summary>
-        /// Executes the query, and returns a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keyProjector" />, and <paramref name="elementProjector" />.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="transaction">The transaction.</param>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type</param>
-        /// <param name="parameters">The command parameters</param>
-        /// <param name="keyProjector">A function to extract a key from each entity.</param>
-        /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
-        /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        protected virtual IEnumerable<IGrouping<TGroupKey, TElement>> ExecuteGroup<TGroupKey, TElement>(DbTransaction transaction, string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, TGroupKey> keyProjector, Func<DbDataReader, TElement> elementProjector)
-        {
-            using (var reader = ExecuteReader(transaction, cmdText, cmdType, parameters))
-            {
-                var dict = new Dictionary<TGroupKey, TElement>();
-
-                while (reader.Read())
-                {
-                    dict.Add(keyProjector(reader), elementProjector(reader));
-                }
-
-                return dict.GroupBy(x => x.Key, x => x.Value);
-            }
-        }
-
-        /// <summary>
         /// Asynchronously executes a SQL statement against a connection.
         /// </summary>
         /// <param name="connection">The connection.</param>
@@ -2021,62 +1870,6 @@
                 }
 
                 return dict;
-            }
-        }
-
-        /// <summary>
-        /// Asynchronously executes the query, and returns a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keyProjector" />, and <paramref name="elementProjector" />.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="connection">The connection.</param>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type</param>
-        /// <param name="parameters">The command parameters</param>
-        /// <param name="keyProjector">A function to extract a key from each entity.</param>
-        /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        protected virtual async Task<IEnumerable<IGrouping<TGroupKey, TElement>>> ExecuteGroupAsync<TGroupKey, TElement>(DbConnection connection, string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, TGroupKey> keyProjector, Func<DbDataReader, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            using (var reader = await ExecuteReaderAsync(connection, cmdText, cmdType, parameters, cancellationToken))
-            {
-                var dict = new Dictionary<TGroupKey, TElement>();
-
-                while (await reader.ReadAsync(cancellationToken))
-                {
-                    dict.Add(keyProjector(reader), elementProjector(reader));
-                }
-
-                return dict.GroupBy(x => x.Key, x => x.Value);
-            }
-        }
-
-        /// <summary>
-        /// Asynchronously executes the query, and returns a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keyProjector" />, and <paramref name="elementProjector" />.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="transaction">The transaction.</param>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type</param>
-        /// <param name="parameters">The command parameters</param>
-        /// <param name="keyProjector">A function to extract a key from each entity.</param>
-        /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        protected virtual async Task<IEnumerable<IGrouping<TGroupKey, TElement>>> ExecuteGroupAsync<TGroupKey, TElement>(DbTransaction transaction, string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, TGroupKey> keyProjector, Func<DbDataReader, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            using (var reader = await ExecuteReaderAsync(transaction, cmdText, cmdType, parameters, cancellationToken))
-            {
-                var dict = new Dictionary<TGroupKey, TElement>();
-
-                while (await reader.ReadAsync(cancellationToken))
-                {
-                    dict.Add(keyProjector(reader), elementProjector(reader));
-                }
-
-                return dict.GroupBy(x => x.Key, x => x.Value);
             }
         }
 
@@ -2632,20 +2425,22 @@
         }
 
         /// <summary>
-        /// Gets a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
+        /// Gets a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected override IEnumerable<IGrouping<TGroupKey, TElement>> GetGroupBy<TGroupKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
+        protected override IEnumerable<TResult> GetGroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
             PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
 
-            return ExecuteGroup<TGroupKey, TElement>(
-                config.Sql,
-                config.Parameters,
-                r => AutoMap<TGroupKey>(r, keySelector, config),
-                r => AutoMap<TElement>(r, elementSelector, config));
+            var keySelectFunc = keySelector.Compile();
+            var resultSelectorFunc = resultSelector.Compile();
+
+            return ExecuteList(config.Sql, config.Parameters, r => AutoMap(r, config))
+                .GroupBy(keySelectFunc, EqualityComparer<TGroupKey>.Default)
+                .Select(resultSelectorFunc)
+                .ToList();
         }
 
         #endregion
@@ -2801,24 +2596,22 @@
         }
 
         /// <summary>
-        /// A protected asynchronous overridable method for getting a new <see cref="IGrouping{TGroupKey, TElemen}" /> according to the specified <paramref name="keySelector" />, an element selector.
+        /// A protected asynchronous overridable method for getting a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected override Task<IEnumerable<IGrouping<TGroupKey, TElement>>> GetGroupByAsync<TGroupKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
+        protected override async Task<IEnumerable<TResult>> GetGroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
-            if (elementSelector == null)
-                throw new ArgumentNullException(nameof(elementSelector));
-
             PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
 
-            return ExecuteGroupAsync<TGroupKey, TElement>(
-                config.Sql,
-                config.Parameters,
-                r => AutoMap<TGroupKey>(r, keySelector, config),
-                r => AutoMap<TElement>(r, elementSelector, config),
-                cancellationToken);
+            var keySelectFunc = keySelector.Compile();
+            var resultSelectorFunc = resultSelector.Compile();
+
+            return (await ExecuteListAsync(config.Sql, config.Parameters, r => AutoMap(r, config), cancellationToken))
+                .GroupBy(keySelectFunc, EqualityComparer<TGroupKey>.Default)
+                .Select(resultSelectorFunc)
+                .ToList();
         }
 
         #endregion

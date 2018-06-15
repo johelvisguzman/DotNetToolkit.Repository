@@ -439,7 +439,7 @@
             var repo = repoFactory.Create<Customer>();
 
             const string name = "Random Name";
-            
+
             var options = new QueryOptions<Customer>();
             var entity = new Customer { Name = name };
 
@@ -465,7 +465,7 @@
                 new Customer { Name = "Random Name 2" },
                 new Customer { Name = "Random Name 1" }
             };
-            
+
             var options = new QueryOptions<Customer>().SortByDescending(x => x.Name);
 
             Assert.Null(repo.Find(x => x.Name.Contains("Random Name"))?.Name);
@@ -491,7 +491,7 @@
                 new Customer { Name = "Random Name 1" }
             };
 
-var options = new QueryOptions<Customer>().SortBy(x => x.Name);
+            var options = new QueryOptions<Customer>().SortBy(x => x.Name);
 
             Assert.Null(repo.Find(x => x.Name.Contains("Random Name"))?.Name);
             Assert.Null(repo.Find(options)?.Name);
@@ -511,7 +511,7 @@ var options = new QueryOptions<Customer>().SortBy(x => x.Name);
             var repo = repoFactory.Create<Customer>();
 
             const string name = "Random Name";
-            
+
             var options = new QueryOptions<Customer>().SortBy(x => x.Name);
             var entity = new Customer { Name = name };
 
@@ -761,7 +761,7 @@ var options = new QueryOptions<Customer>().SortBy(x => x.Name);
             var repo = repoFactory.Create<Customer>();
 
             const string name = "Random Name";
-            
+
             var options = new QueryOptions<Customer>();
             var entity = new Customer { Name = name };
 
@@ -799,7 +799,7 @@ var options = new QueryOptions<Customer>().SortBy(x => x.Name);
             var repo = repoFactory.Create<Customer>();
 
             const string name = "Random Name";
-            
+
             var options = new QueryOptions<Customer>();
             var entity = new Customer { Id = 1, Name = name };
             var expectedDictionary = new Dictionary<int, Customer>();
@@ -831,7 +831,7 @@ var options = new QueryOptions<Customer>().SortBy(x => x.Name);
             {
                 entities.Add(new Customer { Id = i + 1, Name = "Random Name " + i });
             }
-            
+
             var options = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
             var expectedDictionary = entities.ToDictionary(x => x.Id);
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
@@ -1145,7 +1145,7 @@ var options = new QueryOptions<Customer>().SortBy(x => x.Name);
             var repo = repoFactory.Create<Customer>();
 
             const string name = "Random Name";
-            
+
             var options = new QueryOptions<Customer>();
             var entities = new List<Customer>()
             {
@@ -1155,17 +1155,17 @@ var options = new QueryOptions<Customer>().SortBy(x => x.Name);
             var expectedGroup = entities.GroupBy(y => y.Id);
             var expectedGroupByElementSelector = entities.GroupBy(y => y.Id, y => y.Name);
 
+            Assert.False(expectedGroup.All(x => repo.GroupBy(y => y.Id).Select(y => y.Key).Contains(x.Key)));
             Assert.False(expectedGroup.All(x => repo.GroupBy(options, y => y.Id).Select(y => y.Key).Contains(x.Key)));
-            Assert.False(expectedGroup.All(x => repo.GroupBy(options, y => y.Id).Select(y => y.Key).Contains(x.Key)));
-            Assert.False(expectedGroupByElementSelector.All(x => repo.GroupBy(options, y => y.Id, y => y.Name).Select(y => y.Key).Contains(x.Key)));
-            Assert.False(expectedGroupByElementSelector.All(x => repo.GroupBy(options, y => y.Id, y => y.Name).Select(y => y.Key).Contains(x.Key)));
+            Assert.False(expectedGroupByElementSelector.All(x => repo.GroupBy(y => y.Id, y => y.Key).Contains(x.Key)));
+            Assert.False(expectedGroupByElementSelector.All(x => repo.GroupBy(options, y => y.Id, y => y.Key).Contains(x.Key)));
 
             repo.Add(entities);
 
+            Assert.True(expectedGroup.All(x => repo.GroupBy(y => y.Id).Select(y => y.Key).Contains(x.Key)));
             Assert.True(expectedGroup.All(x => repo.GroupBy(options, y => y.Id).Select(y => y.Key).Contains(x.Key)));
-            Assert.True(expectedGroup.All(x => repo.GroupBy(options, y => y.Id).Select(y => y.Key).Contains(x.Key)));
-            Assert.True(expectedGroupByElementSelector.All(x => repo.GroupBy(options, y => y.Id, y => y.Name).Select(y => y.Key).Contains(x.Key)));
-            Assert.True(expectedGroupByElementSelector.All(x => repo.GroupBy(options, y => y.Id, y => y.Name).Select(y => y.Key).Contains(x.Key)));
+            Assert.True(expectedGroupByElementSelector.All(x => repo.GroupBy(y => y.Id, y => y.Key).Contains(x.Key)));
+            Assert.True(expectedGroupByElementSelector.All(x => repo.GroupBy(options, y => y.Id, y => y.Key).Contains(x.Key)));
         }
 
         private static void TestGroupByWithSortingOptionsAscending(IRepositoryFactory repoFactory)
@@ -1177,15 +1177,15 @@ var options = new QueryOptions<Customer>().SortBy(x => x.Name);
                 new Customer { Name = "Random Name 2" },
                 new Customer { Name = "Random Name 1" }
             };
-            
+
             var options = new QueryOptions<Customer>().SortByDescending(x => x.Name);
 
             repo.Add(entities);
 
             Assert.Equal("Random Name 2", repo.GroupBy(options, y => y.Name).First().Key);
             Assert.Equal("Random Name 2", repo.GroupBy(y => y.Name).First().Key);
-            Assert.Equal("Random Name 2", repo.GroupBy(options, y => y.Name, x => x.Name).First().Key);
-            Assert.Equal("Random Name 2", repo.GroupBy(y => y.Name, x => x.Name).First().Key);
+            Assert.Equal("Random Name 2", repo.GroupBy(options, y => y.Name, x => x.Key).First());
+            Assert.Equal("Random Name 2", repo.GroupBy(y => y.Name, x => x.Key).First());
         }
 
         private static void TestGroupByWithSortingOptionsDescending(IRepositoryFactory repoFactory)
@@ -1204,8 +1204,8 @@ var options = new QueryOptions<Customer>().SortBy(x => x.Name);
 
             Assert.Equal("Random Name 2", repo.GroupBy(y => y.Name).First().Key);
             Assert.Equal("Random Name 1", repo.GroupBy(options, y => y.Name).First().Key);
-            Assert.Equal("Random Name 2", repo.GroupBy(y => y.Name, x => x.Name).First().Key);
-            Assert.Equal("Random Name 1", repo.GroupBy(options, y => y.Name, x => x.Name).First().Key);
+            Assert.Equal("Random Name 2", repo.GroupBy(y => y.Name, x => x.Key).First());
+            Assert.Equal("Random Name 1", repo.GroupBy(options, y => y.Name, x => x.Key).First());
         }
 
         private static void TestGroupByWithPagingOptionsSortAscending(IRepositoryFactory repoFactory)
@@ -1464,7 +1464,7 @@ var options = new QueryOptions<Customer>().SortBy(x => x.Name);
             var repo = repoFactory.CreateAsync<Customer>();
 
             const string name = "Random Name";
-            
+
             var options = new QueryOptions<Customer>();
             var entity = new Customer { Name = name };
 
@@ -1490,7 +1490,7 @@ var options = new QueryOptions<Customer>().SortBy(x => x.Name);
                 new Customer { Name = "Random Name 2" },
                 new Customer { Name = "Random Name 1" }
             };
-            
+
             var options = new QueryOptions<Customer>().SortByDescending(x => x.Name);
 
             Assert.Null((await repo.FindAsync(x => x.Name.Contains("Random Name")))?.Name);
@@ -1515,7 +1515,7 @@ var options = new QueryOptions<Customer>().SortBy(x => x.Name);
                 new Customer { Name = "Random Name 2" },
                 new Customer { Name = "Random Name 1" }
             };
-            
+
             var options = new QueryOptions<Customer>().SortBy(x => x.Name);
 
             Assert.Null((await repo.FindAsync(x => x.Name.Contains("Random Name")))?.Name);
@@ -1536,7 +1536,7 @@ var options = new QueryOptions<Customer>().SortBy(x => x.Name);
             var repo = repoFactory.CreateAsync<Customer>();
 
             const string name = "Random Name";
-            
+
             var options = new QueryOptions<Customer>().SortBy(x => x.Name);
             var entity = new Customer { Name = name };
 
@@ -1786,7 +1786,7 @@ var options = new QueryOptions<Customer>().SortBy(x => x.Name);
             var repo = repoFactory.CreateAsync<Customer>();
 
             const string name = "Random Name";
-            
+
             var options = new QueryOptions<Customer>();
             var entity = new Customer { Name = name };
 
@@ -1806,7 +1806,7 @@ var options = new QueryOptions<Customer>().SortBy(x => x.Name);
             var repo = repoFactory.CreateAsync<Customer>();
 
             const string name = "Random Name";
-            
+
             var options = new QueryOptions<Customer>();
             var entity = new Customer { Name = name };
 
@@ -1824,7 +1824,7 @@ var options = new QueryOptions<Customer>().SortBy(x => x.Name);
             var repo = repoFactory.CreateAsync<Customer>();
 
             const string name = "Random Name";
-            
+
             var options = new QueryOptions<Customer>();
             var entity = new Customer { Id = 1, Name = name };
             var expectedDictionary = new Dictionary<int, Customer>();
@@ -1856,7 +1856,7 @@ var options = new QueryOptions<Customer>().SortBy(x => x.Name);
             {
                 entities.Add(new Customer { Id = i + 1, Name = "Random Name " + i });
             }
-            
+
             var options = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
             var expectedDictionary = entities.ToDictionary(x => x.Id);
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
@@ -2182,15 +2182,15 @@ var options = new QueryOptions<Customer>().SortBy(x => x.Name);
 
             Assert.False(expectedGroup.All(x => repo.GroupByAsync(y => y.Id).Result.Select(y => y.Key).Contains(x.Key)));
             Assert.False(expectedGroup.All(x => repo.GroupByAsync(options, y => y.Id).Result.Select(y => y.Key).Contains(x.Key)));
-            Assert.False(expectedGroupByElementSelector.All(x => repo.GroupByAsync(y => y.Id, y => y.Name).Result.Select(y => y.Key).Contains(x.Key)));
-            Assert.False(expectedGroupByElementSelector.All(x => repo.GroupByAsync(options, y => y.Id, y => y.Name).Result.Select(y => y.Key).Contains(x.Key)));
+            Assert.False(expectedGroupByElementSelector.All(x => repo.GroupByAsync(y => y.Id, y => y.Key).Result.Contains(x.Key)));
+            Assert.False(expectedGroupByElementSelector.All(x => repo.GroupByAsync(options, y => y.Id, y => y.Key).Result.Contains(x.Key)));
 
             await repo.AddAsync(entities);
 
+            Assert.True(expectedGroup.All(x => repo.GroupByAsync(y => y.Id).Result.Select(y => y.Key).Contains(x.Key)));
             Assert.True(expectedGroup.All(x => repo.GroupByAsync(options, y => y.Id).Result.Select(y => y.Key).Contains(x.Key)));
-            Assert.True(expectedGroup.All(x => repo.GroupByAsync(options, y => y.Id).Result.Select(y => y.Key).Contains(x.Key)));
-            Assert.True(expectedGroupByElementSelector.All(x => repo.GroupByAsync(options, y => y.Id, y => y.Name).Result.Select(y => y.Key).Contains(x.Key)));
-            Assert.True(expectedGroupByElementSelector.All(x => repo.GroupByAsync(options, y => y.Id, y => y.Name).Result.Select(y => y.Key).Contains(x.Key)));
+            Assert.True(expectedGroupByElementSelector.All(x => repo.GroupByAsync(y => y.Id, y => y.Key).Result.Contains(x.Key)));
+            Assert.True(expectedGroupByElementSelector.All(x => repo.GroupByAsync(options, y => y.Id, y => y.Key).Result.Contains(x.Key)));
         }
 
         private static async Task TestGroupByWithSortingOptionsAscendingAsync(IRepositoryFactoryAsync repoFactory)
@@ -2209,8 +2209,8 @@ var options = new QueryOptions<Customer>().SortBy(x => x.Name);
 
             Assert.Equal("Random Name 2", (await repo.GroupByAsync(options, y => y.Name)).First().Key);
             Assert.Equal("Random Name 2", (await repo.GroupByAsync(y => y.Name)).First().Key);
-            Assert.Equal("Random Name 2", (await repo.GroupByAsync(options, y => y.Name, x => x.Name)).First().Key);
-            Assert.Equal("Random Name 2", (await repo.GroupByAsync(y => y.Name, x => x.Name)).First().Key);
+            Assert.Equal("Random Name 2", (await repo.GroupByAsync(options, y => y.Name, x => x.Key)).First());
+            Assert.Equal("Random Name 2", (await repo.GroupByAsync(y => y.Name, x => x.Key)).First());
         }
 
         private static async Task TestGroupByWithSortingOptionsDescendingAsync(IRepositoryFactoryAsync repoFactory)
@@ -2229,8 +2229,8 @@ var options = new QueryOptions<Customer>().SortBy(x => x.Name);
 
             Assert.Equal("Random Name 2", (await repo.GroupByAsync(y => y.Name)).First().Key);
             Assert.Equal("Random Name 1", (await repo.GroupByAsync(options, y => y.Name)).First().Key);
-            Assert.Equal("Random Name 2", (await repo.GroupByAsync(y => y.Name, x => x.Name)).First().Key);
-            Assert.Equal("Random Name 1", (await repo.GroupByAsync(options, y => y.Name, x => x.Name)).First().Key);
+            Assert.Equal("Random Name 2", (await repo.GroupByAsync(y => y.Name, x => x.Key)).First());
+            Assert.Equal("Random Name 1", (await repo.GroupByAsync(options, y => y.Name, x => x.Key)).First());
         }
 
         private static async Task TestGroupByWithPagingOptionsSortAscendingAsync(IRepositoryFactoryAsync repoFactory)
