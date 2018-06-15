@@ -267,7 +267,7 @@
             if (propertyType == typeof(int))
             {
                 var key = GetQuery()
-                    .Select(x => x.GetPrimaryKeyPropertyValue<TKey>())
+                    .Select(x => ConventionHelper.GetPrimaryKeyPropertyValue<TKey>(x))
                     .OrderByDescending(x => x)
                     .FirstOrDefault();
 
@@ -282,7 +282,7 @@
         /// </summary>
         protected virtual void ThrowIfEntityKeyValueTypeMismatch()
         {
-            var propertyInfo = typeof(TEntity).GetPrimaryKeyPropertyInfo();
+            var propertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<TEntity>();
             if (propertyInfo.PropertyType != typeof(TKey))
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeMismatch, typeof(TKey), propertyInfo.PropertyType));
         }

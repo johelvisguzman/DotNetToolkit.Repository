@@ -82,7 +82,7 @@
                 if (!fileName.EndsWith(@"\"))
                     fileName += @"\";
 
-                fileName += $"{typeof(TEntity).GetTableName()}{FileExtension}";
+                fileName += $"{ConventionHelper.GetTableName<TEntity>()}{FileExtension}";
             }
             else
             {

@@ -19,12 +19,12 @@
         /// </summary>
         /// <param name="obj">The object containing the property.</param>
         /// <returns>The property value.</returns>
-        public static T GetPrimaryKeyPropertyValue<T>(this object obj)
+        public static T GetPrimaryKeyPropertyValue<T>(object obj)
         {
             if (obj == null)
                 throw new ArgumentNullException(nameof(obj));
 
-            var propertyInfo = obj.GetType().GetPrimaryKeyPropertyInfo();
+            var propertyInfo = GetPrimaryKeyPropertyInfo(obj.GetType());
             var value = propertyInfo.GetValue(obj, null);
 
             return (T)Convert.ChangeType(value, typeof(T));
@@ -35,14 +35,12 @@
         /// </summary>
         /// <param name="obj">The object containing the property.</param>
         /// <param name="value">The value to set for the property.</param>
-        /// <exception cref="System.ArgumentNullException"><paramref name="obj" /> is <c>null</c>.</exception>
-        /// <exception cref="System.InvalidOperationException">The instance of entity type requires a primary key to be defined.</exception>
-        public static void SetPrimaryKeyPropertyValue(this object obj, object value)
+        public static void SetPrimaryKeyPropertyValue(object obj, object value)
         {
             if (obj == null)
                 throw new ArgumentNullException(nameof(obj));
 
-            var propertyInfo = obj.GetType().GetPrimaryKeyPropertyInfo();
+            var propertyInfo = GetPrimaryKeyPropertyInfo(obj.GetType());
             var convertedValue = Convert.ChangeType(value, propertyInfo.PropertyType);
 
             propertyInfo.SetValue(obj, convertedValue, null);
@@ -53,7 +51,7 @@
         /// </summary>
         /// <param name="entityType">The entity type to get the primary key from.</param>
         /// <returns>The primary key property info.</returns>
-        public static PropertyInfo GetPrimaryKeyPropertyInfo(this Type entityType)
+        public static PropertyInfo GetPrimaryKeyPropertyInfo(Type entityType)
         {
             if (entityType == null)
                 throw new ArgumentNullException(nameof(entityType));
@@ -63,8 +61,8 @@
 
             var propertyInfo = entityType
                 .GetRuntimeProperties()
-                .Where(x => x.IsMapped())
-                .SingleOrDefault(x => x.IsMapped() && x.GetCustomAttribute<KeyAttribute>() != null);
+                .Where(x => IsMapped(x))
+                .SingleOrDefault(x => IsMapped(x) && x.GetCustomAttribute<KeyAttribute>() != null);
 
             if (propertyInfo != null)
                 return propertyInfo;
@@ -73,7 +71,7 @@
             {
                 propertyInfo = entityType.GetTypeInfo().GetDeclaredProperty(propertyName);
 
-                if (propertyInfo != null && propertyInfo.IsMapped())
+                if (propertyInfo != null && IsMapped(propertyInfo))
                 {
                     InMemoryCache.Instance.PrimaryKeyMapping[entityType] = propertyInfo;
 
@@ -90,7 +88,7 @@
         /// <returns>The primary key property info.</returns>
         public static PropertyInfo GetPrimaryKeyPropertyInfo<T>()
         {
-            return typeof(T).GetPrimaryKeyPropertyInfo();
+            return GetPrimaryKeyPropertyInfo(typeof(T));
         }
 
         /// <summary>
@@ -98,7 +96,7 @@
         /// </summary>
         /// <param name="entityType">Type of the entity.</param>
         /// <returns>The name of the table.</returns>
-        public static string GetTableName(this Type entityType)
+        public static string GetTableName(Type entityType)
         {
             if (InMemoryCache.Instance.TableNameMapping.ContainsKey(entityType))
                 return InMemoryCache.Instance.TableNameMapping[entityType];
@@ -114,13 +112,22 @@
         }
 
         /// <summary>
+        /// Gets the name of the table.
+        /// </summary>
+        /// <returns>The name of the table.</returns>
+        public static string GetTableName<T>()
+        {
+            return GetTableName(typeof(T));
+        }
+
+        /// <summary>
         /// Determines whether the specified property is mapped (does not have a <see cref="NotMappedAttribute"/> defined).
         /// </summary>
         /// <param name="pi">The property info.</param>
         /// <returns>
         ///   <c>true</c> if the property is mapped; otherwise, <c>false</c>.
         /// </returns>
-        public static bool IsMapped(this PropertyInfo pi)
+        public static bool IsMapped(PropertyInfo pi)
         {
             if (pi == null)
                 throw new ArgumentNullException(nameof(pi));
@@ -133,7 +140,7 @@
         /// </summary>
         /// <param name="pi">The property info.</param>
         /// <returns>The column order.</returns>
-        public static int GetColumnOrder(this PropertyInfo pi)
+        public static int GetColumnOrder(PropertyInfo pi)
         {
             if (pi == null)
                 throw new ArgumentNullException(nameof(pi));
@@ -151,14 +158,14 @@
         /// <param name="sourceType">The source type.</param>
         /// <param name="foreignType">The foreign type to match.</param>
         /// <returns>The name of the foreign key.</returns>
-        public static PropertyInfo GetForeignKeyPropertyInfo(this Type sourceType, Type foreignType)
+        public static PropertyInfo GetForeignKeyPropertyInfo(Type sourceType, Type foreignType)
         {
             var tupleKey = Tuple.Create(sourceType, foreignType);
 
             if (InMemoryCache.Instance.ForeignKeyMapping.ContainsKey(tupleKey))
                 return InMemoryCache.Instance.ForeignKeyMapping[tupleKey];
 
-            var properties = sourceType.GetRuntimeProperties().Where(x => x.IsMapped());
+            var properties = sourceType.GetRuntimeProperties().Where(IsMapped);
             var foreignPropertyInfo = properties.SingleOrDefault(x => x.PropertyType == foreignType);
 
             PropertyInfo propertyInfo = null;
@@ -170,22 +177,22 @@
                 {
                     // Try to find by checking on the foreign key property
                     propertyInfo = propertyInfosWithForeignKeys
-                        .Where(x => x.IsPrimitive())
+                        .Where(IsPrimitive)
                         .SingleOrDefault(x => x.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(foreignPropertyInfo.Name));
 
                     // Try to find by checking on the navigation property
                     if (propertyInfo == null)
                     {
                         propertyInfo = properties
-                            .Where(x => x.IsPrimitive())
-                            .SingleOrDefault(x => foreignPropertyInfo.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(x.GetColumnName()));
+                            .Where(IsPrimitive)
+                            .SingleOrDefault(x => foreignPropertyInfo.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(GetColumnName(x)));
                     }
                 }
 
                 // Try to find by naming convention
                 if (propertyInfo == null)
                 {
-                    var foreignPrimaryKeyName = foreignType.GetPrimaryKeyPropertyInfo().GetColumnName();
+                    var foreignPrimaryKeyName = GetColumnName(GetPrimaryKeyPropertyInfo(foreignType));
 
                     propertyInfo = properties
                         .SingleOrDefault(x => x.Name == $"{foreignPropertyInfo.Name}{foreignPrimaryKeyName}");
@@ -202,7 +209,7 @@
         /// </summary>
         /// <param name="pi">The property info.</param>
         /// <returns><c>true</c> if the specified type is a complex type; otherwise, <c>false</c>.</returns>
-        public static bool IsComplex(this PropertyInfo pi)
+        public static bool IsComplex(PropertyInfo pi)
         {
             return pi.PropertyType.Namespace != "System";
         }
@@ -212,7 +219,7 @@
         /// </summary>
         /// <param name="pi">The property info.</param>
         /// <returns><c>true</c> if the specified type is a primitive type; otherwise, <c>false</c>.</returns>
-        public static bool IsPrimitive(this PropertyInfo pi)
+        public static bool IsPrimitive(PropertyInfo pi)
         {
             return !IsComplex(pi);
         }
@@ -222,13 +229,13 @@
         /// </summary>
         /// <param name="pi">The property info.</param>
         /// <returns>The name of the column.</returns>
-        public static string GetColumnName(this PropertyInfo pi)
+        public static string GetColumnName(PropertyInfo pi)
         {
             if (pi == null)
                 throw new ArgumentNullException(nameof(pi));
 
             // If this is a complex object then don't worry about finding a column attribute for it
-            if (pi.IsComplex())
+            if (IsComplex(pi))
                 return pi.Name;
 
             var columnName = pi.GetCustomAttribute<ColumnAttribute>()?.Name;

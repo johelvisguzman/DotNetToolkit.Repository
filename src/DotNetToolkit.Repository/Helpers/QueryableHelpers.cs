@@ -44,7 +44,7 @@
             else
             {
                 // Sorts on the Id key by default if no sorting is provided
-                var primaryKeyPropertyInfo = typeof(T).GetPrimaryKeyPropertyInfo();
+                var primaryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<T>();
                 var primaryKeyPropertyName = primaryKeyPropertyInfo.Name;
 
                 query = query.OrderBy(primaryKeyPropertyName);

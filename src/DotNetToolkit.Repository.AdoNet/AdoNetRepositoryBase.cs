@@ -2088,11 +2088,11 @@
         {
             SqlPropertiesMapping = typeof(TEntity)
                 .GetRuntimeProperties()
-                .Where(x => x.IsPrimitive() && x.IsMapped())
-                .OrderBy(x => x.GetColumnOrder())
+                .Where(x => ConventionHelper.IsPrimitive(x) && ConventionHelper.IsMapped(x))
+                .OrderBy(ConventionHelper.GetColumnOrder)
                 .ToDictionary(ConventionHelper.GetColumnName, x => x);
 
-            TableName = typeof(TEntity).GetTableName();
+            TableName = ConventionHelper.GetTableName<TEntity>();
 
             DataRow autoIncrementDataRow = null;
 
@@ -2132,14 +2132,15 @@
             var mainTableType = typeof(TEntity);
             var mainTableAlias = cfg.GenerateTableAlias(mainTableType);
             var mainTableProperties = mainTableType.GetRuntimeProperties();
-            var mainTablePrimaryKeyName = typeof(TEntity).GetPrimaryKeyPropertyInfo().GetColumnName();
+            var mainTablePrimaryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<TEntity>();
+            var mainTablePrimaryKeyName = ConventionHelper.GetColumnName(mainTablePrimaryKeyPropertyInfo);
 
             // Default select
             var columns = string.Join(",\n\t",
                 SqlPropertiesMapping.Select(x =>
                 {
                     var colAlias = cfg.GenerateColumnAlias(x.Value);
-                    var colName = x.Value.GetColumnName();
+                    var colName = ConventionHelper.GetColumnName(x.Value);
 
                     return $"[{mainTableAlias}].[{colName}] AS [{colAlias}]";
                 }));
@@ -2152,7 +2153,8 @@
                 // the same type as the primary table
                 // Only do a join when the primary table has a foreign key property for the join table
                 var paths = mainTableProperties
-                    .Where(x => x.IsComplex() && !string.IsNullOrEmpty(x.PropertyType.GetPrimaryKeyPropertyInfo()?.GetColumnName()))
+                    .Where(x => ConventionHelper.IsComplex(x) &&
+                                !string.IsNullOrEmpty(ConventionHelper.GetColumnName(ConventionHelper.GetPrimaryKeyPropertyInfo(x.PropertyType))))
                     .Select(x => x.Name)
                     .ToList();
 
@@ -2180,21 +2182,22 @@
                 {
                     var joinTablePropertyInfo = mainTableProperties.Single(x => x.Name.Equals(path));
                     var joinTableType = joinTablePropertyInfo.PropertyType;
-                    var joinTableForeignKeyName = joinTableType.GetForeignKeyPropertyInfo(mainTableType)?.GetColumnName();
+                    var joinTableForeignKeyPropertyInfo = ConventionHelper.GetForeignKeyPropertyInfo(joinTableType, mainTableType);
 
                     // Only do a join when the primary table has a foreign key property for the join table
-                    if (!string.IsNullOrEmpty(joinTableForeignKeyName))
+                    if (joinTableForeignKeyPropertyInfo != null)
                     {
+                        var joinTableForeignKeyName = ConventionHelper.GetColumnName(joinTableForeignKeyPropertyInfo);
                         var joinTableProperties = joinTableType.GetRuntimeProperties();
-                        var joinTableName = joinTableType.GetTableName();
+                        var joinTableName = ConventionHelper.GetTableName(joinTableType);
                         var joinTableAlias = cfg.GenerateTableAlias(joinTableType);
                         var joinTableColumnNames = string.Join(",\n\t",
                             joinTableProperties
-                                .Where(x => x.IsPrimitive())
+                                .Where(ConventionHelper.IsPrimitive)
                                 .Select(x =>
                                 {
                                     var colAlias = cfg.GenerateColumnAlias(x);
-                                    var colName = x.GetColumnName();
+                                    var colName = ConventionHelper.GetColumnName(x);
 
                                     return $"[{joinTableAlias}].[{colName}] AS [{colAlias}]";
                                 }));
@@ -2206,7 +2209,7 @@
                         joinStatementSb.Append("\n");
                         joinStatementSb.Append($"LEFT OUTER JOIN [{joinTableName}] AS [{joinTableAlias}] ON [{mainTableAlias}].[{mainTablePrimaryKeyName}] = [{joinTableAlias}].[{joinTableForeignKeyName}]");
 
-                        cfg.JoinTablePropertiesMapping.Add(joinTableType, joinTableProperties.ToDictionary(x => x.GetColumnName(), x => x));
+                        cfg.JoinTablePropertiesMapping.Add(joinTableType, joinTableProperties.ToDictionary(ConventionHelper.GetColumnName, x => x));
                     }
                 }
 
@@ -2259,7 +2262,7 @@
                 if (!sortings.Any())
                 {
                     // Sorts on the Id key by default if no sorting is provided
-                    var primaryKeyPropertyInfo = typeof(TEntity).GetPrimaryKeyPropertyInfo();
+                    var primaryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<TEntity>();
                     var primaryKeyPropertyName = primaryKeyPropertyInfo.Name;
 
                     sortings.Add(primaryKeyPropertyName, false);
@@ -2299,7 +2302,7 @@
 
         private void PrepareEntitySetStatement(EntitySet entitySet, out string sql, out Dictionary<string, object> parameters)
         {
-            var primeryKeyColumnName = SqlIdentityPropertyInfo.GetColumnName();
+            var primeryKeyColumnName = ConventionHelper.GetColumnName(SqlIdentityPropertyInfo);
             var properties = IsIdentity ? SqlPropertiesMapping.Where(x => !x.Key.Equals(primeryKeyColumnName)) : SqlPropertiesMapping;
 
             parameters = new Dictionary<string, object>();
@@ -2309,14 +2312,14 @@
             {
                 case EntityState.Added:
                     {
-                        var columnNames = string.Join(", ", properties.Select(x => x.Value.GetColumnName())).TrimEnd();
-                        var values = string.Join(", ", properties.Select(x => $"@{x.Value.GetColumnName()}")).TrimEnd();
+                        var columnNames = string.Join(", ", properties.Select(x => ConventionHelper.GetColumnName(x.Value))).TrimEnd();
+                        var values = string.Join(", ", properties.Select(x => $"@{ConventionHelper.GetColumnName(x.Value)}")).TrimEnd();
 
                         sql = $"INSERT INTO [{TableName}] ({columnNames})\nVALUES ({values})";
 
                         foreach (var pi in properties)
                         {
-                            parameters.Add($"@{pi.Value.GetColumnName()}", pi.Value.GetValue(entitySet.Entity, null));
+                            parameters.Add($"@{ConventionHelper.GetColumnName(pi.Value)}", pi.Value.GetValue(entitySet.Entity, null));
                         }
 
                         if (IsIdentity)
@@ -2336,7 +2339,7 @@
                     {
                         var values = string.Join(",\n\t", properties.Select(x =>
                         {
-                            var columnName = x.Value.GetColumnName();
+                            var columnName = ConventionHelper.GetColumnName(x.Value);
                             return columnName + " = " + $"@{columnName}";
                         }));
 
@@ -2344,7 +2347,7 @@
 
                         foreach (var pi in properties)
                         {
-                            parameters.Add($"@{pi.Value.GetColumnName()}", pi.Value.GetValue(entitySet.Entity, null));
+                            parameters.Add($"@{ConventionHelper.GetColumnName(pi.Value)}", pi.Value.GetValue(entitySet.Entity, null));
                         }
 
                         if (IsIdentity)
@@ -2501,7 +2504,7 @@
                         ? ExecuteScalar<TKey>(CurrentTransaction, "SELECT @@IDENTITY")
                         : ExecuteScalar<TKey>(connection, "SELECT @@IDENTITY");
 
-                    entitySet.Entity.SetPrimaryKeyPropertyValue(key);
+                    ConventionHelper.SetPrimaryKeyPropertyValue(entitySet.Entity, key);
                 }
             }
 
@@ -2676,7 +2679,7 @@
                         ? await ExecuteScalarAsync<TKey>(CurrentTransaction, "SELECT @@IDENTITY", null, cancellationToken)
                         : await ExecuteScalarAsync<TKey>(connection, "SELECT @@IDENTITY", null, cancellationToken);
 
-                    entitySet.Entity.SetPrimaryKeyPropertyValue(key);
+                    ConventionHelper.SetPrimaryKeyPropertyValue(entitySet.Entity, key);
                 }
             }
 
