@@ -212,20 +212,20 @@
         }
 
         /// <summary>
-        /// Gets a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
+        /// Gets a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, an element selector.
         /// </summary>
-        protected virtual IEnumerable<IGrouping<TGroupKey, TElement>> GetGroupBy<TGroupKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
+        protected virtual IEnumerable<TResult> GetGroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector)
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
-            if (elementSelector == null)
-                throw new ArgumentNullException(nameof(elementSelector));
+            if (resultSelector == null)
+                throw new ArgumentNullException(nameof(resultSelector));
 
             var keySelectFunc = keySelector.Compile();
-            var elementSelectorFunc = elementSelector.Compile();
+            var resultSelectorFunc = resultSelector.Compile();
 
-            return GetQuery(options).AsEnumerable().GroupBy(keySelectFunc, elementSelectorFunc, EqualityComparer<TGroupKey>.Default);
+            return GetQuery(options).GroupBy(keySelectFunc, EqualityComparer<TGroupKey>.Default).Select(resultSelectorFunc).ToList();
         }
 
         /// <summary>
@@ -388,7 +388,7 @@
         }
 
         /// <summary>
-        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElemen}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
+        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
         /// </summary>
         /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
         /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
@@ -401,7 +401,7 @@
         }
 
         /// <summary>
-        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElemen}" /> according to the specified <paramref name="keySelector" />, and an element selector function with entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
+        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, and an element selector function with entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
         /// </summary>
         /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
         /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
@@ -449,42 +449,42 @@
         /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public IEnumerable<IGrouping<TGroupKey, TEntity>> GroupBy<TGroupKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector)
         {
-            return GroupBy<TGroupKey, TEntity>(options, keySelector, IdentityExpression<TEntity>.Instance);
+            return GroupBy(options, keySelector, x => x);
         }
 
         /// <summary>
-        /// Returns a new <see cref="IGrouping{TGroupKey, TElemen}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
+        /// Returns a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
         /// </summary>
         /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
+        /// <typeparam name="TResult">The type of the value returned by resultSelector.</typeparam>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
+        /// <param name="resultSelector">A transform function to produce a result value from each element.</param>
         /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TElement>> GroupBy<TGroupKey, TElement>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
+        public IEnumerable<TResult> GroupBy<TGroupKey, TResult>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector)
         {
-            return GroupBy<TGroupKey, TElement>((IQueryOptions<TEntity>)null, keySelector, elementSelector);
+            return GroupBy<TGroupKey, TResult>((IQueryOptions<TEntity>)null, keySelector, resultSelector);
         }
 
         /// <summary>
-        /// Returns a new <see cref="IGrouping{TGroupKey, TElemen}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
+        /// Returns a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
         /// </summary>
         /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
+        /// <typeparam name="TResult">The type of the value returned by resultSelector.</typeparam>
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
+        /// <param name="resultSelector">A transform function to produce a result value from each element.</param>
         /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TElement>> GroupBy<TGroupKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
+        public IEnumerable<TResult> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector)
         {
             try
             {
                 if (keySelector == null)
                     throw new ArgumentNullException(nameof(keySelector));
 
-                if (elementSelector == null)
-                    throw new ArgumentNullException(nameof(elementSelector));
+                if (resultSelector == null)
+                    throw new ArgumentNullException(nameof(resultSelector));
 
-                return GetGroupBy<TGroupKey, TElement>(options, keySelector, elementSelector);
+                return GetGroupBy<TGroupKey, TResult>(options, keySelector, resultSelector);
             }
             catch (Exception ex)
             {

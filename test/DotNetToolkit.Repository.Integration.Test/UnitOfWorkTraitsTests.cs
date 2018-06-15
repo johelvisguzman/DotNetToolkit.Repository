@@ -1224,17 +1224,17 @@
             var expectedGroup = entities.GroupBy(y => y.Id);
             var expectedGroupByElementSelector = entities.GroupBy(y => y.Id, y => y.Name);
 
+            Assert.False(expectedGroup.All(x => uow.GroupBy<Customer, int>(y => y.Id).Select(y => y.Key).Contains(x.Key)));
             Assert.False(expectedGroup.All(x => uow.GroupBy<Customer, int>(options, y => y.Id).Select(y => y.Key).Contains(x.Key)));
-            Assert.False(expectedGroup.All(x => uow.GroupBy<Customer, int>(options, y => y.Id).Select(y => y.Key).Contains(x.Key)));
-            Assert.False(expectedGroupByElementSelector.All(x => uow.GroupBy<Customer, int, string>(options, y => y.Id, y => y.Name).Select(y => y.Key).Contains(x.Key)));
-            Assert.False(expectedGroupByElementSelector.All(x => uow.GroupBy<Customer, int, string>(options, y => y.Id, y => y.Name).Select(y => y.Key).Contains(x.Key)));
+            Assert.False(expectedGroupByElementSelector.All(x => uow.GroupBy<Customer, int, int>(y => y.Id, y => y.Key).Contains(x.Key)));
+            Assert.False(expectedGroupByElementSelector.All(x => uow.GroupBy<Customer, int, int>(options, y => y.Id, y => y.Key).Contains(x.Key)));
 
             uow.Add<Customer>(entities);
 
+            Assert.True(expectedGroup.All(x => uow.GroupBy<Customer, int>(y => y.Id).Select(y => y.Key).Contains(x.Key)));
             Assert.True(expectedGroup.All(x => uow.GroupBy<Customer, int>(options, y => y.Id).Select(y => y.Key).Contains(x.Key)));
-            Assert.True(expectedGroup.All(x => uow.GroupBy<Customer, int>(options, y => y.Id).Select(y => y.Key).Contains(x.Key)));
-            Assert.True(expectedGroupByElementSelector.All(x => uow.GroupBy<Customer, int, string>(options, y => y.Id, y => y.Name).Select(y => y.Key).Contains(x.Key)));
-            Assert.True(expectedGroupByElementSelector.All(x => uow.GroupBy<Customer, int, string>(options, y => y.Id, y => y.Name).Select(y => y.Key).Contains(x.Key)));
+            Assert.True(expectedGroupByElementSelector.All(x => uow.GroupBy<Customer, int, int>(options, y => y.Id, y => y.Key).Contains(x.Key)));
+            Assert.True(expectedGroupByElementSelector.All(x => uow.GroupBy<Customer, int, int>(options, y => y.Id, y => y.Key).Contains(x.Key)));
         }
 
         private static void TestGroupByWithSortingOptionsAscending(IUnitOfWorkFactory uowFactory)
@@ -1253,8 +1253,8 @@
 
             Assert.Equal("Random Name 2", uow.GroupBy<Customer, string>(options, y => y.Name).First().Key);
             Assert.Equal("Random Name 2", uow.GroupBy<Customer, string>(y => y.Name).First().Key);
-            Assert.Equal("Random Name 2", uow.GroupBy<Customer, string, string>(options, y => y.Name, x => x.Name).First().Key);
-            Assert.Equal("Random Name 2", uow.GroupBy<Customer, string, string>(y => y.Name, x => x.Name).First().Key);
+            Assert.Equal("Random Name 2", uow.GroupBy<Customer, string, string>(options, y => y.Name, x => x.Key).First());
+            Assert.Equal("Random Name 2", uow.GroupBy<Customer, string, string>(y => y.Name, x => x.Key).First());
         }
 
         private static void TestGroupByWithSortingOptionsDescending(IUnitOfWorkFactory uowFactory)
@@ -1273,8 +1273,8 @@
 
             Assert.Equal("Random Name 2", uow.GroupBy<Customer, string>(y => y.Name).First().Key);
             Assert.Equal("Random Name 1", uow.GroupBy<Customer, string>(options, y => y.Name).First().Key);
-            Assert.Equal("Random Name 2", uow.GroupBy<Customer, string, string>(y => y.Name, x => x.Name).First().Key);
-            Assert.Equal("Random Name 1", uow.GroupBy<Customer, string, string>(options, y => y.Name, x => x.Name).First().Key);
+            Assert.Equal("Random Name 2", uow.GroupBy<Customer, string, string>(y => y.Name, x => x.Key).First());
+            Assert.Equal("Random Name 1", uow.GroupBy<Customer, string, string>(options, y => y.Name, x => x.Key).First());
         }
 
         private static void TestGroupByWithPagingOptionsSortAscending(IUnitOfWorkFactory uowFactory)
@@ -2251,15 +2251,15 @@
 
             Assert.False(expectedGroup.All(x => uow.GroupByAsync<Customer, int>(y => y.Id).Result.Select(y => y.Key).Contains(x.Key)));
             Assert.False(expectedGroup.All(x => uow.GroupByAsync<Customer, int>(options, y => y.Id).Result.Select(y => y.Key).Contains(x.Key)));
-            Assert.False(expectedGroupByElementSelector.All(x => uow.GroupByAsync<Customer, int, string>(y => y.Id, y => y.Name).Result.Select(y => y.Key).Contains(x.Key)));
-            Assert.False(expectedGroupByElementSelector.All(x => uow.GroupByAsync<Customer, int, string>(options, y => y.Id, y => y.Name).Result.Select(y => y.Key).Contains(x.Key)));
+            Assert.False(expectedGroupByElementSelector.All(x => uow.GroupByAsync<Customer, int, int>(y => y.Id, y => y.Key).Result.Contains(x.Key)));
+            Assert.False(expectedGroupByElementSelector.All(x => uow.GroupByAsync<Customer, int, int>(options, y => y.Id, y => y.Key).Result.Contains(x.Key)));
 
             await uow.AddAsync<Customer>(entities);
 
+            Assert.True(expectedGroup.All(x => uow.GroupByAsync<Customer, int>(y => y.Id).Result.Select(y => y.Key).Contains(x.Key)));
             Assert.True(expectedGroup.All(x => uow.GroupByAsync<Customer, int>(options, y => y.Id).Result.Select(y => y.Key).Contains(x.Key)));
-            Assert.True(expectedGroup.All(x => uow.GroupByAsync<Customer, int>(options, y => y.Id).Result.Select(y => y.Key).Contains(x.Key)));
-            Assert.True(expectedGroupByElementSelector.All(x => uow.GroupByAsync<Customer, int, string>(options, y => y.Id, y => y.Name).Result.Select(y => y.Key).Contains(x.Key)));
-            Assert.True(expectedGroupByElementSelector.All(x => uow.GroupByAsync<Customer, int, string>(options, y => y.Id, y => y.Name).Result.Select(y => y.Key).Contains(x.Key)));
+            Assert.True(expectedGroupByElementSelector.All(x => uow.GroupByAsync<Customer, int, int>(y => y.Id, y => y.Key).Result.Contains(x.Key)));
+            Assert.True(expectedGroupByElementSelector.All(x => uow.GroupByAsync<Customer, int, int>(options, y => y.Id, y => y.Key).Result.Contains(x.Key)));
         }
 
         private static async Task TestGroupByWithSortingOptionsAscendingAsync(IUnitOfWorkFactoryAsync uowFactory)
@@ -2278,8 +2278,8 @@
 
             Assert.Equal("Random Name 2", (await uow.GroupByAsync<Customer, string>(options, y => y.Name)).First().Key);
             Assert.Equal("Random Name 2", (await uow.GroupByAsync<Customer, string>(y => y.Name)).First().Key);
-            Assert.Equal("Random Name 2", (await uow.GroupByAsync<Customer, string, string>(options, y => y.Name, x => x.Name)).First().Key);
-            Assert.Equal("Random Name 2", (await uow.GroupByAsync<Customer, string, string>(y => y.Name, x => x.Name)).First().Key);
+            Assert.Equal("Random Name 2", (await uow.GroupByAsync<Customer, string, string>(options, y => y.Name, x => x.Key)).First());
+            Assert.Equal("Random Name 2", (await uow.GroupByAsync<Customer, string, string>(y => y.Name, x => x.Key)).First());
         }
 
         private static async Task TestGroupByWithSortingOptionsDescendingAsync(IUnitOfWorkFactoryAsync uowFactory)
@@ -2298,8 +2298,8 @@
 
             Assert.Equal("Random Name 2", (await uow.GroupByAsync<Customer, string>(y => y.Name)).First().Key);
             Assert.Equal("Random Name 1", (await uow.GroupByAsync<Customer, string>(options, y => y.Name)).First().Key);
-            Assert.Equal("Random Name 2", (await uow.GroupByAsync<Customer, string, string>(y => y.Name, x => x.Name)).First().Key);
-            Assert.Equal("Random Name 1", (await uow.GroupByAsync<Customer, string, string>(options, y => y.Name, x => x.Name)).First().Key);
+            Assert.Equal("Random Name 2", (await uow.GroupByAsync<Customer, string, string>(y => y.Name, x => x.Key)).First());
+            Assert.Equal("Random Name 1", (await uow.GroupByAsync<Customer, string, string>(options, y => y.Name, x => x.Key)).First());
         }
 
         private static async Task TestGroupByWithPagingOptionsSortAscendingAsync(IUnitOfWorkFactoryAsync uowFactory)
