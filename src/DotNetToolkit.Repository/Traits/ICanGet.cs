@@ -50,16 +50,9 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         bool Exists(TKey key);
     }
-}
-
-namespace DotNetToolkit.Repository.Transactions.Traits
-{
-    using FetchStrategies;
-    using System;
-    using System.Linq.Expressions;
 
     /// <summary>
-    /// Represents a trait for getting items from a unit of work repository.
+    /// Represents a trait for getting items from a repository.
     /// </summary>
     public interface ICanGet
     {

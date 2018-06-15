@@ -122,22 +122,11 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         Task<IEnumerable<IGrouping<TGroupKey, TElement>>> GroupByAsync<TGroupKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = default(CancellationToken));
     }
-}
-
-namespace DotNetToolkit.Repository.Transactions.Traits
-{
-    using Queries;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Linq.Expressions;
-    using System.Threading;
-    using System.Threading.Tasks;
 
     /// <summary>
-    /// Represents a trait for aggregating items from a unit of work repository.
+    /// Represents a trait for aggregating items from a repository.
     /// </summary>
-    /// <seealso cref="DotNetToolkit.Repository.Transactions.Traits.ICanAggregate" />
+    /// <seealso cref="DotNetToolkit.Repository.Traits.ICanAggregate" />
     public interface ICanAggregateAsync : ICanAggregate
     {
         /// <summary>

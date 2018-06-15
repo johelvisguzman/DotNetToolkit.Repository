@@ -113,21 +113,11 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
         Task<bool> ExistsAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = default(CancellationToken));
     }
-}
-
-namespace DotNetToolkit.Repository.Transactions.Traits
-{
-    using Queries;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq.Expressions;
-    using System.Threading;
-    using System.Threading.Tasks;
 
     /// <summary>
-    /// Represents a trait for finding items in a unit of work repository.
+    /// Represents a trait for finding items in a repository.
     /// </summary>
-    /// <seealso cref="DotNetToolkit.Repository.Transactions.Traits.ICanFind" />
+    /// <seealso cref="DotNetToolkit.Repository.Traits.ICanFind" />
     public interface ICanFindAsync : ICanFind
     {
         /// <summary>

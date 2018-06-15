@@ -13,14 +13,9 @@
         /// </summary>
         IQueryable<TEntity> AsQueryable();
     }
-}
-
-namespace DotNetToolkit.Repository.Transactions.Traits
-{
-    using System.Linq;
 
     /// <summary>
-    /// Represents a trait for returning a <see cref="System.Linq.IQueryable{TEntity}" /> from a unit of work repository.
+    /// Represents a trait for returning a <see cref="System.Linq.IQueryable{TEntity}" /> from a repository.
     /// </summary>
     public interface ICanQuery
     {

@@ -108,18 +108,9 @@
         /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         IEnumerable<IGrouping<TGroupKey, TElement>> GroupBy<TGroupKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector);
     }
-}
-
-namespace DotNetToolkit.Repository.Transactions.Traits
-{
-    using Queries;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Linq.Expressions;
 
     /// <summary>
-    /// Represents a trait for aggregating items from a unit of work repository.
+    /// Represents a trait for aggregating items from a repository.
     /// </summary>
     public interface ICanAggregate
     {

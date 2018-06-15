@@ -20,14 +20,9 @@
         /// <param name="entities">The collection of entities to update.</param>
         void Update(IEnumerable<TEntity> entities);
     }
-}
-
-namespace DotNetToolkit.Repository.Transactions.Traits
-{
-    using System.Collections.Generic;
 
     /// <summary>
-    /// Represents a trait for updating items in a unit of work repository.
+    /// Represents a trait for updating items in a repository.
     /// </summary>
     public interface ICanUpdate
     {

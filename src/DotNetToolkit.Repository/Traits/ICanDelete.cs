@@ -34,15 +34,9 @@
         /// <param name="entities">The collection of entities to delete.</param>
         void Delete(IEnumerable<TEntity> entities);
     }
-}
-
-namespace DotNetToolkit.Repository.Transactions.Traits
-{
-    using Queries;
-    using System.Collections.Generic;
 
     /// <summary>
-    /// Represents a trait for deleting items from a unit of work repository.
+    /// Represents a trait for deleting items from a repository.
     /// </summary>
     public interface ICanDelete
     {
