@@ -20,16 +20,16 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity, TKey}" /> class.
         /// </summary>
-        /// <param name="providerName">The name of the provider.</param>
         /// <param name="connectionString">The connection string.</param>
-        public AdoNetRepository(string providerName, string connectionString) : base(providerName, connectionString) { }
+        /// <param name="interceptors">The interceptors.</param>
+        public AdoNetRepository(string connectionString, IEnumerable<IRepositoryInterceptor> interceptors) : base(connectionString, interceptors) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity, TKey}" /> class.
         /// </summary>
+        /// <param name="providerName">The name of the provider.</param>
         /// <param name="connectionString">The connection string.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        public AdoNetRepository(string connectionString, IEnumerable<IRepositoryInterceptor> interceptors) : base(connectionString, interceptors) { }
+        public AdoNetRepository(string providerName, string connectionString) : base(providerName, connectionString) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity, TKey}" /> class.
@@ -71,17 +71,17 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity}" /> class.
         /// </summary>
-        /// <param name="providerName">The name of the provider.</param>
-        /// <param name="connectionString">The connection string.</param>
-        public AdoNetRepository(string providerName, string connectionString) : base(providerName, connectionString) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity}" /> class.
-        /// </summary>
         /// <param name="connectionString">The connection string.</param>
         /// <param name="interceptors">The interceptors.</param>
         public AdoNetRepository(string connectionString, IEnumerable<IRepositoryInterceptor> interceptors) : base(connectionString, interceptors) { }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity}" /> class.
+        /// </summary>
+        /// <param name="providerName">The name of the provider.</param>
+        /// <param name="connectionString">The connection string.</param>
+        public AdoNetRepository(string providerName, string connectionString) : base(providerName, connectionString) { }
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity}" /> class.
         /// </summary>

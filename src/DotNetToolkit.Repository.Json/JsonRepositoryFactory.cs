@@ -24,8 +24,14 @@
         /// Initializes a new instance of the <see cref="JsonRepositoryFactory"/> class.
         /// </summary>
         /// <param name="path">The path.</param>
+        public JsonRepositoryFactory(string path) : this(path, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonRepositoryFactory"/> class.
+        /// </summary>
+        /// <param name="path">The path.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public JsonRepositoryFactory(string path, IEnumerable<IRepositoryInterceptor> interceptors = null)
+        public JsonRepositoryFactory(string path, IEnumerable<IRepositoryInterceptor> interceptors)
         {
             _path = path;
             _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();

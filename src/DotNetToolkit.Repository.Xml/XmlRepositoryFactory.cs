@@ -24,8 +24,14 @@
         /// Initializes a new instance of the <see cref="XmlRepositoryFactory"/> class.
         /// </summary>
         /// <param name="path">The path.</param>
+        public XmlRepositoryFactory(string path) : this(path, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="XmlRepositoryFactory"/> class.
+        /// </summary>
+        /// <param name="path">The path.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public XmlRepositoryFactory(string path, IEnumerable<IRepositoryInterceptor> interceptors = null)
+        public XmlRepositoryFactory(string path, IEnumerable<IRepositoryInterceptor> interceptors)
         {
             _path = path;
             _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();

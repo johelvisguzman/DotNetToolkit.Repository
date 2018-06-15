@@ -42,9 +42,7 @@
         /// Initializes a new instance of the <see cref="EfRepositoryBase{TEntity, TKey}" /> class.
         /// </summary>
         /// <param name="context">The database context.</param>
-        protected EfRepositoryBase(DbContext context) : this(context, null)
-        {
-        }
+        protected EfRepositoryBase(DbContext context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EfRepositoryBase{TEntity, TKey}" /> class.

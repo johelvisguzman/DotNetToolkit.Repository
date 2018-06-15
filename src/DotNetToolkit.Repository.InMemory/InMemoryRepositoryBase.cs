@@ -39,18 +39,19 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
+        protected InMemoryRepositoryBase() : this(null, (IEnumerable<IRepositoryInterceptor>)null)  { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey}"/> class.
+        /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
-        protected InMemoryRepositoryBase(string databaseName = null) : this(databaseName, null)
-        {
-        }
+        protected InMemoryRepositoryBase(string databaseName) : this(databaseName, (IEnumerable<IRepositoryInterceptor>)null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="interceptors">The interceptors.</param>
-        protected InMemoryRepositoryBase(IEnumerable<IRepositoryInterceptor> interceptors) : this(null, interceptors)
-        {
-        }
+        protected InMemoryRepositoryBase(IEnumerable<IRepositoryInterceptor> interceptors) : this(null, interceptors) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey}"/> class.

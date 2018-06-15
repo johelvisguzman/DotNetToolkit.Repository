@@ -14,18 +14,14 @@
         /// Initializes a new instance of the <see cref="JsonRepository{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
-        public JsonRepository(string filePath) : base(filePath)
-        {
-        }
+        public JsonRepository(string filePath) : base(filePath) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonRepository{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public JsonRepository(string filePath, IEnumerable<IRepositoryInterceptor> interceptors) : base(filePath, interceptors)
-        {
-        }
+        public JsonRepository(string filePath, IEnumerable<IRepositoryInterceptor> interceptors) : base(filePath, interceptors) { }
 
         #endregion
     }
@@ -41,18 +37,14 @@
         /// Initializes a new instance of the <see cref="JsonRepository{TEntity}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
-        public JsonRepository(string filePath) : base(filePath)
-        {
-        }
+        public JsonRepository(string filePath) : base(filePath) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonRepository{TEntity}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public JsonRepository(string filePath, IEnumerable<IRepositoryInterceptor> interceptors) : base(filePath, interceptors)
-        {
-        }
+        public JsonRepository(string filePath, IEnumerable<IRepositoryInterceptor> interceptors) : base(filePath, interceptors) { }
 
         #endregion
     }

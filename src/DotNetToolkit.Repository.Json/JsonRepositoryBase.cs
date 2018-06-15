@@ -18,18 +18,14 @@
         /// Initializes a new instance of the <see cref="JsonRepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
-        protected JsonRepositoryBase(string filePath) : base(filePath)
-        {
-        }
+        protected JsonRepositoryBase(string filePath) : base(filePath) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonRepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
         /// <param name="interceptors">The interceptors.</param>
-        protected JsonRepositoryBase(string filePath, IEnumerable<IRepositoryInterceptor> interceptors) : base(filePath, interceptors)
-        {
-        }
+        protected JsonRepositoryBase(string filePath, IEnumerable<IRepositoryInterceptor> interceptors) : base(filePath, interceptors) { }
 
         #endregion
 

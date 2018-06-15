@@ -14,18 +14,14 @@
         /// Initializes a new instance of the <see cref="CsvRepository{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
-        public CsvRepository(string filePath) : base(filePath)
-        {
-        }
+        public CsvRepository(string filePath) : base(filePath) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CsvRepository{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public CsvRepository(string filePath, IEnumerable<IRepositoryInterceptor> interceptors) : base(filePath, interceptors)
-        {
-        }
+        public CsvRepository(string filePath, IEnumerable<IRepositoryInterceptor> interceptors) : base(filePath, interceptors) { }
 
         #endregion
     }
@@ -41,18 +37,14 @@
         /// Initializes a new instance of the <see cref="CsvRepository{TEntity}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
-        public CsvRepository(string filePath) : base(filePath)
-        {
-        }
+        public CsvRepository(string filePath) : base(filePath)  { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CsvRepository{TEntity}"/> class.
         /// </summary>
         /// <param name="filePath">The file path.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public CsvRepository(string filePath, IEnumerable<IRepositoryInterceptor> interceptors) : base(filePath, interceptors)
-        {
-        }
+        public CsvRepository(string filePath, IEnumerable<IRepositoryInterceptor> interceptors) : base(filePath, interceptors) { }
 
         #endregion
     }

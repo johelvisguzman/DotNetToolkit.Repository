@@ -27,8 +27,14 @@
         /// Initializes a new instance of the <see cref="AdoNetUnitOfWorkFactory"/> class.
         /// </summary>
         /// <param name="connectionString">The connection string.</param>
+        public AdoNetUnitOfWorkFactory(string connectionString) : this(connectionString, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetUnitOfWorkFactory"/> class.
+        /// </summary>
+        /// <param name="connectionString">The connection string.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public AdoNetUnitOfWorkFactory(string connectionString, IEnumerable<IRepositoryInterceptor> interceptors = null)
+        public AdoNetUnitOfWorkFactory(string connectionString, IEnumerable<IRepositoryInterceptor> interceptors)
         {
             if (connectionString == null)
                 throw new ArgumentNullException(nameof(connectionString));
@@ -42,8 +48,15 @@
         /// </summary>
         /// <param name="providerName">Name of the provider.</param>
         /// <param name="connectionString">The connection string.</param>
+        public AdoNetUnitOfWorkFactory(string providerName, string connectionString) : this(providerName, connectionString, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetUnitOfWorkFactory"/> class.
+        /// </summary>
+        /// <param name="providerName">Name of the provider.</param>
+        /// <param name="connectionString">The connection string.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public AdoNetUnitOfWorkFactory(string providerName, string connectionString, IEnumerable<IRepositoryInterceptor> interceptors = null)
+        public AdoNetUnitOfWorkFactory(string providerName, string connectionString, IEnumerable<IRepositoryInterceptor> interceptors)
         {
             if (providerName == null)
                 throw new ArgumentNullException(nameof(providerName));

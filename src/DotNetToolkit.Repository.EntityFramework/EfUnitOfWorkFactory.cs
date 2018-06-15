@@ -27,8 +27,14 @@
         /// Initializes a new instance of the <see cref="EfUnitOfWorkFactory"/> class.
         /// </summary>
         /// <param name="dbContextFactory">The database context factory.</param>
+        public EfUnitOfWorkFactory(Func<DbContext> dbContextFactory) : this(dbContextFactory, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EfUnitOfWorkFactory"/> class.
+        /// </summary>
+        /// <param name="dbContextFactory">The database context factory.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public EfUnitOfWorkFactory(Func<DbContext> dbContextFactory, IEnumerable<IRepositoryInterceptor> interceptors = null)
+        public EfUnitOfWorkFactory(Func<DbContext> dbContextFactory, IEnumerable<IRepositoryInterceptor> interceptors)
         {
             if (dbContextFactory == null)
                 throw new ArgumentNullException(nameof(dbContextFactory));
