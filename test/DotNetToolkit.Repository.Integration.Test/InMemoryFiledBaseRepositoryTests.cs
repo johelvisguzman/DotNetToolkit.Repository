@@ -2,7 +2,6 @@
 {
     using Data;
     using Factories;
-    using Helpers;
     using System;
     using System.IO;
     using System.Reflection;
@@ -23,15 +22,9 @@
         }
 
         [Fact]
-        public void ThrowsIfFilePathIsInvalid()
+        public void ThrowsIfPathIsFileName()
         {
-            ForAllRepositoryFactoriesInMemoryFileBased(TestThrowsIfFilePathIsInvalid);
-        }
-
-        [Fact]
-        public void ThrowsIfFileExtensionIsNotValid()
-        {
-            ForAllRepositoryFactoriesInMemoryFileBased(TestThrowsIfFileExtensionIsNotValid);
+            ForAllRepositoryFactoriesInMemoryFileBased(TestThrowsIfPathIsFileName);
         }
 
         private static string GetFileExtension(IRepository<Customer, int> repo)
@@ -46,23 +39,23 @@
         private static void TestCreatesTempFileOnConstruction(IRepositoryFactory repoFactory)
         {
             var repo = repoFactory.Create<Customer>();
-            var path = GetTempFileName(Guid.NewGuid().ToString("N") + GetFileExtension(repo));
+            var path = Path.GetTempPath() + Guid.NewGuid().ToString("N");
 
-            Assert.True(!File.Exists(path));
+            Assert.True(!Directory.Exists(path));
 
             repo = CreateRepositoryInstanceOfType(repo.GetType(), path);
 
-            Assert.True(File.Exists(path));
+            Assert.True(Directory.Exists(path));
 
-            File.Delete(path);
+            Directory.Delete(path, true);
         }
 
         private static void TestGeneratesTempFileNameWhenOnlyDirectoryIsProvided(IRepositoryFactory repoFactory)
         {
             var repo = repoFactory.Create<Customer>();
-            var dir = GetTempFileName(string.Empty);
-            var defaultGeneratedPathName = ConventionHelper.GetTableName<Customer>() + GetFileExtension(repo);
-            var path = dir + defaultGeneratedPathName;
+            var dir = Path.GetTempPath() + Guid.NewGuid().ToString("N");
+            var defaultGeneratedPathName = "Customers" + GetFileExtension(repo);
+            var path = dir + "\\" + defaultGeneratedPathName;
 
             Assert.True(!File.Exists(path));
 
@@ -70,25 +63,16 @@
 
             Assert.True(File.Exists(path));
 
-            File.Delete(path);
+            Directory.Delete(dir, true);
         }
 
-        private static void TestThrowsIfFilePathIsInvalid(IRepositoryFactory repoFactory)
+        private static void TestThrowsIfPathIsFileName(IRepositoryFactory repoFactory)
         {
             var repo = repoFactory.Create<Customer>();
-            var path = "TestData";
+            var path = Path.GetTempPath() + Guid.NewGuid().ToString("N") + "\\" + "TestData.txt";
+
             var ex = Assert.Throws<InvalidOperationException>(() => CreateRepositoryInstanceOfType(repo.GetType(), path));
-
-            Assert.Equal($"The specified '{path}{GetFileExtension(repo)}' file is not a valid path.", ex.Message);
-        }
-
-        private static void TestThrowsIfFileExtensionIsNotValid(IRepositoryFactory repoFactory)
-        {
-            var repo = repoFactory.Create<Customer>();
-            var path = GetTempFileName("TestData.tmp");
-            var ex = Assert.Throws<InvalidOperationException>(() => CreateRepositoryInstanceOfType(repo.GetType(), path));
-
-            Assert.Equal($"The specified '{path}' file has an invalid extension. Please consider using '{GetFileExtension(repo)}'.", ex.Message);
+            Assert.Equal($"The specified '{path}' path cannot be a file name.", ex.Message);
         }
     }
 }

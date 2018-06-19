@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
     using Data;
-    using InMemory;
     using System;
     using Xunit;
 

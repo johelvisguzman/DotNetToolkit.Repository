@@ -13,15 +13,15 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonRepository{TEntity, TKey}"/> class.
         /// </summary>
-        /// <param name="filePath">The file path.</param>
-        public JsonRepository(string filePath) : base(filePath) { }
+        /// <param name="path">The database directory to create.</param>
+        public JsonRepository(string path) : base(path) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonRepository{TEntity, TKey}"/> class.
         /// </summary>
-        /// <param name="filePath">The file path.</param>
+        /// <param name="path">The database directory to create.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public JsonRepository(string filePath, IEnumerable<IRepositoryInterceptor> interceptors) : base(filePath, interceptors) { }
+        public JsonRepository(string path, IEnumerable<IRepositoryInterceptor> interceptors) : base(path, interceptors) { }
 
         #endregion
     }
@@ -36,15 +36,15 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonRepository{TEntity}"/> class.
         /// </summary>
-        /// <param name="filePath">The file path.</param>
-        public JsonRepository(string filePath) : base(filePath) { }
+        /// <param name="path">The database directory to create.</param>
+        public JsonRepository(string path) : base(path) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonRepository{TEntity}"/> class.
         /// </summary>
-        /// <param name="filePath">The file path.</param>
+        /// <param name="path">The database directory to create.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public JsonRepository(string filePath, IEnumerable<IRepositoryInterceptor> interceptors) : base(filePath, interceptors) { }
+        public JsonRepository(string path, IEnumerable<IRepositoryInterceptor> interceptors) : base(path, interceptors) { }
 
         #endregion
     }
