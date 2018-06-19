@@ -16,15 +16,15 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlRepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
-        /// <param name="filePath">The file path.</param>
-        protected XmlRepositoryBase(string filePath) : base(filePath) { }
+        /// <param name="path">The database directory to create.</param>
+        protected XmlRepositoryBase(string path) : base(path) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlRepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
-        /// <param name="filePath">The file path.</param>
+        /// <param name="path">The database directory to create.</param>
         /// <param name="interceptors">The interceptors.</param>
-        protected XmlRepositoryBase(string filePath, IEnumerable<IRepositoryInterceptor> interceptors) : base(filePath, interceptors) { }
+        protected XmlRepositoryBase(string path, IEnumerable<IRepositoryInterceptor> interceptors) : base(path, interceptors) { }
 
         #endregion
 

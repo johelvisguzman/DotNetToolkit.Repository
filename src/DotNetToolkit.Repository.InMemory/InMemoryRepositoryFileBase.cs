@@ -36,19 +36,17 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepositoryFileBase{TEntity, TKey}"/> class.
         /// </summary>
-        /// <param name="filePath">The file path.</param>
-        protected InMemoryRepositoryFileBase(string filePath) : this(filePath, null)
-        {
-        }
+        /// <param name="path">The database directory to create.</param>
+        protected InMemoryRepositoryFileBase(string path) : this(path, null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepositoryFileBase{TEntity, TKey}"/> class.
         /// </summary>
-        /// <param name="filePath">The file path.</param>
+        /// <param name="path">The database directory to create.</param>
         /// <param name="interceptors">The interceptors.</param>
-        protected InMemoryRepositoryFileBase(string filePath, IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
+        protected InMemoryRepositoryFileBase(string path, IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
         {
-            OnInitialize(filePath);
+            OnInitialize(path);
         }
 
         #endregion
@@ -69,39 +67,25 @@
 
         #region Private Methods
 
-        private string ValidateFile(string filePath)
+        private void OnInitialize(string path)
         {
-            if (string.IsNullOrEmpty(filePath))
-                throw new ArgumentException(Resources.ArgumentCannotBeNullOrEmpty, nameof(filePath));
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
 
-            // Ensures we have a valid file
-            var fileName = filePath;
+            if (!string.IsNullOrEmpty(Path.GetExtension(path)))
+                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.CannotBeFileName, path));
 
-            if (Directory.Exists(filePath))
-            {
-                if (!fileName.EndsWith(@"\"))
-                    fileName += @"\";
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
 
-                fileName += $"{ConventionHelper.GetTableName<TEntity>()}{FileExtension}";
-            }
-            else
-            {
-                if (string.IsNullOrEmpty(Path.GetExtension(fileName)))
-                    fileName += FileExtension;
+            var fileName = path;
 
-                if (!Path.GetExtension(fileName).Equals(FileExtension))
-                    throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.InvalidFileExtension, fileName, FileExtension));
+            if (!fileName.EndsWith(@"\"))
+                fileName += @"\";
 
-                if (fileName.IndexOfAny(Path.GetInvalidFileNameChars()) < 0)
-                    throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.InvalidFilePath, fileName));
-            }
+            fileName += $"{ConventionHelper.GetTableName<TEntity>()}{FileExtension}";
 
-            return fileName;
-        }
-
-        private void OnInitialize(string filePath)
-        {
-            DatabaseName = ValidateFile(filePath);
+            DatabaseName = fileName;
 
             // Creates the file if does not exist
             if (!File.Exists(DatabaseName))

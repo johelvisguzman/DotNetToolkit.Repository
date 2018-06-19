@@ -61,11 +61,11 @@ namespace DotNetToolkit.Repository.InMemory.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot be null or empty..
+        ///   Looks up a localized string similar to The specified &apos;{0}&apos; path cannot be a file name..
         /// </summary>
-        internal static string ArgumentCannotBeNullOrEmpty {
+        internal static string CannotBeFileName {
             get {
-                return ResourceManager.GetString("ArgumentCannotBeNullOrEmpty", resourceCulture);
+                return ResourceManager.GetString("CannotBeFileName", resourceCulture);
             }
         }
         
@@ -93,24 +93,6 @@ namespace DotNetToolkit.Repository.InMemory.Properties {
         internal static string EntityNotFoundInStore {
             get {
                 return ResourceManager.GetString("EntityNotFoundInStore", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The specified &apos;{0}&apos; file has an invalid extension. Please consider using &apos;{1}&apos;..
-        /// </summary>
-        internal static string InvalidFileExtension {
-            get {
-                return ResourceManager.GetString("InvalidFileExtension", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The specified &apos;{0}&apos; file is not a valid path..
-        /// </summary>
-        internal static string InvalidFilePath {
-            get {
-                return ResourceManager.GetString("InvalidFilePath", resourceCulture);
             }
         }
     }

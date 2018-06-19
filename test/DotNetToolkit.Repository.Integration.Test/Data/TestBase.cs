@@ -67,23 +67,15 @@
             }
         }
 
-        protected static string GetTempFileName(string fileName)
-        {
-            var path = Path.GetTempPath() + fileName;
-
-            if (File.Exists(path))
-                File.Delete(path);
-
-            return path;
-        }
-
         private static List<IRepositoryFactory> GetInMemoryFileBasedRepositoryFactories()
         {
+            var path = Path.GetTempPath() + Guid.NewGuid().ToString("N");
+
             return new List<IRepositoryFactory>
             {
-                new Json.JsonRepositoryFactory(GetTempFileName(Guid.NewGuid().ToString("N") + ".json")),
-                new Xml.XmlRepositoryFactory(GetTempFileName(Guid.NewGuid().ToString("N") + ".xml")),
-                new Csv.CsvRepositoryFactory(GetTempFileName(Guid.NewGuid().ToString("N") + ".csv"))
+                new Json.JsonRepositoryFactory(path),
+                new Xml.XmlRepositoryFactory(path),
+                new Csv.CsvRepositoryFactory(path)
             };
         }
 
