@@ -27,8 +27,21 @@
         /// Initializes a new instance of the <see cref="AdoNetRepositoryFactory"/> class.
         /// </summary>
         /// <param name="connectionString">The connection string.</param>
+        public AdoNetRepositoryFactory(string connectionString) : this(connectionString, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryFactory"/> class.
+        /// </summary>
+        /// <param name="connectionString">The connection string.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public AdoNetRepositoryFactory(string connectionString, IRepositoryInterceptor interceptor) : this(connectionString, new List<IRepositoryInterceptor> { interceptor }) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryFactory"/> class.
+        /// </summary>
+        /// <param name="connectionString">The connection string.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public AdoNetRepositoryFactory(string connectionString, IEnumerable<IRepositoryInterceptor> interceptors = null)
+        public AdoNetRepositoryFactory(string connectionString, IEnumerable<IRepositoryInterceptor> interceptors)
         {
             if (connectionString == null)
                 throw new ArgumentNullException(nameof(connectionString));
@@ -42,8 +55,23 @@
         /// </summary>
         /// <param name="providerName">Name of the provider.</param>
         /// <param name="connectionString">The connection string.</param>
+        public AdoNetRepositoryFactory(string providerName, string connectionString) : this(providerName, connectionString, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryFactory"/> class.
+        /// </summary>
+        /// <param name="providerName">Name of the provider.</param>
+        /// <param name="connectionString">The connection string.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public AdoNetRepositoryFactory(string providerName, string connectionString, IRepositoryInterceptor interceptor) : this(providerName, connectionString, new List<IRepositoryInterceptor> { interceptor }) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryFactory"/> class.
+        /// </summary>
+        /// <param name="providerName">Name of the provider.</param>
+        /// <param name="connectionString">The connection string.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public AdoNetRepositoryFactory(string providerName, string connectionString, IEnumerable<IRepositoryInterceptor> interceptors = null)
+        public AdoNetRepositoryFactory(string providerName, string connectionString, IEnumerable<IRepositoryInterceptor> interceptors)
         {
             if (providerName == null)
                 throw new ArgumentNullException(nameof(providerName));
@@ -60,8 +88,21 @@
         /// Initializes a new instance of the <see cref="AdoNetRepositoryFactory"/> class.
         /// </summary>
         /// <param name="transaction">The transaction.</param>
+        public AdoNetRepositoryFactory(DbTransaction transaction) : this(transaction, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryFactory"/> class.
+        /// </summary>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public AdoNetRepositoryFactory(DbTransaction transaction, IRepositoryInterceptor interceptor) : this(transaction, new List<IRepositoryInterceptor> { interceptor }) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryFactory"/> class.
+        /// </summary>
+        /// <param name="transaction">The transaction.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public AdoNetRepositoryFactory(DbTransaction transaction, IEnumerable<IRepositoryInterceptor> interceptors = null)
+        public AdoNetRepositoryFactory(DbTransaction transaction, IEnumerable<IRepositoryInterceptor> interceptors)
         {
             if (transaction == null)
                 throw new ArgumentNullException(nameof(transaction));

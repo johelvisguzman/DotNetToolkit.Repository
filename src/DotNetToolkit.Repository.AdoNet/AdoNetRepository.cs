@@ -21,6 +21,13 @@
         /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity, TKey}" /> class.
         /// </summary>
         /// <param name="connectionString">The connection string.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public AdoNetRepository(string connectionString, IRepositoryInterceptor interceptor) : this(connectionString, new List<IRepositoryInterceptor> { interceptor }) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity, TKey}" /> class.
+        /// </summary>
+        /// <param name="connectionString">The connection string.</param>
         /// <param name="interceptors">The interceptors.</param>
         public AdoNetRepository(string connectionString, IEnumerable<IRepositoryInterceptor> interceptors) : base(connectionString, interceptors) { }
 
@@ -36,6 +43,14 @@
         /// </summary>
         /// <param name="providerName">The name of the provider.</param>
         /// <param name="connectionString">The connection string.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public AdoNetRepository(string providerName, string connectionString, IRepositoryInterceptor interceptor) : this(providerName, connectionString, new List<IRepositoryInterceptor> { interceptor }) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity, TKey}" /> class.
+        /// </summary>
+        /// <param name="providerName">The name of the provider.</param>
+        /// <param name="connectionString">The connection string.</param>
         /// <param name="interceptors">The interceptors.</param>
         public AdoNetRepository(string providerName, string connectionString, IEnumerable<IRepositoryInterceptor> interceptors) : base(providerName, connectionString, interceptors) { }
 
@@ -44,6 +59,13 @@
         /// </summary>
         /// <param name="transaction">The transaction.</param>
         public AdoNetRepository(DbTransaction transaction) : base(transaction) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity, TKey}" /> class.
+        /// </summary>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public AdoNetRepository(DbTransaction transaction, IRepositoryInterceptor interceptor) : this(transaction, new List<IRepositoryInterceptor> { interceptor }) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity, TKey}" /> class.
@@ -72,6 +94,13 @@
         /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity}" /> class.
         /// </summary>
         /// <param name="connectionString">The connection string.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public AdoNetRepository(string connectionString, IRepositoryInterceptor interceptor) : this(connectionString, new List<IRepositoryInterceptor> { interceptor }) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity}" /> class.
+        /// </summary>
+        /// <param name="connectionString">The connection string.</param>
         /// <param name="interceptors">The interceptors.</param>
         public AdoNetRepository(string connectionString, IEnumerable<IRepositoryInterceptor> interceptors) : base(connectionString, interceptors) { }
 
@@ -81,7 +110,15 @@
         /// <param name="providerName">The name of the provider.</param>
         /// <param name="connectionString">The connection string.</param>
         public AdoNetRepository(string providerName, string connectionString) : base(providerName, connectionString) { }
-        
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity}" /> class.
+        /// </summary>
+        /// <param name="providerName">The name of the provider.</param>
+        /// <param name="connectionString">The connection string.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public AdoNetRepository(string providerName, string connectionString, IRepositoryInterceptor interceptor) : this(providerName, connectionString, new List<IRepositoryInterceptor> { interceptor }) { }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity}" /> class.
         /// </summary>
@@ -95,6 +132,13 @@
         /// </summary>
         /// <param name="transaction">The transaction.</param>
         public AdoNetRepository(DbTransaction transaction) : base(transaction) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity}" /> class.
+        /// </summary>
+        /// <param name="transaction">The transaction.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public AdoNetRepository(DbTransaction transaction, IRepositoryInterceptor interceptor) : this(transaction, new List<IRepositoryInterceptor> { interceptor }) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdoNetRepository{TEntity}" /> class.

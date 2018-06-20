@@ -20,6 +20,13 @@
         /// Initializes a new instance of the <see cref="JsonRepository{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="path">The database directory to create.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public JsonRepository(string path, IRepositoryInterceptor interceptor) : this(path, new List<IRepositoryInterceptor> { interceptor }) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonRepository{TEntity, TKey}"/> class.
+        /// </summary>
+        /// <param name="path">The database directory to create.</param>
         /// <param name="interceptors">The interceptors.</param>
         public JsonRepository(string path, IEnumerable<IRepositoryInterceptor> interceptors) : base(path, interceptors) { }
 
@@ -38,6 +45,13 @@
         /// </summary>
         /// <param name="path">The database directory to create.</param>
         public JsonRepository(string path) : base(path) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonRepository{TEntity}"/> class.
+        /// </summary>
+        /// <param name="path">The database directory to create.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public JsonRepository(string path, IRepositoryInterceptor interceptor) : this(path, new List<IRepositoryInterceptor> { interceptor }) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonRepository{TEntity}"/> class.

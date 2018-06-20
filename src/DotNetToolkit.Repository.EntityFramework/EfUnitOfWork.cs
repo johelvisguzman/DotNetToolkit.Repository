@@ -26,6 +26,13 @@
         /// Initializes a new instance of the <see cref="EfUnitOfWork"/> class.
         /// </summary>
         /// <param name="context">The database context.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public EfUnitOfWork(DbContext context, IRepositoryInterceptor interceptor) : this(context, new List<IRepositoryInterceptor> { interceptor }) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EfUnitOfWork"/> class.
+        /// </summary>
+        /// <param name="context">The database context.</param>
         /// <param name="interceptors">The interceptors.</param>
         public EfUnitOfWork(DbContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(new EfTransactionManager(context))
         {

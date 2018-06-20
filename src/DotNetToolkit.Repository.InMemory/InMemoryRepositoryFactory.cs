@@ -23,17 +23,31 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepositoryFactory"/> class.
         /// </summary>
-        public InMemoryRepositoryFactory()
-        {
-        }
+        public InMemoryRepositoryFactory() { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepositoryFactory"/> class.
         /// </summary>
-        /// <param name="databaseName">The name of the database.</param>
+        /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
+        public InMemoryRepositoryFactory(string databaseName) : this(databaseName, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryFactory"/> class.
+        /// </summary>
+        /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public InMemoryRepositoryFactory(string databaseName, IRepositoryInterceptor interceptor) : this(databaseName, new List<IRepositoryInterceptor> { interceptor }) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryFactory"/> class.
+        /// </summary>
+        /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public InMemoryRepositoryFactory(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors = null)
+        public InMemoryRepositoryFactory(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors)
         {
+            if (databaseName == null)
+                throw new ArgumentNullException(nameof(databaseName));
+
             _databaseName = databaseName;
             _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
         }

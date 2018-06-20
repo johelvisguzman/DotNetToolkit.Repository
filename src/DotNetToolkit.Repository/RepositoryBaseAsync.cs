@@ -22,17 +22,13 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity, TKey}"/> class.
         /// </summary>
-        protected RepositoryBaseAsync()
-        {
-        }
+        protected RepositoryBaseAsync() { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="interceptors">The interceptors.</param>
-        protected RepositoryBaseAsync(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
-        {
-        }
+        protected RepositoryBaseAsync(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors) { }
 
         #endregion
 

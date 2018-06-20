@@ -29,10 +29,20 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlRepositoryFactory"/> class.
         /// </summary>
+        /// <param name="path">The database directory to create.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public XmlRepositoryFactory(string path, IRepositoryInterceptor interceptor) : this(path, new List<IRepositoryInterceptor> { interceptor }) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="XmlRepositoryFactory"/> class.
+        /// </summary>
         /// <param name="path">The path.</param>
         /// <param name="interceptors">The interceptors.</param>
         public XmlRepositoryFactory(string path, IEnumerable<IRepositoryInterceptor> interceptors)
         {
+            if (path == null)
+                throw new ArgumentNullException(nameof(path));
+
             _path = path;
             _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
         }
