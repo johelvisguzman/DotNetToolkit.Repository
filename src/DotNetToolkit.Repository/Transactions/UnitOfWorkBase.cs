@@ -344,7 +344,7 @@
         }
 
         /// <summary>
-        /// Deletes all the entities in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
+        /// Deletes all the entities in the repository that satisfies the criteria specified by the <paramref name="predicate" />.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="predicate">A function to filter each entity.</param>

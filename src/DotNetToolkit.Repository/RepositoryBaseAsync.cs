@@ -409,7 +409,7 @@
         }
 
         /// <summary>
-        /// Asynchronously all the entities in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
+        /// Asynchronously deletes all the entities in the repository that satisfies the criteria specified by the <paramref name="predicate" />.
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
