@@ -19,7 +19,7 @@
             const int pageSize = 5;
             const int defaultPageSize = 100;
 
-            IQueryOptions<Customer> options = new QueryOptions<Customer>();
+            var options = new QueryOptions<Customer>();
 
             Assert.Equal(-1, options.PageIndex);
             Assert.Equal(-1, options.PageSize);
@@ -52,7 +52,7 @@
         [Fact]
         public void SortBy()
         {
-            IQueryOptions<Customer> options = new QueryOptions<Customer>();
+            var options = new QueryOptions<Customer>();
 
             Assert.Empty(options.SortingPropertiesMapping);
 
@@ -72,7 +72,7 @@
         [Fact]
         public void SortByDescending()
         {
-            IQueryOptions<Customer> options = new QueryOptions<Customer>();
+            var options = new QueryOptions<Customer>();
 
             Assert.Empty(options.SortingPropertiesMapping);
 
@@ -92,7 +92,7 @@
         [Fact]
         public void SortThenBy()
         {
-            IQueryOptions<Customer> options = new QueryOptions<Customer>();
+            var options = new QueryOptions<Customer>();
 
             options = options.SortBy(x => x.Id).SortBy(x => x.Name);
 
@@ -110,7 +110,7 @@
         [Fact]
         public void SortThenByDescending()
         {
-            IQueryOptions<Customer> options = new QueryOptions<Customer>();
+            var options = new QueryOptions<Customer>();
 
             options = options.SortByDescending(x => x.Id).SortByDescending(x => x.Name);
 
