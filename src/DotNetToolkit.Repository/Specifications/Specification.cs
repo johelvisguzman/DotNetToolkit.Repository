@@ -34,7 +34,7 @@
         }
 
         /// <summary>    
-        /// Returns a new specification which has been combined with the current and the specified predicate using the logical "and".
+        /// Returns a new specification which has been combined with the current specified predicate using the logical "and".
         /// </summary>    
         public ISpecification<T> And(Expression<Func<T, bool>> predicate)
         {
@@ -50,7 +50,7 @@
         }
 
         /// <summary>    
-        /// Returns a new specification which has been combined with the current and the specified predicate using the logical "or".
+        /// Returns a new specification which has been combined with the current specified predicate using the logical "or".
         /// </summary>    
         public ISpecification<T> Or(Expression<Func<T, bool>> predicate)
         {
