@@ -1,7 +1,9 @@
 ﻿namespace DotNetToolkit.Repository.Traits
 {
+    using System;
     using Queries;
     using System.Collections.Generic;
+    using System.Linq.Expressions;
 
     /// <summary>
     /// Represents a trait for deleting items from a repository.
@@ -21,6 +23,12 @@
         /// </summary>
         /// <param name="entity">The entity to delete.</param>
         void Delete(TEntity entity);
+
+        /// <summary>
+        /// Deletes all the entities in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
+        /// </summary>
+        /// <param name="predicate">A function to filter each entity.</param>
+        void Delete(Expression<Func<TEntity, bool>> predicate);
 
         /// <summary>
         /// Deletes all entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
@@ -54,6 +62,13 @@
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="entity">The entity to delete.</param>
         void Delete<TEntity>(TEntity entity) where TEntity : class;
+
+        /// <summary>
+        /// Deletes all the entities in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="predicate">A function to filter each entity.</param>
+        void Delete<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class;
 
         /// <summary>
         /// Deletes all entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
