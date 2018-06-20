@@ -31,6 +31,13 @@
         /// Initializes a new instance of the <see cref="EfCoreRepositoryFactory"/> class.
         /// </summary>
         /// <param name="dbContextFactory">The database context factory.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public EfCoreRepositoryFactory(Func<DbContext> dbContextFactory, IRepositoryInterceptor interceptor) : this(dbContextFactory, new List<IRepositoryInterceptor> { interceptor }) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EfCoreRepositoryFactory"/> class.
+        /// </summary>
+        /// <param name="dbContextFactory">The database context factory.</param>
         /// <param name="interceptors">The interceptors.</param>
         public EfCoreRepositoryFactory(Func<DbContext> dbContextFactory, IEnumerable<IRepositoryInterceptor> interceptors)
         {

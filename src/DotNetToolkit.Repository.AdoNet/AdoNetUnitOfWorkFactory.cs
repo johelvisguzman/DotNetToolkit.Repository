@@ -33,6 +33,13 @@
         /// Initializes a new instance of the <see cref="AdoNetUnitOfWorkFactory"/> class.
         /// </summary>
         /// <param name="connectionString">The connection string.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public AdoNetUnitOfWorkFactory(string connectionString, IRepositoryInterceptor interceptor) : this(connectionString, new List<IRepositoryInterceptor> { interceptor }) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetUnitOfWorkFactory"/> class.
+        /// </summary>
+        /// <param name="connectionString">The connection string.</param>
         /// <param name="interceptors">The interceptors.</param>
         public AdoNetUnitOfWorkFactory(string connectionString, IEnumerable<IRepositoryInterceptor> interceptors)
         {
@@ -49,6 +56,14 @@
         /// <param name="providerName">Name of the provider.</param>
         /// <param name="connectionString">The connection string.</param>
         public AdoNetUnitOfWorkFactory(string providerName, string connectionString) : this(providerName, connectionString, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetUnitOfWorkFactory"/> class.
+        /// </summary>
+        /// <param name="providerName">Name of the provider.</param>
+        /// <param name="connectionString">The connection string.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public AdoNetUnitOfWorkFactory(string providerName, string connectionString, IRepositoryInterceptor interceptor) : this(providerName, connectionString, new List<IRepositoryInterceptor> { interceptor }) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdoNetUnitOfWorkFactory"/> class.

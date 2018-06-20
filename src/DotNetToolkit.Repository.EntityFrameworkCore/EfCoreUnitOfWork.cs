@@ -6,7 +6,7 @@
     using Transactions;
 
     /// <summary>
-    /// Represents a unit of work for entity framework.
+    /// Represents a unit of work for entity framework core.
     /// </summary>
     /// <seealso cref="DotNetToolkit.Repository.Transactions.UnitOfWorkBaseAsync" />
     public class EfCoreUnitOfWork : UnitOfWorkBaseAsync
@@ -21,6 +21,13 @@
         {
             Factory = new EfCoreRepositoryFactory(() => context);
         }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EfCoreUnitOfWork"/> class.
+        /// </summary>
+        /// <param name="context">The database context.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public EfCoreUnitOfWork(DbContext context, IRepositoryInterceptor interceptor) : this(context, new List<IRepositoryInterceptor> { interceptor }) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EfCoreUnitOfWork"/> class.

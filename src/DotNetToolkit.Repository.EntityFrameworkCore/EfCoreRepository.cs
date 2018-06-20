@@ -18,6 +18,13 @@
         public EfCoreRepository(DbContext context) : base(context) { }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="EfCoreRepository{TEntity, TKey}"/> class.
+        /// </summary>
+        /// <param name="context">The database context.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public EfCoreRepository(DbContext context, IRepositoryInterceptor interceptor) : this(context, new List<IRepositoryInterceptor> { interceptor }) { }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="EfCoreRepository{TEntity, TKey}" /> class.
         /// </summary>
         /// <param name="context">The database context.</param>
@@ -39,6 +46,13 @@
         /// </summary>
         /// <param name="context">The database context.</param>
         public EfCoreRepository(DbContext context) : base(context) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EfCoreRepository{TEntity}"/> class.
+        /// </summary>
+        /// <param name="context">The database context.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public EfCoreRepository(DbContext context, IRepositoryInterceptor interceptor) : this(context, new List<IRepositoryInterceptor> { interceptor }) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EfCoreRepository{TEntity}" /> class.
