@@ -1,7 +1,9 @@
 ﻿namespace DotNetToolkit.Repository.Traits
 {
     using Queries;
+    using System;
     using System.Collections.Generic;
+    using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -28,6 +30,14 @@
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default(CancellationToken));
+
+        /// <summary>
+        /// Asynchronously all the entities in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
+        /// </summary>
+        /// <param name="predicate">A function to filter each entity.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        Task DeleteAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Asynchronously deletes all entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
@@ -70,6 +80,14 @@
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         Task DeleteAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default(CancellationToken)) where TEntity : class;
+
+        /// <summary>
+        /// Asynchronously all the entities in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
+        /// </summary>
+        /// <param name="predicate">A function to filter each entity.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        Task DeleteAsync<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default(CancellationToken)) where TEntity : class;
 
         /// <summary>
         /// Asynchronously deletes all entities in the repository that satisfied the criteria specified by the <paramref name="options" />.

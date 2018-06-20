@@ -403,6 +403,19 @@
         }
 
         /// <summary>
+        /// Asynchronously all the entities in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
+        /// </summary>
+        /// <param name="predicate">A function to filter each entity.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        public async Task DeleteAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
+        {
+            var entitiesInDb = await FindAllAsync(predicate, cancellationToken);
+
+            await DeleteAsync(entitiesInDb, cancellationToken);
+        }
+
+        /// <summary>
         /// Asynchronously deletes all entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
         /// </summary>
         /// <param name="options">The options to apply to the query.</param>
