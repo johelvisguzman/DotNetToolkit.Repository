@@ -619,6 +619,15 @@
         }
 
         /// <summary>
+        /// Deletes all the entities in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
+        /// </summary>
+        /// <param name="predicate">A function to filter each entity.</param>
+        public void Delete(Expression<Func<TEntity, bool>> predicate)
+        {
+            Delete(FindAll(predicate));
+        }
+
+        /// <summary>
         /// Deletes all entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
         /// </summary>
         /// <param name="options">The options to apply to the query.</param>

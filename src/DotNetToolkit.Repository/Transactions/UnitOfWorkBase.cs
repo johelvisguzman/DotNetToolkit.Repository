@@ -344,6 +344,16 @@
         }
 
         /// <summary>
+        /// Deletes all the entities in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="predicate">A function to filter each entity.</param>
+        public void Delete<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class
+        {
+            GetRepository<TEntity>().Delete(predicate);
+        }
+
+        /// <summary>
         /// Deletes all entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
