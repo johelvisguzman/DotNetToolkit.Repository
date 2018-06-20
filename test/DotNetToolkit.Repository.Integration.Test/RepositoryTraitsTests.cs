@@ -749,11 +749,13 @@
 
             Assert.Null(repo.Get(key));
             Assert.Null(repo.Get(key, fetchStrategy));
+            Assert.Null(repo.Get(key, x => x.Name, fetchStrategy));
 
             repo.Add(entity);
 
             Assert.NotNull(repo.Get(key));
             Assert.NotNull(repo.Get(key, fetchStrategy));
+            Assert.NotNull(repo.Get(key, x => x.Name, fetchStrategy));
         }
 
         private static void TestCount(IRepositoryFactory repoFactory)
@@ -1766,11 +1768,13 @@
 
             Assert.Null(await repo.GetAsync(key));
             Assert.Null(await repo.GetAsync(key, fetchStrategy));
+            Assert.Null(await repo.GetAsync(key, x => x.Name, fetchStrategy));
 
             await repo.AddAsync(entity);
 
             Assert.NotNull(await repo.GetAsync(key));
             Assert.NotNull(await repo.GetAsync(key, fetchStrategy));
+            Assert.NotNull(await repo.GetAsync(key, x => x.Name, fetchStrategy));
         }
 
         private static async Task TestCountAsync(IRepositoryFactoryAsync repoFactory)
