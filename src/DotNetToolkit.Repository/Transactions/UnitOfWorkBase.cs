@@ -2,9 +2,12 @@
 {
     using Factories;
     using FetchStrategies;
+    using Helpers;
+    using Properties;
     using Queries;
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
 
@@ -94,6 +97,16 @@
             _repositories.Add(typeof(TEntity), repo);
 
             return repo;
+        }
+
+        /// <summary>
+        /// Throws if the entity key value type does not match the type of the property defined.
+        /// </summary>
+        protected virtual void ThrowIfEntityKeyValueTypeMismatch<TEntity>(Type keyType) where TEntity : class
+        {
+            var propertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<TEntity>();
+            if (propertyInfo.PropertyType != keyType)
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeMismatch, keyType, propertyInfo.PropertyType));
         }
 
         #endregion
@@ -358,11 +371,12 @@
         /// Gets an entity with the given primary key value in the repository.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <typeparam name="TKey">The type of the primary key.</typeparam>
         /// <param name="key">The value of the primary key for the entity to be found.</param>
         /// <return>The entity found.</return>
-        public TEntity Get<TEntity, TKey>(TKey key) where TEntity : class
+        public TEntity Get<TEntity>(object key) where TEntity : class
         {
+            ThrowIfEntityKeyValueTypeMismatch<TEntity>(key.GetType());
+
             return GetRepository<TEntity>().Get(key);
         }
 
@@ -370,12 +384,13 @@
         /// Gets an entity with the given primary key value in the repository.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <typeparam name="TKey">The type of the primary key.</typeparam>
         /// <param name="key">The value of the primary key for the entity to be found.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <return>The entity found.</return>
-        public TEntity Get<TEntity, TKey>(TKey key, IFetchStrategy<TEntity> fetchStrategy) where TEntity : class
+        public TEntity Get<TEntity>(object key, IFetchStrategy<TEntity> fetchStrategy) where TEntity : class
         {
+            ThrowIfEntityKeyValueTypeMismatch<TEntity>(key.GetType());
+
             return GetRepository<TEntity>().Get(key, fetchStrategy);
         }
 
@@ -383,13 +398,14 @@
         /// Gets a specific projected entity result with the given primary key value in the repository.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <typeparam name="TKey">The type of the primary key.</typeparam>
         /// <typeparam name="TResult">The type of the projected result.</typeparam>
         /// <param name="key">The value of the primary key for the entity to be found.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public TResult Get<TEntity, TKey, TResult>(TKey key, Expression<Func<TEntity, TResult>> selector) where TEntity : class
+        public TResult Get<TEntity, TResult>(object key, Expression<Func<TEntity, TResult>> selector) where TEntity : class
         {
+            ThrowIfEntityKeyValueTypeMismatch<TEntity>(key.GetType());
+
             return GetRepository<TEntity>().Get(key, selector);
         }
 
@@ -397,27 +413,16 @@
         /// Gets a specific projected entity result with the given primary key value in the repository.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <typeparam name="TKey">The type of the primary key.</typeparam>
         /// <typeparam name="TResult">The type of the projected result.</typeparam>
         /// <param name="key">The value of the primary key for the entity to be found.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public TResult Get<TEntity, TKey, TResult>(TKey key, Expression<Func<TEntity, TResult>> selector, IFetchStrategy<TEntity> fetchStrategy) where TEntity : class
+        public TResult Get<TEntity, TResult>(object key, Expression<Func<TEntity, TResult>> selector, IFetchStrategy<TEntity> fetchStrategy) where TEntity : class
         {
-            return GetRepository<TEntity>().Get(key, selector, fetchStrategy);
-        }
+            ThrowIfEntityKeyValueTypeMismatch<TEntity>(key.GetType());
 
-        /// <summary>
-        /// Determines whether the repository contains an entity with the given primary key value
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <typeparam name="TKey">The type of the primary key.</typeparam>
-        /// <param name="key">The value of the primary key used to match entities against.</param>
-        /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
-        public bool Exists<TEntity, TKey>(TKey key) where TEntity : class
-        {
-            return GetRepository<TEntity>().Exists(key);
+            return GetRepository<TEntity>().Get(key, selector, fetchStrategy);
         }
 
         #endregion

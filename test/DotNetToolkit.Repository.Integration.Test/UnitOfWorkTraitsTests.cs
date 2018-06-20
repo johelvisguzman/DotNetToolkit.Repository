@@ -816,13 +816,24 @@
 
             var entity = new Customer { Id = key, Name = name };
 
-            Assert.Null(uow.Get<Customer, int>(key));
-            Assert.Null(uow.Get<Customer, int>(key, fetchStrategy));
+            Assert.Null(uow.Get<Customer>(key));
+            Assert.Null(uow.Get<Customer>(key, fetchStrategy));
+            Assert.Null(uow.Get<Customer, string>(key, x => x.Name, fetchStrategy));
 
             uow.Add<Customer>(entity);
 
-            Assert.NotNull(uow.Get<Customer, int>(key));
-            Assert.NotNull(uow.Get<Customer, int>(key, fetchStrategy));
+            Assert.NotNull(uow.Get<Customer>(key));
+            Assert.NotNull(uow.Get<Customer>(key, fetchStrategy));
+            Assert.NotNull(uow.Get<Customer, string>(key, x => x.Name, fetchStrategy));
+
+            var ex = Assert.Throws<ArgumentException>(() => uow.Get<Customer>(key.ToString()));
+            Assert.Equal($"The key value was of type '{typeof(string)}', which does not match the property type of '{typeof(int)}'.", ex.Message);
+
+            ex = Assert.Throws<ArgumentException>(() => uow.Get<Customer>(key.ToString(), fetchStrategy));
+            Assert.Equal($"The key value was of type '{typeof(string)}', which does not match the property type of '{typeof(int)}'.", ex.Message);
+
+            ex = Assert.Throws<ArgumentException>(() => uow.Get<Customer, string>(key.ToString(), x => x.Name, fetchStrategy));
+            Assert.Equal($"The key value was of type '{typeof(string)}', which does not match the property type of '{typeof(int)}'.", ex.Message);
         }
 
         private static void TestCount(IUnitOfWorkFactory uowFactory)
@@ -1833,13 +1844,24 @@
 
             var entity = new Customer { Id = key, Name = name };
 
-            Assert.Null(await uow.GetAsync<Customer, int>(key));
-            Assert.Null(await uow.GetAsync<Customer, int>(key, fetchStrategy));
+            Assert.Null(await uow.GetAsync<Customer>(key));
+            Assert.Null(await uow.GetAsync<Customer>(key, fetchStrategy));
+            Assert.Null(await uow.GetAsync<Customer, string>(key, x => x.Name, fetchStrategy));
 
-            await uow.AddAsync<Customer>(entity);
+            uow.Add<Customer>(entity);
 
-            Assert.NotNull(await uow.GetAsync<Customer, int>(key));
-            Assert.NotNull(await uow.GetAsync<Customer, int>(key, fetchStrategy));
+            Assert.NotNull(await uow.GetAsync<Customer>(key));
+            Assert.NotNull(await uow.GetAsync<Customer>(key, fetchStrategy));
+            Assert.NotNull(await uow.GetAsync<Customer, string>(key, x => x.Name, fetchStrategy));
+
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => uow.GetAsync<Customer>(key.ToString()));
+            Assert.Equal($"The key value was of type '{typeof(string)}', which does not match the property type of '{typeof(int)}'.", ex.Message);
+
+            ex = await Assert.ThrowsAsync<ArgumentException>(() => uow.GetAsync<Customer>(key.ToString(), fetchStrategy));
+            Assert.Equal($"The key value was of type '{typeof(string)}', which does not match the property type of '{typeof(int)}'.", ex.Message);
+
+            ex = await Assert.ThrowsAsync<ArgumentException>(() => uow.GetAsync<Customer, string>(key.ToString(), x => x.Name, fetchStrategy));
+            Assert.Equal($"The key value was of type '{typeof(string)}', which does not match the property type of '{typeof(int)}'.", ex.Message);
         }
 
         private static async Task TestCountAsync(IUnitOfWorkFactoryAsync uowFactory)
