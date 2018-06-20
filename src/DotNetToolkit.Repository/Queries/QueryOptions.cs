@@ -5,6 +5,7 @@
     using Specifications;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Linq.Expressions;
 
     /// <summary>
@@ -213,7 +214,7 @@
         }
 
         /// <summary>
-        /// Applies a criteria that is used for matching entities against.
+        /// Applies a criteria that is used for matching entities against and combine it with the current specified predicate using the logical "and".
         /// </summary>
         /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
         /// <returns>The current instance.</returns>
@@ -222,13 +223,15 @@
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
 
-            Specification = criteria;
+            var predicate = Specification != null ? Specification.Predicate.And(criteria.Predicate) : criteria.Predicate;
+
+            Specification = new Specification<T>(predicate);
 
             return this;
         }
 
         /// <summary>
-        /// Applies a criteria that is used for matching entities against.
+        /// Applies a criteria that is used for matching entities against and combine it with the current specified predicate using the logical "and".
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
         /// <returns>The current instance.</returns>
@@ -237,7 +240,11 @@
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
-            return SatisfyBy(new Specification<T>(predicate));
+            predicate = Specification != null ? Specification.Predicate.And(predicate) : predicate;
+
+            Specification = new Specification<T>(predicate);
+
+            return this;
         }
 
         /// <summary>
@@ -250,11 +257,16 @@
             if (fetchStrategy == null)
                 throw new ArgumentNullException(nameof(fetchStrategy));
 
-            FetchStrategy = fetchStrategy;
+            var paths = FetchStrategy != null ? FetchStrategy.IncludePaths : new List<string>();
+            var mergedPaths = paths.Union(fetchStrategy.IncludePaths).ToList();
+
+            FetchStrategy = FetchStrategy ?? new FetchStrategy<T>();
+
+            mergedPaths.ForEach(path => FetchStrategy.Include(path));
 
             return this;
         }
-        
+
         /// <summary>
         /// Specifies the related objects to include in the query results.
         /// </summary>
@@ -265,9 +277,9 @@
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
 
-            var fetchStrategy = FetchStrategy ?? new FetchStrategy<T>();
+            FetchStrategy = FetchStrategy ?? new FetchStrategy<T>();
 
-            fetchStrategy.Include(path);
+            FetchStrategy.Include(path);
 
             return this;
         }

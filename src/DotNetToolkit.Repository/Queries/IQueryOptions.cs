@@ -99,14 +99,14 @@
         IQueryOptions<T> Page(int pageIndex);
 
         /// <summary>
-        /// Applies a criteria that is used for matching entities against.
+        /// Applies a criteria that is used for matching entities against and combine it with the current specified predicate using the logical "and".
         /// </summary>
         /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
         /// <returns>The current instance.</returns>
         IQueryOptions<T> SatisfyBy(ISpecification<T> criteria);
 
         /// <summary>
-        /// Applies a criteria that is used for matching entities against.
+        /// Applies a criteria that is used for matching entities against and combine it with the current specified predicate using the logical "and".
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
         /// <returns>The current instance.</returns>
@@ -132,7 +132,7 @@
         /// <param name="path">A lambda expression representing the path to include.</param>
         /// <returns>The current instance.</returns>
         IQueryOptions<T> Fetch(Expression<Func<T, object>> path);
-        
+
         /// <summary>
         /// Gets the fetch strategy which defines the child objects that should be retrieved when loading the entity.
         /// </summary>
