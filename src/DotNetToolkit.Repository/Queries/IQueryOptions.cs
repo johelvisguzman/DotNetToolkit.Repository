@@ -25,7 +25,17 @@
         /// <summary>
         /// Gets a collection of sorting property paths.
         /// </summary>
-        IDictionary<string, SortOrder> SortingPropertiesMapping { get; }
+        IReadOnlyDictionary<string, SortOrder> SortingPropertiesMapping { get; }
+
+        /// <summary>
+        /// Gets the fetch strategy which defines the child objects that should be retrieved when loading the entity.
+        /// </summary>
+        IFetchStrategy<T> FetchStrategy { get; }
+
+        /// <summary>
+        /// Gets the specification.
+        /// </summary>
+        ISpecification<T> Specification { get; }
 
         /// <summary>
         /// Applies an ascending sort order according to the specified property name.
@@ -104,15 +114,5 @@
         /// <param name="path">A lambda expression representing the path to include.</param>
         /// <returns>The current instance.</returns>
         IQueryOptions<T> Fetch(Expression<Func<T, object>> path);
-
-        /// <summary>
-        /// Gets the fetch strategy which defines the child objects that should be retrieved when loading the entity.
-        /// </summary>
-        IFetchStrategy<T> FetchStrategy { get; }
-
-        /// <summary>
-        /// Gets the specification.
-        /// </summary>
-        ISpecification<T> Specification { get; }
     }
 }

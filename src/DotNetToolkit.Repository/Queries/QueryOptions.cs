@@ -19,6 +19,8 @@
 
         private const int DefaultPageSize = 100;
 
+        private readonly Dictionary<string, SortOrder> _sortingPropertiesMapping;
+
         #endregion
 
         #region Constructors
@@ -31,7 +33,7 @@
             PageSize = -1;
             PageIndex = -1;
 
-            SortingPropertiesMapping = new Dictionary<string, SortOrder>();
+            _sortingPropertiesMapping = new Dictionary<string, SortOrder>();
         }
 
         #endregion
@@ -51,7 +53,17 @@
         /// <summary>
         /// Gets a collection of sorting property paths.
         /// </summary>
-        public IDictionary<string, SortOrder> SortingPropertiesMapping { get; }
+        public IReadOnlyDictionary<string, SortOrder> SortingPropertiesMapping { get { return _sortingPropertiesMapping; } }
+
+        /// <summary>
+        /// Gets the fetch strategy which defines the child objects that should be retrieved when loading the entity.
+        /// </summary>
+        public IFetchStrategy<T> FetchStrategy { get; private set; }
+
+        /// <summary>
+        /// Gets the specification.
+        /// </summary>
+        public ISpecification<T> Specification { get; private set; }
 
         /// <summary>
         /// Applies an ascending sort order according to the specified property name.
@@ -63,8 +75,8 @@
             if (propertyName == null)
                 throw new ArgumentNullException(nameof(propertyName));
 
-            if (!SortingPropertiesMapping.ContainsKey(propertyName))
-                SortingPropertiesMapping.Add(propertyName, SortOrder.Ascending);
+            if (!_sortingPropertiesMapping.ContainsKey(propertyName))
+                _sortingPropertiesMapping.Add(propertyName, SortOrder.Ascending);
 
             return this;
         }
@@ -79,8 +91,8 @@
             if (propertyName == null)
                 throw new ArgumentNullException(nameof(propertyName));
 
-            if (!SortingPropertiesMapping.ContainsKey(propertyName))
-                SortingPropertiesMapping.Add(propertyName, SortOrder.Descending);
+            if (!_sortingPropertiesMapping.ContainsKey(propertyName))
+                _sortingPropertiesMapping.Add(propertyName, SortOrder.Descending);
 
             return this;
         }
@@ -226,16 +238,6 @@
 
             return Fetch(path.ToIncludeString());
         }
-
-        /// <summary>
-        /// Gets the fetch strategy which defines the child objects that should be retrieved when loading the entity.
-        /// </summary>
-        public IFetchStrategy<T> FetchStrategy { get; private set; }
-
-        /// <summary>
-        /// Gets the specification.
-        /// </summary>
-        public ISpecification<T> Specification { get; private set; }
 
         #endregion
     }
