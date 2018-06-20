@@ -25,63 +25,35 @@
         /// <summary>
         /// Gets a collection of sorting property paths.
         /// </summary>
-        IDictionary<string, bool> SortingPropertiesMapping { get; }
+        IDictionary<string, SortOrder> SortingPropertiesMapping { get; }
 
         /// <summary>
-        /// Applies a primary ascending sort order according to the specified property name.
+        /// Applies an ascending sort order according to the specified property name.
         /// </summary>
         /// <param name="propertyName">The name of the property.</param>
         /// <returns>The current instance.</returns>
         IQueryOptions<T> SortBy(string propertyName);
 
         /// <summary>
-        /// Applies a secondary ascending sort order according to the specified property name.
-        /// </summary>
-        /// <param name="propertyName">The name of the property.</param>
-        /// <returns>The current instance.</returns>
-        IQueryOptions<T> ThenSortBy(string propertyName);
-
-        /// <summary>
-        /// Applies a primary descending sort order according to the specified property name.
+        /// Applies a descending sort order according to the specified property name.
         /// </summary>
         /// <param name="propertyName">The name of the property.</param>
         /// <returns>The current instance.</returns>
         IQueryOptions<T> SortByDescending(string propertyName);
 
         /// <summary>
-        /// Applies a secondary descending sort order according to the specified property name.
-        /// </summary>
-        /// <param name="propertyName">The name of the property.</param>
-        /// <returns>The current instance.</returns>
-        IQueryOptions<T> ThenSortByDescending(string propertyName);
-
-        /// <summary>
-        /// Applies a primary ascending sort order according to the specified property name.
+        /// Applies an ascending sort order according to the specified property name.
         /// </summary>
         /// <param name="property">The sorting property expression.</param>
         /// <returns>The current instance.</returns>
         IQueryOptions<T> SortBy(Expression<Func<T, object>> property);
 
         /// <summary>
-        /// Applies a primary descending sort order according to the specified property name.
-        /// </summary>
-        /// <param name="property">The sorting property expression.</param>
-        /// <returns>The current instance.</returns>
-        IQueryOptions<T> ThenSortBy(Expression<Func<T, object>> property);
-
-        /// <summary>
-        /// Applies a primary descending sort order according to the specified property name.
+        /// Applies a descending sort order according to the specified property name.
         /// </summary>
         /// <param name="property">The sorting property expression.</param>
         /// <returns>The current instance.</returns>
         IQueryOptions<T> SortByDescending(Expression<Func<T, object>> property);
-
-        /// <summary>
-        /// Applies a secondary descending sort order according to the specified property name.
-        /// </summary>
-        /// <param name="property">The sorting property expression.</param>
-        /// <returns>The current instance.</returns>
-        IQueryOptions<T> ThenSortByDescending(Expression<Func<T, object>> property);
 
         /// <summary>
         /// Applies paging according to the specified index and page size.

@@ -631,7 +631,7 @@
             Assert.Equal(1, uow.FindAll<Customer, int>(x => x.Id).First());
             Assert.Equal(1, uow.FindAll<Customer, int>(options, x => x.Id).First());
 
-            options = new QueryOptions<Customer>().SortByDescending(x => x.Name).ThenSortByDescending(x => x.Id);
+            options = new QueryOptions<Customer>().SortByDescending(x => x.Name).SortByDescending(x => x.Id);
 
             Assert.Equal("Random Name 2", uow.FindAll<Customer>().First().Name);
             Assert.Equal("Random Name 2", uow.FindAll<Customer>(options).First().Name);
@@ -668,7 +668,7 @@
             Assert.Equal("Random Name 2", uow.FindAll<Customer, string>(x => x.Name).First());
             Assert.Equal("Random Name 1", uow.FindAll<Customer, string>(options, x => x.Name).First());
 
-            options = new QueryOptions<Customer>().SortBy(x => x.Name).ThenSortBy(x => x.Id);
+            options = new QueryOptions<Customer>().SortBy(x => x.Name).SortBy(x => x.Id);
 
             Assert.Equal("Random Name 2", uow.FindAll<Customer>().First().Name);
             Assert.Equal("Random Name 1", uow.FindAll<Customer>(options).First().Name);
@@ -1659,7 +1659,7 @@
             Assert.Equal(1, (await uow.FindAllAsync<Customer, int>(x => x.Id)).First());
             Assert.Equal(1, (await uow.FindAllAsync<Customer, int>(options, x => x.Id)).First());
 
-            options = new QueryOptions<Customer>().SortByDescending(x => x.Name).ThenSortByDescending(x => x.Id);
+            options = new QueryOptions<Customer>().SortByDescending(x => x.Name).SortByDescending(x => x.Id);
 
             Assert.Equal("Random Name 2", (await uow.FindAllAsync<Customer>()).First().Name);
             Assert.Equal("Random Name 2", (await uow.FindAllAsync<Customer>(options)).First().Name);
@@ -1696,7 +1696,7 @@
             Assert.Equal("Random Name 2", (await uow.FindAllAsync<Customer, string>(x => x.Name)).First());
             Assert.Equal("Random Name 1", (await uow.FindAllAsync<Customer, string>(options, x => x.Name)).First());
 
-            options = new QueryOptions<Customer>().SortBy(x => x.Name).ThenSortBy(x => x.Id);
+            options = new QueryOptions<Customer>().SortBy(x => x.Name).SortBy(x => x.Id);
 
             Assert.Equal("Random Name 2", (await uow.FindAllAsync<Customer>()).First().Name);
             Assert.Equal("Random Name 1", (await uow.FindAllAsync<Customer>(options)).First().Name);

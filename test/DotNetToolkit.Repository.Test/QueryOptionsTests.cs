@@ -60,13 +60,13 @@
 
             Assert.Equal(1, options.SortingPropertiesMapping.Count);
             Assert.Equal("Id", options.SortingPropertiesMapping.ElementAt(0).Key);
-            Assert.False(options.SortingPropertiesMapping.ElementAt(0).Value);
+            Assert.Equal(SortOrder.Ascending, options.SortingPropertiesMapping.ElementAt(0).Value);
 
             options = options.SortBy("Id");
 
             Assert.Equal(1, options.SortingPropertiesMapping.Count);
             Assert.Equal("Id", options.SortingPropertiesMapping.ElementAt(0).Key);
-            Assert.False(options.SortingPropertiesMapping.ElementAt(0).Value);
+            Assert.Equal(SortOrder.Ascending, options.SortingPropertiesMapping.ElementAt(0).Value);
         }
 
         [Fact]
@@ -80,13 +80,13 @@
 
             Assert.Equal(1, options.SortingPropertiesMapping.Count);
             Assert.Equal("Id", options.SortingPropertiesMapping.ElementAt(0).Key);
-            Assert.True(options.SortingPropertiesMapping.ElementAt(0).Value);
+            Assert.Equal(SortOrder.Descending, options.SortingPropertiesMapping.ElementAt(0).Value);
 
             options = options.SortByDescending("Id");
 
             Assert.Equal(1, options.SortingPropertiesMapping.Count);
             Assert.Equal("Id", options.SortingPropertiesMapping.ElementAt(0).Key);
-            Assert.True(options.SortingPropertiesMapping.ElementAt(0).Value);
+            Assert.Equal(SortOrder.Descending, options.SortingPropertiesMapping.ElementAt(0).Value);
         }
 
         [Fact]
@@ -94,23 +94,17 @@
         {
             IQueryOptions<Customer> options = new QueryOptions<Customer>();
 
-            var ex = Assert.Throws<InvalidOperationException>(() => options.ThenSortBy("Name"));
-            Assert.Equal("Cannot perform sorting action. A primary sorting will need to be applied first.", ex.Message);
-
-            ex = Assert.Throws<InvalidOperationException>(() => options.ThenSortBy(x => x.Name));
-            Assert.Equal("Cannot perform sorting action. A primary sorting will need to be applied first.", ex.Message);
-
-            options = options.SortBy(x => x.Id).ThenSortBy(x => x.Name);
+            options = options.SortBy(x => x.Id).SortBy(x => x.Name);
 
             Assert.Equal(2, options.SortingPropertiesMapping.Count);
             Assert.Equal("Name", options.SortingPropertiesMapping.ElementAt(1).Key);
-            Assert.False(options.SortingPropertiesMapping.ElementAt(1).Value);
+            Assert.Equal(SortOrder.Ascending, options.SortingPropertiesMapping.ElementAt(1).Value);
 
-            options = options.SortBy("Id").ThenSortBy("Name");
+            options = options.SortBy("Id").SortBy("Name");
 
             Assert.Equal(2, options.SortingPropertiesMapping.Count);
             Assert.Equal("Name", options.SortingPropertiesMapping.ElementAt(1).Key);
-            Assert.False(options.SortingPropertiesMapping.ElementAt(1).Value);
+            Assert.Equal(SortOrder.Ascending, options.SortingPropertiesMapping.ElementAt(1).Value);
         }
 
         [Fact]
@@ -118,23 +112,17 @@
         {
             IQueryOptions<Customer> options = new QueryOptions<Customer>();
 
-            var ex = Assert.Throws<InvalidOperationException>(() => options.ThenSortByDescending("Name"));
-            Assert.Equal("Cannot perform sorting action. A primary sorting will need to be applied first.", ex.Message);
-
-            ex = Assert.Throws<InvalidOperationException>(() => options.ThenSortByDescending(x => x.Name));
-            Assert.Equal("Cannot perform sorting action. A primary sorting will need to be applied first.", ex.Message);
-
-            options = options.SortByDescending(x => x.Id).ThenSortByDescending(x => x.Name);
+            options = options.SortByDescending(x => x.Id).SortByDescending(x => x.Name);
 
             Assert.Equal(2, options.SortingPropertiesMapping.Count);
             Assert.Equal("Name", options.SortingPropertiesMapping.ElementAt(1).Key);
-            Assert.True(options.SortingPropertiesMapping.ElementAt(1).Value);
+            Assert.Equal(SortOrder.Descending, options.SortingPropertiesMapping.ElementAt(1).Value);
 
-            options = options.SortByDescending("Id").ThenSortByDescending("Name");
+            options = options.SortByDescending("Id").SortByDescending("Name");
 
             Assert.Equal(2, options.SortingPropertiesMapping.Count);
             Assert.Equal("Name", options.SortingPropertiesMapping.ElementAt(1).Key);
-            Assert.True(options.SortingPropertiesMapping.ElementAt(1).Value);
+            Assert.Equal(SortOrder.Descending, options.SortingPropertiesMapping.ElementAt(1).Value);
         }
 
         [Fact]
@@ -175,11 +163,9 @@
             Assert.Contains("Phone.Customer", options.FetchStrategy.IncludePaths);
 
             options = new QueryOptions<Customer>()
-                .Fetch(new FetchStrategy<Customer>()
-                    .Include("Address"))
-                .Fetch(new FetchStrategy<Customer>()
-                    .Include("Phone")
-                    .Include("Phone.Customer"));
+                .Fetch(new FetchStrategy<Customer>().Include("Address"))
+                .Fetch(new FetchStrategy<Customer>().Include("Phone"))
+                .Fetch("Phone.Customer");
 
             Assert.Contains("Address", options.FetchStrategy.IncludePaths);
             Assert.Contains("Phone", options.FetchStrategy.IncludePaths);
@@ -199,11 +185,9 @@
             Assert.Contains("Phone.Customer", options.FetchStrategy.IncludePaths);
 
             options = new QueryOptions<Customer>()
-                .Fetch(new FetchStrategy<Customer>()
-                    .Include(x => x.Address))
-                .Fetch(new FetchStrategy<Customer>()
-                    .Include(x => x.Phone)
-                    .Include(x => x.Phone.Customer));
+                .Fetch(new FetchStrategy<Customer>().Include(x => x.Address))
+                .Fetch(new FetchStrategy<Customer>().Include(x => x.Phone))
+                .Fetch(x => x.Phone.Customer);
 
             Assert.Contains("Address", options.FetchStrategy.IncludePaths);
             Assert.Contains("Phone", options.FetchStrategy.IncludePaths);
