@@ -2058,7 +2058,7 @@
                     var primaryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<TEntity>();
                     var primaryKeyPropertyName = primaryKeyPropertyInfo.Name;
 
-                    sortings.Add(primaryKeyPropertyName, false);
+                    sortings.Add(primaryKeyPropertyName, SortOrder.Ascending);
                 }
 
                 sb.Append("\n");
@@ -2066,7 +2066,7 @@
 
                 foreach (var sorting in sortings)
                 {
-                    var isSortingDecending = sorting.Value;
+                    var sortingOrder = sorting.Value;
                     var sortingProperty = sorting.Key;
                     var lambda = ExpressionHelper.GetExpression<TEntity>(sortingProperty);
                     var tableType = ExpressionHelper.GetMemberExpression(lambda).Expression.Type;
@@ -2075,7 +2075,7 @@
                     var sortingPropertyInfo = ExpressionHelper.GetPropertyInfo(lambda);
                     var columnAlias = config.GetColumnAlias(sortingPropertyInfo);
 
-                    sb.Append($"[{tableAlias}].[{columnAlias}] {(isSortingDecending ? "DESC" : "ASC")}, ");
+                    sb.Append($"[{tableAlias}].[{columnAlias}] {(sortingOrder == SortOrder.Descending ? "DESC" : "ASC")}, ");
                 }
 
                 sb.Remove(sb.Length - 2, 2);

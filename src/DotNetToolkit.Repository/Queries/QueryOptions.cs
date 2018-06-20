@@ -31,7 +31,7 @@
             PageSize = -1;
             PageIndex = -1;
 
-            SortingPropertiesMapping = new Dictionary<string, bool>();
+            SortingPropertiesMapping = new Dictionary<string, SortOrder>();
         }
 
         #endregion
@@ -51,7 +51,7 @@
         /// <summary>
         /// Gets a collection of sorting property paths.
         /// </summary>
-        public IDictionary<string, bool> SortingPropertiesMapping { get; }
+        public IDictionary<string, SortOrder> SortingPropertiesMapping { get; }
 
         /// <summary>
         /// Applies an ascending sort order according to the specified property name.
@@ -64,7 +64,7 @@
                 throw new ArgumentNullException(nameof(propertyName));
 
             if (!SortingPropertiesMapping.ContainsKey(propertyName))
-                SortingPropertiesMapping.Add(propertyName, false);
+                SortingPropertiesMapping.Add(propertyName, SortOrder.Ascending);
 
             return this;
         }
@@ -80,7 +80,7 @@
                 throw new ArgumentNullException(nameof(propertyName));
 
             if (!SortingPropertiesMapping.ContainsKey(propertyName))
-                SortingPropertiesMapping.Add(propertyName, true);
+                SortingPropertiesMapping.Add(propertyName, SortOrder.Descending);
 
             return this;
         }

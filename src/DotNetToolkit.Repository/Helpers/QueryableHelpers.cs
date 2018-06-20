@@ -21,20 +21,20 @@
             if (options.SortingPropertiesMapping.Any())
             {
                 var primarySorting = options.SortingPropertiesMapping.ElementAt(0);
-                var isPrimarySortingDecending = primarySorting.Value;
+                var primarySortingOrder = primarySorting.Value;
                 var primarySortingProperty = primarySorting.Key;
 
-                var sortedQuery = isPrimarySortingDecending
+                var sortedQuery = primarySortingOrder == SortOrder.Descending
                     ? query.OrderByDescending(primarySortingProperty)
                     : query.OrderBy(primarySortingProperty);
 
                 for (var i = 1; i < options.SortingPropertiesMapping.Count; i++)
                 {
                     var sorting = options.SortingPropertiesMapping.ElementAt(i);
-                    var isSortingDecending = sorting.Value;
+                    var sortingOrder = sorting.Value;
                     var sortingProperty = sorting.Key;
 
-                    sortedQuery = isSortingDecending
+                    sortedQuery = sortingOrder == SortOrder.Descending
                         ? sortedQuery.ThenByDescending(sortingProperty)
                         : sortedQuery.ThenBy(sortingProperty);
                 }

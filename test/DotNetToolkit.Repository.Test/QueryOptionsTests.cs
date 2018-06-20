@@ -60,13 +60,13 @@
 
             Assert.Equal(1, options.SortingPropertiesMapping.Count);
             Assert.Equal("Id", options.SortingPropertiesMapping.ElementAt(0).Key);
-            Assert.False(options.SortingPropertiesMapping.ElementAt(0).Value);
+            Assert.Equal(SortOrder.Ascending, options.SortingPropertiesMapping.ElementAt(0).Value);
 
             options = options.SortBy("Id");
 
             Assert.Equal(1, options.SortingPropertiesMapping.Count);
             Assert.Equal("Id", options.SortingPropertiesMapping.ElementAt(0).Key);
-            Assert.False(options.SortingPropertiesMapping.ElementAt(0).Value);
+            Assert.Equal(SortOrder.Ascending, options.SortingPropertiesMapping.ElementAt(0).Value);
         }
 
         [Fact]
@@ -80,13 +80,13 @@
 
             Assert.Equal(1, options.SortingPropertiesMapping.Count);
             Assert.Equal("Id", options.SortingPropertiesMapping.ElementAt(0).Key);
-            Assert.True(options.SortingPropertiesMapping.ElementAt(0).Value);
+            Assert.Equal(SortOrder.Descending, options.SortingPropertiesMapping.ElementAt(0).Value);
 
             options = options.SortByDescending("Id");
 
             Assert.Equal(1, options.SortingPropertiesMapping.Count);
             Assert.Equal("Id", options.SortingPropertiesMapping.ElementAt(0).Key);
-            Assert.True(options.SortingPropertiesMapping.ElementAt(0).Value);
+            Assert.Equal(SortOrder.Descending, options.SortingPropertiesMapping.ElementAt(0).Value);
         }
 
         [Fact]
@@ -98,13 +98,13 @@
 
             Assert.Equal(2, options.SortingPropertiesMapping.Count);
             Assert.Equal("Name", options.SortingPropertiesMapping.ElementAt(1).Key);
-            Assert.False(options.SortingPropertiesMapping.ElementAt(1).Value);
+            Assert.Equal(SortOrder.Ascending, options.SortingPropertiesMapping.ElementAt(1).Value);
 
             options = options.SortBy("Id").SortBy("Name");
 
             Assert.Equal(2, options.SortingPropertiesMapping.Count);
             Assert.Equal("Name", options.SortingPropertiesMapping.ElementAt(1).Key);
-            Assert.False(options.SortingPropertiesMapping.ElementAt(1).Value);
+            Assert.Equal(SortOrder.Ascending, options.SortingPropertiesMapping.ElementAt(1).Value);
         }
 
         [Fact]
@@ -116,13 +116,13 @@
 
             Assert.Equal(2, options.SortingPropertiesMapping.Count);
             Assert.Equal("Name", options.SortingPropertiesMapping.ElementAt(1).Key);
-            Assert.True(options.SortingPropertiesMapping.ElementAt(1).Value);
+            Assert.Equal(SortOrder.Descending, options.SortingPropertiesMapping.ElementAt(1).Value);
 
             options = options.SortByDescending("Id").SortByDescending("Name");
 
             Assert.Equal(2, options.SortingPropertiesMapping.Count);
             Assert.Equal("Name", options.SortingPropertiesMapping.ElementAt(1).Key);
-            Assert.True(options.SortingPropertiesMapping.ElementAt(1).Value);
+            Assert.Equal(SortOrder.Descending, options.SortingPropertiesMapping.ElementAt(1).Value);
         }
 
         [Fact]

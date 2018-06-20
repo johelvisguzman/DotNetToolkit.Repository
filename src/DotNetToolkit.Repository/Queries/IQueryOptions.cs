@@ -25,7 +25,7 @@
         /// <summary>
         /// Gets a collection of sorting property paths.
         /// </summary>
-        IDictionary<string, bool> SortingPropertiesMapping { get; }
+        IDictionary<string, SortOrder> SortingPropertiesMapping { get; }
 
         /// <summary>
         /// Applies an ascending sort order according to the specified property name.
