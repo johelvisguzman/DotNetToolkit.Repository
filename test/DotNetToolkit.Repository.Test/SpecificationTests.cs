@@ -17,7 +17,7 @@
         }
 
         [Fact]
-        public void Find_By_Specification()
+        public void FindBySpecification()
         {
             var product = new Product { Price = 99 };
             var spec = new Specification<Product>(p => p.Price < 100);
@@ -30,7 +30,7 @@
         }
 
         [Fact]
-        public void Find_By_And_Composite_Specification()
+        public void FindByAndCompositeSpecification()
         {
             var product = new Product { Price = 99, Name = "Windows XP Professional" };
             var spec = new Specification<Product>(p => p.Price < 100).And(new Specification<Product>(p => p.Name == "Windows XP Professional"));
@@ -51,7 +51,7 @@
         }
 
         [Fact]
-        public void Find_By_Or_Composite_Specification()
+        public void FindByOrCompositeSpecification()
         {
             var product = new Product { Price = 99, Name = "Windows XP Professional" };
             var spec = new Specification<Product>(p => p.Price < 100).Or(new Specification<Product>(p => p.Name == "Windows XP Professional"));
@@ -73,7 +73,7 @@
         }
 
         [Fact]
-        public void Find_By_Not_Composite_Specification()
+        public void FindByNotCompositeSpecification()
         {
             var product = new Product { Price = 99, Name = "Windows XP Professional" };
             var spec = new Specification<Product>(p => p.Price < 100).Not();
@@ -86,7 +86,7 @@
         }
 
         [Fact]
-        public void Find_By_Concret_Specification()
+        public void FindByConcretSpecification()
         {
             var product = new Product { Price = 99 };
             var spec = new ProductOnSaleSpecification();
