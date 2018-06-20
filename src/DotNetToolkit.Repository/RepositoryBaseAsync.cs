@@ -275,6 +275,9 @@
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
 
+                if (!entities.Any())
+                    return;
+
                 cancellationToken.ThrowIfCancellationRequested();
 
                 InterceptAddItem(entities);
@@ -332,6 +335,9 @@
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
+
+                if (!entities.Any())
+                    return;
 
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -440,6 +446,9 @@
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
+
+                if (!entities.Any())
+                    return;
 
                 cancellationToken.ThrowIfCancellationRequested();
 

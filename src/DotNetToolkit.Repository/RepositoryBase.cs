@@ -509,6 +509,9 @@
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
 
+                if (!entities.Any())
+                    return;
+
                 InterceptAddItem(entities);
 
                 SaveChanges();
@@ -558,6 +561,9 @@
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
+
+                if (!entities.Any())
+                    return;
 
                 InterceptUpdateItem(entities);
 
@@ -646,6 +652,9 @@
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
+
+                if (!entities.Any())
+                    return;
 
                 InterceptDeleteItem(entities);
 
