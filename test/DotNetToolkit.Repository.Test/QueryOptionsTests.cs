@@ -94,19 +94,13 @@
         {
             IQueryOptions<Customer> options = new QueryOptions<Customer>();
 
-            var ex = Assert.Throws<InvalidOperationException>(() => options.ThenSortBy("Name"));
-            Assert.Equal("Cannot perform sorting action. A primary sorting will need to be applied first.", ex.Message);
-
-            ex = Assert.Throws<InvalidOperationException>(() => options.ThenSortBy(x => x.Name));
-            Assert.Equal("Cannot perform sorting action. A primary sorting will need to be applied first.", ex.Message);
-
-            options = options.SortBy(x => x.Id).ThenSortBy(x => x.Name);
+            options = options.SortBy(x => x.Id).SortBy(x => x.Name);
 
             Assert.Equal(2, options.SortingPropertiesMapping.Count);
             Assert.Equal("Name", options.SortingPropertiesMapping.ElementAt(1).Key);
             Assert.False(options.SortingPropertiesMapping.ElementAt(1).Value);
 
-            options = options.SortBy("Id").ThenSortBy("Name");
+            options = options.SortBy("Id").SortBy("Name");
 
             Assert.Equal(2, options.SortingPropertiesMapping.Count);
             Assert.Equal("Name", options.SortingPropertiesMapping.ElementAt(1).Key);
@@ -118,19 +112,13 @@
         {
             IQueryOptions<Customer> options = new QueryOptions<Customer>();
 
-            var ex = Assert.Throws<InvalidOperationException>(() => options.ThenSortByDescending("Name"));
-            Assert.Equal("Cannot perform sorting action. A primary sorting will need to be applied first.", ex.Message);
-
-            ex = Assert.Throws<InvalidOperationException>(() => options.ThenSortByDescending(x => x.Name));
-            Assert.Equal("Cannot perform sorting action. A primary sorting will need to be applied first.", ex.Message);
-
-            options = options.SortByDescending(x => x.Id).ThenSortByDescending(x => x.Name);
+            options = options.SortByDescending(x => x.Id).SortByDescending(x => x.Name);
 
             Assert.Equal(2, options.SortingPropertiesMapping.Count);
             Assert.Equal("Name", options.SortingPropertiesMapping.ElementAt(1).Key);
             Assert.True(options.SortingPropertiesMapping.ElementAt(1).Value);
 
-            options = options.SortByDescending("Id").ThenSortByDescending("Name");
+            options = options.SortByDescending("Id").SortByDescending("Name");
 
             Assert.Equal(2, options.SortingPropertiesMapping.Count);
             Assert.Equal("Name", options.SortingPropertiesMapping.ElementAt(1).Key);

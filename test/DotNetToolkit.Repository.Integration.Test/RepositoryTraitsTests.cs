@@ -562,7 +562,7 @@
             Assert.Equal(1, repo.FindAll<int>(x => x.Id).First());
             Assert.Equal(1, repo.FindAll<int>(options, x => x.Id).First());
 
-            options = new QueryOptions<Customer>().SortByDescending(x => x.Name).ThenSortByDescending(x => x.Id);
+            options = new QueryOptions<Customer>().SortByDescending(x => x.Name).SortByDescending(x => x.Id);
 
             Assert.Equal("Random Name 2", repo.FindAll().First().Name);
             Assert.Equal("Random Name 2", repo.FindAll(options).First().Name);
@@ -599,7 +599,7 @@
             Assert.Equal("Random Name 2", repo.FindAll<string>(x => x.Name).First());
             Assert.Equal("Random Name 1", repo.FindAll<string>(options, x => x.Name).First());
 
-            options = new QueryOptions<Customer>().SortBy(x => x.Name).ThenSortBy(x => x.Id);
+            options = new QueryOptions<Customer>().SortBy(x => x.Name).SortBy(x => x.Id);
 
             Assert.Equal("Random Name 2", repo.FindAll().First().Name);
             Assert.Equal("Random Name 1", repo.FindAll(options).First().Name);
@@ -1581,7 +1581,7 @@
             Assert.Equal(1, (await repo.FindAllAsync<int>(x => x.Id)).First());
             Assert.Equal(1, (await repo.FindAllAsync<int>(options, x => x.Id)).First());
 
-            options = new QueryOptions<Customer>().SortByDescending(x => x.Name).ThenSortByDescending(x => x.Id);
+            options = new QueryOptions<Customer>().SortByDescending(x => x.Name).SortByDescending(x => x.Id);
 
             Assert.Equal("Random Name 2", (await repo.FindAllAsync()).First().Name);
             Assert.Equal("Random Name 2", (await repo.FindAllAsync(options)).First().Name);
@@ -1618,7 +1618,7 @@
             Assert.Equal("Random Name 2", (await repo.FindAllAsync<string>(x => x.Name)).First());
             Assert.Equal("Random Name 1", (await repo.FindAllAsync<string>(options, x => x.Name)).First());
 
-            options = new QueryOptions<Customer>().SortBy(x => x.Name).ThenSortBy(x => x.Id);
+            options = new QueryOptions<Customer>().SortBy(x => x.Name).SortBy(x => x.Id);
 
             Assert.Equal("Random Name 2", (await repo.FindAllAsync()).First().Name);
             Assert.Equal("Random Name 1", (await repo.FindAllAsync(options)).First().Name);
