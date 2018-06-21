@@ -12,7 +12,7 @@
     /// <summary>
     /// Represents a convention helper for the repositories.
     /// </summary>
-    public static class ConventionHelper
+    internal static class ConventionHelper
     {
         /// <summary>
         /// Gets the value of the specified object primary key property.
@@ -61,7 +61,7 @@
 
             var propertyInfo = entityType
                 .GetRuntimeProperties()
-                .Where(x => IsMapped(x))
+                .Where(IsMapped)
                 .SingleOrDefault(x => IsMapped(x) && x.GetCustomAttribute<KeyAttribute>() != null);
 
             if (propertyInfo != null)
