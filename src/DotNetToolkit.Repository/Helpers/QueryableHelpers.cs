@@ -18,37 +18,37 @@
             if (options.Specification != null)
                 query = options.Specification.SatisfyingEntitiesFrom(query);
 
-            if (options.SortingPropertiesMapping.Any())
+            var sortings = options.SortingPropertiesMapping.ToDictionary(x => x.Key, x => x.Value);
+
+            // Sorts on the composite key by default if no sorting is provided
+            if (!sortings.Any())
             {
-                var primarySorting = options.SortingPropertiesMapping.ElementAt(0);
-                var primarySortingOrder = primarySorting.Value;
-                var primarySortingProperty = primarySorting.Key;
-
-                var sortedQuery = primarySortingOrder == SortOrder.Descending
-                    ? query.OrderByDescending(primarySortingProperty)
-                    : query.OrderBy(primarySortingProperty);
-
-                for (var i = 1; i < options.SortingPropertiesMapping.Count; i++)
+                foreach (var primaryKeyPropertyInfo in ConventionHelper.GetPrimaryKeyPropertyInfos<T>())
                 {
-                    var sorting = options.SortingPropertiesMapping.ElementAt(i);
-                    var sortingOrder = sorting.Value;
-                    var sortingProperty = sorting.Key;
-
-                    sortedQuery = sortingOrder == SortOrder.Descending
-                        ? sortedQuery.ThenByDescending(sortingProperty)
-                        : sortedQuery.ThenBy(sortingProperty);
+                    sortings.Add(primaryKeyPropertyInfo.Name, SortOrder.Ascending);
                 }
-
-                query = sortedQuery;
             }
-            else
+
+            var primarySorting = sortings.ElementAt(0);
+            var primarySortingOrder = primarySorting.Value;
+            var primarySortingProperty = primarySorting.Key;
+
+            var sortedQuery = primarySortingOrder == SortOrder.Descending
+                ? query.OrderByDescending(primarySortingProperty)
+                : query.OrderBy(primarySortingProperty);
+
+            for (var i = 1; i < sortings.Count; i++)
             {
-                // Sorts on the Id key by default if no sorting is provided
-                var primaryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<T>();
-                var primaryKeyPropertyName = primaryKeyPropertyInfo.Name;
+                var sorting = sortings.ElementAt(i);
+                var sortingOrder = sorting.Value;
+                var sortingProperty = sorting.Key;
 
-                query = query.OrderBy(primaryKeyPropertyName);
+                sortedQuery = sortingOrder == SortOrder.Descending
+                    ? sortedQuery.ThenByDescending(sortingProperty)
+                    : sortedQuery.ThenBy(sortingProperty);
             }
+
+            query = sortedQuery;
 
             if (options.PageSize != -1)
             {

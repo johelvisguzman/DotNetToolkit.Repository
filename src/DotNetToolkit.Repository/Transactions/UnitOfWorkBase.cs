@@ -104,7 +104,7 @@
         /// </summary>
         protected virtual void ThrowIfEntityKeyValueTypeMismatch<TEntity>(Type keyType) where TEntity : class
         {
-            var propertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<TEntity>();
+            var propertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().First();
             if (propertyInfo.PropertyType != keyType)
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeMismatch, keyType, propertyInfo.PropertyType));
         }

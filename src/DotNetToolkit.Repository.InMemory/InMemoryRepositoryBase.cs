@@ -20,7 +20,7 @@
 
         private const string DefaultDatabaseName = "DotNetToolkit.Repository.InMemory";
 
-        private ConcurrentDictionary<TKey, EntitySet> _items;
+        private List<EntitySet> _items;
         private bool _disposed;
 
         #endregion
@@ -39,7 +39,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
-        protected InMemoryRepositoryBase() : this(null, (IEnumerable<IRepositoryInterceptor>)null)  { }
+        protected InMemoryRepositoryBase() : this(null, (IEnumerable<IRepositoryInterceptor>)null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey}"/> class.
@@ -61,7 +61,7 @@
         protected InMemoryRepositoryBase(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
         {
             DatabaseName = string.IsNullOrEmpty(databaseName) ? DefaultDatabaseName : databaseName;
-            _items = new ConcurrentDictionary<TKey, EntitySet>();
+            _items = new List<EntitySet>();
         }
 
         #endregion
@@ -102,24 +102,6 @@
             return newItem;
         }
 
-        /// <summary>
-        /// Generates a new temporary primary id for the entity.
-        /// </summary>
-        /// <returns>The new generated primary id.</returns>
-        protected virtual TKey GenerateTemporaryPrimaryKey()
-        {
-            var propertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<TEntity>();
-            var propertyType = propertyInfo.PropertyType;
-            if (propertyType == typeof(int))
-            {
-                var key = _items.OrderByDescending(x => x.Key).Select(x => x.Key).FirstOrDefault();
-
-                return (TKey)Convert.ChangeType(Convert.ToInt32(key) + 1, typeof(TKey));
-            }
-
-            return GeneratePrimaryKey();
-        }
-
         #endregion
 
         #region Overrides of RepositoryBase<TEntity, TKey>
@@ -146,31 +128,7 @@
         /// </summary>
         protected override void AddItem(TEntity entity)
         {
-            // Ensures the last entity of the same reference is updated by the current one added
-            var key = _items
-                .Where(x => x.Value.Entity.Equals(entity))
-                .Select(x => x.Key)
-                .SingleOrDefault();
-
-            var hasTemporaryKey = false;
-
-            // Check if it is null or default
-            if (key != null && key.Equals(default(TKey)))
-            {
-                key = ConventionHelper.GetPrimaryKeyPropertyValue<TKey>(entity);
-
-                // Check if it is null or default
-                if (key != null && key.Equals(default(TKey)))
-                {
-                    key = GenerateTemporaryPrimaryKey();
-                    hasTemporaryKey = true;
-                }
-            }
-
-            _items[key] = new EntitySet(entity, key, EntityState.Added)
-            {
-                HasTemporaryKey = hasTemporaryKey
-            };
+            _items.Add(new EntitySet(entity, EntityState.Added));
         }
 
         /// <summary>
@@ -178,20 +136,7 @@
         /// </summary>
         protected override void DeleteItem(TEntity entity)
         {
-            var key = ConventionHelper.GetPrimaryKeyPropertyValue<TKey>(entity);
-            var hasTemporaryKey = false;
-
-            // Check if it is null or default
-            if (key != null && key.Equals(default(TKey)))
-            {
-                key = GenerateTemporaryPrimaryKey();
-                hasTemporaryKey = true;
-            }
-
-            _items[key] = new EntitySet(entity, key, EntityState.Removed)
-            {
-                HasTemporaryKey = hasTemporaryKey
-            };
+            _items.Add(new EntitySet(entity, EntityState.Removed));
         }
 
         /// <summary>
@@ -199,20 +144,7 @@
         /// </summary>
         protected override void UpdateItem(TEntity entity)
         {
-            var key = ConventionHelper.GetPrimaryKeyPropertyValue<TKey>(entity);
-            var hasTemporaryKey = false;
-
-            // Check if it is null or default
-            if (key != null && key.Equals(default(TKey)))
-            {
-                key = GenerateTemporaryPrimaryKey();
-                hasTemporaryKey = true;
-            }
-
-            _items[key] = new EntitySet(entity, key, EntityState.Modified)
-            {
-                HasTemporaryKey = hasTemporaryKey
-            };
+            _items.Add(new EntitySet(entity, EntityState.Modified));
         }
 
         /// <summary>
@@ -222,16 +154,21 @@
         {
             var context = InMemoryCache.Instance.GetContext(DatabaseName);
 
-            foreach (var entitySet in _items.Select(y => y.Value))
+            foreach (var entitySet in _items)
             {
-                var key = entitySet.Key;
+                var entityType = entitySet.Entity.GetType();
+                var keyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+                var key = (TKey)Convert.ChangeType(keyPropertyInfo.GetValue(entitySet.Entity, null), typeof(TKey));
 
                 if (entitySet.State == EntityState.Added)
                 {
-                    if (entitySet.HasTemporaryKey)
+                    var isKeyNullOrDefault = key != null && key.Equals(default(TKey));
+
+                    if (isKeyNullOrDefault)
                     {
                         key = GeneratePrimaryKey();
-                        ConventionHelper.SetPrimaryKeyPropertyValue(entitySet.Entity, key);
+
+                        keyPropertyInfo.SetValue(entitySet.Entity, key);
                     }
                     else if (context.ContainsKey(key))
                     {
@@ -261,10 +198,7 @@
         /// </summary>
         protected override IQueryable<TEntity> GetQuery(IFetchStrategy<TEntity> fetchStrategy = null)
         {
-            return InMemoryCache.Instance
-                .GetContext(DatabaseName)
-                .Select(y => y.Value)
-                .AsQueryable();
+            return InMemoryCache.Instance.GetContext(DatabaseName).Select(y => y.Value).AsQueryable();
         }
 
         /// <summary>
@@ -272,9 +206,7 @@
         /// </summary>
         protected override TEntity GetEntity(TKey key, IFetchStrategy<TEntity> fetchStrategy)
         {
-            InMemoryCache.Instance
-                .GetContext(DatabaseName)
-                .TryGetValue(key, out TEntity entity);
+            InMemoryCache.Instance.GetContext(DatabaseName).TryGetValue(key, out TEntity entity);
 
             return entity;
         }
@@ -294,12 +226,10 @@
             /// Initializes a new instance of the <see cref="EntitySet"/> class.
             /// </summary>
             /// <param name="entity">The entity.</param>
-            /// <param name="key">The entity primary key value.</param>
             /// <param name="state">The state.</param>
-            public EntitySet(TEntity entity, TKey key, EntityState state)
+            public EntitySet(TEntity entity, EntityState state)
             {
                 Entity = entity;
-                Key = key;
                 State = state;
             }
 
@@ -313,19 +243,9 @@
             public TEntity Entity { get; }
 
             /// <summary>
-            /// Gets the primary key value.
-            /// </summary>
-            public TKey Key { get; }
-
-            /// <summary>
             /// Gets the state.
             /// </summary>
             public EntityState State { get; }
-
-            /// <summary>
-            /// Gets or sets a value indicating whether this instance has a temporary key.
-            /// </summary>
-            public bool HasTemporaryKey { get; set; }
 
             #endregion
         }

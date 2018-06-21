@@ -120,6 +120,45 @@
         }
 
         [Fact]
+        public void GetWithFetchStrategyAndCompositeKey()
+        {
+            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+
+            var customerKey = 1;
+            var addressKey = 1;
+
+            var addressRepo = new AdoNetRepository<CustomerCompositeAddress>(providerName, connectionString);
+            var customerRepo = new AdoNetRepository<CustomerWithCompositeAddress>(providerName, connectionString);
+            var customerFetchStrategy = new FetchStrategy<CustomerWithCompositeAddress>();
+
+            var entity = new CustomerWithCompositeAddress
+            {
+                Id = customerKey,
+                Name = "Random Name",
+                AddressId = addressKey
+            };
+
+            customerRepo.Add(entity);
+
+            var address = new CustomerCompositeAddress
+            {
+                Id = addressKey,
+                Street = "Street",
+                City = "New City",
+                State = "ST",
+                CustomerId = customerKey,
+                Customer = entity
+            };
+
+            addressRepo.Add(address);
+
+            TestCustomerAddress(address, customerRepo.Get(customerKey, customerFetchStrategy).Address);
+
+            // for one to one, the navigation properties will be included automatically (no need to fetch)
+            TestCustomerAddress(address, customerRepo.Get(customerKey).Address);
+        }
+
+        [Fact]
         public async Task GetWithFetchStrategyWithNavigationPropertyAsync()
         {
             Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
@@ -454,6 +493,31 @@
             Assert.Equal(expected.Customer.AddressId, expected.Customer.AddressId);
         }
 
+        private static void TestCustomerAddress(CustomerCompositeAddress expected, CustomerCompositeAddress actual)
+        {
+            Assert.NotNull(expected);
+            Assert.NotNull(actual);
+            Assert.NotEqual(expected, actual);
+
+            // The navigation property should have all the values mapped correctly
+            Assert.Equal(expected.Street, actual.Street);
+            Assert.Equal(expected.City, actual.City);
+            Assert.Equal(expected.State, actual.State);
+
+            // The navigation property should have a key linking back to the main class (customer)
+            Assert.NotEqual(0, actual.CustomerId);
+            Assert.NotEqual(0, expected.CustomerId);
+            Assert.Equal(expected.CustomerId, actual.CustomerId);
+
+            // If the navigation property has also a navigation property linking back to the main class (customer),
+            // then that navigation property should also be mapped correctly
+            Assert.NotNull(expected.Customer);
+            Assert.NotNull(actual.Customer);
+            Assert.Equal(expected.Customer.Id, expected.Customer.Id);
+            Assert.Equal(expected.Customer.Name, expected.Customer.Name);
+            Assert.Equal(expected.Customer.AddressId, expected.Customer.AddressId);
+        }
+
         private static void TestCustomerAddress(CustomerAddressWithForeignKeyAnnotationOnForeignKey expected, CustomerAddressWithForeignKeyAnnotationOnForeignKey actual)
         {
             Assert.NotNull(expected);
@@ -544,6 +608,15 @@
             public CustomerAddressWithForeignKeyAnnotationOnNavigationProperty Address { get; set; }
         }
 
+        [Table("Customers")]
+        class CustomerWithCompositeAddress
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public int AddressId { get; set; }
+            public CustomerCompositeAddress Address { get; set; }
+        }
+
         class CustomerAddress
         {
             public int Id { get; set; }
@@ -552,6 +625,19 @@
             public string State { get; set; }
             public int CustomerId { get; set; }
             public Customer Customer { get; set; }
+        }
+
+        [Table("CustomerAddresses")]
+        class CustomerCompositeAddress
+        {
+            [Key]
+            public int Id { get; set; }
+            [Key]
+            public int CustomerId { get; set; }
+            public string Street { get; set; }
+            public string City { get; set; }
+            public string State { get; set; }
+            public CustomerWithCompositeAddress Customer { get; set; }
         }
 
         [Table("CustomerAddresses")]
