@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Reflection;
 
     internal class InMemoryCache
@@ -26,13 +27,13 @@
             }
         }
 
-        public ConcurrentDictionary<Type, PropertyInfo> PrimaryKeyMapping { get; }
+        public ConcurrentDictionary<Type, IEnumerable<PropertyInfo>> PrimaryKeyMapping { get; }
         public ConcurrentDictionary<Tuple<Type, Type>, PropertyInfo> ForeignKeyMapping { get; }
         public ConcurrentDictionary<Type, string> TableNameMapping { get; }
 
         private InMemoryCache()
         {
-            PrimaryKeyMapping = new ConcurrentDictionary<Type, PropertyInfo>();
+            PrimaryKeyMapping = new ConcurrentDictionary<Type, IEnumerable<PropertyInfo>>();
             ForeignKeyMapping = new ConcurrentDictionary<Tuple<Type, Type>, PropertyInfo>();
             TableNameMapping = new ConcurrentDictionary<Type, string>();
         }

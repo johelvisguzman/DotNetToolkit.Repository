@@ -236,7 +236,7 @@
         // https://github.com/SharpRepository/SharpRepository/blob/develop/SharpRepository.Repository/RepositoryBase.cs
         protected virtual ISpecification<TEntity> GetByPrimaryKeySpecification(TKey key)
         {
-            var propInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<TEntity>();
+            var propInfo = ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().First();
             var parameter = Expression.Parameter(typeof(TEntity), "x");
             var lambda = Expression.Lambda<Func<TEntity, bool>>(
                 Expression.Equal(
@@ -255,7 +255,7 @@
         /// <returns>The new generated primary id.</returns>
         protected virtual TKey GeneratePrimaryKey()
         {
-            var propertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<TEntity>();
+            var propertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().First();
             var propertyType = propertyInfo.PropertyType;
 
             if (propertyType == typeof(Guid))
@@ -267,7 +267,7 @@
             if (propertyType == typeof(int))
             {
                 var key = GetQuery()
-                    .Select(x => ConventionHelper.GetPrimaryKeyPropertyValue<TKey>(x))
+                    .Select(x => propertyInfo.GetValue(x, null))
                     .OrderByDescending(x => x)
                     .FirstOrDefault();
 
@@ -282,7 +282,7 @@
         /// </summary>
         protected virtual void ThrowIfEntityKeyValueTypeMismatch()
         {
-            var propertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<TEntity>();
+            var propertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().First();
             if (propertyInfo.PropertyType != typeof(TKey))
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeMismatch, typeof(TKey), propertyInfo.PropertyType));
         }

@@ -15,43 +15,11 @@
     internal static class ConventionHelper
     {
         /// <summary>
-        /// Gets the value of the specified object primary key property.
-        /// </summary>
-        /// <param name="obj">The object containing the property.</param>
-        /// <returns>The property value.</returns>
-        public static T GetPrimaryKeyPropertyValue<T>(object obj)
-        {
-            if (obj == null)
-                throw new ArgumentNullException(nameof(obj));
-
-            var propertyInfo = GetPrimaryKeyPropertyInfo(obj.GetType());
-            var value = propertyInfo.GetValue(obj, null);
-
-            return (T)Convert.ChangeType(value, typeof(T));
-        }
-
-        /// <summary>
-        /// Sets a value for the specified object primary key property.
-        /// </summary>
-        /// <param name="obj">The object containing the property.</param>
-        /// <param name="value">The value to set for the property.</param>
-        public static void SetPrimaryKeyPropertyValue(object obj, object value)
-        {
-            if (obj == null)
-                throw new ArgumentNullException(nameof(obj));
-
-            var propertyInfo = GetPrimaryKeyPropertyInfo(obj.GetType());
-            var convertedValue = Convert.ChangeType(value, propertyInfo.PropertyType);
-
-            propertyInfo.SetValue(obj, convertedValue, null);
-        }
-
-        /// <summary>
-        /// Gets the primary key property information for the specified type.
+        /// Gets the composite primary key property information for the specified type.
         /// </summary>
         /// <param name="entityType">The entity type to get the primary key from.</param>
-        /// <returns>The primary key property info.</returns>
-        public static PropertyInfo GetPrimaryKeyPropertyInfo(Type entityType)
+        /// <returns>The composite primary key property infos.</returns>
+        public static IEnumerable<PropertyInfo> GetPrimaryKeyPropertyInfos(Type entityType)
         {
             if (entityType == null)
                 throw new ArgumentNullException(nameof(entityType));
@@ -59,36 +27,57 @@
             if (InMemoryCache.Instance.PrimaryKeyMapping.ContainsKey(entityType))
                 return InMemoryCache.Instance.PrimaryKeyMapping[entityType];
 
-            var propertyInfo = entityType
+            // Gets by checking the annotations
+            var propertyInfos = entityType
                 .GetRuntimeProperties()
-                .Where(IsMapped)
-                .SingleOrDefault(x => IsMapped(x) && x.GetCustomAttribute<KeyAttribute>() != null);
+                .Where(x => IsMapped(x) && x.GetCustomAttribute<KeyAttribute>() != null)
+                .ToList();
 
-            if (propertyInfo != null)
-                return propertyInfo;
-
-            foreach (var propertyName in GetDefaultPrimaryKeyNameChecks(entityType))
+            // Gets by naming convention
+            if (!propertyInfos.Any())
             {
-                propertyInfo = entityType.GetTypeInfo().GetDeclaredProperty(propertyName);
-
-                if (propertyInfo != null && IsMapped(propertyInfo))
+                foreach (var propertyName in GetDefaultPrimaryKeyNameChecks(entityType))
                 {
-                    InMemoryCache.Instance.PrimaryKeyMapping[entityType] = propertyInfo;
+                    var propertyInfo = entityType.GetTypeInfo().GetDeclaredProperty(propertyName);
 
-                    return propertyInfo;
+                    if (propertyInfo != null && IsMapped(propertyInfo))
+                    {
+                        propertyInfos.Add(propertyInfo);
+
+                        break;
+                    }
                 }
+            }
+
+            if (propertyInfos.Any())
+            {
+                InMemoryCache.Instance.PrimaryKeyMapping[entityType] = propertyInfos;
+
+                return propertyInfos;
             }
 
             throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityRequiresPrimaryKey, entityType));
         }
 
         /// <summary>
-        /// Gets the primary key property information for the specified type.
+        /// Determines whether the specified entity type has a composite primary key defined.
         /// </summary>
-        /// <returns>The primary key property info.</returns>
-        public static PropertyInfo GetPrimaryKeyPropertyInfo<T>()
+        /// <param name="entityType">The type of the entity.</param>
+        public static bool HasCompositePrimaryKey(Type entityType)
         {
-            return GetPrimaryKeyPropertyInfo(typeof(T));
+            if (entityType == null)
+                throw new ArgumentNullException(nameof(entityType));
+
+            return GetPrimaryKeyPropertyInfos(entityType).Count() > 1;
+        }
+
+        /// <summary>
+        /// Gets the composite primary key property information for the specified type.
+        /// </summary>
+        /// <returns>The primary key property infos.</returns>
+        public static IEnumerable<PropertyInfo> GetPrimaryKeyPropertyInfos<T>()
+        {
+            return GetPrimaryKeyPropertyInfos(typeof(T));
         }
 
         /// <summary>
@@ -192,10 +181,13 @@
                 // Try to find by naming convention
                 if (propertyInfo == null)
                 {
-                    var foreignPrimaryKeyName = GetColumnName(GetPrimaryKeyPropertyInfo(foreignType));
+                    var primaryKeyPropertyInfo = GetPrimaryKeyPropertyInfos(foreignType).FirstOrDefault();
+                    if (primaryKeyPropertyInfo != null)
+                    {
+                        var foreignPrimaryKeyName = GetColumnName(primaryKeyPropertyInfo);
 
-                    propertyInfo = properties
-                        .SingleOrDefault(x => x.Name == $"{foreignPropertyInfo.Name}{foreignPrimaryKeyName}");
+                        propertyInfo = properties.SingleOrDefault(x => x.Name == $"{foreignPropertyInfo.Name}{foreignPrimaryKeyName}");
+                    }
                 }
             }
 

@@ -1925,12 +1925,11 @@
             var mainTableType = typeof(TEntity);
             var mainTableAlias = cfg.GenerateTableAlias(mainTableType);
             var mainTableProperties = mainTableType.GetRuntimeProperties();
-            var mainTablePrimaryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<TEntity>();
+            var mainTablePrimaryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().First();
             var mainTablePrimaryKeyName = ConventionHelper.GetColumnName(mainTablePrimaryKeyPropertyInfo);
 
             // Default select
-            var columns = string.Join(",\n\t",
-                SqlPropertiesMapping.Select(x =>
+            var columns = string.Join(",\n\t", SqlPropertiesMapping.Select(x =>
                 {
                     var colAlias = cfg.GenerateColumnAlias(x.Value);
                     var colName = ConventionHelper.GetColumnName(x.Value);
@@ -1946,8 +1945,7 @@
                 // the same type as the primary table
                 // Only do a join when the primary table has a foreign key property for the join table
                 var paths = mainTableProperties
-                    .Where(x => ConventionHelper.IsComplex(x) &&
-                                !string.IsNullOrEmpty(ConventionHelper.GetColumnName(ConventionHelper.GetPrimaryKeyPropertyInfo(x.PropertyType))))
+                    .Where(x => ConventionHelper.IsComplex(x) && ConventionHelper.GetPrimaryKeyPropertyInfos(x.PropertyType).Any())
                     .Select(x => x.Name)
                     .ToList();
 
@@ -2055,10 +2053,10 @@
                 if (!sortings.Any())
                 {
                     // Sorts on the Id key by default if no sorting is provided
-                    var primaryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<TEntity>();
-                    var primaryKeyPropertyName = primaryKeyPropertyInfo.Name;
-
-                    sortings.Add(primaryKeyPropertyName, SortOrder.Ascending);
+                    foreach (var primaryKeyPropertyInfo in ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>())
+                    {
+                        sortings.Add(primaryKeyPropertyInfo.Name, SortOrder.Ascending);
+                    }
                 }
 
                 sb.Append("\n");
@@ -2291,13 +2289,18 @@
                     ? ExecuteNonQuery(CurrentTransaction, sql, parameters)
                     : ExecuteNonQuery(connection, sql, parameters);
 
-                if (entitySet.State == EntityState.Added && IsIdentity)
+                if (!ConventionHelper.HasCompositePrimaryKey(entitySet.Entity.GetType()) &&
+                    entitySet.State == EntityState.Added &&
+                    IsIdentity)
                 {
                     var key = CurrentTransaction != null
                         ? ExecuteScalar<TKey>(CurrentTransaction, "SELECT @@IDENTITY")
                         : ExecuteScalar<TKey>(connection, "SELECT @@IDENTITY");
 
-                    ConventionHelper.SetPrimaryKeyPropertyValue(entitySet.Entity, key);
+                    var primeryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().First();
+                    var convertedKeyValue = Convert.ChangeType(key, primeryKeyPropertyInfo.PropertyType);
+
+                    primeryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
                 }
             }
 
@@ -2468,13 +2471,18 @@
                     ? await ExecuteNonQueryAsync(CurrentTransaction, sql, parameters, cancellationToken)
                     : await ExecuteNonQueryAsync(connection, sql, parameters, cancellationToken);
 
-                if (entitySet.State == EntityState.Added && IsIdentity)
+                if (!ConventionHelper.HasCompositePrimaryKey(entitySet.Entity.GetType()) &&
+                    entitySet.State == EntityState.Added &&
+                    IsIdentity)
                 {
                     var key = CurrentTransaction != null
                         ? await ExecuteScalarAsync<TKey>(CurrentTransaction, "SELECT @@IDENTITY", null, cancellationToken)
                         : await ExecuteScalarAsync<TKey>(connection, "SELECT @@IDENTITY", null, cancellationToken);
 
-                    ConventionHelper.SetPrimaryKeyPropertyValue(entitySet.Entity, key);
+                    var primeryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().First();
+                    var convertedKeyValue = Convert.ChangeType(key, primeryKeyPropertyInfo.PropertyType);
+
+                    primeryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
                 }
             }
 
