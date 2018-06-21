@@ -9,7 +9,7 @@
     {
         public static void Create(out string provider, out string connectionString)
         {
-            var currentFile = Path.GetTempFileName();
+            var currentFile = TestPathHelper.GetTempFileName();
 
             provider = "System.Data.SqlServerCe.4.0";
             connectionString = $"Data Source={currentFile};Persist Security Info=False";
