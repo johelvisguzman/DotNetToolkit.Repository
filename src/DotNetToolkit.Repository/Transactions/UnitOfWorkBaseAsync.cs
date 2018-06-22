@@ -330,8 +330,6 @@
         /// <return>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</return>
         public Task<TEntity> GetAsync<TEntity>(object key, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            ThrowIfEntityKeyValueTypeMismatch<TEntity>(key.GetType());
-
             return GetRepositoryAsync<TEntity>().GetAsync(key, cancellationToken);
         }
 
@@ -345,8 +343,6 @@
         /// <return>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  entity found.</return>
         public Task<TEntity> GetAsync<TEntity>(object key, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            ThrowIfEntityKeyValueTypeMismatch<TEntity>(key.GetType());
-
             return GetRepositoryAsync<TEntity>().GetAsync(key, fetchStrategy, cancellationToken);
         }
 
@@ -361,8 +357,6 @@
         /// <return>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</return>
         public Task<TResult> GetAsync<TEntity, TResult>(object key, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            ThrowIfEntityKeyValueTypeMismatch<TEntity>(key.GetType());
-
             return GetRepositoryAsync<TEntity>().GetAsync<TResult>(key, selector, cancellationToken);
         }
 
@@ -378,8 +372,6 @@
         /// <return>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</return>
         public Task<TResult> GetAsync<TEntity, TResult>(object key, Expression<Func<TEntity, TResult>> selector, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            ThrowIfEntityKeyValueTypeMismatch<TEntity>(key.GetType());
-
             return GetRepositoryAsync<TEntity>().GetAsync<TResult>(key, selector, fetchStrategy, cancellationToken);
         }
 

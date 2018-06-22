@@ -2,12 +2,9 @@
 {
     using Factories;
     using FetchStrategies;
-    using Helpers;
-    using Properties;
     using Queries;
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
 
@@ -97,16 +94,6 @@
             _repositories.Add(typeof(TEntity), repo);
 
             return repo;
-        }
-
-        /// <summary>
-        /// Throws if the entity key value type does not match the type of the property defined.
-        /// </summary>
-        protected virtual void ThrowIfEntityKeyValueTypeMismatch<TEntity>(Type keyType) where TEntity : class
-        {
-            var propertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().First();
-            if (propertyInfo.PropertyType != keyType)
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeMismatch, keyType, propertyInfo.PropertyType));
         }
 
         #endregion
@@ -385,8 +372,6 @@
         /// <return>The entity found.</return>
         public TEntity Get<TEntity>(object key) where TEntity : class
         {
-            ThrowIfEntityKeyValueTypeMismatch<TEntity>(key.GetType());
-
             return GetRepository<TEntity>().Get(key);
         }
 
@@ -399,8 +384,6 @@
         /// <return>The entity found.</return>
         public TEntity Get<TEntity>(object key, IFetchStrategy<TEntity> fetchStrategy) where TEntity : class
         {
-            ThrowIfEntityKeyValueTypeMismatch<TEntity>(key.GetType());
-
             return GetRepository<TEntity>().Get(key, fetchStrategy);
         }
 
@@ -414,8 +397,6 @@
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public TResult Get<TEntity, TResult>(object key, Expression<Func<TEntity, TResult>> selector) where TEntity : class
         {
-            ThrowIfEntityKeyValueTypeMismatch<TEntity>(key.GetType());
-
             return GetRepository<TEntity>().Get(key, selector);
         }
 
@@ -430,8 +411,6 @@
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public TResult Get<TEntity, TResult>(object key, Expression<Func<TEntity, TResult>> selector, IFetchStrategy<TEntity> fetchStrategy) where TEntity : class
         {
-            ThrowIfEntityKeyValueTypeMismatch<TEntity>(key.GetType());
-
             return GetRepository<TEntity>().Get(key, selector, fetchStrategy);
         }
 
