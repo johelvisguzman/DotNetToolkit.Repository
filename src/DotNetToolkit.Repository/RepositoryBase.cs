@@ -28,10 +28,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
-        protected RepositoryBase()
-        {
-            ThrowIfEntityKeyValueTypeMismatch();
-        }
+        protected RepositoryBase() { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}"/> class.
@@ -275,16 +272,6 @@
             }
 
             throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeInvalid, typeof(TEntity), propertyType));
-        }
-
-        /// <summary>
-        /// Throws if the entity key value type does not match the type of the property defined.
-        /// </summary>
-        protected virtual void ThrowIfEntityKeyValueTypeMismatch()
-        {
-            var propertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().First();
-            if (propertyInfo.PropertyType != typeof(TKey))
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeMismatch, typeof(TKey), propertyInfo.PropertyType));
         }
 
         /// <summary>
