@@ -10,7 +10,7 @@
     /// <summary>
     /// Represents an internal sql expression translator.
     /// </summary>
-    internal class DbSqlExpressionTranslator
+    internal class SqlExpressionTranslator
     {
         #region Fields
 

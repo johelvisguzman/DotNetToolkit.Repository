@@ -2032,7 +2032,7 @@
                 // Append where statement
                 if (options.Specification != null)
                 {
-                    new DbSqlExpressionTranslator().Translate(
+                    new SqlExpressionTranslator().Translate(
                         options.Specification.Predicate,
                         config,
                         out string whereSql,
