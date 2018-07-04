@@ -15,8 +15,7 @@
     {
         #region Fields
 
-        private readonly string _connectionString;
-        private readonly string _providerName;
+        private readonly Func<AdoNetContext> _contextFactory;
         private readonly IEnumerable<IRepositoryInterceptor> _interceptors;
 
         #endregion
@@ -26,61 +25,27 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="AdoNetUnitOfWorkFactory"/> class.
         /// </summary>
-        /// <param name="connectionString">The connection string.</param>
-        public AdoNetUnitOfWorkFactory(string connectionString) : this(connectionString, (IEnumerable<IRepositoryInterceptor>)null) { }
+        /// <param name="contextFactory">The context factory.</param>
+        public AdoNetUnitOfWorkFactory(Func<AdoNetContext> contextFactory) : this(contextFactory, (IEnumerable<IRepositoryInterceptor>)null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdoNetUnitOfWorkFactory"/> class.
         /// </summary>
-        /// <param name="connectionString">The connection string.</param>
+        /// <param name="contextFactory">The context factory.</param>
         /// <param name="interceptor">The interceptor.</param>
-        public AdoNetUnitOfWorkFactory(string connectionString, IRepositoryInterceptor interceptor) : this(connectionString, new List<IRepositoryInterceptor> { interceptor }) { }
+        public AdoNetUnitOfWorkFactory(Func<AdoNetContext> contextFactory, IRepositoryInterceptor interceptor) : this(contextFactory, new List<IRepositoryInterceptor> { interceptor }) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdoNetUnitOfWorkFactory"/> class.
         /// </summary>
-        /// <param name="connectionString">The connection string.</param>
+        /// <param name="contextFactory">The context factory.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public AdoNetUnitOfWorkFactory(string connectionString, IEnumerable<IRepositoryInterceptor> interceptors)
+        public AdoNetUnitOfWorkFactory(Func<AdoNetContext> contextFactory, IEnumerable<IRepositoryInterceptor> interceptors)
         {
-            if (connectionString == null)
-                throw new ArgumentNullException(nameof(connectionString));
+            if (contextFactory == null)
+                throw new ArgumentNullException(nameof(contextFactory));
 
-            _connectionString = connectionString;
-            _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AdoNetUnitOfWorkFactory"/> class.
-        /// </summary>
-        /// <param name="providerName">Name of the provider.</param>
-        /// <param name="connectionString">The connection string.</param>
-        public AdoNetUnitOfWorkFactory(string providerName, string connectionString) : this(providerName, connectionString, (IEnumerable<IRepositoryInterceptor>)null) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AdoNetUnitOfWorkFactory"/> class.
-        /// </summary>
-        /// <param name="providerName">Name of the provider.</param>
-        /// <param name="connectionString">The connection string.</param>
-        /// <param name="interceptor">The interceptor.</param>
-        public AdoNetUnitOfWorkFactory(string providerName, string connectionString, IRepositoryInterceptor interceptor) : this(providerName, connectionString, new List<IRepositoryInterceptor> { interceptor }) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AdoNetUnitOfWorkFactory"/> class.
-        /// </summary>
-        /// <param name="providerName">Name of the provider.</param>
-        /// <param name="connectionString">The connection string.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        public AdoNetUnitOfWorkFactory(string providerName, string connectionString, IEnumerable<IRepositoryInterceptor> interceptors)
-        {
-            if (providerName == null)
-                throw new ArgumentNullException(nameof(providerName));
-
-            if (connectionString == null)
-                throw new ArgumentNullException(nameof(connectionString));
-
-            _connectionString = connectionString;
-            _providerName = providerName;
+            _contextFactory = contextFactory;
             _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
         }
 
@@ -104,12 +69,7 @@
         /// <returns>The new repository.</returns>
         public T CreateInstance<T>() where T : class
         {
-            var args = new List<object>();
-
-            if (!string.IsNullOrEmpty(_providerName))
-                args.Add(_providerName);
-
-            args.Add(_connectionString);
+            var args = new List<object> { _contextFactory() };
 
             if (_interceptors.Any())
                 args.Add(_interceptors);

@@ -81,8 +81,7 @@
 
         private static List<IRepositoryFactory> GetRepositoryFactories()
         {
-            TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
-
+            var adoNetContext = TestAdoNetContextFactory.Create();
             var efCoreContext = new TestEfCoreDbContext(Guid.NewGuid().ToString());
             var efContext = TestEfDbContextFactory.Create();
 
@@ -91,7 +90,7 @@
                 new InMemory.InMemoryRepositoryFactory(Guid.NewGuid().ToString()),
                 new EntityFramework.EfRepositoryFactory(() => efContext),
                 new EntityFrameworkCore.EfCoreRepositoryFactory(() => efCoreContext),
-                new AdoNet.AdoNetRepositoryFactory(providerName, connectionString)
+                new AdoNet.AdoNetRepositoryFactory(() => adoNetContext)
             };
 
             repos.AddRange(GetInMemoryFileBasedRepositoryFactories());
@@ -101,12 +100,10 @@
 
         private static List<IUnitOfWorkFactory> GetUnitOfWorkFactories()
         {
-            TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
-
             var uows = new List<IUnitOfWorkFactory>
             {
                 new EntityFramework.EfUnitOfWorkFactory(TestEfDbContextFactory.Create),
-                new AdoNet.AdoNetUnitOfWorkFactory(providerName, connectionString)
+                new AdoNet.AdoNetUnitOfWorkFactory(TestAdoNetContextFactory.Create)
             };
 
             return uows;

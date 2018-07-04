@@ -1,8 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet
 {
-    using Properties;
     using System;
-    using System.Configuration;
     using System.Data.Common;
     using Transactions;
 
@@ -26,54 +24,13 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="AdoNetTransactionManager"/> class.
         /// </summary>
-        /// <param name="connectionString">The connection string.</param>
-        public AdoNetTransactionManager(string connectionString)
+        /// <param name="context">The context.</param>
+        public AdoNetTransactionManager(AdoNetContext context)
         {
-            if (connectionString == null)
-                throw new ArgumentNullException(nameof(connectionString));
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
 
-            var ccs = ConfigurationManager.ConnectionStrings[connectionString];
-            if (ccs == null)
-                throw new ArgumentException(Resources.ConnectionStringDoestNotExistInConfigFile);
-
-            Transaction = BeginTransaction(ccs.ProviderName, connectionString);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AdoNetTransactionManager"/> class.
-        /// </summary>
-        /// <param name="providerName">Name of the provider.</param>
-        /// <param name="connectionString">The connection string.</param>
-        public AdoNetTransactionManager(string providerName, string connectionString)
-        {
-            if (providerName == null)
-                throw new ArgumentNullException(nameof(providerName));
-
-            if (connectionString == null)
-                throw new ArgumentNullException(nameof(connectionString));
-
-            Transaction = BeginTransaction(providerName, connectionString);
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        private DbTransaction BeginTransaction(string providerName, string connectionString)
-        {
-            if (providerName == null)
-                throw new ArgumentNullException(nameof(providerName));
-
-            if (connectionString == null)
-                throw new ArgumentNullException(nameof(connectionString));
-
-            var dbProviderFactory = Internal.DbProviderFactories.GetFactory(providerName);
-            var connection = dbProviderFactory.CreateConnection();
-
-            connection.ConnectionString = connectionString;
-            connection.Open();
-
-            return connection.BeginTransaction();
+            Transaction = context.BeginTransaction();
         }
 
         #endregion

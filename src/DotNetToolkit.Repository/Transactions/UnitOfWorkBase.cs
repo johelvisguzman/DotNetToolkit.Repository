@@ -15,7 +15,8 @@
     {
         #region Fields
 
-        internal readonly Dictionary<Type, object> _repositories;
+        private IRepositoryFactory _factory;
+
         private bool _disposed;
 
         #endregion
@@ -23,14 +24,14 @@
         #region Properties
 
         /// <summary>
-        /// Gets or sets the repository factory.
-        /// </summary>
-        protected IRepositoryFactory Factory { get; set; }
-
-        /// <summary>
         /// Gets the transaction manager.
         /// </summary>
         protected ITransactionManager TransactionManager { get; private set; }
+
+        /// <summary>
+        /// Gets the repositories.
+        /// </summary>
+        internal Dictionary<Type, object> Repositories { get; }
 
         #endregion
 
@@ -40,15 +41,18 @@
         /// Initializes a new instance of the <see cref="UnitOfWorkBase"/> class.
         /// </summary>
         /// <param name="transactionManager">The transaction.</param>
-        /// <exception cref="ArgumentNullException">transaction</exception>
-        protected UnitOfWorkBase(ITransactionManager transactionManager)
+        /// <param name="factory">The repository factory.</param>
+        protected UnitOfWorkBase(ITransactionManager transactionManager, IRepositoryFactory factory)
         {
             if (transactionManager == null)
                 throw new ArgumentNullException(nameof(transactionManager));
 
-            TransactionManager = transactionManager;
+            if (factory == null)
+                throw new ArgumentNullException(nameof(factory));
 
-            _repositories = new Dictionary<Type, object>();
+            TransactionManager = transactionManager;
+            _factory = factory;
+            Repositories = new Dictionary<Type, object>();
         }
 
         #endregion
@@ -83,15 +87,12 @@
         /// <returns>The new repository.</returns>
         protected virtual IRepository<TEntity, object> GetRepository<TEntity>() where TEntity : class
         {
-            if (Factory == null)
-                throw new InvalidOperationException("A repository factory has not been specified.");
+            if (Repositories.ContainsKey(typeof(TEntity)))
+                return Repositories[typeof(TEntity)] as IRepository<TEntity, object>;
 
-            if (_repositories.ContainsKey(typeof(TEntity)))
-                return _repositories[typeof(TEntity)] as IRepository<TEntity, object>;
+            var repo = _factory.Create<TEntity, object>();
 
-            var repo = Factory.Create<TEntity, object>();
-
-            _repositories.Add(typeof(TEntity), repo);
+            Repositories.Add(typeof(TEntity), repo);
 
             return repo;
         }

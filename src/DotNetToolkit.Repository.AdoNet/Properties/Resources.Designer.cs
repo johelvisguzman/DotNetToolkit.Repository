@@ -9,9 +9,9 @@
 //------------------------------------------------------------------------------
 
 namespace DotNetToolkit.Repository.AdoNet.Properties {
-    using System;
-    
-    
+    using System.Reflection;
+
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -39,7 +39,7 @@ namespace DotNetToolkit.Repository.AdoNet.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DotNetToolkit.Repository.AdoNet.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DotNetToolkit.Repository.AdoNet.Properties.Resources", typeof(Resources).GetTypeInfo().Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -75,6 +75,24 @@ namespace DotNetToolkit.Repository.AdoNet.Properties {
         internal static string ConnectionStringDoestNotExistInConfigFile {
             get {
                 return ResourceManager.GetString("ConnectionStringDoestNotExistInConfigFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; cannot be added to the database because another instance of this type with the same key is already being tracked..
+        /// </summary>
+        internal static string EntityAlreadyBeingTrackedInStore {
+            get {
+                return ResourceManager.GetString("EntityAlreadyBeingTrackedInStore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Attempted to update or delete an entity that does not exist in the database..
+        /// </summary>
+        internal static string EntityNotFoundInStore {
+            get {
+                return ResourceManager.GetString("EntityNotFoundInStore", resourceCulture);
             }
         }
         

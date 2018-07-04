@@ -132,4 +132,10 @@
   <data name="ConnectionStringDoestNotExistInConfigFile" xml:space="preserve">
     <value>The connection string does not exist in your configuration file.</value>
   </data>
+  <data name="EntityAlreadyBeingTrackedInStore" xml:space="preserve">
+    <value>The instance of entity type '{0}' cannot be added to the database because another instance of this type with the same key is already being tracked.</value>
+  </data>
+  <data name="EntityNotFoundInStore" xml:space="preserve">
+    <value>Attempted to update or delete an entity that does not exist in the database.</value>
+  </data>
 </root>

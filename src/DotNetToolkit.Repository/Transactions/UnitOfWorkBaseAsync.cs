@@ -15,12 +15,9 @@
     /// </summary>
     public abstract class UnitOfWorkBaseAsync : UnitOfWorkBase, IUnitOfWorkAsync
     {
-        #region Properties
+        #region Fields
 
-        /// <summary>
-        /// Gets or sets the asynchronous repository factory.
-        /// </summary>
-        protected new IRepositoryFactoryAsync Factory { get; set; }
+        private readonly IRepositoryFactoryAsync _factory;
 
         #endregion
 
@@ -30,7 +27,11 @@
         /// Initializes a new instance of the <see cref="UnitOfWorkBaseAsync"/> class.
         /// </summary>
         /// <param name="transactionManager">The transaction.</param>
-        protected UnitOfWorkBaseAsync(ITransactionManager transactionManager) : base(transactionManager) { }
+        /// <param name="factory">The asynchronous repository factory.</param>
+        protected UnitOfWorkBaseAsync(ITransactionManager transactionManager, IRepositoryFactoryAsync factory) : base(transactionManager, factory)
+        {
+            _factory = factory;
+        }
 
         #endregion
 
@@ -43,15 +44,12 @@
         /// <returns>The new asynchronous repository.</returns>
         protected virtual IRepositoryAsync<TEntity, object> GetRepositoryAsync<TEntity>() where TEntity : class
         {
-            if (Factory == null)
-                throw new InvalidOperationException("A repository factory has not been specified.");
+            if (Repositories.ContainsKey(typeof(TEntity)))
+                return Repositories[typeof(TEntity)] as IRepositoryAsync<TEntity, object>;
 
-            if (_repositories.ContainsKey(typeof(TEntity)))
-                return _repositories[typeof(TEntity)] as IRepositoryAsync<TEntity, object>;
+            var repo = _factory.CreateAsync<TEntity, object>();
 
-            var repo = Factory.CreateAsync<TEntity, object>();
-
-            _repositories.Add(typeof(TEntity), repo);
+            Repositories.Add(typeof(TEntity), repo);
 
             return repo;
         }
