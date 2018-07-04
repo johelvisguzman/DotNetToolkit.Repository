@@ -86,7 +86,7 @@
             if (ccs == null)
                 throw new ArgumentException(Resources.ConnectionStringDoestNotExistInConfigFile);
 
-            _factory = Internal.DbProviderFactories.GetFactory(ccs.ProviderName);
+            _factory = DbProviderFactories.GetFactory(ccs.ProviderName);
             _connectionString = connectionString;
 
             Initialize();
@@ -113,7 +113,7 @@
             if (connectionString == null)
                 throw new ArgumentNullException(nameof(connectionString));
 
-            _factory = Internal.DbProviderFactories.GetFactory(providerName);
+            _factory = DbProviderFactories.GetFactory(providerName);
             _connectionString = connectionString;
 
             Initialize();
