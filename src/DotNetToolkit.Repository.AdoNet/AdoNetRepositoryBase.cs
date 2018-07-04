@@ -1917,10 +1917,10 @@
             }
         }
 
-        private void PrepareSelectStatement(IFetchStrategy<TEntity> fetchStrategy, out DbSqlSelectStatementConfig config)
+        private void PrepareSelectStatement(IFetchStrategy<TEntity> fetchStrategy, out Mapper mapper)
         {
             var sb = new StringBuilder();
-            var cfg = new DbSqlSelectStatementConfig();
+            var cfg = new Mapper();
 
             var mainTableType = typeof(TEntity);
             var mainTableAlias = cfg.GenerateTableAlias(mainTableType);
@@ -2014,18 +2014,18 @@
 
             cfg.Sql = sb.ToString();
 
-            config = cfg;
+            mapper = cfg;
         }
 
-        private void PrepareSelectStatement(IQueryOptions<TEntity> options, out DbSqlSelectStatementConfig config)
+        private void PrepareSelectStatement(IQueryOptions<TEntity> options, out Mapper mapper)
         {
             var parameters = new Dictionary<string, object>();
             var sb = new StringBuilder();
 
             // Append initial select statement
-            PrepareSelectStatement(options?.FetchStrategy, out config);
+            PrepareSelectStatement(options?.FetchStrategy, out mapper);
 
-            sb.Append(config.Sql);
+            sb.Append(mapper.Sql);
 
             if (options != null)
             {
@@ -2034,7 +2034,7 @@
                 {
                     new SqlExpressionTranslator().Translate(
                         options.Specification.Predicate,
-                        config,
+                        mapper,
                         out string whereSql,
                         out Dictionary<string, object> whereParameters);
 
@@ -2068,10 +2068,10 @@
                     var sortingProperty = sorting.Key;
                     var lambda = ExpressionHelper.GetExpression<TEntity>(sortingProperty);
                     var tableType = ExpressionHelper.GetMemberExpression(lambda).Expression.Type;
-                    var tableName = config.GetTableName(tableType);
-                    var tableAlias = config.GetTableAlias(tableName);
+                    var tableName = mapper.GetTableName(tableType);
+                    var tableAlias = mapper.GetTableAlias(tableName);
                     var sortingPropertyInfo = ExpressionHelper.GetPropertyInfo(lambda);
-                    var columnAlias = config.GetColumnAlias(sortingPropertyInfo);
+                    var columnAlias = mapper.GetColumnAlias(sortingPropertyInfo);
 
                     sb.Append($"[{tableAlias}].[{columnAlias}] {(sortingOrder == SortOrder.Descending ? "DESC" : "ASC")}, ");
                 }
@@ -2087,8 +2087,8 @@
                 }
             }
 
-            config.Sql = sb.ToString();
-            config.Parameters = parameters;
+            mapper.Sql = sb.ToString();
+            mapper.Parameters = parameters;
         }
 
         private void PrepareEntitySetStatement(EntitySet entitySet, out string sql, out Dictionary<string, object> parameters)
@@ -2149,16 +2149,16 @@
             }
         }
 
-        private TElement AutoMap<TElement>(DbDataReader r, Expression<Func<TEntity, TElement>> elementSelector, DbSqlSelectStatementConfig config)
+        private TElement AutoMap<TElement>(DbDataReader r, Expression<Func<TEntity, TElement>> elementSelector, Mapper mapper)
         {
             var entity = Activator.CreateInstance<TEntity>();
             var entityType = typeof(TEntity);
 
             Dictionary<Type, object> joinTableInstances = null;
 
-            if (config != null)
+            if (mapper != null)
             {
-                joinTableInstances = config.JoinTablePropertiesMapping.Keys.ToDictionary(x => x, Activator.CreateInstance);
+                joinTableInstances = mapper.JoinTablePropertiesMapping.Keys.ToDictionary(x => x, Activator.CreateInstance);
             }
 
             for (var i = 0; i < r.FieldCount; i++)
@@ -2175,12 +2175,12 @@
                 }
                 else if (joinTableInstances != null)
                 {
-                    var joinTableType = config.GetTableTypeByColumnAlias(name);
+                    var joinTableType = mapper.GetTableTypeByColumnAlias(name);
 
                     if (joinTableType != null)
                     {
-                        var columnPropertyInfosMapping = config.JoinTablePropertiesMapping.Single(x => x.Key == joinTableType).Value;
-                        var columnName = config.GetColumnName(name);
+                        var columnPropertyInfosMapping = mapper.JoinTablePropertiesMapping.Single(x => x.Key == joinTableType).Value;
+                        var columnName = mapper.GetColumnName(name);
 
                         columnPropertyInfosMapping[columnName].SetValue(joinTableInstances[joinTableType], value);
                     }
@@ -2213,9 +2213,9 @@
             return elementSelectorFunc(entity);
         }
 
-        private TEntity AutoMap(DbDataReader r, DbSqlSelectStatementConfig config)
+        private TEntity AutoMap(DbDataReader r, Mapper mapper)
         {
-            return AutoMap<TEntity>(r, IdentityExpression<TEntity>.Instance, config);
+            return AutoMap<TEntity>(r, IdentityExpression<TEntity>.Instance, mapper);
         }
 
         #endregion
@@ -2316,9 +2316,9 @@
         /// </summary>
         protected override IQueryable<TEntity> GetQuery(IFetchStrategy<TEntity> fetchStrategy = null)
         {
-            PrepareSelectStatement(fetchStrategy, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(fetchStrategy, out Mapper mapper);
 
-            return ExecuteList<TEntity>(config.Sql, r => AutoMap(r, config)).AsQueryable();
+            return ExecuteList<TEntity>(mapper.Sql, r => AutoMap(r, mapper)).AsQueryable();
         }
 
         /// <summary>
@@ -2331,9 +2331,9 @@
             if (fetchStrategy != null)
                 options.Fetch(fetchStrategy);
 
-            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out Mapper mapper);
 
-            return ExecuteObject<TEntity>(config.Sql, config.Parameters, r => AutoMap(r, config));
+            return ExecuteObject<TEntity>(mapper.Sql, mapper.Parameters, r => AutoMap(r, mapper));
         }
 
         /// <summary>
@@ -2347,9 +2347,9 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out Mapper mapper);
 
-            return ExecuteObject<TResult>(config.Sql, config.Parameters, r => AutoMap<TResult>(r, selector, config));
+            return ExecuteObject<TResult>(mapper.Sql, mapper.Parameters, r => AutoMap<TResult>(r, selector, mapper));
         }
 
         /// <summary>
@@ -2360,9 +2360,9 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out Mapper mapper);
 
-            return ExecuteList<TResult>(config.Sql, config.Parameters, r => AutoMap<TResult>(r, selector, config));
+            return ExecuteList<TResult>(mapper.Sql, mapper.Parameters, r => AutoMap<TResult>(r, selector, mapper));
         }
 
         /// <summary>
@@ -2370,9 +2370,9 @@
         /// </summary>
         protected override int GetCount(IQueryOptions<TEntity> options)
         {
-            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out Mapper mapper);
 
-            using (var reader = ExecuteReader(config.Sql, config.Parameters))
+            using (var reader = ExecuteReader(mapper.Sql, mapper.Parameters))
             {
                 var count = 0;
 
@@ -2393,9 +2393,9 @@
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out Mapper mapper);
 
-            using (var reader = ExecuteReader(config.Sql, config.Parameters))
+            using (var reader = ExecuteReader(mapper.Sql, mapper.Parameters))
             {
                 var hasRows = false;
 
@@ -2418,13 +2418,13 @@
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
-            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out Mapper mapper);
 
             return ExecuteDictionary<TDictionaryKey, TElement>(
-                config.Sql,
-                config.Parameters,
-                r => AutoMap<TDictionaryKey>(r, keySelector, config),
-                r => AutoMap<TElement>(r, elementSelector, config));
+                mapper.Sql,
+                mapper.Parameters,
+                r => AutoMap<TDictionaryKey>(r, keySelector, mapper),
+                r => AutoMap<TElement>(r, elementSelector, mapper));
         }
 
         /// <summary>
@@ -2435,12 +2435,12 @@
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
-            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out Mapper mapper);
 
             var keySelectFunc = keySelector.Compile();
             var resultSelectorFunc = resultSelector.Compile();
 
-            return ExecuteList(config.Sql, config.Parameters, r => AutoMap(r, config))
+            return ExecuteList(mapper.Sql, mapper.Parameters, r => AutoMap(r, mapper))
                 .GroupBy(keySelectFunc, EqualityComparer<TGroupKey>.Default)
                 .Select(resultSelectorFunc)
                 .ToList();
@@ -2503,9 +2503,9 @@
             if (fetchStrategy != null)
                 options.Fetch(fetchStrategy);
 
-            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out Mapper mapper);
 
-            return ExecuteObjectAsync<TEntity>(config.Sql, config.Parameters, r => AutoMap(r, config), cancellationToken);
+            return ExecuteObjectAsync<TEntity>(mapper.Sql, mapper.Parameters, r => AutoMap(r, mapper), cancellationToken);
         }
 
         /// <summary>
@@ -2519,9 +2519,9 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out Mapper mapper);
 
-            return ExecuteObjectAsync<TResult>(config.Sql, config.Parameters, r => AutoMap<TResult>(r, selector, config), cancellationToken);
+            return ExecuteObjectAsync<TResult>(mapper.Sql, mapper.Parameters, r => AutoMap<TResult>(r, selector, mapper), cancellationToken);
         }
 
         /// <summary>
@@ -2532,9 +2532,9 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out Mapper mapper);
 
-            return ExecuteListAsync<TResult>(config.Sql, config.Parameters, r => AutoMap<TResult>(r, selector, config), cancellationToken);
+            return ExecuteListAsync<TResult>(mapper.Sql, mapper.Parameters, r => AutoMap<TResult>(r, selector, mapper), cancellationToken);
         }
 
         /// <summary>
@@ -2542,9 +2542,9 @@
         /// </summary>
         protected override async Task<int> GetCountAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out Mapper mapper);
 
-            using (var reader = await ExecuteReaderAsync(config.Sql, config.Parameters, cancellationToken))
+            using (var reader = await ExecuteReaderAsync(mapper.Sql, mapper.Parameters, cancellationToken))
             {
                 var count = 0;
 
@@ -2565,9 +2565,9 @@
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out Mapper mapper);
 
-            using (var reader = await ExecuteReaderAsync(config.Sql, config.Parameters, cancellationToken))
+            using (var reader = await ExecuteReaderAsync(mapper.Sql, mapper.Parameters, cancellationToken))
             {
                 var hasRows = false;
 
@@ -2593,13 +2593,13 @@
             if (elementSelector == null)
                 throw new ArgumentNullException(nameof(elementSelector));
 
-            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out Mapper mapper);
 
             return ExecuteDictionaryAsync<TDictionaryKey, TElement>(
-                config.Sql,
-                config.Parameters,
-                r => AutoMap<TDictionaryKey>(r, keySelector, config),
-                r => AutoMap<TElement>(r, elementSelector, config),
+                mapper.Sql,
+                mapper.Parameters,
+                r => AutoMap<TDictionaryKey>(r, keySelector, mapper),
+                r => AutoMap<TElement>(r, elementSelector, mapper),
                 cancellationToken);
         }
 
@@ -2611,12 +2611,12 @@
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
 
-            PrepareSelectStatement(options, out DbSqlSelectStatementConfig config);
+            PrepareSelectStatement(options, out Mapper mapper);
 
             var keySelectFunc = keySelector.Compile();
             var resultSelectorFunc = resultSelector.Compile();
 
-            return (await ExecuteListAsync(config.Sql, config.Parameters, r => AutoMap(r, config), cancellationToken))
+            return (await ExecuteListAsync(mapper.Sql, mapper.Parameters, r => AutoMap(r, mapper), cancellationToken))
                 .GroupBy(keySelectFunc, EqualityComparer<TGroupKey>.Default)
                 .Select(resultSelectorFunc)
                 .ToList();
