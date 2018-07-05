@@ -17,10 +17,7 @@
         /// Initializes a new instance of the <see cref="EfUnitOfWork"/> class.
         /// </summary>
         /// <param name="context">The database context.</param>
-        public EfUnitOfWork(DbContext context) : base(new EfTransactionManager(context))
-        {
-            Factory = new EfRepositoryFactory(() => context);
-        }
+        public EfUnitOfWork(DbContext context) : base(new EfTransactionManager(context), new EfRepositoryFactory(() => context)) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EfUnitOfWork"/> class.
@@ -34,10 +31,7 @@
         /// </summary>
         /// <param name="context">The database context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public EfUnitOfWork(DbContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(new EfTransactionManager(context))
-        {
-            Factory = new EfRepositoryFactory(() => context, interceptors);
-        }
+        public EfUnitOfWork(DbContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(new EfTransactionManager(context), new EfRepositoryFactory(() => context, interceptors)) { }
 
         #endregion
     }

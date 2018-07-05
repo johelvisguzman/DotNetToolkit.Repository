@@ -239,6 +239,24 @@
         }
 
         /// <summary>
+        /// Determines whether the specified property is defined as identity.
+        /// </summary>
+        /// <param name="pi">The property info.</param>
+        /// <returns><c>true</c> if the specified property is defined as identity; otherwise, <c>false</c>.</returns>
+        /// <remarks>If no the property does not have a <see cref="DatabaseGeneratedOption.Identity" /> option defined, this function will returned <c>true</c> as default.</remarks>
+        public static bool IsIdentity(PropertyInfo pi)
+        {
+            if (pi == null)
+                throw new ArgumentNullException(nameof(pi));
+
+            var databaseGeneratedAttribute = pi.GetCustomAttribute<DatabaseGeneratedAttribute>();
+            if (databaseGeneratedAttribute == null)
+                return true;
+
+            return databaseGeneratedAttribute.DatabaseGeneratedOption == DatabaseGeneratedOption.Identity;
+        }
+
+        /// <summary>
         /// Gets the primary key name checks.
         /// </summary>
         /// <param name="entityType">The entity type to get the primary key from.</param>

@@ -14,13 +14,13 @@
         [Fact]
         public void GetWithFetchStrategyWithNavigationProperty()
         {
-            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+            var context = Data.TestAdoNetContextFactory.Create();
 
             var customerKey = 1;
             var addressKey = 1;
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(providerName, connectionString);
-            var customerRepo = new AdoNetRepository<Customer>(providerName, connectionString);
+            var addressRepo = new AdoNetRepository<CustomerAddress>(context);
+            var customerRepo = new AdoNetRepository<Customer>(context);
             var customerFetchStrategy = new FetchStrategy<Customer>();
 
             var entity = new Customer
@@ -53,13 +53,12 @@
         [Fact]
         public void GetWithFetchStrategyAndForeignKeyAnnotationChanged()
         {
-            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
-
+            var context = Data.TestAdoNetContextFactory.Create();
             var customerKey = 1;
             var addressKey = 1;
 
-            var addressWithForeignKeyAnnotationOnForeignKeyRepo = new AdoNetRepository<CustomerAddressWithForeignKeyAnnotationOnForeignKey>(providerName, connectionString);
-            var customerWithForeignKeyAnnotationOnForeignKeyRepo = new AdoNetRepository<CustomerWithForeignKeyAnnotationOnForeignKey>(providerName, connectionString);
+            var addressWithForeignKeyAnnotationOnForeignKeyRepo = new AdoNetRepository<CustomerAddressWithForeignKeyAnnotationOnForeignKey>(context);
+            var customerWithForeignKeyAnnotationOnForeignKeyRepo = new AdoNetRepository<CustomerWithForeignKeyAnnotationOnForeignKey>(context);
             var customerWithForeignKeyAnnotationOnForeignKeyFetchStrategy = new FetchStrategy<CustomerWithForeignKeyAnnotationOnForeignKey>();
 
             var customerWithForeignKeyAnnotationOnForeignKey = new CustomerWithForeignKeyAnnotationOnForeignKey
@@ -88,9 +87,12 @@
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(addressWithForeignKeyAnnotationOnForeignKey, customerWithForeignKeyAnnotationOnForeignKeyRepo.Get(customerKey).Address);
 
-            var addressWithForeignKeyAnnotationOnNavigationPropertyRepo = new AdoNetRepository<CustomerAddressWithForeignKeyAnnotationOnNavigationProperty>(providerName, connectionString);
-            var customerWithForeignKeyAnnotationOnNavigationPropertyRepo = new AdoNetRepository<CustomerWithForeignKeyAnnotationOnNavigationProperty>(providerName, connectionString);
+            var addressWithForeignKeyAnnotationOnNavigationPropertyRepo = new AdoNetRepository<CustomerAddressWithForeignKeyAnnotationOnNavigationProperty>(context);
+            var customerWithForeignKeyAnnotationOnNavigationPropertyRepo = new AdoNetRepository<CustomerWithForeignKeyAnnotationOnNavigationProperty>(context);
             var customerWithForeignKeyAnnotationOnNavigationPropertyFetchStrategy = new FetchStrategy<CustomerWithForeignKeyAnnotationOnNavigationProperty>();
+
+            customerKey = 2;
+            addressKey = 2;
 
             var customerWithForeignKeyAnnotationOnNavigationProperty = new CustomerWithForeignKeyAnnotationOnNavigationProperty
             {
@@ -122,13 +124,13 @@
         [Fact]
         public void GetWithFetchStrategyAndCompositeKey()
         {
-            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+            var context = Data.TestAdoNetContextFactory.Create();
 
             var customerKey = 1;
             var addressKey = 1;
 
-            var addressRepo = new AdoNetRepository<CustomerCompositeAddress>(providerName, connectionString);
-            var customerRepo = new AdoNetRepository<CustomerWithCompositeAddress>(providerName, connectionString);
+            var addressRepo = new AdoNetRepository<CustomerCompositeAddress>(context);
+            var customerRepo = new AdoNetRepository<CustomerWithCompositeAddress>(context);
             var customerFetchStrategy = new FetchStrategy<CustomerWithCompositeAddress>();
 
             var entity = new CustomerWithCompositeAddress
@@ -161,10 +163,10 @@
         [Fact]
         public async Task GetWithFetchStrategyWithNavigationPropertyAsync()
         {
-            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+            var context = Data.TestAdoNetContextFactory.Create();
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(providerName, connectionString);
-            var customerRepo = new AdoNetRepository<Customer>(providerName, connectionString);
+            var addressRepo = new AdoNetRepository<CustomerAddress>(context);
+            var customerRepo = new AdoNetRepository<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
             var fetchStrategy = new FetchStrategy<Customer>();
@@ -199,10 +201,10 @@
         [Fact]
         public void FindWithFetchStrategyWithNavigationProperty()
         {
-            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+            var context = Data.TestAdoNetContextFactory.Create();
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(providerName, connectionString);
-            var customerRepo = new AdoNetRepository<Customer>(providerName, connectionString);
+            var addressRepo = new AdoNetRepository<CustomerAddress>(context);
+            var customerRepo = new AdoNetRepository<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
@@ -241,10 +243,10 @@
         [Fact]
         public async Task FindWithFetchStrategyWithNavigationPropertyAsync()
         {
-            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+            var context = Data.TestAdoNetContextFactory.Create();
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(providerName, connectionString);
-            var customerRepo = new AdoNetRepository<Customer>(providerName, connectionString);
+            var addressRepo = new AdoNetRepository<CustomerAddress>(context);
+            var customerRepo = new AdoNetRepository<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
@@ -283,10 +285,10 @@
         [Fact]
         public void FindAlldWithFetchStrategyWithNavigationProperty()
         {
-            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+            var context = Data.TestAdoNetContextFactory.Create();
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(providerName, connectionString);
-            var customerRepo = new AdoNetRepository<Customer>(providerName, connectionString);
+            var addressRepo = new AdoNetRepository<CustomerAddress>(context);
+            var customerRepo = new AdoNetRepository<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
@@ -326,10 +328,10 @@
         [Fact]
         public async Task FindAlldWithFetchStrategyWithNavigationPropertyAsync()
         {
-            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+            var context = Data.TestAdoNetContextFactory.Create();
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(providerName, connectionString);
-            var customerRepo = new AdoNetRepository<Customer>(providerName, connectionString);
+            var addressRepo = new AdoNetRepository<CustomerAddress>(context);
+            var customerRepo = new AdoNetRepository<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
@@ -369,10 +371,10 @@
         [Fact]
         public void ExistWithFetchStrategyWithNavigationProperty()
         {
-            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+            var context = Data.TestAdoNetContextFactory.Create();
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(providerName, connectionString);
-            var customerRepo = new AdoNetRepository<Customer>(providerName, connectionString);
+            var addressRepo = new AdoNetRepository<CustomerAddress>(context);
+            var customerRepo = new AdoNetRepository<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
@@ -410,10 +412,10 @@
         [Fact]
         public async Task ExistWithFetchStrategyWithNavigationPropertyAsync()
         {
-            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+            var context = Data.TestAdoNetContextFactory.Create();
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(providerName, connectionString);
-            var customerRepo = new AdoNetRepository<Customer>(providerName, connectionString);
+            var addressRepo = new AdoNetRepository<CustomerAddress>(context);
+            var customerRepo = new AdoNetRepository<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
@@ -451,9 +453,9 @@
         [Fact]
         public void DeleteWithKeyDataAttributeChanged()
         {
-            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+            var context = Data.TestAdoNetContextFactory.Create();
 
-            var repo = new AdoNetRepository<CustomerWithKeyAnnotation>(providerName, connectionString);
+            var repo = new AdoNetRepository<CustomerWithKeyAnnotation>(context);
 
             const string name = "Random Name";
 

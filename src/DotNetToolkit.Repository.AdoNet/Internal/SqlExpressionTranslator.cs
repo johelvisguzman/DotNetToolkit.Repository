@@ -10,13 +10,13 @@
     /// <summary>
     /// Represents an internal sql expression translator.
     /// </summary>
-    internal class DbSqlExpressionTranslator
+    internal class SqlExpressionTranslator
     {
         #region Fields
 
         private readonly StringBuilder _sb = new StringBuilder();
         private readonly Dictionary<string, object> _parameters = new Dictionary<string, object>();
-        private DbSqlSelectStatementConfig _config;
+        private Mapper _mapper;
 
         #endregion
 
@@ -27,12 +27,12 @@
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="predicate">The predicate.</param>
-        /// <param name="config">The configuration.</param>
+        /// <param name="mapper">The mapper.</param>
         /// <param name="sql">The sql query string.</param>
         /// <param name="parameters">The parameters.</param>
-        public void Translate<T>(Expression<Func<T, bool>> predicate, DbSqlSelectStatementConfig config, out string sql, out Dictionary<string, object> parameters)
+        public void Translate<T>(Expression<Func<T, bool>> predicate, Mapper mapper, out string sql, out Dictionary<string, object> parameters)
         {
-            _config = config;
+            _mapper = mapper;
             _sb.Append("WHERE ");
 
             var node = PartialEvaluator.Evaluate(predicate.Body);
@@ -101,9 +101,9 @@
                 var propertyInfo = ExpressionHelper.GetPropertyInfo(variableExpression);
                 var value = ExpressionHelper.GetPropertyValue(constantExpression);
                 var tableType = ExpressionHelper.GetMemberExpression(variableExpression).Expression.Type;
-                var tableName = _config.GetTableName(tableType);
-                var tableAlias = _config.GetTableAlias(tableName);
-                var columnAlias = _config.GetColumnAlias(propertyInfo);
+                var tableName = _mapper.GetTableName(tableType);
+                var tableAlias = _mapper.GetTableAlias(tableName);
+                var columnAlias = _mapper.GetColumnAlias(propertyInfo);
 
                 _sb.Append($"[{tableAlias}].[{columnAlias}]");
 
@@ -132,9 +132,9 @@
             var propertyInfo = ExpressionHelper.GetPropertyInfo(variableExpression);
             var value = ExpressionHelper.GetPropertyValue(constantExpression);
             var tableType = ExpressionHelper.GetMemberExpression(variableExpression).Expression.Type;
-            var tableName = _config.GetTableName(tableType);
-            var tableAlias = _config.GetTableAlias(tableName);
-            var columnAlias = _config.GetColumnAlias(propertyInfo);
+            var tableName = _mapper.GetTableName(tableType);
+            var tableAlias = _mapper.GetTableAlias(tableName);
+            var columnAlias = _mapper.GetColumnAlias(propertyInfo);
 
             _sb.Append($"[{tableAlias}].[{columnAlias}]");
 
