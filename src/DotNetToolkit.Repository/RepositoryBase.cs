@@ -125,6 +125,14 @@
         protected abstract void SaveChanges();
 
         /// <summary>
+        /// Returns the entity <see cref="System.Linq.IQueryable{TEntity}" />.
+        /// </summary>
+        protected IQueryable<TEntity> AsQueryable()
+        {
+            return InterceptError<IQueryable<TEntity>>(() => GetQuery());
+        }
+
+        /// <summary>
         /// A protected overridable method for getting an entity query that supplies the specified fetching strategy from the repository.
         /// </summary>
         protected abstract IQueryable<TEntity> GetQuery(IFetchStrategy<TEntity> fetchStrategy = null);
@@ -280,19 +288,7 @@
 
         #endregion
 
-        #region Implementation of IRepositoryQueryable<out TEntity>
-
-        /// <summary>
-        /// Returns the entity <see cref="System.Linq.IQueryable{TEntity}" />.
-        /// </summary>
-        public virtual IQueryable<TEntity> AsQueryable()
-        {
-            return InterceptError<IQueryable<TEntity>>(() => GetQuery());
-        }
-
-        #endregion
-
-        #region Implementation of ICanAggregate<TEntity>
+        #region Implementation of IRepository<TEntity, TKey>
 
         /// <summary>
         /// Returns the number of entities contained in the repository.
@@ -430,10 +426,6 @@
             }
         }
 
-        #endregion
-
-        #region Implementation of ICanAdd<in TEntity>
-
         /// <summary>
         /// Adds the specified <paramref name="entity" /> into the repository.
         /// </summary>
@@ -483,10 +475,6 @@
             }
         }
 
-        #endregion
-
-        #region Implementation of ICanUpdate<in TEntity>
-
         /// <summary>
         /// Updates the specified <paramref name="entity" /> into the repository.
         /// </summary>
@@ -535,10 +523,6 @@
                 throw;
             }
         }
-
-        #endregion
-
-        #region Implementation of ICanDelete<in TEntity,in TKey>
 
         /// <summary>
         /// Deletes an entity with the given primary key value in the repository.
@@ -627,10 +611,6 @@
             }
         }
 
-        #endregion
-
-        #region Implementation of ICanGet<TEntity,in TKey>
-
         /// <summary>
         /// Gets an entity with the given primary key value in the repository.
         /// </summary>
@@ -704,10 +684,6 @@
         {
             return Get(key) != null;
         }
-
-        #endregion
-
-        #region Implementation of ICanFind<TEntity>
 
         /// <summary>
         /// Finds the first entity in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.

@@ -84,7 +84,7 @@
 
         #endregion
 
-        #region Implementation of ICanAggregateAsync<TEntity>
+        #region Implementation of IRepositoryAsync<TEntity, TKey>
 
         /// <summary>
         /// Asynchronously returns the number of entities contained in the repository.
@@ -231,10 +231,6 @@
             }
         }
 
-        #endregion
-
-        #region Implementation of ICanAddAsync<in TEntity>
-
         /// <summary>
         /// Asynchronously adds the specified <paramref name="entity" /> into the repository.
         /// </summary>
@@ -292,10 +288,6 @@
             }
         }
 
-        #endregion
-
-        #region Implementation of ICanUpdateAsync<in TEntity>
-
         /// <summary>
         /// Asynchronously updates the specified <paramref name="entity" /> in the repository.
         /// </summary>
@@ -352,10 +344,6 @@
                 throw;
             }
         }
-
-        #endregion
-
-        #region Implementation of ICanDeleteAsync<TEntity,in TKey>
 
         /// <summary>
         /// Asynchronously deletes an entity with the given primary key value in the repository.
@@ -464,10 +452,6 @@
             }
         }
 
-        #endregion
-
-        #region Implementation of ICanGetAsync<TEntity,in TKey>
-
         /// <summary>
         /// Asynchronously gets an entity with the given primary key value in the repository.
         /// </summary>
@@ -558,10 +542,6 @@
                 throw;
             }
         }
-
-        #endregion
-
-        #region Implementation of ICanFindAsync<TEntity>
 
         /// <summary>
         /// Asynchronously finds the first entity in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
