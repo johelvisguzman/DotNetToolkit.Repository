@@ -120,9 +120,6 @@
   <data name="EntityKeyNotFound" xml:space="preserve">
     <value>No entity found in the repository with the '{0}' key.</value>
   </data>
-  <data name="EntityKeyValueTypeInvalid" xml:space="preserve">
-    <value>The instance of entity type '{0}' cannot be added to the in-memory store because the key type '{1}' is an invalid primary key property type.</value>
-  </data>
   <data name="EntityRequiresPrimaryKey" xml:space="preserve">
     <value>The instance of entity type '{0}' requires a primary key to be defined.</value>
   </data>

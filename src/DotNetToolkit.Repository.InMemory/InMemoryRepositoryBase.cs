@@ -162,9 +162,7 @@
 
                 if (entitySet.State == EntityState.Added)
                 {
-                    var isKeyNullOrDefault = key != null && key.Equals(default(TKey));
-
-                    if (isKeyNullOrDefault)
+                    if (ConventionHelper.IsIdentity(keyPropertyInfo) && !ConventionHelper.HasCompositePrimaryKey(entityType))
                     {
                         key = GeneratePrimaryKey();
 
@@ -209,6 +207,34 @@
             InMemoryCache.Instance.GetContext(DatabaseName).TryGetValue(key, out TEntity entity);
 
             return entity;
+        }
+
+        /// <summary>
+        /// Generates a new primary id for the entity.
+        /// </summary>
+        /// <returns>The new generated primary id.</returns>
+        protected virtual TKey GeneratePrimaryKey()
+        {
+            var propertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().First();
+            var propertyType = propertyInfo.PropertyType;
+
+            if (propertyType == typeof(Guid))
+                return (TKey)Convert.ChangeType(Guid.NewGuid(), typeof(TKey));
+
+            if (propertyType == typeof(string))
+                return (TKey)Convert.ChangeType(Guid.NewGuid().ToString("N"), typeof(TKey));
+
+            if (propertyType == typeof(int))
+            {
+                var key = GetQuery()
+                    .Select(x => propertyInfo.GetValue(x, null))
+                    .OrderByDescending(x => x)
+                    .FirstOrDefault();
+
+                return (TKey)Convert.ChangeType(Convert.ToInt32(key) + 1, typeof(TKey));
+            }
+
+            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeInvalid, typeof(TEntity), propertyType));
         }
 
         #endregion

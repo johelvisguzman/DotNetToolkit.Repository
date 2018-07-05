@@ -150,19 +150,13 @@
                     // Checks to see if the model needs to be updated with the new key returned from the database
                     if (entitySet.State == EntityState.Added && isIdentity && !ConventionHelper.HasCompositePrimaryKey(entityType))
                     {
-                        var key = Convert.ChangeType(primeryKeyPropertyInfo.GetValue(entitySet.Entity, null), primeryKeyPropertyInfo.PropertyType);
-                        var isKeyNullOrDefault = key != null && key.Equals(primeryKeyPropertyInfo.PropertyType.GetDefault());
+                        command.CommandText = "SELECT @@IDENTITY";
+                        command.Parameters.Clear();
 
-                        if (isKeyNullOrDefault)
-                        {
-                            command.CommandText = "SELECT @@IDENTITY";
-                            command.Parameters.Clear();
+                        var newKey = command.ExecuteScalar();
+                        var convertedKeyValue = Convert.ChangeType(newKey, primeryKeyPropertyInfo.PropertyType);
 
-                            var newKey = command.ExecuteScalar();
-                            var convertedKeyValue = Convert.ChangeType(newKey, primeryKeyPropertyInfo.PropertyType);
-
-                            primeryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
-                        }
+                        primeryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
                     }
                 }
 
@@ -223,19 +217,13 @@
                     // Checks to see if the model needs to be updated with the new key returned from the database
                     if (entitySet.State == EntityState.Added && isIdentity && !ConventionHelper.HasCompositePrimaryKey(entityType))
                     {
-                        var key = Convert.ChangeType(primeryKeyPropertyInfo.GetValue(entitySet.Entity, null), primeryKeyPropertyInfo.PropertyType);
-                        var isKeyNullOrDefault = key != null && key.Equals(primeryKeyPropertyInfo.PropertyType.GetDefault());
+                        command.CommandText = "SELECT @@IDENTITY";
+                        command.Parameters.Clear();
 
-                        if (isKeyNullOrDefault)
-                        {
-                            command.CommandText = "SELECT @@IDENTITY";
-                            command.Parameters.Clear();
+                        var newKey = await command.ExecuteScalarAsync(cancellationToken);
+                        var convertedKeyValue = Convert.ChangeType(newKey, primeryKeyPropertyInfo.PropertyType);
 
-                            var newKey = await command.ExecuteScalarAsync(cancellationToken);
-                            var convertedKeyValue = Convert.ChangeType(newKey, primeryKeyPropertyInfo.PropertyType);
-
-                            primeryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
-                        }
+                        primeryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
                     }
                 }
 
