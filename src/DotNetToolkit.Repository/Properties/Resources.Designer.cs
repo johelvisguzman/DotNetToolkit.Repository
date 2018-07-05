@@ -70,15 +70,6 @@ namespace DotNetToolkit.Repository.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; cannot be added to the in-memory store because the key type &apos;{1}&apos; is an invalid primary key property type..
-        /// </summary>
-        internal static string EntityKeyValueTypeInvalid {
-            get {
-                return ResourceManager.GetString("EntityKeyValueTypeInvalid", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; requires a primary key to be defined..
         /// </summary>
         internal static string EntityRequiresPrimaryKey {
