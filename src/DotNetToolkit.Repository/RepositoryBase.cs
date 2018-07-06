@@ -11,6 +11,7 @@
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
+    using Wrappers;
 
     /// <summary>
     /// An implementation of <see cref="IRepository{TEntity, TKey}" />.
@@ -20,6 +21,7 @@
         #region Fields
 
         private readonly IEnumerable<IRepositoryInterceptor> _interceptors;
+        private IReadOnlyRepository<TEntity, TKey> _wrapper;
 
         #endregion
 
@@ -424,6 +426,15 @@
 
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey}" /> wrapper for the current repository.
+        /// </summary>
+        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
+        public IReadOnlyRepository<TEntity, TKey> AsReadOnly()
+        {
+            return _wrapper ?? (_wrapper = new ReadOnlyRepository<TEntity, TKey>(this));
         }
 
         /// <summary>

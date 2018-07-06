@@ -11,12 +11,19 @@
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
+    using Wrappers;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryAsync{TEntity, TKey}" />.
     /// </summary>
     public abstract class RepositoryBaseAsync<TEntity, TKey> : RepositoryBase<TEntity, TKey>, IRepositoryAsync<TEntity, TKey> where TEntity : class
     {
+        #region Fields
+
+        private IReadOnlyRepositoryAsync<TEntity, TKey> _wrapper;
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -229,6 +236,15 @@
 
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Returns a read-only <see cref="IReadOnlyRepositoryAsync{TEntity, TKey}" /> wrapper for the current repository.
+        /// </summary>
+        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
+        public IReadOnlyRepositoryAsync<TEntity, TKey> AsReadOnlyAsync()
+        {
+            return _wrapper ?? (_wrapper = new ReadOnlyRepositoryAsync<TEntity, TKey>(this));
         }
 
         /// <summary>
