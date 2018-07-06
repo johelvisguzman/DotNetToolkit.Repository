@@ -20,8 +20,8 @@
 
         private const string DefaultDatabaseName = "DotNetToolkit.Repository.InMemory";
 
-        private List<EntitySet> _items;
         private bool _disposed;
+        private readonly BlockingCollection<EntitySet> _items = new BlockingCollection<EntitySet>();
 
         #endregion
 
@@ -61,7 +61,6 @@
         protected InMemoryRepositoryBase(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
         {
             DatabaseName = string.IsNullOrEmpty(databaseName) ? DefaultDatabaseName : databaseName;
-            _items = new List<EntitySet>();
         }
 
         #endregion
@@ -73,7 +72,12 @@
         /// </summary>
         internal void EnsureDeleted()
         {
-            _items.Clear();
+            // Clears the collection
+            while (_items.Count > 0)
+            {
+                _items.TryTake(out _);
+            }
+
             InMemoryCache.Instance.GetContext(DatabaseName).Clear();
         }
 
@@ -116,8 +120,11 @@
 
             if (disposing)
             {
-                _items.Clear();
-                _items = null;
+                // Clears the collection
+                while (_items.Count > 0)
+                {
+                    _items.TryTake(out _);
+                }
             }
 
             _disposed = true;
@@ -188,7 +195,11 @@
                 }
             }
 
-            _items.Clear();
+            // Clears the collection
+            while (_items.Count > 0)
+            {
+                _items.TryTake(out _);
+            }
         }
 
         /// <summary>
