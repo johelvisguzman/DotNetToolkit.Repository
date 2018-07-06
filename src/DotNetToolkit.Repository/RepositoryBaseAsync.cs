@@ -11,12 +11,19 @@
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
+    using Wrappers;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryAsync{TEntity, TKey}" />.
     /// </summary>
     public abstract class RepositoryBaseAsync<TEntity, TKey> : RepositoryBase<TEntity, TKey>, IRepositoryAsync<TEntity, TKey> where TEntity : class
     {
+        #region Fields
+
+        private IReadOnlyRepositoryAsync<TEntity, TKey> _wrapper;
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -84,7 +91,7 @@
 
         #endregion
 
-        #region Implementation of ICanAggregateAsync<TEntity>
+        #region Implementation of IRepositoryAsync<TEntity, TKey>
 
         /// <summary>
         /// Asynchronously returns the number of entities contained in the repository.
@@ -231,9 +238,14 @@
             }
         }
 
-        #endregion
-
-        #region Implementation of ICanAddAsync<in TEntity>
+        /// <summary>
+        /// Returns a read-only <see cref="IReadOnlyRepositoryAsync{TEntity, TKey}" /> wrapper for the current repository.
+        /// </summary>
+        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
+        public IReadOnlyRepositoryAsync<TEntity, TKey> AsReadOnlyAsync()
+        {
+            return _wrapper ?? (_wrapper = new ReadOnlyRepositoryAsync<TEntity, TKey>(this));
+        }
 
         /// <summary>
         /// Asynchronously adds the specified <paramref name="entity" /> into the repository.
@@ -292,10 +304,6 @@
             }
         }
 
-        #endregion
-
-        #region Implementation of ICanUpdateAsync<in TEntity>
-
         /// <summary>
         /// Asynchronously updates the specified <paramref name="entity" /> in the repository.
         /// </summary>
@@ -352,10 +360,6 @@
                 throw;
             }
         }
-
-        #endregion
-
-        #region Implementation of ICanDeleteAsync<TEntity,in TKey>
 
         /// <summary>
         /// Asynchronously deletes an entity with the given primary key value in the repository.
@@ -464,10 +468,6 @@
             }
         }
 
-        #endregion
-
-        #region Implementation of ICanGetAsync<TEntity,in TKey>
-
         /// <summary>
         /// Asynchronously gets an entity with the given primary key value in the repository.
         /// </summary>
@@ -558,10 +558,6 @@
                 throw;
             }
         }
-
-        #endregion
-
-        #region Implementation of ICanFindAsync<TEntity>
 
         /// <summary>
         /// Asynchronously finds the first entity in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
