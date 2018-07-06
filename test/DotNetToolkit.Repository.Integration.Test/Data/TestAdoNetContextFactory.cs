@@ -48,6 +48,48 @@
                 {
                     command.CommandType = CommandType.Text;
                     command.Connection = connection;
+                    command.CommandText = @"CREATE TABLE CustomerWithTwoCompositePrimaryKeys (
+                                            Id1 int,
+                                            Id2 int,
+                                            Name nvarchar (100),
+                                            PRIMARY KEY (Id1, Id2))";
+
+                    var result = command.ExecuteNonQuery();
+                }
+
+                using (var command = factory.CreateCommand())
+                {
+                    command.CommandType = CommandType.Text;
+                    command.Connection = connection;
+                    command.CommandText = @"CREATE TABLE CustomerWithThreeCompositePrimaryKeys (
+                                            Id1 int,
+                                            Id2 int,
+                                            Id3 int,
+                                            Name nvarchar (100),
+                                            PRIMARY KEY (Id1, Id2, Id3))";
+
+                    var result = command.ExecuteNonQuery();
+                }
+
+                using (var command = factory.CreateCommand())
+                {
+                    command.CommandType = CommandType.Text;
+                    command.Connection = connection;
+                    command.CommandText = @"CREATE TABLE CustomerCompositeAddresses (
+                                            Id int,
+                                            CustomerId int,
+                                            Street nvarchar (100),
+                                            City nvarchar (100),
+                                            State nvarchar (2),
+                                            PRIMARY KEY (Id, CustomerId))";
+
+                    var result = command.ExecuteNonQuery();
+                }
+
+                using (var command = factory.CreateCommand())
+                {
+                    command.CommandType = CommandType.Text;
+                    command.Connection = connection;
                     command.CommandText = @"CREATE TABLE CustomerAddresses (
                                             Id int IDENTITY PRIMARY KEY,
                                             Street nvarchar (100),

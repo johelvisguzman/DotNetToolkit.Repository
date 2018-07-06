@@ -4,6 +4,66 @@
     using System.Collections.Generic;
 
     /// <summary>
+    /// Represents a repository for storing entities as an xml formatted file with a composite primary key.
+    /// </summary>
+    public class XmlRepository<TEntity, TKey1, TKey2, TKey3> : XmlRepositoryBase<TEntity, TKey1, TKey2, TKey3> where TEntity : class
+    {
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="XmlRepository{TEntity, TKey1, TKey2, TKey3}"/> class.
+        /// </summary>
+        /// <param name="path">The database directory to create.</param>
+        public XmlRepository(string path) : base(path) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="XmlRepository{TEntity, TKey1, TKey2, TKey3}"/> class.
+        /// </summary>
+        /// <param name="path">The database directory to create.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public XmlRepository(string path, IRepositoryInterceptor interceptor) : this(path, new List<IRepositoryInterceptor> { interceptor }) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="XmlRepository{TEntity, TKey1, TKey2, TKey3}"/> class.
+        /// </summary>
+        /// <param name="path">The database directory to create.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        public XmlRepository(string path, IEnumerable<IRepositoryInterceptor> interceptors) : base(path, interceptors) { }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Represents a repository for storing entities as an xml formatted file with a composite primary key.
+    /// </summary>
+    public class XmlRepository<TEntity, TKey1, TKey2> : XmlRepositoryBase<TEntity, TKey1, TKey2> where TEntity : class
+    {
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="XmlRepository{TEntity, TKey1, TKey2}"/> class.
+        /// </summary>
+        /// <param name="path">The database directory to create.</param>
+        public XmlRepository(string path) : base(path) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="XmlRepository{TEntity, TKey1, TKey2}"/> class.
+        /// </summary>
+        /// <param name="path">The database directory to create.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public XmlRepository(string path, IRepositoryInterceptor interceptor) : this(path, new List<IRepositoryInterceptor> { interceptor }) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="XmlRepository{TEntity, TKey1, TKey2}"/> class.
+        /// </summary>
+        /// <param name="path">The database directory to create.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        public XmlRepository(string path, IEnumerable<IRepositoryInterceptor> interceptors) : base(path, interceptors) { }
+
+        #endregion
+    }
+
+    /// <summary>
     /// Represents a repository for storing entities as an xml formatted file.
     /// </summary>
     public class XmlRepository<TEntity, TKey> : XmlRepositoryBase<TEntity, TKey> where TEntity : class

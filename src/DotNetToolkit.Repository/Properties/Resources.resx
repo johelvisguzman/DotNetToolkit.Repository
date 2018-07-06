@@ -120,6 +120,9 @@
   <data name="EntityKeyNotFound" xml:space="preserve">
     <value>No entity found in the repository with the '{0}' key.</value>
   </data>
+  <data name="EntityPrimaryKeyValuesLengthMismatch" xml:space="preserve">
+    <value>The number of primary key values passed must match number of primary key values defined on the entity.</value>
+  </data>
   <data name="EntityRequiresPrimaryKey" xml:space="preserve">
     <value>The instance of entity type '{0}' requires a primary key to be defined.</value>
   </data>

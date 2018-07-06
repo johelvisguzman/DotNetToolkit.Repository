@@ -70,6 +70,15 @@ namespace DotNetToolkit.Repository.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The number of primary key values passed must match number of primary key values defined on the entity..
+        /// </summary>
+        internal static string EntityPrimaryKeyValuesLengthMismatch {
+            get {
+                return ResourceManager.GetString("EntityPrimaryKeyValuesLengthMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; requires a primary key to be defined..
         /// </summary>
         internal static string EntityRequiresPrimaryKey {

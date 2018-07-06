@@ -124,8 +124,9 @@
                 foreach (var entitySet in _items)
                 {
                     var entityType = entitySet.Entity.GetType();
+                    var hasCompositePrimaryKey = ConventionHelper.HasCompositePrimaryKey(entityType);
                     var primeryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-                    var isIdentity = ConventionHelper.IsIdentity(primeryKeyPropertyInfo);
+                    var isIdentity = !hasCompositePrimaryKey && ConventionHelper.IsIdentity(primeryKeyPropertyInfo);
 
                     // Checks if the entity exist in the database
                     var existInDb = command.ExecuteObjectExist(entitySet.Entity);
@@ -148,7 +149,7 @@
                     rows += command.ExecuteNonQuery();
 
                     // Checks to see if the model needs to be updated with the new key returned from the database
-                    if (entitySet.State == EntityState.Added && isIdentity && !ConventionHelper.HasCompositePrimaryKey(entityType))
+                    if (entitySet.State == EntityState.Added && isIdentity)
                     {
                         command.CommandText = "SELECT @@IDENTITY";
                         command.Parameters.Clear();
@@ -191,8 +192,9 @@
                 foreach (var entitySet in _items)
                 {
                     var entityType = entitySet.Entity.GetType();
+                    var hasCompositePrimaryKey = ConventionHelper.HasCompositePrimaryKey(entityType);
                     var primeryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-                    var isIdentity = ConventionHelper.IsIdentity(primeryKeyPropertyInfo);
+                    var isIdentity = !hasCompositePrimaryKey && ConventionHelper.IsIdentity(primeryKeyPropertyInfo);
 
                     // Checks if the entity exist in the database
                     var existInDb = await command.ExecuteObjectExistAsync(entitySet.Entity, cancellationToken);
@@ -215,7 +217,7 @@
                     rows += await command.ExecuteNonQueryAsync(cancellationToken);
 
                     // Checks to see if the model needs to be updated with the new key returned from the database
-                    if (entitySet.State == EntityState.Added && isIdentity && !ConventionHelper.HasCompositePrimaryKey(entityType))
+                    if (entitySet.State == EntityState.Added && isIdentity)
                     {
                         command.CommandText = "SELECT @@IDENTITY";
                         command.Parameters.Clear();
@@ -1670,7 +1672,7 @@
                 }
 
                 // -----------------------------------------------------------------------------------------------------------
-                // Paging and sorting clause
+                // Sorting clause
                 // -----------------------------------------------------------------------------------------------------------
 
                 var sortings = options.SortingPropertiesMapping.ToDictionary(x => x.Key, x => x.Value);
@@ -1702,6 +1704,10 @@
                 }
 
                 sb.Remove(sb.Length - 2, 2);
+
+                // -----------------------------------------------------------------------------------------------------------
+                // Paging clause
+                // -----------------------------------------------------------------------------------------------------------
 
                 if (options.PageSize != -1)
                 {

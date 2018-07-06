@@ -5,7 +5,6 @@
     using Interceptors;
     using Properties;
     using Queries;
-    using Specifications;
     using System;
     using System.Collections.Generic;
     using System.Globalization;
@@ -14,13 +13,241 @@
     using Wrappers;
 
     /// <summary>
-    /// An implementation of <see cref="IRepository{TEntity, TKey}" />.
+    /// An implementation of <see cref="IRepository{TEntity, TKey1, TKey2, TKey3}" />.
     /// </summary>
-    public abstract class RepositoryBase<TEntity, TKey> : IRepository<TEntity, TKey> where TEntity : class
+    public abstract class RepositoryBase<TEntity, TKey1, TKey2, TKey3> : RepositoryBase<TEntity>, IRepository<TEntity, TKey1, TKey2, TKey3> where TEntity : class
     {
         #region Fields
 
-        private readonly IEnumerable<IRepositoryInterceptor> _interceptors;
+        private IReadOnlyRepository<TEntity, TKey1, TKey2, TKey3> _wrapper;
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2, TKey3}"/> class.
+        /// </summary>
+        protected RepositoryBase() { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2, TKey3}"/> class.
+        /// </summary>
+        /// <param name="interceptors">The interceptors.</param>
+        protected RepositoryBase(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors) { }
+
+        #endregion
+
+        #region Implementation of IRepository<TEntity, TKey1, TKey2, TKey3>
+
+        /// <summary>
+        /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey1, TKey2, TKey3}" /> wrapper for the current repository.
+        /// </summary>
+        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
+        public IReadOnlyRepository<TEntity, TKey1, TKey2, TKey3> AsReadOnly()
+        {
+            return _wrapper ?? (_wrapper = new ReadOnlyRepository<TEntity, TKey1, TKey2, TKey3>(this));
+        }
+
+        /// <summary>
+        /// Deletes an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        public void Delete(TKey1 key1, TKey2 key2, TKey3 key3)
+        {
+            var entity = Get(key1, key2, key3);
+
+            if (entity == null)
+            {
+                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2));
+
+                Intercept(x => x.Error(ex));
+
+                throw ex;
+            }
+
+            Delete(entity);
+        }
+
+        /// <summary>
+        /// Gets an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <return>The entity found.</return>
+        public TEntity Get(TKey1 key1, TKey2 key2, TKey3 key3)
+        {
+            return Get(key1, key2, key3, (IFetchStrategy<TEntity>)null);
+        }
+
+        /// <summary>
+        /// Gets an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <return>The entity found.</return>
+        public TEntity Get(TKey1 key1, TKey2 key2, TKey3 key3, IFetchStrategy<TEntity> fetchStrategy)
+        {
+            try
+            {
+                if (key1 == null)
+                    throw new ArgumentNullException(nameof(key1));
+
+                if (key2 == null)
+                    throw new ArgumentNullException(nameof(key2));
+
+                if (key3 == null)
+                    throw new ArgumentNullException(nameof(key3));
+
+                return GetEntity(new object[] { key1, key2, key3 }, fetchStrategy);
+
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the repository contains an entity with the given primary key value
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        public bool Exists(TKey1 key1, TKey2 key2, TKey3 key3)
+        {
+            return Get(key1, key2, key3) != null;
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// An implementation of <see cref="IRepository{TEntity, TKey1, TKey2}" />.
+    /// </summary>
+    public abstract class RepositoryBase<TEntity, TKey1, TKey2> : RepositoryBase<TEntity>, IRepository<TEntity, TKey1, TKey2> where TEntity : class
+    {
+        #region Fields
+
+        private IReadOnlyRepository<TEntity, TKey1, TKey2> _wrapper;
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2}"/> class.
+        /// </summary>
+        protected RepositoryBase() { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2}"/> class.
+        /// </summary>
+        /// <param name="interceptors">The interceptors.</param>
+        protected RepositoryBase(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors) { }
+
+        #endregion
+
+        #region Implementation of IRepository<TEntity, TKey1, TKey2>
+
+        /// <summary>
+        /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey1, TKey2}" /> wrapper for the current repository.
+        /// </summary>
+        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
+        public IReadOnlyRepository<TEntity, TKey1, TKey2> AsReadOnly()
+        {
+            return _wrapper ?? (_wrapper = new ReadOnlyRepository<TEntity, TKey1, TKey2>(this));
+        }
+
+        /// <summary>
+        /// Deletes an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        public void Delete(TKey1 key1, TKey2 key2)
+        {
+            var entity = Get(key1, key2);
+
+            if (entity == null)
+            {
+                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2));
+
+                Intercept(x => x.Error(ex));
+
+                throw ex;
+            }
+
+            Delete(entity);
+        }
+
+        /// <summary>
+        /// Gets an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <return>The entity found.</return>
+        public TEntity Get(TKey1 key1, TKey2 key2)
+        {
+            return Get(key1, key2, (IFetchStrategy<TEntity>)null);
+        }
+
+        /// <summary>
+        /// Gets an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <return>The entity found.</return>
+        public TEntity Get(TKey1 key1, TKey2 key2, IFetchStrategy<TEntity> fetchStrategy)
+        {
+            try
+            {
+                if (key1 == null)
+                    throw new ArgumentNullException(nameof(key1));
+
+                if (key2 == null)
+                    throw new ArgumentNullException(nameof(key2));
+
+                return GetEntity(new object[] { key1, key2 }, fetchStrategy);
+
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the repository contains an entity with the given primary key value
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        public bool Exists(TKey1 key1, TKey2 key2)
+        {
+            return Get(key1, key2) != null;
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// An implementation of <see cref="IRepository{TEntity, TKey}" />.
+    /// </summary>
+    public abstract class RepositoryBase<TEntity, TKey> : RepositoryBase<TEntity>, IRepository<TEntity, TKey> where TEntity : class
+    {
+        #region Fields
+
         private IReadOnlyRepository<TEntity, TKey> _wrapper;
 
         #endregion
@@ -34,6 +261,110 @@
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}"/> class.
+        /// </summary>
+        /// <param name="interceptors">The interceptors.</param>
+        protected RepositoryBase(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors) { }
+
+        #endregion
+
+        #region Implementation of IRepository<TEntity, TKey>
+
+        /// <summary>
+        /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey}" /> wrapper for the current repository.
+        /// </summary>
+        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
+        public IReadOnlyRepository<TEntity, TKey> AsReadOnly()
+        {
+            return _wrapper ?? (_wrapper = new ReadOnlyRepository<TEntity, TKey>(this));
+        }
+
+        /// <summary>
+        /// Deletes an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key used to match entities against.</param>
+        public void Delete(TKey key)
+        {
+            var entity = Get(key);
+
+            if (entity == null)
+            {
+                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
+
+                Intercept(x => x.Error(ex));
+
+                throw ex;
+            }
+
+            Delete(entity);
+        }
+
+        /// <summary>
+        /// Gets an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <return>The entity found.</return>
+        public TEntity Get(TKey key)
+        {
+            return Get(key, (IFetchStrategy<TEntity>)null);
+        }
+
+        /// <summary>
+        /// Gets an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <return>The entity found.</return>
+        public TEntity Get(TKey key, IFetchStrategy<TEntity> fetchStrategy)
+        {
+            try
+            {
+                if (key == null)
+                    throw new ArgumentNullException(nameof(key));
+
+                return GetEntity(new object[] { key }, fetchStrategy);
+
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the repository contains an entity with the given primary key value
+        /// </summary>
+        /// <param name="key">The value of the primary key used to match entities against.</param>
+        /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        public bool Exists(TKey key)
+        {
+            return Get(key) != null;
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// An implementation of <see cref="IRepositoryBase{TEntity}" />.
+    /// </summary>
+    public abstract class RepositoryBase<TEntity> : IRepositoryBase<TEntity> where TEntity : class
+    {
+        #region Fields
+
+        private readonly IEnumerable<IRepositoryInterceptor> _interceptors;
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity}"/> class.
+        /// </summary>
+        protected RepositoryBase() { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity}"/> class.
         /// </summary>
         /// <param name="interceptors">The interceptors.</param>
         protected RepositoryBase(IEnumerable<IRepositoryInterceptor> interceptors)
@@ -127,14 +458,6 @@
         protected abstract void SaveChanges();
 
         /// <summary>
-        /// Returns the entity <see cref="System.Linq.IQueryable{TEntity}" />.
-        /// </summary>
-        protected IQueryable<TEntity> AsQueryable()
-        {
-            return InterceptError<IQueryable<TEntity>>(() => GetQuery());
-        }
-
-        /// <summary>
         /// A protected overridable method for getting an entity query that supplies the specified fetching strategy from the repository.
         /// </summary>
         protected abstract IQueryable<TEntity> GetQuery(IFetchStrategy<TEntity> fetchStrategy = null);
@@ -150,9 +473,11 @@
         /// <summary>
         /// Gets an entity query with the given primary key value from the repository.
         /// </summary>
-        protected virtual TEntity GetEntity(TKey key, IFetchStrategy<TEntity> fetchStrategy)
+        protected virtual TEntity GetEntity(object[] keyValues, IFetchStrategy<TEntity> fetchStrategy)
         {
-            var options = new QueryOptions<TEntity>().SatisfyBy(GetByPrimaryKeySpecification(key));
+            ThrowsIfEntityPrimaryKeyValuesLengthMismatch(keyValues);
+
+            var options = new QueryOptions<TEntity>().SatisfyBy(ConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
 
             if (fetchStrategy != null)
                 options.Fetch(fetchStrategy);
@@ -236,27 +561,6 @@
         }
 
         /// <summary>
-        /// Returns a specification for getting an entity by it's primary key.
-        /// </summary>
-        /// <param name="key">The entity's key.</param>
-        /// <returns>The new specification.</returns>
-        // https://github.com/SharpRepository/SharpRepository/blob/develop/SharpRepository.Repository/RepositoryBase.cs
-        protected virtual ISpecification<TEntity> GetByPrimaryKeySpecification(TKey key)
-        {
-            var propInfo = ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().First();
-            var parameter = Expression.Parameter(typeof(TEntity), "x");
-            var lambda = Expression.Lambda<Func<TEntity, bool>>(
-                Expression.Equal(
-                    Expression.PropertyOrField(parameter, propInfo.Name),
-                    Expression.Constant(key)
-                ),
-                parameter
-            );
-
-            return new Specification<TEntity>(lambda);
-        }
-
-        /// <summary>
         /// Executes the specified interceptor activity.
         /// </summary>
         /// <param name="action">The action to be executed.</param>
@@ -288,9 +592,19 @@
             }
         }
 
+        /// <summary>
+        /// Throws an exception if entity primary key values length mismatch.
+        /// </summary>
+        /// <param name="keyValues">The key values.</param>
+        protected void ThrowsIfEntityPrimaryKeyValuesLengthMismatch(object[] keyValues)
+        {
+            if (keyValues.Length != ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Count())
+                throw new ArgumentException(Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
+        }
+
         #endregion
 
-        #region Implementation of IRepository<TEntity, TKey>
+        #region Implementation of IRepositoryBase<TEntity>
 
         /// <summary>
         /// Returns the number of entities contained in the repository.
@@ -429,15 +743,6 @@
         }
 
         /// <summary>
-        /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey}" /> wrapper for the current repository.
-        /// </summary>
-        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
-        public IReadOnlyRepository<TEntity, TKey> AsReadOnly()
-        {
-            return _wrapper ?? (_wrapper = new ReadOnlyRepository<TEntity, TKey>(this));
-        }
-
-        /// <summary>
         /// Adds the specified <paramref name="entity" /> into the repository.
         /// </summary>
         /// <param name="entity">The entity to add.</param>
@@ -536,26 +841,6 @@
         }
 
         /// <summary>
-        /// Deletes an entity with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key">The value of the primary key used to match entities against.</param>
-        public void Delete(TKey key)
-        {
-            var entity = Get(key);
-
-            if (entity == null)
-            {
-                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
-
-                Intercept(x => x.Error(ex));
-
-                throw ex;
-            }
-
-            Delete(entity);
-        }
-
-        /// <summary>
         /// Deletes the specified <paramref name="entity" /> into the repository.
         /// </summary>
         /// <param name="entity">The entity to delete.</param>
@@ -620,80 +905,6 @@
 
                 throw;
             }
-        }
-
-        /// <summary>
-        /// Gets an entity with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key">The value of the primary key for the entity to be found.</param>
-        /// <return>The entity found.</return>
-        public TEntity Get(TKey key)
-        {
-            return Get<TEntity>(key, IdentityExpression<TEntity>.Instance);
-        }
-
-        /// <summary>
-        /// Gets an entity with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key">The value of the primary key for the entity to be found.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
-        /// <return>The entity found.</return>
-        public TEntity Get(TKey key, IFetchStrategy<TEntity> fetchStrategy)
-        {
-            return Get<TEntity>(key, IdentityExpression<TEntity>.Instance, fetchStrategy);
-        }
-
-        /// <summary>
-        /// Gets a specific projected entity result with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key">The value of the primary key for the entity to be found.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public TResult Get<TResult>(TKey key, Expression<Func<TEntity, TResult>> selector)
-        {
-            return Get<TResult>(key, selector, (IFetchStrategy<TEntity>)null);
-        }
-
-        /// <summary>
-        /// Gets a specific projected entity result with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key">The value of the primary key for the entity to be found.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
-        /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public TResult Get<TResult>(TKey key, Expression<Func<TEntity, TResult>> selector, IFetchStrategy<TEntity> fetchStrategy)
-        {
-            try
-            {
-                if (key == null)
-                    throw new ArgumentNullException(nameof(key));
-
-                if (selector == null)
-                    throw new ArgumentNullException(nameof(selector));
-
-                var options = new QueryOptions<TEntity>().SatisfyBy(GetByPrimaryKeySpecification(key));
-
-                if (fetchStrategy != null)
-                    options.Fetch(fetchStrategy);
-
-                return GetEntity<TResult>(options, selector);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Determines whether the repository contains an entity with the given primary key value
-        /// </summary>
-        /// <param name="key">The value of the primary key used to match entities against.</param>
-        /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
-        public bool Exists(TKey key)
-        {
-            return Get(key) != null;
         }
 
         /// <summary>

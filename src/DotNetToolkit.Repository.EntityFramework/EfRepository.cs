@@ -5,6 +5,66 @@
     using System.Data.Entity;
 
     /// <summary>
+    /// Represents a repository for entity framework with a composite primary key.
+    /// </summary>
+    public class EfRepository<TEntity, TKey1, TKey2, TKey3> : EfRepositoryBase<TEntity, TKey1, TKey2, TKey3> where TEntity : class
+    {
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EfRepository{TEntity, TKey1, TKey2, TKey3}" /> class.
+        /// </summary>
+        /// <param name="context">The database context.</param>
+        public EfRepository(DbContext context) : base(context) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EfRepository{TEntity, TKey1, TKey2, TKey3}"/> class.
+        /// </summary>
+        /// <param name="context">The database context.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public EfRepository(DbContext context, IRepositoryInterceptor interceptor) : this(context, new List<IRepositoryInterceptor> { interceptor }) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EfRepository{TEntity, TKey1, TKey2, TKey3}" /> class.
+        /// </summary>
+        /// <param name="context">The database context.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        public EfRepository(DbContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Represents a repository for entity framework with a composite primary key.
+    /// </summary>
+    public class EfRepository<TEntity, TKey1, TKey2> : EfRepositoryBase<TEntity, TKey1, TKey2> where TEntity : class
+    {
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EfRepository{TEntity, TKey1, TKey2}" /> class.
+        /// </summary>
+        /// <param name="context">The database context.</param>
+        public EfRepository(DbContext context) : base(context) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EfRepository{TEntity, TKey1, TKey2}"/> class.
+        /// </summary>
+        /// <param name="context">The database context.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public EfRepository(DbContext context, IRepositoryInterceptor interceptor) : this(context, new List<IRepositoryInterceptor> { interceptor }) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EfRepository{TEntity, TKey1, TKey2}" /> class.
+        /// </summary>
+        /// <param name="context">The database context.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        public EfRepository(DbContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+
+        #endregion
+    }
+
+    /// <summary>
     /// Represents a repository for entity framework.
     /// </summary>
     public class EfRepository<TEntity, TKey> : EfRepositoryBase<TEntity, TKey> where TEntity : class

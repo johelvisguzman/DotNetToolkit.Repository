@@ -1,12 +1,14 @@
 ﻿namespace DotNetToolkit.Repository.Helpers
 {
     using Properties;
+    using Specifications;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Globalization;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Reflection;
 
     /// <summary>
@@ -78,6 +80,41 @@
         public static IEnumerable<PropertyInfo> GetPrimaryKeyPropertyInfos<T>()
         {
             return GetPrimaryKeyPropertyInfos(typeof(T));
+        }
+
+        /// <summary>
+        /// Returns a specification for getting an entity by it's primary key.
+        /// </summary>
+        /// <returns>The new specification.</returns>
+        public static ISpecification<TEntity> GetByPrimaryKeySpecification<TEntity>(params object[] keyValues) where TEntity : class
+        {
+            if (keyValues == null)
+                throw new ArgumentNullException(nameof(keyValues));
+
+            var propInfos = GetPrimaryKeyPropertyInfos<TEntity>().ToList();
+
+            if (keyValues.Length != propInfos.Count)
+                throw new ArgumentException(Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
+
+            var parameter = Expression.Parameter(typeof(TEntity), "x");
+
+            BinaryExpression exp = null;
+
+            for (var i = 0; i < propInfos.Count; i++)
+            {
+                var propInfo = propInfos[i];
+                var keyValue = keyValues[i];
+
+                var x = Expression.Equal(
+                    Expression.PropertyOrField(parameter, propInfo.Name),
+                    Expression.Constant(keyValue));
+
+                exp = exp == null ? x : Expression.AndAlso(x, exp);
+            }
+
+            var lambda = Expression.Lambda<Func<TEntity, bool>>(exp, parameter);
+
+            return new Specification<TEntity>(lambda);
         }
 
         /// <summary>

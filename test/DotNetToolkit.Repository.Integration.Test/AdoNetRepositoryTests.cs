@@ -962,7 +962,7 @@
             public Customer Customer { get; set; }
         }
 
-        [Table("CustomerAddresses")]
+        [Table("CustomerCompositeAddresses")]
         class CustomerCompositeAddress
         {
             [Key]

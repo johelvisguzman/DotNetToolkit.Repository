@@ -1,15 +1,255 @@
 ﻿namespace DotNetToolkit.Repository.InMemory
 {
     using FetchStrategies;
-    using Helpers;
     using Interceptors;
-    using Properties;
-    using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
-    using System.Reflection;
+
+    /// <summary>
+    /// Represents a repository for in-memory operations with a composite primary key (for testing purposes).
+    /// </summary>
+    public abstract class InMemoryRepositoryBase<TEntity, TKey1, TKey2, TKey3> : RepositoryBase<TEntity, TKey1, TKey2, TKey3> where TEntity : class
+    {
+        #region Fields
+
+        private bool _disposed;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets the context.
+        /// </summary>
+        internal InMemoryContext Context { get; private set; }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey1, TKey2, TKey3}"/> class.
+        /// </summary>
+        protected InMemoryRepositoryBase() : this(null, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey1, TKey2, TKey3}"/> class.
+        /// </summary>
+        /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
+        protected InMemoryRepositoryBase(string databaseName) : this(databaseName, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey1, TKey2, TKey3}"/> class.
+        /// </summary>
+        /// <param name="interceptors">The interceptors.</param>
+        protected InMemoryRepositoryBase(IEnumerable<IRepositoryInterceptor> interceptors) : this(null, interceptors) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey1, TKey2, TKey3}"/> class.
+        /// </summary>
+        /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        protected InMemoryRepositoryBase(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
+        {
+            Context = new InMemoryContext(databaseName);
+        }
+
+        #endregion
+
+        #region Overrides of RepositoryBase<TEntity, TKey1, TKey2, TKey3>
+
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+
+            if (disposing)
+            {
+                Context.Dispose();
+                Context = null;
+            }
+
+            _disposed = true;
+        }
+
+        /// <summary>
+        /// A protected overridable method for adding the specified <paramref name="entity" /> into the repository.
+        /// </summary>
+        protected override void AddItem(TEntity entity)
+        {
+            Context.Add(entity);
+        }
+
+        /// <summary>
+        /// A protected overridable method for deleting the specified <paramref name="entity" /> from the repository.
+        /// </summary>
+        protected override void DeleteItem(TEntity entity)
+        {
+            Context.Remove(entity);
+        }
+
+        /// <summary>
+        /// A protected overridable method for updating the specified <paramref name="entity" /> in the repository.
+        /// </summary>
+        protected override void UpdateItem(TEntity entity)
+        {
+            Context.Update(entity);
+        }
+
+        /// <summary>
+        /// A protected overridable method for saving changes made in the current unit of work in the repository.
+        /// </summary>
+        protected override void SaveChanges()
+        {
+            Context.SaveChanges();
+        }
+
+        /// <summary>
+        /// A protected overridable method for getting an entity query that supplies the specified fetching strategy from the repository.
+        /// </summary>
+        protected override IQueryable<TEntity> GetQuery(IFetchStrategy<TEntity> fetchStrategy = null)
+        {
+            return Context.FindAll<TEntity>().AsQueryable();
+        }
+
+        /// <summary>
+        /// Gets an entity query with the given primary key value from the repository.
+        /// </summary>
+        protected override TEntity GetEntity(object[] keyValues, IFetchStrategy<TEntity> fetchStrategy)
+        {
+            ThrowsIfEntityPrimaryKeyValuesLengthMismatch(keyValues);
+
+            return Context.Find<TEntity>(keyValues);
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Represents a repository for in-memory operations with a composite primary key (for testing purposes).
+    /// </summary>
+    public abstract class InMemoryRepositoryBase<TEntity, TKey1, TKey2> : RepositoryBase<TEntity, TKey1, TKey2> where TEntity : class
+    {
+        #region Fields
+
+        private bool _disposed;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets the context.
+        /// </summary>
+        internal InMemoryContext Context { get; private set; }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey1, TKey2}"/> class.
+        /// </summary>
+        protected InMemoryRepositoryBase() : this(null, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey1, TKey2}"/> class.
+        /// </summary>
+        /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
+        protected InMemoryRepositoryBase(string databaseName) : this(databaseName, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey1, TKey2}"/> class.
+        /// </summary>
+        /// <param name="interceptors">The interceptors.</param>
+        protected InMemoryRepositoryBase(IEnumerable<IRepositoryInterceptor> interceptors) : this(null, interceptors) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryBase{TEntity, TKey1, TKey2}"/> class.
+        /// </summary>
+        /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        protected InMemoryRepositoryBase(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
+        {
+            Context = new InMemoryContext(databaseName);
+        }
+
+        #endregion
+
+        #region Overrides of RepositoryBase<TEntity, TKey1, TKey2>
+
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+
+            if (disposing)
+            {
+                Context.Dispose();
+                Context = null;
+            }
+
+            _disposed = true;
+        }
+
+        /// <summary>
+        /// A protected overridable method for adding the specified <paramref name="entity" /> into the repository.
+        /// </summary>
+        protected override void AddItem(TEntity entity)
+        {
+            Context.Add(entity);
+        }
+
+        /// <summary>
+        /// A protected overridable method for deleting the specified <paramref name="entity" /> from the repository.
+        /// </summary>
+        protected override void DeleteItem(TEntity entity)
+        {
+            Context.Remove(entity);
+        }
+
+        /// <summary>
+        /// A protected overridable method for updating the specified <paramref name="entity" /> in the repository.
+        /// </summary>
+        protected override void UpdateItem(TEntity entity)
+        {
+            Context.Update(entity);
+        }
+
+        /// <summary>
+        /// A protected overridable method for saving changes made in the current unit of work in the repository.
+        /// </summary>
+        protected override void SaveChanges()
+        {
+            Context.SaveChanges();
+        }
+
+        /// <summary>
+        /// A protected overridable method for getting an entity query that supplies the specified fetching strategy from the repository.
+        /// </summary>
+        protected override IQueryable<TEntity> GetQuery(IFetchStrategy<TEntity> fetchStrategy = null)
+        {
+            return Context.FindAll<TEntity>().AsQueryable();
+        }
+
+        /// <summary>
+        /// Gets an entity query with the given primary key value from the repository.
+        /// </summary>
+        protected override TEntity GetEntity(object[] keyValues, IFetchStrategy<TEntity> fetchStrategy)
+        {
+            ThrowsIfEntityPrimaryKeyValuesLengthMismatch(keyValues);
+
+            return Context.Find<TEntity>(keyValues);
+        }
+
+        #endregion
+    }
 
     /// <summary>
     /// Represents a repository for in-memory operations (for testing purposes).
@@ -18,19 +258,16 @@
     {
         #region Fields
 
-        private const string DefaultDatabaseName = "DotNetToolkit.Repository.InMemory";
-
         private bool _disposed;
-        private readonly BlockingCollection<EntitySet> _items = new BlockingCollection<EntitySet>();
 
         #endregion
 
         #region Properties
 
         /// <summary>
-        /// Gets or sets the name of the database.
+        /// Gets the context.
         /// </summary>
-        internal string DatabaseName { get; set; }
+        internal InMemoryContext Context { get; private set; }
 
         #endregion
 
@@ -60,50 +297,7 @@
         /// <param name="interceptors">The interceptors.</param>
         protected InMemoryRepositoryBase(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors)
         {
-            DatabaseName = string.IsNullOrEmpty(databaseName) ? DefaultDatabaseName : databaseName;
-        }
-
-        #endregion
-
-        #region Internal Methods
-
-        /// <summary>
-        /// Ensures the in-memory store is completely deleted.
-        /// </summary>
-        internal void EnsureDeleted()
-        {
-            // Clears the collection
-            while (_items.Count > 0)
-            {
-                _items.TryTake(out _);
-            }
-
-            InMemoryCache.Instance.GetContext(DatabaseName).Clear();
-        }
-
-        #endregion
-
-        #region	Private Methods
-
-        /// <summary>
-        /// Returns a deep copy of the specified object. This method does not require the object to be marked as serializable.
-        /// </summary>
-        /// <param name="entity">The object to be copy.</param>
-        /// <returns>The deep copy of the specified object.</returns>
-        private static TEntity DeepCopy(TEntity entity)
-        {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
-            var newItem = (TEntity)Activator.CreateInstance(typeof(TEntity));
-
-            foreach (var propInfo in entity.GetType().GetRuntimeProperties())
-            {
-                if (propInfo.CanWrite)
-                    propInfo.SetValue(newItem, propInfo.GetValue(entity, null), null);
-            }
-
-            return newItem;
+            Context = new InMemoryContext(databaseName);
         }
 
         #endregion
@@ -120,11 +314,8 @@
 
             if (disposing)
             {
-                // Clears the collection
-                while (_items.Count > 0)
-                {
-                    _items.TryTake(out _);
-                }
+                Context.Dispose();
+                Context = null;
             }
 
             _disposed = true;
@@ -135,7 +326,7 @@
         /// </summary>
         protected override void AddItem(TEntity entity)
         {
-            _items.Add(new EntitySet(entity, EntityState.Added));
+            Context.Add(entity);
         }
 
         /// <summary>
@@ -143,7 +334,7 @@
         /// </summary>
         protected override void DeleteItem(TEntity entity)
         {
-            _items.Add(new EntitySet(entity, EntityState.Removed));
+            Context.Remove(entity);
         }
 
         /// <summary>
@@ -151,7 +342,7 @@
         /// </summary>
         protected override void UpdateItem(TEntity entity)
         {
-            _items.Add(new EntitySet(entity, EntityState.Modified));
+            Context.Update(entity);
         }
 
         /// <summary>
@@ -159,47 +350,7 @@
         /// </summary>
         protected override void SaveChanges()
         {
-            var context = InMemoryCache.Instance.GetContext(DatabaseName);
-
-            foreach (var entitySet in _items)
-            {
-                var entityType = entitySet.Entity.GetType();
-                var keyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-                var key = (TKey)Convert.ChangeType(keyPropertyInfo.GetValue(entitySet.Entity, null), typeof(TKey));
-
-                if (entitySet.State == EntityState.Added)
-                {
-                    if (ConventionHelper.IsIdentity(keyPropertyInfo) && !ConventionHelper.HasCompositePrimaryKey(entityType))
-                    {
-                        key = GeneratePrimaryKey();
-
-                        keyPropertyInfo.SetValue(entitySet.Entity, key);
-                    }
-                    else if (context.ContainsKey(key))
-                    {
-                        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
-                    }
-                }
-                else if (!context.ContainsKey(key))
-                {
-                    throw new InvalidOperationException(Resources.EntityNotFoundInStore);
-                }
-
-                if (entitySet.State == EntityState.Removed)
-                {
-                    context.TryRemove(key, out TEntity entity);
-                }
-                else
-                {
-                    context[key] = DeepCopy(entitySet.Entity);
-                }
-            }
-
-            // Clears the collection
-            while (_items.Count > 0)
-            {
-                _items.TryTake(out _);
-            }
+            Context.SaveChanges();
         }
 
         /// <summary>
@@ -207,172 +358,17 @@
         /// </summary>
         protected override IQueryable<TEntity> GetQuery(IFetchStrategy<TEntity> fetchStrategy = null)
         {
-            return InMemoryCache.Instance.GetContext(DatabaseName).Select(y => y.Value).AsQueryable();
+            return Context.FindAll<TEntity>().AsQueryable();
         }
 
         /// <summary>
         /// Gets an entity query with the given primary key value from the repository.
         /// </summary>
-        protected override TEntity GetEntity(TKey key, IFetchStrategy<TEntity> fetchStrategy)
+        protected override TEntity GetEntity(object[] keyValues, IFetchStrategy<TEntity> fetchStrategy)
         {
-            InMemoryCache.Instance.GetContext(DatabaseName).TryGetValue(key, out TEntity entity);
+            ThrowsIfEntityPrimaryKeyValuesLengthMismatch(keyValues);
 
-            return entity;
-        }
-
-        /// <summary>
-        /// Generates a new primary id for the entity.
-        /// </summary>
-        /// <returns>The new generated primary id.</returns>
-        protected virtual TKey GeneratePrimaryKey()
-        {
-            var propertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().First();
-            var propertyType = propertyInfo.PropertyType;
-
-            if (propertyType == typeof(Guid))
-                return (TKey)Convert.ChangeType(Guid.NewGuid(), typeof(TKey));
-
-            if (propertyType == typeof(string))
-                return (TKey)Convert.ChangeType(Guid.NewGuid().ToString("N"), typeof(TKey));
-
-            if (propertyType == typeof(int))
-            {
-                var key = GetQuery()
-                    .Select(x => propertyInfo.GetValue(x, null))
-                    .OrderByDescending(x => x)
-                    .FirstOrDefault();
-
-                return (TKey)Convert.ChangeType(Convert.ToInt32(key) + 1, typeof(TKey));
-            }
-
-            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeInvalid, typeof(TEntity), propertyType));
-        }
-
-        #endregion
-
-        #region Nested type: EntitySet
-
-        /// <summary>
-        /// Represents an internal entity set in the in-memory store, which holds the entity and it's state representing the operation that was performed at the time.
-        /// </summary>
-        private class EntitySet
-        {
-            #region Constructors
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="EntitySet"/> class.
-            /// </summary>
-            /// <param name="entity">The entity.</param>
-            /// <param name="state">The state.</param>
-            public EntitySet(TEntity entity, EntityState state)
-            {
-                Entity = entity;
-                State = state;
-            }
-
-            #endregion
-
-            #region Properties
-
-            /// <summary>
-            /// Gets the entity.
-            /// </summary>
-            public TEntity Entity { get; }
-
-            /// <summary>
-            /// Gets the state.
-            /// </summary>
-            public EntityState State { get; }
-
-            #endregion
-        }
-
-        #endregion
-
-        #region Nested type: EntityState
-
-        /// <summary>
-        /// Represents an internal state for an entity in the in-memory store.
-        /// </summary>
-        private enum EntityState
-        {
-            Added,
-            Removed,
-            Modified
-        }
-
-        #endregion
-
-        #region Nested type: InMemoryCache
-
-        /// <summary>
-        /// Represents an internal thread safe database storage which will store any information for the in-memory
-        /// store that is needed through the life time of the application.
-        /// </summary>
-        private class InMemoryCache
-        {
-            #region Fields
-
-            private static volatile InMemoryCache _instance;
-            private static readonly object _syncRoot = new object();
-            private readonly ConcurrentDictionary<string, ConcurrentDictionary<TKey, TEntity>> _storage;
-
-            #endregion
-
-            #region Constructors
-
-            /// <summary>
-            /// Prevents a default instance of the <see cref="InMemoryCache"/> class from being created.
-            /// </summary>
-            private InMemoryCache()
-            {
-                _storage = new ConcurrentDictionary<string, ConcurrentDictionary<TKey, TEntity>>();
-            }
-
-            #endregion
-
-            #region Properties
-
-            /// <summary>
-            /// Gets the instance.
-            /// </summary>
-            public static InMemoryCache Instance
-            {
-                get
-                {
-                    if (_instance == null)
-                    {
-                        lock (_syncRoot)
-                        {
-                            if (_instance == null)
-                                _instance = new InMemoryCache();
-                        }
-                    }
-
-                    return _instance;
-                }
-            }
-
-            #endregion
-
-            #region Public Methods
-
-            /// <summary>
-            /// Gets the scoped database context by the specified name.
-            /// </summary>
-            /// <param name="name">The database name.</param>
-            /// <returns>The scoped database context by the specified database name.</returns>
-            public ConcurrentDictionary<TKey, TEntity> GetContext(string name)
-            {
-                if (!_storage.ContainsKey(name))
-                {
-                    _storage[name] = new ConcurrentDictionary<TKey, TEntity>();
-                }
-
-                return _storage[name];
-            }
-
-            #endregion
+            return Context.Find<TEntity>(keyValues);
         }
 
         #endregion
