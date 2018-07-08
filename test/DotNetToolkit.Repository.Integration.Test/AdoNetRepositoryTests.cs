@@ -3,6 +3,7 @@
     using AdoNet;
     using FetchStrategies;
     using Queries;
+    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
@@ -468,6 +469,338 @@
             repo.Delete(entity.Key);
 
             Assert.False(repo.Exists(entity.Key));
+        }
+
+        [Fact]
+        public void FindWithComplexExpressions()
+        {
+            var context = Data.TestAdoNetContextFactory.Create();
+
+            var repo = new AdoNetRepository<Customer>(context);
+
+            var entities = new List<Customer>
+            {
+                new Customer { Id = 1, Name = "Random Name 1" },
+                new Customer { Id = 2, Name = "Random Name 2" },
+                new Customer { Id = 3, Name = "Random Test Name 3" },
+                new Customer { Id = 4, Name = "Random Name 4" }
+            };
+
+            repo.Add(entities);
+
+            // The ado.net repository should be able translate the expression into a valid sql query string to execute
+            // things like parentheses and operators should be tested
+
+            // property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(1, repo.Find(x => 1 == x.Id).Id);
+            Assert.Equal(1, repo.Find(x => x.Id == 1).Id);
+            Assert.Equal(1, repo.Find<int>(x => 1 == x.Id, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id == 1, x => x.Id));
+
+            // boolean
+            Assert.Equal(1, repo.Find(x => true).Id);
+            Assert.Null(repo.Find(x => false));
+            Assert.Equal(1, repo.Find(x => true, x => x.Id));
+            Assert.Equal(0, repo.Find(x => false, x => x.Id));
+
+            // method calls
+            Assert.Equal(1, repo.Find(x => x.Name.StartsWith("Random")).Id);
+            Assert.Equal(2, repo.Find(x => x.Name.Equals("Random Name 2")).Id);
+            Assert.Equal(3, repo.Find(x => x.Name.Contains("Test")).Id);
+            Assert.Equal(4, repo.Find(x => x.Name.EndsWith("4")).Id);
+            Assert.Equal(1, repo.Find<int>(x => x.Name.StartsWith("Random"), x => x.Id));
+            Assert.Equal(2, repo.Find<int>(x => x.Name.Equals("Random Name 2"), x => x.Id));
+            Assert.Equal(3, repo.Find<int>(x => x.Name.Contains("Test"), x => x.Id));
+            Assert.Equal(4, repo.Find<int>(x => x.Name.EndsWith("4"), x => x.Id));
+
+            // relational and equality operators - property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(1, repo.Find(x => x.Id == 1).Id);
+            Assert.Equal(1, repo.Find(x => x.Id != 2).Id);
+            Assert.Equal(2, repo.Find(x => x.Id > 1).Id);
+            Assert.Equal(3, repo.Find(x => x.Id >= 3).Id);
+            Assert.Equal(1, repo.Find(x => x.Id < 2).Id);
+            Assert.Equal(1, repo.Find(x => x.Id <= 2).Id);
+            Assert.Equal(1, repo.Find<int>(x => x.Id == 1, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id != 2, x => x.Id));
+            Assert.Equal(2, repo.Find<int>(x => x.Id > 1, x => x.Id));
+            Assert.Equal(3, repo.Find<int>(x => x.Id >= 3, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id < 2, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id <= 2, x => x.Id));
+
+            // conditional or operations - property variables on the left and constants on the right (and vice verse)
+            // relational and equality operators
+            Assert.Equal(1, repo.Find(x => (x.Id == 1) || (x.Id >= 1)).Id);
+            Assert.Equal(1, repo.Find(x => (1 == x.Id) || (1 <= x.Id)).Id);
+            Assert.Equal(1, repo.Find<int>(x => (x.Id == 1) || (x.Id >= 1), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (1 == x.Id) || (1 <= x.Id), x => x.Id));
+
+            // logical or operations - property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(1, repo.Find(x => (x.Id == 1) | (x.Id >= 1)).Id);
+            Assert.Equal(1, repo.Find(x => (1 == x.Id) | (1 <= x.Id)).Id);
+            Assert.Equal(1, repo.Find<int>(x => (x.Id == 1) | (x.Id >= 1), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (1 == x.Id) | (1 <= x.Id), x => x.Id));
+
+            // conditional and operations - property variables on the left and constants on the right (and vice verse)
+            // relational and equality operators
+            Assert.Equal(2, repo.Find(x => x.Id > 1 && x.Id < 3).Id);
+            Assert.Equal(2, repo.Find(x => (x.Id > 1) && (x.Id < 3)).Id);
+            Assert.Equal(2, repo.Find<int>(x => x.Id > 1 && x.Id < 3, x => x.Id));
+            Assert.Equal(2, repo.Find<int>(x => (x.Id > 1) && (x.Id < 3), x => x.Id));
+
+            // logical and operations - property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(1, repo.Find(x => (x.Id == 1) & (x.Id >= 1)).Id);
+            Assert.Equal(1, repo.Find(x => (1 == x.Id) & (1 <= x.Id)).Id);
+            Assert.Equal(1, repo.Find<int>(x => (x.Id == 1) & (x.Id >= 1), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (1 == x.Id) & (1 <= x.Id), x => x.Id));
+        }
+
+        [Fact]
+        public async void FindWithComplexExpressionsAsync()
+        {
+            var context = Data.TestAdoNetContextFactory.Create();
+
+            var repo = new AdoNetRepository<Customer>(context);
+
+            var entities = new List<Customer>
+            {
+                new Customer { Id = 1, Name = "Random Name 1" },
+                new Customer { Id = 2, Name = "Random Name 2" },
+                new Customer { Id = 3, Name = "Random Test Name 3" },
+                new Customer { Id = 4, Name = "Random Name 4" }
+            };
+
+            await repo.AddAsync(entities);
+
+            // The ado.net repository should be able translate the expression into a valid sql query string to execute
+            // things like parentheses and operators should be tested
+
+            // property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(1, (await repo.FindAsync(x => 1 == x.Id)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id == 1)).Id);
+            Assert.Equal(1, repo.Find<int>(x => 1 == x.Id, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id == 1, x => x.Id));
+
+            // boolean
+            Assert.Equal(1, (await repo.FindAsync(x => true)).Id);
+            Assert.Null(await repo.FindAsync(x => false));
+            Assert.Equal(1, await repo.FindAsync(x => true, x => x.Id));
+            Assert.Equal(0, await repo.FindAsync(x => false, x => x.Id));
+
+            // method calls
+            Assert.Equal(1, (await repo.FindAsync(x => x.Name.StartsWith("Random"))).Id);
+            Assert.Equal(2, (await repo.FindAsync(x => x.Name.Equals("Random Name 2"))).Id);
+            Assert.Equal(3, (await repo.FindAsync(x => x.Name.Contains("Test"))).Id);
+            Assert.Equal(4, (await repo.FindAsync(x => x.Name.EndsWith("4"))).Id);
+            Assert.Equal(1, repo.Find<int>(x => x.Name.StartsWith("Random"), x => x.Id));
+            Assert.Equal(2, repo.Find<int>(x => x.Name.Equals("Random Name 2"), x => x.Id));
+            Assert.Equal(3, repo.Find<int>(x => x.Name.Contains("Test"), x => x.Id));
+            Assert.Equal(4, repo.Find<int>(x => x.Name.EndsWith("4"), x => x.Id));
+
+            // relational and equality operators - property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id == 1)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id != 2)).Id);
+            Assert.Equal(2, (await repo.FindAsync(x => x.Id > 1)).Id);
+            Assert.Equal(3, (await repo.FindAsync(x => x.Id >= 3)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id < 2)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id <= 2)).Id);
+            Assert.Equal(1, repo.Find<int>(x => x.Id == 1, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id != 2, x => x.Id));
+            Assert.Equal(2, repo.Find<int>(x => x.Id > 1, x => x.Id));
+            Assert.Equal(3, repo.Find<int>(x => x.Id >= 3, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id < 2, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id <= 2, x => x.Id));
+
+            // conditional or operations - property variables on the left and constants on the right (and vice verse)
+            // relational and equality operators
+            Assert.Equal(1, (await repo.FindAsync(x => (x.Id == 1) || (x.Id >= 1))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (1 == x.Id) || (1 <= x.Id))).Id);
+            Assert.Equal(1, repo.Find<int>(x => (x.Id == 1) || (x.Id >= 1), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (1 == x.Id) || (1 <= x.Id), x => x.Id));
+
+            // logical or operations - property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(1, (await repo.FindAsync(x => (x.Id == 1) | (x.Id >= 1))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (1 == x.Id) | (1 <= x.Id))).Id);
+            Assert.Equal(1, repo.Find<int>(x => (x.Id == 1) | (x.Id >= 1), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (1 == x.Id) | (1 <= x.Id), x => x.Id));
+
+            // conditional and operations - property variables on the left and constants on the right (and vice verse)
+            // relational and equality operators
+            Assert.Equal(2, (await repo.FindAsync(x => x.Id > 1 && x.Id < 3)).Id);
+            Assert.Equal(2, (await repo.FindAsync(x => (x.Id > 1) && (x.Id < 3))).Id);
+            Assert.Equal(2, repo.Find<int>(x => x.Id > 1 && x.Id < 3, x => x.Id));
+            Assert.Equal(2, repo.Find<int>(x => (x.Id > 1) && (x.Id < 3), x => x.Id));
+
+            // logical and operations - property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(1, (await repo.FindAsync(x => (x.Id == 1) & (x.Id >= 1))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (1 == x.Id) & (1 <= x.Id))).Id);
+            Assert.Equal(1, repo.Find<int>(x => (x.Id == 1) & (x.Id >= 1), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (1 == x.Id) & (1 <= x.Id), x => x.Id));
+        }
+
+        [Fact]
+        public void FindAllWithComplexExpressions()
+        {
+            var context = Data.TestAdoNetContextFactory.Create();
+
+            var repo = new AdoNetRepository<Customer>(context);
+
+            var entities = new List<Customer>
+            {
+                new Customer { Id = 1, Name = "Random Name 1" },
+                new Customer { Id = 2, Name = "Random Name 2" },
+                new Customer { Id = 3, Name = "Random Test Name 3" },
+                new Customer { Id = 4, Name = "Random Name 4" }
+            };
+
+            repo.Add(entities);
+
+            // The ado.net repository should be able translate the expression into a valid sql query string to execute
+            // things like parentheses and operators should be tested
+
+            // property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(1, repo.FindAll(x => 1 == x.Id).First().Id);
+            Assert.Equal(1, repo.FindAll(x => x.Id == 1).First().Id);
+            Assert.Equal(1, repo.FindAll<int>(x => 1 == x.Id, x => x.Id).First());
+            Assert.Equal(1, repo.FindAll<int>(x => x.Id == 1, x => x.Id).First());
+
+            // boolean
+            Assert.Equal(1, repo.FindAll(x => true).First().Id);
+            Assert.Empty(repo.FindAll(x => false));
+            Assert.Equal(1, repo.FindAll(x => true, x => x.Id).First());
+            Assert.Empty(repo.FindAll(x => false, x => x.Id));
+
+            // method calls
+            Assert.Equal(4, repo.FindAll(x => x.Name.StartsWith("Random")).Count());
+            Assert.Single(repo.FindAll(x => x.Name.Equals("Random Name 2")));
+            Assert.Single(repo.FindAll(x => x.Name.Contains("Test")));
+            Assert.Single(repo.FindAll(x => x.Name.EndsWith("4")));
+            Assert.Equal(4, repo.FindAll<int>(x => x.Name.StartsWith("Random"), x => x.Id).Count());
+            Assert.Single(repo.FindAll<int>(x => x.Name.Equals("Random Name 2"), x => x.Id));
+            Assert.Single(repo.FindAll<int>(x => x.Name.Contains("Test"), x => x.Id));
+            Assert.Single(repo.FindAll<int>(x => x.Name.EndsWith("4"), x => x.Id));
+
+            // relational and equality operators - property variables on the left and constants on the right (and vice verse)
+            Assert.Single(repo.FindAll(x => x.Id == 1));
+            Assert.Equal(3, repo.FindAll(x => x.Id != 2).Count());
+            Assert.Equal(3, repo.FindAll(x => x.Id > 1).Count());
+            Assert.Equal(2, repo.FindAll(x => x.Id >= 3).Count());
+            Assert.Single(repo.FindAll(x => x.Id < 2));
+            Assert.Equal(2, repo.FindAll(x => x.Id <= 2).Count());
+            Assert.Single(repo.FindAll<int>(x => x.Id == 1, x => x.Id));
+            Assert.Equal(3, repo.FindAll<int>(x => x.Id != 2, x => x.Id).Count());
+            Assert.Equal(3, repo.FindAll<int>(x => x.Id > 1, x => x.Id).Count());
+            Assert.Equal(2, repo.FindAll<int>(x => x.Id >= 3, x => x.Id).Count());
+            Assert.Single(repo.FindAll<int>(x => x.Id < 2, x => x.Id));
+            Assert.Equal(2, repo.FindAll<int>(x => x.Id <= 2, x => x.Id).Count());
+
+            // conditional or operations - property variables on the left and constants on the right (and vice verse)
+            // relational and equality operators
+            Assert.Equal(4, repo.FindAll(x => (x.Id == 1) || (x.Id >= 1)).Count());
+            Assert.Single(repo.FindAll(x => (1 == x.Id) || (1 <= x.Id)));
+            Assert.Equal(4, repo.FindAll<int>(x => (x.Id == 1) || (x.Id >= 1), x => x.Id).Count());
+            Assert.Single(repo.FindAll<int>(x => (1 == x.Id) || (1 <= x.Id), x => x.Id));
+
+            // logical or operations - property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(4, repo.FindAll(x => (x.Id == 1) | (x.Id >= 1)).Count());
+            Assert.Single(repo.FindAll(x => (1 == x.Id) | (1 <= x.Id)));
+            Assert.Equal(4, repo.FindAll<int>(x => (x.Id == 1) | (x.Id >= 1), x => x.Id).Count());
+            Assert.Single(repo.FindAll<int>(x => (1 == x.Id) | (1 <= x.Id), x => x.Id));
+
+            // conditional and operations - property variables on the left and constants on the right (and vice verse)
+            // relational and equality operators
+            Assert.Single(repo.FindAll(x => x.Id > 1 && x.Id < 3));
+            Assert.Single(repo.FindAll(x => (x.Id > 1) && (x.Id < 3)));
+            Assert.Single(repo.FindAll<int>(x => x.Id > 1 && x.Id < 3, x => x.Id));
+            Assert.Single(repo.FindAll<int>(x => (x.Id > 1) && (x.Id < 3), x => x.Id));
+
+            // logical and operations - property variables on the left and constants on the right (and vice verse)
+            Assert.Single(repo.FindAll(x => (x.Id == 1) & (x.Id >= 1)));
+            Assert.Single(repo.FindAll(x => (1 == x.Id) & (1 <= x.Id)));
+            Assert.Single(repo.FindAll<int>(x => (x.Id == 1) & (x.Id >= 1), x => x.Id));
+            Assert.Single(repo.FindAll<int>(x => (1 == x.Id) & (1 <= x.Id), x => x.Id));
+        }
+
+        [Fact]
+        public async void FindAllWithComplexExpressionsAsync()
+        {
+            var context = Data.TestAdoNetContextFactory.Create();
+
+            var repo = new AdoNetRepository<Customer>(context);
+
+            var entities = new List<Customer>
+            {
+                new Customer { Id = 1, Name = "Random Name 1" },
+                new Customer { Id = 2, Name = "Random Name 2" },
+                new Customer { Id = 3, Name = "Random Test Name 3" },
+                new Customer { Id = 4, Name = "Random Name 4" }
+            };
+
+            await repo.AddAsync(entities);
+
+            // The ado.net repository should be able translate the expression into a valid sql query string to execute
+            // things like parentheses and operators should be tested
+
+            // property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(1, (await repo.FindAllAsync(x => 1 == x.Id)).First().Id);
+            Assert.Equal(1, (await repo.FindAllAsync(x => x.Id == 1)).First().Id);
+            Assert.Equal(1, (await repo.FindAllAsync<int>(x => 1 == x.Id, x => x.Id)).First());
+            Assert.Equal(1, (await repo.FindAllAsync<int>(x => x.Id == 1, x => x.Id)).First());
+
+            // boolean
+            Assert.Equal(1, (await repo.FindAllAsync(x => true)).First().Id);
+            Assert.Empty(await repo.FindAllAsync(x => false));
+            Assert.Equal(1, (await repo.FindAllAsync(x => true, x => x.Id)).First());
+            Assert.Empty(await repo.FindAllAsync(x => false, x => x.Id));
+
+            // method calls
+            Assert.Equal(4, (await repo.FindAllAsync(x => x.Name.StartsWith("Random"))).Count());
+            Assert.Single(await repo.FindAllAsync(x => x.Name.Equals("Random Name 2")));
+            Assert.Single(await repo.FindAllAsync(x => x.Name.Contains("Test")));
+            Assert.Single(await repo.FindAllAsync(x => x.Name.EndsWith("4")));
+            Assert.Equal(4, (await repo.FindAllAsync<int>(x => x.Name.StartsWith("Random"), x => x.Id)).Count());
+            Assert.Single(await repo.FindAllAsync<int>(x => x.Name.Equals("Random Name 2"), x => x.Id));
+            Assert.Single(await repo.FindAllAsync<int>(x => x.Name.Contains("Test"), x => x.Id));
+            Assert.Single(await repo.FindAllAsync<int>(x => x.Name.EndsWith("4"), x => x.Id));
+
+            // relational and equality operators - property variables on the left and constants on the right (and vice verse)
+            Assert.Single(await repo.FindAllAsync(x => x.Id == 1));
+            Assert.Equal(3, (await repo.FindAllAsync(x => x.Id != 2)).Count());
+            Assert.Equal(3, (await repo.FindAllAsync(x => x.Id > 1)).Count());
+            Assert.Equal(2, (await repo.FindAllAsync(x => x.Id >= 3)).Count());
+            Assert.Single(await repo.FindAllAsync(x => x.Id < 2));
+            Assert.Equal(2, (await repo.FindAllAsync(x => x.Id <= 2)).Count());
+            Assert.Single(await repo.FindAllAsync<int>(x => x.Id == 1, x => x.Id));
+            Assert.Equal(3, (await repo.FindAllAsync<int>(x => x.Id != 2, x => x.Id)).Count());
+            Assert.Equal(3, (await repo.FindAllAsync<int>(x => x.Id > 1, x => x.Id)).Count());
+            Assert.Equal(2, (await repo.FindAllAsync<int>(x => x.Id >= 3, x => x.Id)).Count());
+            Assert.Single(await repo.FindAllAsync<int>(x => x.Id < 2, x => x.Id));
+            Assert.Equal(2, (await repo.FindAllAsync<int>(x => x.Id <= 2, x => x.Id)).Count());
+
+            // conditional or operations - property variables on the left and constants on the right (and vice verse)
+            // relational and equality operators
+            Assert.Equal(4, (await repo.FindAllAsync(x => (x.Id == 1) || (x.Id >= 1))).Count());
+            Assert.Single(await repo.FindAllAsync(x => (1 == x.Id) || (1 <= x.Id)));
+            Assert.Equal(4, (await repo.FindAllAsync<int>(x => (x.Id == 1) || (x.Id >= 1), x => x.Id)).Count());
+            Assert.Single(await repo.FindAllAsync<int>(x => (1 == x.Id) || (1 <= x.Id), x => x.Id));
+
+            // logical or operations - property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(4, (await repo.FindAllAsync(x => (x.Id == 1) | (x.Id >= 1))).Count());
+            Assert.Single(await repo.FindAllAsync(x => (1 == x.Id) | (1 <= x.Id)));
+            Assert.Equal(4, (await repo.FindAllAsync<int>(x => (x.Id == 1) | (x.Id >= 1), x => x.Id)).Count());
+            Assert.Single(await repo.FindAllAsync<int>(x => (1 == x.Id) | (1 <= x.Id), x => x.Id));
+
+            // conditional and operations - property variables on the left and constants on the right (and vice verse)
+            // relational and equality operators
+            Assert.Single(await repo.FindAllAsync(x => x.Id > 1 && x.Id < 3));
+            Assert.Single(await repo.FindAllAsync(x => (x.Id > 1) && (x.Id < 3)));
+            Assert.Single(await repo.FindAllAsync<int>(x => x.Id > 1 && x.Id < 3, x => x.Id));
+            Assert.Single(await repo.FindAllAsync<int>(x => (x.Id > 1) && (x.Id < 3), x => x.Id));
+
+            // logical and operations - property variables on the left and constants on the right (and vice verse)
+            Assert.Single(await repo.FindAllAsync(x => (x.Id == 1) & (x.Id >= 1)));
+            Assert.Single(await repo.FindAllAsync(x => (1 == x.Id) & (1 <= x.Id)));
+            Assert.Single(await repo.FindAllAsync<int>(x => (x.Id == 1) & (x.Id >= 1), x => x.Id));
+            Assert.Single(await repo.FindAllAsync<int>(x => (1 == x.Id) & (1 <= x.Id), x => x.Id));
         }
 
         private static void TestCustomerAddress(CustomerAddress expected, CustomerAddress actual)
