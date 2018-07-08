@@ -1654,16 +1654,16 @@
 
                 if (options.Specification != null)
                 {
-                    new SqlExpressionTranslator().Translate(
+                    new ExpressionTranslator().Translate(
                         options.Specification.Predicate,
                         m,
-                        out string whereSql,
-                        out Dictionary<string, object> whereParameters);
+                        out string expSql,
+                        out Dictionary<string, object> expParameters);
 
-                    sb.Append("\n");
-                    sb.Append(whereSql);
+                    sb.Append("\nWHERE ");
+                    sb.Append(expSql);
 
-                    foreach (var item in whereParameters)
+                    foreach (var item in expParameters)
                     {
                         parameters.Add(item.Key, item.Value);
                     }
