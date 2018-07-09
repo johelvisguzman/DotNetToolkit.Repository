@@ -30,13 +30,15 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity, TKey1, TKey2, TKey3}"/> class.
         /// </summary>
-        protected RepositoryBaseAsync() { }
+        /// <param name="context">The context.</param>
+        protected RepositoryBaseAsync(IRepositoryContextAsync context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity, TKey1, TKey2, TKey3}"/> class.
         /// </summary>
+        /// <param name="context">The context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        protected RepositoryBaseAsync(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors) { }
+        protected RepositoryBaseAsync(IRepositoryContextAsync context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
 
         #endregion
 
@@ -108,7 +110,7 @@
                 if (key3 == null)
                     throw new ArgumentNullException(nameof(key3));
 
-                return GetEntityAsync(new object[] { key1, key2, key3 }, fetchStrategy, cancellationToken);
+                return Context.FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2, key3);
             }
             catch (Exception ex)
             {
@@ -155,7 +157,7 @@
                 if (key3 == null)
                     throw new ArgumentNullException(nameof(key3));
 
-                return GetEntity(new object[] { key1, key2, key3 }, fetchStrategy);
+                return Context.Find<TEntity>(fetchStrategy, key1, key2, key3);
             }
             catch (Exception ex)
             {
@@ -270,13 +272,15 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity, TKey1, TKey2}"/> class.
         /// </summary>
-        protected RepositoryBaseAsync() { }
+        /// <param name="context">The context.</param>
+        protected RepositoryBaseAsync(IRepositoryContextAsync context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity, TKey1, TKey2}"/> class.
         /// </summary>
+        /// <param name="context">The context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        protected RepositoryBaseAsync(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors) { }
+        protected RepositoryBaseAsync(IRepositoryContextAsync context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
 
         #endregion
 
@@ -339,7 +343,7 @@
                 if (key2 == null)
                     throw new ArgumentNullException(nameof(key2));
 
-                return GetEntityAsync(new object[] { key1, key2 }, fetchStrategy, cancellationToken);
+                return Context.FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2);
             }
             catch (Exception ex)
             {
@@ -381,7 +385,7 @@
                 if (key2 == null)
                     throw new ArgumentNullException(nameof(key2));
 
-                return GetEntity(new object[] { key1, key2 }, fetchStrategy);
+                return Context.Find<TEntity>(fetchStrategy, key1, key2);
             }
             catch (Exception ex)
             {
@@ -493,13 +497,15 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity, TKey}"/> class.
         /// </summary>
-        protected RepositoryBaseAsync() { }
+        /// <param name="context">The context.</param>
+        protected RepositoryBaseAsync(IRepositoryContextAsync context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity, TKey}"/> class.
         /// </summary>
+        /// <param name="context">The context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        protected RepositoryBaseAsync(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors) { }
+        protected RepositoryBaseAsync(IRepositoryContextAsync context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
 
         #endregion
 
@@ -553,7 +559,7 @@
                 if (key == null)
                     throw new ArgumentNullException(nameof(key));
 
-                return GetEntityAsync(new object[] { key }, fetchStrategy, cancellationToken);
+                return Context.FindAsync<TEntity>(cancellationToken, fetchStrategy, key);
             }
             catch (Exception ex)
             {
@@ -590,7 +596,7 @@
                 if (key == null)
                     throw new ArgumentNullException(nameof(key));
 
-                return GetEntity(new object[] { key }, fetchStrategy);
+                return Context.Find<TEntity>(fetchStrategy, key);
             }
             catch (Exception ex)
             {
@@ -688,73 +694,36 @@
     /// </summary>
     public abstract class RepositoryBaseAsync<TEntity> : RepositoryBase<TEntity>, IRepositoryBaseAsync<TEntity> where TEntity : class
     {
+        #region Properties
+
+        /// <summary>
+        /// Gets the context.
+        /// </summary>
+        internal new IRepositoryContextAsync Context { get; private set; }
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity}"/> class.
         /// </summary>
-        protected RepositoryBaseAsync() { }
+        /// <param name="context">The context.</param>
+        protected RepositoryBaseAsync(IRepositoryContextAsync context) : this(context, (IEnumerable<IRepositoryInterceptor>)null)
+        {
+            Context = context;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity}"/> class.
         /// </summary>
+        /// <param name="context">The context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        protected RepositoryBaseAsync(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors) { }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// A protected asynchronous overridable method for saving changes made in the current unit of work in the repository.
-        /// </summary>
-        protected abstract Task SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken());
-
-        /// <summary>
-        /// A protected asynchronous overridable method for getting an entity that satisfies the criteria specified by the <paramref name="options" /> from the repository.
-        /// </summary>
-        protected abstract Task<TResult> GetEntityAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken());
-
-        /// <summary>
-        /// A protected asynchronous overridable method for getting a collection of entities that satisfies the criteria specified by the <paramref name="options" /> from the repository.
-        /// </summary>
-        protected abstract Task<IEnumerable<TResult>> GetEntitiesAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken());
-
-        /// <summary>
-        /// A protected asynchronous overridable method for getting the number of entities that satisfies the criteria specified by the <paramref name="options" /> from the repository.
-        /// </summary>
-        protected abstract Task<int> GetCountAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken());
-
-        /// <summary>
-        /// A protected asynchronous overridable method for determining whether the repository contains an entity that satisfies the criteria specified by the <paramref name="options" /> from the repository.
-        /// </summary>
-        protected abstract Task<bool> GetExistAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken());
-
-        /// <summary>
-        /// A protected asynchronous overridable method for getting a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
-        /// </summary>
-        protected abstract Task<Dictionary<TDictionaryKey, TElement>> GetDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken());
-
-        /// <summary>
-        /// A protected asynchronous overridable method for getting a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, an element selector.
-        /// </summary>
-        protected abstract Task<IEnumerable<TResult>> GetGroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken());
-
-        /// <summary>
-        /// Asynchronously gets an entity query with the given primary key value from the repository.
-        /// </summary>
-        protected virtual Task<TEntity> GetEntityAsync(object[] keyValues, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        protected RepositoryBaseAsync(IRepositoryContextAsync context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors)
         {
-            ThrowsIfEntityPrimaryKeyValuesLengthMismatch(keyValues);
-
-            var options = new QueryOptions<TEntity>().SatisfyBy(ConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
-
-            if (fetchStrategy != null)
-                options.Fetch(fetchStrategy);
-
-            return GetEntityAsync(options, IdentityExpression<TEntity>.Instance, cancellationToken);
+            Context = context;
         }
-        
+
         #endregion
 
         #region Implementation of IRepositoryAsync<TEntity>
@@ -788,7 +757,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public Task<int> CountAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptError<Task<int>>(() => GetCountAsync(options, cancellationToken));
+            return InterceptError<Task<int>>(() => Context.CountAsync<TEntity>(options, cancellationToken));
         }
 
         /// <summary>
@@ -842,22 +811,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            try
-            {
-                if (keySelector == null)
-                    throw new ArgumentNullException(nameof(keySelector));
-
-                if (elementSelector == null)
-                    throw new ArgumentNullException(nameof(elementSelector));
-
-                return GetDictionaryAsync<TDictionaryKey, TElement>(options, keySelector, elementSelector, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return InterceptError<Task<Dictionary<TDictionaryKey, TElement>>>(() => Context.ToDictionaryAsync(options, keySelector, elementSelector, cancellationToken));
         }
 
         /// <summary>
@@ -886,22 +840,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public Task<IEnumerable<TResult>> GroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            try
-            {
-                if (keySelector == null)
-                    throw new ArgumentNullException(nameof(keySelector));
-
-                if (resultSelector == null)
-                    throw new ArgumentNullException(nameof(resultSelector));
-
-                return GetGroupByAsync<TGroupKey, TResult>(options, keySelector, resultSelector, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return InterceptError<Task<IEnumerable<TResult>>>(() => Context.GroupByAsync(options, keySelector, resultSelector, cancellationToken));
         }
 
         /// <summary>
@@ -921,7 +860,7 @@
 
                 InterceptAddItem(entity);
 
-                await SaveChangesAsync(cancellationToken);
+                await Context.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -951,7 +890,7 @@
 
                 InterceptAddItem(entities);
 
-                await SaveChangesAsync(cancellationToken);
+                await Context.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -978,7 +917,7 @@
 
                 InterceptUpdateItem(entity);
 
-                await SaveChangesAsync(cancellationToken);
+                await Context.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -1008,7 +947,7 @@
 
                 InterceptUpdateItem(entities);
 
-                await SaveChangesAsync(cancellationToken);
+                await Context.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -1035,7 +974,7 @@
 
                 InterceptDeleteItem(entity);
 
-                await SaveChangesAsync(cancellationToken);
+                await Context.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -1091,7 +1030,7 @@
 
                 InterceptDeleteItem(entities);
 
-                await SaveChangesAsync(cancellationToken);
+                await Context.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -1144,22 +1083,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public Task<TResult> FindAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            try
-            {
-                if (options == null)
-                    throw new ArgumentNullException(nameof(options));
-
-                if (selector == null)
-                    throw new ArgumentNullException(nameof(selector));
-
-                return GetEntityAsync<TResult>(options, selector, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return InterceptError<Task<TResult>>(() => Context.FindAsync<TEntity, TResult>(options, selector, cancellationToken));
         }
 
         /// <summary>
@@ -1226,19 +1150,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public Task<IEnumerable<TResult>> FindAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            try
-            {
-                if (selector == null)
-                    throw new ArgumentNullException(nameof(selector));
-
-                return GetEntitiesAsync<TResult>(options, selector, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return InterceptError<Task<IEnumerable<TResult>>>(() => Context.FindAllAsync<TEntity, TResult>(options, selector, cancellationToken));
         }
 
         /// <summary>
@@ -1260,19 +1172,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
         public Task<bool> ExistsAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            try
-            {
-                if (options == null)
-                    throw new ArgumentNullException(nameof(options));
-
-                return GetExistAsync(options, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return InterceptError<Task<bool>>(() => Context.ExistsAsync<TEntity>(options, cancellationToken));
         }
 
         #endregion

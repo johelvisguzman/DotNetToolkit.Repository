@@ -28,13 +28,15 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2, TKey3}"/> class.
         /// </summary>
-        protected RepositoryBase() { }
+        /// <param name="context">The context.</param>
+        protected RepositoryBase(IRepositoryContext context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2, TKey3}"/> class.
         /// </summary>
+        /// <param name="context">The context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        protected RepositoryBase(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors) { }
+        protected RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
 
         #endregion
 
@@ -104,7 +106,7 @@
                 if (key3 == null)
                     throw new ArgumentNullException(nameof(key3));
 
-                return GetEntity(new object[] { key1, key2, key3 }, fetchStrategy);
+                return Context.Find<TEntity>(fetchStrategy, key1, key2, key3);
 
             }
             catch (Exception ex)
@@ -146,13 +148,15 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2}"/> class.
         /// </summary>
-        protected RepositoryBase() { }
+        /// <param name="context">The context.</param>
+        protected RepositoryBase(IRepositoryContext context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2}"/> class.
         /// </summary>
+        /// <param name="context">The context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        protected RepositoryBase(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors) { }
+        protected RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
 
         #endregion
 
@@ -216,7 +220,7 @@
                 if (key2 == null)
                     throw new ArgumentNullException(nameof(key2));
 
-                return GetEntity(new object[] { key1, key2 }, fetchStrategy);
+                return Context.Find<TEntity>(fetchStrategy, key1, key2);
 
             }
             catch (Exception ex)
@@ -257,13 +261,15 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
-        protected RepositoryBase() { }
+        /// <param name="context">The context.</param>
+        protected RepositoryBase(IRepositoryContext context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
+        /// <param name="context">The context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        protected RepositoryBase(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors) { }
+        protected RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
 
         #endregion
 
@@ -321,8 +327,7 @@
                 if (key == null)
                     throw new ArgumentNullException(nameof(key));
 
-                return GetEntity(new object[] { key }, fetchStrategy);
-
+                return Context.Find<TEntity>(fetchStrategy, key);
             }
             catch (Exception ex)
             {
@@ -352,7 +357,17 @@
     {
         #region Fields
 
+        private bool _disposed;
         private readonly IEnumerable<IRepositoryInterceptor> _interceptors;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets the context.
+        /// </summary>
+        internal IRepositoryContext Context { get; private set; }
 
         #endregion
 
@@ -361,14 +376,20 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity}"/> class.
         /// </summary>
-        protected RepositoryBase() { }
+        /// <param name="context">The context.</param>
+        protected RepositoryBase(IRepositoryContext context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity}"/> class.
         /// </summary>
+        /// <param name="context">The context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        protected RepositoryBase(IEnumerable<IRepositoryInterceptor> interceptors)
+        protected RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors)
         {
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+
+            Context = context;
             _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
         }
 
@@ -380,7 +401,7 @@
         {
             Intercept(x => x.AddExecuting(entity));
 
-            AddItem(entity);
+            Context.Add(entity);
 
             Intercept(x => x.AddExecuted(entity));
         }
@@ -397,7 +418,7 @@
         {
             Intercept(x => x.UpdateExecuting(entity));
 
-            UpdateItem(entity);
+            Context.Update(entity);
 
             Intercept(x => x.UpdateExecuted(entity));
         }
@@ -414,7 +435,7 @@
         {
             Intercept(x => x.DeleteExecuting(entity));
 
-            DeleteItem(entity);
+            Context.Remove(entity);
 
             Intercept(x => x.DeleteExecuted(entity));
         }
@@ -435,129 +456,20 @@
         /// Releases unmanaged and - optionally - managed resources.
         /// </summary>
         /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
-        protected abstract void Dispose(bool disposing);
-
-        /// <summary>
-        /// A protected overridable method for adding the specified <paramref name="entity" /> into the repository.
-        /// </summary>
-        protected abstract void AddItem(TEntity entity);
-
-        /// <summary>
-        /// A protected overridable method for deleting the specified <paramref name="entity" /> from the repository.
-        /// </summary>
-        protected abstract void DeleteItem(TEntity entity);
-
-        /// <summary>
-        /// A protected overridable method for updating the specified <paramref name="entity" /> in the repository.
-        /// </summary>
-        protected abstract void UpdateItem(TEntity entity);
-
-        /// <summary>
-        /// A protected overridable method for saving changes made in the current unit of work in the repository.
-        /// </summary>
-        protected abstract void SaveChanges();
-
-        /// <summary>
-        /// A protected overridable method for getting an entity query that supplies the specified fetching strategy from the repository.
-        /// </summary>
-        protected abstract IQueryable<TEntity> GetQuery(IFetchStrategy<TEntity> fetchStrategy = null);
-
-        /// <summary>
-        /// Gets an entity query that satisfies the criteria specified by the <paramref name="options" /> from the repository.
-        /// </summary>
-        protected IQueryable<TEntity> GetQuery(IQueryOptions<TEntity> options)
+        protected virtual void Dispose(bool disposing)
         {
-            return options != null ? options.Apply(GetQuery(options.FetchStrategy)) : GetQuery();
-        }
+            if (_disposed) return;
 
-        /// <summary>
-        /// Gets an entity query with the given primary key value from the repository.
-        /// </summary>
-        protected virtual TEntity GetEntity(object[] keyValues, IFetchStrategy<TEntity> fetchStrategy)
-        {
-            ThrowsIfEntityPrimaryKeyValuesLengthMismatch(keyValues);
+            if (disposing)
+            {
+                if (Context != null)
+                {
+                    Context.Dispose();
+                    Context = null;
+                }
+            }
 
-            var options = new QueryOptions<TEntity>().SatisfyBy(ConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
-
-            if (fetchStrategy != null)
-                options.Fetch(fetchStrategy);
-
-            return GetEntity<TEntity>(options, IdentityExpression<TEntity>.Instance);
-        }
-
-        /// <summary>
-        /// Gets an entity that satisfies the criteria specified by the <paramref name="options" /> from the repository.
-        /// </summary>
-        protected virtual TResult GetEntity<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
-        {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
-
-            return GetQuery(options).Select(selector).FirstOrDefault();
-        }
-
-        /// <summary>
-        /// Gets a collection of entities that satisfies the criteria specified by the <paramref name="options" /> from the repository.
-        /// </summary>
-        protected virtual IEnumerable<TResult> GetEntities<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
-        {
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
-
-            return GetQuery(options).Select(selector).ToList();
-        }
-
-        /// <summary>
-        /// Gets the number of entities that satisfies the criteria specified by the <paramref name="options" /> from the repository.
-        /// </summary>
-        protected virtual int GetCount(IQueryOptions<TEntity> options)
-        {
-            return GetQuery(options).Count();
-        }
-
-        /// <summary>
-        /// Determining whether the repository contains an entity that satisfies the criteria specified by the <paramref name="options" /> from the repository.
-        /// </summary>
-        protected virtual bool GetExist(IQueryOptions<TEntity> options)
-        {
-            return GetQuery(options).Any();
-        }
-
-        /// <summary>
-        /// Gets a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
-        /// </summary>
-        protected virtual Dictionary<TDictionaryKey, TElement> GetDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
-        {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
-            if (elementSelector == null)
-                throw new ArgumentNullException(nameof(elementSelector));
-
-            var keySelectFunc = keySelector.Compile();
-            var elementSelectorFunc = elementSelector.Compile();
-
-            return GetQuery(options).ToDictionary(keySelectFunc, elementSelectorFunc, EqualityComparer<TDictionaryKey>.Default);
-        }
-
-        /// <summary>
-        /// Gets a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, an element selector.
-        /// </summary>
-        protected virtual IEnumerable<TResult> GetGroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector)
-        {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
-            if (resultSelector == null)
-                throw new ArgumentNullException(nameof(resultSelector));
-
-            var keySelectFunc = keySelector.Compile();
-            var resultSelectorFunc = resultSelector.Compile();
-
-            return GetQuery(options).GroupBy(keySelectFunc, EqualityComparer<TGroupKey>.Default).Select(resultSelectorFunc).ToList();
+            _disposed = true;
         }
 
         /// <summary>
@@ -592,16 +504,6 @@
             }
         }
 
-        /// <summary>
-        /// Throws an exception if entity primary key values length mismatch.
-        /// </summary>
-        /// <param name="keyValues">The key values.</param>
-        protected void ThrowsIfEntityPrimaryKeyValuesLengthMismatch(object[] keyValues)
-        {
-            if (keyValues.Length != ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Count())
-                throw new ArgumentException(Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
-        }
-
         #endregion
 
         #region Implementation of IRepositoryBase<TEntity>
@@ -632,7 +534,7 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public int Count(IQueryOptions<TEntity> options)
         {
-            return InterceptError<int>(() => GetCount(options));
+            return InterceptError<int>(() => Context.Count<TEntity>(options));
         }
 
         /// <summary>
@@ -682,22 +584,7 @@
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
-            try
-            {
-                if (keySelector == null)
-                    throw new ArgumentNullException(nameof(keySelector));
-
-                if (elementSelector == null)
-                    throw new ArgumentNullException(nameof(elementSelector));
-
-                return GetDictionary<TDictionaryKey, TElement>(options, keySelector, elementSelector);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return InterceptError<Dictionary<TDictionaryKey, TElement>>(() => Context.ToDictionary(options, keySelector, elementSelector));
         }
 
         /// <summary>
@@ -724,22 +611,7 @@
         /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public IEnumerable<TResult> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector)
         {
-            try
-            {
-                if (keySelector == null)
-                    throw new ArgumentNullException(nameof(keySelector));
-
-                if (resultSelector == null)
-                    throw new ArgumentNullException(nameof(resultSelector));
-
-                return GetGroupBy<TGroupKey, TResult>(options, keySelector, resultSelector);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return InterceptError<IEnumerable<TResult>>(() => Context.GroupBy(options, keySelector, resultSelector));
         }
 
         /// <summary>
@@ -755,7 +627,7 @@
 
                 InterceptAddItem(entity);
 
-                SaveChanges();
+                Context.SaveChanges();
             }
             catch (Exception ex)
             {
@@ -781,7 +653,7 @@
 
                 InterceptAddItem(entities);
 
-                SaveChanges();
+                Context.SaveChanges();
             }
             catch (Exception ex)
             {
@@ -804,7 +676,7 @@
 
                 InterceptUpdateItem(entity);
 
-                SaveChanges();
+                Context.SaveChanges();
             }
             catch (Exception ex)
             {
@@ -830,7 +702,7 @@
 
                 InterceptUpdateItem(entities);
 
-                SaveChanges();
+                Context.SaveChanges();
             }
             catch (Exception ex)
             {
@@ -853,7 +725,7 @@
 
                 InterceptDeleteItem(entity);
 
-                SaveChanges();
+                Context.SaveChanges();
             }
             catch (Exception ex)
             {
@@ -897,7 +769,7 @@
 
                 InterceptDeleteItem(entities);
 
-                SaveChanges();
+                Context.SaveChanges();
             }
             catch (Exception ex)
             {
@@ -946,22 +818,7 @@
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public TResult Find<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
-            try
-            {
-                if (options == null)
-                    throw new ArgumentNullException(nameof(options));
-
-                if (selector == null)
-                    throw new ArgumentNullException(nameof(selector));
-
-                return GetEntity<TResult>(options, selector);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return InterceptError<TResult>(() => Context.Find<TEntity, TResult>(options, selector));
         }
 
         /// <summary>
@@ -1022,19 +879,7 @@
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public IEnumerable<TResult> FindAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
-            try
-            {
-                if (selector == null)
-                    throw new ArgumentNullException(nameof(selector));
-
-                return GetEntities<TResult>(options, selector);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return InterceptError<IEnumerable<TResult>>(() => Context.FindAll<TEntity, TResult>(options, selector));
         }
 
         /// <summary>
@@ -1054,31 +899,7 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
         public bool Exists(IQueryOptions<TEntity> options)
         {
-            try
-            {
-                if (options == null)
-                    throw new ArgumentNullException(nameof(options));
-
-                return GetExist(options);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
-        }
-
-        #endregion
-
-        #region Nested type: IdentityExpression<TElement>
-
-        protected class IdentityExpression<TElement>
-        {
-            public static Expression<Func<TElement, TElement>> Instance
-            {
-                get { return x => x; }
-            }
+            return InterceptError<bool>(() => Context.Exists<TEntity>(options));
         }
 
         #endregion

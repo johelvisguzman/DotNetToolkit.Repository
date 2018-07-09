@@ -6,7 +6,7 @@
     /// <summary>
     /// Represents a repository for ado.net with a composite primary key.
     /// </summary>
-    public class AdoNetRepository<TEntity, TKey1, TKey2, TKey3> : AdoNetRepositoryBase<TEntity, TKey1, TKey2, TKey3> where TEntity : class
+    public class AdoNetRepository<TEntity, TKey1, TKey2, TKey3> : RepositoryBaseAsync<TEntity, TKey1, TKey2, TKey3> where TEntity : class
     {
         #region Constructors
 
@@ -36,7 +36,7 @@
     /// <summary>
     /// Represents a repository for ado.net with a composite primary key.
     /// </summary>
-    public class AdoNetRepository<TEntity, TKey1, TKey2> : AdoNetRepositoryBase<TEntity, TKey1, TKey2> where TEntity : class
+    public class AdoNetRepository<TEntity, TKey1, TKey2> : RepositoryBaseAsync<TEntity, TKey1, TKey2> where TEntity : class
     {
         #region Constructors
 
@@ -66,7 +66,7 @@
     /// <summary>
     /// Represents a repository for ado.net.
     /// </summary>
-    public class AdoNetRepository<TEntity, TKey> : AdoNetRepositoryBase<TEntity, TKey> where TEntity : class
+    public class AdoNetRepository<TEntity, TKey> : RepositoryBaseAsync<TEntity, TKey> where TEntity : class
     {
         #region Constructors
 
@@ -96,7 +96,7 @@
     /// <summary>
     /// Represents a repository for ado.net with a default primary key value of type integer.
     /// </summary>
-    public class AdoNetRepository<TEntity> : AdoNetRepositoryBase<TEntity, int>, IRepositoryAsync<TEntity> where TEntity : class
+    public class AdoNetRepository<TEntity> : RepositoryBaseAsync<TEntity, int>, IRepositoryAsync<TEntity> where TEntity : class
     {
         #region Constructors
 

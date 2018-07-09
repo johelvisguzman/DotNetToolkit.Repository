@@ -6,20 +6,20 @@
     /// <summary>
     /// Represents a repository for in-memory operations with a composite primary key (for testing purposes).
     /// </summary>
-    public class InMemoryRepository<TEntity, TKey1, TKey2, TKey3> : InMemoryRepositoryBase<TEntity, TKey1, TKey2, TKey3> where TEntity : class
+    public class InMemoryRepository<TEntity, TKey1, TKey2, TKey3> : RepositoryBase<TEntity, TKey1, TKey2, TKey3> where TEntity : class
     {
         #region Constructors
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey1, TKey2, TKey3}"/> class.
         /// </summary>
-        public InMemoryRepository() { }
+        public InMemoryRepository() : this(string.Empty) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey1, TKey2, TKey3}"/> class.
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
-        public InMemoryRepository(string databaseName) : base(databaseName) { }
+        public InMemoryRepository(string databaseName) : base(new InMemoryContext(databaseName)) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey1, TKey2, TKey3}"/> class.
@@ -31,7 +31,7 @@
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey1, TKey2, TKey3}"/> class.
         /// </summary>
         /// <param name="interceptors">The interceptors.</param>
-        public InMemoryRepository(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors) { }
+        public InMemoryRepository(IEnumerable<IRepositoryInterceptor> interceptors) : base(new InMemoryContext(null), interceptors) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey1, TKey2, TKey3}"/> class.
@@ -45,7 +45,7 @@
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public InMemoryRepository(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors) : base(databaseName, interceptors) { }
+        public InMemoryRepository(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors) : base(new InMemoryContext(databaseName), interceptors) { }
 
         #endregion
     }
@@ -53,20 +53,20 @@
     /// <summary>
     /// Represents a repository for in-memory operations with a composite primary key (for testing purposes).
     /// </summary>
-    public class InMemoryRepository<TEntity, TKey1, TKey2> : InMemoryRepositoryBase<TEntity, TKey1, TKey2> where TEntity : class
+    public class InMemoryRepository<TEntity, TKey1, TKey2> : RepositoryBase<TEntity, TKey1, TKey2> where TEntity : class
     {
         #region Constructors
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey1, TKey2}"/> class.
         /// </summary>
-        public InMemoryRepository() { }
+        public InMemoryRepository() : this(string.Empty) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey1, TKey2}"/> class.
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
-        public InMemoryRepository(string databaseName) : base(databaseName) { }
+        public InMemoryRepository(string databaseName) : base(new InMemoryContext(databaseName)) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey1, TKey2}"/> class.
@@ -78,7 +78,7 @@
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey1, TKey2}"/> class.
         /// </summary>
         /// <param name="interceptors">The interceptors.</param>
-        public InMemoryRepository(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors) { }
+        public InMemoryRepository(IEnumerable<IRepositoryInterceptor> interceptors) : base(new InMemoryContext(null), interceptors) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey1, TKey2}"/> class.
@@ -92,7 +92,7 @@
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public InMemoryRepository(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors) : base(databaseName, interceptors) { }
+        public InMemoryRepository(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors) : base(new InMemoryContext(databaseName), interceptors) { }
 
         #endregion
     }
@@ -100,20 +100,20 @@
     /// <summary>
     /// Represents a repository for in-memory operations (for testing purposes).
     /// </summary>
-    public class InMemoryRepository<TEntity, TKey> : InMemoryRepositoryBase<TEntity, TKey> where TEntity : class
+    public class InMemoryRepository<TEntity, TKey> : RepositoryBase<TEntity, TKey> where TEntity : class
     {
         #region Constructors
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey}"/> class.
         /// </summary>
-        public InMemoryRepository() { }
+        public InMemoryRepository() : this(string.Empty) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
-        public InMemoryRepository(string databaseName) : base(databaseName) { }
+        public InMemoryRepository(string databaseName) : base(new InMemoryContext(databaseName)) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey}"/> class.
@@ -125,7 +125,7 @@
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="interceptors">The interceptors.</param>
-        public InMemoryRepository(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors) { }
+        public InMemoryRepository(IEnumerable<IRepositoryInterceptor> interceptors) : base(new InMemoryContext(null), interceptors) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity, TKey}"/> class.
@@ -139,7 +139,7 @@
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public InMemoryRepository(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors) : base(databaseName, interceptors) { }
+        public InMemoryRepository(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors) : base(new InMemoryContext(databaseName), interceptors) { }
 
         #endregion
     }
@@ -147,20 +147,20 @@
     /// <summary>
     /// Represents a repository for in-memory operations with a default primary key value of type integer (for testing purposes).
     /// </summary>
-    public class InMemoryRepository<TEntity> : InMemoryRepositoryBase<TEntity, int>, IRepository<TEntity> where TEntity : class
+    public class InMemoryRepository<TEntity> : RepositoryBase<TEntity, int>, IRepository<TEntity> where TEntity : class
     {
         #region Constructors
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity}"/> class.
         /// </summary>
-        public InMemoryRepository() { }
+        public InMemoryRepository() : this(string.Empty) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity}"/> class.
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
-        public InMemoryRepository(string databaseName) : base(databaseName) { }
+        public InMemoryRepository(string databaseName) : base(new InMemoryContext(databaseName)) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity}"/> class.
@@ -172,7 +172,7 @@
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity}"/> class.
         /// </summary>
         /// <param name="interceptors">The interceptors.</param>
-        public InMemoryRepository(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors) { }
+        public InMemoryRepository(IEnumerable<IRepositoryInterceptor> interceptors) : base(new InMemoryContext(null), interceptors) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepository{TEntity}"/> class.
@@ -186,7 +186,7 @@
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public InMemoryRepository(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors) : base(databaseName, interceptors) { }
+        public InMemoryRepository(string databaseName, IEnumerable<IRepositoryInterceptor> interceptors) : base(new InMemoryContext(databaseName), interceptors) { }
 
         #endregion
     }

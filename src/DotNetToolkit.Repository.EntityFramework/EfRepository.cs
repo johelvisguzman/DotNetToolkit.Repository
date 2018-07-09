@@ -7,7 +7,7 @@
     /// <summary>
     /// Represents a repository for entity framework with a composite primary key.
     /// </summary>
-    public class EfRepository<TEntity, TKey1, TKey2, TKey3> : EfRepositoryBase<TEntity, TKey1, TKey2, TKey3> where TEntity : class
+    public class EfRepository<TEntity, TKey1, TKey2, TKey3> : RepositoryBaseAsync<TEntity, TKey1, TKey2, TKey3> where TEntity : class
     {
         #region Constructors
 
@@ -15,7 +15,7 @@
         /// Initializes a new instance of the <see cref="EfRepository{TEntity, TKey1, TKey2, TKey3}" /> class.
         /// </summary>
         /// <param name="context">The database context.</param>
-        public EfRepository(DbContext context) : base(context) { }
+        public EfRepository(DbContext context) : base(new EfContext(context)) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EfRepository{TEntity, TKey1, TKey2, TKey3}"/> class.
@@ -29,7 +29,7 @@
         /// </summary>
         /// <param name="context">The database context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public EfRepository(DbContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+        public EfRepository(DbContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(new EfContext(context), interceptors) { }
 
         #endregion
     }
@@ -37,7 +37,7 @@
     /// <summary>
     /// Represents a repository for entity framework with a composite primary key.
     /// </summary>
-    public class EfRepository<TEntity, TKey1, TKey2> : EfRepositoryBase<TEntity, TKey1, TKey2> where TEntity : class
+    public class EfRepository<TEntity, TKey1, TKey2> : RepositoryBaseAsync<TEntity, TKey1, TKey2> where TEntity : class
     {
         #region Constructors
 
@@ -45,7 +45,7 @@
         /// Initializes a new instance of the <see cref="EfRepository{TEntity, TKey1, TKey2}" /> class.
         /// </summary>
         /// <param name="context">The database context.</param>
-        public EfRepository(DbContext context) : base(context) { }
+        public EfRepository(DbContext context) : base(new EfContext(context)) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EfRepository{TEntity, TKey1, TKey2}"/> class.
@@ -59,7 +59,7 @@
         /// </summary>
         /// <param name="context">The database context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public EfRepository(DbContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+        public EfRepository(DbContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(new EfContext(context), interceptors) { }
 
         #endregion
     }
@@ -67,7 +67,7 @@
     /// <summary>
     /// Represents a repository for entity framework.
     /// </summary>
-    public class EfRepository<TEntity, TKey> : EfRepositoryBase<TEntity, TKey> where TEntity : class
+    public class EfRepository<TEntity, TKey> : RepositoryBaseAsync<TEntity, TKey> where TEntity : class
     {
         #region Constructors
 
@@ -75,7 +75,7 @@
         /// Initializes a new instance of the <see cref="EfRepository{TEntity, TKey}" /> class.
         /// </summary>
         /// <param name="context">The database context.</param>
-        public EfRepository(DbContext context) : base(context) { }
+        public EfRepository(DbContext context) : base(new EfContext(context)) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EfRepository{TEntity, TKey}"/> class.
@@ -89,7 +89,7 @@
         /// </summary>
         /// <param name="context">The database context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public EfRepository(DbContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+        public EfRepository(DbContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(new EfContext(context), interceptors) { }
 
         #endregion
     }
@@ -97,7 +97,7 @@
     /// <summary>
     /// Represents a repository for entity framework with a default primary key value of type integer.
     /// </summary>
-    public class EfRepository<TEntity> : EfRepositoryBase<TEntity, int>, IRepositoryAsync<TEntity> where TEntity : class
+    public class EfRepository<TEntity> : RepositoryBaseAsync<TEntity, int>, IRepositoryAsync<TEntity> where TEntity : class
     {
         #region Constructors
 
@@ -105,7 +105,7 @@
         /// Initializes a new instance of the <see cref="EfRepository{TEntity}" /> class.
         /// </summary>
         /// <param name="context">The database context.</param>
-        public EfRepository(DbContext context) : base(context) { }
+        public EfRepository(DbContext context) : base(new EfContext(context)) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EfRepository{TEntity}"/> class.
@@ -119,7 +119,7 @@
         /// </summary>
         /// <param name="context">The database context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public EfRepository(DbContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+        public EfRepository(DbContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(new EfContext(context), interceptors) { }
 
         #endregion
     }

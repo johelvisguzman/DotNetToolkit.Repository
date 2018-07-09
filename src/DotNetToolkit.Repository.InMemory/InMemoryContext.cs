@@ -1,19 +1,21 @@
 ﻿namespace DotNetToolkit.Repository.InMemory
 {
+    using FetchStrategies;
     using Helpers;
     using Properties;
+    using Queries;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Reflection;
 
     /// <summary>
-    /// Represents an internal in-memory context.
+    /// An implementation of <see cref="IRepositoryContextAsync" />.
     /// </summary>
-    /// <seealso cref="System.IDisposable" />
-    internal class InMemoryContext : IDisposable
+    internal class InMemoryContext : IRepositoryContext
     {
         #region Fields
 
@@ -50,7 +52,22 @@
 
         #endregion
 
-        #region Public Methods
+        #region Private Methods
+
+        private void ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(object[] keyValues) where TEntity : class
+        {
+            if (keyValues.Length != ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Count())
+                throw new ArgumentException(DotNetToolkit.Repository.Properties.Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
+        }
+
+        private IQueryable<TEntity> GetQuery<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
+        {
+            return options != null ? options.Apply(AsQueryable<TEntity>(options.FetchStrategy)) : AsQueryable<TEntity>();
+        }
+
+        #endregion
+
+        #region Implementation of IRepositoryContext
 
         /// <summary>
         /// Tracks the specified entity in memory and will be inserted into the database when <see cref="SaveChanges" /> is called..
@@ -86,7 +103,7 @@
         /// Saves all changes made in this context to the database.
         /// </summary>
         /// <returns>The number of state entries written to the database.</returns>
-        public int SaveChanges()
+        public virtual int SaveChanges()
         {
             var context = InMemoryCache.Instance.GetContext(DatabaseName);
             var count = 0;
@@ -138,15 +155,42 @@
         }
 
         /// <summary>
-        /// Finds an entity in the in-memory context with the specified key values and entity type.
+        /// Returns the entity <see cref="T:System.Linq.IQueryable`1" />.
         /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <param name="keyValues">The key values.</param>
-        /// <returns>The entity found.</returns>
-        public TEntity Find<TEntity>(params object[] keyValues) where TEntity : class
+        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
+        /// <returns>The entity <see cref="T:System.Linq.IQueryable`1" />.</returns>
+        public virtual IQueryable<TEntity> AsQueryable<TEntity>() where TEntity : class
         {
-            if (keyValues.Length != ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Count())
-                throw new ArgumentException(DotNetToolkit.Repository.Properties.Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
+            return InMemoryCache.Instance.
+                GetContext(DatabaseName).
+                Select(x => (TEntity)Convert.ChangeType(x, typeof(TEntity)))
+                .AsQueryable();
+        }
+
+        /// <summary>
+        /// Returns the entity <see cref="T:System.Linq.IQueryable`1" /> using the specified fetching strategy.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
+        /// <param name="fetchStrategy"></param>
+        /// <returns>The entity <see cref="T:System.Linq.IQueryable`1" />.</returns>
+        public IQueryable<TEntity> AsQueryable<TEntity>(IFetchStrategy<TEntity> fetchStrategy) where TEntity : class
+        {
+            return AsQueryable<TEntity>();
+        }
+
+        /// <summary>
+        /// Finds an entity with the given primary key values in the repository.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
+        /// <returns>The entity found in the repository.</returns>
+        public virtual TEntity Find<TEntity>(IFetchStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
+        {
+            if (keyValues == null)
+                throw new ArgumentNullException(nameof(keyValues));
+
+            ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
 
             object key;
 
@@ -175,13 +219,114 @@
         }
 
         /// <summary>
-        /// Finds a collection of entities in the in-memory context of the specified type.
+        /// Finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.
         /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <returns>The collection of entities in the in-memory context of the specified type.</returns>
-        public IEnumerable<TEntity> FindAll<TEntity>() where TEntity : class
+        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
+        /// <typeparam name="TResult">The type of the value returned by selector.</typeparam>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="selector">A function to project each entity into a new form.</param>
+        /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
+        public TResult Find<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
         {
-            return InMemoryCache.Instance.GetContext(DatabaseName).Select(y => (TEntity)Convert.ChangeType(y.Value, typeof(TEntity)));
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
+
+            if (selector == null)
+                throw new ArgumentNullException(nameof(selector));
+
+            return GetQuery(options).Select(selector).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
+        /// <typeparam name="TResult">The type of the value returned by selector.</typeparam>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="selector">A function to project each entity into a new form.</param>
+        /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
+        public IEnumerable<TResult> FindAll<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
+        {
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
+
+            if (selector == null)
+                throw new ArgumentNullException(nameof(selector));
+
+            return GetQuery(options).Select(selector).ToList();
+        }
+
+        /// <summary>
+        /// Returns the number of entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        public int Count<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
+        {
+            return GetQuery(options).Count();
+        }
+
+        /// <summary>
+        /// Determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="options" />.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
+        public bool Exists<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
+        {
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
+
+            return GetQuery(options).Any();
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="T:System.Collections.Generic.Dictionary`2" /> according to the specified <paramref name="keySelector" />, and an element selector function with entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
+        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
+        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
+        /// <returns>A new <see cref="T:System.Collections.Generic.Dictionary`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        public Dictionary<TDictionaryKey, TElement> ToDictionary<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector) where TEntity : class
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            if (elementSelector == null)
+                throw new ArgumentNullException(nameof(elementSelector));
+
+            var keySelectFunc = keySelector.Compile();
+            var elementSelectorFunc = elementSelector.Compile();
+
+            return GetQuery(options).ToDictionary(keySelectFunc, elementSelectorFunc, EqualityComparer<TDictionaryKey>.Default);
+        }
+
+        /// <summary>
+        /// Returns a new <see cref="T:System.Collections.Generic.IEnumerable`1" /> according to the specified <paramref name="keySelector" />, and an element selector function.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
+        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
+        /// <typeparam name="TResult">The type of the value returned by resultSelector.</typeparam>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="resultSelector">A function to project each entity into a new form</param>
+        /// <returns>A new <see cref="T:System.Linq.IGrouping`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        public IEnumerable<TResult> GroupBy<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector) where TEntity : class
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            if (resultSelector == null)
+                throw new ArgumentNullException(nameof(resultSelector));
+
+            var keySelectFunc = keySelector.Compile();
+            var resultSelectorFunc = resultSelector.Compile();
+
+            return GetQuery(options).GroupBy(keySelectFunc, EqualityComparer<TGroupKey>.Default).Select(resultSelectorFunc).ToList();
         }
 
         /// <summary>
