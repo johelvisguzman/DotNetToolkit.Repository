@@ -208,6 +208,22 @@
         }
     }
 
+    internal class IdentityExpression<TElement>
+    {
+        public static Expression<Func<TElement, TElement>> Instance
+        {
+            get { return x => x; }
+        }
+    }
+
+    internal class IdentityFunction<TElement>
+    {
+        public static Func<TElement, TElement> Instance
+        {
+            get { return x => x; }
+        }
+    }
+
     class ParameterRebinder : ExpressionVisitor
     {
         readonly Dictionary<ParameterExpression, ParameterExpression> map;

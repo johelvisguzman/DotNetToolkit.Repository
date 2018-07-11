@@ -128,7 +128,7 @@
     </Style>
 
     <Style TargetType="DataGridCell" BasedOn="{StaticResource MetroDataGridCell}">
-        <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self},Path=Content.Text}"/>
+        <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self},Path=Content.Text}" />
     </Style>
 
     <Style x:Key="NavigateAzureToggleButtonStyle" TargetType="{x:Type ToggleButton}">

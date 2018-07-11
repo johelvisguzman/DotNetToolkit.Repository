@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.EntityFrameworkCore
 {
-    using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Storage;
     using System;
     using Transactions;
@@ -23,15 +22,15 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EfCoreTransactionManager"/> class.
+        /// Initializes a new instance of the <see cref="EfCoreTransactionManager" /> class.
         /// </summary>
-        /// <param name="context">The database context.</param>
-        public EfCoreTransactionManager(DbContext context)
+        /// <param name="transaction">The underlying transaction.</param>
+        public EfCoreTransactionManager(IDbContextTransaction transaction)
         {
-            if (context == null)
-                throw new ArgumentNullException(nameof(context));
+            if (transaction == null)
+                throw new ArgumentNullException(nameof(transaction));
 
-            Transaction = context.Database.BeginTransaction();
+            Transaction = transaction;
         }
 
         #endregion

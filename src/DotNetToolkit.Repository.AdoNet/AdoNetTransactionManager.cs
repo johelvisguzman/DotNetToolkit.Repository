@@ -22,15 +22,15 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AdoNetTransactionManager"/> class.
+        /// Initializes a new instance of the <see cref="AdoNetTransactionManager" /> class.
         /// </summary>
-        /// <param name="context">The context.</param>
-        public AdoNetTransactionManager(AdoNetContext context)
+        /// <param name="transaction">The underlying transaction.</param>
+        public AdoNetTransactionManager(DbTransaction transaction)
         {
-            if (context == null)
-                throw new ArgumentNullException(nameof(context));
+            if (transaction == null)
+                throw new ArgumentNullException(nameof(transaction));
 
-            Transaction = context.BeginTransaction();
+            Transaction = transaction;
         }
 
         #endregion

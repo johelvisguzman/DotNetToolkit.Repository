@@ -129,4 +129,10 @@
   <data name="EntityNotFoundInStore" xml:space="preserve">
     <value>Attempted to update or delete an entity that does not exist in the in-memory store.</value>
   </data>
+  <data name="InvalidFileExtension" xml:space="preserve">
+    <value>The specified '{0}' file extension is not valid.</value>
+  </data>
+  <data name="TransactionNotSupported" xml:space="preserve">
+    <value>The repository context does not support transactions.</value>
+  </data>
 </root>

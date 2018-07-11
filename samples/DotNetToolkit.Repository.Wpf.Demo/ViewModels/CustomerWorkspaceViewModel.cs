@@ -8,6 +8,7 @@
     using Models;
     using System;
     using System.Collections.ObjectModel;
+    using Factories;
 
     public class CustomerWorkspaceViewModel : ViewModelBase
     {
@@ -15,6 +16,8 @@
 
         private ObservableCollection<CustomerFormViewModel> _customers;
         private readonly NavigationController _navigator;
+
+        private readonly IRepositoryFactory _repositoryFactory;
 
         #endregion
 
@@ -43,6 +46,8 @@
             DeleteCommand = new RelayCommand<CustomerFormViewModel>(OnDelete);
             DisplayName = "Customers";
             _navigator = NavigationController.Instance;
+
+            _repositoryFactory = new RepositoryFactory(() => new InMemoryRepositoryContext());
         }
 
         #endregion
@@ -58,7 +63,7 @@
             viewModel.IsDirty = false;
             viewModel.Submitted += async (sender, e) =>
             {
-                var repo = new InMemoryRepository<Customer>();
+                var repo = _repositoryFactory.Create<Customer>();
                 var model = new Customer();
 
                 AutoMapper.Map(viewModel, model);
@@ -91,7 +96,7 @@
             {
                 AutoMapper.Map(copy, viewModel);
 
-                var repo = new InMemoryRepository<Customer>();
+                var repo = _repositoryFactory.Create<Customer>();
                 var model = repo.Get(viewModel.Id);
 
                 AutoMapper.Map(viewModel, model);
@@ -118,7 +123,7 @@
             if (await DialogController.Instance.ShowWarningMessageAsync(
                     $"Do you wish to delete item '{viewModel.Id}'?") == MessageDialogResult.Affirmative)
             {
-                var repo = new InMemoryRepository<Customer>();
+                var repo = _repositoryFactory.Create<Customer>();
 
                 repo.Delete(viewModel.Id);
 
@@ -166,7 +171,7 @@
 
         private void Refresh()
         {
-            var repo = new InMemoryRepository<Customer>();
+            var repo = _repositoryFactory.Create<Customer>();
             var data = repo.FindAll<CustomerFormViewModel>(x => AutoMapper.Map<Customer, CustomerFormViewModel>(x));
 
             Customers = new ObservableCollection<CustomerFormViewModel>(data);

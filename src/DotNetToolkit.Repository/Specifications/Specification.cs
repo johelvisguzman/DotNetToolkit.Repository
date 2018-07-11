@@ -75,20 +75,20 @@
         public Expression<Func<T, bool>> Predicate { get; }
 
         /// <summary>
-        /// Returns a collection of entities that satisfied the criteria specified by the <see cref="ISpecification{T}.Predicate"/> from the query.
+        /// Returns a collection of entities that satisfied the criteria specified by the <see cref="ISpecification{T}.Predicate" /> from the query.
         /// </summary>
         /// <param name="query">The entity query.</param>
-        /// <returns>The collection of entities that satisfied the criteria specified by the <see cref="ISpecification{T}.Predicate"/> from the query.</returns>
+        /// <returns>The collection of entities that satisfied the criteria specified by the <see cref="ISpecification{T}.Predicate" /> from the query.</returns>
         public virtual IQueryable<T> SatisfyingEntitiesFrom(IQueryable<T> query)
         {
             return Predicate == null ? query : query.Where(Predicate);
         }
 
         /// <summary>
-        /// Determines wheter the entity that satisfied the criteria specified by the <see cref="ISpecification{T}.Predicate"/>.
+        /// Determines wheter the entity that satisfied the criteria specified by the <see cref="ISpecification{T}.Predicate" />.
         /// </summary>
         /// <param name="entity">The entity to test.</param>
-        /// <returns><c>true</c> if the entity satisfied the criteria specified by the <see cref="ISpecification{T}.Predicate"/>; otherwise, <c>false</c>.</returns>
+        /// <returns><c>true</c> if the entity satisfied the criteria specified by the <see cref="ISpecification{T}.Predicate" />; otherwise, <c>false</c>.</returns>
         public bool IsSatisfiedBy(T entity)
         {
             return Predicate == null || new[] { entity }.AsQueryable().Any(Predicate);

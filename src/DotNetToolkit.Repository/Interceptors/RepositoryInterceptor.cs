@@ -18,12 +18,12 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryInterceptor"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryInterceptor" /> class.
         /// </summary>
         public RepositoryInterceptor() { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryInterceptor"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryInterceptor" /> class.
         /// </summary>
         /// <param name="logger">The logger.</param>
         public RepositoryInterceptor(ILogger logger)

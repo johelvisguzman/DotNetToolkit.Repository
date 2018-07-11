@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository
 {
     using FetchStrategies;
+    using Helpers;
     using Interceptors;
     using Properties;
     using Queries;
@@ -14,9 +15,476 @@
     using Wrappers;
 
     /// <summary>
+    /// An implementation of <see cref="IRepositoryAsync{TEntity, TKey1, TKey2, TKey3}" />.
+    /// </summary>
+    public abstract class RepositoryBaseAsync<TEntity, TKey1, TKey2, TKey3> : RepositoryBaseAsync<TEntity>, IRepositoryAsync<TEntity, TKey1, TKey2, TKey3> where TEntity : class
+    {
+        #region Fields
+
+        private IReadOnlyRepositoryAsync<TEntity, TKey1, TKey2, TKey3> _wrapper;
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity, TKey1, TKey2, TKey3}" /> class.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        protected RepositoryBaseAsync(IRepositoryContextAsync context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity, TKey1, TKey2, TKey3}" /> class.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        protected RepositoryBaseAsync(IRepositoryContextAsync context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+
+        #endregion
+
+        #region Implementation of IReadOnlyRepositoryAsync<TEntity, TKey1, TKey2, TKey3>
+
+        /// <summary>
+        /// Asynchronously determines whether the repository contains an entity with the given primary key value
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        public async Task<bool> ExistsAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
+        {
+            try
+            {
+                if (key1 == null)
+                    throw new ArgumentNullException(nameof(key1));
+
+                if (key2 == null)
+                    throw new ArgumentNullException(nameof(key2));
+
+                if (key3 == null)
+                    throw new ArgumentNullException(nameof(key3));
+
+                return await GetAsync(key1, key2, key3, cancellationToken) != null;
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously gets an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return GetAsync(key1, key2, key3, (IFetchStrategy<TEntity>)null, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously gets an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        {
+            try
+            {
+                if (key1 == null)
+                    throw new ArgumentNullException(nameof(key1));
+
+                if (key2 == null)
+                    throw new ArgumentNullException(nameof(key2));
+
+                if (key3 == null)
+                    throw new ArgumentNullException(nameof(key3));
+
+                return Context.FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2, key3);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
+        }
+
+        #endregion
+
+        #region Implementation of IReadOnlyRepository<TEntity, TKey1, TKey2, TKey3>
+
+        /// <summary>
+        /// Gets an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <return>The entity found.</return>
+        public TEntity Get(TKey1 key1, TKey2 key2, TKey3 key3)
+        {
+            return Get(key1, key2, key3, (IFetchStrategy<TEntity>)null);
+        }
+
+        /// <summary>
+        /// Gets an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <return>The entity found.</return>
+        public TEntity Get(TKey1 key1, TKey2 key2, TKey3 key3, IFetchStrategy<TEntity> fetchStrategy)
+        {
+            try
+            {
+                if (key1 == null)
+                    throw new ArgumentNullException(nameof(key1));
+
+                if (key2 == null)
+                    throw new ArgumentNullException(nameof(key2));
+
+                if (key3 == null)
+                    throw new ArgumentNullException(nameof(key3));
+
+                return Context.Find<TEntity>(fetchStrategy, key1, key2, key3);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the repository contains an entity with the given primary key value
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        public bool Exists(TKey1 key1, TKey2 key2, TKey3 key3)
+        {
+            return Get(key1, key2, key3) != null;
+        }
+
+        #endregion
+
+        #region Implementation of IRepository<TEntity, TKey1, TKey2, TKey3>
+
+        /// <summary>
+        /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey}" /> wrapper for the current repository.
+        /// </summary>
+        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
+        public IReadOnlyRepository<TEntity, TKey1, TKey2, TKey3> AsReadOnly()
+        {
+            return AsReadOnlyAsync();
+        }
+
+        /// <summary>
+        /// Deletes an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        public void Delete(TKey1 key1, TKey2 key2, TKey3 key3)
+        {
+            var entity = Get(key1, key2, key3);
+
+            if (entity == null)
+            {
+                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3));
+
+                Intercept(x => x.Error(ex));
+
+                throw ex;
+            }
+
+            Delete(entity);
+        }
+
+        #endregion
+
+        #region Implementation of IRepositoryAsync<TEntity, TKey1, TKey2, TKey3>
+
+        /// <summary>
+        /// Returns a read-only asynchronous <see cref="IReadOnlyRepository{TEntity, TKey}" /> wrapper for the current repository.
+        /// </summary>
+        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
+        public IReadOnlyRepositoryAsync<TEntity, TKey1, TKey2, TKey3> AsReadOnlyAsync()
+        {
+            return _wrapper ?? (_wrapper = new ReadOnlyRepositoryAsync<TEntity, TKey1, TKey2, TKey3>(this));
+        }
+
+        /// <summary>
+        /// Asynchronously deletes an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        public async Task DeleteAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var entity = await GetAsync(key1, key2, key3, cancellationToken);
+
+            if (entity == null)
+            {
+                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3));
+
+                Intercept(x => x.Error(ex));
+
+                throw ex;
+            }
+
+            await DeleteAsync(entity, cancellationToken);
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// An implementation of <see cref="IRepositoryAsync{TEntity, TKey1, TKey2}" />.
+    /// </summary>
+    public abstract class RepositoryBaseAsync<TEntity, TKey1, TKey2> : RepositoryBaseAsync<TEntity>, IRepositoryAsync<TEntity, TKey1, TKey2> where TEntity : class
+    {
+        #region Fields
+
+        private IReadOnlyRepositoryAsync<TEntity, TKey1, TKey2> _wrapper;
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity, TKey1, TKey2}" /> class.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        protected RepositoryBaseAsync(IRepositoryContextAsync context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity, TKey1, TKey2}" /> class.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        protected RepositoryBaseAsync(IRepositoryContextAsync context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+
+        #endregion
+
+        #region Implementation of IReadOnlyRepositoryAsync<TEntity, TKey1, TKey2>
+
+        /// <summary>
+        /// Asynchronously determines whether the repository contains an entity with the given primary key value
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        public async Task<bool> ExistsAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
+        {
+            try
+            {
+                if (key1 == null)
+                    throw new ArgumentNullException(nameof(key1));
+
+                if (key2 == null)
+                    throw new ArgumentNullException(nameof(key2));
+
+                return await GetAsync(key1, key2, cancellationToken) != null;
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously gets an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return GetAsync(key1, key2, (IFetchStrategy<TEntity>)null, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously gets an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        {
+            try
+            {
+                if (key1 == null)
+                    throw new ArgumentNullException(nameof(key1));
+
+                if (key2 == null)
+                    throw new ArgumentNullException(nameof(key2));
+
+                return Context.FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
+        }
+
+        #endregion
+
+        #region Implementation of IReadOnlyRepository<TEntity, TKey1, TKey2>
+
+        /// <summary>
+        /// Gets an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <return>The entity found.</return>
+        public TEntity Get(TKey1 key1, TKey2 key2)
+        {
+            return Get(key1, key2, (IFetchStrategy<TEntity>)null);
+        }
+
+        /// <summary>
+        /// Gets an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <return>The entity found.</return>
+        public TEntity Get(TKey1 key1, TKey2 key2, IFetchStrategy<TEntity> fetchStrategy)
+        {
+            try
+            {
+                if (key1 == null)
+                    throw new ArgumentNullException(nameof(key1));
+
+                if (key2 == null)
+                    throw new ArgumentNullException(nameof(key2));
+
+                return Context.Find<TEntity>(fetchStrategy, key1, key2);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the repository contains an entity with the given primary key value
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        public bool Exists(TKey1 key1, TKey2 key2)
+        {
+            return Get(key1, key2) != null;
+        }
+
+        #endregion
+
+        #region Implementation of IRepository<TEntity, TKey1, TKey2>
+
+        /// <summary>
+        /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey}" /> wrapper for the current repository.
+        /// </summary>
+        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
+        public IReadOnlyRepository<TEntity, TKey1, TKey2> AsReadOnly()
+        {
+            return AsReadOnlyAsync();
+        }
+
+        /// <summary>
+        /// Deletes an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        public void Delete(TKey1 key1, TKey2 key2)
+        {
+            var entity = Get(key1, key2);
+
+            if (entity == null)
+            {
+                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2));
+
+                Intercept(x => x.Error(ex));
+
+                throw ex;
+            }
+
+            Delete(entity);
+        }
+
+        #endregion
+
+        #region Implementation of IRepositoryAsync<TEntity, TKey1, TKey2>
+
+        /// <summary>
+        /// Returns a read-only asynchronous <see cref="IReadOnlyRepository{TEntity, TKey}" /> wrapper for the current repository.
+        /// </summary>
+        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
+        public IReadOnlyRepositoryAsync<TEntity, TKey1, TKey2> AsReadOnlyAsync()
+        {
+            return _wrapper ?? (_wrapper = new ReadOnlyRepositoryAsync<TEntity, TKey1, TKey2>(this));
+        }
+
+        /// <summary>
+        /// Asynchronously deletes an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        public async Task DeleteAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var entity = await GetAsync(key1, key2, cancellationToken);
+
+            if (entity == null)
+            {
+                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2));
+
+                Intercept(x => x.Error(ex));
+
+                throw ex;
+            }
+
+            await DeleteAsync(entity, cancellationToken);
+        }
+
+        #endregion
+    }
+
+    /// <summary>
     /// An implementation of <see cref="IRepositoryAsync{TEntity, TKey}" />.
     /// </summary>
-    public abstract class RepositoryBaseAsync<TEntity, TKey> : RepositoryBase<TEntity, TKey>, IRepositoryAsync<TEntity, TKey> where TEntity : class
+    public abstract class RepositoryBaseAsync<TEntity, TKey> : RepositoryBaseAsync<TEntity>, IRepositoryAsync<TEntity, TKey> where TEntity : class
     {
         #region Fields
 
@@ -27,71 +495,238 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity, TKey}"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity, TKey}" /> class.
         /// </summary>
-        protected RepositoryBaseAsync() { }
+        /// <param name="context">The context.</param>
+        protected RepositoryBaseAsync(IRepositoryContextAsync context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity, TKey}"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity, TKey}" /> class.
         /// </summary>
+        /// <param name="context">The context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        protected RepositoryBaseAsync(IEnumerable<IRepositoryInterceptor> interceptors) : base(interceptors) { }
+        protected RepositoryBaseAsync(IRepositoryContextAsync context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
 
         #endregion
 
-        #region Protected Methods
+        #region Implementation of IReadOnlyRepositoryAsync<TEntity, TKey>
 
         /// <summary>
-        /// A protected asynchronous overridable method for saving changes made in the current unit of work in the repository.
+        /// Asynchronously determines whether the repository contains an entity with the given primary key value
         /// </summary>
-        protected abstract Task SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken());
-
-        /// <summary>
-        /// Asynchronously gets an entity query with the given primary key value from the repository.
-        /// </summary>
-        protected virtual Task<TEntity> GetEntityAsync(TKey key, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        /// <param name="key">The value of the primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        public async Task<bool> ExistsAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
-            var options = new QueryOptions<TEntity>().SatisfyBy(GetByPrimaryKeySpecification(key));
+            try
+            {
+                if (key == null)
+                    throw new ArgumentNullException(nameof(key));
 
-            if (fetchStrategy != null)
-                options.Fetch(fetchStrategy);
+                return await GetAsync(key, cancellationToken) != null;
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
 
-            return GetEntityAsync(options, IdentityExpression<TEntity>.Instance, cancellationToken);
+                throw;
+            }
         }
 
         /// <summary>
-        /// A protected asynchronous overridable method for getting an entity that satisfies the criteria specified by the <paramref name="options" /> from the repository.
+        /// Asynchronously gets an entity with the given primary key value in the repository.
         /// </summary>
-        protected abstract Task<TResult> GetEntityAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken());
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        public Task<TEntity> GetAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return GetAsync(key, (IFetchStrategy<TEntity>)null, cancellationToken);
+        }
 
         /// <summary>
-        /// A protected asynchronous overridable method for getting a collection of entities that satisfies the criteria specified by the <paramref name="options" /> from the repository.
+        /// Asynchronously gets an entity with the given primary key value in the repository.
         /// </summary>
-        protected abstract Task<IEnumerable<TResult>> GetEntitiesAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken());
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        public Task<TEntity> GetAsync(TKey key, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        {
+            try
+            {
+                if (key == null)
+                    throw new ArgumentNullException(nameof(key));
+
+                return Context.FindAsync<TEntity>(cancellationToken, fetchStrategy, key);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
+        }
+
+        #endregion
+
+        #region Implementation of IReadOnlyRepository<TEntity, TKey>
 
         /// <summary>
-        /// A protected asynchronous overridable method for getting the number of entities that satisfies the criteria specified by the <paramref name="options" /> from the repository.
+        /// Gets an entity with the given primary key value in the repository.
         /// </summary>
-        protected abstract Task<int> GetCountAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken());
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <return>The entity found.</return>
+        public TEntity Get(TKey key)
+        {
+            return Get(key, (IFetchStrategy<TEntity>)null);
+        }
 
         /// <summary>
-        /// A protected asynchronous overridable method for determining whether the repository contains an entity that satisfies the criteria specified by the <paramref name="options" /> from the repository.
+        /// Gets an entity with the given primary key value in the repository.
         /// </summary>
-        protected abstract Task<bool> GetExistAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken());
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <return>The entity found.</return>
+        public TEntity Get(TKey key, IFetchStrategy<TEntity> fetchStrategy)
+        {
+            try
+            {
+                if (key == null)
+                    throw new ArgumentNullException(nameof(key));
+
+                return Context.Find<TEntity>(fetchStrategy, key);
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
+        }
 
         /// <summary>
-        /// A protected asynchronous overridable method for getting a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
+        /// Determines whether the repository contains an entity with the given primary key value
         /// </summary>
-        protected abstract Task<Dictionary<TDictionaryKey, TElement>> GetDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken());
+        /// <param name="key">The value of the primary key used to match entities against.</param>
+        /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        public bool Exists(TKey key)
+        {
+            return Get(key) != null;
+        }
+
+        #endregion
+
+        #region Implementation of IRepository<TEntity, TKey>
 
         /// <summary>
-        /// A protected asynchronous overridable method for getting a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, an element selector.
+        /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey}" /> wrapper for the current repository.
         /// </summary>
-        protected abstract Task<IEnumerable<TResult>> GetGroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken());
+        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
+        public IReadOnlyRepository<TEntity, TKey> AsReadOnly()
+        {
+            return AsReadOnlyAsync();
+        }
+
+        /// <summary>
+        /// Deletes an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key used to match entities against.</param>
+        public void Delete(TKey key)
+        {
+            var entity = Get(key);
+
+            if (entity == null)
+            {
+                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
+
+                Intercept(x => x.Error(ex));
+
+                throw ex;
+            }
+
+            Delete(entity);
+        }
 
         #endregion
 
         #region Implementation of IRepositoryAsync<TEntity, TKey>
+
+        /// <summary>
+        /// Returns a read-only asynchronous <see cref="IReadOnlyRepository{TEntity, TKey}" /> wrapper for the current repository.
+        /// </summary>
+        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
+        public IReadOnlyRepositoryAsync<TEntity, TKey> AsReadOnlyAsync()
+        {
+            return _wrapper ?? (_wrapper = new ReadOnlyRepositoryAsync<TEntity, TKey>(this));
+        }
+
+        /// <summary>
+        /// Asynchronously deletes an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        public async Task DeleteAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var entity = await GetAsync(key, cancellationToken);
+
+            if (entity == null)
+            {
+                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
+
+                Intercept(x => x.Error(ex));
+
+                throw ex;
+            }
+
+            await DeleteAsync(entity, cancellationToken);
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// An implementation of <see cref="IRepositoryBaseAsync{TEntity}" />.
+    /// </summary>
+    public abstract class RepositoryBaseAsync<TEntity> : RepositoryBase<TEntity>, IRepositoryBaseAsync<TEntity> where TEntity : class
+    {
+        #region Properties
+
+        /// <summary>
+        /// Gets the context.
+        /// </summary>
+        internal new IRepositoryContextAsync Context { get; private set; }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity}" /> class.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        protected RepositoryBaseAsync(IRepositoryContextAsync context) : this(context, (IEnumerable<IRepositoryInterceptor>)null)
+        {
+            Context = context;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryBaseAsync{TEntity}" /> class.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        protected RepositoryBaseAsync(IRepositoryContextAsync context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors)
+        {
+            Context = context;
+        }
+
+        #endregion
+
+        #region Implementation of IRepositoryAsync<TEntity>
 
         /// <summary>
         /// Asynchronously returns the number of entities contained in the repository.
@@ -122,7 +757,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public Task<int> CountAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptError<Task<int>>(() => GetCountAsync(options, cancellationToken));
+            return InterceptError<Task<int>>(() => Context.CountAsync<TEntity>(options, cancellationToken));
         }
 
         /// <summary>
@@ -176,22 +811,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            try
-            {
-                if (keySelector == null)
-                    throw new ArgumentNullException(nameof(keySelector));
-
-                if (elementSelector == null)
-                    throw new ArgumentNullException(nameof(elementSelector));
-
-                return GetDictionaryAsync<TDictionaryKey, TElement>(options, keySelector, elementSelector, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return InterceptError<Task<Dictionary<TDictionaryKey, TElement>>>(() => Context.ToDictionaryAsync(options, keySelector, elementSelector, cancellationToken));
         }
 
         /// <summary>
@@ -220,31 +840,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public Task<IEnumerable<TResult>> GroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            try
-            {
-                if (keySelector == null)
-                    throw new ArgumentNullException(nameof(keySelector));
-
-                if (resultSelector == null)
-                    throw new ArgumentNullException(nameof(resultSelector));
-
-                return GetGroupByAsync<TGroupKey, TResult>(options, keySelector, resultSelector, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Returns a read-only <see cref="IReadOnlyRepositoryAsync{TEntity, TKey}" /> wrapper for the current repository.
-        /// </summary>
-        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
-        public IReadOnlyRepositoryAsync<TEntity, TKey> AsReadOnlyAsync()
-        {
-            return _wrapper ?? (_wrapper = new ReadOnlyRepositoryAsync<TEntity, TKey>(this));
+            return InterceptError<Task<IEnumerable<TResult>>>(() => Context.GroupByAsync(options, keySelector, resultSelector, cancellationToken));
         }
 
         /// <summary>
@@ -264,7 +860,7 @@
 
                 InterceptAddItem(entity);
 
-                await SaveChangesAsync(cancellationToken);
+                await Context.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -294,7 +890,7 @@
 
                 InterceptAddItem(entities);
 
-                await SaveChangesAsync(cancellationToken);
+                await Context.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -321,7 +917,7 @@
 
                 InterceptUpdateItem(entity);
 
-                await SaveChangesAsync(cancellationToken);
+                await Context.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -351,7 +947,7 @@
 
                 InterceptUpdateItem(entities);
 
-                await SaveChangesAsync(cancellationToken);
+                await Context.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -359,30 +955,6 @@
 
                 throw;
             }
-        }
-
-        /// <summary>
-        /// Asynchronously deletes an entity with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key">The value of the primary key used to match entities against.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        public async Task DeleteAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var entity = await GetAsync(key, cancellationToken);
-
-            if (entity == null)
-            {
-                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
-
-                Intercept(x => x.Error(ex));
-
-                throw ex;
-            }
-
-            await DeleteAsync(entity, cancellationToken);
         }
 
         /// <summary>
@@ -402,7 +974,7 @@
 
                 InterceptDeleteItem(entity);
 
-                await SaveChangesAsync(cancellationToken);
+                await Context.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -458,98 +1030,7 @@
 
                 InterceptDeleteItem(entities);
 
-                await SaveChangesAsync(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Asynchronously gets an entity with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key">The value of the primary key for the entity to be found.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <return>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</return>
-        public Task<TEntity> GetAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return GetAsync<TEntity>(key, IdentityExpression<TEntity>.Instance, cancellationToken);
-        }
-
-        /// <summary>
-        /// Asynchronously gets an entity with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key">The value of the primary key for the entity to be found.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <return>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</return>
-        public Task<TEntity> GetAsync(TKey key, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return GetAsync<TEntity>(key, IdentityExpression<TEntity>.Instance, fetchStrategy, cancellationToken);
-        }
-
-        /// <summary>
-        /// Asynchronously gets a specific projected entity result with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key">The value of the primary key for the entity to be found.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public Task<TResult> GetAsync<TResult>(TKey key, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return GetAsync<TResult>(key, selector, (IFetchStrategy<TEntity>)null, cancellationToken);
-        }
-
-        /// <summary>
-        /// Asynchronously gets a specific projected entity result with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key">The value of the primary key for the entity to be found.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public Task<TResult> GetAsync<TResult>(TKey key, Expression<Func<TEntity, TResult>> selector, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
-        {
-            try
-            {
-                if (key == null)
-                    throw new ArgumentNullException(nameof(key));
-
-                if (selector == null)
-                    throw new ArgumentNullException(nameof(selector));
-
-                var options = new QueryOptions<TEntity>().SatisfyBy(GetByPrimaryKeySpecification(key));
-
-                if (fetchStrategy != null)
-                    options.Fetch(fetchStrategy);
-
-                return GetEntityAsync<TResult>(options, selector, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Asynchronously determines whether the repository contains an entity with the given primary key value
-        /// </summary>
-        /// <param name="key">The value of the primary key used to match entities against.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
-        public Task<bool> ExistsAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
-        {
-            try
-            {
-                if (key == null)
-                    throw new ArgumentNullException(nameof(key));
-
-                return GetExistAsync(new QueryOptions<TEntity>().SatisfyBy(GetByPrimaryKeySpecification(key)), cancellationToken);
+                await Context.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -602,22 +1083,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public Task<TResult> FindAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            try
-            {
-                if (options == null)
-                    throw new ArgumentNullException(nameof(options));
-
-                if (selector == null)
-                    throw new ArgumentNullException(nameof(selector));
-
-                return GetEntityAsync<TResult>(options, selector, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return InterceptError<Task<TResult>>(() => Context.FindAsync<TEntity, TResult>(options, selector, cancellationToken));
         }
 
         /// <summary>
@@ -684,19 +1150,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public Task<IEnumerable<TResult>> FindAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            try
-            {
-                if (selector == null)
-                    throw new ArgumentNullException(nameof(selector));
-
-                return GetEntitiesAsync<TResult>(options, selector, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return InterceptError<Task<IEnumerable<TResult>>>(() => Context.FindAllAsync<TEntity, TResult>(options, selector, cancellationToken));
         }
 
         /// <summary>
@@ -718,19 +1172,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
         public Task<bool> ExistsAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            try
-            {
-                if (options == null)
-                    throw new ArgumentNullException(nameof(options));
-
-                return GetExistAsync(options, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return InterceptError<Task<bool>>(() => Context.ExistsAsync<TEntity>(options, cancellationToken));
         }
 
         #endregion

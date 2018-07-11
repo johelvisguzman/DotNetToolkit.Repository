@@ -7,7 +7,7 @@
 
     public class TestAdoNetContextFactory
     {
-        public static AdoNetContext Create()
+        public static AdoNetRepositoryContext Create()
         {
             var currentFile = TestPathHelper.GetTempFileName();
 
@@ -19,7 +19,7 @@
 
             CreateDatabase(provider, connectionString);
 
-            return new AdoNetContext(provider, connectionString);
+            return new AdoNetRepositoryContext(provider, connectionString);
         }
 
         private static void CreateDatabase(string provider, string connectionString)
@@ -40,6 +40,48 @@
                                             Id int IDENTITY PRIMARY KEY,
                                             Name nvarchar (100),
                                             AddressId int)";
+
+                    var result = command.ExecuteNonQuery();
+                }
+
+                using (var command = factory.CreateCommand())
+                {
+                    command.CommandType = CommandType.Text;
+                    command.Connection = connection;
+                    command.CommandText = @"CREATE TABLE CustomerWithTwoCompositePrimaryKeys (
+                                            Id1 int,
+                                            Id2 int,
+                                            Name nvarchar (100),
+                                            PRIMARY KEY (Id1, Id2))";
+
+                    var result = command.ExecuteNonQuery();
+                }
+
+                using (var command = factory.CreateCommand())
+                {
+                    command.CommandType = CommandType.Text;
+                    command.Connection = connection;
+                    command.CommandText = @"CREATE TABLE CustomerWithThreeCompositePrimaryKeys (
+                                            Id1 int,
+                                            Id2 int,
+                                            Id3 int,
+                                            Name nvarchar (100),
+                                            PRIMARY KEY (Id1, Id2, Id3))";
+
+                    var result = command.ExecuteNonQuery();
+                }
+
+                using (var command = factory.CreateCommand())
+                {
+                    command.CommandType = CommandType.Text;
+                    command.Connection = connection;
+                    command.CommandText = @"CREATE TABLE CustomerCompositeAddresses (
+                                            Id int,
+                                            CustomerId int,
+                                            Street nvarchar (100),
+                                            City nvarchar (100),
+                                            State nvarchar (2),
+                                            PRIMARY KEY (Id, CustomerId))";
 
                     var result = command.ExecuteNonQuery();
                 }

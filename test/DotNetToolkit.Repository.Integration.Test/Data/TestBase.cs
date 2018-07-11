@@ -1,112 +1,64 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Data
 {
+    using Csv;
+    using EntityFrameworkCore;
     using Factories;
+    using InMemory;
+    using Json;
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using Xml;
 
     public abstract class TestBase
     {
         protected static void ForAllRepositoryFactories(Action<IRepositoryFactory> action)
         {
-            GetRepositoryFactories().ForEach(action);
+            GetRepositoryContextFactories().ToList().ForEach(x => action(new RepositoryFactory(x)));
         }
 
         protected static void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactoryAsync, Task> action)
         {
-            foreach (var repo in GetRepositoryFactories())
-            {
-                var repoAsync = repo as IRepositoryFactoryAsync;
-
-                if (repoAsync != null)
-                {
-                    action(repoAsync);
-                }
-            }
-        }
-
-        protected static void ForAllRepositoriesInMemory(Action<InMemory.InMemoryRepository<Customer, int>> action)
-        {
-            GetRepositoryFactories().OfType<InMemory.InMemoryRepository<Customer, int>>().ToList().ForEach(action);
-        }
-
-        protected static void ForAllRepositoryFactoriesInMemoryFileBased(Action<IRepositoryFactory> action)
-        {
-            GetInMemoryFileBasedRepositoryFactories().ForEach(action);
+            GetRepositoryContextFactoriesAsync().ToList().ForEach(x => action(new RepositoryFactoryAsync(x)));
         }
 
         protected static void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory> action)
         {
-            GetUnitOfWorkFactories().ForEach(action);
+            GetRepositoryContextFactories().ToList().ForEach(x =>
+            {
+                // the in memory context will not support transactions currently
+                if (x() is InMemoryRepositoryContext || x() is EfCoreRepositoryContext)
+                    return;
+
+                action(new UnitOfWorkFactory(x));
+            });
         }
 
-        protected static void ForAllUnitOfWorkFactoriesAsync(Func<IUnitOfWorkFactoryAsync, Task> action)
+        protected static IEnumerable<Func<IRepositoryContextAsync>> GetRepositoryContextFactoriesAsync()
         {
-            foreach (var uowFactory in GetUnitOfWorkFactories())
+            return new List<Func<IRepositoryContextAsync>>
             {
-                var uowFactoryAsync = uowFactory as IUnitOfWorkFactoryAsync;
-
-                if (uowFactoryAsync != null)
-                {
-                    action(uowFactoryAsync);
-                }
-            }
-        }
-
-        protected static IRepository<Customer> CreateRepositoryInstanceOfType(Type type, object arg)
-        {
-            try
-            {
-                return (IRepository<Customer>)Activator.CreateInstance(type, arg);
-            }
-            catch (Exception ex)
-            {
-                throw ex?.InnerException ?? ex;
-            }
-        }
-
-        private static List<IRepositoryFactory> GetInMemoryFileBasedRepositoryFactories()
-        {
-            var path = Path.GetTempPath() + Guid.NewGuid().ToString("N");
-
-            return new List<IRepositoryFactory>
-            {
-                new Json.JsonRepositoryFactory(path),
-                new Xml.XmlRepositoryFactory(path),
-                new Csv.CsvRepositoryFactory(path)
+                () => TestAdoNetContextFactory.Create(),
+                () => TestEfCoreDbContextFactory.Create(),
+                () => TestEfDbContextFactory.Create()
             };
         }
 
-        private static List<IRepositoryFactory> GetRepositoryFactories()
+        protected static IEnumerable<Func<IRepositoryContext>> GetRepositoryContextFactories()
         {
-            var adoNetContext = TestAdoNetContextFactory.Create();
-            var efCoreContext = new TestEfCoreDbContext(Guid.NewGuid().ToString());
-            var efContext = TestEfDbContextFactory.Create();
-
-            var repos = new List<IRepositoryFactory>
+            var contexts = new List<Func<IRepositoryContext>>
             {
-                new InMemory.InMemoryRepositoryFactory(Guid.NewGuid().ToString()),
-                new EntityFramework.EfRepositoryFactory(() => efContext),
-                new EntityFrameworkCore.EfCoreRepositoryFactory(() => efCoreContext),
-                new AdoNet.AdoNetRepositoryFactory(() => adoNetContext)
+                () => new InMemoryRepositoryContext(Guid.NewGuid().ToString()),
+                () => new CsvRepositoryContext(Path.GetTempPath() + Guid.NewGuid().ToString("N")),
+                () => new JsonRepositoryContext(Path.GetTempPath() + Guid.NewGuid().ToString("N")),
+                () => new XmlRepositoryContext(Path.GetTempPath() + Guid.NewGuid().ToString("N"))
             };
 
-            repos.AddRange(GetInMemoryFileBasedRepositoryFactories());
+            contexts.AddRange(GetRepositoryContextFactoriesAsync());
 
-            return repos;
-        }
-
-        private static List<IUnitOfWorkFactory> GetUnitOfWorkFactories()
-        {
-            var uows = new List<IUnitOfWorkFactory>
-            {
-                new EntityFramework.EfUnitOfWorkFactory(TestEfDbContextFactory.Create),
-                new AdoNet.AdoNetUnitOfWorkFactory(TestAdoNetContextFactory.Create)
-            };
-
-            return uows;
+            return contexts;
         }
     }
 }

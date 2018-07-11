@@ -22,15 +22,15 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EfTransactionManager"/> class.
+        /// Initializes a new instance of the <see cref="EfTransactionManager" /> class.
         /// </summary>
-        /// <param name="context">The database context.</param>
-        public EfTransactionManager(DbContext context)
+        /// <param name="transaction">The underlying transaction.</param>
+        public EfTransactionManager(DbContextTransaction transaction)
         {
-            if (context == null)
-                throw new ArgumentNullException(nameof(context));
+            if (transaction == null)
+                throw new ArgumentNullException(nameof(transaction));
 
-            Transaction = context.Database.BeginTransaction();
+            Transaction = transaction;
         }
 
         #endregion

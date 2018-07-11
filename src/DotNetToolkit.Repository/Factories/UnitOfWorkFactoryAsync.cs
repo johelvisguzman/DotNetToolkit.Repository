@@ -1,8 +1,6 @@
-﻿namespace DotNetToolkit.Repository.EntityFrameworkCore
+﻿namespace DotNetToolkit.Repository.Factories
 {
-    using Factories;
     using Interceptors;
-    using Microsoft.EntityFrameworkCore;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -12,11 +10,11 @@
     /// An implementation of <see cref="IUnitOfWorkFactoryAsync" />.
     /// </summary>
     /// <seealso cref="DotNetToolkit.Repository.Factories.IUnitOfWorkFactoryAsync" />
-    public class EfCoreUnitOfWorkFactory : IUnitOfWorkFactoryAsync
+    public class UnitOfWorkFactoryAsync : IUnitOfWorkFactoryAsync
     {
         #region Fields
 
-        private readonly Func<DbContext> _dbContextFactory;
+        private readonly Func<IRepositoryContextAsync> _contextFactory;
         private readonly IEnumerable<IRepositoryInterceptor> _interceptors;
 
         #endregion
@@ -24,29 +22,29 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EfCoreUnitOfWorkFactory"/> class.
+        /// Initializes a new instance of the <see cref="UnitOfWorkFactoryAsync" /> class.
         /// </summary>
-        /// <param name="dbContextFactory">The database context factory.</param>
-        public EfCoreUnitOfWorkFactory(Func<DbContext> dbContextFactory) : this(dbContextFactory, (IEnumerable<IRepositoryInterceptor>)null) { }
+        /// <param name="contextFactory">The repository context factory.</param>
+        public UnitOfWorkFactoryAsync(Func<IRepositoryContextAsync> contextFactory) : this(contextFactory, (IEnumerable<IRepositoryInterceptor>)null) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EfCoreUnitOfWorkFactory"/> class.
+        /// Initializes a new instance of the <see cref="UnitOfWorkFactoryAsync" /> class.
         /// </summary>
-        /// <param name="dbContextFactory">The database context factory.</param>
+        /// <param name="contextFactory">The repository context factory.</param>
         /// <param name="interceptor">The interceptor.</param>
-        public EfCoreUnitOfWorkFactory(Func<DbContext> dbContextFactory, IRepositoryInterceptor interceptor) : this(dbContextFactory, new List<IRepositoryInterceptor> { interceptor }) { }
+        public UnitOfWorkFactoryAsync(Func<IRepositoryContextAsync> contextFactory, IRepositoryInterceptor interceptor) : this(contextFactory, new List<IRepositoryInterceptor> { interceptor }) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EfCoreUnitOfWorkFactory"/> class.
+        /// Initializes a new instance of the <see cref="UnitOfWorkFactoryAsync" /> class.
         /// </summary>
-        /// <param name="dbContextFactory">The database context factory.</param>
+        /// <param name="contextFactory">The repository context factory.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public EfCoreUnitOfWorkFactory(Func<DbContext> dbContextFactory, IEnumerable<IRepositoryInterceptor> interceptors)
+        public UnitOfWorkFactoryAsync(Func<IRepositoryContextAsync> contextFactory, IEnumerable<IRepositoryInterceptor> interceptors)
         {
-            if (dbContextFactory == null)
-                throw new ArgumentNullException(nameof(dbContextFactory));
+            if (contextFactory == null)
+                throw new ArgumentNullException(nameof(contextFactory));
 
-            _dbContextFactory = dbContextFactory;
+            _contextFactory = contextFactory;
             _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
         }
 
@@ -70,7 +68,7 @@
         /// <returns>The new repository.</returns>
         public T CreateInstance<T>() where T : class
         {
-            var args = new List<object> { _dbContextFactory() };
+            var args = new List<object> { _contextFactory() };
 
             if (_interceptors.Any())
                 args.Add(_interceptors);
@@ -88,7 +86,7 @@
         /// <returns>The new asynchronous unit of work.</returns>
         public IUnitOfWorkAsync CreateAsync()
         {
-            return CreateInstance<EfCoreUnitOfWork>();
+            return CreateInstance<UnitOfWorkAsync>();
         }
 
         #endregion

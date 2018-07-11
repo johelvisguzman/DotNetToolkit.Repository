@@ -26,7 +26,7 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="QueryOptions{T}"/> class.
+        /// Initializes a new instance of the <see cref="QueryOptions{T}" /> class.
         /// </summary>
         public QueryOptions()
         {

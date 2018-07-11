@@ -1,10 +1,13 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Data
 {
+    using EntityFramework;
+    using EntityFrameworkCore;
+    using System;
     using System.Data.Common;
 
     public static class TestEfDbContextFactory
     {
-        public static TestEfDbContext Create()
+        public static EfRepositoryContext Create()
         {
             var currentFile = TestPathHelper.GetTempFileName();
             var connectionString = $"Data Source={currentFile};Persist Security Info=False";
@@ -13,7 +16,15 @@
             conn.ConnectionString = connectionString;
             conn.Open();
 
-            return new TestEfDbContext(conn);
+            return new EfRepositoryContext(new TestEfDbContext(conn));
+        }
+    }
+
+    public static class TestEfCoreDbContextFactory
+    {
+        public static EfCoreRepositoryContext Create()
+        {
+            return new EfCoreRepositoryContext(new TestEfCoreDbContext(Guid.NewGuid().ToString()));
         }
     }
 }

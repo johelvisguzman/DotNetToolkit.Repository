@@ -8,6 +8,8 @@
     {
         public System.Data.Entity.DbSet<Customer> Customers { get; set; }
         public System.Data.Entity.DbSet<CustomerAddress> CustomerAddresses { get; set; }
+        public System.Data.Entity.DbSet<CustomerWithTwoCompositePrimaryKey> CustomersWithTwoCompositePrimaryKey { get; set; }
+        public System.Data.Entity.DbSet<CustomerWithThreeCompositePrimaryKey> CustomersWithThreeCompositePrimaryKey { get; set; }
 
         public TestEfDbContext(DbConnection connection)
             : base(connection, true) { }
@@ -22,6 +24,12 @@
             modelBuilder.Entity<Customer>()
                  .HasOptional(s => s.Address)
                  .WithRequired(ad => ad.Customer);
+
+            modelBuilder.Entity<CustomerWithTwoCompositePrimaryKey>()
+                .HasKey(e => new { e.Id1, e.Id2 });
+
+            modelBuilder.Entity<CustomerWithThreeCompositePrimaryKey>()
+                .HasKey(e => new { e.Id1, e.Id2, e.Id3 });
         }
     }
 
@@ -29,6 +37,8 @@
     {
         public System.Data.Entity.DbSet<Customer> Customers { get; set; }
         public System.Data.Entity.DbSet<CustomerAddress> CustomerAddresses { get; set; }
+        public System.Data.Entity.DbSet<CustomerWithTwoCompositePrimaryKey> CustomersWithTwoCompositePrimaryKey { get; set; }
+        public System.Data.Entity.DbSet<CustomerWithThreeCompositePrimaryKey> CustomersWithThreeCompositePrimaryKey { get; set; }
 
         private readonly string _databaseName;
 
@@ -57,6 +67,12 @@
             modelBuilder.Entity<Customer>()
                 .HasOne(s => s.Address)
                 .WithOne(ad => ad.Customer);
+
+            modelBuilder.Entity<CustomerWithTwoCompositePrimaryKey>()
+                .HasKey(e => new { e.Id1, e.Id2 });
+
+            modelBuilder.Entity<CustomerWithThreeCompositePrimaryKey>()
+                .HasKey(e => new { e.Id1, e.Id2, e.Id3 });
         }
     }
 }

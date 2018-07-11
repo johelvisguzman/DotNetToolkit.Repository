@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Data
 {
     using System;
+    using System.ComponentModel.DataAnnotations;
 
     public class Customer
     {
@@ -18,6 +19,26 @@
         public string State { get; set; }
         public int CustomerId { get; set; }
         public Customer Customer { get; set; }
+    }
+
+    public class CustomerWithTwoCompositePrimaryKey
+    {
+        [Key]
+        public int Id1 { get; set; }
+        [Key]
+        public int Id2 { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class CustomerWithThreeCompositePrimaryKey
+    {
+        [Key]
+        public int Id1 { get; set; }
+        [Key]
+        public int Id2 { get; set; }
+        [Key]
+        public int Id3 { get; set; }
+        public string Name { get; set; }
     }
 
     public class CustomerWithTimeStamp : IHaveTimeStamp
