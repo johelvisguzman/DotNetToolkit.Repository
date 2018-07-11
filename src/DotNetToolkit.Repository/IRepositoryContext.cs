@@ -6,6 +6,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
+    using Transactions;
 
     /// <summary>
     /// Represents a repository context.
@@ -13,6 +14,12 @@
     /// <seealso cref="System.IDisposable" />
     public interface IRepositoryContext : IDisposable
     {
+        /// <summary>
+        /// Begins the transaction.
+        /// </summary>
+        /// <returns>The transaction.</returns>
+        ITransactionManager BeginTransaction();
+
         /// <summary>
         /// Tracks the specified entity in memory and will be inserted into the database when <see cref="SaveChanges" /> is called..
         /// </summary>

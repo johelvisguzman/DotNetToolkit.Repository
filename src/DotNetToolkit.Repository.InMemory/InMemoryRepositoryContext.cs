@@ -11,11 +11,13 @@
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
+    using Transactions;
 
     /// <summary>
-    /// An implementation of <see cref="IRepositoryContextAsync" />.
+    /// Represents repository context for in-memory operations (for testing purposes).
     /// </summary>
-    internal class InMemoryContext : IRepositoryContext
+    /// <seealso cref="IRepositoryContext" />
+    public class InMemoryRepositoryContext : IRepositoryContext
     {
         #region Fields
 
@@ -32,20 +34,25 @@
         /// </summary>
         public string DatabaseName { get; internal set; }
 
+        /// <summary>
+        /// Gets the item types in-memory that have not yet been saved. This collection is cleared after the context is saved.
+        /// </summary>
+        internal IEnumerable<Type> ItemTypes { get { return _items.Select(x => x.Entity.GetType()); } }
+
         #endregion
 
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryContext"/> class.
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryContext" /> class.
         /// </summary>
-        public InMemoryContext() : this(null) { }
+        public InMemoryRepositoryContext() : this(null) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryContext"/> class.
+        /// Initializes a new instance of the <see cref="InMemoryRepositoryContext" /> class.
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
-        public InMemoryContext(string databaseName)
+        public InMemoryRepositoryContext(string databaseName)
         {
             DatabaseName = string.IsNullOrEmpty(databaseName) ? DefaultDatabaseName : databaseName;
         }
@@ -67,7 +74,16 @@
 
         #endregion
 
-        #region Implementation of IRepositoryContext
+        #region Implementation of IContext
+
+        /// <summary>
+        /// Begins the transaction.
+        /// </summary>
+        /// <returns>The transaction.</returns>
+        public ITransactionManager BeginTransaction()
+        {
+            throw new NotSupportedException(Resources.TransactionNotSupported);
+        }
 
         /// <summary>
         /// Tracks the specified entity in memory and will be inserted into the database when <see cref="SaveChanges" /> is called..
@@ -105,30 +121,35 @@
         /// <returns>The number of state entries written to the database.</returns>
         public virtual int SaveChanges()
         {
-            var context = InMemoryCache.Instance.GetContext(DatabaseName);
+            var store = InMemoryCache.Instance.GetDatabaseStore(DatabaseName);
             var count = 0;
 
             foreach (var entitySet in _items)
             {
                 var entityType = entitySet.Entity.GetType();
-                var keyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
                 var key = GetPrimaryKey(entitySet.Entity);
-                var existInDb = context.Any(x => x.Value.GetType() == entityType && x.Key.Equals(key));
+
+                if (!store.ContainsKey(entityType))
+                    store[entityType] = new ConcurrentDictionary<object, object>();
+
+                var context = store[entityType];
 
                 if (entitySet.State == EntityState.Added)
                 {
-                    if (ConventionHelper.IsIdentity(keyPropertyInfo) && !ConventionHelper.HasCompositePrimaryKey(entityType))
+                    var primeryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+
+                    if (ConventionHelper.IsIdentity(primeryKeyPropertyInfo) && !ConventionHelper.HasCompositePrimaryKey(entityType))
                     {
                         key = GeneratePrimaryKey(entityType);
 
-                        keyPropertyInfo.SetValue(entitySet.Entity, key);
+                        primeryKeyPropertyInfo.SetValue(entitySet.Entity, key);
                     }
-                    else if (existInDb)
+                    else if (context.ContainsKey(key))
                     {
                         throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
                     }
                 }
-                else if (!existInDb)
+                else if (!context.ContainsKey(key))
                 {
                     throw new InvalidOperationException(Resources.EntityNotFoundInStore);
                 }
@@ -161,10 +182,13 @@
         /// <returns>The entity <see cref="T:System.Linq.IQueryable`1" />.</returns>
         public virtual IQueryable<TEntity> AsQueryable<TEntity>() where TEntity : class
         {
-            return InMemoryCache.Instance.
-                GetContext(DatabaseName).
-                Select(x => (TEntity)Convert.ChangeType(x, typeof(TEntity)))
-                .AsQueryable();
+            var entityType = typeof(TEntity);
+            var store = InMemoryCache.Instance.GetDatabaseStore(DatabaseName);
+
+            if (!store.ContainsKey(entityType))
+                return Enumerable.Empty<TEntity>().AsQueryable();
+
+            return store[entityType].Select(x => (TEntity)Convert.ChangeType(x.Value, entityType)).AsQueryable();
         }
 
         /// <summary>
@@ -213,9 +237,15 @@
                     }
             }
 
-            InMemoryCache.Instance.GetContext(DatabaseName).TryGetValue(key, out object entity);
+            var entityType = typeof(TEntity);
+            var store = InMemoryCache.Instance.GetDatabaseStore(DatabaseName);
 
-            return (TEntity)Convert.ChangeType(entity, typeof(TEntity));
+            if (!store.ContainsKey(entityType))
+                return default(TEntity);
+
+            store[entityType].TryGetValue(key, out object entity);
+
+            return (TEntity)Convert.ChangeType(entity, entityType);
         }
 
         /// <summary>
@@ -247,13 +277,20 @@
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public IEnumerable<TResult> FindAll<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
             return GetQuery(options).Select(selector).ToList();
+        }
+
+        /// <summary>
+        /// Finds the collection of entities in the repository.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
+        /// <returns>The collection of entities in the repository.</returns>
+        public IEnumerable<TEntity> FindAll<TEntity>() where TEntity : class
+        {
+            return FindAll<TEntity, TEntity>((IQueryOptions<TEntity>) null, IdentityExpression<TEntity>.Instance);
         }
 
         /// <summary>
@@ -340,7 +377,7 @@
                 _items.TryTake(out _);
             }
 
-            InMemoryCache.Instance.GetContext(DatabaseName).Clear();
+            InMemoryCache.Instance.GetDatabaseStore(DatabaseName).Clear();
         }
 
         #endregion
@@ -409,8 +446,12 @@
 
             if (propertyType == typeof(int))
             {
-                var key = InMemoryCache.Instance.GetContext(DatabaseName)
-                    .Where(x => x.Value.GetType() == entityType)
+                var store = InMemoryCache.Instance.GetDatabaseStore(DatabaseName);
+
+                if (!store.ContainsKey(entityType))
+                    return 1;
+
+                var key = store[entityType]
                     .Select(x => propertyInfo.GetValue(x.Value, null))
                     .OrderByDescending(x => x)
                     .FirstOrDefault();
@@ -449,7 +490,7 @@
             #region Constructors
 
             /// <summary>
-            /// Initializes a new instance of the <see cref="EntitySet"/> class.
+            /// Initializes a new instance of the <see cref="EntitySet" /> class.
             /// </summary>
             /// <param name="entity">The entity.</param>
             /// <param name="state">The state.</param>
@@ -504,18 +545,18 @@
 
             private static volatile InMemoryCache _instance;
             private static readonly object _syncRoot = new object();
-            private readonly ConcurrentDictionary<string, ConcurrentDictionary<object, object>> _storage;
+            private readonly ConcurrentDictionary<string, ConcurrentDictionary<Type, ConcurrentDictionary<object, object>>> _storage;
 
             #endregion
 
             #region Constructors
 
             /// <summary>
-            /// Prevents a default instance of the <see cref="InMemoryCache"/> class from being created.
+            /// Prevents a default instance of the <see cref="InMemoryCache" /> class from being created.
             /// </summary>
             private InMemoryCache()
             {
-                _storage = new ConcurrentDictionary<string, ConcurrentDictionary<object, object>>();
+                _storage = new ConcurrentDictionary<string, ConcurrentDictionary<Type, ConcurrentDictionary<object, object>>>();
             }
 
             #endregion
@@ -551,11 +592,11 @@
             /// </summary>
             /// <param name="name">The database name.</param>
             /// <returns>The scoped database context by the specified database name.</returns>
-            public ConcurrentDictionary<object, object> GetContext(string name)
+            public ConcurrentDictionary<Type, ConcurrentDictionary<object, object>> GetDatabaseStore(string name)
             {
                 if (!_storage.ContainsKey(name))
                 {
-                    _storage[name] = new ConcurrentDictionary<object, object>();
+                    _storage[name] = new ConcurrentDictionary<Type, ConcurrentDictionary<object, object>>();
                 }
 
                 return _storage[name];

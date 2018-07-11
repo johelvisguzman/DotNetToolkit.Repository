@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
-    using AdoNet;
     using FetchStrategies;
     using Queries;
     using System.Collections.Generic;
@@ -20,8 +19,8 @@
             var customerKey = 1;
             var addressKey = 1;
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(context);
-            var customerRepo = new AdoNetRepository<Customer>(context);
+            var addressRepo = new RepositoryAsync<CustomerAddress>(context);
+            var customerRepo = new RepositoryAsync<Customer>(context);
             var customerFetchStrategy = new FetchStrategy<Customer>();
 
             var entity = new Customer
@@ -58,8 +57,8 @@
             var customerKey = 1;
             var addressKey = 1;
 
-            var addressWithForeignKeyAnnotationOnForeignKeyRepo = new AdoNetRepository<CustomerAddressWithForeignKeyAnnotationOnForeignKey>(context);
-            var customerWithForeignKeyAnnotationOnForeignKeyRepo = new AdoNetRepository<CustomerWithForeignKeyAnnotationOnForeignKey>(context);
+            var addressWithForeignKeyAnnotationOnForeignKeyRepo = new RepositoryAsync<CustomerAddressWithForeignKeyAnnotationOnForeignKey>(context);
+            var customerWithForeignKeyAnnotationOnForeignKeyRepo = new RepositoryAsync<CustomerWithForeignKeyAnnotationOnForeignKey>(context);
             var customerWithForeignKeyAnnotationOnForeignKeyFetchStrategy = new FetchStrategy<CustomerWithForeignKeyAnnotationOnForeignKey>();
 
             var customerWithForeignKeyAnnotationOnForeignKey = new CustomerWithForeignKeyAnnotationOnForeignKey
@@ -88,8 +87,8 @@
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(addressWithForeignKeyAnnotationOnForeignKey, customerWithForeignKeyAnnotationOnForeignKeyRepo.Get(customerKey).Address);
 
-            var addressWithForeignKeyAnnotationOnNavigationPropertyRepo = new AdoNetRepository<CustomerAddressWithForeignKeyAnnotationOnNavigationProperty>(context);
-            var customerWithForeignKeyAnnotationOnNavigationPropertyRepo = new AdoNetRepository<CustomerWithForeignKeyAnnotationOnNavigationProperty>(context);
+            var addressWithForeignKeyAnnotationOnNavigationPropertyRepo = new RepositoryAsync<CustomerAddressWithForeignKeyAnnotationOnNavigationProperty>(context);
+            var customerWithForeignKeyAnnotationOnNavigationPropertyRepo = new RepositoryAsync<CustomerWithForeignKeyAnnotationOnNavigationProperty>(context);
             var customerWithForeignKeyAnnotationOnNavigationPropertyFetchStrategy = new FetchStrategy<CustomerWithForeignKeyAnnotationOnNavigationProperty>();
 
             customerKey = 2;
@@ -130,8 +129,8 @@
             var customerKey = 1;
             var addressKey = 1;
 
-            var addressRepo = new AdoNetRepository<CustomerCompositeAddress>(context);
-            var customerRepo = new AdoNetRepository<CustomerWithCompositeAddress>(context);
+            var addressRepo = new RepositoryAsync<CustomerCompositeAddress>(context);
+            var customerRepo = new RepositoryAsync<CustomerWithCompositeAddress>(context);
             var customerFetchStrategy = new FetchStrategy<CustomerWithCompositeAddress>();
 
             var entity = new CustomerWithCompositeAddress
@@ -166,8 +165,8 @@
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(context);
-            var customerRepo = new AdoNetRepository<Customer>(context);
+            var addressRepo = new RepositoryAsync<CustomerAddress>(context);
+            var customerRepo = new RepositoryAsync<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
             var fetchStrategy = new FetchStrategy<Customer>();
@@ -204,8 +203,8 @@
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(context);
-            var customerRepo = new AdoNetRepository<Customer>(context);
+            var addressRepo = new RepositoryAsync<CustomerAddress>(context);
+            var customerRepo = new RepositoryAsync<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
@@ -246,8 +245,8 @@
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(context);
-            var customerRepo = new AdoNetRepository<Customer>(context);
+            var addressRepo = new RepositoryAsync<CustomerAddress>(context);
+            var customerRepo = new RepositoryAsync<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
@@ -288,8 +287,8 @@
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(context);
-            var customerRepo = new AdoNetRepository<Customer>(context);
+            var addressRepo = new RepositoryAsync<CustomerAddress>(context);
+            var customerRepo = new RepositoryAsync<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
@@ -331,8 +330,8 @@
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(context);
-            var customerRepo = new AdoNetRepository<Customer>(context);
+            var addressRepo = new RepositoryAsync<CustomerAddress>(context);
+            var customerRepo = new RepositoryAsync<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
@@ -374,8 +373,8 @@
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(context);
-            var customerRepo = new AdoNetRepository<Customer>(context);
+            var addressRepo = new RepositoryAsync<CustomerAddress>(context);
+            var customerRepo = new RepositoryAsync<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
@@ -415,8 +414,8 @@
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(context);
-            var customerRepo = new AdoNetRepository<Customer>(context);
+            var addressRepo = new RepositoryAsync<CustomerAddress>(context);
+            var customerRepo = new RepositoryAsync<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
@@ -456,7 +455,7 @@
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
-            var repo = new AdoNetRepository<CustomerWithKeyAnnotation>(context);
+            var repo = new RepositoryAsync<CustomerWithKeyAnnotation>(context);
 
             const string name = "Random Name";
 
@@ -476,7 +475,7 @@
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
-            var repo = new AdoNetRepository<Customer>(context);
+            var repo = new RepositoryAsync<Customer>(context);
 
             var entities = new List<Customer>
             {
@@ -559,7 +558,7 @@
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
-            var repo = new AdoNetRepository<Customer>(context);
+            var repo = new RepositoryAsync<Customer>(context);
 
             var entities = new List<Customer>
             {
@@ -642,7 +641,7 @@
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
-            var repo = new AdoNetRepository<Customer>(context);
+            var repo = new RepositoryAsync<Customer>(context);
 
             var entities = new List<Customer>
             {
@@ -725,7 +724,7 @@
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
-            var repo = new AdoNetRepository<Customer>(context);
+            var repo = new RepositoryAsync<Customer>(context);
 
             var entities = new List<Customer>
             {

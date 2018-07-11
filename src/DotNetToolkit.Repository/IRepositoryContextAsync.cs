@@ -12,7 +12,7 @@
     /// <summary>
     /// Represents an asynchronous repository context.
     /// </summary>
-    /// <seealso cref="DotNetToolkit.Repository.IRepositoryContext" />
+    /// <seealso cref="IRepositoryContext" />
     /// <seealso cref="System.IDisposable" />
     public interface IRepositoryContextAsync : IRepositoryContext, IDisposable
     {

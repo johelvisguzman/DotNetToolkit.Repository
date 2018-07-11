@@ -24,7 +24,7 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ReadOnlyRepositoryBase{TEntity}"/> class.
+        /// Initializes a new instance of the <see cref="ReadOnlyRepositoryBase{TEntity}" /> class.
         /// </summary>
         /// <param name="repo">The underlying repository.</param>
         protected ReadOnlyRepositoryBase(IRepositoryBase<TEntity> repo)

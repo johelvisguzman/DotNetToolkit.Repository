@@ -27,7 +27,7 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ReadOnlyRepositoryBaseAsync{TEntity}"/> class.
+        /// Initializes a new instance of the <see cref="ReadOnlyRepositoryBaseAsync{TEntity}" /> class.
         /// </summary>
         /// <param name="repo">The underlying repository.</param>
         protected ReadOnlyRepositoryBaseAsync(IRepositoryBaseAsync<TEntity> repo) : base(repo)

@@ -28,7 +28,7 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ReadOnlyRepositoryAsync{TEntity, TKey1, TKey2, TKey3}"/> class.
+        /// Initializes a new instance of the <see cref="ReadOnlyRepositoryAsync{TEntity, TKey1, TKey2, TKey3}" /> class.
         /// </summary>
         /// <param name="repo">The underlying repository.</param>
         public ReadOnlyRepositoryAsync(IRepositoryAsync<TEntity, TKey1, TKey2, TKey3> repo) : base(repo)
@@ -147,7 +147,7 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ReadOnlyRepositoryAsync{TEntity, TKey1, TKey2}"/> class.
+        /// Initializes a new instance of the <see cref="ReadOnlyRepositoryAsync{TEntity, TKey1, TKey2}" /> class.
         /// </summary>
         /// <param name="repo">The underlying repository.</param>
         public ReadOnlyRepositoryAsync(IRepositoryAsync<TEntity, TKey1, TKey2> repo) : base(repo)
@@ -259,7 +259,7 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ReadOnlyRepositoryAsync{TEntity, TKey}"/> class.
+        /// Initializes a new instance of the <see cref="ReadOnlyRepositoryAsync{TEntity, TKey}" /> class.
         /// </summary>
         /// <param name="repo">The underlying repository.</param>
         public ReadOnlyRepositoryAsync(IRepositoryAsync<TEntity, TKey> repo) : base(repo)

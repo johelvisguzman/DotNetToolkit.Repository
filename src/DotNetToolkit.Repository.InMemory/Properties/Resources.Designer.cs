@@ -95,5 +95,23 @@ namespace DotNetToolkit.Repository.InMemory.Properties {
                 return ResourceManager.GetString("EntityNotFoundInStore", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified &apos;{0}&apos; file extension is not valid..
+        /// </summary>
+        internal static string InvalidFileExtension {
+            get {
+                return ResourceManager.GetString("InvalidFileExtension", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The repository context does not support transactions..
+        /// </summary>
+        internal static string TransactionNotSupported {
+            get {
+                return ResourceManager.GetString("TransactionNotSupported", resourceCulture);
+            }
+        }
     }
 }

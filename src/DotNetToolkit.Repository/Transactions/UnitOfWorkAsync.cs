@@ -1,11 +1,14 @@
 ﻿namespace DotNetToolkit.Repository.Transactions
 {
     using Factories;
+    using Interceptors;
+    using System;
+    using System.Collections.Generic;
 
     /// <summary>
     /// An implementation of <see cref="IUnitOfWorkAsync" />.
     /// </summary>
-    public abstract class UnitOfWorkBaseAsync : UnitOfWorkBase, IUnitOfWorkAsync
+    public class UnitOfWorkAsync : UnitOfWork, IUnitOfWorkAsync
     {
         #region Fields
 
@@ -16,13 +19,29 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UnitOfWorkBaseAsync"/> class.
+        /// Initializes a new instance of the <see cref="UnitOfWorkAsync" /> class.
         /// </summary>
-        /// <param name="transactionManager">The transaction.</param>
-        /// <param name="factory">The asynchronous underlying repository factory.</param>
-        protected UnitOfWorkBaseAsync(ITransactionManager transactionManager, IRepositoryFactoryAsync factory) : base(transactionManager, factory)
+        /// <param name="context">The repository context.</param>
+        public UnitOfWorkAsync(IRepositoryContextAsync context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UnitOfWorkAsync" /> class.
+        /// </summary>
+        /// <param name="context">The repository context.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public UnitOfWorkAsync(IRepositoryContextAsync context, IRepositoryInterceptor interceptor) : this(context, new List<IRepositoryInterceptor> { interceptor }) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UnitOfWorkAsync" /> class.
+        /// </summary>
+        /// <param name="context">The repository context.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        public UnitOfWorkAsync(IRepositoryContextAsync context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors)
         {
-            _factory = factory;
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+
+            _factory = new RepositoryFactoryAsync(() => context, interceptors);
         }
 
         #endregion

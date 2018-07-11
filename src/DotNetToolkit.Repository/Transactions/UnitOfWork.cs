@@ -1,16 +1,19 @@
 ﻿namespace DotNetToolkit.Repository.Transactions
 {
     using Factories;
+    using Interceptors;
     using System;
     using System.Collections.Generic;
 
     /// <summary>
     /// An implementation of <see cref="IUnitOfWork" />.
     /// </summary>
-    public abstract class UnitOfWorkBase : IUnitOfWork
+    public class UnitOfWork : IUnitOfWork
     {
         #region Fields
 
+        private IRepositoryContext _context;
+        private ITransactionManager _transactionManager;
         private readonly IRepositoryFactory _factory;
 
         private bool _disposed;
@@ -18,11 +21,6 @@
         #endregion
 
         #region Properties
-
-        /// <summary>
-        /// Gets the transaction manager.
-        /// </summary>
-        protected ITransactionManager TransactionManager { get; private set; }
 
         /// <summary>
         /// Gets the repositories.
@@ -34,20 +32,31 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UnitOfWorkBase"/> class.
+        /// Initializes a new instance of the <see cref="UnitOfWork" /> class.
         /// </summary>
-        /// <param name="transactionManager">The transaction.</param>
-        /// <param name="factory">The underlying repository factory.</param>
-        protected UnitOfWorkBase(ITransactionManager transactionManager, IRepositoryFactory factory)
+        /// <param name="context">The repository context.</param>
+        public UnitOfWork(IRepositoryContext context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UnitOfWork" /> class.
+        /// </summary>
+        /// <param name="context">The repository context.</param>
+        /// <param name="interceptor">The interceptor.</param>
+        public UnitOfWork(IRepositoryContext context, IRepositoryInterceptor interceptor) : this(context, new List<IRepositoryInterceptor> { interceptor }) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UnitOfWork" /> class.
+        /// </summary>
+        /// <param name="context">The repository context.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        public UnitOfWork(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors)
         {
-            if (transactionManager == null)
-                throw new ArgumentNullException(nameof(transactionManager));
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
 
-            if (factory == null)
-                throw new ArgumentNullException(nameof(factory));
-
-            TransactionManager = transactionManager;
-            _factory = factory;
+            _context = context;
+            _transactionManager = _context.BeginTransaction();
+            _factory = new RepositoryFactory(() => context, interceptors);
             Repositories = new Dictionary<Type, object>();
         }
 
@@ -65,12 +74,14 @@
 
             if (disposing)
             {
-                if (TransactionManager != null)
+                if (_transactionManager != null)
                 {
-                    TransactionManager.Rollback();
-                    TransactionManager.Dispose();
-                    TransactionManager = null;
+                    _transactionManager.Rollback();
+                    _transactionManager.Dispose();
+                    _transactionManager = null;
                 }
+
+                _context = null;
             }
 
             _disposed = true;
@@ -85,11 +96,11 @@
         /// </summary>
         public virtual void Commit()
         {
-            if (TransactionManager == null)
+            if (_transactionManager == null)
                 throw new InvalidOperationException("The transaction has already been committed or disposed.");
 
-            TransactionManager.Commit();
-            TransactionManager = null;
+            _transactionManager.Commit();
+            _transactionManager = null;
         }
 
         #endregion

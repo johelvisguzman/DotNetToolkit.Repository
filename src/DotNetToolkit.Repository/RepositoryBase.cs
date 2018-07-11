@@ -26,13 +26,13 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2, TKey3}"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2, TKey3}" /> class.
         /// </summary>
         /// <param name="context">The context.</param>
         protected RepositoryBase(IRepositoryContext context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2, TKey3}"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2, TKey3}" /> class.
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="interceptors">The interceptors.</param>
@@ -146,13 +146,13 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2}"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2}" /> class.
         /// </summary>
         /// <param name="context">The context.</param>
         protected RepositoryBase(IRepositoryContext context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2}"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2}" /> class.
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="interceptors">The interceptors.</param>
@@ -259,13 +259,13 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}" /> class.
         /// </summary>
         /// <param name="context">The context.</param>
         protected RepositoryBase(IRepositoryContext context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}" /> class.
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="interceptors">The interceptors.</param>
@@ -374,13 +374,13 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity}"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity}" /> class.
         /// </summary>
         /// <param name="context">The context.</param>
         protected RepositoryBase(IRepositoryContext context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity}"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity}" /> class.
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="interceptors">The interceptors.</param>

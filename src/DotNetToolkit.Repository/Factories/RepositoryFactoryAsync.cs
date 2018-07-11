@@ -1,6 +1,5 @@
-﻿namespace DotNetToolkit.Repository.AdoNet
+﻿namespace DotNetToolkit.Repository.Factories
 {
-    using Factories;
     using Interceptors;
     using System;
     using System.Collections.Generic;
@@ -9,11 +8,12 @@
     /// <summary>
     /// An implementation of <see cref="IRepositoryFactoryAsync" />.
     /// </summary>
-    public class AdoNetRepositoryFactory : IRepositoryFactoryAsync
+    /// <seealso cref="DotNetToolkit.Repository.Factories.IRepositoryFactoryAsync" />
+    public class RepositoryFactoryAsync : IRepositoryFactoryAsync
     {
         #region Fields
 
-        private readonly Func<AdoNetContext> _contextFactory;
+        private readonly Func<IRepositoryContextAsync> _contextFactory;
         private readonly IEnumerable<IRepositoryInterceptor> _interceptors;
 
         #endregion
@@ -21,24 +21,24 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AdoNetRepositoryFactory"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryFactoryAsync" /> class.
         /// </summary>
-        /// <param name="contextFactory">The context factory.</param>
-        public AdoNetRepositoryFactory(Func<AdoNetContext> contextFactory) : this(contextFactory, (IEnumerable<IRepositoryInterceptor>)null) { }
+        /// <param name="contextFactory">The repository context.</param>
+        public RepositoryFactoryAsync(Func<IRepositoryContextAsync> contextFactory) : this(contextFactory, (IEnumerable<IRepositoryInterceptor>)null) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AdoNetRepositoryFactory"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryFactoryAsync" /> class.
         /// </summary>
-        /// <param name="contextFactory">The context factory.</param>
+        /// <param name="contextFactory">The repository context.</param>
         /// <param name="interceptor">The interceptor.</param>
-        public AdoNetRepositoryFactory(Func<AdoNetContext> contextFactory, IRepositoryInterceptor interceptor) : this(contextFactory, new List<IRepositoryInterceptor> { interceptor }) { }
+        public RepositoryFactoryAsync(Func<IRepositoryContextAsync> contextFactory, IRepositoryInterceptor interceptor) : this(contextFactory, new List<IRepositoryInterceptor> { interceptor }) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AdoNetRepositoryFactory"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryFactoryAsync" /> class.
         /// </summary>
-        /// <param name="contextFactory">The context factory.</param>
+        /// <param name="contextFactory">The repository context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public AdoNetRepositoryFactory(Func<AdoNetContext> contextFactory, IEnumerable<IRepositoryInterceptor> interceptors)
+        public RepositoryFactoryAsync(Func<IRepositoryContextAsync> contextFactory, IEnumerable<IRepositoryInterceptor> interceptors)
         {
             if (contextFactory == null)
                 throw new ArgumentNullException(nameof(contextFactory));
@@ -123,7 +123,7 @@
         /// <returns>The new asynchronous repository.</returns>
         public IRepositoryAsync<TEntity> CreateAsync<TEntity>() where TEntity : class
         {
-            return CreateInstance<AdoNetRepository<TEntity>>();
+            return CreateInstance<RepositoryAsync<TEntity>>();
         }
 
         /// <summary>
@@ -134,7 +134,7 @@
         /// <returns>The new asynchronous repository.</returns>
         public IRepositoryAsync<TEntity, TKey> CreateAsync<TEntity, TKey>() where TEntity : class
         {
-            return CreateInstance<AdoNetRepository<TEntity, TKey>>();
+            return CreateInstance<RepositoryAsync<TEntity, TKey>>();
         }
 
         /// <summary>
@@ -146,7 +146,7 @@
         /// <returns>The new asynchronous repository.</returns>
         public IRepositoryAsync<TEntity, TKey1, TKey2> CreateAsync<TEntity, TKey1, TKey2>() where TEntity : class
         {
-            return CreateInstance<AdoNetRepository<TEntity, TKey1, TKey2>>();
+            return CreateInstance<RepositoryAsync<TEntity, TKey1, TKey2>>();
         }
 
         /// <summary>
@@ -159,7 +159,7 @@
         /// <returns>The new asynchronous repository.</returns>
         public IRepositoryAsync<TEntity, TKey1, TKey2, TKey3> CreateAsync<TEntity, TKey1, TKey2, TKey3>() where TEntity : class
         {
-            return CreateInstance<AdoNetRepository<TEntity, TKey1, TKey2, TKey3>>();
+            return CreateInstance<RepositoryAsync<TEntity, TKey1, TKey2, TKey3>>();
         }
 
         #endregion

@@ -147,7 +147,7 @@
         }
 
         /// <summary>
-        /// Determines whether the specified property is mapped (does not have a <see cref="NotMappedAttribute"/> defined).
+        /// Determines whether the specified property is mapped (does not have a <see cref="NotMappedAttribute" /> defined).
         /// </summary>
         /// <param name="pi">The property info.</param>
         /// <returns>

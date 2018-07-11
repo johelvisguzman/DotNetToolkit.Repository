@@ -10,11 +10,13 @@
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
+    using Transactions;
 
     /// <summary>
-    /// An implementation of <see cref="IRepositoryContextAsync" />.
+    /// Represents an entity framework core repository context.
     /// </summary>
-    internal class EfCoreContext : IRepositoryContextAsync
+    /// <seealso cref="IRepositoryContextAsync" />
+    public class EfCoreRepositoryContext : IRepositoryContextAsync
     {
         #region Fields
 
@@ -25,10 +27,10 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EfCoreContext"/> class.
+        /// Initializes a new instance of the <see cref="EfCoreRepositoryContext" /> class.
         /// </summary>
         /// <param name="context">The context.</param>
-        public EfCoreContext(DbContext context)
+        public EfCoreRepositoryContext(DbContext context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
@@ -53,10 +55,19 @@
 
         #endregion
 
-        #region Implementation of IRepositoryContext
+        #region Implementation of IContext
 
         /// <summary>
-        /// Tracks the specified entity in memory and will be inserted into the database when <see cref="M:DotNetToolkit.Repository.IRepositoryContext.SaveChanges" /> is called..
+        /// Begins the transaction.
+        /// </summary>
+        /// <returns>The transaction.</returns>
+        public ITransactionManager BeginTransaction()
+        {
+            return new EfCoreTransactionManager(_context.Database.BeginTransaction());
+        }
+
+        /// <summary>
+        /// Tracks the specified entity in memory and will be inserted into the database when <see cref="M:DotNetToolkit.Repository.IContext.SaveChanges" /> is called..
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="entity">The entity.</param>
@@ -69,7 +80,7 @@
         }
 
         /// <summary>
-        /// Tracks the specified entity in memory and will be updated in the database when <see cref="M:DotNetToolkit.Repository.IRepositoryContext.SaveChanges" /> is called..
+        /// Tracks the specified entity in memory and will be updated in the database when <see cref="M:DotNetToolkit.Repository.IContext.SaveChanges" /> is called..
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="entity">The entity.</param>
@@ -82,7 +93,7 @@
         }
 
         /// <summary>
-        /// Tracks the specified entity in memory and will be removed from the database when <see cref="M:DotNetToolkit.Repository.IRepositoryContext.SaveChanges" /> is called..
+        /// Tracks the specified entity in memory and will be removed from the database when <see cref="M:DotNetToolkit.Repository.IContext.SaveChanges" /> is called..
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="entity">The entity.</param>
@@ -181,9 +192,6 @@
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public IEnumerable<TResult> FindAll<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
@@ -265,7 +273,7 @@
 
         #endregion
 
-        #region #region Implementation of IRepositoryContextAsync
+        #region #region Implementation of IContextAsync
 
         /// <summary>
         /// Asynchronously saves all changes made in this context to the database.
@@ -333,9 +341,6 @@
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public async Task<IEnumerable<TResult>> FindAllAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 

@@ -17,17 +17,17 @@
         Expression<Func<T, bool>> Predicate { get; }
         
         /// <summary>
-        /// Returns a collection of entities that satisfied the criteria specified by the <see cref="Predicate"/> from the query.
+        /// Returns a collection of entities that satisfied the criteria specified by the <see cref="Predicate" /> from the query.
         /// </summary>
         /// <param name="query">The entity query.</param>
-        /// <returns>The collection of entities that satisfied the criteria specified by the <see cref="Predicate"/> from the query.</returns>
+        /// <returns>The collection of entities that satisfied the criteria specified by the <see cref="Predicate" /> from the query.</returns>
         IQueryable<T> SatisfyingEntitiesFrom(IQueryable<T> query);
 
         /// <summary>
-        /// Determines wheter the entity that satisfied the criteria specified by the <see cref="Predicate"/>.
+        /// Determines wheter the entity that satisfied the criteria specified by the <see cref="Predicate" />.
         /// </summary>
         /// <param name="entity">The entity to test.</param>
-        /// <returns><c>true</c> if the entity satisfied the criteria specified by the <see cref="Predicate"/>; otherwise, <c>false</c>.</returns>
+        /// <returns><c>true</c> if the entity satisfied the criteria specified by the <see cref="Predicate" />; otherwise, <c>false</c>.</returns>
         bool IsSatisfiedBy(T entity);
     }
 }

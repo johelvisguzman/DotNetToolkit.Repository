@@ -7,7 +7,7 @@
 
     public class TestAdoNetContextFactory
     {
-        public static AdoNetContext Create()
+        public static AdoNetRepositoryContext Create()
         {
             var currentFile = TestPathHelper.GetTempFileName();
 
@@ -19,7 +19,7 @@
 
             CreateDatabase(provider, connectionString);
 
-            return new AdoNetContext(provider, connectionString);
+            return new AdoNetRepositoryContext(provider, connectionString);
         }
 
         private static void CreateDatabase(string provider, string connectionString)

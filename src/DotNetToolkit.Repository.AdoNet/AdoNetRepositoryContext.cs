@@ -18,11 +18,13 @@
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using Transactions;
 
     /// <summary>
-    /// An implementation of <see cref="IRepositoryContextAsync" />.
+    /// Represents an ado.net repository context.
     /// </summary>
-    public class AdoNetContext : IRepositoryContextAsync
+    /// <seealso cref="IRepositoryContextAsync" />
+    public class AdoNetRepositoryContext : IRepositoryContextAsync
     {
         #region Fields
 
@@ -39,10 +41,10 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AdoNetContext" /> class.
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryContext" /> class.
         /// </summary>
         /// <param name="connectionString">The connection string.</param>
-        public AdoNetContext(string connectionString)
+        public AdoNetRepositoryContext(string connectionString)
         {
             if (connectionString == null)
                 throw new ArgumentNullException(nameof(connectionString));
@@ -56,11 +58,11 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AdoNetContext" /> class.
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryContext" /> class.
         /// </summary>
         /// <param name="providerName">The name of the provider.</param>
         /// <param name="connectionString">The connection string.</param>
-        public AdoNetContext(string providerName, string connectionString)
+        public AdoNetRepositoryContext(string providerName, string connectionString)
         {
             if (providerName == null)
                 throw new ArgumentNullException(nameof(providerName));
@@ -107,37 +109,6 @@
             command.Connection = connection;
 
             return command;
-        }
-
-        /// <summary>
-        /// Begins the database transaction.
-        /// </summary>
-        /// <returns>The database transaction.</returns>
-        public DbTransaction BeginTransaction()
-        {
-            var connection = CreateConnection();
-
-            connection.Open();
-
-            _transaction = connection.BeginTransaction();
-
-            return _transaction;
-        }
-
-        /// <summary>
-        /// Begins the database transaction.
-        /// </summary>
-        /// <param name="isolationLevel">Specifies the isolation level for the transaction.</param>
-        /// <returns>The database transaction.</returns>
-        public DbTransaction BeginTransaction(IsolationLevel isolationLevel)
-        {
-            var connection = CreateConnection();
-
-            connection.Open();
-
-            _transaction = connection.BeginTransaction(isolationLevel);
-
-            return _transaction;
         }
 
         /// <summary>
@@ -1388,7 +1359,7 @@
 
         #endregion
 
-        #region Implementation of IRepositoryContextAsync
+        #region Implementation of IContextAsync
 
         /// <summary>
         /// Saves all changes made in this context to the database.
@@ -1516,9 +1487,6 @@
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public Task<IEnumerable<TResult>> FindAllAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
@@ -1649,7 +1617,22 @@
 
         #endregion
 
-        #region Implementation of IRepositoryContext
+        #region Implementation of IContext
+
+        /// <summary>
+        /// Begins the transaction.
+        /// </summary>
+        /// <returns>The transaction.</returns>
+        public ITransactionManager BeginTransaction()
+        {
+            var connection = CreateConnection();
+
+            connection.Open();
+
+            _transaction = connection.BeginTransaction();
+
+            return new AdoNetTransactionManager(_transaction);
+        }
 
         /// <summary>
         /// Tracks the specified entity in memory and will be inserted into the database when <see cref="SaveChanges" /> is called..
@@ -1830,9 +1813,6 @@
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public IEnumerable<TResult> FindAll<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
@@ -1971,6 +1951,8 @@
                 _connection.Dispose();
                 _connection = null;
             }
+
+            _transaction = null;
 
             GC.SuppressFinalize(this);
         }

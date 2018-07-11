@@ -25,7 +25,7 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ReadOnlyRepository{TEntity, TKey1, TKey2, TKey3}"/> class.
+        /// Initializes a new instance of the <see cref="ReadOnlyRepository{TEntity, TKey1, TKey2, TKey3}" /> class.
         /// </summary>
         /// <param name="repo">The underlying repository.</param>
         public ReadOnlyRepository(IRepository<TEntity, TKey1, TKey2, TKey3> repo) : base(repo)
@@ -100,7 +100,7 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ReadOnlyRepository{TEntity, TKey1, TKey2}"/> class.
+        /// Initializes a new instance of the <see cref="ReadOnlyRepository{TEntity, TKey1, TKey2}" /> class.
         /// </summary>
         /// <param name="repo">The underlying repository.</param>
         public ReadOnlyRepository(IRepository<TEntity, TKey1, TKey2> repo) : base(repo)
@@ -171,7 +171,7 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ReadOnlyRepository{TEntity, TKey}"/> class.
+        /// Initializes a new instance of the <see cref="ReadOnlyRepository{TEntity, TKey}" /> class.
         /// </summary>
         /// <param name="repo">The underlying repository.</param>
         public ReadOnlyRepository(IRepository<TEntity, TKey> repo) : base(repo)
