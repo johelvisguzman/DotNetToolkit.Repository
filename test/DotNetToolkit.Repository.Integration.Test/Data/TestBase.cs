@@ -11,29 +11,41 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Xml;
+    using Xunit;
 
     public abstract class TestBase
     {
         protected static void ForAllRepositoryFactories(Action<IRepositoryFactory> action)
         {
-            GetRepositoryContextFactories().ToList().ForEach(x => action(new RepositoryFactory(x)));
+            GetRepositoryContextFactories()
+                .ToList()
+                .ForEach(x => action(new RepositoryFactory(x)));
         }
 
         protected static void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactoryAsync, Task> action)
         {
-            GetRepositoryContextFactoriesAsync().ToList().ForEach(x => action(new RepositoryFactoryAsync(x)));
+            GetRepositoryContextFactoriesAsync()
+                .ToList()
+                .ForEach(x =>
+                {
+                    var ex = Record.ExceptionAsync(async () => await action(new RepositoryFactoryAsync(x)));
+
+                    Assert.Null(ex?.Result);
+                });
         }
 
         protected static void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory> action)
         {
-            GetRepositoryContextFactories().ToList().ForEach(x =>
-            {
-                // the in memory context will not support transactions currently
-                if (x() is InMemoryRepositoryContext || x() is EfCoreRepositoryContext)
-                    return;
+            GetRepositoryContextFactories()
+                .ToList()
+                .ForEach(x =>
+                {
+                    // the in memory context will not support transactions currently
+                    if (x() is InMemoryRepositoryContext || x() is EfCoreRepositoryContext)
+                        return;
 
-                action(new UnitOfWorkFactory(x));
-            });
+                    action(new UnitOfWorkFactory(x));
+                });
         }
 
         protected static IEnumerable<Func<IRepositoryContextAsync>> GetRepositoryContextFactoriesAsync()

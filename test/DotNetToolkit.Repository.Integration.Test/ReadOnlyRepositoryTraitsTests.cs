@@ -6,10 +6,9 @@
     using Moq;
     using Queries;
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Wrappers;
     using Xunit;
 
@@ -174,13 +173,13 @@
         public void GroupBy()
         {
             Expression<Func<Customer, string>> selector = x => x.Name;
-            Expression<Func<IGrouping<string, Customer>, string>> grouping = x => x.Key;
+            Expression<Func<string, IEnumerable<Customer>, string>> grouping = (key, g) => key;
             var options = new QueryOptions<Customer>();
 
             var mock = new Mock<IRepository<Customer>>();
 
-            mock.Setup(x => x.GroupBy(It.IsAny<Expression<Func<Customer, string>>>(), It.IsAny<Expression<Func<IGrouping<string, Customer>, string>>>()));
-            mock.Setup(x => x.GroupBy(It.IsAny<IQueryOptions<Customer>>(), It.IsAny<Expression<Func<Customer, string>>>(), It.IsAny<Expression<Func<IGrouping<string, Customer>, string>>>()));
+            mock.Setup(x => x.GroupBy(It.IsAny<Expression<Func<Customer, string>>>(), It.IsAny<Expression<Func<string, IEnumerable<Customer>, string>>>()));
+            mock.Setup(x => x.GroupBy(It.IsAny<IQueryOptions<Customer>>(), It.IsAny<Expression<Func<Customer, string>>>(), It.IsAny<Expression<Func<string, IEnumerable<Customer>, string>>>()));
 
             var readOnlyRepo = new ReadOnlyRepository<Customer, int>(mock.Object);
 

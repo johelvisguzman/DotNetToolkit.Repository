@@ -1598,7 +1598,7 @@
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="T:System.Linq.IGrouping`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public async Task<IEnumerable<TResult>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public async Task<IEnumerable<TResult>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -1610,8 +1610,7 @@
             var resultSelectorFunc = resultSelector.Compile();
 
             return (await FindAllAsync<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken))
-                .GroupBy(keySelectFunc, EqualityComparer<TGroupKey>.Default)
-                .Select(resultSelectorFunc)
+                .GroupBy(keySelectFunc, resultSelectorFunc)
                 .ToList();
         }
 
@@ -1920,7 +1919,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <returns>A new <see cref="T:System.Linq.IGrouping`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public IEnumerable<TResult> GroupBy<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector) where TEntity : class
+        public IEnumerable<TResult> GroupBy<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector) where TEntity : class
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -1932,8 +1931,7 @@
             var resultSelectorFunc = resultSelector.Compile();
 
             return FindAll<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance)
-                .GroupBy(keySelectFunc, EqualityComparer<TGroupKey>.Default)
-                .Select(resultSelectorFunc)
+                .GroupBy(keySelectFunc, resultSelectorFunc)
                 .ToList();
         }
 

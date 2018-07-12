@@ -595,7 +595,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="resultSelector">A transform function to produce a result value from each element.</param>
         /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        public IEnumerable<TResult> GroupBy<TGroupKey, TResult>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector)
+        public IEnumerable<TResult> GroupBy<TGroupKey, TResult>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
             return GroupBy<TGroupKey, TResult>((IQueryOptions<TEntity>)null, keySelector, resultSelector);
         }
@@ -609,7 +609,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="resultSelector">A transform function to produce a result value from each element.</param>
         /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public IEnumerable<TResult> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector)
+        public IEnumerable<TResult> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
             return InterceptError<IEnumerable<TResult>>(() => Context.GroupBy(options, keySelector, resultSelector));
         }
