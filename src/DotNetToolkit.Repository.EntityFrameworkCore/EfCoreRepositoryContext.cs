@@ -244,7 +244,7 @@
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            return GetQuery(options).ToDictionary(keySelectFunc, elementSelectorFunc, EqualityComparer<TDictionaryKey>.Default);
+            return GetQuery(options).ToDictionary(keySelectFunc, elementSelectorFunc);
         }
 
         /// <summary>
@@ -396,7 +396,7 @@
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            return GetQuery(options).ToDictionaryAsync(keySelectFunc, elementSelectorFunc, EqualityComparer<TDictionaryKey>.Default, cancellationToken);
+            return GetQuery(options).ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken);
         }
 
         /// <summary>

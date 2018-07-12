@@ -339,7 +339,7 @@
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            return GetQuery(options).ToDictionary(keySelectFunc, elementSelectorFunc, EqualityComparer<TDictionaryKey>.Default);
+            return GetQuery(options).ToDictionary(keySelectFunc, elementSelectorFunc);
         }
 
         /// <summary>

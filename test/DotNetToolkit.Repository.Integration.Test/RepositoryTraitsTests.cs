@@ -1825,15 +1825,15 @@
             expectedDictionary.Add(entity.Id, entity);
             expectedDictionaryByElementSelector.Add(entity.Id, entity.Name);
 
-            Assert.False(expectedDictionary.All(x => repo.ToDictionaryAsync(y => y.Id).Result.Contains(x)));
-            Assert.False(expectedDictionary.All(x => repo.ToDictionaryAsync(options, y => y.Id).Result.Contains(x)));
+            Assert.False(expectedDictionary.All(x => repo.ToDictionaryAsync(y => y.Id).Result.ContainsKey(x.Key)));
+            Assert.False(expectedDictionary.All(x => repo.ToDictionaryAsync(options, y => y.Id).Result.ContainsKey(x.Key)));
             Assert.False(expectedDictionaryByElementSelector.All(x => repo.ToDictionaryAsync(y => y.Id, y => y.Name).Result.Contains(x)));
             Assert.False(expectedDictionaryByElementSelector.All(x => repo.ToDictionaryAsync(options, y => y.Id, y => y.Name).Result.Contains(x)));
 
             await repo.AddAsync(entity);
 
-            Assert.True(expectedDictionary.All(x => repo.ToDictionaryAsync(y => y.Id).Result.Contains(x)));
-            Assert.True(expectedDictionary.All(x => repo.ToDictionaryAsync(options, y => y.Id).Result.Contains(x)));
+            Assert.True(expectedDictionary.All(x => repo.ToDictionaryAsync(y => y.Id).Result.ContainsKey(x.Key)));
+            Assert.True(expectedDictionary.All(x => repo.ToDictionaryAsync(options, y => y.Id).Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionaryAsync(y => y.Id, y => y.Name).Result.Contains(x)));
             Assert.True(expectedDictionaryByElementSelector.All(x => repo.ToDictionaryAsync(options, y => y.Id, y => y.Name).Result.Contains(x)));
         }
