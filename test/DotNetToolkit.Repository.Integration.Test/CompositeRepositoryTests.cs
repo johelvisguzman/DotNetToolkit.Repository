@@ -105,9 +105,9 @@
             Assert.NotNull(repo.Get(key1, key2, key3, fetchStrategy));
         }
 
-        private static async Task TestGetWithTwoCompositePrimaryKeyAsync(IRepositoryFactoryAsync repoFactory)
+        private static async Task TestGetWithTwoCompositePrimaryKeyAsync(IRepositoryFactory repoFactory)
         {
-            var repo = repoFactory.CreateAsync<CustomerWithTwoCompositePrimaryKey, int, int>();
+            var repo = repoFactory.Create<CustomerWithTwoCompositePrimaryKey, int, int>();
 
             int key1 = 1;
             int key2 = 2;
@@ -117,16 +117,16 @@
 
             var entity = new CustomerWithTwoCompositePrimaryKey { Id1 = key1, Id2 = key2, Name = "Random Name" };
 
-            var ex = await Assert.ThrowsAnyAsync<ArgumentException>(() => repoFactory.CreateAsync<CustomerWithTwoCompositePrimaryKey, int>().GetAsync(1));
+            var ex = await Assert.ThrowsAnyAsync<ArgumentException>(() => repoFactory.Create<CustomerWithTwoCompositePrimaryKey, int>().GetAsync(1));
             Assert.Equal("The number of primary key values passed must match number of primary key values defined on the entity.\r\nParameter name: keyValues", ex.Message);
 
-            ex = await Assert.ThrowsAnyAsync<ArgumentException>(() => repoFactory.CreateAsync<CustomerWithTwoCompositePrimaryKey, int>().GetAsync(1, fetchStrategy));
+            ex = await Assert.ThrowsAnyAsync<ArgumentException>(() => repoFactory.Create<CustomerWithTwoCompositePrimaryKey, int>().GetAsync(1, fetchStrategy));
             Assert.Equal("The number of primary key values passed must match number of primary key values defined on the entity.\r\nParameter name: keyValues", ex.Message);
 
-            ex = await Assert.ThrowsAnyAsync<ArgumentException>(() => repoFactory.CreateAsync<CustomerWithTwoCompositePrimaryKey, int, int, int>().GetAsync(1, 1, 1));
+            ex = await Assert.ThrowsAnyAsync<ArgumentException>(() => repoFactory.Create<CustomerWithTwoCompositePrimaryKey, int, int, int>().GetAsync(1, 1, 1));
             Assert.Equal("The number of primary key values passed must match number of primary key values defined on the entity.\r\nParameter name: keyValues", ex.Message);
 
-            ex = await Assert.ThrowsAnyAsync<ArgumentException>(() => repoFactory.CreateAsync<CustomerWithTwoCompositePrimaryKey, int, int, int>().GetAsync(1, 1, 1, fetchStrategy));
+            ex = await Assert.ThrowsAnyAsync<ArgumentException>(() => repoFactory.Create<CustomerWithTwoCompositePrimaryKey, int, int, int>().GetAsync(1, 1, 1, fetchStrategy));
             Assert.Equal("The number of primary key values passed must match number of primary key values defined on the entity.\r\nParameter name: keyValues", ex.Message);
 
             Assert.Null(await repo.GetAsync(key1, key2));
@@ -140,9 +140,9 @@
             Assert.NotNull(await repo.GetAsync(key1, key2, fetchStrategy));
         }
 
-        private static async Task TestGetWithThreeCompositePrimaryKeyAsync(IRepositoryFactoryAsync repoFactory)
+        private static async Task TestGetWithThreeCompositePrimaryKeyAsync(IRepositoryFactory repoFactory)
         {
-            var repo = repoFactory.CreateAsync<CustomerWithThreeCompositePrimaryKey, int, int, int>();
+            var repo = repoFactory.Create<CustomerWithThreeCompositePrimaryKey, int, int, int>();
 
             int key1 = 1;
             int key2 = 2;
@@ -153,16 +153,16 @@
 
             var entity = new CustomerWithThreeCompositePrimaryKey { Id1 = key1, Id2 = key2, Id3 = key3, Name = "Random Name" };
 
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => repoFactory.CreateAsync<CustomerWithThreeCompositePrimaryKey, int>().GetAsync(1));
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => repoFactory.Create<CustomerWithThreeCompositePrimaryKey, int>().GetAsync(1));
             Assert.Equal("The number of primary key values passed must match number of primary key values defined on the entity.\r\nParameter name: keyValues", ex.Message);
 
-            ex = await Assert.ThrowsAsync<ArgumentException>(() => repoFactory.CreateAsync<CustomerWithThreeCompositePrimaryKey, int>().GetAsync(1, fetchStrategy));
+            ex = await Assert.ThrowsAsync<ArgumentException>(() => repoFactory.Create<CustomerWithThreeCompositePrimaryKey, int>().GetAsync(1, fetchStrategy));
             Assert.Equal("The number of primary key values passed must match number of primary key values defined on the entity.\r\nParameter name: keyValues", ex.Message);
 
-            ex = await Assert.ThrowsAsync<ArgumentException>(() => repoFactory.CreateAsync<CustomerWithThreeCompositePrimaryKey, int, int>().GetAsync(1, 1));
+            ex = await Assert.ThrowsAsync<ArgumentException>(() => repoFactory.Create<CustomerWithThreeCompositePrimaryKey, int, int>().GetAsync(1, 1));
             Assert.Equal("The number of primary key values passed must match number of primary key values defined on the entity.\r\nParameter name: keyValues", ex.Message);
 
-            ex = await Assert.ThrowsAsync<ArgumentException>(() => repoFactory.CreateAsync<CustomerWithThreeCompositePrimaryKey, int, int>().GetAsync(1, 1, fetchStrategy));
+            ex = await Assert.ThrowsAsync<ArgumentException>(() => repoFactory.Create<CustomerWithThreeCompositePrimaryKey, int, int>().GetAsync(1, 1, fetchStrategy));
             Assert.Equal("The number of primary key values passed must match number of primary key values defined on the entity.\r\nParameter name: keyValues", ex.Message);
 
             Assert.Null(await repo.GetAsync(key1, key2, key3));

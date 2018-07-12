@@ -126,4 +126,7 @@
   <data name="EntityRequiresPrimaryKey" xml:space="preserve">
     <value>The instance of entity type '{0}' requires a primary key to be defined.</value>
   </data>
+  <data name="IRepositoryContextNotAsync" xml:space="preserve">
+    <value>The source IRepositoryContext doesn't implement IRepositoryContextAsync. Only sources that implement IRepositoryContextAsync can be used for asynchronous operations.</value>
+  </data>
 </root>

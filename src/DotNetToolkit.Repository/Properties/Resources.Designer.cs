@@ -86,5 +86,14 @@ namespace DotNetToolkit.Repository.Properties {
                 return ResourceManager.GetString("EntityRequiresPrimaryKey", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The source IRepositoryContext doesn&apos;t implement IRepositoryContextAsync. Only sources that implement IRepositoryContextAsync can be used for asynchronous operations..
+        /// </summary>
+        internal static string IRepositoryContextNotAsync {
+            get {
+                return ResourceManager.GetString("IRepositoryContextNotAsync", resourceCulture);
+            }
+        }
     }
 }
