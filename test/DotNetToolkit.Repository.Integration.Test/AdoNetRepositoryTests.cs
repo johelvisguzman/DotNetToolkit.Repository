@@ -44,10 +44,10 @@
 
             addressRepo.Add(address);
 
-            TestCustomerAddress(address, customerRepo.Get(customerKey, customerFetchStrategy).Address);
+            TestCustomerAddress(address, customerRepo.Find(customerKey, customerFetchStrategy).Address);
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
-            TestCustomerAddress(address, customerRepo.Get(customerKey).Address);
+            TestCustomerAddress(address, customerRepo.Find(customerKey).Address);
         }
 
         [Fact]
@@ -82,10 +82,10 @@
 
             addressWithForeignKeyAnnotationOnForeignKeyRepo.Add(addressWithForeignKeyAnnotationOnForeignKey);
 
-            TestCustomerAddress(addressWithForeignKeyAnnotationOnForeignKey, customerWithForeignKeyAnnotationOnForeignKeyRepo.Get(customerKey, customerWithForeignKeyAnnotationOnForeignKeyFetchStrategy).Address);
+            TestCustomerAddress(addressWithForeignKeyAnnotationOnForeignKey, customerWithForeignKeyAnnotationOnForeignKeyRepo.Find(customerKey, customerWithForeignKeyAnnotationOnForeignKeyFetchStrategy).Address);
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
-            TestCustomerAddress(addressWithForeignKeyAnnotationOnForeignKey, customerWithForeignKeyAnnotationOnForeignKeyRepo.Get(customerKey).Address);
+            TestCustomerAddress(addressWithForeignKeyAnnotationOnForeignKey, customerWithForeignKeyAnnotationOnForeignKeyRepo.Find(customerKey).Address);
 
             var addressWithForeignKeyAnnotationOnNavigationPropertyRepo = new Repository<CustomerAddressWithForeignKeyAnnotationOnNavigationProperty>(context);
             var customerWithForeignKeyAnnotationOnNavigationPropertyRepo = new Repository<CustomerWithForeignKeyAnnotationOnNavigationProperty>(context);
@@ -115,10 +115,10 @@
 
             addressWithForeignKeyAnnotationOnNavigationPropertyRepo.Add(addressWithForeignKeyAnnotationOnNavigationProperty);
 
-            TestCustomerAddress(addressWithForeignKeyAnnotationOnNavigationProperty, customerWithForeignKeyAnnotationOnNavigationPropertyRepo.Get(customerKey, customerWithForeignKeyAnnotationOnNavigationPropertyFetchStrategy).Address);
+            TestCustomerAddress(addressWithForeignKeyAnnotationOnNavigationProperty, customerWithForeignKeyAnnotationOnNavigationPropertyRepo.Find(customerKey, customerWithForeignKeyAnnotationOnNavigationPropertyFetchStrategy).Address);
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
-            TestCustomerAddress(addressWithForeignKeyAnnotationOnNavigationProperty, customerWithForeignKeyAnnotationOnNavigationPropertyRepo.Get(customerKey).Address);
+            TestCustomerAddress(addressWithForeignKeyAnnotationOnNavigationProperty, customerWithForeignKeyAnnotationOnNavigationPropertyRepo.Find(customerKey).Address);
         }
 
         [Fact]
@@ -154,10 +154,10 @@
 
             addressRepo.Add(address);
 
-            TestCustomerAddress(address, customerRepo.Get(customerKey, customerFetchStrategy).Address);
+            TestCustomerAddress(address, customerRepo.Find(customerKey, customerFetchStrategy).Address);
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
-            TestCustomerAddress(address, customerRepo.Get(customerKey).Address);
+            TestCustomerAddress(address, customerRepo.Find(customerKey).Address);
         }
 
         [Fact]
@@ -192,10 +192,10 @@
 
             addressRepo.Add(address);
 
-            TestCustomerAddress(address, (await customerRepo.GetAsync(customerKey, fetchStrategy)).Address);
+            TestCustomerAddress(address, (await customerRepo.FindAsync(customerKey, fetchStrategy)).Address);
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
-            TestCustomerAddress(address, (await customerRepo.GetAsync(customerKey)).Address);
+            TestCustomerAddress(address, (await customerRepo.FindAsync(customerKey)).Address);
         }
 
         [Fact]

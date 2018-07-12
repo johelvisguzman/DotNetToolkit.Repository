@@ -24,7 +24,7 @@
         IReadOnlyRepository<TEntity, TKey1, TKey2, TKey3> AsReadOnly();
 
         /// <summary>
-        /// Deletes an entity with the given primary key value in the repository.
+        /// Deletes an entity with the given composite primary key values in the repository.
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
@@ -32,7 +32,7 @@
         void Delete(TKey1 key1, TKey2 key2, TKey3 key3);
 
         /// <summary>
-        /// Asynchronously deletes an entity with the given primary key value in the repository.
+        /// Asynchronously deletes an entity with the given composite primary key values in the repository.
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
@@ -60,14 +60,14 @@
         IReadOnlyRepository<TEntity, TKey1, TKey2> AsReadOnly();
 
         /// <summary>
-        /// Deletes an entity with the given primary key value in the repository.
+        /// Deletes an entity with the given composite primary key values in the repository.
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         void Delete(TKey1 key1, TKey2 key2);
 
         /// <summary>
-        /// Asynchronously deletes an entity with the given primary key value in the repository.
+        /// Asynchronously deletes an entity with the given composite primary key values in the repository.
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>

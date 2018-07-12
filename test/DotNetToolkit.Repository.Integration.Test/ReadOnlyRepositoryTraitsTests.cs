@@ -108,16 +108,16 @@
 
             var mock = new Mock<IRepository<Customer>>();
 
-            mock.Setup(x => x.Get(It.IsAny<int>()));
-            mock.Setup(x => x.Get(It.IsAny<int>(), It.IsAny<IFetchStrategy<Customer>>()));
+            mock.Setup(x => x.Find(It.IsAny<int>()));
+            mock.Setup(x => x.Find(It.IsAny<int>(), It.IsAny<IFetchStrategy<Customer>>()));
 
             var readOnlyRepo = new ReadOnlyRepository<Customer, int>(mock.Object);
 
-            readOnlyRepo.Get(key);
-            readOnlyRepo.Get(key, fetchStrategy);
+            readOnlyRepo.Find(key);
+            readOnlyRepo.Find(key, fetchStrategy);
 
-            mock.Verify(x => x.Get(key), Times.Once);
-            mock.Verify(x => x.Get(key, fetchStrategy), Times.Once);
+            mock.Verify(x => x.Find(key), Times.Once);
+            mock.Verify(x => x.Find(key, fetchStrategy), Times.Once);
         }
 
         [Fact]

@@ -43,7 +43,7 @@
         #region Implementation of IReadOnlyRepository<TEntity, TKey1, TKey2, TKey3>
 
         /// <summary>
-        /// Determines whether the repository contains an entity with the given primary key value
+        /// Determines whether the repository contains an entity with the given composite primary key values.
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
@@ -55,32 +55,32 @@
         }
 
         /// <summary>
-        /// Gets an entity with the given primary key value in the repository.
+        /// Finds an entity with the given composite primary key values in the repository.
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
         /// <return>The entity found.</return>
-        public TEntity Get(TKey1 key1, TKey2 key2, TKey3 key3)
+        public TEntity Find(TKey1 key1, TKey2 key2, TKey3 key3)
         {
-            return _repo.Get(key1, key2, key3);
+            return _repo.Find(key1, key2, key3);
         }
 
         /// <summary>
-        /// Gets an entity with the given primary key value in the repository.
+        /// Finds an entity with the given composite primary key values in the repository.
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <return>The entity found.</return>
-        public TEntity Get(TKey1 key1, TKey2 key2, TKey3 key3, IFetchStrategy<TEntity> fetchStrategy)
+        public TEntity Find(TKey1 key1, TKey2 key2, TKey3 key3, IFetchStrategy<TEntity> fetchStrategy)
         {
-            return _repo.Get(key1, key2, key3, fetchStrategy);
+            return _repo.Find(key1, key2, key3, fetchStrategy);
         }
 
         /// <summary>
-        /// Asynchronously determines whether the repository contains an entity with the given primary key value
+        /// Asynchronously determines whether the repository contains an entity with the given composite primary key values.
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
@@ -93,20 +93,20 @@
         }
 
         /// <summary>
-        /// Asynchronously gets an entity with the given primary key value in the repository.
+        /// Asynchronously finds an entity with the given composite primary key values in the repository.
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
-            return _repo.GetAsync(key1, key2, key3, cancellationToken);
+            return _repo.FindAsync(key1, key2, key3, cancellationToken);
         }
 
         /// <summary>
-        /// Asynchronously gets an entity with the given primary key value in the repository.
+        /// Asynchronously finds an entity with the given composite primary key values in the repository.
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
@@ -114,9 +114,9 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            return _repo.GetAsync(key1, key2, key3, fetchStrategy, cancellationToken);
+            return _repo.FindAsync(key1, key2, key3, fetchStrategy, cancellationToken);
         }
 
         #endregion
@@ -158,7 +158,7 @@
         #region Implementation of IReadOnlyRepository<TEntity, TKey1, TKey2>
 
         /// <summary>
-        /// Determines whether the repository contains an entity with the given primary key value
+        /// Determines whether the repository contains an entity with the given composite primary key values.
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
@@ -169,30 +169,30 @@
         }
 
         /// <summary>
-        /// Gets an entity with the given primary key value in the repository.
+        /// Finds an entity with the given composite primary key values in the repository.
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <return>The entity found.</return>
-        public TEntity Get(TKey1 key1, TKey2 key2)
+        public TEntity Find(TKey1 key1, TKey2 key2)
         {
-            return _repo.Get(key1, key2);
+            return _repo.Find(key1, key2);
         }
 
         /// <summary>
-        /// Gets an entity with the given primary key value in the repository.
+        /// Finds an entity with the given composite primary key values in the repository.
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <return>The entity found.</return>
-        public TEntity Get(TKey1 key1, TKey2 key2, IFetchStrategy<TEntity> fetchStrategy)
+        public TEntity Find(TKey1 key1, TKey2 key2, IFetchStrategy<TEntity> fetchStrategy)
         {
-            return _repo.Get(key1, key2, fetchStrategy);
+            return _repo.Find(key1, key2, fetchStrategy);
         }
 
         /// <summary>
-        /// Asynchronously determines whether the repository contains an entity with the given primary key value
+        /// Asynchronously determines whether the repository contains an entity with the given composite primary key values.
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
@@ -204,28 +204,28 @@
         }
 
         /// <summary>
-        /// Asynchronously gets an entity with the given primary key value in the repository.
+        /// Asynchronously finds an entity with the given composite primary key values in the repository.
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
-            return _repo.GetAsync(key1, key2, cancellationToken);
+            return _repo.FindAsync(key1, key2, cancellationToken);
         }
 
         /// <summary>
-        /// Asynchronously gets an entity with the given primary key value in the repository.
+        /// Asynchronously finds an entity with the given composite primary key values in the repository.
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            return _repo.GetAsync(key1, key2, fetchStrategy, cancellationToken);
+            return _repo.FindAsync(key1, key2, fetchStrategy, cancellationToken);
         }
 
         #endregion
@@ -266,7 +266,7 @@
         #region Implementation of IReadOnlyRepository<TEntity, TKey>
 
         /// <summary>
-        /// Determines whether the repository contains an entity with the given primary key value
+        /// Determines whether the repository contains an entity with the given primary key value.
         /// </summary>
         /// <param name="key">The value of the primary key used to match entities against.</param>
         /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
@@ -276,28 +276,28 @@
         }
 
         /// <summary>
-        /// Gets an entity with the given primary key value in the repository.
+        /// Finds an entity with the given primary key value in the repository.
         /// </summary>
         /// <param name="key">The value of the primary key for the entity to be found.</param>
         /// <return>The entity found.</return>
-        public TEntity Get(TKey key)
+        public TEntity Find(TKey key)
         {
-            return _repo.Get(key);
+            return _repo.Find(key);
         }
 
         /// <summary>
-        /// Gets an entity with the given primary key value in the repository.
+        /// Finds an entity with the given composite primary key values in the repository.
         /// </summary>
         /// <param name="key">The value of the primary key for the entity to be found.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <return>The entity found.</return>
-        public TEntity Get(TKey key, IFetchStrategy<TEntity> fetchStrategy)
+        public TEntity Find(TKey key, IFetchStrategy<TEntity> fetchStrategy)
         {
-            return _repo.Get(key, fetchStrategy);
+            return _repo.Find(key, fetchStrategy);
         }
 
         /// <summary>
-        /// Asynchronously determines whether the repository contains an entity with the given primary key value
+        /// Asynchronously determines whether the repository contains an entity with the given primary key value.
         /// </summary>
         /// <param name="key">The value of the primary key used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
@@ -308,26 +308,26 @@
         }
 
         /// <summary>
-        /// Asynchronously gets an entity with the given primary key value in the repository.
+        /// Asynchronously finds an entity with the given primary key value in the repository.
         /// </summary>
         /// <param name="key">The value of the primary key for the entity to be found.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        public Task<TEntity> GetAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
-            return _repo.GetAsync(key, cancellationToken);
+            return _repo.FindAsync(key, cancellationToken);
         }
 
         /// <summary>
-        /// Asynchronously gets an entity with the given primary key value in the repository.
+        /// Asynchronously finds an entity with the given primary key value in the repository.
         /// </summary>
         /// <param name="key">The value of the primary key for the entity to be found.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        public Task<TEntity> GetAsync(TKey key, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync(TKey key, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            return _repo.GetAsync(key, fetchStrategy, cancellationToken);
+            return _repo.FindAsync(key, fetchStrategy, cancellationToken);
         }
 
         #endregion

@@ -97,7 +97,7 @@
                 AutoMapper.Map(copy, viewModel);
 
                 var repo = _repositoryFactory.Create<Customer>();
-                var model = repo.Get(viewModel.Id);
+                var model = repo.Find(viewModel.Id);
 
                 AutoMapper.Map(viewModel, model);
 
