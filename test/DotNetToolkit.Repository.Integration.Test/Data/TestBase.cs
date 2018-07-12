@@ -15,26 +15,39 @@
 
     public abstract class TestBase
     {
-        protected static void ForAllRepositoryFactories(Action<IRepositoryFactory> action)
+        protected static void ForAllRepositoryFactories(Action<IRepositoryFactory> action, params Type[] contextTypeExceptionList)
         {
             GetRepositoryContextFactories()
                 .ToList()
-                .ForEach(x => action(new RepositoryFactory(x)));
+                .ForEach(x =>
+                {
+                    var contextType = x().GetType();
+
+                    if (contextTypeExceptionList != null && contextTypeExceptionList.Contains(contextType))
+                        return;
+
+                    action(new RepositoryFactory(x));
+                });
         }
 
-        protected static void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactory, Task> action)
+        protected static void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactory, Task> action, params Type[] contextTypeExceptionList)
         {
             GetRepositoryContextFactories()
                 .ToList()
                 .ForEach(async x =>
                 {
+                    var contextType = x().GetType();
+
+                    if (contextTypeExceptionList != null && contextTypeExceptionList.Contains(contextType))
+                        return;
+
                     var task = Record.ExceptionAsync(() => action(new RepositoryFactory(x)));
                     if (task != null)
                     {
                         var ex = await task;
 
                         // the in-memory context will not support async operations for now (an exception should be thrown)
-                        if (x() is InMemoryRepositoryContext)
+                        if (typeof(InMemoryRepositoryContext).IsAssignableFrom(contextType))
                         {
                             Assert.Contains(Properties.Resources.IRepositoryContextNotAsync, ex.Message);
                         }
@@ -52,8 +65,10 @@
                 .ToList()
                 .ForEach(x =>
                 {
+                    var contextType = x().GetType();
+
                     // the in-memory context will not support transactions currently
-                    if (x() is InMemoryRepositoryContext || x() is EfCoreRepositoryContext)
+                    if (typeof(InMemoryRepositoryContext).IsAssignableFrom(contextType) || typeof(EfCoreRepositoryContext).IsAssignableFrom(contextType))
                         return;
 
                     action(new UnitOfWorkFactory(x));

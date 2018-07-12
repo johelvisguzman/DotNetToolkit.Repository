@@ -2,17 +2,32 @@
 {
     using System;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     public class Customer
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string Name { get; set; }
         public int AddressId { get; set; }
         public CustomerAddress Address { get; set; }
     }
 
+    [Table("CustomersWithNoIdentity")]
+    public class CustomerWithNoIdentity
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int AddressId { get; set; }
+    }
+
     public class CustomerAddress
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string Street { get; set; }
         public string City { get; set; }
@@ -43,6 +58,8 @@
 
     public class CustomerWithTimeStamp : IHaveTimeStamp
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string Name { get; set; }
         public DateTime? CreateTime { get; set; }
