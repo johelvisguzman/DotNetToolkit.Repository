@@ -352,7 +352,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <returns>A new <see cref="T:System.Linq.IGrouping`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public IEnumerable<TResult> GroupBy<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector) where TEntity : class
+        public IEnumerable<TResult> GroupBy<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector) where TEntity : class
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -363,7 +363,7 @@
             var keySelectFunc = keySelector.Compile();
             var resultSelectorFunc = resultSelector.Compile();
 
-            return GetQuery(options).GroupBy(keySelectFunc, EqualityComparer<TGroupKey>.Default).Select(resultSelectorFunc).ToList();
+            return GetQuery(options).GroupBy(keySelectFunc, resultSelectorFunc).ToList();
         }
 
         /// <summary>
