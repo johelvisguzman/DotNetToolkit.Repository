@@ -301,7 +301,7 @@
             ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
 
             if (fetchStrategy == null)
-                return _context.Set<TEntity>().FindAsync(cancellationToken, keyValues);
+                return _context.Set<TEntity>().FindAsync(keyValues, cancellationToken);
 
             var options = new QueryOptions<TEntity>()
                 .SatisfyBy(ConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
