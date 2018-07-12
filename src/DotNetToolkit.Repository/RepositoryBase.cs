@@ -65,7 +65,7 @@
 
             if (entity == null)
             {
-                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2));
+                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3));
 
                 Intercept(x => x.Error(ex));
 
