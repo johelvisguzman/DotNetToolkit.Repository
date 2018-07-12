@@ -138,4 +138,7 @@
   <data name="EntityNotFoundInStore" xml:space="preserve">
     <value>Attempted to update or delete an entity that does not exist in the database.</value>
   </data>
+  <data name="SchemaTableColumnsMismatch" xml:space="preserve">
+    <value>The model backing the '{0}' context has changed since the database was created. Consider updating the database.</value>
+  </data>
 </root>
