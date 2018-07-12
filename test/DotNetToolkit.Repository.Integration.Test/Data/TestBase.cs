@@ -22,15 +22,27 @@
                 .ForEach(x => action(new RepositoryFactory(x)));
         }
 
-        protected static void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactoryAsync, Task> action)
+        protected static void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactory, Task> action)
         {
-            GetRepositoryContextFactoriesAsync()
+            GetRepositoryContextFactories()
                 .ToList()
-                .ForEach(x =>
+                .ForEach(async x =>
                 {
-                    var ex = Record.ExceptionAsync(async () => await action(new RepositoryFactoryAsync(x)));
+                    var task = Record.ExceptionAsync(() => action(new RepositoryFactory(x)));
+                    if (task != null)
+                    {
+                        var ex = await task;
 
-                    Assert.Null(ex?.Result);
+                        // the in-memory context will not support async operations for now (an exception should be thrown)
+                        if (x() is InMemoryRepositoryContext)
+                        {
+                            Assert.Contains(Properties.Resources.IRepositoryContextNotAsync, ex.Message);
+                        }
+                        else
+                        {
+                            Assert.Null(ex);
+                        }
+                    }
                 });
         }
 
@@ -40,7 +52,7 @@
                 .ToList()
                 .ForEach(x =>
                 {
-                    // the in memory context will not support transactions currently
+                    // the in-memory context will not support transactions currently
                     if (x() is InMemoryRepositoryContext || x() is EfCoreRepositoryContext)
                         return;
 
@@ -48,29 +60,18 @@
                 });
         }
 
-        protected static IEnumerable<Func<IRepositoryContextAsync>> GetRepositoryContextFactoriesAsync()
+        protected static IEnumerable<Func<IRepositoryContext>> GetRepositoryContextFactories()
         {
-            return new List<Func<IRepositoryContextAsync>>
+            return new List<Func<IRepositoryContext>>
             {
                 () => TestAdoNetContextFactory.Create(),
                 () => TestEfCoreDbContextFactory.Create(),
-                () => TestEfDbContextFactory.Create()
-            };
-        }
-
-        protected static IEnumerable<Func<IRepositoryContext>> GetRepositoryContextFactories()
-        {
-            var contexts = new List<Func<IRepositoryContext>>
-            {
+                () => TestEfDbContextFactory.Create(),
                 () => new InMemoryRepositoryContext(Guid.NewGuid().ToString()),
                 () => new CsvRepositoryContext(Path.GetTempPath() + Guid.NewGuid().ToString("N")),
                 () => new JsonRepositoryContext(Path.GetTempPath() + Guid.NewGuid().ToString("N")),
                 () => new XmlRepositoryContext(Path.GetTempPath() + Guid.NewGuid().ToString("N"))
             };
-
-            contexts.AddRange(GetRepositoryContextFactoriesAsync());
-
-            return contexts;
         }
     }
 }
