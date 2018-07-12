@@ -48,6 +48,18 @@
                 {
                     command.CommandType = CommandType.Text;
                     command.Connection = connection;
+                    command.CommandText = @"CREATE TABLE CustomersWithNoIdentity (
+                                            Id int PRIMARY KEY,
+                                            Name nvarchar (100),
+                                            AddressId int)";
+
+                    var result = command.ExecuteNonQuery();
+                }
+
+                using (var command = factory.CreateCommand())
+                {
+                    command.CommandType = CommandType.Text;
+                    command.Connection = connection;
                     command.CommandText = @"CREATE TABLE CustomerWithTwoCompositePrimaryKeys (
                                             Id1 int,
                                             Id2 int,
