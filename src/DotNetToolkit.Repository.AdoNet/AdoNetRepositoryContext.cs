@@ -3,6 +3,7 @@
     using FetchStrategies;
     using Helpers;
     using Internal;
+    using Internal.Schema;
     using Properties;
     using Queries;
     using System;
@@ -24,7 +25,7 @@
     /// Represents an ado.net repository context.
     /// </summary>
     /// <seealso cref="IRepositoryContextAsync" />
-    public class AdoNetRepositoryContext : IRepositoryContextAsync
+    public class AdoNetRepositoryContext : IRepositoryContextAsync, IHaveRepositoryContextConfiguration
     {
         #region Fields
 
@@ -244,7 +245,7 @@
         /// <returns>An entity which has been projected into a new form.</returns>
         public T ExecuteObject<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters) where T : class
         {
-            return ExecuteObject<T>(cmdText, cmdType, parameters, reader => new Mapper(typeof(T)).Map<T, T>(reader, IdentityFunction<T>.Instance));
+            return ExecuteObject<T>(cmdText, cmdType, parameters, Mapper<T>.Map);
         }
 
         /// <summary>
@@ -269,7 +270,7 @@
         /// <returns>An entity which has been projected into a new form.</returns>
         public T ExecuteObject<T>(string cmdText, Dictionary<string, object> parameters) where T : class
         {
-            return ExecuteObject<T>(cmdText, parameters, reader => new Mapper(typeof(T)).Map<T, T>(reader, IdentityFunction<T>.Instance));
+            return ExecuteObject<T>(cmdText, parameters, Mapper<T>.Map);
         }
 
         /// <summary>
@@ -294,7 +295,7 @@
         /// <returns>An entity which has been projected into a new form.</returns>
         public T ExecuteObject<T>(string cmdText, CommandType cmdType) where T : class
         {
-            return ExecuteObject<T>(cmdText, cmdType, reader => new Mapper(typeof(T)).Map<T, T>(reader, IdentityFunction<T>.Instance));
+            return ExecuteObject<T>(cmdText, cmdType, Mapper<T>.Map);
         }
 
         /// <summary>
@@ -317,7 +318,7 @@
         /// <returns>An entity which has been projected into a new form.</returns>
         public T ExecuteObject<T>(string cmdText) where T : class
         {
-            return ExecuteObject<T>(cmdText, reader => new Mapper(typeof(T)).Map<T, T>(reader, IdentityFunction<T>.Instance));
+            return ExecuteObject<T>(cmdText, Mapper<T>.Map);
         }
 
         /// <summary>
@@ -354,7 +355,7 @@
         /// <returns>A list which each entity has been projected into a new form.</returns>
         public IEnumerable<T> ExecuteList<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters) where T : class
         {
-            return ExecuteList<T>(cmdText, cmdType, parameters, reader => new Mapper(typeof(T)).Map<T, T>(reader, IdentityFunction<T>.Instance));
+            return ExecuteList<T>(cmdText, cmdType, parameters, Mapper<T>.Map);
         }
 
         /// <summary>
@@ -379,7 +380,7 @@
         /// <returns>A list which each entity has been projected into a new form.</returns>
         public IEnumerable<T> ExecuteList<T>(string cmdText, Dictionary<string, object> parameters) where T : class
         {
-            return ExecuteList<T>(cmdText, parameters, reader => new Mapper(typeof(T)).Map<T, T>(reader, IdentityFunction<T>.Instance));
+            return ExecuteList<T>(cmdText, parameters, Mapper<T>.Map);
         }
 
         /// <summary>
@@ -404,7 +405,7 @@
         /// <returns>A list which each entity has been projected into a new form.</returns>
         public IEnumerable<T> ExecuteList<T>(string cmdText, CommandType cmdType) where T : class
         {
-            return ExecuteList<T>(cmdText, cmdType, reader => new Mapper(typeof(T)).Map<T, T>(reader, IdentityFunction<T>.Instance));
+            return ExecuteList<T>(cmdText, cmdType, Mapper<T>.Map);
         }
 
         /// <summary>
@@ -427,7 +428,7 @@
         /// <returns>A list which each entity has been projected into a new form.</returns>
         public IEnumerable<T> ExecuteList<T>(string cmdText) where T : class
         {
-            return ExecuteList<T>(cmdText, reader => new Mapper(typeof(T)).Map<T, T>(reader, IdentityFunction<T>.Instance));
+            return ExecuteList<T>(cmdText, Mapper<T>.Map);
         }
 
         /// <summary>
@@ -698,7 +699,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing an entity which has been projected into a new form.</returns>
         public Task<T> ExecuteObjectAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken()) where T : class
         {
-            return ExecuteObjectAsync<T>(cmdText, cmdType, parameters, reader => new Mapper(typeof(T)).Map<T, T>(reader, IdentityFunction<T>.Instance), cancellationToken);
+            return ExecuteObjectAsync<T>(cmdText, cmdType, parameters, Mapper<T>.Map, cancellationToken);
         }
 
         /// <summary>
@@ -725,7 +726,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing an entity which has been projected into a new form.</returns>
         public Task<T> ExecuteObjectAsync<T>(string cmdText, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken()) where T : class
         {
-            return ExecuteObjectAsync<T>(cmdText, parameters, reader => new Mapper(typeof(T)).Map<T, T>(reader, IdentityFunction<T>.Instance), cancellationToken);
+            return ExecuteObjectAsync<T>(cmdText, parameters, Mapper<T>.Map, cancellationToken);
         }
 
         /// <summary>
@@ -752,7 +753,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing an entity which has been projected into a new form.</returns>
         public Task<T> ExecuteObjectAsync<T>(string cmdText, CommandType cmdType, CancellationToken cancellationToken = new CancellationToken()) where T : class
         {
-            return ExecuteObjectAsync<T>(cmdText, cmdType, reader => new Mapper(typeof(T)).Map<T, T>(reader, IdentityFunction<T>.Instance), cancellationToken);
+            return ExecuteObjectAsync<T>(cmdText, cmdType, Mapper<T>.Map, cancellationToken);
         }
 
         /// <summary>
@@ -777,7 +778,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing an entity which has been projected into a new form.</returns>
         public Task<T> ExecuteObjectAsync<T>(string cmdText, CancellationToken cancellationToken = new CancellationToken()) where T : class
         {
-            return ExecuteObjectAsync<T>(cmdText, reader => new Mapper(typeof(T)).Map<T, T>(reader, IdentityFunction<T>.Instance), cancellationToken);
+            return ExecuteObjectAsync<T>(cmdText, Mapper<T>.Map, cancellationToken);
         }
 
         /// <summary>
@@ -816,7 +817,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
         public Task<IEnumerable<T>> ExecuteListAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken()) where T : class
         {
-            return ExecuteListAsync<T>(cmdText, cmdType, parameters, reader => new Mapper(typeof(T)).Map<T, T>(reader, IdentityFunction<T>.Instance), cancellationToken);
+            return ExecuteListAsync<T>(cmdText, cmdType, parameters, Mapper<T>.Map, cancellationToken);
         }
 
         /// <summary>
@@ -843,7 +844,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
         public Task<IEnumerable<T>> ExecuteListAsync<T>(string cmdText, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken()) where T : class
         {
-            return ExecuteListAsync<T>(cmdText, parameters, reader => new Mapper(typeof(T)).Map<T, T>(reader, IdentityFunction<T>.Instance), cancellationToken);
+            return ExecuteListAsync<T>(cmdText, parameters, Mapper<T>.Map, cancellationToken);
         }
 
         /// <summary>
@@ -870,7 +871,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
         public Task<IEnumerable<T>> ExecuteListAsync<T>(string cmdText, CommandType cmdType, CancellationToken cancellationToken = new CancellationToken()) where T : class
         {
-            return ExecuteListAsync<T>(cmdText, cmdType, reader => new Mapper(typeof(T)).Map<T, T>(reader, IdentityFunction<T>.Instance), cancellationToken);
+            return ExecuteListAsync<T>(cmdText, cmdType, Mapper<T>.Map, cancellationToken);
         }
 
         /// <summary>
@@ -895,7 +896,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
         public Task<IEnumerable<T>> ExecuteListAsync<T>(string cmdText, CancellationToken cancellationToken = new CancellationToken()) where T : class
         {
-            return ExecuteListAsync<T>(cmdText, reader => new Mapper(typeof(T)).Map<T, T>(reader, IdentityFunction<T>.Instance), cancellationToken);
+            return ExecuteListAsync<T>(cmdText, Mapper<T>.Map, cancellationToken);
         }
 
         /// <summary>
@@ -2006,6 +2007,21 @@
             Added,
             Removed,
             Modified
+        }
+
+        #endregion
+
+        #region Implementation of IHaveRepositoryContextConfiguration
+
+        /// <summary>
+        /// Initializes this instance.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        void IHaveRepositoryContextConfiguration.Initialize<TEntity>()
+        {
+            var schemaHelper = new SchemaTableHelper(this);
+
+            schemaHelper.Validate<TEntity>();
         }
 
         #endregion

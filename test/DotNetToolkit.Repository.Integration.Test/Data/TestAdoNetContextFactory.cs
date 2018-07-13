@@ -13,7 +13,7 @@
 
             var provider = "System.Data.SqlServerCe.4.0";
             var connectionString = $"Data Source={currentFile};Persist Security Info=False";
-
+            
             if (File.Exists(currentFile))
                 File.Delete(currentFile);
 
@@ -41,7 +41,51 @@
                                             Name nvarchar (100),
                                             AddressId int)";
 
-                    var result = command.ExecuteNonQuery();
+                    command.ExecuteNonQuery();
+                }
+
+                using (var command = factory.CreateCommand())
+                {
+                    command.CommandType = CommandType.Text;
+                    command.Connection = connection;
+                    command.CommandText = @"CREATE TABLE CustomersColumnNameMismatch (
+                                            Id int IDENTITY PRIMARY KEY,
+                                            Name nvarchar (100))";
+
+                    command.ExecuteNonQuery();
+                }
+
+                using (var command = factory.CreateCommand())
+                {
+                    command.CommandType = CommandType.Text;
+                    command.Connection = connection;
+                    command.CommandText = @"CREATE TABLE CustomersColumnNameMissing (
+                                            Id int IDENTITY PRIMARY KEY,
+                                            Name nvarchar (100))";
+
+                    command.ExecuteNonQuery();
+                }
+
+                using (var command = factory.CreateCommand())
+                {
+                    command.CommandType = CommandType.Text;
+                    command.Connection = connection;
+                    command.CommandText = @"CREATE TABLE CustomersKeyMismatch (
+                                            Id int,
+                                            Id1 int IDENTITY PRIMARY KEY)";
+
+                    command.ExecuteNonQuery();
+                }
+
+                using (var command = factory.CreateCommand())
+                {
+                    command.CommandType = CommandType.Text;
+                    command.Connection = connection;
+                    command.CommandText = @"CREATE TABLE CustomersColumnRequiredMissing (
+                                            Id int IDENTITY PRIMARY KEY,
+                                            Name nvarchar (100) NOT NULL)";
+
+                    command.ExecuteNonQuery();
                 }
 
                 using (var command = factory.CreateCommand())
@@ -53,7 +97,7 @@
                                             Name nvarchar (100),
                                             AddressId int)";
 
-                    var result = command.ExecuteNonQuery();
+                    command.ExecuteNonQuery();
                 }
 
                 using (var command = factory.CreateCommand())
@@ -66,7 +110,7 @@
                                             Name nvarchar (100),
                                             PRIMARY KEY (Id1, Id2))";
 
-                    var result = command.ExecuteNonQuery();
+                    command.ExecuteNonQuery();
                 }
 
                 using (var command = factory.CreateCommand())
@@ -80,7 +124,7 @@
                                             Name nvarchar (100),
                                             PRIMARY KEY (Id1, Id2, Id3))";
 
-                    var result = command.ExecuteNonQuery();
+                    command.ExecuteNonQuery();
                 }
 
                 using (var command = factory.CreateCommand())
@@ -95,7 +139,7 @@
                                             State nvarchar (2),
                                             PRIMARY KEY (Id, CustomerId))";
 
-                    var result = command.ExecuteNonQuery();
+                    command.ExecuteNonQuery();
                 }
 
                 using (var command = factory.CreateCommand())
@@ -109,7 +153,7 @@
                                             State nvarchar (2),
                                             CustomerId int)";
 
-                    var result = command.ExecuteNonQuery();
+                    command.ExecuteNonQuery();
                 }
             }
         }

@@ -2,11 +2,13 @@
 {
     using FetchStrategies;
     using Queries;
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
     using System.Threading.Tasks;
+    using AdoNet;
     using Xunit;
 
     public class AdoNetRepositoryTests
@@ -802,6 +804,24 @@
             Assert.Single(await repo.FindAllAsync<int>(x => (1 == x.Id) & (1 <= x.Id), x => x.Id));
         }
 
+        [Fact]
+        public void ThrowsIfSchemaTableColumnsMismatchOnConstruction()
+        {
+            var context = Data.TestAdoNetContextFactory.Create();
+
+            var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerColumnNameMismatch>(context));
+            Assert.Equal($"The model backing the '{context.GetType().Name}' context has changed since the database was created. Consider updating the database.", ex.Message);
+
+            ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerColumnNameMissing>(context));
+            Assert.Equal($"The model backing the '{context.GetType().Name}' context has changed since the database was created. Consider updating the database.", ex.Message);
+
+            ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerKeyMismatch>(context));
+            Assert.Equal($"The model backing the '{context.GetType().Name}' context has changed since the database was created. Consider updating the database.", ex.Message);
+
+            ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerColumnRequiredMissing>(context));
+            Assert.Equal($"The model backing the '{context.GetType().Name}' context has changed since the database was created. Consider updating the database.", ex.Message);
+        }
+
         private static void TestCustomerAddress(CustomerAddress expected, CustomerAddress actual)
         {
             Assert.NotNull(expected);
@@ -998,6 +1018,34 @@
             public int CustomerKey { get; set; }
             [ForeignKey("CustomerId")]
             public CustomerWithForeignKeyAnnotationOnNavigationProperty Customer { get; set; }
+        }
+
+        [Table("CustomersColumnNameMismatch")]
+        class CustomerColumnNameMismatch
+        {
+            public int Id { get; set; }
+            public string MismatchName { get; set; }
+        }
+
+        [Table("CustomersColumnNameMissing")]
+        class CustomerColumnNameMissing
+        {
+            public int Id { get; set; }
+        }
+
+        [Table("CustomersColumnNameMissing")]
+        class CustomerKeyMismatch
+        {
+            public int Id { get; set; }
+            [Key]
+            public int Id1 { get; set; }
+        }
+
+        [Table("CustomersColumnRequiredMissing")]
+        class CustomerColumnRequiredMissing
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
         }
     }
 }

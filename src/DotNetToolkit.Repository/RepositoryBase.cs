@@ -668,7 +668,21 @@
                 throw new ArgumentNullException(nameof(context));
 
             Context = context;
+            
             _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
+
+            try
+            {
+                var haveConfiguration = context as IHaveRepositoryContextConfiguration;
+                if (haveConfiguration != null)
+                    haveConfiguration.Initialize<TEntity>();
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error(ex));
+
+                throw;
+            }
         }
 
         #endregion

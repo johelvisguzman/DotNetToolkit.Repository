@@ -20,10 +20,12 @@
         /// <param name="command">The command.</param>
         /// <param name="name">The name.</param>
         /// <param name="value">The value.</param>
-        public static void AddParmeter(this DbCommand command, string name, object value)
+        public static void AddParameter(this DbCommand command, string name, object value)
         {
             if (command == null)
                 throw new ArgumentNullException(nameof(command));
+
+            name = name.StartsWith("@") ? name : "@" + name;
 
             var parameter = command.CreateParameter();
 
@@ -31,6 +33,35 @@
             parameter.ParameterName = name;
 
             command.Parameters.Add(parameter);
+        }
+
+        /// <summary>
+        /// Adds a new parameter with the specified name and value to the command.
+        /// </summary>
+        /// <param name="command">The command.</param>
+        /// <param name="name">The name.</param>
+        /// <param name="values">The collection of values.</param>
+        public static void AddParameter(this DbCommand command, string name, object[] values)
+        {
+            if (command == null)
+                throw new ArgumentNullException(nameof(command));
+
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
+
+            name = name.StartsWith("@") ? name : "@" + name;
+
+            var names = string.Join(", ", values.Select((value, i) =>
+            {
+                var parameterName = name + i;
+
+                command.AddParameter(parameterName, value);
+
+                return parameterName;
+            }));
+
+            command.CommandText = command.CommandText.Replace(name, names);
+
         }
 
         /// <summary>
@@ -51,7 +82,10 @@
 
             foreach (var item in parameters)
             {
-                command.AddParmeter(item.Key, item.Value);
+                if (item.Value is object[] values)
+                    command.AddParameter(item.Key, values);
+                else
+                    command.AddParameter(item.Key, item.Value);
             }
         }
 
@@ -71,7 +105,7 @@
             command.CommandText = $"SELECT * FROM [{tableName}]\nWHERE {primeryKeyColumnName} = @{primeryKeyColumnName}";
             command.CommandType = CommandType.Text;
             command.Parameters.Clear();
-            command.AddParmeter($"@{primeryKeyColumnName}", primeryKeyPropertyInfo.GetValue(obj, null));
+            command.AddParameter($"@{primeryKeyColumnName}", primeryKeyPropertyInfo.GetValue(obj, null));
 
             var existInDb = false;
 
@@ -104,7 +138,7 @@
             command.CommandText = $"SELECT * FROM [{tableName}]\nWHERE {primeryKeyColumnName} = @{primeryKeyColumnName}";
             command.CommandType = CommandType.Text;
             command.Parameters.Clear();
-            command.AddParmeter($"@{primeryKeyColumnName}", primeryKeyPropertyInfo.GetValue(obj, null));
+            command.AddParameter($"@{primeryKeyColumnName}", primeryKeyPropertyInfo.GetValue(obj, null));
 
             var existInDb = false;
 

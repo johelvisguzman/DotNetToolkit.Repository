@@ -188,4 +188,12 @@
 
         #endregion
     }
+
+    internal class Mapper<T> where T : class
+    {
+        public static T Map(DbDataReader r)
+        {
+            return new Mapper(typeof(T)).Map<T, T>(r, IdentityFunction<T>.Instance);
+        }
+    }
 }
