@@ -28,13 +28,13 @@
         }
 
         public ConcurrentDictionary<Type, IEnumerable<PropertyInfo>> PrimaryKeyMapping { get; }
-        public ConcurrentDictionary<Tuple<Type, Type>, PropertyInfo> ForeignKeyMapping { get; }
+        public ConcurrentDictionary<Tuple<Type, Type>, IEnumerable<PropertyInfo>> ForeignKeyMapping { get; }
         public ConcurrentDictionary<Type, string> TableNameMapping { get; }
 
         private InMemoryCache()
         {
             PrimaryKeyMapping = new ConcurrentDictionary<Type, IEnumerable<PropertyInfo>>();
-            ForeignKeyMapping = new ConcurrentDictionary<Tuple<Type, Type>, PropertyInfo>();
+            ForeignKeyMapping = new ConcurrentDictionary<Tuple<Type, Type>, IEnumerable<PropertyInfo>>();
             TableNameMapping = new ConcurrentDictionary<Type, string>();
         }
     }

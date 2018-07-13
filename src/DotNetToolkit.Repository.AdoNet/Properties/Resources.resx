@@ -139,6 +139,9 @@
     <value>Attempted to update or delete an entity that does not exist in the database.</value>
   </data>
   <data name="SchemaTableColumnsMismatch" xml:space="preserve">
-    <value>The model backing the '{0}' context has changed since the database was created. Consider updating the database.</value>
+    <value>The model '{0}' has changed since the database was created. Consider updating the database.</value>
+  </data>
+  <data name="ConflictingMultiplicities" xml:space="preserve">
+    <value>The navigation property '{0}' declared on type '{1}' has been configured with conflicting multiplicities.</value>
   </data>
 </root>
