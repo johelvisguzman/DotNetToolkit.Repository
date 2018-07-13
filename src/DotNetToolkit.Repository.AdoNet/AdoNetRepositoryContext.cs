@@ -44,18 +44,29 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="AdoNetRepositoryContext" /> class.
         /// </summary>
-        /// <param name="connectionString">The connection string.</param>
-        public AdoNetRepositoryContext(string connectionString)
+        /// <param name="nameOrConnectionString">Either the database name or a connection string.</param>
+        public AdoNetRepositoryContext(string nameOrConnectionString)
         {
-            if (connectionString == null)
-                throw new ArgumentNullException(nameof(connectionString));
+            if (nameOrConnectionString == null)
+                throw new ArgumentNullException(nameof(nameOrConnectionString));
 
-            var ccs = ConfigurationManager.ConnectionStrings[connectionString];
-            if (ccs == null)
+            var css = ConfigurationManager.ConnectionStrings[nameOrConnectionString];
+            if (css == null)
+            {
+                for (var i = 0; i < ConfigurationManager.ConnectionStrings.Count; i++)
+                {
+                    css = ConfigurationManager.ConnectionStrings[i];
+
+                    if (css.ConnectionString.Equals(nameOrConnectionString))
+                        break;
+                }
+            }
+
+            if (css == null)
                 throw new ArgumentException("The connection string does not exist in your configuration file.");
 
-            _factory = DbProviderFactories.GetFactory(ccs.ProviderName);
-            _connectionString = connectionString;
+            _factory = DbProviderFactories.GetFactory(css.ProviderName);
+            _connectionString = css.ConnectionString;
         }
 
         /// <summary>
