@@ -8,13 +8,12 @@
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
     using System.Threading.Tasks;
-    using AdoNet;
     using Xunit;
 
     public class AdoNetRepositoryTests
     {
         [Fact]
-        public void GetWithFetchStrategyWithNavigationProperty()
+        public void FindWithNavigationPropertyByKey_OneToOneRelationship()
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
@@ -53,7 +52,48 @@
         }
 
         [Fact]
-        public void GetWithFetchStrategyAndForeignKeyAnnotationChanged()
+        public void FindWithCompositeNavigationPropertyByKey_OneToOneRelationship()
+        {
+            var context = Data.TestAdoNetContextFactory.Create();
+
+            var customerKey = 1;
+            var addressKey1 = 1;
+            var addressKey2 = 2;
+
+            var addressRepo = new Repository<CustomerAddressWithTwoCompositePrimaryKey>(context);
+            var customerRepo = new Repository<CustomerWithTwoCompositePrimaryKey>(context);
+            var customerFetchStrategy = new FetchStrategy<CustomerWithTwoCompositePrimaryKey>();
+
+            var entity = new CustomerWithTwoCompositePrimaryKey
+            {
+                Id = customerKey,
+                Name = "Random Name",
+                AddressId1 = addressKey1,
+                AddressId2 = addressKey2
+            };
+
+            var address = new CustomerAddressWithTwoCompositePrimaryKey
+            {
+                Id1 = addressKey1,
+                Id2 = addressKey2,
+                Street = "Street",
+                City = "New City",
+                State = "ST",
+                CustomerId = customerKey,
+                Customer = entity
+            };
+
+            addressRepo.Add(address);
+            customerRepo.Add(entity);
+
+            TestCustomerAddress(address, customerRepo.Find(customerKey, customerFetchStrategy).Address);
+
+            // for one to one, the navigation properties will be included automatically (no need to fetch)
+            TestCustomerAddress(address, customerRepo.Find(customerKey).Address);
+        }
+        
+        [Fact]
+        public void FindWithForeignKeyAnnotationChangedByKey_OneToOneRelationship()
         {
             var context = Data.TestAdoNetContextFactory.Create();
             var customerKey = 1;
@@ -124,7 +164,7 @@
         }
 
         [Fact]
-        public void GetWithFetchStrategyAndCompositeKey()
+        public void FindWithNavigationPropertyByCompositeKey_OneToOneRelationship()
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
@@ -163,7 +203,7 @@
         }
 
         [Fact]
-        public async Task GetWithFetchStrategyWithNavigationPropertyAsync()
+        public async Task FindWithNavigationPropertyByKeyAsync_OneToOneRelationship()
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
@@ -201,7 +241,7 @@
         }
 
         [Fact]
-        public void FindWithFetchStrategyWithNavigationProperty()
+        public void FindWithNavigationProperty_OneToOneRelationship()
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
@@ -243,7 +283,7 @@
         }
 
         [Fact]
-        public async Task FindWithFetchStrategyWithNavigationPropertyAsync()
+        public async Task FindWithNavigationPropertyAsync_OneToOneRelationship()
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
@@ -285,7 +325,7 @@
         }
 
         [Fact]
-        public void FindAlldWithFetchStrategyWithNavigationProperty()
+        public void FindAlldWithNavigationProperty_OneToOneRelationship()
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
@@ -328,7 +368,7 @@
         }
 
         [Fact]
-        public async Task FindAlldWithFetchStrategyWithNavigationPropertyAsync()
+        public async Task FindAlldWithNavigationPropertyAsync_OneToOneRelationship()
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
@@ -371,7 +411,7 @@
         }
 
         [Fact]
-        public void ExistWithFetchStrategyWithNavigationProperty()
+        public void ExistWithNavigationProperty_OneToOneRelationship()
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
@@ -412,7 +452,7 @@
         }
 
         [Fact]
-        public async Task ExistWithFetchStrategyWithNavigationPropertyAsync()
+        public async Task ExistWithNavigationPropertyAsync_OneToOneRelationship()
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
@@ -453,7 +493,7 @@
         }
 
         [Fact]
-        public void DeleteWithKeyDataAttributeChanged()
+        public void DeleteWithKeyDataAttribute()
         {
             var context = Data.TestAdoNetContextFactory.Create();
 
@@ -470,6 +510,26 @@
             repo.Delete(entity.Key);
 
             Assert.False(repo.Exists(entity.Key));
+        }
+
+        [Fact]
+        public async Task DeleteWithKeyDataAttributeAsync()
+        {
+            var context = Data.TestAdoNetContextFactory.Create();
+
+            var repo = new Repository<CustomerWithKeyAnnotation>(context);
+
+            const string name = "Random Name";
+
+            var entity = new CustomerWithKeyAnnotation { Name = name };
+
+            await repo.AddAsync(entity);
+
+            Assert.True(await repo.ExistsAsync(entity.Key));
+
+            await repo.DeleteAsync(entity.Key);
+
+            Assert.False(await repo.ExistsAsync(entity.Key));
         }
 
         [Fact]
@@ -847,6 +907,32 @@
             Assert.Equal(expected.Customer.AddressId, expected.Customer.AddressId);
         }
 
+        private static void TestCustomerAddress(CustomerAddressWithTwoCompositePrimaryKey expected, CustomerAddressWithTwoCompositePrimaryKey actual)
+        {
+            Assert.NotNull(expected);
+            Assert.NotNull(actual);
+            Assert.NotEqual(expected, actual);
+
+            // The navigation property should have all the values mapped correctly
+            Assert.Equal(expected.Street, actual.Street);
+            Assert.Equal(expected.City, actual.City);
+            Assert.Equal(expected.State, actual.State);
+
+            // The navigation property should have a key linking back to the main class (customer)
+            Assert.NotEqual(0, actual.CustomerId);
+            Assert.NotEqual(0, expected.CustomerId);
+            Assert.Equal(expected.CustomerId, actual.CustomerId);
+
+            // If the navigation property has also a navigation property linking back to the main class (customer),
+            // then that navigation property should also be mapped correctly
+            Assert.NotNull(expected.Customer);
+            Assert.NotNull(actual.Customer);
+            Assert.Equal(expected.Customer.Id, expected.Customer.Id);
+            Assert.Equal(expected.Customer.Name, expected.Customer.Name);
+            Assert.Equal(expected.Customer.AddressId1, expected.Customer.AddressId1);
+            Assert.Equal(expected.Customer.AddressId2, expected.Customer.AddressId2);
+        }
+
         private static void TestCustomerAddress(CustomerCompositeAddress expected, CustomerCompositeAddress actual)
         {
             Assert.NotNull(expected);
@@ -1046,6 +1132,30 @@
         {
             public int Id { get; set; }
             public string Name { get; set; }
+        }
+
+        [Table("CustomersWithTwoCompositePrimaryKey")]
+        class CustomerWithTwoCompositePrimaryKey
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public int AddressId1 { get; set; }
+            public int AddressId2 { get; set; }
+            public CustomerAddressWithTwoCompositePrimaryKey Address { get; set; }
+        }
+
+        [Table("CustomersAddressWithTwoCompositePrimaryKey")]
+        class CustomerAddressWithTwoCompositePrimaryKey
+        {
+            [Key]
+            public int Id1 { get; set; }
+            [Key]
+            public int Id2 { get; set; }
+            public string Street { get; set; }
+            public string City { get; set; }
+            public string State { get; set; }
+            public int CustomerId { get; set; }
+            public CustomerWithTwoCompositePrimaryKey Customer { get; set; }
         }
     }
 }

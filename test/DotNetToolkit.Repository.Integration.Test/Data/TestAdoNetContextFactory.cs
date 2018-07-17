@@ -27,10 +27,56 @@
             new SqlCeEngine(connectionString).CreateDatabase();
 
             var factory = DbProviderFactories.GetFactory(provider);
+
             using (var connection = factory.CreateConnection())
             {
                 connection.ConnectionString = connectionString;
                 connection.Open();
+
+                using (var command = factory.CreateCommand())
+                {
+                    command.CommandType = CommandType.Text;
+                    command.Connection = connection;
+                    command.CommandText = @"CREATE TABLE CustomerCompositeAddresses (
+                                            Id int,
+                                            CustomerId int,
+                                            Street nvarchar (100),
+                                            City nvarchar (100),
+                                            State nvarchar (2),
+                                            PRIMARY KEY (Id, CustomerId))";
+
+                    command.ExecuteNonQuery();
+                }
+
+                using (var command = factory.CreateCommand())
+                {
+                    command.CommandType = CommandType.Text;
+                    command.Connection = connection;
+                    command.CommandText = @"CREATE TABLE CustomerAddresses (
+                                            Id int IDENTITY PRIMARY KEY,
+                                            Street nvarchar (100),
+                                            City nvarchar (100),
+                                            State nvarchar (2),
+                                            CustomerId int)";
+
+                    command.ExecuteNonQuery();
+                }
+
+                using (var command = factory.CreateCommand())
+                {
+                    command.CommandType = CommandType.Text;
+                    command.Connection = connection;
+                    command.CommandText = @"CREATE TABLE CustomersAddressWithTwoCompositePrimaryKey (
+                                            Id1 int,
+                                            Id2 int,
+                                            Street nvarchar (100),
+                                            City nvarchar (100),
+                                            State nvarchar (2),
+                                            CustomerId int,
+                                            PRIMARY KEY (Id1, Id2))";
+
+                    command.ExecuteNonQuery();
+                }
 
                 using (var command = factory.CreateCommand())
                 {
@@ -131,27 +177,12 @@
                 {
                     command.CommandType = CommandType.Text;
                     command.Connection = connection;
-                    command.CommandText = @"CREATE TABLE CustomerCompositeAddresses (
-                                            Id int,
-                                            CustomerId int,
-                                            Street nvarchar (100),
-                                            City nvarchar (100),
-                                            State nvarchar (2),
-                                            PRIMARY KEY (Id, CustomerId))";
-
-                    command.ExecuteNonQuery();
-                }
-
-                using (var command = factory.CreateCommand())
-                {
-                    command.CommandType = CommandType.Text;
-                    command.Connection = connection;
-                    command.CommandText = @"CREATE TABLE CustomerAddresses (
+                    command.CommandText = @"CREATE TABLE CustomersWithTwoCompositePrimaryKey (
                                             Id int IDENTITY PRIMARY KEY,
-                                            Street nvarchar (100),
-                                            City nvarchar (100),
-                                            State nvarchar (2),
-                                            CustomerId int)";
+                                            Name nvarchar (100),
+                                            AddressId1 int,
+                                            AddressId2 int,
+                                            FOREIGN KEY (AddressId1, AddressId2) REFERENCES CustomersAddressWithTwoCompositePrimaryKey (Id1, Id2))";
 
                     command.ExecuteNonQuery();
                 }
