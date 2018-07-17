@@ -118,7 +118,7 @@
             return columnMapping[columnName];
         }
 
-        public string GetColumnName(string columnAlias)
+        public string NormalizeColumnAlias(string columnAlias)
         {
             return Regex.Replace(columnAlias, @"[\d-]", string.Empty);
         }
@@ -155,9 +155,15 @@
                     if (joinTableType != null)
                     {
                         var columnPropertyInfosMapping = SqlNavigationPropertiesMapping.Single(x => x.Key == joinTableType).Value;
-                        var columnName = GetColumnName(name);
 
-                        columnPropertyInfosMapping[columnName].SetValue(joinTableInstances[joinTableType], value);
+                        if (columnPropertyInfosMapping.ContainsKey(name))
+                        {
+                            columnPropertyInfosMapping[name].SetValue(joinTableInstances[joinTableType], value);
+                        }
+                        else
+                        {
+                            columnPropertyInfosMapping[NormalizeColumnAlias(name)].SetValue(joinTableInstances[joinTableType], value);
+                        }
                     }
                 }
             }
