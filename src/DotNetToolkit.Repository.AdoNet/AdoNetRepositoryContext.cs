@@ -1165,7 +1165,7 @@
                 {
                     var joinTablePropertyInfo = mainTableProperties.Single(x => x.Name.Equals(path));
                     var joinTableType = joinTablePropertyInfo.PropertyType;
-                    var joinTableForeignKeyPropertyInfo = ConventionHelper.GetForeignKeyPropertyInfo(joinTableType, mainTableType);
+                    var joinTableForeignKeyPropertyInfo = ConventionHelper.GetForeignKeyPropertyInfos(joinTableType, mainTableType).FirstOrDefault();
 
                     // Only do a join when the primary table has a foreign key property for the join table
                     if (joinTableForeignKeyPropertyInfo != null)
@@ -2030,9 +2030,7 @@
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         void IHaveRepositoryContextConfiguration.Initialize<TEntity>()
         {
-            var schemaHelper = new SchemaTableHelper(this);
-
-            schemaHelper.Validate<TEntity>();
+            new SchemaTableHelper(this).Initialize<TEntity>();
         }
 
         #endregion

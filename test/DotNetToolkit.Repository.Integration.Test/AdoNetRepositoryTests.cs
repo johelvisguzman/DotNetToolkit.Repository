@@ -1,5 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
+    using AdoNet.Internal.Schema;
+    using Data;
     using FetchStrategies;
     using Queries;
     using System;
@@ -870,16 +872,36 @@
             var context = Data.TestAdoNetContextFactory.Create();
 
             var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerColumnNameMismatch>(context));
-            Assert.Equal($"The model backing the '{context.GetType().Name}' context has changed since the database was created. Consider updating the database.", ex.Message);
+            Assert.Equal($"The model '{typeof(CustomerColumnNameMismatch).Name}' has changed since the database was created. Consider updating the database.", ex.Message);
 
             ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerColumnNameMissing>(context));
-            Assert.Equal($"The model backing the '{context.GetType().Name}' context has changed since the database was created. Consider updating the database.", ex.Message);
+            Assert.Equal($"The model '{typeof(CustomerColumnNameMissing).Name}' has changed since the database was created. Consider updating the database.", ex.Message);
 
             ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerKeyMismatch>(context));
-            Assert.Equal($"The model backing the '{context.GetType().Name}' context has changed since the database was created. Consider updating the database.", ex.Message);
+            Assert.Equal($"The model '{typeof(CustomerKeyMismatch).Name}' has changed since the database was created. Consider updating the database.", ex.Message);
 
             ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerColumnRequiredMissing>(context));
-            Assert.Equal($"The model backing the '{context.GetType().Name}' context has changed since the database was created. Consider updating the database.", ex.Message);
+            Assert.Equal($"The model '{typeof(CustomerColumnRequiredMissing).Name}' has changed since the database was created. Consider updating the database.", ex.Message);
+        }
+
+        [Fact]
+        public void CreateTableOnConstruction()
+        {
+            var context = TestAdoNetContextFactory.Create();
+            var schemaHelper = new SchemaTableHelper(context);
+
+            Assert.False(schemaHelper.CheckIfTableExists<CustomerNotCreated>());
+            Assert.False(schemaHelper.CheckIfTableExists<CustomerAddressNotCreated>());
+
+            var repo = new Repository<CustomerNotCreated>(context);
+
+            Assert.True(schemaHelper.CheckIfTableExists<CustomerNotCreated>());
+
+            // the customer address is a navigation property of the customer table, and so, it will be created as well
+            Assert.True(schemaHelper.CheckIfTableExists<CustomerAddressNotCreated>());
+
+            schemaHelper.ValidateTable<CustomerNotCreated>();
+            schemaHelper.ValidateTable<CustomerAddressNotCreated>();
         }
 
         private static void TestCustomerAddress(CustomerAddress expected, CustomerAddress actual)
@@ -1156,6 +1178,37 @@
             public string State { get; set; }
             public int CustomerId { get; set; }
             public CustomerWithTwoCompositePrimaryKey Customer { get; set; }
+        }
+
+        [Table("CustomersNotCreated")]
+        class CustomerNotCreated
+        {
+            public int Id { get; set; }
+            [Required]
+            public string Name { get; set; }
+            [ForeignKey("Address")]
+            public int AddressId1 { get; set; }
+            [ForeignKey("Address")]
+            public int AddressId2 { get; set; }
+            public CustomerAddressNotCreated Address { get; set; }
+        }
+
+        [Table("CustomersAddressNotCreated")]
+        class CustomerAddressNotCreated
+        {
+            [Key]
+            public int Id1 { get; set; }
+            [Key]
+            public int Id2 { get; set; }
+            [Required]
+            public string Street1 { get; set; }
+            [Required]
+            public string City { get; set; }
+            [Required]
+            [Column("ST")]
+            [StringLength(2)]
+            public string State { get; set; }
+            public CustomerNotCreated Customer { get; set; }
         }
     }
 }

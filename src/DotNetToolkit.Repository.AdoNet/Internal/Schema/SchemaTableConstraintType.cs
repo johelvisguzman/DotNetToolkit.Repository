@@ -1,5 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal.Schema
 {
+    /// <summary>
+    /// Represents an schema table constraint type.
+    /// </summary>
     internal class SchemaTableConstraintType
     {
         public const string NotNull = "NOT NULL";

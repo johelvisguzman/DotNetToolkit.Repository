@@ -179,12 +179,12 @@
         }
 
         /// <summary>
-        /// Gets the name of the foreign key that matches the specified foreign type.
+        /// Gets the collection of foreign key properties that matches the specified foreign type.
         /// </summary>
         /// <param name="sourceType">The source type.</param>
         /// <param name="foreignType">The foreign type to match.</param>
-        /// <returns>The name of the foreign key.</returns>
-        public static PropertyInfo GetForeignKeyPropertyInfo(Type sourceType, Type foreignType)
+        /// <returns>The collection of foreign key properties.</returns>
+        public static IEnumerable<PropertyInfo> GetForeignKeyPropertyInfos(Type sourceType, Type foreignType)
         {
             var tupleKey = Tuple.Create(sourceType, foreignType);
 
@@ -192,45 +192,77 @@
                 return InMemoryCache.Instance.ForeignKeyMapping[tupleKey];
 
             var properties = sourceType.GetRuntimeProperties().Where(IsMapped);
-            var foreignPropertyInfo = properties.SingleOrDefault(x => x.PropertyType == foreignType);
+            var foreignNavigationPropertyInfo = properties.SingleOrDefault(x => x.PropertyType == foreignType);
+            var propertyInfos = new List<PropertyInfo>();
 
-            PropertyInfo propertyInfo = null;
-
-            if (foreignPropertyInfo != null)
+            if (foreignNavigationPropertyInfo != null)
             {
                 var propertyInfosWithForeignKeys = properties.Where(x => x.GetCustomAttribute<ForeignKeyAttribute>() != null);
                 if (propertyInfosWithForeignKeys.Any())
                 {
                     // Try to find by checking on the foreign key property
-                    propertyInfo = propertyInfosWithForeignKeys
+                    propertyInfos = propertyInfosWithForeignKeys
                         .Where(IsPrimitive)
-                        .SingleOrDefault(x => x.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(foreignPropertyInfo.Name));
+                        .Where(x => x.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(foreignNavigationPropertyInfo.Name))
+                        .ToList();
 
                     // Try to find by checking on the navigation property
-                    if (propertyInfo == null)
+                    if (!propertyInfos.Any())
                     {
-                        propertyInfo = properties
+                        propertyInfos = properties
                             .Where(IsPrimitive)
-                            .SingleOrDefault(x => foreignPropertyInfo.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(GetColumnName(x)));
+                            .Where(x => foreignNavigationPropertyInfo.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(GetColumnName(x)))
+                            .ToList();
                     }
                 }
 
                 // Try to find by naming convention
-                if (propertyInfo == null)
+                if (!propertyInfos.Any() && !HasCompositePrimaryKey(foreignType))
                 {
                     var primaryKeyPropertyInfo = GetPrimaryKeyPropertyInfos(foreignType).FirstOrDefault();
                     if (primaryKeyPropertyInfo != null)
                     {
                         var foreignPrimaryKeyName = GetColumnName(primaryKeyPropertyInfo);
+                        var propertyInfo = properties.SingleOrDefault(x => x.Name == $"{foreignNavigationPropertyInfo.Name}{foreignPrimaryKeyName}");
 
-                        propertyInfo = properties.SingleOrDefault(x => x.Name == $"{foreignPropertyInfo.Name}{foreignPrimaryKeyName}");
+                        if (propertyInfo != null)
+                        {
+                            propertyInfos.Add(propertyInfo);
+                        }
                     }
                 }
             }
 
-            InMemoryCache.Instance.ForeignKeyMapping[tupleKey] = propertyInfo;
+            InMemoryCache.Instance.ForeignKeyMapping[tupleKey] = propertyInfos;
 
-            return propertyInfo;
+            return propertyInfos;
+        }
+
+        /// <summary>
+        /// Gets a dictionary of foreign properties with the key as the foreign key column name for the navigation property, and the value as the navigation property.
+        /// </summary>
+        /// <param name="entityType">The type of the entity that contains all the foreign keys.</param>
+        /// <returns>A dictionary of foreign properties with the key as the foreign key column name for the navigation property, and the value as the navigation property.</returns>
+        public static Dictionary<string, PropertyInfo> GetForeignKeyPropertiesMapping(Type entityType)
+        {
+            if (entityType == null)
+                throw new ArgumentNullException(nameof(entityType));
+
+            var foreignNavigationPropertyInfos = entityType.GetRuntimeProperties().Where(IsComplex);
+            var foreignKeyPropertyInfosMapping = new Dictionary<string, PropertyInfo>();
+
+            foreach (var foreignNavigationPropertyInfo in foreignNavigationPropertyInfos)
+            {
+                var dict = GetForeignKeyPropertyInfos(entityType, foreignNavigationPropertyInfo.PropertyType)
+                    .ToDictionary(GetColumnName, x => foreignNavigationPropertyInfo);
+
+                foreach (var item in dict)
+                {
+                    foreignKeyPropertyInfosMapping.Add(item.Key, item.Value);
+                }
+            }
+
+            return foreignKeyPropertyInfosMapping;
         }
 
         /// <summary>
@@ -288,7 +320,16 @@
 
             var databaseGeneratedAttribute = pi.GetCustomAttribute<DatabaseGeneratedAttribute>();
             if (databaseGeneratedAttribute == null)
-                return true;
+            {
+                var declaringType = pi.DeclaringType;
+
+                if (HasCompositePrimaryKey(declaringType))
+                    return false;
+
+                var primaryKeyPropertyInfo = GetPrimaryKeyPropertyInfos(declaringType).First();
+
+                return primaryKeyPropertyInfo.Name.Equals(pi.Name);
+            }
 
             return databaseGeneratedAttribute.DatabaseGeneratedOption == DatabaseGeneratedOption.Identity;
         }

@@ -668,7 +668,7 @@
                 throw new ArgumentNullException(nameof(context));
 
             Context = context;
-            
+
             _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
 
             try
