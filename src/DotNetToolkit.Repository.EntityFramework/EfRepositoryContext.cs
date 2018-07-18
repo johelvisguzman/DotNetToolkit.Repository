@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.EntityFramework
 {
+    using Configuration;
     using FetchStrategies;
     using Helpers;
     using Queries;

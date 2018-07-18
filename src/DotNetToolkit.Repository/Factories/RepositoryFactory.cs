@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Factories
 {
+    using Configuration;
     using Interceptors;
     using System;
     using System.Collections.Generic;

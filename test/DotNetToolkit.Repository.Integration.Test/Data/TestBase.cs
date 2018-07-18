@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Data
 {
+    using Configuration;
     using Csv;
     using EntityFrameworkCore;
     using Factories;

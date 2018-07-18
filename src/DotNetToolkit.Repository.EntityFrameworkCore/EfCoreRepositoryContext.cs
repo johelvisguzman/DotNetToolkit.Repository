@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.EntityFrameworkCore
 {
+    using Configuration;
     using FetchStrategies;
     using Helpers;
     using Microsoft.EntityFrameworkCore;

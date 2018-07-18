@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet
 {
+    using Configuration;
     using FetchStrategies;
     using Helpers;
     using Internal;

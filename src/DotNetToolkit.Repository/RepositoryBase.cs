@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository
 {
+    using Configuration;
     using FetchStrategies;
     using Helpers;
     using Interceptors;

@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.InMemory
 {
+    using Configuration;
     using FetchStrategies;
     using Helpers;
     using Properties;

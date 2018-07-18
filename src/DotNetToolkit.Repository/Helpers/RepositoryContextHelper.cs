@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Helpers
 {
+    using Configuration;
     using Properties;
     using System;
 

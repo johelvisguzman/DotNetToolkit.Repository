@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
+    using Configuration;
     using Data;
     using InMemory;
     using System;

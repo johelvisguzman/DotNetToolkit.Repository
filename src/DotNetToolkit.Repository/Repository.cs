@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository
 {
+    using Configuration;
     using Interceptors;
     using System.Collections.Generic;
 

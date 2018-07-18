@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Transactions
 {
+    using Configuration;
     using Factories;
     using Interceptors;
     using System;
