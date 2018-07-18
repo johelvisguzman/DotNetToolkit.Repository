@@ -68,6 +68,11 @@
         public string ModUser { get; set; }
     }
 
+    public class CustomerWithNoId
+    {
+        public string Name { get; set; }
+    }
+
     public interface IHaveTimeStamp
     {
         DateTime? CreateTime { get; set; }

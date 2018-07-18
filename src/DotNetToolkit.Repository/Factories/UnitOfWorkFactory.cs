@@ -73,7 +73,14 @@
             if (_interceptors.Any())
                 args.Add(_interceptors);
 
-            return (T)Activator.CreateInstance(typeof(T), args.ToArray());
+            try
+            {
+                return (T)Activator.CreateInstance(typeof(T), args.ToArray());
+            }
+            catch (Exception ex)
+            {
+                throw ex.InnerException ?? ex;
+            }
         }
 
         #endregion

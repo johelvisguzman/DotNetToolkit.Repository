@@ -5,6 +5,7 @@
     using Factories;
     using FetchStrategies;
     using Queries;
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -338,6 +339,12 @@
         public void GroupByWithPagingOptionsSortDescendingAsync()
         {
             ForAllRepositoryFactoriesAsync(TestGroupByWithPagingOptionsSortDescendingAsync);
+        }
+
+        [Fact]
+        public void ThrowsIfModelHasNoId()
+        {
+            ForAllRepositoryFactories(TestThrowsIfModelHasNoId);
         }
 
         private static void TestAdd(IRepositoryFactory repoFactory)
@@ -2436,6 +2443,13 @@
 
             Assert.Single(entitiesInDb);
             Assert.Equal("Random Name 0", entitiesInDb.ElementAt(0));
+        }
+
+        private static void TestThrowsIfModelHasNoId(IRepositoryFactory repoFactory)
+        {
+            var ex = Assert.Throws<InvalidOperationException>(() => repoFactory.Create<CustomerWithNoId>());
+
+            Assert.Equal($"The instance of entity type '{typeof(CustomerWithNoId).FullName}' requires a primary key to be defined.", ex.Message);
         }
     }
 }
