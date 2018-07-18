@@ -3,12 +3,12 @@
     using DotNetToolkit.Wpf.Commands;
     using DotNetToolkit.Wpf.Metro.Dialogs;
     using DotNetToolkit.Wpf.Mvvm;
+    using Factories;
     using Infrastructure;
     using InMemory;
     using Models;
     using System;
     using System.Collections.ObjectModel;
-    using Factories;
 
     public class CustomerWorkspaceViewModel : ViewModelBase
     {
@@ -47,7 +47,7 @@
             DisplayName = "Customers";
             _navigator = NavigationController.Instance;
 
-            _repositoryFactory = new RepositoryFactory(() => new InMemoryRepositoryContext());
+            _repositoryFactory = new RepositoryFactory(new InMemoryRepositoryContextFactory());
         }
 
         #endregion

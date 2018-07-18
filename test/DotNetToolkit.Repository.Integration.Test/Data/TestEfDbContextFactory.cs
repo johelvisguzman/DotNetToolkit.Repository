@@ -2,12 +2,11 @@
 {
     using EntityFramework;
     using EntityFrameworkCore;
-    using System;
     using System.Data.Common;
 
     public static class TestEfDbContextFactory
     {
-        public static EfRepositoryContext Create()
+        public static EfRepositoryContextFactory<TestEfDbContext> Create()
         {
             var currentFile = TestPathHelper.GetTempFileName();
             var connectionString = $"Data Source={currentFile};Persist Security Info=False";
@@ -16,15 +15,15 @@
             conn.ConnectionString = connectionString;
             conn.Open();
 
-            return new EfRepositoryContext(new TestEfDbContext(conn));
+            return new EfRepositoryContextFactory<TestEfDbContext>(conn, true);
         }
     }
 
     public static class TestEfCoreDbContextFactory
     {
-        public static EfCoreRepositoryContext Create()
+        public static EfCoreRepositoryContextFactory<TestEfCoreDbContext> Create()
         {
-            return new EfCoreRepositoryContext(new TestEfCoreDbContext(Guid.NewGuid().ToString()));
+            return new EfCoreRepositoryContextFactory<TestEfCoreDbContext>();
         }
     }
 }

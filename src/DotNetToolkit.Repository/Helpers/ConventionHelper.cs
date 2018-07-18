@@ -321,13 +321,9 @@
             if (databaseGeneratedAttribute == null)
             {
                 var declaringType = pi.DeclaringType;
-
-                if (HasCompositePrimaryKey(declaringType))
-                    return false;
-
                 var primaryKeyPropertyInfo = GetPrimaryKeyPropertyInfos(declaringType).First();
 
-                return primaryKeyPropertyInfo.Name.Equals(pi.Name);
+                return primaryKeyPropertyInfo.Name.Equals(pi.Name) && !HasCompositePrimaryKey(declaringType);
             }
 
             return databaseGeneratedAttribute.DatabaseGeneratedOption == DatabaseGeneratedOption.Identity;

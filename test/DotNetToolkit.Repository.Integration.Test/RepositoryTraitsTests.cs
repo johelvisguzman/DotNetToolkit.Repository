@@ -24,7 +24,7 @@
         {
             // run for all repositories context except for ef core.. it looks like this will not pass for some reason.
             // will need to comeback to this at somepoint
-            ForAllRepositoryFactories(TestAddWithSeededIdForIdentity, typeof(EfCoreRepositoryContext));
+            ForAllRepositoryFactories(TestAddWithSeededIdForIdentity, typeof(EfCoreRepositoryContextFactory<TestEfCoreDbContext>));
         }
 
         [Fact]
@@ -188,7 +188,7 @@
         {
             // run for all repositories context except for ef core.. it looks like this will not pass for some reason.
             // will need to comeback to this at somepoint
-            ForAllRepositoryFactoriesAsync(TestAddWithSeededIdForIdentityAsync, typeof(EfCoreRepositoryContext));
+            ForAllRepositoryFactoriesAsync(TestAddWithSeededIdForIdentityAsync, typeof(EfCoreRepositoryContextFactory<TestEfCoreDbContext>));
         }
 
         [Fact]

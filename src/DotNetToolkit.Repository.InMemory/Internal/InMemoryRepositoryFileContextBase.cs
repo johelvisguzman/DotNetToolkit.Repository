@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.InMemory
+﻿namespace DotNetToolkit.Repository.InMemory.Internal
 {
     using Helpers;
     using Properties;
@@ -14,7 +14,7 @@
     /// Represents an internal file based repository context for in-memory operations (for testing purposes).
     /// </summary>
     /// <seealso cref="InMemoryRepositoryContext" />
-    public abstract class InMemoryRepositoryFileContextBase : InMemoryRepositoryContext
+    internal abstract class InMemoryRepositoryFileContextBase : InMemoryRepositoryContext
     {
         #region Fields
 

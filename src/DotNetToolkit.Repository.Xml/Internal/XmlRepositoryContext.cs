@@ -1,24 +1,23 @@
-﻿namespace DotNetToolkit.Repository.Json
+﻿namespace DotNetToolkit.Repository.Xml.Internal
 {
-    using InMemory;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Serialization;
+    using InMemory.Internal;
     using System.Collections.Generic;
     using System.IO;
+    using System.Xml.Serialization;
 
     /// <summary>
-    /// Represents a json repository context.
+    /// Represents an internal xml repository context.
     /// </summary>
     /// <seealso cref="InMemoryRepositoryFileContextBase" />
-    public class JsonRepositoryContext : InMemoryRepositoryFileContextBase
+    internal class XmlRepositoryContext : InMemoryRepositoryFileContextBase
     {
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="JsonRepositoryContext" /> class.
+        /// Initializes a new instance of the <see cref="XmlRepositoryContext" /> class.
         /// </summary>
         /// <param name="path">The database directory to create.</param>
-        public JsonRepositoryContext(string path) : base(path, ".json") { }
+        public XmlRepositoryContext(string path) : base(path, ".xml") { }
 
         #endregion
 
@@ -29,8 +28,8 @@
         /// </summary>
         protected override IEnumerable<TEntity> OnLoaded<TEntity>(StreamReader reader)
         {
-            var serializer = new JsonSerializer();
-            var entities = (List<TEntity>)serializer.Deserialize(reader, typeof(List<TEntity>));
+            var serializer = new XmlSerializer(typeof(List<TEntity>));
+            var entities = (List<TEntity>)serializer.Deserialize(reader);
 
             return entities;
         }
@@ -40,11 +39,7 @@
         /// </summary>
         protected override void OnSaved<TEntity>(StreamWriter writer, IEnumerable<TEntity> entities)
         {
-            var serializer = new JsonSerializer
-            {
-                Formatting = Formatting.Indented,
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
-            };
+            var serializer = new XmlSerializer(typeof(List<TEntity>));
 
             serializer.Serialize(writer, entities);
         }

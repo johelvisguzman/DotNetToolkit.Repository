@@ -15,10 +15,10 @@
     using Transactions;
 
     /// <summary>
-    /// Represents repository context for in-memory operations (for testing purposes).
+    /// Represents an internal repository context for in-memory operations (for testing purposes).
     /// </summary>
     /// <seealso cref="IRepositoryContext" />
-    public class InMemoryRepositoryContext : IRepositoryContext
+    internal class InMemoryRepositoryContext : IRepositoryContext
     {
         #region Fields
 
@@ -137,17 +137,18 @@
 
                 if (entitySet.State == EntityState.Added)
                 {
+                    if (context.ContainsKey(key))
+                    {
+                        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
+                    }
+
                     var primeryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
 
-                    if (ConventionHelper.IsIdentity(primeryKeyPropertyInfo) && !ConventionHelper.HasCompositePrimaryKey(entityType))
+                    if (ConventionHelper.IsIdentity(primeryKeyPropertyInfo))
                     {
                         key = GeneratePrimaryKey(entityType);
 
                         primeryKeyPropertyInfo.SetValue(entitySet.Entity, key);
-                    }
-                    else if (context.ContainsKey(key))
-                    {
-                        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
                     }
                 }
                 else if (!context.ContainsKey(key))
@@ -291,7 +292,7 @@
         /// <returns>The collection of entities in the repository.</returns>
         public IEnumerable<TEntity> FindAll<TEntity>() where TEntity : class
         {
-            return FindAll<TEntity, TEntity>((IQueryOptions<TEntity>) null, IdentityExpression<TEntity>.Instance);
+            return FindAll<TEntity, TEntity>((IQueryOptions<TEntity>)null, IdentityExpression<TEntity>.Instance);
         }
 
         /// <summary>

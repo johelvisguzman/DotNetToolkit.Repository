@@ -16,6 +16,9 @@
         {
             Assert.NotNull(repoFactory.Create<Customer>());
             Assert.NotNull(repoFactory.Create<Customer, int>());
+            Assert.NotNull(repoFactory.Create<CustomerWithTwoCompositePrimaryKey, int, int>());
+            Assert.NotNull(repoFactory.Create<CustomerWithThreeCompositePrimaryKey, int, int, int>());
+            Assert.NotNull(repoFactory.CreateInstance<Repository<Customer>>());
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Factories
 {
-    using Configuration;
     using Interceptors;
     using System;
     using System.Collections.Generic;
@@ -15,7 +14,7 @@
     {
         #region Fields
 
-        private readonly Func<IRepositoryContext> _contextFactory;
+        private readonly IRepositoryContextFactory _factory;
         private readonly IEnumerable<IRepositoryInterceptor> _interceptors;
 
         #endregion
@@ -25,27 +24,27 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="UnitOfWorkFactory" /> class.
         /// </summary>
-        /// <param name="contextFactory">The repository context factory.</param>
-        public UnitOfWorkFactory(Func<IRepositoryContext> contextFactory) : this(contextFactory, (IEnumerable<IRepositoryInterceptor>)null) { }
+        /// <param name="factory">The repository context factory.</param>
+        public UnitOfWorkFactory(IRepositoryContextFactory factory) : this(factory, (IEnumerable<IRepositoryInterceptor>)null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UnitOfWorkFactory" /> class.
         /// </summary>
-        /// <param name="contextFactory">The repository context factory.</param>
+        /// <param name="factory">The repository context factory.</param>
         /// <param name="interceptor">The interceptor.</param>
-        public UnitOfWorkFactory(Func<IRepositoryContext> contextFactory, IRepositoryInterceptor interceptor) : this(contextFactory, new List<IRepositoryInterceptor> { interceptor }) { }
+        public UnitOfWorkFactory(IRepositoryContextFactory factory, IRepositoryInterceptor interceptor) : this(factory, new List<IRepositoryInterceptor> { interceptor }) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UnitOfWorkFactory" /> class.
         /// </summary>
-        /// <param name="contextFactory">The repository context factory.</param>
+        /// <param name="factory">The repository context factory.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public UnitOfWorkFactory(Func<IRepositoryContext> contextFactory, IEnumerable<IRepositoryInterceptor> interceptors)
+        public UnitOfWorkFactory(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors)
         {
-            if (contextFactory == null)
-                throw new ArgumentNullException(nameof(contextFactory));
+            if (factory == null)
+                throw new ArgumentNullException(nameof(factory));
 
-            _contextFactory = contextFactory;
+            _factory = factory;
             _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
         }
 
@@ -69,7 +68,7 @@
         /// <returns>The new repository.</returns>
         public T CreateInstance<T>() where T : class
         {
-            var args = new List<object> { _contextFactory() };
+            var args = new List<object> { _factory };
 
             if (_interceptors.Any())
                 args.Add(_interceptors);

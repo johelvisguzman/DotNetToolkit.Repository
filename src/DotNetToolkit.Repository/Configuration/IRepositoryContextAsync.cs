@@ -1,13 +1,13 @@
 ﻿namespace DotNetToolkit.Repository.Configuration
 {
+    using FetchStrategies;
+    using Queries;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
-    using FetchStrategies;
-    using Queries;
 
     /// <summary>
     /// Represents an asynchronous repository context.

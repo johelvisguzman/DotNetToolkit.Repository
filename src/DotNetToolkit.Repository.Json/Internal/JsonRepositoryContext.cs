@@ -1,23 +1,24 @@
-﻿namespace DotNetToolkit.Repository.Csv
+﻿namespace DotNetToolkit.Repository.Json.Internal
 {
-    using CsvHelper;
-    using InMemory;
+    using InMemory.Internal;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Serialization;
     using System.Collections.Generic;
     using System.IO;
 
     /// <summary>
-    /// Represents a csv repository context.
+    /// Represents an internal json repository context.
     /// </summary>
     /// <seealso cref="InMemoryRepositoryFileContextBase" />
-    public class CsvRepositoryContext : InMemoryRepositoryFileContextBase
+    internal class JsonRepositoryContext : InMemoryRepositoryFileContextBase
     {
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CsvRepositoryContext" /> class.
+        /// Initializes a new instance of the <see cref="JsonRepositoryContext" /> class.
         /// </summary>
         /// <param name="path">The database directory to create.</param>
-        public CsvRepositoryContext(string path) : base(path, ".csv") { }
+        public JsonRepositoryContext(string path) : base(path, ".json") { }
 
         #endregion
 
@@ -28,8 +29,8 @@
         /// </summary>
         protected override IEnumerable<TEntity> OnLoaded<TEntity>(StreamReader reader)
         {
-            var csv = new CsvReader(reader);
-            var entities = csv.GetRecords<TEntity>();
+            var serializer = new JsonSerializer();
+            var entities = (List<TEntity>)serializer.Deserialize(reader, typeof(List<TEntity>));
 
             return entities;
         }
@@ -39,9 +40,13 @@
         /// </summary>
         protected override void OnSaved<TEntity>(StreamWriter writer, IEnumerable<TEntity> entities)
         {
-            var csv = new CsvWriter(writer);
+            var serializer = new JsonSerializer
+            {
+                Formatting = Formatting.Indented,
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            };
 
-            csv.WriteRecords(entities);
+            serializer.Serialize(writer, entities);
         }
 
         #endregion

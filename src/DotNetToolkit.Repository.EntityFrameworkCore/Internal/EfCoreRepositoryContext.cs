@@ -3,6 +3,7 @@
     using Configuration;
     using FetchStrategies;
     using Helpers;
+    using Internal;
     using Microsoft.EntityFrameworkCore;
     using Queries;
     using System;
@@ -14,10 +15,10 @@
     using Transactions;
 
     /// <summary>
-    /// Represents an entity framework core repository context.
+    /// Represents an internal entity framework core repository context.
     /// </summary>
     /// <seealso cref="IRepositoryContextAsync" />
-    public class EfCoreRepositoryContext : IRepositoryContextAsync
+    internal class EfCoreRepositoryContext : IRepositoryContextAsync
     {
         #region Fields
 

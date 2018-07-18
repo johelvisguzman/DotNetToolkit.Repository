@@ -1,9 +1,9 @@
-﻿namespace DotNetToolkit.Repository.Traits
+﻿namespace DotNetToolkit.Repository.Configuration
 {
     /// <summary>
     /// Represents an internal trait for initializing a repository context.
     /// </summary>
-    internal interface ICanInitContext
+    internal interface IHaveRepositoryContextInitializer
     {
         /// <summary>
         /// Initializes this instance.

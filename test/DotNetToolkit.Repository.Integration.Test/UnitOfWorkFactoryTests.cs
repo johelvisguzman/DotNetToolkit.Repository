@@ -2,6 +2,7 @@
 {
     using Data;
     using Factories;
+    using Transactions;
     using Xunit;
 
     public class UnitOfWorkFactoryTests : TestBase
@@ -12,9 +13,10 @@
             ForAllUnitOfWorkFactories(TestCreate);
         }
 
-        private static void TestCreate(IUnitOfWorkFactory repoFactory)
+        private static void TestCreate(IUnitOfWorkFactory uowFactory)
         {
-            Assert.NotNull(repoFactory.Create());
+            Assert.NotNull(uowFactory.Create());
+            Assert.NotNull(uowFactory.CreateInstance<UnitOfWork>());
         }
     }
 }

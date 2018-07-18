@@ -1,31 +1,31 @@
-﻿namespace DotNetToolkit.Repository.EntityFrameworkCore
+﻿namespace DotNetToolkit.Repository.EntityFramework.Internal
 {
-    using Microsoft.EntityFrameworkCore.Storage;
     using System;
+    using System.Data.Entity;
     using Transactions;
 
     /// <summary>
     /// An implementation of <see cref="ITransactionManager" />.
     /// </summary>
     /// <seealso cref="ITransactionManager" />
-    internal class EfCoreTransactionManager : ITransactionManager
+    internal class EfTransactionManager : ITransactionManager
     {
         #region Properties
 
         /// <summary>
         /// Gets the underlying transaction.
         /// </summary>
-        public IDbContextTransaction Transaction { get; }
+        public DbContextTransaction Transaction { get; }
 
         #endregion
 
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EfCoreTransactionManager" /> class.
+        /// Initializes a new instance of the <see cref="EfTransactionManager" /> class.
         /// </summary>
         /// <param name="transaction">The underlying transaction.</param>
-        public EfCoreTransactionManager(IDbContextTransaction transaction)
+        public EfTransactionManager(DbContextTransaction transaction)
         {
             if (transaction == null)
                 throw new ArgumentNullException(nameof(transaction));

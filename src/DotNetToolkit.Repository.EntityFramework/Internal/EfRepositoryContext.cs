@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.EntityFramework
+﻿namespace DotNetToolkit.Repository.EntityFramework.Internal
 {
     using Configuration;
     using FetchStrategies;
@@ -14,10 +14,10 @@
     using Transactions;
 
     /// <summary>
-    /// Represents a entity framework repository context.
+    /// Represents an internal entity framework core repository context.
     /// </summary>
     /// <seealso cref="IRepositoryContextAsync" />
-    public class EfRepositoryContext : IRepositoryContextAsync
+    internal class EfRepositoryContext : IRepositoryContextAsync
     {
         #region Fields
 

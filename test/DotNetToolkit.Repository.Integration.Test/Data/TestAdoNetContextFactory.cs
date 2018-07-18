@@ -2,24 +2,25 @@
 {
     using AdoNet;
     using System.Data;
+    using System.Data.Common;
     using System.Data.SqlServerCe;
     using System.IO;
 
     public class TestAdoNetContextFactory
     {
-        public static AdoNetRepositoryContext Create()
+        public static AdoNetRepositoryContextFactory Create()
         {
             var currentFile = TestPathHelper.GetTempFileName();
 
             var provider = "System.Data.SqlServerCe.4.0";
             var connectionString = $"Data Source={currentFile};Persist Security Info=False";
-            
+
             if (File.Exists(currentFile))
                 File.Delete(currentFile);
 
             CreateDatabase(provider, connectionString);
 
-            return new AdoNetRepositoryContext(provider, connectionString);
+            return new AdoNetRepositoryContextFactory(provider, connectionString);
         }
 
         private static void CreateDatabase(string provider, string connectionString)
