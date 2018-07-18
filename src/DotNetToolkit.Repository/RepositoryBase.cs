@@ -673,6 +673,9 @@
 
             try
             {
+                if (!ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Any())
+                    throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityRequiresPrimaryKey, typeof(TEntity).FullName));
+
                 var haveConfiguration = context as IHaveRepositoryContextConfiguration;
                 if (haveConfiguration != null)
                     haveConfiguration.Initialize<TEntity>();

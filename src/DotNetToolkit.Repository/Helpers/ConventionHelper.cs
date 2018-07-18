@@ -6,7 +6,6 @@
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
@@ -58,7 +57,7 @@
                 return propertyInfos;
             }
 
-            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityRequiresPrimaryKey, entityType));
+            return Enumerable.Empty<PropertyInfo>();
         }
 
         /// <summary>
