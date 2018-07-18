@@ -19,13 +19,14 @@
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using Traits;
     using Transactions;
 
     /// <summary>
     /// Represents an ado.net repository context.
     /// </summary>
     /// <seealso cref="IRepositoryContextAsync" />
-    public class AdoNetRepositoryContext : IRepositoryContextAsync, IHaveRepositoryContextConfiguration
+    public class AdoNetRepositoryContext : IRepositoryContextAsync, ICanInitContext
     {
         #region Fields
 
@@ -2022,13 +2023,13 @@
 
         #endregion
 
-        #region Implementation of IHaveRepositoryContextConfiguration
+        #region Implementation of ICanInitialize
 
         /// <summary>
         /// Initializes this instance.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        void IHaveRepositoryContextConfiguration.Initialize<TEntity>()
+        void ICanInitContext.Initialize<TEntity>()
         {
             new SchemaTableHelper(this).Initialize<TEntity>();
         }

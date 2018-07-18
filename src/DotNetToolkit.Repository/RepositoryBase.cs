@@ -12,6 +12,7 @@
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
+    using Traits;
     using Wrappers;
 
     /// <summary>
@@ -676,9 +677,9 @@
                 if (!ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Any())
                     throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityRequiresPrimaryKey, typeof(TEntity).FullName));
 
-                var haveConfiguration = context as IHaveRepositoryContextConfiguration;
-                if (haveConfiguration != null)
-                    haveConfiguration.Initialize<TEntity>();
+                var canInitialize = context as ICanInitContext;
+                if (canInitialize != null)
+                    canInitialize.Initialize<TEntity>();
             }
             catch (Exception ex)
             {
