@@ -55,7 +55,9 @@
                             typeof(JsonRepositoryContextFactory).IsAssignableFrom(type) ||
                             typeof(XmlRepositoryContextFactory).IsAssignableFrom(type))
                         {
-                            Assert.Contains(Properties.Resources.IRepositoryContextNotAsync, ex.Message);
+                            var err = ex.InnerException?.Message ?? ex.Message;
+
+                            Assert.Contains(Properties.Resources.IRepositoryContextNotAsync, err);
                         }
                         else
                         {
@@ -89,13 +91,13 @@
         {
             return new List<IRepositoryContextFactory>
             {
-                //TestAdoNetContextFactory.Create(),
-                //TestEfCoreDbContextFactory.Create(),
+                TestAdoNetContextFactory.Create(),
+                TestEfCoreDbContextFactory.Create(),
                 TestEfDbContextFactory.Create(),
-                //new InMemoryRepositoryContextFactory(Guid.NewGuid().ToString()),
-                //new CsvRepositoryContextFactory(Path.GetTempPath() + Guid.NewGuid().ToString("N")),
-                //new JsonRepositoryContextFactory(Path.GetTempPath() + Guid.NewGuid().ToString("N")),
-                //new XmlRepositoryContextFactory(Path.GetTempPath() + Guid.NewGuid().ToString("N"))
+                new InMemoryRepositoryContextFactory(Guid.NewGuid().ToString()),
+                new CsvRepositoryContextFactory(Path.GetTempPath() + Guid.NewGuid().ToString("N")),
+                new JsonRepositoryContextFactory(Path.GetTempPath() + Guid.NewGuid().ToString("N")),
+                new XmlRepositoryContextFactory(Path.GetTempPath() + Guid.NewGuid().ToString("N"))
             };
         }
     }
