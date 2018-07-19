@@ -1,23 +1,23 @@
-﻿namespace DotNetToolkit.Repository.Xml
+﻿namespace DotNetToolkit.Repository.Csv.Internal
 {
-    using InMemory;
+    using CsvHelper;
+    using InMemory.Internal;
     using System.Collections.Generic;
     using System.IO;
-    using System.Xml.Serialization;
 
     /// <summary>
-    /// Represents a xml repository context.
+    /// Represents an internal csv repository context.
     /// </summary>
     /// <seealso cref="InMemoryRepositoryFileContextBase" />
-    public class XmlRepositoryContext : InMemoryRepositoryFileContextBase
+    internal class CsvRepositoryContext : InMemoryRepositoryFileContextBase
     {
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="XmlRepositoryContext" /> class.
+        /// Initializes a new instance of the <see cref="CsvRepositoryContext" /> class.
         /// </summary>
         /// <param name="path">The database directory to create.</param>
-        public XmlRepositoryContext(string path) : base(path, ".xml") { }
+        public CsvRepositoryContext(string path) : base(path, ".csv") { }
 
         #endregion
 
@@ -28,8 +28,8 @@
         /// </summary>
         protected override IEnumerable<TEntity> OnLoaded<TEntity>(StreamReader reader)
         {
-            var serializer = new XmlSerializer(typeof(List<TEntity>));
-            var entities = (List<TEntity>)serializer.Deserialize(reader);
+            var csv = new CsvReader(reader);
+            var entities = csv.GetRecords<TEntity>();
 
             return entities;
         }
@@ -39,9 +39,9 @@
         /// </summary>
         protected override void OnSaved<TEntity>(StreamWriter writer, IEnumerable<TEntity> entities)
         {
-            var serializer = new XmlSerializer(typeof(List<TEntity>));
+            var csv = new CsvWriter(writer);
 
-            serializer.Serialize(writer, entities);
+            csv.WriteRecords(entities);
         }
 
         #endregion

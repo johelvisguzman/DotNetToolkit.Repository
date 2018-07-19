@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.AdoNet
+﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
     using Helpers;
     using System;
@@ -12,7 +12,7 @@
     /// <summary>
     /// Contains various extensions for <see cref="DbCommand" />.
     /// </summary>
-    public static class DbCommandExtensions
+    internal static class DbCommandExtensions
     {
         /// <summary>
         /// Adds a new parameter with the specified name and value to the command.

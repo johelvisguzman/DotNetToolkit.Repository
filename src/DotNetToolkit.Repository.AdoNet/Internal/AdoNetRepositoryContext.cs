@@ -1,11 +1,11 @@
-﻿namespace DotNetToolkit.Repository.AdoNet
+﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
+    using Configuration;
     using FetchStrategies;
     using Helpers;
-    using Internal;
-    using Internal.Schema;
     using Properties;
     using Queries;
+    using Schema;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -22,10 +22,10 @@
     using Transactions;
 
     /// <summary>
-    /// Represents an ado.net repository context.
+    /// Represents an internal ado.net repository context.
     /// </summary>
     /// <seealso cref="IRepositoryContextAsync" />
-    public class AdoNetRepositoryContext : IRepositoryContextAsync, IHaveRepositoryContextConfiguration
+    internal class AdoNetRepositoryContext : IRepositoryContextAsync, IHaveRepositoryContextInitializer
     {
         #region Fields
 
@@ -1969,6 +1969,19 @@
 
         #endregion
 
+        #region Implementation of IHaveRepositoryContextInitializer
+
+        /// <summary>
+        /// Initializes this instance.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        public void Initialize<TEntity>() where TEntity : class
+        {
+            new SchemaTableHelper(this).Initialize<TEntity>();
+        }
+
+        #endregion
+
         #region Nested type: EntitySet
 
         /// <summary>
@@ -2018,19 +2031,6 @@
             Added,
             Removed,
             Modified
-        }
-
-        #endregion
-
-        #region Implementation of IHaveRepositoryContextConfiguration
-
-        /// <summary>
-        /// Initializes this instance.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        void IHaveRepositoryContextConfiguration.Initialize<TEntity>()
-        {
-            new SchemaTableHelper(this).Initialize<TEntity>();
         }
 
         #endregion

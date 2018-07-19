@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.AdoNet
+﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
     using Microsoft.DotNet.PlatformAbstractions;
     using Microsoft.Extensions.DependencyModel;
@@ -13,7 +13,7 @@
     /// <summary>
     /// Represents a set of static methods for creating one or more instances of System.Data.Common.DbProviderFactory classes.
     /// </summary>
-    public static class DbProviderFactories
+    internal static class DbProviderFactories
     {
         #region Public Methods
 

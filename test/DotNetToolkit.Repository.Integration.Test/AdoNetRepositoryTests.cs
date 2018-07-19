@@ -10,6 +10,7 @@
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
     using System.Threading.Tasks;
+    using AdoNet.Internal;
     using Xunit;
 
     public class AdoNetRepositoryTests
@@ -17,7 +18,8 @@
         [Fact]
         public void FindWithNavigationPropertyByKey_OneToOneRelationship()
         {
-            var context = Data.TestAdoNetContextFactory.Create();
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
             var customerKey = 1;
             var addressKey = 1;
@@ -56,7 +58,8 @@
         [Fact]
         public void FindWithCompositeNavigationPropertyByKey_OneToOneRelationship()
         {
-            var context = Data.TestAdoNetContextFactory.Create();
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
             var customerKey = 1;
             var addressKey1 = 1;
@@ -97,7 +100,9 @@
         [Fact]
         public void FindWithForeignKeyAnnotationChangedByKey_OneToOneRelationship()
         {
-            var context = Data.TestAdoNetContextFactory.Create();
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
+
             var customerKey = 1;
             var addressKey = 1;
 
@@ -168,7 +173,8 @@
         [Fact]
         public void FindWithNavigationPropertyByCompositeKey_OneToOneRelationship()
         {
-            var context = Data.TestAdoNetContextFactory.Create();
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
             var customerKey = 1;
             var addressKey = 1;
@@ -207,7 +213,8 @@
         [Fact]
         public async Task FindWithNavigationPropertyByKeyAsync_OneToOneRelationship()
         {
-            var context = Data.TestAdoNetContextFactory.Create();
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
             var addressRepo = new Repository<CustomerAddress>(context);
             var customerRepo = new Repository<Customer>(context);
@@ -245,7 +252,8 @@
         [Fact]
         public void FindWithNavigationProperty_OneToOneRelationship()
         {
-            var context = Data.TestAdoNetContextFactory.Create();
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
             var addressRepo = new Repository<CustomerAddress>(context);
             var customerRepo = new Repository<Customer>(context);
@@ -287,7 +295,8 @@
         [Fact]
         public async Task FindWithNavigationPropertyAsync_OneToOneRelationship()
         {
-            var context = Data.TestAdoNetContextFactory.Create();
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
             var addressRepo = new Repository<CustomerAddress>(context);
             var customerRepo = new Repository<Customer>(context);
@@ -329,7 +338,8 @@
         [Fact]
         public void FindAlldWithNavigationProperty_OneToOneRelationship()
         {
-            var context = Data.TestAdoNetContextFactory.Create();
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
             var addressRepo = new Repository<CustomerAddress>(context);
             var customerRepo = new Repository<Customer>(context);
@@ -372,7 +382,8 @@
         [Fact]
         public async Task FindAlldWithNavigationPropertyAsync_OneToOneRelationship()
         {
-            var context = Data.TestAdoNetContextFactory.Create();
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
             var addressRepo = new Repository<CustomerAddress>(context);
             var customerRepo = new Repository<Customer>(context);
@@ -415,7 +426,8 @@
         [Fact]
         public void ExistWithNavigationProperty_OneToOneRelationship()
         {
-            var context = Data.TestAdoNetContextFactory.Create();
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
             var addressRepo = new Repository<CustomerAddress>(context);
             var customerRepo = new Repository<Customer>(context);
@@ -456,7 +468,8 @@
         [Fact]
         public async Task ExistWithNavigationPropertyAsync_OneToOneRelationship()
         {
-            var context = Data.TestAdoNetContextFactory.Create();
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
             var addressRepo = new Repository<CustomerAddress>(context);
             var customerRepo = new Repository<Customer>(context);
@@ -497,7 +510,8 @@
         [Fact]
         public void DeleteWithKeyDataAttribute()
         {
-            var context = Data.TestAdoNetContextFactory.Create();
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
             var repo = new Repository<CustomerWithKeyAnnotation>(context);
 
@@ -517,7 +531,8 @@
         [Fact]
         public async Task DeleteWithKeyDataAttributeAsync()
         {
-            var context = Data.TestAdoNetContextFactory.Create();
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
             var repo = new Repository<CustomerWithKeyAnnotation>(context);
 
@@ -537,7 +552,8 @@
         [Fact]
         public void FindWithComplexExpressions()
         {
-            var context = Data.TestAdoNetContextFactory.Create();
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
             var repo = new Repository<Customer>(context);
 
@@ -620,7 +636,8 @@
         [Fact]
         public async void FindWithComplexExpressionsAsync()
         {
-            var context = Data.TestAdoNetContextFactory.Create();
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
             var repo = new Repository<Customer>(context);
 
@@ -703,7 +720,8 @@
         [Fact]
         public void FindAllWithComplexExpressions()
         {
-            var context = Data.TestAdoNetContextFactory.Create();
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
             var repo = new Repository<Customer>(context);
 
@@ -786,7 +804,8 @@
         [Fact]
         public async void FindAllWithComplexExpressionsAsync()
         {
-            var context = Data.TestAdoNetContextFactory.Create();
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
             var repo = new Repository<Customer>(context);
 
@@ -869,7 +888,8 @@
         [Fact]
         public void ThrowsIfSchemaTableColumnsMismatchOnConstruction()
         {
-            var context = Data.TestAdoNetContextFactory.Create();
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
             var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerColumnNameMismatch>(context));
             Assert.Equal($"The model '{typeof(CustomerColumnNameMismatch).Name}' has changed since the database was created. Consider updating the database.", ex.Message);
@@ -887,7 +907,8 @@
         [Fact]
         public void CreateTableOnConstruction()
         {
-            var context = TestAdoNetContextFactory.Create();
+            var contextFactory = TestAdoNetContextFactory.Create();
+            var context = (AdoNetRepositoryContext)contextFactory.Create();
             var schemaHelper = new SchemaTableHelper(context);
 
             Assert.False(schemaHelper.CheckIfTableExists<CustomerNotCreated>());

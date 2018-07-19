@@ -1,11 +1,12 @@
-﻿namespace DotNetToolkit.Repository.EntityFrameworkCore
+﻿namespace DotNetToolkit.Repository.EntityFramework.Internal
 {
+    using Configuration;
     using FetchStrategies;
     using Helpers;
-    using Microsoft.EntityFrameworkCore;
     using Queries;
     using System;
     using System.Collections.Generic;
+    using System.Data.Entity;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Threading;
@@ -13,10 +14,10 @@
     using Transactions;
 
     /// <summary>
-    /// Represents an entity framework core repository context.
+    /// Represents an internal entity framework core repository context.
     /// </summary>
     /// <seealso cref="IRepositoryContextAsync" />
-    public class EfCoreRepositoryContext : IRepositoryContextAsync
+    internal class EfRepositoryContext : IRepositoryContextAsync
     {
         #region Fields
 
@@ -27,10 +28,10 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EfCoreRepositoryContext" /> class.
+        /// Initializes a new instance of the <see cref="EfRepositoryContext" /> class.
         /// </summary>
         /// <param name="context">The context.</param>
-        public EfCoreRepositoryContext(DbContext context)
+        public EfRepositoryContext(DbContext context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
@@ -63,7 +64,7 @@
         /// <returns>The transaction.</returns>
         public ITransactionManager BeginTransaction()
         {
-            return new EfCoreTransactionManager(_context.Database.BeginTransaction());
+            return new EfTransactionManager(_context.Database.BeginTransaction());
         }
 
         /// <summary>
@@ -301,7 +302,7 @@
             ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
 
             if (fetchStrategy == null)
-                return _context.Set<TEntity>().FindAsync(keyValues, cancellationToken);
+                return _context.Set<TEntity>().FindAsync(cancellationToken, keyValues);
 
             var options = new QueryOptions<TEntity>()
                 .SatisfyBy(ConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))

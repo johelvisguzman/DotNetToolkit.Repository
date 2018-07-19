@@ -13,7 +13,7 @@
         {
             var databaseName = Guid.NewGuid().ToString();
 
-            using (var repo = new Repository<Customer>(new InMemoryRepositoryContext(databaseName)))
+            using (var repo = new Repository<Customer>(new InMemoryRepositoryContextFactory(databaseName).Create()))
             {
                 var entity = new Customer { Name = "Random Name" };
 
@@ -23,7 +23,7 @@
                 Assert.Equal(1, entity.Id);
             }
 
-            using (var repo = new Repository<Customer>(new InMemoryRepositoryContext(databaseName)))
+            using (var repo = new Repository<Customer>(new InMemoryRepositoryContextFactory(databaseName).Create()))
             {
                 var entity = new Customer { Name = "Random Name" };
 
@@ -33,7 +33,7 @@
                 Assert.Equal(2, repo.Count(x => x.Name.Equals("Random Name")));
             }
 
-            using (var repo = new Repository<Customer>(new InMemoryRepositoryContext(Guid.NewGuid().ToString())))
+            using (var repo = new Repository<Customer>(new InMemoryRepositoryContextFactory(Guid.NewGuid().ToString()).Create()))
             {
                 var entity = new Customer { Name = "Random Name" };
 
@@ -47,24 +47,24 @@
         [Fact]
         public void ThrowsIfDeleteWhenEntityNoInStore()
         {
-            GetRepositoryContextFactories().OfType<InMemoryRepositoryContext>().ToList().ForEach(TestThrowsIfDeleteWhenEntityNoInStore);
+            GetRepositoryContextFactories().OfType<InMemoryRepositoryContextFactory>().ToList().ForEach(TestThrowsIfDeleteWhenEntityNoInStore);
         }
 
         [Fact]
         public void ThrowsIfUpdateWhenEntityNoInStore()
         {
-            GetRepositoryContextFactories().OfType<InMemoryRepositoryContext>().ToList().ForEach(TestThrowsIfUpdateWhenEntityNoInStore);
+            GetRepositoryContextFactories().OfType<InMemoryRepositoryContextFactory>().ToList().ForEach(TestThrowsIfUpdateWhenEntityNoInStore);
         }
 
         [Fact]
         public void ThrowsIfAddingEntityOfSameTypeWithSamePrimaryKeyValue()
         {
-            GetRepositoryContextFactories().OfType<InMemoryRepositoryContext>().ToList().ForEach(TestThrowsIfAddingEntityOfSameTypeWithSamePrimaryKeyValue);
+            GetRepositoryContextFactories().OfType<InMemoryRepositoryContextFactory>().ToList().ForEach(TestThrowsIfAddingEntityOfSameTypeWithSamePrimaryKeyValue);
         }
 
-        private static void TestThrowsIfDeleteWhenEntityNoInStore(InMemoryRepositoryContext repoContext)
+        private static void TestThrowsIfDeleteWhenEntityNoInStore(InMemoryRepositoryContextFactory contextFactory)
         {
-            var repo = new Repository<Customer>(repoContext);
+            var repo = new Repository<Customer>(contextFactory.Create());
 
             var entity = new Customer { Name = "Random Name" };
 
@@ -72,9 +72,9 @@
             Assert.Equal("Attempted to update or delete an entity that does not exist in the in-memory store.", ex.Message);
         }
 
-        private static void TestThrowsIfUpdateWhenEntityNoInStore(InMemoryRepositoryContext repoContext)
+        private static void TestThrowsIfUpdateWhenEntityNoInStore(InMemoryRepositoryContextFactory contextFactory)
         {
-            var repo = new Repository<Customer>(repoContext);
+            var repo = new Repository<Customer>(contextFactory.Create());
 
             var entity = new Customer { Name = "Random Name" };
 
@@ -82,9 +82,9 @@
             Assert.Equal("Attempted to update or delete an entity that does not exist in the in-memory store.", ex.Message);
         }
 
-        private static void TestThrowsIfAddingEntityOfSameTypeWithSamePrimaryKeyValue(InMemoryRepositoryContext repoContext)
+        private static void TestThrowsIfAddingEntityOfSameTypeWithSamePrimaryKeyValue(InMemoryRepositoryContextFactory contextFactory)
         {
-            var repo = new Repository<Customer>(repoContext);
+            var repo = new Repository<Customer>(contextFactory.Create());
 
             var entity = new Customer { Name = "Random Name" };
 
@@ -97,9 +97,9 @@
         [Fact]
         public void ThrowsIfBeginTransaction()
         {
-            var repoContext = new InMemoryRepositoryContext();
+            var configuration = new InMemoryRepositoryContextFactory();
 
-            var ex = Assert.Throws<NotSupportedException>(() => repoContext.BeginTransaction());
+            var ex = Assert.Throws<NotSupportedException>(() => configuration.Create().BeginTransaction());
             Assert.Equal("The repository context does not support transactions.", ex.Message);
         }
     }

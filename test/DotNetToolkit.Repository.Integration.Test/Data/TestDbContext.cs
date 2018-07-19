@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Data
 {
     using Microsoft.EntityFrameworkCore;
+    using System;
     using System.Data.Common;
     using System.Data.Entity;
 
@@ -12,8 +13,8 @@
         public System.Data.Entity.DbSet<CustomerWithThreeCompositePrimaryKey> CustomersWithThreeCompositePrimaryKey { get; set; }
         public System.Data.Entity.DbSet<CustomerWithNoIdentity> CustomersWithNoIdentity { get; set; }
 
-        public TestEfDbContext(DbConnection connection)
-            : base(connection, true) { }
+        public TestEfDbContext(DbConnection connection, bool contextOwnsConnection)
+            : base(connection, contextOwnsConnection) { }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -45,19 +46,9 @@
         public System.Data.Entity.DbSet<CustomerWithThreeCompositePrimaryKey> CustomersWithThreeCompositePrimaryKey { get; set; }
         public System.Data.Entity.DbSet<CustomerWithNoIdentity> CustomersWithNoIdentity { get; set; }
 
-        private readonly string _databaseName;
-
-        public TestEfCoreDbContext(string databaseName = null)
-        {
-            _databaseName = databaseName;
-        }
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (!string.IsNullOrEmpty(_databaseName))
-                optionsBuilder.UseInMemoryDatabase(_databaseName);
-            else
-                optionsBuilder.UseInMemoryDatabase();
+                optionsBuilder.UseInMemoryDatabase(Guid.NewGuid().ToString());
 
             base.OnConfiguring(optionsBuilder);
         }

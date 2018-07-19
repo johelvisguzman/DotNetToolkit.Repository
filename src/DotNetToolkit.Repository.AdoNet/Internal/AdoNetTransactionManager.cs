@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.AdoNet
+﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
     using System;
     using System.Data.Common;

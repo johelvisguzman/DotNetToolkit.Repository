@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository
+﻿namespace DotNetToolkit.Repository.Configuration
 {
     using FetchStrategies;
     using Queries;

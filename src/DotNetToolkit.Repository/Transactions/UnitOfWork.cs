@@ -1,9 +1,11 @@
 ﻿namespace DotNetToolkit.Repository.Transactions
 {
+    using Configuration;
     using Factories;
     using Interceptors;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     /// <summary>
     /// An implementation of <see cref="IUnitOfWork" />.
@@ -14,18 +16,9 @@
 
         private IRepositoryContext _context;
         private ITransactionManager _transactionManager;
-        private readonly IRepositoryFactory _factory;
+        private readonly IEnumerable<IRepositoryInterceptor> _interceptors;
 
         private bool _disposed;
-
-        #endregion
-
-        #region Properties
-
-        /// <summary>
-        /// Gets the repositories.
-        /// </summary>
-        internal Dictionary<Type, object> Repositories { get; }
 
         #endregion
 
@@ -34,30 +27,29 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="UnitOfWork" /> class.
         /// </summary>
-        /// <param name="context">The repository context.</param>
-        public UnitOfWork(IRepositoryContext context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
+        /// <param name="factory">The repository context factory.</param>
+        public UnitOfWork(IRepositoryContextFactory factory) : this(factory, (IEnumerable<IRepositoryInterceptor>)null) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UnitOfWork" /> class.
         /// </summary>
-        /// <param name="context">The repository context.</param>
+        /// <param name="factory">The repository context factory.</param>
         /// <param name="interceptor">The interceptor.</param>
-        public UnitOfWork(IRepositoryContext context, IRepositoryInterceptor interceptor) : this(context, new List<IRepositoryInterceptor> { interceptor }) { }
+        public UnitOfWork(IRepositoryContextFactory factory, IRepositoryInterceptor interceptor) : this(factory, new List<IRepositoryInterceptor> { interceptor }) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UnitOfWork" /> class.
         /// </summary>
-        /// <param name="context">The repository context.</param>
+        /// <param name="factory">The repository context factory.</param>
         /// <param name="interceptors">The interceptors.</param>
-        public UnitOfWork(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors)
+        public UnitOfWork(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors)
         {
-            if (context == null)
-                throw new ArgumentNullException(nameof(context));
+            if (factory == null)
+                throw new ArgumentNullException(nameof(factory));
 
-            _context = context;
+            _context = factory.Create();
             _transactionManager = _context.BeginTransaction();
-            _factory = new RepositoryFactory(() => context, interceptors);
-            Repositories = new Dictionary<Type, object>();
+            _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
         }
 
         #endregion
@@ -80,8 +72,6 @@
                     _transactionManager.Dispose();
                     _transactionManager = null;
                 }
-
-                _context = null;
             }
 
             _disposed = true;
@@ -127,7 +117,7 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity> Create<TEntity>() where TEntity : class
         {
-            return _factory.Create<TEntity>();
+            return CreateInstance<Repository<TEntity>>();
         }
 
         /// <summary>
@@ -138,7 +128,7 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey> Create<TEntity, TKey>() where TEntity : class
         {
-            return _factory.Create<TEntity, TKey>();
+            return CreateInstance<Repository<TEntity, TKey>>();
         }
 
         /// <summary>
@@ -150,7 +140,7 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey1, TKey2> Create<TEntity, TKey1, TKey2>() where TEntity : class
         {
-            return _factory.Create<TEntity, TKey1, TKey2>();
+            return CreateInstance<Repository<TEntity, TKey1, TKey2>>();
         }
 
         /// <summary>
@@ -163,7 +153,7 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey1, TKey2, TKey3> Create<TEntity, TKey1, TKey2, TKey3>() where TEntity : class
         {
-            return _factory.Create<TEntity, TKey1, TKey2, TKey3>();
+            return CreateInstance<Repository<TEntity, TKey1, TKey2, TKey3>>();
         }
 
         /// <summary>
@@ -172,7 +162,19 @@
         /// <returns>The new repository.</returns>
         public T CreateInstance<T>() where T : class
         {
-            return _factory.CreateInstance<T>();
+            var args = new List<object> { _context };
+
+            if (_interceptors.Any())
+                args.Add(_interceptors);
+
+            try
+            {
+                return (T)Activator.CreateInstance(typeof(T), args.ToArray());
+            }
+            catch (Exception ex)
+            {
+                throw ex.InnerException ?? ex;
+            }
         }
 
         #endregion

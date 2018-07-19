@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository
+﻿namespace DotNetToolkit.Repository.Configuration
 {
     using FetchStrategies;
     using Queries;
@@ -21,21 +21,21 @@
         ITransactionManager BeginTransaction();
 
         /// <summary>
-        /// Tracks the specified entity in memory and will be inserted into the database when <see cref="SaveChanges" /> is called..
+        /// Tracks the specified entity in memory and will be inserted into the database when <see cref="SaveChanges()" /> is called..
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="entity">The entity.</param>
         void Add<TEntity>(TEntity entity) where TEntity : class;
 
         /// <summary>
-        /// Tracks the specified entity in memory and will be updated in the database when <see cref="SaveChanges" /> is called..
+        /// Tracks the specified entity in memory and will be updated in the database when <see cref="SaveChanges()" /> is called..
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="entity">The entity.</param>
         void Update<TEntity>(TEntity entity) where TEntity : class;
 
         /// <summary>
-        /// Tracks the specified entity in memory and will be removed from the database when <see cref="SaveChanges" /> is called..
+        /// Tracks the specified entity in memory and will be removed from the database when <see cref="SaveChanges()" /> is called..
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="entity">The entity.</param>

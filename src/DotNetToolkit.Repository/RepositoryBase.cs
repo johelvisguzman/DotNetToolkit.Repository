@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository
 {
+    using Configuration;
     using FetchStrategies;
     using Helpers;
     using Interceptors;
@@ -676,7 +677,7 @@
                 if (!ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Any())
                     throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityRequiresPrimaryKey, typeof(TEntity).FullName));
 
-                var haveConfiguration = context as IHaveRepositoryContextConfiguration;
+                var haveConfiguration = context as IHaveRepositoryContextInitializer;
                 if (haveConfiguration != null)
                     haveConfiguration.Initialize<TEntity>();
             }
