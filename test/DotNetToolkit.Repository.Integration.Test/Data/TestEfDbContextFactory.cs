@@ -15,7 +15,7 @@
             conn.ConnectionString = connectionString;
             conn.Open();
 
-            return new EfRepositoryContextFactory<TestEfDbContext>(conn, true);
+            return new EfRepositoryContextFactory<TestEfDbContext>(conn);
         }
     }
 

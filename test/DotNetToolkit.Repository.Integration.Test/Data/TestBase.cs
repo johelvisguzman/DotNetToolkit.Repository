@@ -89,13 +89,13 @@
         {
             return new List<IRepositoryContextFactory>
             {
-                TestAdoNetContextFactory.Create(),
-                TestEfCoreDbContextFactory.Create(),
+                //TestAdoNetContextFactory.Create(),
+                //TestEfCoreDbContextFactory.Create(),
                 TestEfDbContextFactory.Create(),
-                new InMemoryRepositoryContextFactory(Guid.NewGuid().ToString()),
-                new CsvRepositoryContextFactory(Path.GetTempPath() + Guid.NewGuid().ToString("N")),
-                new JsonRepositoryContextFactory(Path.GetTempPath() + Guid.NewGuid().ToString("N")),
-                new XmlRepositoryContextFactory(Path.GetTempPath() + Guid.NewGuid().ToString("N"))
+                //new InMemoryRepositoryContextFactory(Guid.NewGuid().ToString()),
+                //new CsvRepositoryContextFactory(Path.GetTempPath() + Guid.NewGuid().ToString("N")),
+                //new JsonRepositoryContextFactory(Path.GetTempPath() + Guid.NewGuid().ToString("N")),
+                //new XmlRepositoryContextFactory(Path.GetTempPath() + Guid.NewGuid().ToString("N"))
             };
         }
     }

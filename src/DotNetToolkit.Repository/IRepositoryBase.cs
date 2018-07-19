@@ -14,7 +14,7 @@
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <seealso cref="DotNetToolkit.Repository.Wrappers.IReadOnlyRepositoryBase{TEntity}" />
     /// <seealso cref="System.IDisposable" />
-    public interface IRepositoryBase<TEntity> : IReadOnlyRepositoryBase<TEntity>, IDisposable where TEntity : class
+    public interface IRepositoryBase<TEntity> : IReadOnlyRepositoryBase<TEntity> where TEntity : class
     {
         /// <summary>
         /// Adds the specified <paramref name="entity" /> into the repository.

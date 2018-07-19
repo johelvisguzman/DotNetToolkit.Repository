@@ -5,7 +5,9 @@
     using Interceptors;
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
+    using System.Reflection;
 
     /// <summary>
     /// An implementation of <see cref="IUnitOfWork" />.
@@ -169,7 +171,7 @@
 
             try
             {
-                return (T)Activator.CreateInstance(typeof(T), args.ToArray());
+                return (T)Activator.CreateInstance(typeof(T), BindingFlags.NonPublic | BindingFlags.Instance, null, args.ToArray(), null);
             }
             catch (Exception ex)
             {

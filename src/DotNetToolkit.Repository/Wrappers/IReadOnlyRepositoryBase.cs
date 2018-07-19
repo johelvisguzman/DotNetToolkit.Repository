@@ -13,7 +13,7 @@
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <seealso cref="System.IDisposable" />
-    public interface IReadOnlyRepositoryBase<TEntity> : IDisposable where TEntity : class
+    public interface IReadOnlyRepositoryBase<TEntity> where TEntity : class
     {
         /// <summary>
         /// Finds the first entity in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
