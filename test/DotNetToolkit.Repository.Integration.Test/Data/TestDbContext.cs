@@ -4,6 +4,7 @@
     using System;
     using System.Data.Common;
     using System.Data.Entity;
+    using Microsoft.EntityFrameworkCore.Infrastructure;
 
     public class TestEfDbContext : System.Data.Entity.DbContext
     {
@@ -46,13 +47,8 @@
         public System.Data.Entity.DbSet<CustomerWithThreeCompositePrimaryKey> CustomersWithThreeCompositePrimaryKey { get; set; }
         public System.Data.Entity.DbSet<CustomerWithNoIdentity> CustomersWithNoIdentity { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-                optionsBuilder.UseInMemoryDatabase(Guid.NewGuid().ToString());
-
-            base.OnConfiguring(optionsBuilder);
-        }
-
+        public TestEfCoreDbContext(DbContextOptions options) : base(options) { }
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
