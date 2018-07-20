@@ -125,53 +125,59 @@
             var store = InMemoryCache.Instance.GetDatabaseStore(DatabaseName);
             var count = 0;
 
-            foreach (var entitySet in _items)
+            try
             {
-                var entityType = entitySet.Entity.GetType();
-                var key = GetPrimaryKey(entitySet.Entity);
-
-                if (!store.ContainsKey(entityType))
-                    store[entityType] = new ConcurrentDictionary<object, object>();
-
-                var context = store[entityType];
-
-                if (entitySet.State == EntityState.Added)
+                foreach (var entitySet in _items)
                 {
-                    if (context.ContainsKey(key))
+                    var entityType = entitySet.Entity.GetType();
+                    var key = GetPrimaryKey(entitySet.Entity);
+
+                    if (!store.ContainsKey(entityType))
+                        store[entityType] = new ConcurrentDictionary<object, object>();
+
+                    var context = store[entityType];
+
+                    if (entitySet.State == EntityState.Added)
                     {
-                        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
+                        if (context.ContainsKey(key))
+                        {
+                            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
+                                Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
+                        }
+
+                        var primeryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+
+                        if (ConventionHelper.IsIdentity(primeryKeyPropertyInfo))
+                        {
+                            key = GeneratePrimaryKey(entityType);
+
+                            primeryKeyPropertyInfo.SetValue(entitySet.Entity, key);
+                        }
+                    }
+                    else if (!context.ContainsKey(key))
+                    {
+                        throw new InvalidOperationException(Resources.EntityNotFoundInStore);
                     }
 
-                    var primeryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-
-                    if (ConventionHelper.IsIdentity(primeryKeyPropertyInfo))
+                    if (entitySet.State == EntityState.Removed)
                     {
-                        key = GeneratePrimaryKey(entityType);
-
-                        primeryKeyPropertyInfo.SetValue(entitySet.Entity, key);
+                        context.TryRemove(key, out object entity);
                     }
-                }
-                else if (!context.ContainsKey(key))
-                {
-                    throw new InvalidOperationException(Resources.EntityNotFoundInStore);
-                }
+                    else
+                    {
+                        context[key] = DeepCopy(entitySet.Entity);
+                    }
 
-                if (entitySet.State == EntityState.Removed)
-                {
-                    context.TryRemove(key, out object entity);
+                    count++;
                 }
-                else
-                {
-                    context[key] = DeepCopy(entitySet.Entity);
-                }
-
-                count++;
             }
-
-            // Clears the collection
-            while (_items.Count > 0)
+            finally
             {
-                _items.TryTake(out _);
+                // Clears the collection
+                while (_items.Count > 0)
+                {
+                    _items.TryTake(out _);
+                }
             }
 
             return count;
