@@ -39,16 +39,6 @@
 
         #endregion
 
-        #region Implementation of IDisposable
-
-        /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
-        public void Dispose()
-        {
-            _repo.Dispose();
-        }
-
-        #endregion
-
         #region Implementation of IReadOnlyRepository<TEntity,in TKey>
 
         /// <summary>

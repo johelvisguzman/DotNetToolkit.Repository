@@ -14,7 +14,7 @@
     /// <typeparam name="TKey3">The type of the third part of the composite primary key.</typeparam>
     /// <seealso cref="DotNetToolkit.Repository.Wrappers.IReadOnlyRepositoryBase{TEntity}" />
     /// <seealso cref="System.IDisposable" />
-    public interface IReadOnlyRepository<TEntity, in TKey1, in TKey2, in TKey3> : IReadOnlyRepositoryBase<TEntity>, IDisposable where TEntity : class
+    public interface IReadOnlyRepository<TEntity, in TKey1, in TKey2, in TKey3> : IReadOnlyRepositoryBase<TEntity> where TEntity : class
     {
         /// <summary>
         /// Determines whether the repository contains an entity with the given composite primary key values.
@@ -84,7 +84,7 @@
     /// <typeparam name="TKey2">The type of the second part of the composite primary key.</typeparam>
     /// <seealso cref="DotNetToolkit.Repository.Wrappers.IReadOnlyRepositoryBase{TEntity}" />
     /// <seealso cref="System.IDisposable" />
-    public interface IReadOnlyRepository<TEntity, in TKey1, in TKey2> : IReadOnlyRepositoryBase<TEntity>, IDisposable where TEntity : class
+    public interface IReadOnlyRepository<TEntity, in TKey1, in TKey2> : IReadOnlyRepositoryBase<TEntity> where TEntity : class
     {
         /// <summary>
         /// Determines whether the repository contains an entity with the given composite primary key values.
@@ -147,7 +147,7 @@
     /// <typeparam name="TKey">The type of the primary key.</typeparam>
     /// <seealso cref="DotNetToolkit.Repository.Wrappers.IReadOnlyRepositoryBase{TEntity}" />
     /// <seealso cref="System.IDisposable" />
-    public interface IReadOnlyRepository<TEntity, in TKey> : IReadOnlyRepositoryBase<TEntity>, IDisposable where TEntity : class
+    public interface IReadOnlyRepository<TEntity, in TKey> : IReadOnlyRepositoryBase<TEntity> where TEntity : class
     {
         /// <summary>
         /// Determines whether the repository contains an entity with the given primary key value.

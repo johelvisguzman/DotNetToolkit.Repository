@@ -15,7 +15,7 @@
     /// <seealso cref="DotNetToolkit.Repository.IRepositoryBase{TEntity}" />
     /// <seealso cref="DotNetToolkit.Repository.Wrappers.IReadOnlyRepository{TEntity, TKey1, TKey2, TKey3}" />
     /// <seealso cref="System.IDisposable" />
-    public interface IRepository<TEntity, in TKey1, in TKey2, in TKey3> : IRepositoryBase<TEntity>, IReadOnlyRepository<TEntity, TKey1, TKey2, TKey3>, IDisposable where TEntity : class
+    public interface IRepository<TEntity, in TKey1, in TKey2, in TKey3> : IRepositoryBase<TEntity>, IReadOnlyRepository<TEntity, TKey1, TKey2, TKey3> where TEntity : class
     {
         /// <summary>
         /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey1, TKey2, TKey3}" /> wrapper for the current repository.
@@ -51,7 +51,7 @@
     /// <seealso cref="DotNetToolkit.Repository.IRepositoryBase{TEntity}" />
     /// <seealso cref="DotNetToolkit.Repository.Wrappers.IReadOnlyRepository{TEntity, TKey1, TKey2}" />
     /// <seealso cref="System.IDisposable" />
-    public interface IRepository<TEntity, in TKey1, in TKey2> : IRepositoryBase<TEntity>, IReadOnlyRepository<TEntity, TKey1, TKey2>, IDisposable where TEntity : class
+    public interface IRepository<TEntity, in TKey1, in TKey2> : IRepositoryBase<TEntity>, IReadOnlyRepository<TEntity, TKey1, TKey2> where TEntity : class
     {
         /// <summary>
         /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey1, TKey2}" /> wrapper for the current repository.
@@ -84,7 +84,7 @@
     /// <seealso cref="DotNetToolkit.Repository.IRepositoryBase{TEntity}" />
     /// <seealso cref="DotNetToolkit.Repository.Wrappers.IReadOnlyRepository{TEntity, TKey}" />
     /// <seealso cref="System.IDisposable" />
-    public interface IRepository<TEntity, in TKey> : IRepositoryBase<TEntity>, IReadOnlyRepository<TEntity, TKey>, IDisposable where TEntity : class
+    public interface IRepository<TEntity, in TKey> : IRepositoryBase<TEntity>, IReadOnlyRepository<TEntity, TKey> where TEntity : class
     {
         /// <summary>
         /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey}" /> wrapper for the current repository.

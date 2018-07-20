@@ -2,6 +2,8 @@
 {
     using EntityFramework;
     using EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore;
+    using System;
     using System.Data.Common;
 
     public static class TestEfDbContextFactory
@@ -15,7 +17,7 @@
             conn.ConnectionString = connectionString;
             conn.Open();
 
-            return new EfRepositoryContextFactory<TestEfDbContext>(conn, true);
+            return new EfRepositoryContextFactory<TestEfDbContext>(conn);
         }
     }
 
@@ -23,7 +25,11 @@
     {
         public static EfCoreRepositoryContextFactory<TestEfCoreDbContext> Create()
         {
-            return new EfCoreRepositoryContextFactory<TestEfCoreDbContext>();
+            var contextOptionsBuilder = new DbContextOptionsBuilder<TestEfCoreDbContext>();
+
+            contextOptionsBuilder.UseInMemoryDatabase(Guid.NewGuid().ToString());
+
+            return new EfCoreRepositoryContextFactory<TestEfCoreDbContext>(contextOptionsBuilder.Options);
         }
     }
 }

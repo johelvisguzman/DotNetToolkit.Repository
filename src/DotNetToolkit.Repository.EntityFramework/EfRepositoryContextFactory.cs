@@ -40,15 +40,12 @@
         /// Initializes a new instance of the <see cref="EfRepositoryContextFactory{TDbContext}"/> class.
         /// </summary>
         /// <param name="existingConnection">The existing connection.</param>
-        /// <param name="contextOwnsConnection">if set to <c>true</c> [context owns connection].</param>
-        /// <exception cref="ArgumentNullException">nameOrConnectionString</exception>
-        public EfRepositoryContextFactory(DbConnection existingConnection, bool contextOwnsConnection)
+        public EfRepositoryContextFactory(DbConnection existingConnection)
         {
             if (existingConnection == null)
                 throw new ArgumentNullException(nameof(existingConnection));
 
             _existingConnection = existingConnection;
-            _contextOwnsConnection = contextOwnsConnection;
         }
 
         #endregion
@@ -66,7 +63,7 @@
             try
             {
                 underlyingContext = _existingConnection != null
-                    ? (TDbContext)Activator.CreateInstance(typeof(TDbContext), _existingConnection, _contextOwnsConnection)
+                    ? (TDbContext)Activator.CreateInstance(typeof(TDbContext), _existingConnection, false)
                     : (TDbContext)Activator.CreateInstance(typeof(TDbContext), _nameOrConnectionString);
             }
             catch (Exception ex)

@@ -104,7 +104,7 @@
         /// <returns>The new repository.</returns>
         public T CreateInstance<T>() where T : class
         {
-            var args = new List<object> { _factory.Create() };
+            var args = new List<object> { _factory };
 
             if (_interceptors.Any())
                 args.Add(_interceptors);

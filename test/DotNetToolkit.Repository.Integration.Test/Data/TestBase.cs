@@ -55,7 +55,9 @@
                             typeof(JsonRepositoryContextFactory).IsAssignableFrom(type) ||
                             typeof(XmlRepositoryContextFactory).IsAssignableFrom(type))
                         {
-                            Assert.Contains(Properties.Resources.IRepositoryContextNotAsync, ex.Message);
+                            var err = ex.InnerException?.Message ?? ex.Message;
+
+                            Assert.Contains(Properties.Resources.IRepositoryContextNotAsync, err);
                         }
                         else
                         {

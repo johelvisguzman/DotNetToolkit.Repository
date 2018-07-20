@@ -13,8 +13,9 @@
         {
             var databaseName = Guid.NewGuid().ToString();
 
-            using (var repo = new Repository<Customer>(new InMemoryRepositoryContextFactory(databaseName).Create()))
+            using (var context = new InMemoryRepositoryContextFactory(databaseName).Create())
             {
+                var repo = new Repository<Customer>(context);
                 var entity = new Customer { Name = "Random Name" };
 
                 repo.Add(entity);
@@ -23,8 +24,9 @@
                 Assert.Equal(1, entity.Id);
             }
 
-            using (var repo = new Repository<Customer>(new InMemoryRepositoryContextFactory(databaseName).Create()))
+            using (var context = new InMemoryRepositoryContextFactory(databaseName).Create())
             {
+                var repo = new Repository<Customer>(context);
                 var entity = new Customer { Name = "Random Name" };
 
                 repo.Add(entity);
@@ -33,8 +35,9 @@
                 Assert.Equal(2, repo.Count(x => x.Name.Equals("Random Name")));
             }
 
-            using (var repo = new Repository<Customer>(new InMemoryRepositoryContextFactory(Guid.NewGuid().ToString()).Create()))
+            using (var context = new InMemoryRepositoryContextFactory(Guid.NewGuid().ToString()).Create())
             {
+                var repo = new Repository<Customer>(context);
                 var entity = new Customer { Name = "Random Name" };
 
                 repo.Add(entity);

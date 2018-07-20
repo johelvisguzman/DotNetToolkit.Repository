@@ -6,6 +6,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
 
     /// <summary>
     /// An implementation of <see cref="IUnitOfWork" />.
@@ -72,9 +73,24 @@
                     _transactionManager.Dispose();
                     _transactionManager = null;
                 }
+
+                if (_context != null)
+                {
+                    _context.Dispose();
+                    _context = null;
+                }
             }
 
             _disposed = true;
+        }
+
+        /// <summary>
+        /// Throws if this class has been disposed.
+        /// </summary>
+        protected virtual void ThrowIfDisposed()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(GetType().Name);
         }
 
         #endregion
@@ -86,8 +102,10 @@
         /// </summary>
         public virtual void Commit()
         {
+            ThrowIfDisposed();
+
             if (_transactionManager == null)
-                throw new InvalidOperationException("The transaction has already been committed or disposed.");
+                throw new InvalidOperationException("The transaction has already been committed.");
 
             _transactionManager.Commit();
             _transactionManager = null;
@@ -162,6 +180,8 @@
         /// <returns>The new repository.</returns>
         public T CreateInstance<T>() where T : class
         {
+            ThrowIfDisposed();
+
             var args = new List<object> { _context };
 
             if (_interceptors.Any())
@@ -169,7 +189,7 @@
 
             try
             {
-                return (T)Activator.CreateInstance(typeof(T), args.ToArray());
+                return (T)Activator.CreateInstance(typeof(T), BindingFlags.NonPublic | BindingFlags.Instance, null, args.ToArray(), null);
             }
             catch (Exception ex)
             {

@@ -103,7 +103,23 @@
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
-            _context.Set<TEntity>().Remove(entity);
+            if (_context.Entry(entity).State == EntityState.Detached)
+            {
+                var keyValues = ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>()
+                    .Select(x => x.GetValue(entity, null))
+                    .ToArray();
+
+                var entityInDb = _context.Set<TEntity>().Find(keyValues);
+
+                if (entityInDb != null)
+                {
+                    _context.Set<TEntity>().Remove(entityInDb);
+                }
+            }
+            else
+            {
+                _context.Set<TEntity>().Remove(entity);
+            }
         }
 
         /// <summary>
@@ -421,7 +437,7 @@
 
             var keySelectFunc = keySelector.Compile();
             var resultSelectorFunc = resultSelector.Compile();
-            var result = GetQuery(options).GroupBy(keySelectFunc, resultSelectorFunc);
+            var result = GetQuery(options).GroupBy(keySelectFunc, resultSelectorFunc).ToList();
 
             // It looks like the options sorting is being applied to the query
             // when using the groupby expression variant. Only the func variant seems

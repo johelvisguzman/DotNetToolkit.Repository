@@ -422,7 +422,7 @@
 
             var keySelectFunc = keySelector.Compile();
             var resultSelectorFunc = resultSelector.Compile();
-            var result = GetQuery(options).GroupBy(keySelectFunc, resultSelectorFunc);
+            var result = GetQuery(options).GroupBy(keySelectFunc, resultSelectorFunc).ToList();
 
             // It looks like the options sorting is being applied to the query
             // when using the groupby expression variant. Only the func variant seems
