@@ -531,17 +531,14 @@
         /// <param name="interceptors">The interceptors.</param>
         protected RepositoryBase(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors)
         {
-            InterceptError(() =>
-            {
-                if (factory == null)
-                    throw new ArgumentNullException(nameof(factory));
+            if (factory == null)
+                throw new ArgumentNullException(nameof(factory));
 
-                _contextFactory = factory;
-                _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
-                _canDisposeContext = true;
+            _contextFactory = factory;
+            _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
+            _canDisposeContext = true;
 
-                OnInitialize();
-            });
+            ThrowsIfEntityPrimaryKeyMissing();
         }
 
         /// <summary>
@@ -551,16 +548,13 @@
         /// <param name="interceptors">The interceptors.</param>
         internal RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors)
         {
-            InterceptError(() =>
-            {
-                if (context == null)
-                    throw new ArgumentNullException(nameof(context));
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
 
-                _context = context;
-                _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
+            _context = context;
+            _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
 
-                OnInitialize();
-            });
+            ThrowsIfEntityPrimaryKeyMissing();
         }
 
         #endregion
@@ -653,14 +647,10 @@
 
         #region Private Methods
 
-        private void OnInitialize()
+        private void ThrowsIfEntityPrimaryKeyMissing()
         {
             if (!ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Any())
                 throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityRequiresPrimaryKey, typeof(TEntity).FullName));
-
-            var haveConfiguration = Context as IHaveRepositoryContextInitializer;
-            if (haveConfiguration != null)
-                haveConfiguration.Initialize<TEntity>();
         }
 
         private void InterceptAddItem(TEntity entity)

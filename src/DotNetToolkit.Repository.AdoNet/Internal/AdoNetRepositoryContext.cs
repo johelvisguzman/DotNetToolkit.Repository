@@ -25,7 +25,7 @@
     /// Represents an internal ado.net repository context.
     /// </summary>
     /// <seealso cref="IRepositoryContextAsync" />
-    internal class AdoNetRepositoryContext : IRepositoryContextAsync, IHaveRepositoryContextInitializer
+    internal class AdoNetRepositoryContext : IRepositoryContextAsync
     {
         #region Fields
 
@@ -36,6 +36,8 @@
 
         private readonly BlockingCollection<EntitySet> _items = new BlockingCollection<EntitySet>();
         private readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, PropertyInfo>> _sqlPropertiesMapping = new ConcurrentDictionary<Type, ConcurrentDictionary<string, PropertyInfo>>();
+        private readonly ConcurrentDictionary<Type, bool> _schemaValidationTypeMapping = new ConcurrentDictionary<Type, bool>();
+        private readonly SchemaTableHelper _schemaHelper;
 
         #endregion
 
@@ -67,6 +69,7 @@
 
             _factory = DbProviderFactories.GetFactory(css.ProviderName);
             _connectionString = css.ConnectionString;
+            _schemaHelper = new SchemaTableHelper(this);
         }
 
         /// <summary>
@@ -84,6 +87,7 @@
 
             _factory = DbProviderFactories.GetFactory(providerName);
             _connectionString = connectionString;
+            _schemaHelper = new SchemaTableHelper(this);
         }
 
         #endregion
@@ -1388,53 +1392,66 @@
                 if (connection.State == ConnectionState.Closed)
                     await connection.OpenAsync(cancellationToken);
 
-                foreach (var entitySet in _items)
+                try
                 {
-                    var entityType = entitySet.Entity.GetType();
-                    var hasCompositePrimaryKey = ConventionHelper.HasCompositePrimaryKey(entityType);
-                    var primeryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-                    var isIdentity = !hasCompositePrimaryKey && ConventionHelper.IsIdentity(primeryKeyPropertyInfo);
-
-                    // Checks if the entity exist in the database
-                    var existInDb = await command.ExecuteObjectExistAsync(entitySet.Entity, cancellationToken);
-
-                    // Prepare the sql statement
-                    PrepareEntitySetQuery(
-                        entitySet,
-                        existInDb,
-                        isIdentity,
-                        primeryKeyPropertyInfo,
-                        out string sql,
-                        out Dictionary<string, object> parameters);
-
-                    // Executes the sql statement
-                    command.CommandText = sql;
-                    command.CommandType = CommandType.Text;
-                    command.Parameters.Clear();
-                    command.AddParmeters(parameters);
-
-                    rows += await command.ExecuteNonQueryAsync(cancellationToken);
-
-                    // Checks to see if the model needs to be updated with the new key returned from the database
-                    if (entitySet.State == EntityState.Added && isIdentity)
+                    foreach (var entitySet in _items)
                     {
-                        command.CommandText = "SELECT @@IDENTITY";
+                        var entityType = entitySet.Entity.GetType();
+
+                        // Performs some schema validation for this type (either creates the table if does not exist, or validates)
+                        if (!_schemaValidationTypeMapping.ContainsKey(entityType))
+                        {
+                            try { await _schemaHelper.ExecuteSchemaValidateAsync(entityType, cancellationToken); }
+                            finally { _schemaValidationTypeMapping[entityType] = true; }
+                        }
+
+                        var hasCompositePrimaryKey = ConventionHelper.HasCompositePrimaryKey(entityType);
+                        var primeryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+                        var isIdentity = !hasCompositePrimaryKey && ConventionHelper.IsIdentity(primeryKeyPropertyInfo);
+
+                        // Checks if the entity exist in the database
+                        var existInDb = await command.ExecuteObjectExistAsync(entitySet.Entity, cancellationToken);
+
+                        // Prepare the sql statement
+                        PrepareEntitySetQuery(
+                            entitySet,
+                            existInDb,
+                            isIdentity,
+                            primeryKeyPropertyInfo,
+                            out string sql,
+                            out Dictionary<string, object> parameters);
+
+                        // Executes the sql statement
+                        command.CommandText = sql;
+                        command.CommandType = CommandType.Text;
                         command.Parameters.Clear();
+                        command.AddParmeters(parameters);
 
-                        var newKey = await command.ExecuteScalarAsync(cancellationToken);
-                        var convertedKeyValue = Convert.ChangeType(newKey, primeryKeyPropertyInfo.PropertyType);
+                        rows += await command.ExecuteNonQueryAsync(cancellationToken);
 
-                        primeryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
+                        // Checks to see if the model needs to be updated with the new key returned from the database
+                        if (entitySet.State == EntityState.Added && isIdentity)
+                        {
+                            command.CommandText = "SELECT @@IDENTITY";
+                            command.Parameters.Clear();
+
+                            var newKey = await command.ExecuteScalarAsync(cancellationToken);
+                            var convertedKeyValue = Convert.ChangeType(newKey, primeryKeyPropertyInfo.PropertyType);
+
+                            primeryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
+                        }
                     }
                 }
-
-                if (ownsConnection)
-                    connection.Dispose();
-
-                // Clears the collection
-                while (_items.Count > 0)
+                finally
                 {
-                    _items.TryTake(out _);
+                    if (ownsConnection)
+                        connection.Dispose();
+
+                    // Clears the collection
+                    while (_items.Count > 0)
+                    {
+                        _items.TryTake(out _);
+                    }
                 }
 
                 return rows;
@@ -1690,53 +1707,66 @@
                 if (connection.State == ConnectionState.Closed)
                     connection.Open();
 
-                foreach (var entitySet in _items)
+                try
                 {
-                    var entityType = entitySet.Entity.GetType();
-                    var hasCompositePrimaryKey = ConventionHelper.HasCompositePrimaryKey(entityType);
-                    var primeryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-                    var isIdentity = !hasCompositePrimaryKey && ConventionHelper.IsIdentity(primeryKeyPropertyInfo);
-
-                    // Checks if the entity exist in the database
-                    var existInDb = command.ExecuteObjectExist(entitySet.Entity);
-
-                    // Prepare the sql statement
-                    PrepareEntitySetQuery(
-                        entitySet,
-                        existInDb,
-                        isIdentity,
-                        primeryKeyPropertyInfo,
-                        out string sql,
-                        out Dictionary<string, object> parameters);
-
-                    // Executes the sql statement
-                    command.CommandText = sql;
-                    command.CommandType = CommandType.Text;
-                    command.Parameters.Clear();
-                    command.AddParmeters(parameters);
-
-                    rows += command.ExecuteNonQuery();
-
-                    // Checks to see if the model needs to be updated with the new key returned from the database
-                    if (entitySet.State == EntityState.Added && isIdentity)
+                    foreach (var entitySet in _items)
                     {
-                        command.CommandText = "SELECT @@IDENTITY";
+                        var entityType = entitySet.Entity.GetType();
+
+                        // Performs some schema validation for this type (either creates the table if does not exist, or validates)
+                        if (!_schemaValidationTypeMapping.ContainsKey(entityType))
+                        {
+                            try { _schemaHelper.ExecuteSchemaValidate(entityType); }
+                            finally { _schemaValidationTypeMapping[entityType] = true; }
+                        }
+
+                        var hasCompositePrimaryKey = ConventionHelper.HasCompositePrimaryKey(entityType);
+                        var primeryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+                        var isIdentity = !hasCompositePrimaryKey && ConventionHelper.IsIdentity(primeryKeyPropertyInfo);
+
+                        // Checks if the entity exist in the database
+                        var existInDb = command.ExecuteObjectExist(entitySet.Entity);
+
+                        // Prepare the sql statement
+                        PrepareEntitySetQuery(
+                            entitySet,
+                            existInDb,
+                            isIdentity,
+                            primeryKeyPropertyInfo,
+                            out string sql,
+                            out Dictionary<string, object> parameters);
+
+                        // Executes the sql statement
+                        command.CommandText = sql;
+                        command.CommandType = CommandType.Text;
                         command.Parameters.Clear();
+                        command.AddParmeters(parameters);
 
-                        var newKey = command.ExecuteScalar();
-                        var convertedKeyValue = Convert.ChangeType(newKey, primeryKeyPropertyInfo.PropertyType);
+                        rows += command.ExecuteNonQuery();
 
-                        primeryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
+                        // Checks to see if the model needs to be updated with the new key returned from the database
+                        if (entitySet.State == EntityState.Added && isIdentity)
+                        {
+                            command.CommandText = "SELECT @@IDENTITY";
+                            command.Parameters.Clear();
+
+                            var newKey = command.ExecuteScalar();
+                            var convertedKeyValue = Convert.ChangeType(newKey, primeryKeyPropertyInfo.PropertyType);
+
+                            primeryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
+                        }
                     }
                 }
-
-                if (ownsConnection)
-                    connection.Dispose();
-
-                // Clears the collection
-                while (_items.Count > 0)
+                finally
                 {
-                    _items.TryTake(out _);
+                    if (ownsConnection)
+                        connection.Dispose();
+
+                    // Clears the collection
+                    while (_items.Count > 0)
+                    {
+                        _items.TryTake(out _);
+                    }
                 }
 
                 return rows;
@@ -1965,19 +1995,6 @@
             _transaction = null;
 
             GC.SuppressFinalize(this);
-        }
-
-        #endregion
-
-        #region Implementation of IHaveRepositoryContextInitializer
-
-        /// <summary>
-        /// Initializes this instance.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        public void Initialize<TEntity>() where TEntity : class
-        {
-            new SchemaTableHelper(this).Initialize<TEntity>();
         }
 
         #endregion

@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
+    using AdoNet.Internal;
     using AdoNet.Internal.Schema;
     using Data;
     using FetchStrategies;
@@ -10,7 +11,6 @@
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
     using System.Threading.Tasks;
-    using AdoNet.Internal;
     using Xunit;
 
     public class AdoNetRepositoryTests
@@ -96,7 +96,7 @@
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(address, customerRepo.Find(customerKey).Address);
         }
-        
+
         [Fact]
         public void FindWithForeignKeyAnnotationChangedByKey_OneToOneRelationship()
         {
@@ -891,38 +891,50 @@
             var contextFactory = Data.TestAdoNetContextFactory.Create();
             var context = contextFactory.Create();
 
-            var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerColumnNameMismatch>(context));
+            var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerColumnNameMismatch>(context).Add(new CustomerColumnNameMismatch()));
             Assert.Equal($"The model '{typeof(CustomerColumnNameMismatch).Name}' has changed since the database was created. Consider updating the database.", ex.Message);
 
-            ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerColumnNameMissing>(context));
+            ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerColumnNameMissing>(context).Add(new CustomerColumnNameMissing()));
             Assert.Equal($"The model '{typeof(CustomerColumnNameMissing).Name}' has changed since the database was created. Consider updating the database.", ex.Message);
 
-            ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerKeyMismatch>(context));
+            ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerKeyMismatch>(context).Add(new CustomerKeyMismatch()));
             Assert.Equal($"The model '{typeof(CustomerKeyMismatch).Name}' has changed since the database was created. Consider updating the database.", ex.Message);
 
-            ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerColumnRequiredMissing>(context));
+            ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerColumnRequiredMissing>(context).Add(new CustomerColumnRequiredMissing()));
             Assert.Equal($"The model '{typeof(CustomerColumnRequiredMissing).Name}' has changed since the database was created. Consider updating the database.", ex.Message);
         }
 
         [Fact]
-        public void CreateTableOnConstruction()
+        public void CreateTableOnSaveChanges()
         {
             var contextFactory = TestAdoNetContextFactory.Create();
             var context = (AdoNetRepositoryContext)contextFactory.Create();
             var schemaHelper = new SchemaTableHelper(context);
 
-            Assert.False(schemaHelper.CheckIfTableExists<CustomerNotCreated>());
-            Assert.False(schemaHelper.CheckIfTableExists<CustomerAddressNotCreated>());
+            Assert.False(schemaHelper.ExexuteTableExists<CustomerNotCreated>());
+            Assert.False(schemaHelper.ExexuteTableExists<CustomerAddressNotCreated>());
 
             var repo = new Repository<CustomerNotCreated>(context);
 
-            Assert.True(schemaHelper.CheckIfTableExists<CustomerNotCreated>());
+            // Needs to create foreign table since the CustomerNotCreated table needs it
+            new Repository<CustomerAddressNotCreated>(context).Add(new CustomerAddressNotCreated
+            {
+                Id1 = 1,
+                Id2 = 1,
+                State = "ST",
+                Street1 = "Street 1",
+                City = "City"
+            });
+
+            repo.Add(new CustomerNotCreated { Name = "Random Name", AddressId1 = 1, AddressId2 = 1 });
+
+            Assert.True(schemaHelper.ExexuteTableExists<CustomerNotCreated>());
 
             // the customer address is a navigation property of the customer table, and so, it will be created as well
-            Assert.True(schemaHelper.CheckIfTableExists<CustomerAddressNotCreated>());
+            Assert.True(schemaHelper.ExexuteTableExists<CustomerAddressNotCreated>());
 
-            schemaHelper.ValidateTable<CustomerNotCreated>();
-            schemaHelper.ValidateTable<CustomerAddressNotCreated>();
+            schemaHelper.ExecuteTableValidate<CustomerNotCreated>();
+            schemaHelper.ExecuteTableValidate<CustomerAddressNotCreated>();
         }
 
         private static void TestCustomerAddress(CustomerAddress expected, CustomerAddress actual)

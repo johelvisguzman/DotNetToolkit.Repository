@@ -10,6 +10,8 @@
     using System.Linq;
     using System.Reflection;
     using System.Text;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Represents an internal schema database helper for executing operations related to editing the database/table schema.
@@ -19,7 +21,7 @@
         #region Fields
 
         private readonly AdoNetRepositoryContext _context;
-        private Dictionary<Type, string> _multiplicitiesMapping;
+        private readonly Dictionary<Type, string> _multiplicitiesMapping = new Dictionary<Type, string>();
 
         #endregion
 
@@ -42,18 +44,21 @@
         #region Public Methods
 
         /// <summary>
-        /// Initializes this instance.
+        /// Validates the specified type.
         /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        public void Initialize<TEntity>() where TEntity : class
+        /// <param name="entityType">Type of the entity.</param>
+        public void ExecuteSchemaValidate(Type entityType)
         {
-            if (!CheckIfTableExists<TEntity>())
+            if (entityType == null)
+                throw new ArgumentNullException(nameof(entityType));
+
+            if (!ExexuteTableExists(entityType))
             {
-                CreateTable<TEntity>();
+                ExexuteTableCreate(entityType);
             }
             else
             {
-                ValidateTable<TEntity>();
+                ExecuteTableValidate(entityType);
             }
         }
 
@@ -62,35 +67,113 @@
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <returns><c>true</c> if the table exists; otherwise, <c>false</c>.</returns>
-        public bool CheckIfTableExists<TEntity>() where TEntity : class
+        public bool ExexuteTableExists<TEntity>() where TEntity : class
         {
-            return CheckIfTableExists(typeof(TEntity));
+            return ExexuteTableExists(typeof(TEntity));
         }
 
         /// <summary>
         /// Creates the table.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        public void CreateTable<TEntity>() where TEntity : class
+        public void ExexuteTableCreate<TEntity>() where TEntity : class
         {
-            _multiplicitiesMapping = new Dictionary<Type, string>();
-
-            CreateTable(typeof(TEntity));
-
-            _multiplicitiesMapping.Clear();
+            ExexuteTableCreate(typeof(TEntity));
         }
 
         /// <summary>
         /// Validates the table.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        public void ValidateTable<TEntity>() where TEntity : class
+        public void ExecuteTableValidate<TEntity>() where TEntity : class
+        {
+            ExecuteTableValidate(typeof(TEntity));
+        }
+
+        /// <summary>
+        /// Asynchronously initializes the specified entity type.
+        /// </summary>
+        /// <param name="entityType">Type of the entity.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        public async Task ExecuteSchemaValidateAsync(Type entityType, CancellationToken cancellationToken = new CancellationToken())
+        {
+            if (entityType == null)
+                throw new ArgumentNullException(nameof(entityType));
+
+            if (!await ExecuteTableExistsAsync(entityType, cancellationToken))
+            {
+                await ExecuteTableCreateAsync(entityType, cancellationToken);
+            }
+            else
+            {
+                await ExecuteTableValidateAsync(entityType, cancellationToken);
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously checks if table exists.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <returns><c>true</c> if the table exists; otherwise, <c>false</c>.</returns>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the table exists; otherwise, <c>false</c>..</returns>
+        public Task<bool> ExecuteTableExistsAsync<TEntity>(CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            return ExecuteTableExistsAsync(typeof(TEntity), cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously creates the table.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        public Task ExecuteTableCreateAsync<TEntity>(CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            return ExecuteTableCreateAsync(typeof(TEntity), cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously validates the table.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        public Task ExecuteTableValidateAsync<TEntity>(CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            return ExecuteTableValidateAsync(typeof(TEntity), cancellationToken);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void ExecuteTableValidate(Type entityType)
+        {
+            if (entityType == null)
+                throw new ArgumentNullException(nameof(entityType));
+
+            var tableName = ConventionHelper.GetTableName(entityType);
+            var schemaTableColumns = GetSchemaTableColumns(tableName);
+
+            ValidateTable(entityType, schemaTableColumns, tableName);
+        }
+
+        private async Task ExecuteTableValidateAsync(Type entityType, CancellationToken cancellationToken)
+        {
+            if (entityType == null)
+                throw new ArgumentNullException(nameof(entityType));
+
+            var tableName = ConventionHelper.GetTableName(entityType);
+            var schemaTableColumns = await GetSchemaTableColumnsAsync(tableName, cancellationToken);
+
+            ValidateTable(entityType, schemaTableColumns, tableName);
+        }
+
+        private void ValidateTable(Type entityType, IEnumerable<SchemaTableColumn> schemaTableColumns, string tableName)
         {
             var error = new Dictionary<string, bool>();
-            var entityType = typeof(TEntity);
-            var tableName = ConventionHelper.GetTableName(entityType);
-
-            var schemaTableColumns = GetSchemaTableColumns(tableName);
 
             var propertiesMapping = entityType
                 .GetRuntimeProperties()
@@ -113,7 +196,8 @@
             // Gets all the constraints
             var schemaTableColumnConstraintsMapping = GetSchemaTableColumnConstraintsMapping(tableName, columns);
 
-            var primaryKeyPropertiesMapping = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).ToDictionary(ConventionHelper.GetColumnName, x => x);
+            var primaryKeyPropertiesMapping = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType)
+                .ToDictionary(ConventionHelper.GetColumnName, x => x);
 
             // Validate all the columns
             foreach (var schemaTableColumn in schemaTableColumns)
@@ -141,14 +225,16 @@
                 if (!error.Any())
                 {
                     var requiredAttribute = propertyInfo.GetCustomAttribute<RequiredAttribute>();
-                    var canBeNull = !propertyInfo.PropertyType.IsValueType || Nullable.GetUnderlyingType(propertyInfo.PropertyType) != null;
+                    var canBeNull = !propertyInfo.PropertyType.IsValueType ||
+                                    Nullable.GetUnderlyingType(propertyInfo.PropertyType) != null;
                     if (canBeNull && schemaTableColumn.IsNullable == "NO")
                     {
                         if (requiredAttribute == null)
                             error["IsNullable_Mismatch"] = true;
                     }
 
-                    if (schemaTableColumnConstraintsMapping != null && schemaTableColumnConstraintsMapping.ContainsKey(columnName))
+                    if (schemaTableColumnConstraintsMapping != null &&
+                        schemaTableColumnConstraintsMapping.ContainsKey(columnName))
                     {
                         var constraint = schemaTableColumnConstraintsMapping[columnName];
 
@@ -188,16 +274,20 @@
             }
         }
 
-        #endregion
-
-        #region Private Methods
-
         private IEnumerable<SchemaTableColumn> GetSchemaTableColumns(string tableName)
         {
             var sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName";
             var parameters = new Dictionary<string, object> { { "@tableName", tableName } };
 
             return _context.ExecuteList<SchemaTableColumn>(sql, parameters);
+        }
+
+        private Task<IEnumerable<SchemaTableColumn>> GetSchemaTableColumnsAsync(string tableName, CancellationToken cancellationToken)
+        {
+            var sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName";
+            var parameters = new Dictionary<string, object> { { "@tableName", tableName } };
+
+            return _context.ExecuteListAsync<SchemaTableColumn>(sql, parameters, cancellationToken);
         }
 
         private Dictionary<string, string> GetSchemaTableColumnConstraintsMapping(string tableName, string[] columns)
@@ -229,11 +319,28 @@
             }
         }
 
-        private void CreateTable(Type entityType)
+        private void ExexuteTableCreate(Type entityType)
         {
             if (entityType == null)
                 throw new ArgumentNullException(nameof(entityType));
 
+            var sql = PrepareCreateTableQuery(entityType);
+
+            _context.ExecuteNonQuery(sql);
+        }
+
+        private Task ExecuteTableCreateAsync(Type entityType, CancellationToken cancellationToken)
+        {
+            if (entityType == null)
+                throw new ArgumentNullException(nameof(entityType));
+
+            var sql = PrepareCreateTableQuery(entityType);
+
+            return _context.ExecuteNonQueryAsync(sql, cancellationToken: cancellationToken);
+        }
+
+        private string PrepareCreateTableQuery(Type entityType)
+        {
             var tableName = ConventionHelper.GetTableName(entityType);
 
             var propertiesMapping = entityType
@@ -297,18 +404,20 @@
                     var foreignNavigationType = foreignNavigationPropertyInfo.PropertyType;
 
                     if (_multiplicitiesMapping.ContainsKey(foreignNavigationType))
-                        throw new InvalidOperationException(string.Format(Resources.ConflictingMultiplicities, _multiplicitiesMapping[foreignNavigationType], foreignNavigationType.FullName));
+                        throw new InvalidOperationException(string.Format(Resources.ConflictingMultiplicities,
+                            _multiplicitiesMapping[foreignNavigationType], foreignNavigationType.FullName));
 
                     _multiplicitiesMapping[entityType] = foreignNavigationPropertyInfo.Name;
 
                     // In order to do a foreign key constraint, we need to ensure that the foreign table exists
-                    if (!CheckIfTableExists(foreignNavigationType))
+                    if (!ExexuteTableExists(foreignNavigationType))
                     {
-                        CreateTable(foreignNavigationType);
+                        ExexuteTableCreate(foreignNavigationType);
                     }
 
                     var foreignNavigationTableName = ConventionHelper.GetTableName(foreignNavigationType);
-                    var foreignPrimaryKeyColumnNames = ConventionHelper.GetPrimaryKeyPropertyInfos(foreignNavigationType).Select(ConventionHelper.GetColumnName);
+                    var foreignPrimaryKeyColumnNames = ConventionHelper.GetPrimaryKeyPropertyInfos(foreignNavigationType)
+                        .Select(ConventionHelper.GetColumnName);
                     var foreignPrimaryKeyColumnName = foreignPrimaryKeyColumnNames.ElementAt(foreignKeyOrder++);
 
                     if (!foreignKeyConstraints.ContainsKey(foreignNavigationTableName))
@@ -334,20 +443,22 @@
                 {
                     var foreignNavigationTableName = foreignKeyConstraint.Key;
                     var foreignNavigationTablePrimaryKeysMapping = foreignKeyConstraint.Value;
-                    var foreignNavigationTablePrimaryKeyColumnNames = foreignNavigationTablePrimaryKeysMapping.Select(x => x.Item2);
+                    var foreignNavigationTablePrimaryKeyColumnNames =
+                        foreignNavigationTablePrimaryKeysMapping.Select(x => x.Item2);
                     var foreignKeyColumnNames = foreignNavigationTablePrimaryKeysMapping.Select(x => x.Item1);
 
-                    sb.Append($"\n\tCONSTRAINT FK_{foreignNavigationTableName} FOREIGN KEY({string.Join(", ", foreignKeyColumnNames)}) REFERENCES {foreignNavigationTableName}({string.Join(", ", foreignNavigationTablePrimaryKeyColumnNames)}) ");
+                    sb.Append(
+                        $"\n\tCONSTRAINT FK_{foreignNavigationTableName} FOREIGN KEY({string.Join(", ", foreignKeyColumnNames)}) REFERENCES {foreignNavigationTableName}({string.Join(", ", foreignNavigationTablePrimaryKeyColumnNames)}) ");
                 }
             }
 
             sb.Length -= 1;
             sb.Append("\n)");
 
-            _context.ExecuteNonQuery(sb.ToString());
+            return sb.ToString();
         }
 
-        private bool CheckIfTableExists(Type entityType)
+        private bool ExexuteTableExists(Type entityType)
         {
             if (entityType == null)
                 throw new ArgumentNullException(nameof(entityType));
@@ -357,6 +468,30 @@
             var parameters = new Dictionary<string, object> { { "@tableName", tableName } };
 
             using (var reader = _context.ExecuteReader(sql, parameters))
+            {
+                var hasRows = false;
+
+                while (reader.Read())
+                {
+                    hasRows = true;
+
+                    break;
+                }
+
+                return hasRows;
+            }
+        }
+
+        private async Task<bool> ExecuteTableExistsAsync(Type entityType, CancellationToken cancellationToken)
+        {
+            if (entityType == null)
+                throw new ArgumentNullException(nameof(entityType));
+
+            var tableName = ConventionHelper.GetTableName(entityType);
+            var sql = @"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @tableName";
+            var parameters = new Dictionary<string, object> { { "@tableName", tableName } };
+
+            using (var reader = await _context.ExecuteReaderAsync(sql, parameters, cancellationToken))
             {
                 var hasRows = false;
 
