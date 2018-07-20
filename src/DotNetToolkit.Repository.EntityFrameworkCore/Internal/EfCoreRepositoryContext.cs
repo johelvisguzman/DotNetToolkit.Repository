@@ -413,22 +413,9 @@
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="T:System.Linq.IGrouping`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public async Task<IEnumerable<TResult>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public Task<IEnumerable<TResult>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
-            if (resultSelector == null)
-                throw new ArgumentNullException(nameof(resultSelector));
-
-            var keySelectFunc = keySelector.Compile();
-            var resultSelectorFunc = resultSelector.Compile();
-            var result = GetQuery(options).GroupBy(keySelectFunc, resultSelectorFunc).ToList();
-
-            // It looks like the options sorting is being applied to the query
-            // when using the groupby expression variant. Only the func variant seems
-            // to work; however, it does not have an async operation
-            return await Task.FromResult(result);
+            return Task.FromResult<IEnumerable<TResult>>(GroupBy<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector));
         }
 
         #endregion

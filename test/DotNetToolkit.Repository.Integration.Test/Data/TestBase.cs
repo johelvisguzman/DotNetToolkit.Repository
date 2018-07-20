@@ -49,20 +49,7 @@
                     {
                         var ex = await task;
 
-                        // the in-memory context will not support async operations for now (an exception should be thrown)
-                        if (typeof(InMemoryRepositoryContextFactory).IsAssignableFrom(type) ||
-                            typeof(CsvRepositoryContextFactory).IsAssignableFrom(type) ||
-                            typeof(JsonRepositoryContextFactory).IsAssignableFrom(type) ||
-                            typeof(XmlRepositoryContextFactory).IsAssignableFrom(type))
-                        {
-                            var err = ex.InnerException?.Message ?? ex.Message;
-
-                            Assert.Contains(Properties.Resources.IRepositoryContextNotAsync, err);
-                        }
-                        else
-                        {
-                            Assert.Null(ex);
-                        }
+                        Assert.Null(ex);
                     }
                 });
         }

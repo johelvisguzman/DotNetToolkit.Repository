@@ -518,7 +518,7 @@
         /// </summary>
         internal IRepositoryContext Context
         {
-            get { return _context ?? (_context = _contextFactory.Create()); }
+            get { return _context ?? (_context = new RepositoryContextAsync(_contextFactory.Create())); }
         }
 
         #endregion
