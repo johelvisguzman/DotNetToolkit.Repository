@@ -195,9 +195,16 @@
 
             // Gets all the constraints
             var schemaTableColumnConstraintsMapping = GetSchemaTableColumnConstraintsMapping(tableName, columns);
+            var primaryKeyPropertiesMapping = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).ToDictionary(ConventionHelper.GetColumnName, x => x);
 
-            var primaryKeyPropertiesMapping = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType)
-                .ToDictionary(ConventionHelper.GetColumnName, x => x);
+            // Gets all the foreign keys
+            var foreignKeyPropertyInfosMapping = entityType
+                .GetRuntimeProperties()
+                .Where(ConventionHelper.IsComplex)
+                .Select(pi => ConventionHelper.GetForeignKeyPropertyInfos(entityType, pi.PropertyType)
+                .ToDictionary(ConventionHelper.GetColumnName, x => pi))
+                .SelectMany(x => x)
+                .ToDictionary(x => x.Key, x => x.Value);
 
             // Validate all the columns
             foreach (var schemaTableColumn in schemaTableColumns)
@@ -216,7 +223,22 @@
                     var columnAttribute = propertyInfo.GetCustomAttribute<ColumnAttribute>();
                     if (columnAttribute != null && columnAttribute.Order != -1)
                     {
-                        if (schemaTableColumn.OrdinalPosition != columnAttribute.Order)
+                        var order = schemaTableColumn.OrdinalPosition;
+
+                        // This is cant be a simple 'schemaTableColumn.OrdinalPosition != columnAttribute.Order' to check for a mismatch...
+                        // if the type has foreign composite keys, the foreign keys will have an ordering attribute that matches the one on the
+                        // foreign entity primary keys, not necessarily the ones that are in the sql database
+                        if (foreignKeyPropertyInfosMapping.ContainsKey(columnName))
+                        {
+                            var foreignPropertyInfo = foreignKeyPropertyInfosMapping[columnName];
+
+                            if (ConventionHelper.HasCompositePrimaryKey(foreignPropertyInfo.PropertyType))
+                            {
+                                order = schemaTableColumn.OrdinalPosition - (schemaTableColumn.OrdinalPosition - columnAttribute.Order);
+                            }
+                        }
+
+                        if (order != columnAttribute.Order)
                             error["OrdinalPosition_Mismatch"] = true;
                     }
                 }
@@ -225,8 +247,7 @@
                 if (!error.Any())
                 {
                     var requiredAttribute = propertyInfo.GetCustomAttribute<RequiredAttribute>();
-                    var canBeNull = !propertyInfo.PropertyType.IsValueType ||
-                                    Nullable.GetUnderlyingType(propertyInfo.PropertyType) != null;
+                    var canBeNull = !propertyInfo.PropertyType.IsValueType || Nullable.GetUnderlyingType(propertyInfo.PropertyType) != null;
                     if (canBeNull && schemaTableColumn.IsNullable == "NO")
                     {
                         if (requiredAttribute == null)
@@ -343,14 +364,35 @@
         {
             var tableName = ConventionHelper.GetTableName(entityType);
 
+            // Check if has composite primary keys (more than one key), and if so, it needs to defined an ordering
+            var primaryKeyPropertyInfos = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType);
+            if (primaryKeyPropertyInfos.Count() > 1)
+            {
+                var keysHaveNoOrdering = primaryKeyPropertyInfos.Any(x => x.GetCustomAttribute<ColumnAttribute>() == null);
+                if (keysHaveNoOrdering)
+                    throw new InvalidOperationException(string.Format(Resources.UnableToDetermineCompositePrimaryKeyOrdering, "primary", entityType.FullName));
+            }
+
+            // Check if has composite foreign keys (more than one key for a given navigation property), and if so, it needs to defined an ordering
+            var foreignNavigationPropertyInfos = entityType.GetRuntimeProperties().Where(ConventionHelper.IsComplex);
+            foreach (var pi in foreignNavigationPropertyInfos)
+            {
+                var foreignKeyPropertyInfos = ConventionHelper.GetForeignKeyPropertyInfos(entityType, pi.PropertyType);
+                if (foreignKeyPropertyInfos.Count() > 1)
+                {
+                    var keysHaveNoOrdering = foreignKeyPropertyInfos.Any(x => x.GetCustomAttribute<ColumnAttribute>() == null);
+                    if (keysHaveNoOrdering)
+                        throw new InvalidOperationException(string.Format(Resources.UnableToDetermineCompositePrimaryKeyOrdering, "foreign", entityType.FullName));
+                }
+            }
+
             var propertiesMapping = entityType
                 .GetRuntimeProperties()
                 .Where(ConventionHelper.IsPrimitive)
                 .OrderBy(ConventionHelper.GetColumnOrder)
                 .ToDictionary(ConventionHelper.GetColumnName, x => x);
 
-            var primaryKeyPropertyInfosMapping = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType)
-                .ToDictionary(ConventionHelper.GetColumnName, x => x);
+            var primaryKeyPropertyInfosMapping = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).ToDictionary(ConventionHelper.GetColumnName, x => x);
             var foreignKeyPropertynfosMapping = ConventionHelper.GetForeignKeyPropertiesMapping(entityType);
             var primaryKeyConstraints = new List<string>();
             var foreignKeyConstraints = new Dictionary<string, List<Tuple<string, string>>>();
@@ -393,7 +435,7 @@
                     sb.Append("NOT NULL ");
                 }
 
-                // Prepare PRIMARY/FOREIGN KEY Constraints
+                // Prepare PRIMARY/FOREIGN KEY Constraints (these constraints are added at the bottom, after all the columns are added)
                 if (primaryKeyPropertyInfosMapping.ContainsKey(item.Key))
                 {
                     primaryKeyConstraints.Add(item.Key);
@@ -447,8 +489,7 @@
                         foreignNavigationTablePrimaryKeysMapping.Select(x => x.Item2);
                     var foreignKeyColumnNames = foreignNavigationTablePrimaryKeysMapping.Select(x => x.Item1);
 
-                    sb.Append(
-                        $"\n\tCONSTRAINT FK_{foreignNavigationTableName} FOREIGN KEY({string.Join(", ", foreignKeyColumnNames)}) REFERENCES {foreignNavigationTableName}({string.Join(", ", foreignNavigationTablePrimaryKeyColumnNames)}) ");
+                    sb.Append($"\n\tCONSTRAINT FK_{foreignNavigationTableName} FOREIGN KEY({string.Join(", ", foreignKeyColumnNames)}) REFERENCES {foreignNavigationTableName}({string.Join(", ", foreignNavigationTablePrimaryKeyColumnNames)}) ");
                 }
             }
 

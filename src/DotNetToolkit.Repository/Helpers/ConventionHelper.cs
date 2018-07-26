@@ -172,9 +172,18 @@
 
             var columnAttribute = pi.GetCustomAttribute<ColumnAttribute>();
             if (columnAttribute == null)
-                return -1;
+            {
+                // Checks to see if the property is a primary key, and if so, try to give it the lowest ordering number
+                var declaringTypePrimaryKeyPropertyInfo = GetPrimaryKeyPropertyInfos(pi.DeclaringType).First();
+                if (declaringTypePrimaryKeyPropertyInfo.Name.Equals(pi.Name))
+                    return -1;
+            }
+            else if (columnAttribute.Order > 0)
+            {
+                return columnAttribute.Order;
+            }
 
-            return columnAttribute.Order;
+            return int.MaxValue;
         }
 
         /// <summary>

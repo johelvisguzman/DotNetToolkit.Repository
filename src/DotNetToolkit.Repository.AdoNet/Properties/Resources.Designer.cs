@@ -124,6 +124,15 @@ namespace DotNetToolkit.Repository.AdoNet.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to determine composite {0} key ordering for type &apos;{1}&apos;. Use the ColumnAttribute to specify an order for composite primary keys..
+        /// </summary>
+        internal static string UnableToDetermineCompositePrimaryKeyOrdering {
+            get {
+                return ResourceManager.GetString("UnableToDetermineCompositePrimaryKeyOrdering", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to retrieve DbProviderFactory for: {0.
         /// </summary>
         internal static string UnableToRetrieveDbProviderFactoryForm {

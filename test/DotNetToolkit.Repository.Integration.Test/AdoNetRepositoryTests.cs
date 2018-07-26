@@ -886,7 +886,7 @@
         }
 
         [Fact]
-        public void ThrowsIfSchemaTableColumnsMismatchOnConstruction()
+        public void ThrowsIfSchemaTableColumnsMismatchOnSaveChanges()
         {
             var contextFactory = Data.TestAdoNetContextFactory.Create();
             var context = contextFactory.Create();
@@ -935,6 +935,24 @@
 
             schemaHelper.ExecuteTableValidate<CustomerNotCreated>();
             schemaHelper.ExecuteTableValidate<CustomerAddressNotCreated>();
+        }
+
+        [Fact]
+        public void ThrowsIfUnableToDetermineCompositePrimaryKeyOrderingOnSaveChanges()
+        {
+            var contextFactory = TestAdoNetContextFactory.Create();
+
+            var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering>(contextFactory).Add(new CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering()));
+            Assert.Equal(string.Format(AdoNet.Properties.Resources.UnableToDetermineCompositePrimaryKeyOrdering, "primary", typeof(CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering).FullName), ex.Message);
+        }
+
+        [Fact]
+        public void ThrowsIfUnableToDetermineCompositeForeignKeyOrderingOnSaveChanges()
+        {
+            var contextFactory = TestAdoNetContextFactory.Create();
+
+            var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerWithTwoCompositeForeignKeyAndNoOrdering>(contextFactory).Add(new CustomerWithTwoCompositeForeignKeyAndNoOrdering()));
+            Assert.Equal(string.Format(AdoNet.Properties.Resources.UnableToDetermineCompositePrimaryKeyOrdering, "foreign", typeof(CustomerWithTwoCompositeForeignKeyAndNoOrdering).FullName), ex.Message);
         }
 
         private static void TestCustomerAddress(CustomerAddress expected, CustomerAddress actual)
@@ -1194,7 +1212,11 @@
         {
             public int Id { get; set; }
             public string Name { get; set; }
+            [ForeignKey("Address")]
+            [Column(Order = 1)]
             public int AddressId1 { get; set; }
+            [ForeignKey("Address")]
+            [Column(Order = 2)]
             public int AddressId2 { get; set; }
             public CustomerAddressWithTwoCompositePrimaryKey Address { get; set; }
         }
@@ -1203,8 +1225,10 @@
         class CustomerAddressWithTwoCompositePrimaryKey
         {
             [Key]
+            [Column(Order = 1)]
             public int Id1 { get; set; }
             [Key]
+            [Column(Order = 2)]
             public int Id2 { get; set; }
             public string Street { get; set; }
             public string City { get; set; }
@@ -1220,8 +1244,10 @@
             [Required]
             public string Name { get; set; }
             [ForeignKey("Address")]
+            [Column(Order = 1)]
             public int AddressId1 { get; set; }
             [ForeignKey("Address")]
+            [Column(Order = 2)]
             public int AddressId2 { get; set; }
             public CustomerAddressNotCreated Address { get; set; }
         }
@@ -1230,8 +1256,10 @@
         class CustomerAddressNotCreated
         {
             [Key]
+            [Column(Order = 1)]
             public int Id1 { get; set; }
             [Key]
+            [Column(Order = 2)]
             public int Id2 { get; set; }
             [Required]
             public string Street1 { get; set; }
@@ -1242,6 +1270,29 @@
             [StringLength(2)]
             public string State { get; set; }
             public CustomerNotCreated Customer { get; set; }
+        }
+
+        class CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering
+        {
+            [Key]
+            public int Id1 { get; set; }
+            [Key]
+            public int Id2 { get; set; }
+            public string Street1 { get; set; }
+            public string City { get; set; }
+            public string State { get; set; }
+        }
+
+        class CustomerWithTwoCompositeForeignKeyAndNoOrdering
+        {
+            public int Id { get; set; }
+            [Required]
+            public string Name { get; set; }
+            [ForeignKey("Address")]
+            public int AddressId1 { get; set; }
+            [ForeignKey("Address")]
+            public int AddressId2 { get; set; }
+            public CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering Address { get; set; }
         }
     }
 }
