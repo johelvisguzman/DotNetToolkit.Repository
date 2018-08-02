@@ -920,7 +920,7 @@
         {
             var contextFactory = TestAdoNetContextFactory.Create();
             var context = (AdoNetRepositoryContext)contextFactory.Create();
-            var schemaHelper = new SchemaTableHelper(context);
+            var schemaHelper = new SchemaTableConfigurationHelper(context);
 
             Assert.False(schemaHelper.ExexuteTableExists<CustomerNotCreated>());
             Assert.False(schemaHelper.ExexuteTableExists<CustomerAddressNotCreated>());

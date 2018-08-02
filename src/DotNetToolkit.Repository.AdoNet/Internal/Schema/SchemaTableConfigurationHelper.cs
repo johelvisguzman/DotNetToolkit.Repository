@@ -17,7 +17,7 @@
     /// <summary>
     /// Represents an internal schema database helper for executing operations related to editing the database/table schema.
     /// </summary>
-    internal class SchemaTableHelper
+    internal class SchemaTableConfigurationHelper
     {
         #region Fields
 
@@ -29,10 +29,10 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SchemaTableHelper"/> class.
+        /// Initializes a new instance of the <see cref="SchemaTableConfigurationHelper"/> class.
         /// </summary>
         /// <param name="context">The context.</param>
-        public SchemaTableHelper(AdoNetRepositoryContext context)
+        public SchemaTableConfigurationHelper(AdoNetRepositoryContext context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));

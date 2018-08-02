@@ -38,7 +38,7 @@
         private readonly BlockingCollection<EntitySet> _items = new BlockingCollection<EntitySet>();
         private readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, PropertyInfo>> _sqlPropertiesMapping = new ConcurrentDictionary<Type, ConcurrentDictionary<string, PropertyInfo>>();
         private readonly ConcurrentDictionary<Type, bool> _schemaValidationTypeMapping = new ConcurrentDictionary<Type, bool>();
-        private readonly SchemaTableHelper _schemaHelper;
+        private readonly SchemaTableConfigurationHelper _schemaConfigHelper;
 
         #endregion
 
@@ -70,7 +70,7 @@
 
             _factory = DbProviderFactories.GetFactory(css.ProviderName);
             _connectionString = css.ConnectionString;
-            _schemaHelper = new SchemaTableHelper(this);
+            _schemaConfigHelper = new SchemaTableConfigurationHelper(this);
         }
 
         /// <summary>
@@ -88,7 +88,7 @@
 
             _factory = DbProviderFactories.GetFactory(providerName);
             _connectionString = connectionString;
-            _schemaHelper = new SchemaTableHelper(this);
+            _schemaConfigHelper = new SchemaTableConfigurationHelper(this);
         }
 
         #endregion
@@ -1402,7 +1402,7 @@
                         // Performs some schema validation for this type (either creates the table if does not exist, or validates)
                         if (!_schemaValidationTypeMapping.ContainsKey(entityType))
                         {
-                            try { await _schemaHelper.ExecuteSchemaValidateAsync(entityType, cancellationToken); }
+                            try { await _schemaConfigHelper.ExecuteSchemaValidateAsync(entityType, cancellationToken); }
                             finally { _schemaValidationTypeMapping[entityType] = true; }
                         }
 
@@ -1717,7 +1717,7 @@
                         // Performs some schema validation for this type (either creates the table if does not exist, or validates)
                         if (!_schemaValidationTypeMapping.ContainsKey(entityType))
                         {
-                            try { _schemaHelper.ExecuteSchemaValidate(entityType); }
+                            try { _schemaConfigHelper.ExecuteSchemaValidate(entityType); }
                             finally { _schemaValidationTypeMapping[entityType] = true; }
                         }
 
