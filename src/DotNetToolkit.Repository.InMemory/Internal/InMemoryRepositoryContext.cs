@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.InMemory
 {
     using Configuration;
+    using Configuration.Conventions;
     using FetchStrategies;
     using Helpers;
     using Properties;
@@ -64,7 +65,7 @@
 
         private void ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(object[] keyValues) where TEntity : class
         {
-            if (keyValues.Length != ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Count())
+            if (keyValues.Length != PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Count())
                 throw new ArgumentException(DotNetToolkit.Repository.Properties.Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
         }
 
@@ -145,9 +146,9 @@
                                 Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
                         }
 
-                        var primeryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+                        var primeryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
 
-                        if (ConventionHelper.IsIdentity(primeryKeyPropertyInfo))
+                        if (ModelConventionHelper.IsColumnIdentity(primeryKeyPropertyInfo))
                         {
                             key = GeneratePrimaryKey(entityType);
 
@@ -414,7 +415,7 @@
                 throw new ArgumentNullException(nameof(obj));
 
             var entityType = obj.GetType();
-            var propInfos = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).ToList();
+            var propInfos = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).ToList();
 
             switch (propInfos.Count)
             {
@@ -443,7 +444,7 @@
 
         private object GeneratePrimaryKey(Type entityType)
         {
-            var propertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+            var propertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
             var propertyType = propertyInfo.PropertyType;
 
             if (propertyType == typeof(Guid))

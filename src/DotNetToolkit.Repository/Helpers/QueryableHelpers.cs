@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Helpers
 {
+    using Configuration.Conventions;
     using Queries;
     using System;
     using System.Linq;
@@ -23,7 +24,7 @@
             // Sorts on the composite key by default if no sorting is provided
             if (!sortings.Any())
             {
-                foreach (var primaryKeyPropertyInfo in ConventionHelper.GetPrimaryKeyPropertyInfos<T>())
+                foreach (var primaryKeyPropertyInfo in PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<T>())
                 {
                     sortings.Add(primaryKeyPropertyInfo.Name, SortOrder.Ascending);
                 }

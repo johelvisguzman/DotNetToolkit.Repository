@@ -126,6 +126,9 @@
   <data name="EntityRequiresPrimaryKey" xml:space="preserve">
     <value>The instance of entity type '{0}' requires a primary key to be defined.</value>
   </data>
+  <data name="ForeignKeyAttributeOnPropertyNotFoundOnDependentType" xml:space="preserve">
+    <value>The ForeignKeyAttribute on property '{0}' on type '{1}' is not valid. The foreign key name '{2}' was not found on the dependent type '{1}'. The Name value should be a comma separated list of foreign key property names.</value>
+  </data>
   <data name="IRepositoryContextNotAsync" xml:space="preserve">
     <value>The source IRepositoryContext doesn't implement IRepositoryContextAsync. Only sources that implement IRepositoryContextAsync can be used for asynchronous operations.</value>
   </data>

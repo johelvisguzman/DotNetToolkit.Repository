@@ -88,6 +88,15 @@ namespace DotNetToolkit.Repository.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The ForeignKeyAttribute on property &apos;{0}&apos; on type &apos;{1}&apos; is not valid. The foreign key name &apos;{2}&apos; was not found on the dependent type &apos;{1}&apos;. The Name value should be a comma separated list of foreign key property names..
+        /// </summary>
+        internal static string ForeignKeyAttributeOnPropertyNotFoundOnDependentType {
+            get {
+                return ResourceManager.GetString("ForeignKeyAttributeOnPropertyNotFoundOnDependentType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The source IRepositoryContext doesn&apos;t implement IRepositoryContextAsync. Only sources that implement IRepositoryContextAsync can be used for asynchronous operations..
         /// </summary>
         internal static string IRepositoryContextNotAsync {

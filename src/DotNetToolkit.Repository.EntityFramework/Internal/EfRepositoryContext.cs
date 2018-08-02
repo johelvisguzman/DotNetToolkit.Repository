@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.EntityFramework.Internal
 {
     using Configuration;
+    using Configuration.Conventions;
     using FetchStrategies;
     using Helpers;
     using Queries;
@@ -45,7 +46,7 @@
 
         private void ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(object[] keyValues) where TEntity : class
         {
-            if (keyValues.Length != ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Count())
+            if (keyValues.Length != PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Count())
                 throw new ArgumentException(DotNetToolkit.Repository.Properties.Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
         }
 
@@ -105,7 +106,7 @@
 
             if (_context.Entry(entity).State == EntityState.Detached)
             {
-                var keyValues = ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>()
+                var keyValues = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>()
                     .Select(x => x.GetValue(entity, null))
                     .ToArray();
 
@@ -174,7 +175,7 @@
                 return _context.Set<TEntity>().Find(keyValues);
 
             var options = new QueryOptions<TEntity>()
-                .SatisfyBy(ConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
+                .SatisfyBy(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
                 .Fetch(fetchStrategy);
 
             return Find<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance);
@@ -321,7 +322,7 @@
                 return _context.Set<TEntity>().FindAsync(cancellationToken, keyValues);
 
             var options = new QueryOptions<TEntity>()
-                .SatisfyBy(ConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
+                .SatisfyBy(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
                 .Fetch(fetchStrategy);
 
             return FindAsync<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken);

@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.InMemory.Internal
 {
-    using Helpers;
+    using Configuration.Conventions;
     using Properties;
     using System;
     using System.Collections.Concurrent;
@@ -169,7 +169,7 @@
 
         private string GetFileName(Type type)
         {
-            return $"{_path}{ConventionHelper.GetTableName(type)}{FileExtension}";
+            return $"{_path}{type.GetTableName()}{FileExtension}";
         }
 
         #endregion

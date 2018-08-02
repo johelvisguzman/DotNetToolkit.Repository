@@ -905,11 +905,22 @@
         }
 
         [Fact]
+        public void ThrowsIfThrowsIfSchemaTableForeignKeyAttributeOnPropertyNotFoundOnDependentType()
+        {
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
+
+            var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType>(context).Add(new CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType()));
+            Assert.Equal($"The ForeignKeyAttribute on property 'Address' on type '{typeof(CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType).FullName}' is not valid. The foreign key name 'AddressId' was not found on the dependent type '{typeof(CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType).FullName}'. The Name value should be a comma separated list of foreign key property names.", ex.Message);
+
+        }
+
+        [Fact]
         public void CreateTableOnSaveChanges()
         {
             var contextFactory = TestAdoNetContextFactory.Create();
             var context = (AdoNetRepositoryContext)contextFactory.Create();
-            var schemaHelper = new SchemaTableHelper(context);
+            var schemaHelper = new SchemaTableConfigurationHelper(context);
 
             Assert.False(schemaHelper.ExexuteTableExists<CustomerNotCreated>());
             Assert.False(schemaHelper.ExexuteTableExists<CustomerAddressNotCreated>());
@@ -1293,6 +1304,15 @@
             [ForeignKey("Address")]
             public int AddressId2 { get; set; }
             public CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering Address { get; set; }
+        }
+
+        [Table("CustomersNotCreatedWithForeignKeyAttributeNotFoundOnDependentType")]
+        class CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            [ForeignKey("AddressId")]
+            public CustomerAddress Address { get; set; }
         }
     }
 }

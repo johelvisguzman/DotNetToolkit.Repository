@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal.Schema
 {
+    using Configuration.Conventions;
     using Helpers;
     using Properties;
     using System;
@@ -16,7 +17,7 @@
     /// <summary>
     /// Represents an internal schema database helper for executing operations related to editing the database/table schema.
     /// </summary>
-    internal class SchemaTableHelper
+    internal class SchemaTableConfigurationHelper
     {
         #region Fields
 
@@ -28,10 +29,10 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SchemaTableHelper"/> class.
+        /// Initializes a new instance of the <see cref="SchemaTableConfigurationHelper"/> class.
         /// </summary>
         /// <param name="context">The context.</param>
-        public SchemaTableHelper(AdoNetRepositoryContext context)
+        public SchemaTableConfigurationHelper(AdoNetRepositoryContext context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
@@ -154,7 +155,7 @@
             if (entityType == null)
                 throw new ArgumentNullException(nameof(entityType));
 
-            var tableName = ConventionHelper.GetTableName(entityType);
+            var tableName = entityType.GetTableName();
             var schemaTableColumns = GetSchemaTableColumns(tableName);
 
             ValidateTable(entityType, schemaTableColumns, tableName);
@@ -165,7 +166,7 @@
             if (entityType == null)
                 throw new ArgumentNullException(nameof(entityType));
 
-            var tableName = ConventionHelper.GetTableName(entityType);
+            var tableName = entityType.GetTableName();
             var schemaTableColumns = await GetSchemaTableColumnsAsync(tableName, cancellationToken);
 
             ValidateTable(entityType, schemaTableColumns, tableName);
@@ -177,9 +178,9 @@
 
             var propertiesMapping = entityType
                 .GetRuntimeProperties()
-                .Where(ConventionHelper.IsPrimitive)
-                .OrderBy(ConventionHelper.GetColumnOrder)
-                .ToDictionary(ConventionHelper.GetColumnName, x => x);
+                .Where(x => x.IsPrimitive())
+                .OrderBy(x => x.GetColumnOrder())
+                .ToDictionary(x => x.GetColumnName(), x => x);
 
             var columns = propertiesMapping.Keys.ToArray();
 
@@ -195,14 +196,14 @@
 
             // Gets all the constraints
             var schemaTableColumnConstraintsMapping = GetSchemaTableColumnConstraintsMapping(tableName, columns);
-            var primaryKeyPropertiesMapping = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).ToDictionary(ConventionHelper.GetColumnName, x => x);
+            var primaryKeyPropertiesMapping = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).ToDictionary(x => x.GetColumnName(), x => x);
 
             // Gets all the foreign keys
             var foreignKeyPropertyInfosMapping = entityType
                 .GetRuntimeProperties()
-                .Where(ConventionHelper.IsComplex)
-                .Select(pi => ConventionHelper.GetForeignKeyPropertyInfos(entityType, pi.PropertyType)
-                .ToDictionary(ConventionHelper.GetColumnName, x => pi))
+                .Where(x => x.IsComplex())
+                .Select(pi => ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(entityType, pi.PropertyType)
+                .ToDictionary(x => x.GetColumnName(), x => pi))
                 .SelectMany(x => x)
                 .ToDictionary(x => x.Key, x => x.Value);
 
@@ -232,7 +233,7 @@
                         {
                             var foreignPropertyInfo = foreignKeyPropertyInfosMapping[columnName];
 
-                            if (ConventionHelper.HasCompositePrimaryKey(foreignPropertyInfo.PropertyType))
+                            if (PrimaryKeyConventionHelper.HasCompositePrimaryKey(foreignPropertyInfo.PropertyType))
                             {
                                 order = schemaTableColumn.OrdinalPosition - (schemaTableColumn.OrdinalPosition - columnAttribute.Order);
                             }
@@ -362,10 +363,10 @@
 
         private string PrepareCreateTableQuery(Type entityType)
         {
-            var tableName = ConventionHelper.GetTableName(entityType);
+            var tableName = entityType.GetTableName();
 
             // Check if has composite primary keys (more than one key), and if so, it needs to defined an ordering
-            var primaryKeyPropertyInfos = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType);
+            var primaryKeyPropertyInfos = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType);
             if (primaryKeyPropertyInfos.Count() > 1)
             {
                 var keysHaveNoOrdering = primaryKeyPropertyInfos.Any(x => x.GetCustomAttribute<ColumnAttribute>() == null);
@@ -374,26 +375,34 @@
             }
 
             // Check if has composite foreign keys (more than one key for a given navigation property), and if so, it needs to defined an ordering
-            var foreignNavigationPropertyInfos = entityType.GetRuntimeProperties().Where(ConventionHelper.IsComplex);
+            var foreignNavigationPropertyInfos = entityType.GetRuntimeProperties().Where(x => x.IsComplex());
+            var foreignKeyPropertyInfosMapping = new Dictionary<string, PropertyInfo>();
+
             foreach (var pi in foreignNavigationPropertyInfos)
             {
-                var foreignKeyPropertyInfos = ConventionHelper.GetForeignKeyPropertyInfos(entityType, pi.PropertyType);
+                var foreignKeyPropertyInfos = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(entityType, pi.PropertyType);
                 if (foreignKeyPropertyInfos.Count() > 1)
                 {
                     var keysHaveNoOrdering = foreignKeyPropertyInfos.Any(x => x.GetCustomAttribute<ColumnAttribute>() == null);
                     if (keysHaveNoOrdering)
                         throw new InvalidOperationException(string.Format(Resources.UnableToDetermineCompositePrimaryKeyOrdering, "foreign", entityType.FullName));
                 }
+
+                var dict = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(entityType, pi.PropertyType).ToDictionary(ModelConventionHelper.GetColumnName, x => pi);
+
+                foreach (var item in dict)
+                {
+                    foreignKeyPropertyInfosMapping.Add(item.Key, item.Value);
+                }
             }
 
             var propertiesMapping = entityType
                 .GetRuntimeProperties()
-                .Where(ConventionHelper.IsPrimitive)
-                .OrderBy(ConventionHelper.GetColumnOrder)
-                .ToDictionary(ConventionHelper.GetColumnName, x => x);
+                .Where(x => x.IsPrimitive())
+                .OrderBy(x => x.GetColumnOrder())
+                .ToDictionary(x => x.GetColumnName(), x => x);
 
-            var primaryKeyPropertyInfosMapping = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).ToDictionary(ConventionHelper.GetColumnName, x => x);
-            var foreignKeyPropertynfosMapping = ConventionHelper.GetForeignKeyPropertiesMapping(entityType);
+            var primaryKeyPropertyInfosMapping = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).ToDictionary(x => x.GetColumnName(), x => x);
             var primaryKeyConstraints = new List<string>();
             var foreignKeyConstraints = new Dictionary<string, List<Tuple<string, string>>>();
             var foreignKeyOrder = 0;
@@ -424,7 +433,7 @@
                 }
 
                 // Constraints
-                if (ConventionHelper.IsIdentity(item.Value))
+                if (item.Value.IsColumnIdentity())
                 {
                     sb.Append("IDENTITY ");
                 }
@@ -440,9 +449,9 @@
                 {
                     primaryKeyConstraints.Add(item.Key);
                 }
-                else if (foreignKeyPropertynfosMapping.ContainsKey(item.Key))
+                else if (foreignKeyPropertyInfosMapping.ContainsKey(item.Key))
                 {
-                    var foreignNavigationPropertyInfo = foreignKeyPropertynfosMapping[item.Key];
+                    var foreignNavigationPropertyInfo = foreignKeyPropertyInfosMapping[item.Key];
                     var foreignNavigationType = foreignNavigationPropertyInfo.PropertyType;
 
                     if (_multiplicitiesMapping.ContainsKey(foreignNavigationType))
@@ -457,9 +466,9 @@
                         ExexuteTableCreate(foreignNavigationType);
                     }
 
-                    var foreignNavigationTableName = ConventionHelper.GetTableName(foreignNavigationType);
-                    var foreignPrimaryKeyColumnNames = ConventionHelper.GetPrimaryKeyPropertyInfos(foreignNavigationType)
-                        .Select(ConventionHelper.GetColumnName);
+                    var foreignNavigationTableName = foreignNavigationType.GetTableName();
+                    var foreignPrimaryKeyColumnNames = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(foreignNavigationType)
+                        .Select(x => x.GetColumnName());
                     var foreignPrimaryKeyColumnName = foreignPrimaryKeyColumnNames.ElementAt(foreignKeyOrder++);
 
                     if (!foreignKeyConstraints.ContainsKey(foreignNavigationTableName))
@@ -504,7 +513,7 @@
             if (entityType == null)
                 throw new ArgumentNullException(nameof(entityType));
 
-            var tableName = ConventionHelper.GetTableName(entityType);
+            var tableName = entityType.GetTableName();
             var sql = @"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @tableName";
             var parameters = new Dictionary<string, object> { { "@tableName", tableName } };
 
@@ -528,7 +537,7 @@
             if (entityType == null)
                 throw new ArgumentNullException(nameof(entityType));
 
-            var tableName = ConventionHelper.GetTableName(entityType);
+            var tableName = entityType.GetTableName();
             var sql = @"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @tableName";
             var parameters = new Dictionary<string, object> { { "@tableName", tableName } };
 

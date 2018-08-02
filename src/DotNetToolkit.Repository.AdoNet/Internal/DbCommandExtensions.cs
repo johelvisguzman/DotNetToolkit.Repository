@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
-    using Helpers;
+    using Configuration.Conventions;
     using System;
     using System.Collections.Generic;
     using System.Data;
@@ -98,9 +98,9 @@
                 throw new ArgumentNullException(nameof(obj));
 
             var entityType = obj.GetType();
-            var tableName = ConventionHelper.GetTableName(entityType);
-            var primeryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-            var primeryKeyColumnName = ConventionHelper.GetColumnName(primeryKeyPropertyInfo);
+            var tableName = entityType.GetTableName();
+            var primeryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+            var primeryKeyColumnName = primeryKeyPropertyInfo.GetColumnName();
 
             command.CommandText = $"SELECT * FROM [{tableName}]\nWHERE {primeryKeyColumnName} = @{primeryKeyColumnName}";
             command.CommandType = CommandType.Text;
@@ -131,9 +131,9 @@
                 throw new ArgumentNullException(nameof(obj));
 
             var entityType = obj.GetType();
-            var tableName = ConventionHelper.GetTableName(entityType);
-            var primeryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-            var primeryKeyColumnName = ConventionHelper.GetColumnName(primeryKeyPropertyInfo);
+            var tableName = entityType.GetTableName();
+            var primeryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+            var primeryKeyColumnName = primeryKeyPropertyInfo.GetColumnName();
 
             command.CommandText = $"SELECT * FROM [{tableName}]\nWHERE {primeryKeyColumnName} = @{primeryKeyColumnName}";
             command.CommandType = CommandType.Text;
