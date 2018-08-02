@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
+    using Configuration.Conventions;
     using Helpers;
     using Properties;
     using System;
@@ -33,9 +34,9 @@
 
             SqlPropertiesMapping = entityType
                 .GetRuntimeProperties()
-                .Where(x => ConventionHelper.IsPrimitive(x) && ConventionHelper.IsMapped(x))
-                .OrderBy(ConventionHelper.GetColumnOrder)
-                .ToDictionary(ConventionHelper.GetColumnName, x => x);
+                .Where(x => x.IsPrimitive() && x.IsColumnMapped())
+                .OrderBy(x => x.GetColumnOrder())
+                .ToDictionary(x => x.GetColumnName(), x => x);
         }
 
         #endregion
@@ -54,7 +55,7 @@
         public string GenerateTableAlias(Type tableType)
         {
             var tableAlias = $"Extent{_tableAliasCount++}";
-            var tableName = ConventionHelper.GetTableName(tableType);
+            var tableName = tableType.GetTableName();
 
             _tableAliasMapping.TryAdd(tableName, tableAlias);
             _tableNameAndTypeMapping.TryAdd(tableName, tableType);
@@ -66,9 +67,9 @@
 
         public string GenerateColumnAlias(PropertyInfo pi)
         {
-            var columnName = ConventionHelper.GetColumnName(pi);
+            var columnName = pi.GetColumnName();
             var columnAlias = columnName;
-            var tableName = ConventionHelper.GetTableName(pi.DeclaringType);
+            var tableName = pi.DeclaringType.GetTableName();
 
             if (_columnAliasMappingCount.TryGetValue(columnName, out int columnAliasCount))
             {
@@ -108,8 +109,8 @@
 
         public string GetColumnAlias(PropertyInfo pi)
         {
-            var columnName = ConventionHelper.GetColumnName(pi);
-            var tableName = ConventionHelper.GetTableName(pi.DeclaringType);
+            var columnName = pi.GetColumnName();
+            var tableName = pi.DeclaringType.GetTableName();
             var columnMapping = _tableColumnAliasMapping[tableName];
 
             if (!columnMapping.ContainsKey(columnName))

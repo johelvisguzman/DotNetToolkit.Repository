@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.EntityFrameworkCore
 {
     using Configuration;
+    using Configuration.Conventions;
     using FetchStrategies;
     using Helpers;
     using Internal;
@@ -46,7 +47,7 @@
 
         private void ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(object[] keyValues) where TEntity : class
         {
-            if (keyValues.Length != ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Count())
+            if (keyValues.Length != PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Count())
                 throw new ArgumentException(DotNetToolkit.Repository.Properties.Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
         }
 
@@ -159,7 +160,7 @@
                 return _context.Set<TEntity>().Find(keyValues);
 
             var options = new QueryOptions<TEntity>()
-                .SatisfyBy(ConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
+                .SatisfyBy(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
                 .Fetch(fetchStrategy);
 
             return Find<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance);
@@ -306,7 +307,7 @@
                 return _context.Set<TEntity>().FindAsync(keyValues, cancellationToken);
 
             var options = new QueryOptions<TEntity>()
-                .SatisfyBy(ConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
+                .SatisfyBy(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
                 .Fetch(fetchStrategy);
 
             return FindAsync<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken);

@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
     using Configuration;
+    using Configuration.Conventions;
     using FetchStrategies;
     using Helpers;
     using Properties;
@@ -1112,19 +1113,19 @@
             var parameters = new Dictionary<string, object>();
             var sb = new StringBuilder();
             var mainTableType = typeof(T);
-            var mainTableName = ConventionHelper.GetTableName(mainTableType);
+            var mainTableName = mainTableType.GetTableName();
             var m = new Mapper(mainTableType);
             var mainTableAlias = m.GenerateTableAlias(mainTableType);
             var mainTableProperties = mainTableType.GetRuntimeProperties().ToList();
-            var mainTablePrimaryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos<T>().First();
-            var mainTablePrimaryKeyName = ConventionHelper.GetColumnName(mainTablePrimaryKeyPropertyInfo);
+            var mainTablePrimaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<T>().First();
+            var mainTablePrimaryKeyName = mainTablePrimaryKeyPropertyInfo.GetColumnName();
             var fetchStrategy = options?.FetchStrategy;
 
             // Default select
             var columns = string.Join(",\n\t", m.SqlPropertiesMapping.Select(x =>
             {
                 var colAlias = m.GenerateColumnAlias(x.Value);
-                var colName = ConventionHelper.GetColumnName(x.Value);
+                var colName = x.Value.GetColumnName();
 
                 return $"[{mainTableAlias}].[{colName}] AS [{colAlias}]";
             }));
@@ -1137,7 +1138,7 @@
                 // the same type as the primary table
                 // Only do a join when the primary table has a foreign key property for the join table
                 var paths = mainTableProperties
-                    .Where(x => ConventionHelper.IsComplex(x) && ConventionHelper.GetPrimaryKeyPropertyInfos(x.PropertyType).Any())
+                    .Where(x => x.IsComplex() && PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(x.PropertyType).Any())
                     .Select(x => x.Name)
                     .ToList();
 
@@ -1169,22 +1170,22 @@
                 {
                     var joinTablePropertyInfo = mainTableProperties.Single(x => x.Name.Equals(path));
                     var joinTableType = joinTablePropertyInfo.PropertyType;
-                    var joinTableForeignKeyPropertyInfo = ConventionHelper.GetForeignKeyPropertyInfos(joinTableType, mainTableType).FirstOrDefault();
+                    var joinTableForeignKeyPropertyInfo = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(joinTableType, mainTableType).FirstOrDefault();
 
                     // Only do a join when the primary table has a foreign key property for the join table
                     if (joinTableForeignKeyPropertyInfo != null)
                     {
-                        var joinTableForeignKeyName = ConventionHelper.GetColumnName(joinTableForeignKeyPropertyInfo);
+                        var joinTableForeignKeyName = joinTableForeignKeyPropertyInfo.GetColumnName();
                         var joinTableProperties = joinTableType.GetRuntimeProperties().ToList();
-                        var joinTableName = ConventionHelper.GetTableName(joinTableType);
+                        var joinTableName = joinTableType.GetTableName();
                         var joinTableAlias = m.GenerateTableAlias(joinTableType);
                         var joinTableColumnNames = string.Join(",\n\t",
                             joinTableProperties
-                                .Where(ConventionHelper.IsPrimitive)
+                                .Where(PropertyInfoHelper.IsPrimitive)
                                 .Select(x =>
                                 {
                                     var colAlias = m.GenerateColumnAlias(x);
-                                    var colName = ConventionHelper.GetColumnName(x);
+                                    var colName = x.GetColumnName();
 
                                     return $"[{joinTableAlias}].[{colName}] AS [{colAlias}]";
                                 }));
@@ -1196,7 +1197,7 @@
                         joinStatementSb.Append("\n");
                         joinStatementSb.Append($"LEFT OUTER JOIN [{joinTableName}] AS [{joinTableAlias}] ON [{mainTableAlias}].[{mainTablePrimaryKeyName}] = [{joinTableAlias}].[{joinTableForeignKeyName}]");
 
-                        m.SqlNavigationPropertiesMapping.Add(joinTableType, joinTableProperties.ToDictionary(ConventionHelper.GetColumnName, x => x));
+                        m.SqlNavigationPropertiesMapping.Add(joinTableType, joinTableProperties.ToDictionary(ModelConventionHelper.GetColumnName, x => x));
                     }
                 }
 
@@ -1240,7 +1241,7 @@
                 if (!sortings.Any())
                 {
                     // Sorts on the Id key by default if no sorting is provided
-                    foreach (var primaryKeyPropertyInfo in ConventionHelper.GetPrimaryKeyPropertyInfos<T>())
+                    foreach (var primaryKeyPropertyInfo in PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<T>())
                     {
                         sortings.Add(primaryKeyPropertyInfo.Name, SortOrder.Ascending);
                     }
@@ -1288,16 +1289,16 @@
         private void PrepareEntitySetQuery(EntitySet entitySet, bool existInDb, bool isIdentity, PropertyInfo primeryKeyPropertyInfo, out string sql, out Dictionary<string, object> parameters)
         {
             var entityType = entitySet.Entity.GetType();
-            var tableName = ConventionHelper.GetTableName(entityType);
-            var primeryKeyColumnName = ConventionHelper.GetColumnName(primeryKeyPropertyInfo);
+            var tableName = entityType.GetTableName();
+            var primeryKeyColumnName = primeryKeyPropertyInfo.GetColumnName();
 
             if (!_sqlPropertiesMapping.ContainsKey(entityType))
             {
                 var dict = entityType
                     .GetRuntimeProperties()
-                    .Where(x => ConventionHelper.IsPrimitive(x) && ConventionHelper.IsMapped(x))
-                    .OrderBy(ConventionHelper.GetColumnOrder)
-                    .ToDictionary(ConventionHelper.GetColumnName, x => x);
+                    .Where(x => x.IsPrimitive() && x.IsColumnMapped())
+                    .OrderBy(x => x.GetColumnOrder())
+                    .ToDictionary(x => x.GetColumnName(), x => x);
 
                 _sqlPropertiesMapping[entityType] = new ConcurrentDictionary<string, PropertyInfo>(dict);
             }
@@ -1315,14 +1316,14 @@
                         if (existInDb)
                             throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
 
-                        var columnNames = string.Join(", ", properties.Select(x => ConventionHelper.GetColumnName(x.Value))).TrimEnd();
-                        var values = string.Join(", ", properties.Select(x => $"@{ConventionHelper.GetColumnName(x.Value)}")).TrimEnd();
+                        var columnNames = string.Join(", ", properties.Select(x => x.Value.GetColumnName())).TrimEnd();
+                        var values = string.Join(", ", properties.Select(x => $"@{x.Value.GetColumnName()}")).TrimEnd();
 
                         sql = $"INSERT INTO [{tableName}] ({columnNames})\nVALUES ({values})";
 
                         foreach (var pi in properties)
                         {
-                            parameters.Add($"@{ConventionHelper.GetColumnName(pi.Value)}", pi.Value.GetValue(entitySet.Entity, null));
+                            parameters.Add($"@{pi.Value.GetColumnName()}", pi.Value.GetValue(entitySet.Entity, null));
                         }
 
                         if (isIdentity)
@@ -1348,7 +1349,7 @@
 
                         var values = string.Join(",\n\t", properties.Select(x =>
                         {
-                            var columnName = ConventionHelper.GetColumnName(x.Value);
+                            var columnName = x.Value.GetColumnName();
                             return columnName + " = " + $"@{columnName}";
                         }));
 
@@ -1356,7 +1357,7 @@
 
                         foreach (var pi in properties)
                         {
-                            parameters.Add($"@{ConventionHelper.GetColumnName(pi.Value)}", pi.Value.GetValue(entitySet.Entity, null));
+                            parameters.Add($"@{pi.Value.GetColumnName()}", pi.Value.GetValue(entitySet.Entity, null));
                         }
 
                         if (isIdentity)
@@ -1369,7 +1370,7 @@
 
         private void ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(object[] keyValues) where TEntity : class
         {
-            if (keyValues.Length != ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Count())
+            if (keyValues.Length != PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Count())
                 throw new ArgumentException(DotNetToolkit.Repository.Properties.Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
         }
 
@@ -1405,9 +1406,9 @@
                             finally { _schemaValidationTypeMapping[entityType] = true; }
                         }
 
-                        var hasCompositePrimaryKey = ConventionHelper.HasCompositePrimaryKey(entityType);
-                        var primeryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-                        var isIdentity = !hasCompositePrimaryKey && ConventionHelper.IsIdentity(primeryKeyPropertyInfo);
+                        var hasCompositePrimaryKey = PrimaryKeyConventionHelper.HasCompositePrimaryKey(entityType);
+                        var primeryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+                        var isIdentity = !hasCompositePrimaryKey && primeryKeyPropertyInfo.IsColumnIdentity();
 
                         // Checks if the entity exist in the database
                         var existInDb = await command.ExecuteObjectExistAsync(entitySet.Entity, cancellationToken);
@@ -1473,7 +1474,7 @@
 
             ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
 
-            var options = new QueryOptions<TEntity>().SatisfyBy(ConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
+            var options = new QueryOptions<TEntity>().SatisfyBy(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
 
             if (fetchStrategy != null)
                 options.Fetch(fetchStrategy);
@@ -1720,9 +1721,9 @@
                             finally { _schemaValidationTypeMapping[entityType] = true; }
                         }
 
-                        var hasCompositePrimaryKey = ConventionHelper.HasCompositePrimaryKey(entityType);
-                        var primeryKeyPropertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-                        var isIdentity = !hasCompositePrimaryKey && ConventionHelper.IsIdentity(primeryKeyPropertyInfo);
+                        var hasCompositePrimaryKey = PrimaryKeyConventionHelper.HasCompositePrimaryKey(entityType);
+                        var primeryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+                        var isIdentity = !hasCompositePrimaryKey && primeryKeyPropertyInfo.IsColumnIdentity();
 
                         // Checks if the entity exist in the database
                         var existInDb = command.ExecuteObjectExist(entitySet.Entity);
@@ -1813,7 +1814,7 @@
 
             ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
 
-            var options = new QueryOptions<TEntity>().SatisfyBy(ConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
+            var options = new QueryOptions<TEntity>().SatisfyBy(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
 
             if (fetchStrategy != null)
                 options.Fetch(fetchStrategy);

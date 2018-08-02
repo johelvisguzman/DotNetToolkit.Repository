@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository
 {
     using Configuration;
+    using Configuration.Conventions;
     using Factories;
     using FetchStrategies;
     using Helpers;
@@ -649,7 +650,7 @@
 
         private void ThrowsIfEntityPrimaryKeyMissing()
         {
-            if (!ConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Any())
+            if (!PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Any())
                 throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityRequiresPrimaryKey, typeof(TEntity).FullName));
         }
 
