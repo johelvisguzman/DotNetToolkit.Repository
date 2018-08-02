@@ -208,6 +208,21 @@
                 var propertyInfosWithForeignKeys = properties.Where(x => x.GetCustomAttribute<ForeignKeyAttribute>() != null);
                 if (propertyInfosWithForeignKeys.Any())
                 {
+                    // Ensure that the foreign key names are valid
+                    foreach (var propertyInfosWithForeignKey in propertyInfosWithForeignKeys)
+                    {
+                        var foreignKeyAttributeName = propertyInfosWithForeignKey.GetCustomAttribute<ForeignKeyAttribute>().Name;
+                        if (!properties.Any(x => foreignKeyAttributeName.Equals(GetColumnName(x))))
+                        {
+                            throw new InvalidOperationException(
+                                string.Format(
+                                    Resources.ForeignKeyAttributeOnPropertyNotFoundOnDependentType,
+                                    propertyInfosWithForeignKey.Name,
+                                    sourceType.FullName,
+                                    foreignKeyAttributeName));
+                        }
+                    }
+
                     // Try to find by checking on the foreign key property
                     propertyInfos = propertyInfosWithForeignKeys
                         .Where(IsPrimitive)
