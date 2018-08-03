@@ -247,7 +247,14 @@
         {
             using (var reader = ExecuteReader(cmdText, cmdType, parameters))
             {
-                return reader.Read() ? projector(reader) : default(T);
+                var list = new List<T>();
+
+                while (reader.Read())
+                {
+                    list.Add(projector(reader));
+                }
+
+                return list.FirstOrDefault();
             }
         }
 
@@ -700,7 +707,14 @@
         {
             using (var reader = await ExecuteReaderAsync(cmdText, cmdType, parameters, cancellationToken))
             {
-                return reader.Read() ? projector(reader) : default(T);
+                var list = new List<T>();
+
+                while (reader.Read())
+                {
+                    list.Add(projector(reader));
+                }
+
+                return list.FirstOrDefault();
             }
         }
 
@@ -1169,7 +1183,9 @@
                 foreach (var path in fetchStrategy.IncludePaths)
                 {
                     var joinTablePropertyInfo = mainTableProperties.Single(x => x.Name.Equals(path));
-                    var joinTableType = joinTablePropertyInfo.PropertyType;
+                    var joinTableType = joinTablePropertyInfo.PropertyType.IsGenericCollection()
+                        ? joinTablePropertyInfo.PropertyType.GetGenericArguments().First()
+                        : joinTablePropertyInfo.PropertyType;
                     var joinTableForeignKeyPropertyInfo = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(joinTableType, mainTableType).FirstOrDefault();
 
                     // Only do a join when the primary table has a foreign key property for the join table

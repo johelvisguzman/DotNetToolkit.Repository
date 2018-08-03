@@ -18,6 +18,15 @@
         /// <returns>The collection of foreign key properties.</returns>
         public static IEnumerable<PropertyInfo> GetForeignKeyPropertyInfos(Type sourceType, Type foreignType)
         {
+            if (sourceType == null)
+                throw new ArgumentNullException(nameof(sourceType));
+
+            if (foreignType == null)
+                throw new ArgumentNullException(nameof(foreignType));
+
+            if (sourceType.IsEnumerable() || foreignType.IsEnumerable())
+                return Enumerable.Empty<PropertyInfo>();
+
             var tupleKey = Tuple.Create(sourceType, foreignType);
 
             if (InMemoryCache.Instance.ForeignKeyMapping.ContainsKey(tupleKey))
