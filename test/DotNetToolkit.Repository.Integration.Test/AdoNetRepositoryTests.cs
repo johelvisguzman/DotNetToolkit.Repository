@@ -508,6 +508,194 @@
         }
 
         [Fact]
+        public void FindWithNavigationProperty_OneToManyRelationship()
+        {
+            var context = Data.TestAdoNetContextFactory.Create();
+            var customerKey = 1;
+
+            var addressRepo = new Repository<CustomerAddressWithMultipleAddresses>(context);
+            var customerRepo = new Repository<CustomerWithMultipleAddresses>(context);
+            var customerFetchStrategy = new FetchStrategy<CustomerWithMultipleAddresses>().Include(x => x.Addresses);
+            var options = new QueryOptions<CustomerWithMultipleAddresses>();
+            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Fetch(customerFetchStrategy);
+
+            var entity = new CustomerWithMultipleAddresses
+            {
+                Id = customerKey,
+                Name = "Random Name",
+            };
+
+            customerRepo.Add(entity);
+
+            var addresses = new List<CustomerAddressWithMultipleAddresses>();
+
+            for (int i = 0; i < 5; i++)
+            {
+                addresses.Add(new CustomerAddressWithMultipleAddresses()
+                {
+                    Id = i + 1,
+                    Street = $"Street {i}",
+                    City = $"New City {i}",
+                    State = $"ST {i}",
+                    CustomerId = entity.Id,
+                    Customer = entity
+                });
+            }
+
+            addressRepo.Add(addresses);
+
+            Assert.Null(customerRepo.Find(customerKey).Addresses);
+            Assert.Null(customerRepo.Find(options).Addresses);
+            Assert.Null(customerRepo.Find<ICollection<CustomerAddressWithMultipleAddresses>>(options, x => x.Addresses));
+
+            TestCustomerAddress(addresses, customerRepo.Find(customerKey, customerFetchStrategy).Addresses);
+            TestCustomerAddress(addresses, customerRepo.Find(optionsWithFetchStrategy).Addresses);
+            TestCustomerAddress(addresses, customerRepo.Find<ICollection<CustomerAddressWithMultipleAddresses>>(optionsWithFetchStrategy, x => x.Addresses));
+        }
+
+        [Fact]
+        public async void FindWithNavigationPropertyAsync_OneToManyRelationship()
+        {
+            var context = Data.TestAdoNetContextFactory.Create();
+            var customerKey = 1;
+
+            var addressRepo = new Repository<CustomerAddressWithMultipleAddresses>(context);
+            var customerRepo = new Repository<CustomerWithMultipleAddresses>(context);
+            var customerFetchStrategy = new FetchStrategy<CustomerWithMultipleAddresses>().Include(x => x.Addresses);
+            var options = new QueryOptions<CustomerWithMultipleAddresses>();
+            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Fetch(customerFetchStrategy);
+
+            var entity = new CustomerWithMultipleAddresses
+            {
+                Id = customerKey,
+                Name = "Random Name",
+            };
+
+            await customerRepo.AddAsync(entity);
+
+            var addresses = new List<CustomerAddressWithMultipleAddresses>();
+
+            for (int i = 0; i < 5; i++)
+            {
+                addresses.Add(new CustomerAddressWithMultipleAddresses()
+                {
+                    Id = i + 1,
+                    Street = $"Street {i}",
+                    City = $"New City {i}",
+                    State = $"ST {i}",
+                    CustomerId = entity.Id,
+                    Customer = entity
+                });
+            }
+
+            await addressRepo.AddAsync(addresses);
+
+            Assert.Null((await customerRepo.FindAsync(customerKey)).Addresses);
+            Assert.Null((await customerRepo.FindAsync(options)).Addresses);
+            Assert.Null(await customerRepo.FindAsync<ICollection<CustomerAddressWithMultipleAddresses>>(options, x => x.Addresses));
+
+            TestCustomerAddress(addresses, (await customerRepo.FindAsync(customerKey, customerFetchStrategy)).Addresses);
+            TestCustomerAddress(addresses, (await customerRepo.FindAsync(optionsWithFetchStrategy)).Addresses);
+            TestCustomerAddress(addresses, await customerRepo.FindAsync<ICollection<CustomerAddressWithMultipleAddresses>>(optionsWithFetchStrategy, x => x.Addresses));
+        }
+
+        [Fact]
+        public void FindAlldWithNavigationProperty_OneToManyRelationship()
+        {
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
+
+            var addressRepo = new Repository<CustomerAddressWithMultipleAddresses>(context);
+            var customerRepo = new Repository<CustomerWithMultipleAddresses>(context);
+            var customerFetchStrategy = new FetchStrategy<CustomerWithMultipleAddresses>().Include(x => x.Addresses);
+            var options = new QueryOptions<CustomerWithMultipleAddresses>();
+            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Fetch(customerFetchStrategy);
+
+            var customerKey = 1;
+
+            const string name = "Random Name";
+
+            var entity = new CustomerWithMultipleAddresses
+            {
+                Id = customerKey,
+                Name = name
+            };
+
+            customerRepo.Add(entity);
+
+            var addresses = new List<CustomerAddressWithMultipleAddresses>();
+
+            for (int i = 0; i < 5; i++)
+            {
+                addresses.Add(new CustomerAddressWithMultipleAddresses()
+                {
+                    Id = i + 1,
+                    Street = $"Street {i}",
+                    City = $"New City {i}",
+                    State = $"ST {i}",
+                    CustomerId = entity.Id,
+                    Customer = entity
+                });
+            }
+
+            addressRepo.Add(addresses);
+
+            Assert.Null(customerRepo.FindAll()?.FirstOrDefault()?.Addresses);
+            Assert.Null(customerRepo.FindAll(options)?.FirstOrDefault()?.Addresses);
+
+            TestCustomerAddress(addresses, customerRepo.FindAll(optionsWithFetchStrategy)?.FirstOrDefault()?.Addresses);
+            TestCustomerAddress(addresses, customerRepo.FindAll<ICollection<CustomerAddressWithMultipleAddresses>>(optionsWithFetchStrategy, x => x.Addresses)?.FirstOrDefault());
+        }
+
+        [Fact]
+        public async void FindAlldWithNavigationPropertyAsync_OneToManyRelationship()
+        {
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
+
+            var addressRepo = new Repository<CustomerAddressWithMultipleAddresses>(context);
+            var customerRepo = new Repository<CustomerWithMultipleAddresses>(context);
+            var customerFetchStrategy = new FetchStrategy<CustomerWithMultipleAddresses>().Include(x => x.Addresses);
+            var options = new QueryOptions<CustomerWithMultipleAddresses>();
+            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Fetch(customerFetchStrategy);
+
+            var customerKey = 1;
+
+            const string name = "Random Name";
+
+            var entity = new CustomerWithMultipleAddresses
+            {
+                Id = customerKey,
+                Name = name
+            };
+
+            await customerRepo.AddAsync(entity);
+
+            var addresses = new List<CustomerAddressWithMultipleAddresses>();
+
+            for (int i = 0; i < 5; i++)
+            {
+                addresses.Add(new CustomerAddressWithMultipleAddresses()
+                {
+                    Id = i + 1,
+                    Street = $"Street {i}",
+                    City = $"New City {i}",
+                    State = $"ST {i}",
+                    CustomerId = entity.Id,
+                    Customer = entity
+                });
+            }
+
+            await addressRepo.AddAsync(addresses);
+
+            Assert.Null((await customerRepo.FindAllAsync())?.FirstOrDefault()?.Addresses);
+            Assert.Null((await customerRepo.FindAllAsync(options))?.FirstOrDefault()?.Addresses);
+
+            TestCustomerAddress(addresses, (await customerRepo.FindAllAsync(optionsWithFetchStrategy))?.FirstOrDefault()?.Addresses);
+            TestCustomerAddress(addresses, (await customerRepo.FindAllAsync<ICollection<CustomerAddressWithMultipleAddresses>>(optionsWithFetchStrategy, x => x.Addresses))?.FirstOrDefault());
+        }
+
+        [Fact]
         public void DeleteWithKeyDataAttribute()
         {
             var contextFactory = Data.TestAdoNetContextFactory.Create();
@@ -1092,6 +1280,41 @@
             Assert.Equal(expected.Customer.AddressKey, expected.Customer.AddressKey);
         }
 
+        private static void TestCustomerAddress(IEnumerable<CustomerAddressWithMultipleAddresses> expectedList, IEnumerable<CustomerAddressWithMultipleAddresses> actualList)
+        {
+            Assert.NotEmpty(expectedList);
+            Assert.NotEmpty(actualList);
+            Assert.NotEqual(expectedList, actualList);
+            Assert.Equal(expectedList.Count(), actualList.Count());
+
+            for (var i = 0; i < expectedList.Count(); i++)
+            {
+                var expected = expectedList.ElementAt(i);
+                var actual = actualList.ElementAt(i);
+
+                Assert.NotNull(expected);
+                Assert.NotNull(actual);
+                Assert.NotEqual(expected, actual);
+
+                // The navigation property should have all the values mapped correctly
+                Assert.Equal(expected.Street, actual.Street);
+                Assert.Equal(expected.City, actual.City);
+                Assert.Equal(expected.State, actual.State);
+
+                // The navigation property should have a key linking back to the main class (customer)
+                Assert.NotEqual(0, actual.CustomerId);
+                Assert.NotEqual(0, expected.CustomerId);
+                Assert.Equal(expected.CustomerId, actual.CustomerId);
+
+                // If the navigation property has also a navigation property linking back to the main class (customer),
+                // then that navigation property should also be mapped correctly
+                Assert.NotNull(expected.Customer);
+                Assert.NotNull(actual.Customer);
+                Assert.Equal(expected.Customer.Id, expected.Customer.Id);
+                Assert.Equal(expected.Customer.Name, expected.Customer.Name);
+            }
+        }
+
         class Customer
         {
             public int Id { get; set; }
@@ -1313,6 +1536,23 @@
             public string Name { get; set; }
             [ForeignKey("AddressId")]
             public CustomerAddress Address { get; set; }
+        }
+
+        class CustomerWithMultipleAddresses
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public ICollection<CustomerAddressWithMultipleAddresses> Addresses { get; set; }
+        }
+
+        class CustomerAddressWithMultipleAddresses
+        {
+            public int Id { get; set; }
+            public string Street { get; set; }
+            public string City { get; set; }
+            public string State { get; set; }
+            public int CustomerId { get; set; }
+            public CustomerWithMultipleAddresses Customer { get; set; }
         }
     }
 }

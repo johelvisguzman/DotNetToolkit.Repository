@@ -381,18 +381,21 @@
             foreach (var pi in foreignNavigationPropertyInfos)
             {
                 var foreignKeyPropertyInfos = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(entityType, pi.PropertyType);
-                if (foreignKeyPropertyInfos.Count() > 1)
+                if (foreignKeyPropertyInfos.Any())
                 {
-                    var keysHaveNoOrdering = foreignKeyPropertyInfos.Any(x => x.GetCustomAttribute<ColumnAttribute>() == null);
-                    if (keysHaveNoOrdering)
-                        throw new InvalidOperationException(string.Format(Resources.UnableToDetermineCompositePrimaryKeyOrdering, "foreign", entityType.FullName));
-                }
+                    if (foreignKeyPropertyInfos.Count() > 1)
+                    {
+                        var keysHaveNoOrdering = foreignKeyPropertyInfos.Any(x => x.GetCustomAttribute<ColumnAttribute>() == null);
+                        if (keysHaveNoOrdering)
+                            throw new InvalidOperationException(string.Format(Resources.UnableToDetermineCompositePrimaryKeyOrdering, "foreign", entityType.FullName));
+                    }
 
-                var dict = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(entityType, pi.PropertyType).ToDictionary(ModelConventionHelper.GetColumnName, x => pi);
+                    var dict = foreignKeyPropertyInfos.ToDictionary(ModelConventionHelper.GetColumnName, x => pi);
 
-                foreach (var item in dict)
-                {
-                    foreignKeyPropertyInfosMapping.Add(item.Key, item.Value);
+                    foreach (var item in dict)
+                    {
+                        foreignKeyPropertyInfosMapping.Add(item.Key, item.Value);
+                    }
                 }
             }
 
