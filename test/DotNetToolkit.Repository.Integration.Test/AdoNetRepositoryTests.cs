@@ -761,8 +761,14 @@
             // property variables on the left and constants on the right (and vice verse)
             Assert.Equal(1, repo.Find(x => 1 == x.Id).Id);
             Assert.Equal(1, repo.Find(x => x.Id == 1).Id);
+            Assert.Equal(1, repo.Find(x => 1 == 1).Id);
+            Assert.Null(repo.Find(x => 1 == 2));
+            Assert.Equal(1, repo.Find(x => x.Id == x.Id).Id);
             Assert.Equal(1, repo.Find<int>(x => 1 == x.Id, x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => x.Id == 1, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => 1 == 1, x => x.Id));
+            Assert.Equal(0, repo.Find<int>(x => 1 == 2, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id == x.Id, x => x.Id));
 
             // boolean
             Assert.Equal(1, repo.Find(x => true).Id);
@@ -845,8 +851,14 @@
             // property variables on the left and constants on the right (and vice verse)
             Assert.Equal(1, (await repo.FindAsync(x => 1 == x.Id)).Id);
             Assert.Equal(1, (await repo.FindAsync(x => x.Id == 1)).Id);
-            Assert.Equal(1, repo.Find<int>(x => 1 == x.Id, x => x.Id));
-            Assert.Equal(1, repo.Find<int>(x => x.Id == 1, x => x.Id));
+            Assert.Equal(1, (await repo.FindAsync(x => 1 == 1)).Id);
+            Assert.Null(await repo.FindAsync(x => 1 == 2));
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id == x.Id)).Id);
+            Assert.Equal(1, await repo.FindAsync<int>(x => 1 == x.Id, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == 1, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => 1 == 1, x => x.Id));
+            Assert.Equal(0, await repo.FindAsync<int>(x => 1 == 2, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == x.Id, x => x.Id));
 
             // boolean
             Assert.Equal(1, (await repo.FindAsync(x => true)).Id);
@@ -859,10 +871,10 @@
             Assert.Equal(2, (await repo.FindAsync(x => x.Name.Equals("Random Name 2"))).Id);
             Assert.Equal(3, (await repo.FindAsync(x => x.Name.Contains("Test"))).Id);
             Assert.Equal(4, (await repo.FindAsync(x => x.Name.EndsWith("4"))).Id);
-            Assert.Equal(1, repo.Find<int>(x => x.Name.StartsWith("Random"), x => x.Id));
-            Assert.Equal(2, repo.Find<int>(x => x.Name.Equals("Random Name 2"), x => x.Id));
-            Assert.Equal(3, repo.Find<int>(x => x.Name.Contains("Test"), x => x.Id));
-            Assert.Equal(4, repo.Find<int>(x => x.Name.EndsWith("4"), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Name.StartsWith("Random"), x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => x.Name.Equals("Random Name 2"), x => x.Id));
+            Assert.Equal(3, await repo.FindAsync<int>(x => x.Name.Contains("Test"), x => x.Id));
+            Assert.Equal(4, await repo.FindAsync<int>(x => x.Name.EndsWith("4"), x => x.Id));
 
             // relational and equality operators - property variables on the left and constants on the right (and vice verse)
             Assert.Equal(1, (await repo.FindAsync(x => x.Id == 1)).Id);
@@ -871,38 +883,38 @@
             Assert.Equal(3, (await repo.FindAsync(x => x.Id >= 3)).Id);
             Assert.Equal(1, (await repo.FindAsync(x => x.Id < 2)).Id);
             Assert.Equal(1, (await repo.FindAsync(x => x.Id <= 2)).Id);
-            Assert.Equal(1, repo.Find<int>(x => x.Id == 1, x => x.Id));
-            Assert.Equal(1, repo.Find<int>(x => x.Id != 2, x => x.Id));
-            Assert.Equal(2, repo.Find<int>(x => x.Id > 1, x => x.Id));
-            Assert.Equal(3, repo.Find<int>(x => x.Id >= 3, x => x.Id));
-            Assert.Equal(1, repo.Find<int>(x => x.Id < 2, x => x.Id));
-            Assert.Equal(1, repo.Find<int>(x => x.Id <= 2, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == 1, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id != 2, x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => x.Id > 1, x => x.Id));
+            Assert.Equal(3, await repo.FindAsync<int>(x => x.Id >= 3, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id < 2, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id <= 2, x => x.Id));
 
             // conditional or operations - property variables on the left and constants on the right (and vice verse)
             // relational and equality operators
             Assert.Equal(1, (await repo.FindAsync(x => (x.Id == 1) || (x.Id >= 1))).Id);
             Assert.Equal(1, (await repo.FindAsync(x => (1 == x.Id) || (1 <= x.Id))).Id);
-            Assert.Equal(1, repo.Find<int>(x => (x.Id == 1) || (x.Id >= 1), x => x.Id));
-            Assert.Equal(1, repo.Find<int>(x => (1 == x.Id) || (1 <= x.Id), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == 1) || (x.Id >= 1), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (1 == x.Id) || (1 <= x.Id), x => x.Id));
 
             // logical or operations - property variables on the left and constants on the right (and vice verse)
             Assert.Equal(1, (await repo.FindAsync(x => (x.Id == 1) | (x.Id >= 1))).Id);
             Assert.Equal(1, (await repo.FindAsync(x => (1 == x.Id) | (1 <= x.Id))).Id);
-            Assert.Equal(1, repo.Find<int>(x => (x.Id == 1) | (x.Id >= 1), x => x.Id));
-            Assert.Equal(1, repo.Find<int>(x => (1 == x.Id) | (1 <= x.Id), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == 1) | (x.Id >= 1), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (1 == x.Id) | (1 <= x.Id), x => x.Id));
 
             // conditional and operations - property variables on the left and constants on the right (and vice verse)
             // relational and equality operators
             Assert.Equal(2, (await repo.FindAsync(x => x.Id > 1 && x.Id < 3)).Id);
             Assert.Equal(2, (await repo.FindAsync(x => (x.Id > 1) && (x.Id < 3))).Id);
-            Assert.Equal(2, repo.Find<int>(x => x.Id > 1 && x.Id < 3, x => x.Id));
-            Assert.Equal(2, repo.Find<int>(x => (x.Id > 1) && (x.Id < 3), x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => x.Id > 1 && x.Id < 3, x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => (x.Id > 1) && (x.Id < 3), x => x.Id));
 
             // logical and operations - property variables on the left and constants on the right (and vice verse)
             Assert.Equal(1, (await repo.FindAsync(x => (x.Id == 1) & (x.Id >= 1))).Id);
             Assert.Equal(1, (await repo.FindAsync(x => (1 == x.Id) & (1 <= x.Id))).Id);
-            Assert.Equal(1, repo.Find<int>(x => (x.Id == 1) & (x.Id >= 1), x => x.Id));
-            Assert.Equal(1, repo.Find<int>(x => (1 == x.Id) & (1 <= x.Id), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == 1) & (x.Id >= 1), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (1 == x.Id) & (1 <= x.Id), x => x.Id));
         }
 
         [Fact]
@@ -964,16 +976,16 @@
 
             // conditional or operations - property variables on the left and constants on the right (and vice verse)
             // relational and equality operators
-            Assert.Equal(4, repo.FindAll(x => (x.Id == 1) || (x.Id >= 1)).Count());
-            Assert.Single(repo.FindAll(x => (1 == x.Id) || (1 <= x.Id)));
-            Assert.Equal(4, repo.FindAll<int>(x => (x.Id == 1) || (x.Id >= 1), x => x.Id).Count());
-            Assert.Single(repo.FindAll<int>(x => (1 == x.Id) || (1 <= x.Id), x => x.Id));
+            Assert.Equal(2, repo.FindAll(x => (x.Id == 1) || (x.Id == 4)).Count());
+            Assert.Equal(2, repo.FindAll(x => (1 == x.Id) || (4 == x.Id)).Count());
+            Assert.Equal(2, repo.FindAll<int>(x => (x.Id == 1) || (x.Id == 4), x => x.Id).Count());
+            Assert.Equal(2, repo.FindAll<int>(x => (1 == x.Id) || (4 == x.Id), x => x.Id).Count());
 
             // logical or operations - property variables on the left and constants on the right (and vice verse)
-            Assert.Equal(4, repo.FindAll(x => (x.Id == 1) | (x.Id >= 1)).Count());
-            Assert.Single(repo.FindAll(x => (1 == x.Id) | (1 <= x.Id)));
-            Assert.Equal(4, repo.FindAll<int>(x => (x.Id == 1) | (x.Id >= 1), x => x.Id).Count());
-            Assert.Single(repo.FindAll<int>(x => (1 == x.Id) | (1 <= x.Id), x => x.Id));
+            Assert.Equal(2, repo.FindAll(x => (x.Id == 1) | (x.Id == 4)).Count());
+            Assert.Equal(2, repo.FindAll(x => (1 == x.Id) | (4 == x.Id)).Count());
+            Assert.Equal(2, repo.FindAll<int>(x => (x.Id == 1) | (x.Id == 4), x => x.Id).Count());
+            Assert.Equal(2, repo.FindAll<int>(x => (1 == x.Id) | (4 == x.Id), x => x.Id).Count());
 
             // conditional and operations - property variables on the left and constants on the right (and vice verse)
             // relational and equality operators
@@ -1048,16 +1060,16 @@
 
             // conditional or operations - property variables on the left and constants on the right (and vice verse)
             // relational and equality operators
-            Assert.Equal(4, (await repo.FindAllAsync(x => (x.Id == 1) || (x.Id >= 1))).Count());
-            Assert.Single(await repo.FindAllAsync(x => (1 == x.Id) || (1 <= x.Id)));
-            Assert.Equal(4, (await repo.FindAllAsync<int>(x => (x.Id == 1) || (x.Id >= 1), x => x.Id)).Count());
-            Assert.Single(await repo.FindAllAsync<int>(x => (1 == x.Id) || (1 <= x.Id), x => x.Id));
+            Assert.Equal(2, (await repo.FindAllAsync(x => (x.Id == 1) || (x.Id == 4))).Count());
+            Assert.Equal(2, (await repo.FindAllAsync(x => (1 == x.Id) || (4 == x.Id))).Count());
+            Assert.Equal(2, (await repo.FindAllAsync<int>(x => (x.Id == 1) || (x.Id == 4), x => x.Id)).Count());
+            Assert.Equal(2, (await repo.FindAllAsync<int>(x => (1 == x.Id) || (4 == x.Id), x => x.Id)).Count());
 
             // logical or operations - property variables on the left and constants on the right (and vice verse)
-            Assert.Equal(4, (await repo.FindAllAsync(x => (x.Id == 1) | (x.Id >= 1))).Count());
-            Assert.Single(await repo.FindAllAsync(x => (1 == x.Id) | (1 <= x.Id)));
-            Assert.Equal(4, (await repo.FindAllAsync<int>(x => (x.Id == 1) | (x.Id >= 1), x => x.Id)).Count());
-            Assert.Single(await repo.FindAllAsync<int>(x => (1 == x.Id) | (1 <= x.Id), x => x.Id));
+            Assert.Equal(2, (await repo.FindAllAsync(x => (x.Id == 1) | (x.Id == 4))).Count());
+            Assert.Equal(2, (await repo.FindAllAsync(x => (1 == x.Id) | (4 == x.Id))).Count());
+            Assert.Equal(2, (await repo.FindAllAsync<int>(x => (x.Id == 1) | (x.Id == 4), x => x.Id)).Count());
+            Assert.Equal(2, (await repo.FindAllAsync<int>(x => (1 == x.Id) | (4 == x.Id), x => x.Id)).Count());
 
             // conditional and operations - property variables on the left and constants on the right (and vice verse)
             // relational and equality operators
