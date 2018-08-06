@@ -123,52 +123,56 @@
 
             if (firstExpression != null && secondExpression != null)
             {
-                var variableExpression = firstExpression;
-                if (!(secondExpression is ConstantExpression constantExpression))
+                var leftConstantExpression = firstExpression.AsConstantExpression();
+                var rightConstantExpression = secondExpression.AsConstantExpression();
+
+                string left;
+                string right;
+
+                if (leftConstantExpression != null && rightConstantExpression != null)
                 {
-                    constantExpression = firstExpression as ConstantExpression;
-                    variableExpression = secondExpression;
+                    left = ExpressionHelper.GetExpressionValue(leftConstantExpression).ToString();
+                    right = ExpressionHelper.GetExpressionValue(rightConstantExpression).ToString();
+                }
+                else if (leftConstantExpression == null && rightConstantExpression == null)
+                {
+                    TranslateVariableExpression(firstExpression, out left);
+                    TranslateVariableExpression(secondExpression, out right);
+                }
+                else
+                {
+                    if (leftConstantExpression != null)
+                        TranslateParameterizedVariableExpression(secondExpression, leftConstantExpression, node.Method.Name, out right, out left);
+                    else
+                        TranslateParameterizedVariableExpression(firstExpression, rightConstantExpression, node.Method.Name, out left, out right);
                 }
 
-                var propertyInfo = ExpressionHelper.GetPropertyInfo(variableExpression);
-                var value = ExpressionHelper.GetPropertyValue(constantExpression);
-                var tableType = ExpressionHelper.GetMemberExpression(variableExpression).Expression.Type;
-                var tableName = _mapper.GetTableName(tableType);
-                var tableAlias = _mapper.GetTableAlias(tableName);
-                var columnAlias = _mapper.GetColumnAlias(propertyInfo);
-
-                _sb.Append($"[{tableAlias}].[{columnAlias}]");
+                _sb.Append(left);
 
                 switch (node.Method.Name)
                 {
                     case "Equals":
-                        _sb.Append($" = @{columnAlias}");
+                        _sb.Append(" = ");
                         break;
                     case "StartsWith":
-                        _sb.Append($" LIKE @{columnAlias}");
-                        value = $"{value}%";
-                        break;
                     case "EndsWith":
-                        _sb.Append($" LIKE @{columnAlias}");
-                        value = $"%{value}";
-                        break;
                     case "Contains":
-                        _sb.Append($" LIKE @{columnAlias}");
-                        value = $"%{value}%";
+                        _sb.Append(" LIKE ");
                         break;
                     default:
                         throw new NotSupportedException(node.Method.Name + " isn't supported");
                 }
 
-                _parameters.Add($"@{columnAlias}", value);
+                _sb.Append(right);
             }
         }
 
         private void TranslateComparison(BinaryExpression node)
         {
-            var constantExpression = node.Right as ConstantExpression ?? node.Left as ConstantExpression;
-
-            if (constantExpression == null)
+            if (node.NodeType == ExpressionType.And ||
+                node.NodeType == ExpressionType.AndAlso ||
+                node.NodeType == ExpressionType.Or ||
+                node.NodeType == ExpressionType.OrElse)
             {
                 Visit(node, node.Left);
 
@@ -188,23 +192,39 @@
             }
             else
             {
-                var variableExpression = node.Right is ConstantExpression ? node.Left : node.Right;
-                var propertyInfo = ExpressionHelper.GetPropertyInfo(variableExpression);
-                var value = ExpressionHelper.GetPropertyValue(constantExpression);
-                var tableType = ExpressionHelper.GetMemberExpression(variableExpression).Expression.Type;
-                var tableName = _mapper.GetTableName(tableType);
-                var tableAlias = _mapper.GetTableAlias(tableName);
-                var columnAlias = _mapper.GetColumnAlias(propertyInfo);
+                var leftConstantExpression = node.Left.AsConstantExpression();
+                var rightConstantExpression = node.Right.AsConstantExpression();
 
-                _sb.Append($"[{tableAlias}].[{columnAlias}]");
+                string left;
+                string right;
+
+                if (leftConstantExpression != null && rightConstantExpression != null)
+                {
+                    left = ExpressionHelper.GetExpressionValue(leftConstantExpression).ToString();
+                    right = ExpressionHelper.GetExpressionValue(rightConstantExpression).ToString();
+                }
+                else if (leftConstantExpression == null && rightConstantExpression == null)
+                {
+                    TranslateVariableExpression(node.Left, out left);
+                    TranslateVariableExpression(node.Right, out right);
+                }
+                else
+                {
+                    if (leftConstantExpression != null)
+                        TranslateParameterizedVariableExpression(node.Right, leftConstantExpression, out right, out left);
+                    else
+                        TranslateParameterizedVariableExpression(node.Left, rightConstantExpression, out left, out right);
+                }
+
+                _sb.Append(left);
 
                 switch (node.NodeType)
                 {
                     case ExpressionType.Equal:
-                        _sb.Append(IsNullConstant(node.Right) ? " IS " : " = ");
+                        _sb.Append(IsNullConstant(rightConstantExpression) ? " IS " : " = ");
                         break;
                     case ExpressionType.NotEqual:
-                        _sb.Append(IsNullConstant(node.Right) ? " IS NOT " : " <> ");
+                        _sb.Append(IsNullConstant(rightConstantExpression) ? " IS NOT " : " <> ");
                         break;
                     case ExpressionType.LessThan:
                         _sb.Append(" < ");
@@ -222,30 +242,81 @@
                         throw new NotSupportedException($"The binary operator '{node.NodeType}' is not supported");
                 }
 
-                // In cases where the same property is being used multiple times in an expression, we need to generate
-                // an alias for that property
-                // For example:
-                //    x =>  x.Id == 1 || x.Id > 2
-                //      should translate to
-                //    x => x.Id == @Id || x.Id > @Id1
-                if (_parameters.ContainsKey($"@{columnAlias}"))
-                {
-                    var columnAliasCount = System.Text.RegularExpressions.Regex.Match(columnAlias, @"\d+").Value;
-
-                    if (!string.IsNullOrEmpty(columnAliasCount))
-                    {
-                        columnAlias = columnAlias.TrimEnd(columnAliasCount.ToCharArray());
-                        columnAlias = $"{columnAlias}{int.Parse(columnAliasCount) + 1}";
-                    }
-                    else
-                    {
-                        columnAlias = $"{columnAlias}{1}";
-                    }
-                }
-
-                _parameters.Add($"@{columnAlias}", value);
-                _sb.Append($"@{columnAlias}");
+                _sb.Append(right);
             }
+        }
+
+        private void TranslateVariableExpression(Expression variableExpression, out string column, out string columnAlias)
+        {
+            var propertyInfo = ExpressionHelper.GetPropertyInfo(variableExpression);
+            var tableType = ExpressionHelper.GetMemberExpression(variableExpression).Expression.Type;
+            var tableName = _mapper.GetTableName(tableType);
+            var tableAlias = _mapper.GetTableAlias(tableName);
+
+            columnAlias = _mapper.GetColumnAlias(propertyInfo);
+            column = $"[{tableAlias}].[{columnAlias}]";
+        }
+
+        private void TranslateVariableExpression(Expression variableExpression, out string column)
+        {
+            TranslateVariableExpression(variableExpression, out column, out var columnAlias);
+        }
+
+        private void TranslateParameterizedVariableExpression(Expression variableExpression, ConstantExpression constantExpression, string methodName, out string column, out string parameter)
+        {
+            TranslateVariableExpression(variableExpression, out column, out var columnAlias);
+
+            // In cases where the same property is being used multiple times in an expression, we need to generate
+            // an alias for that property
+            // For example:
+            //    x =>  x.Id == 1 || x.Id > 2
+            //      should translate to
+            //    x => x.Id == @Id || x.Id > @Id1
+            if (_parameters.ContainsKey($"@{columnAlias}"))
+            {
+                var columnAliasCount = System.Text.RegularExpressions.Regex.Match(columnAlias, @"\d+").Value;
+
+                if (!string.IsNullOrEmpty(columnAliasCount))
+                {
+                    columnAlias = columnAlias.TrimEnd(columnAliasCount.ToCharArray());
+                    columnAlias = $"{columnAlias}{int.Parse(columnAliasCount) + 1}";
+                }
+                else
+                {
+                    columnAlias = $"{columnAlias}{1}";
+                }
+            }
+
+            parameter = $"@{columnAlias}";
+
+            var value = ExpressionHelper.GetExpressionValue(constantExpression);
+
+            if (!string.IsNullOrEmpty(methodName))
+            {
+                switch (methodName)
+                {
+                    case "Equals":
+                        break;
+                    case "StartsWith":
+                        value = $"{value}%";
+                        break;
+                    case "EndsWith":
+                        value = $"%{value}";
+                        break;
+                    case "Contains":
+                        value = $"%{value}%";
+                        break;
+                    default:
+                        throw new NotSupportedException(methodName + " isn't supported");
+                }
+            }
+
+            _parameters.Add(parameter, value);
+        }
+
+        private void TranslateParameterizedVariableExpression(Expression variableExpression, ConstantExpression constantExpression, out string column, out string parameter)
+        {
+            TranslateParameterizedVariableExpression(variableExpression, constantExpression, null, out column, out parameter);
         }
 
         private void TranslateConstant(ConstantExpression node)
@@ -255,9 +326,12 @@
             _sb.Append($"1 = {value}");
         }
 
-        private static bool IsNullConstant(Expression exp)
+        private static bool IsNullConstant(ConstantExpression exp)
         {
-            return exp.NodeType == ExpressionType.Constant && ((ConstantExpression)exp).Value == null;
+            if (exp == null)
+                return false;
+
+            return exp.Value == null;
         }
 
         #endregion

@@ -16,6 +16,12 @@
         /// </summary>    
         public static Expression<Func<T, bool>> And<T>(this Expression<Func<T, bool>> first, Expression<Func<T, bool>> second)
         {
+            if (first == null)
+                throw new ArgumentNullException(nameof(first));
+
+            if (second == null)
+                throw new ArgumentNullException(nameof(second));
+
             return first.Compose(second, Expression.AndAlso);
         }
 
@@ -24,16 +30,25 @@
         /// </summary>    
         public static Expression<Func<T, bool>> Or<T>(this Expression<Func<T, bool>> first, Expression<Func<T, bool>> second)
         {
+            if (first == null)
+                throw new ArgumentNullException(nameof(first));
+
+            if (second == null)
+                throw new ArgumentNullException(nameof(second));
+
             return first.Compose(second, Expression.OrElse);
         }
 
         /// <summary>    
         /// Negates the predicate.
         /// </summary>    
-        public static Expression<Func<T, bool>> Not<T>(this Expression<Func<T, bool>> expression)
+        public static Expression<Func<T, bool>> Not<T>(this Expression<Func<T, bool>> exp)
         {
-            var negated = Expression.Not(expression.Body);
-            return Expression.Lambda<Func<T, bool>>(negated, expression.Parameters);
+            if (exp == null)
+                throw new ArgumentNullException(nameof(exp));
+
+            var negated = Expression.Not(exp.Body);
+            return Expression.Lambda<Func<T, bool>>(negated, exp.Parameters);
         }
 
         /// <summary>
@@ -41,6 +56,9 @@
         /// </summary>
         public static Expression GetExpression<T>(string propertyPath)
         {
+            if (propertyPath == null)
+                throw new ArgumentNullException(nameof(propertyPath));
+
             var parts = (propertyPath ?? "").Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
             var type = typeof(T);
             var param = Expression.Parameter(type, "x");
@@ -63,13 +81,49 @@
         /// </summary>
         /// <param name="exp">The expression.</param>
         /// <returns>The value of the property for the specified expression</returns>
-        public static object GetPropertyValue(Expression exp)
+        public static object GetExpressionValue(Expression exp)
         {
-            var objectMember = Expression.Convert(exp, typeof(object));
-            var getterLambda = Expression.Lambda<Func<object>>(objectMember);
-            var getter = getterLambda.Compile();
+            if (exp == null)
+                throw new ArgumentNullException(nameof(exp));
 
-            return getter();
+            if (exp.NodeType == ExpressionType.Constant)
+                return ((ConstantExpression)exp).Value;
+
+            var convertToString = false;
+
+            if (exp.NodeType == ExpressionType.Call)
+            {
+                var methodCallExpression = (MethodCallExpression)exp;
+
+                if (methodCallExpression.Method.Name != "ToString")
+                    throw new NotSupportedException(methodCallExpression.Method.Name + " isn't supported");
+
+                convertToString = true;
+
+                var expr1 = methodCallExpression.Object ?? methodCallExpression.Arguments[0];
+
+                if (expr1.NodeType == ExpressionType.Constant)
+                    return ((ConstantExpression)expr1).Value.ToString();
+            }
+
+            var memberExpression = GetMemberExpression(exp);
+
+            object value = null;
+
+            if (memberExpression.Expression is ConstantExpression container)
+            {
+                switch (memberExpression.Member)
+                {
+                    case FieldInfo fieldInfo:
+                        value = fieldInfo.GetValue(container.Value);
+                        break;
+                    case PropertyInfo propertyInfo:
+                        value = propertyInfo.GetValue(container.Value, null);
+                        break;
+                }
+            }
+
+            return convertToString && value != null ? value.ToString() : value;
         }
 
         /// <summary>
@@ -124,43 +178,67 @@
         /// <summary>
         /// Gets the member expression.
         /// </summary>
-        /// <param name="expression">The expression.</param>
+        /// <param name="exp">The expression.</param>
         /// <returns>The member expression.</returns>
-        public static MemberExpression GetMemberExpression(Expression expression)
+        public static MemberExpression GetMemberExpression(Expression exp)
         {
-            switch (expression)
+            if (exp == null)
+                throw new ArgumentNullException(nameof(exp));
+
+            switch (exp)
             {
-                case MethodCallExpression expr:
-                    return (MemberExpression)expr.Arguments[0];
-
-                case MemberExpression memberExpression:
-                    return memberExpression;
-
-                case UnaryExpression unaryExpression:
-                    return (MemberExpression)unaryExpression.Operand;
-
-                case BinaryExpression binaryExpression:
-                    var binaryExpr = binaryExpression;
-
-                    if (binaryExpr.Left is UnaryExpression left)
-                        return (MemberExpression)left.Operand;
-
-                    return (MemberExpression)binaryExpr.Left;
-
-                case LambdaExpression expression1:
-                    var lambdaExpression = expression1;
-
-                    switch (lambdaExpression.Body)
+                case MethodCallExpression methodCallExpression:
                     {
-                        case MemberExpression body:
-                            return body;
-                        case UnaryExpression expressionBody:
-                            return (MemberExpression)expressionBody.Operand;
+                        return (MemberExpression)(methodCallExpression.Object ?? methodCallExpression.Arguments[0]);
                     }
-                    break;
+                case MemberExpression memberExpression:
+                    {
+                        return memberExpression;
+                    }
+                case UnaryExpression unaryExpression:
+                    {
+                        return (MemberExpression)unaryExpression.Operand;
+                    }
+                case BinaryExpression binaryExpression:
+                    {
+                        if (binaryExpression.Left is UnaryExpression left)
+                            return (MemberExpression)left.Operand;
+
+                        return (MemberExpression)binaryExpression.Left;
+                    }
+                case LambdaExpression lambdaExpression:
+                    {
+                        switch (lambdaExpression.Body)
+                        {
+                            case MemberExpression body:
+                                return body;
+                            case UnaryExpression expressionBody:
+                                return (MemberExpression)expressionBody.Operand;
+                        }
+
+                        break;
+                    }
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Creates a ConstantExpression that has the Value property set to the specified expression's value.
+        /// </summary>
+        /// <param name="exp">The expression.</param>
+        /// <returns>The constant expression.</returns>
+        internal static ConstantExpression AsConstantExpression(this Expression exp)
+        {
+            if (exp == null)
+                throw new ArgumentNullException(nameof(exp));
+
+            if (exp is ConstantExpression constantExpression)
+                return constantExpression;
+
+            var value = GetExpressionValue(exp);
+
+            return value != null ? Expression.Constant(value) : null;
         }
 
         internal static void CollectRelationalMembers(Expression exp, IList<PropertyInfo> members)
