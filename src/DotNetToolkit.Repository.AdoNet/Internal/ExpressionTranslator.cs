@@ -123,16 +123,16 @@
 
             if (firstExpression != null && secondExpression != null)
             {
-                var leftConstantExpression = firstExpression as ConstantExpression;
-                var rightConstantExpression = secondExpression as ConstantExpression;
+                var leftConstantExpression = firstExpression.AsConstantExpression();
+                var rightConstantExpression = secondExpression.AsConstantExpression();
 
                 string left;
                 string right;
 
                 if (leftConstantExpression != null && rightConstantExpression != null)
                 {
-                    left = ExpressionHelper.GetPropertyValue(leftConstantExpression).ToString();
-                    right = ExpressionHelper.GetPropertyValue(rightConstantExpression).ToString();
+                    left = ExpressionHelper.GetExpressionValue(leftConstantExpression).ToString();
+                    right = ExpressionHelper.GetExpressionValue(rightConstantExpression).ToString();
                 }
                 else if (leftConstantExpression == null && rightConstantExpression == null)
                 {
@@ -192,16 +192,16 @@
             }
             else
             {
-                var leftConstantExpression = node.Left as ConstantExpression;
-                var rightConstantExpression = node.Right as ConstantExpression;
+                var leftConstantExpression = node.Left.AsConstantExpression();
+                var rightConstantExpression = node.Right.AsConstantExpression();
 
                 string left;
                 string right;
 
                 if (leftConstantExpression != null && rightConstantExpression != null)
                 {
-                    left = ExpressionHelper.GetPropertyValue(leftConstantExpression).ToString();
-                    right = ExpressionHelper.GetPropertyValue(rightConstantExpression).ToString();
+                    left = ExpressionHelper.GetExpressionValue(leftConstantExpression).ToString();
+                    right = ExpressionHelper.GetExpressionValue(rightConstantExpression).ToString();
                 }
                 else if (leftConstantExpression == null && rightConstantExpression == null)
                 {
@@ -289,7 +289,7 @@
 
             parameter = $"@{columnAlias}";
 
-            var value = ExpressionHelper.GetPropertyValue(constantExpression);
+            var value = ExpressionHelper.GetExpressionValue(constantExpression);
 
             if (!string.IsNullOrEmpty(methodName))
             {

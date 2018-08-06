@@ -745,6 +745,14 @@
 
             var repo = new Repository<Customer>(context);
 
+            var numOneVar = 1;
+            var numTwoVar = 2;
+            var numThreeVar = 3;
+
+            const int numOneConst = 1;
+            const int numTwoConst = 2;
+            const int numThreeConst = 3;
+
             var entities = new List<Customer>
             {
                 new Customer { Id = 1, Name = "Random Name 1" },
@@ -764,11 +772,21 @@
             Assert.Equal(1, repo.Find(x => 1 == 1).Id);
             Assert.Null(repo.Find(x => 1 == 2));
             Assert.Equal(1, repo.Find(x => x.Id == x.Id).Id);
+            Assert.Equal(1, repo.Find(x => numOneVar == x.Id).Id);
+            Assert.Equal(1, repo.Find(x => x.Id == numOneVar).Id);
+            Assert.Equal(1, repo.Find(x => numOneVar == numOneVar).Id);
+            Assert.Equal(1, repo.Find(x => numOneConst == x.Id).Id);
+            Assert.Equal(1, repo.Find(x => x.Id == numOneConst).Id);
+            Assert.Equal(1, repo.Find(x => numOneConst == numOneConst).Id);
+            Assert.Equal(1, repo.Find<int>(x => numOneConst == x.Id, x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => 1 == x.Id, x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => x.Id == 1, x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => 1 == 1, x => x.Id));
             Assert.Equal(0, repo.Find<int>(x => 1 == 2, x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => x.Id == x.Id, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => numOneVar == x.Id, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id == numOneVar, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id == numOneConst, x => x.Id));
 
             // boolean
             Assert.Equal(1, repo.Find(x => true).Id);
@@ -781,10 +799,26 @@
             Assert.Equal(2, repo.Find(x => x.Name.Equals("Random Name 2")).Id);
             Assert.Equal(3, repo.Find(x => x.Name.Contains("Test")).Id);
             Assert.Equal(4, repo.Find(x => x.Name.EndsWith("4")).Id);
+            Assert.Equal(1, repo.Find(x => x.Id.ToString().StartsWith(numOneVar.ToString())).Id);
+            Assert.Equal(1, repo.Find(x => x.Id.ToString().Equals(numOneVar.ToString())).Id);
+            Assert.Equal(1, repo.Find(x => x.Id.ToString().Contains(numOneVar.ToString())).Id);
+            Assert.Equal(1, repo.Find(x => x.Id.ToString().EndsWith(numOneVar.ToString())).Id);
+            Assert.Equal(1, repo.Find(x => x.Id.ToString().StartsWith(numOneConst.ToString())).Id);
+            Assert.Equal(1, repo.Find(x => x.Id.ToString().Equals(numOneConst.ToString())).Id);
+            Assert.Equal(1, repo.Find(x => x.Id.ToString().Contains(numOneConst.ToString())).Id);
+            Assert.Equal(1, repo.Find(x => x.Id.ToString().EndsWith(numOneConst.ToString())).Id);
+            Assert.Equal(1, repo.Find<int>(x => x.Id.ToString().StartsWith(numOneConst.ToString()), x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => x.Name.StartsWith("Random"), x => x.Id));
             Assert.Equal(2, repo.Find<int>(x => x.Name.Equals("Random Name 2"), x => x.Id));
             Assert.Equal(3, repo.Find<int>(x => x.Name.Contains("Test"), x => x.Id));
             Assert.Equal(4, repo.Find<int>(x => x.Name.EndsWith("4"), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id.ToString().StartsWith(numOneVar.ToString()), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id.ToString().Equals(numOneVar.ToString()), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id.ToString().Contains(numOneVar.ToString()), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id.ToString().EndsWith(numOneVar.ToString()), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id.ToString().Equals(numOneConst.ToString()), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id.ToString().Contains(numOneConst.ToString()), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id.ToString().EndsWith(numOneConst.ToString()), x => x.Id));
 
             // relational and equality operators - property variables on the left and constants on the right (and vice verse)
             Assert.Equal(1, repo.Find(x => x.Id == 1).Id);
@@ -793,38 +827,94 @@
             Assert.Equal(3, repo.Find(x => x.Id >= 3).Id);
             Assert.Equal(1, repo.Find(x => x.Id < 2).Id);
             Assert.Equal(1, repo.Find(x => x.Id <= 2).Id);
+            Assert.Equal(1, repo.Find(x => x.Id == numOneVar).Id);
+            Assert.Equal(1, repo.Find(x => x.Id != numTwoVar).Id);
+            Assert.Equal(2, repo.Find(x => x.Id > numOneVar).Id);
+            Assert.Equal(3, repo.Find(x => x.Id >= numThreeVar).Id);
+            Assert.Equal(1, repo.Find(x => x.Id < numTwoVar).Id);
+            Assert.Equal(1, repo.Find(x => x.Id <= numTwoVar).Id);
+            Assert.Equal(1, repo.Find(x => x.Id == numOneConst).Id);
+            Assert.Equal(1, repo.Find(x => x.Id != numTwoConst).Id);
+            Assert.Equal(2, repo.Find(x => x.Id > numOneConst).Id);
+            Assert.Equal(3, repo.Find(x => x.Id >= numThreeConst).Id);
+            Assert.Equal(1, repo.Find(x => x.Id < numTwoConst).Id);
+            Assert.Equal(1, repo.Find(x => x.Id <= numTwoConst).Id);
+            Assert.Equal(1, repo.Find<int>(x => x.Id == numOneConst, x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => x.Id == 1, x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => x.Id != 2, x => x.Id));
             Assert.Equal(2, repo.Find<int>(x => x.Id > 1, x => x.Id));
             Assert.Equal(3, repo.Find<int>(x => x.Id >= 3, x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => x.Id < 2, x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => x.Id <= 2, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id == numOneVar, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id != numTwoVar, x => x.Id));
+            Assert.Equal(2, repo.Find<int>(x => x.Id > numOneVar, x => x.Id));
+            Assert.Equal(3, repo.Find<int>(x => x.Id >= numThreeVar, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id < numTwoVar, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id <= numTwoVar, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id != numTwoConst, x => x.Id));
+            Assert.Equal(2, repo.Find<int>(x => x.Id > numOneConst, x => x.Id));
+            Assert.Equal(3, repo.Find<int>(x => x.Id >= numThreeConst, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id < numTwoConst, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id <= numTwoConst, x => x.Id));
 
             // conditional or operations - property variables on the left and constants on the right (and vice verse)
             // relational and equality operators
             Assert.Equal(1, repo.Find(x => (x.Id == 1) || (x.Id >= 1)).Id);
             Assert.Equal(1, repo.Find(x => (1 == x.Id) || (1 <= x.Id)).Id);
+            Assert.Equal(1, repo.Find(x => (x.Id == numOneVar) || (x.Id >= numOneVar)).Id);
+            Assert.Equal(1, repo.Find(x => (numOneVar == x.Id) || (numOneVar <= x.Id)).Id);
+            Assert.Equal(1, repo.Find(x => (x.Id == numOneConst) || (x.Id >= numOneConst)).Id);
+            Assert.Equal(1, repo.Find(x => (numOneConst == x.Id) || (numOneConst <= x.Id)).Id);
+            Assert.Equal(1, repo.Find<int>(x => (x.Id == numOneConst) || (x.Id >= numOneConst), x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => (x.Id == 1) || (x.Id >= 1), x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => (1 == x.Id) || (1 <= x.Id), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (x.Id == numOneVar) || (x.Id >= numOneVar), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (numOneVar == x.Id) || (numOneVar <= x.Id), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (numOneConst == x.Id) || (numOneConst <= x.Id), x => x.Id));
 
             // logical or operations - property variables on the left and constants on the right (and vice verse)
             Assert.Equal(1, repo.Find(x => (x.Id == 1) | (x.Id >= 1)).Id);
             Assert.Equal(1, repo.Find(x => (1 == x.Id) | (1 <= x.Id)).Id);
+            Assert.Equal(1, repo.Find(x => (x.Id == numOneVar) | (x.Id >= numOneVar)).Id);
+            Assert.Equal(1, repo.Find(x => (numOneVar == x.Id) | (numOneVar <= x.Id)).Id);
+            Assert.Equal(1, repo.Find(x => (x.Id == numOneConst) | (x.Id >= numOneConst)).Id);
+            Assert.Equal(1, repo.Find(x => (numOneConst == x.Id) | (numOneConst <= x.Id)).Id);
+            Assert.Equal(1, repo.Find<int>(x => (x.Id == numOneConst) | (x.Id >= numOneConst), x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => (x.Id == 1) | (x.Id >= 1), x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => (1 == x.Id) | (1 <= x.Id), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (x.Id == numOneVar) | (x.Id >= numOneVar), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (numOneVar == x.Id) | (numOneVar <= x.Id), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (numOneConst == x.Id) | (numOneConst <= x.Id), x => x.Id));
 
             // conditional and operations - property variables on the left and constants on the right (and vice verse)
             // relational and equality operators
             Assert.Equal(2, repo.Find(x => x.Id > 1 && x.Id < 3).Id);
             Assert.Equal(2, repo.Find(x => (x.Id > 1) && (x.Id < 3)).Id);
+            Assert.Equal(2, repo.Find(x => x.Id > numOneVar && x.Id < numThreeVar).Id);
+            Assert.Equal(2, repo.Find(x => x.Id > numOneConst && x.Id < numThreeConst).Id);
+            Assert.Equal(2, repo.Find(x => (x.Id > numOneConst) && (x.Id < numThreeConst)).Id);
+            Assert.Equal(2, repo.Find(x => (x.Id > numOneVar) && (x.Id < numThreeVar)).Id);
+            Assert.Equal(2, repo.Find<int>(x => x.Id > numOneConst && x.Id < numThreeConst, x => x.Id));
             Assert.Equal(2, repo.Find<int>(x => x.Id > 1 && x.Id < 3, x => x.Id));
             Assert.Equal(2, repo.Find<int>(x => (x.Id > 1) && (x.Id < 3), x => x.Id));
+            Assert.Equal(2, repo.Find<int>(x => x.Id > numOneVar && x.Id < numThreeVar, x => x.Id));
+            Assert.Equal(2, repo.Find<int>(x => (x.Id > numOneVar) && (x.Id < numThreeVar), x => x.Id));
+            Assert.Equal(2, repo.Find<int>(x => (x.Id > numOneConst) && (x.Id < numThreeConst), x => x.Id));
 
             // logical and operations - property variables on the left and constants on the right (and vice verse)
             Assert.Equal(1, repo.Find(x => (x.Id == 1) & (x.Id >= 1)).Id);
             Assert.Equal(1, repo.Find(x => (1 == x.Id) & (1 <= x.Id)).Id);
+            Assert.Equal(1, repo.Find(x => (x.Id == numOneVar) | (x.Id >= numOneVar)).Id);
+            Assert.Equal(1, repo.Find(x => (numOneVar == x.Id) | (numOneVar <= x.Id)).Id);
+            Assert.Equal(1, repo.Find(x => (x.Id == numOneConst) | (x.Id >= numOneConst)).Id);
+            Assert.Equal(1, repo.Find(x => (numOneConst == x.Id) | (numOneConst <= x.Id)).Id);
+            Assert.Equal(1, repo.Find<int>(x => (x.Id == numOneConst) | (x.Id >= numOneConst), x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => (x.Id == 1) & (x.Id >= 1), x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => (1 == x.Id) & (1 <= x.Id), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (x.Id == numOneVar) | (x.Id >= numOneVar), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (numOneVar == x.Id) | (numOneVar <= x.Id), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (numOneConst == x.Id) | (numOneConst <= x.Id), x => x.Id));
         }
 
         [Fact]
@@ -834,6 +924,14 @@
             var context = contextFactory.Create();
 
             var repo = new Repository<Customer>(context);
+
+            var numOneVar = 1;
+            var numTwoVar = 2;
+            var numThreeVar = 3;
+
+            const int numOneConst = 1;
+            const int numTwoConst = 2;
+            const int numThreeConst = 3;
 
             var entities = new List<Customer>
             {
@@ -854,11 +952,23 @@
             Assert.Equal(1, (await repo.FindAsync(x => 1 == 1)).Id);
             Assert.Null(await repo.FindAsync(x => 1 == 2));
             Assert.Equal(1, (await repo.FindAsync(x => x.Id == x.Id)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => numOneVar == x.Id)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id == numOneVar)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => numOneVar == numOneVar)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => numOneConst == x.Id)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id == numOneConst)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => numOneConst == numOneConst)).Id);
+            Assert.Equal(1, await repo.FindAsync<int>(x => numOneConst == x.Id, x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => 1 == x.Id, x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == 1, x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => 1 == 1, x => x.Id));
             Assert.Equal(0, await repo.FindAsync<int>(x => 1 == 2, x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == x.Id, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => 1 == x.Id, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == 1, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => numOneVar == x.Id, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == numOneVar, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == numOneConst, x => x.Id));
 
             // boolean
             Assert.Equal(1, (await repo.FindAsync(x => true)).Id);
@@ -871,10 +981,30 @@
             Assert.Equal(2, (await repo.FindAsync(x => x.Name.Equals("Random Name 2"))).Id);
             Assert.Equal(3, (await repo.FindAsync(x => x.Name.Contains("Test"))).Id);
             Assert.Equal(4, (await repo.FindAsync(x => x.Name.EndsWith("4"))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id.ToString().StartsWith(numOneVar.ToString()))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id.ToString().Equals(numOneVar.ToString()))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id.ToString().Contains(numOneVar.ToString()))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id.ToString().EndsWith(numOneVar.ToString()))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id.ToString().StartsWith(numOneConst.ToString()))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id.ToString().Equals(numOneConst.ToString()))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id.ToString().Contains(numOneConst.ToString()))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id.ToString().EndsWith(numOneConst.ToString()))).Id);
             Assert.Equal(1, await repo.FindAsync<int>(x => x.Name.StartsWith("Random"), x => x.Id));
             Assert.Equal(2, await repo.FindAsync<int>(x => x.Name.Equals("Random Name 2"), x => x.Id));
             Assert.Equal(3, await repo.FindAsync<int>(x => x.Name.Contains("Test"), x => x.Id));
             Assert.Equal(4, await repo.FindAsync<int>(x => x.Name.EndsWith("4"), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Name.StartsWith("Random"), x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => x.Name.Equals("Random Name 2"), x => x.Id));
+            Assert.Equal(3, await repo.FindAsync<int>(x => x.Name.Contains("Test"), x => x.Id));
+            Assert.Equal(4, await repo.FindAsync<int>(x => x.Name.EndsWith("4"), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id.ToString().StartsWith(numOneVar.ToString()), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id.ToString().Equals(numOneVar.ToString()), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id.ToString().Contains(numOneVar.ToString()), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id.ToString().EndsWith(numOneVar.ToString()), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id.ToString().StartsWith(numOneConst.ToString()), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id.ToString().Equals(numOneConst.ToString()), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id.ToString().Contains(numOneConst.ToString()), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id.ToString().EndsWith(numOneConst.ToString()), x => x.Id));
 
             // relational and equality operators - property variables on the left and constants on the right (and vice verse)
             Assert.Equal(1, (await repo.FindAsync(x => x.Id == 1)).Id);
@@ -883,38 +1013,108 @@
             Assert.Equal(3, (await repo.FindAsync(x => x.Id >= 3)).Id);
             Assert.Equal(1, (await repo.FindAsync(x => x.Id < 2)).Id);
             Assert.Equal(1, (await repo.FindAsync(x => x.Id <= 2)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id == numOneVar)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id != numTwoVar)).Id);
+            Assert.Equal(2, (await repo.FindAsync(x => x.Id > numOneVar)).Id);
+            Assert.Equal(3, (await repo.FindAsync(x => x.Id >= numThreeVar)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id < numTwoVar)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id <= numTwoVar)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id == numOneConst)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id != numTwoConst)).Id);
+            Assert.Equal(2, (await repo.FindAsync(x => x.Id > numOneConst)).Id);
+            Assert.Equal(3, (await repo.FindAsync(x => x.Id >= numThreeConst)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id < numTwoConst)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id <= numTwoConst)).Id);
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == numOneConst, x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == 1, x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => x.Id != 2, x => x.Id));
             Assert.Equal(2, await repo.FindAsync<int>(x => x.Id > 1, x => x.Id));
             Assert.Equal(3, await repo.FindAsync<int>(x => x.Id >= 3, x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => x.Id < 2, x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => x.Id <= 2, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == 1, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id != 2, x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => x.Id > 1, x => x.Id));
+            Assert.Equal(3, await repo.FindAsync<int>(x => x.Id >= 3, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id < 2, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id <= 2, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == numOneVar, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id != numTwoVar, x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => x.Id > numOneVar, x => x.Id));
+            Assert.Equal(3, await repo.FindAsync<int>(x => x.Id >= numThreeVar, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id < numTwoVar, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id <= numTwoVar, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id != numTwoConst, x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => x.Id > numOneConst, x => x.Id));
+            Assert.Equal(3, await repo.FindAsync<int>(x => x.Id >= numThreeConst, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id < numTwoConst, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id <= numTwoConst, x => x.Id));
 
             // conditional or operations - property variables on the left and constants on the right (and vice verse)
             // relational and equality operators
             Assert.Equal(1, (await repo.FindAsync(x => (x.Id == 1) || (x.Id >= 1))).Id);
             Assert.Equal(1, (await repo.FindAsync(x => (1 == x.Id) || (1 <= x.Id))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (x.Id == numOneVar) || (x.Id >= numOneVar))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (numOneVar == x.Id) || (numOneVar <= x.Id))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (x.Id == numOneConst) || (x.Id >= numOneConst))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (numOneConst == x.Id) || (numOneConst <= x.Id))).Id);
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == numOneConst) || (x.Id >= numOneConst), x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == 1) || (x.Id >= 1), x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => (1 == x.Id) || (1 <= x.Id), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == 1) || (x.Id >= 1), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (1 == x.Id) || (1 <= x.Id), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == numOneVar) || (x.Id >= numOneVar), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (numOneVar == x.Id) || (numOneVar <= x.Id), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (numOneConst == x.Id) || (numOneConst <= x.Id), x => x.Id));
 
             // logical or operations - property variables on the left and constants on the right (and vice verse)
             Assert.Equal(1, (await repo.FindAsync(x => (x.Id == 1) | (x.Id >= 1))).Id);
             Assert.Equal(1, (await repo.FindAsync(x => (1 == x.Id) | (1 <= x.Id))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (x.Id == numOneVar) | (x.Id >= numOneVar))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (numOneVar == x.Id) | (numOneVar <= x.Id))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (x.Id == numOneConst) | (x.Id >= numOneConst))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (numOneConst == x.Id) | (numOneConst <= x.Id))).Id);
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == numOneConst) | (x.Id >= numOneConst), x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == 1) | (x.Id >= 1), x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => (1 == x.Id) | (1 <= x.Id), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == 1) | (x.Id >= 1), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (1 == x.Id) | (1 <= x.Id), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == numOneVar) | (x.Id >= numOneVar), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (numOneVar == x.Id) | (numOneVar <= x.Id), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (numOneConst == x.Id) | (numOneConst <= x.Id), x => x.Id));
 
             // conditional and operations - property variables on the left and constants on the right (and vice verse)
             // relational and equality operators
             Assert.Equal(2, (await repo.FindAsync(x => x.Id > 1 && x.Id < 3)).Id);
             Assert.Equal(2, (await repo.FindAsync(x => (x.Id > 1) && (x.Id < 3))).Id);
+            Assert.Equal(2, (await repo.FindAsync(x => x.Id > numOneVar && x.Id < numThreeVar)).Id);
+            Assert.Equal(2, (await repo.FindAsync(x => (x.Id > numOneVar) && (x.Id < numThreeVar))).Id);
+            Assert.Equal(2, (await repo.FindAsync(x => x.Id > numOneConst && x.Id < numThreeConst)).Id);
+            Assert.Equal(2, (await repo.FindAsync(x => (x.Id > numOneConst) && (x.Id < numThreeConst))).Id);
+            Assert.Equal(2, await repo.FindAsync<int>(x => x.Id > numOneConst && x.Id < numThreeConst, x => x.Id));
             Assert.Equal(2, await repo.FindAsync<int>(x => x.Id > 1 && x.Id < 3, x => x.Id));
             Assert.Equal(2, await repo.FindAsync<int>(x => (x.Id > 1) && (x.Id < 3), x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => x.Id > 1 && x.Id < 3, x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => (x.Id > 1) && (x.Id < 3), x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => x.Id > numOneVar && x.Id < numThreeVar, x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => (x.Id > numOneVar) && (x.Id < numThreeVar), x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => (x.Id > numOneConst) && (x.Id < numThreeConst), x => x.Id));
 
             // logical and operations - property variables on the left and constants on the right (and vice verse)
             Assert.Equal(1, (await repo.FindAsync(x => (x.Id == 1) & (x.Id >= 1))).Id);
             Assert.Equal(1, (await repo.FindAsync(x => (1 == x.Id) & (1 <= x.Id))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (x.Id == numOneVar) & (x.Id >= numOneVar))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (numOneVar == x.Id) & (numOneVar <= x.Id))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (x.Id == numOneConst) & (x.Id >= numOneConst))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (numOneConst == x.Id) & (numOneConst <= x.Id))).Id);
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == numOneConst) & (x.Id >= numOneConst), x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == 1) & (x.Id >= 1), x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => (1 == x.Id) & (1 <= x.Id), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == 1) & (x.Id >= 1), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (1 == x.Id) & (1 <= x.Id), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == numOneVar) & (x.Id >= numOneVar), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (numOneVar == x.Id) & (numOneVar <= x.Id), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (numOneConst == x.Id) & (numOneConst <= x.Id), x => x.Id));
         }
 
         [Fact]
