@@ -22,11 +22,6 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlRepositoryContextFactory"/> class.
         /// </summary>
-        public XmlRepositoryContextFactory() { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="XmlRepositoryContextFactory"/> class.
-        /// </summary>
         /// <param name="path">The database directory to create.</param>
         public XmlRepositoryContextFactory(string path)
         {

@@ -100,9 +100,9 @@
         [Fact]
         public void ThrowsIfBeginTransaction()
         {
-            var configuration = new InMemoryRepositoryContextFactory();
+            var context = new InMemoryRepositoryContextFactory();
 
-            var ex = Assert.Throws<NotSupportedException>(() => configuration.Create().BeginTransaction());
+            var ex = Assert.Throws<NotSupportedException>(() => context.Create().BeginTransaction());
             Assert.Equal("The repository context does not support transactions.", ex.Message);
         }
     }

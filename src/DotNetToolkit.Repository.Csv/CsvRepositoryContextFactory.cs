@@ -22,11 +22,6 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="CsvRepositoryContextFactory"/> class.
         /// </summary>
-        public CsvRepositoryContextFactory() { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CsvRepositoryContextFactory"/> class.
-        /// </summary>
         /// <param name="path">The database directory to create.</param>
         public CsvRepositoryContextFactory(string path)
         {

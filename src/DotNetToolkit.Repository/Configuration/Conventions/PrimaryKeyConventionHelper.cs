@@ -79,6 +79,55 @@
         }
 
         /// <summary>
+        /// Gets the primary key value for the specified object. If the primary key is defined as a composite key, then the result will be returned as a tupple.
+        /// </summary>
+        /// <returns>The primary key value.</returns>
+        public static object GetPrimaryKeyValue(object obj)
+        {
+            if (obj == null)
+                throw new ArgumentNullException(nameof(obj));
+
+            var keyValues = GetPrimaryKeyPropertyInfos(obj.GetType())
+                .Select(x => x.GetValue(obj, null))
+                .ToArray();
+
+            return MergePrimaryKeyValues(keyValues);
+        }
+
+        /// <summary>
+        /// Merges the specified collection of key values into a tupple if there are more than one key; otherwise, it will return the single key object.
+        /// </summary>
+        /// <returns>The merged primary key value.</returns>
+        public static object MergePrimaryKeyValues(object[] keyValues)
+        {
+            if (keyValues == null)
+                throw new ArgumentNullException(nameof(keyValues));
+
+            object key;
+
+            switch (keyValues.Length)
+            {
+                case 3:
+                    {
+                        key = Tuple.Create(keyValues[0], keyValues[1], keyValues[2]);
+                        break;
+                    }
+                case 2:
+                    {
+                        key = Tuple.Create(keyValues[0], keyValues[1]);
+                        break;
+                    }
+                default:
+                    {
+                        key = keyValues[0];
+                        break;
+                    }
+            }
+
+            return key;
+        }
+
+        /// <summary>
         /// Returns a specification for getting an entity by it's primary key.
         /// </summary>
         /// <returns>The new specification.</returns>

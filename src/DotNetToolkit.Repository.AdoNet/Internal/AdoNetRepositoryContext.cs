@@ -1411,7 +1411,7 @@
 
                 try
                 {
-                    foreach (var entitySet in _items)
+                    while (_items.TryTake(out var entitySet))
                     {
                         var entityType = entitySet.Entity.GetType();
 
@@ -1422,9 +1422,8 @@
                             finally { _schemaValidationTypeMapping[entityType] = true; }
                         }
 
-                        var hasCompositePrimaryKey = PrimaryKeyConventionHelper.HasCompositePrimaryKey(entityType);
                         var primeryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-                        var isIdentity = !hasCompositePrimaryKey && primeryKeyPropertyInfo.IsColumnIdentity();
+                        var isIdentity = primeryKeyPropertyInfo.IsColumnIdentity();
 
                         // Checks if the entity exist in the database
                         var existInDb = await command.ExecuteObjectExistAsync(entitySet.Entity, cancellationToken);
@@ -1726,7 +1725,7 @@
 
                 try
                 {
-                    foreach (var entitySet in _items)
+                    while (_items.TryTake(out var entitySet))
                     {
                         var entityType = entitySet.Entity.GetType();
 
@@ -1737,9 +1736,8 @@
                             finally { _schemaValidationTypeMapping[entityType] = true; }
                         }
 
-                        var hasCompositePrimaryKey = PrimaryKeyConventionHelper.HasCompositePrimaryKey(entityType);
                         var primeryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-                        var isIdentity = !hasCompositePrimaryKey && primeryKeyPropertyInfo.IsColumnIdentity();
+                        var isIdentity = primeryKeyPropertyInfo.IsColumnIdentity();
 
                         // Checks if the entity exist in the database
                         var existInDb = command.ExecuteObjectExist(entitySet.Entity);

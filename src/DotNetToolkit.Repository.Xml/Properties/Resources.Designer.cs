@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace DotNetToolkit.Repository.InMemory.Properties {
+namespace DotNetToolkit.Repository.Xml.Properties {
     using System.Reflection;
 
 
@@ -39,7 +39,7 @@ namespace DotNetToolkit.Repository.InMemory.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DotNetToolkit.Repository.InMemory.Properties.Resources", typeof(Resources).GetTypeInfo().Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DotNetToolkit.Repository.Xml.Properties.Resources", typeof(Resources).GetTypeInfo().Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,7 +61,16 @@ namespace DotNetToolkit.Repository.InMemory.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; cannot be added to the in-memory store because another instance of this type with the same key is already being tracked..
+        ///   Looks up a localized string similar to The specified &apos;{0}&apos; path cannot be a file name..
+        /// </summary>
+        internal static string CannotBeFileName {
+            get {
+                return ResourceManager.GetString("CannotBeFileName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; cannot be added to the file because another instance of this type with the same key is already being tracked..
         /// </summary>
         internal static string EntityAlreadyBeingTrackedInStore {
             get {
@@ -70,7 +79,7 @@ namespace DotNetToolkit.Repository.InMemory.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; cannot be added to the in-memory store because the key type &apos;{1}&apos; is an invalid primary key property type..
+        ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; cannot be added to the file because the key type &apos;{1}&apos; is an invalid primary key property type..
         /// </summary>
         internal static string EntityKeyValueTypeInvalid {
             get {
@@ -79,11 +88,20 @@ namespace DotNetToolkit.Repository.InMemory.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Attempted to update or delete an entity that does not exist in the in-memory store..
+        ///   Looks up a localized string similar to Attempted to update or delete an entity that does not exist in the file..
         /// </summary>
         internal static string EntityNotFoundInStore {
             get {
                 return ResourceManager.GetString("EntityNotFoundInStore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified &apos;{0}&apos; file extension is not valid..
+        /// </summary>
+        internal static string InvalidFileExtension {
+            get {
+                return ResourceManager.GetString("InvalidFileExtension", resourceCulture);
             }
         }
         

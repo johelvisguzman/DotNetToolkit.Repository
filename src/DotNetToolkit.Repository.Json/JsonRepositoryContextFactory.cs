@@ -22,11 +22,6 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonRepositoryContextFactory"/> class.
         /// </summary>
-        public JsonRepositoryContextFactory() { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="JsonRepositoryContextFactory"/> class.
-        /// </summary>
         /// <param name="path">The database directory to create.</param>
         public JsonRepositoryContextFactory(string path)
         {
