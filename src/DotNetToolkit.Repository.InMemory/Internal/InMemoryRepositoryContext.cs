@@ -128,10 +128,10 @@
 
             try
             {
-                foreach (var entitySet in _items)
+                while (_items.TryTake(out var entitySet))
                 {
                     var entityType = entitySet.Entity.GetType();
-                    var key = GetPrimaryKey(entitySet.Entity);
+                    var key = PrimaryKeyConventionHelper.GetPrimaryKeyValue(entitySet.Entity);
 
                     if (!store.ContainsKey(entityType))
                         store[entityType] = new ConcurrentDictionary<object, object>();
@@ -148,7 +148,7 @@
 
                         var primeryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
 
-                        if (ModelConventionHelper.IsColumnIdentity(primeryKeyPropertyInfo))
+                        if (primeryKeyPropertyInfo.IsColumnIdentity())
                         {
                             key = GeneratePrimaryKey(entityType);
 
@@ -162,7 +162,7 @@
 
                     if (entitySet.State == EntityState.Removed)
                     {
-                        context.TryRemove(key, out object entity);
+                        context.TryRemove(key, out _);
                     }
                     else
                     {
@@ -407,39 +407,6 @@
             }
 
             return newItem;
-        }
-
-        private object GetPrimaryKey(object obj)
-        {
-            if (obj == null)
-                throw new ArgumentNullException(nameof(obj));
-
-            var entityType = obj.GetType();
-            var propInfos = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).ToList();
-
-            switch (propInfos.Count)
-            {
-                case 3:
-                    {
-                        var key1 = propInfos[0].GetValue(obj, null);
-                        var key2 = propInfos[1].GetValue(obj, null);
-                        var key3 = propInfos[2].GetValue(obj, null);
-
-                        return Tuple.Create(key1, key2, key3);
-                    }
-                case 2:
-                    {
-                        var key1 = propInfos[0].GetValue(obj, null);
-                        var key2 = propInfos[1].GetValue(obj, null);
-
-                        return Tuple.Create(key1, key2);
-                    }
-                default:
-                    {
-                        return propInfos[0].GetValue(obj, null);
-                    }
-
-            }
         }
 
         private object GeneratePrimaryKey(Type entityType)

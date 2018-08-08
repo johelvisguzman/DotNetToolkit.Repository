@@ -117,14 +117,20 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CannotBeFileName" xml:space="preserve">
+    <value>The specified '{0}' path cannot be a file name.</value>
+  </data>
   <data name="EntityAlreadyBeingTrackedInStore" xml:space="preserve">
-    <value>The instance of entity type '{0}' cannot be added to the in-memory store because another instance of this type with the same key is already being tracked.</value>
+    <value>The instance of entity type '{0}' cannot be added to the file because another instance of this type with the same key is already being tracked.</value>
   </data>
   <data name="EntityKeyValueTypeInvalid" xml:space="preserve">
-    <value>The instance of entity type '{0}' cannot be added to the in-memory store because the key type '{1}' is an invalid primary key property type.</value>
+    <value>The instance of entity type '{0}' cannot be added to the file because the key type '{1}' is an invalid primary key property type.</value>
   </data>
   <data name="EntityNotFoundInStore" xml:space="preserve">
-    <value>Attempted to update or delete an entity that does not exist in the in-memory store.</value>
+    <value>Attempted to update or delete an entity that does not exist in the file.</value>
+  </data>
+  <data name="InvalidFileExtension" xml:space="preserve">
+    <value>The specified '{0}' file extension is not valid.</value>
   </data>
   <data name="TransactionNotSupported" xml:space="preserve">
     <value>The repository context does not support transactions.</value>

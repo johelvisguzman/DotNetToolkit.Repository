@@ -2,7 +2,6 @@
 {
     using Configuration;
     using Factories;
-    using Internal;
     using System;
 
     /// <summary>
