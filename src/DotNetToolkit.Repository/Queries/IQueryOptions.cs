@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Queries
 {
-    using Specifications;
     using Strategies;
     using System.Collections.Generic;
 
@@ -33,6 +32,6 @@
         /// <summary>
         /// Gets the specification.
         /// </summary>
-        ISpecification<T> Specification { get; }
+        ISpecificationQueryStrategy<T> SpecificationStrategy { get; }
     }
 }

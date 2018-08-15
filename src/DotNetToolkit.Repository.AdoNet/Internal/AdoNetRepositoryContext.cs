@@ -1231,10 +1231,10 @@
                 // Where clause
                 // -----------------------------------------------------------------------------------------------------------
 
-                if (options.Specification != null)
+                if (options.SpecificationStrategy != null)
                 {
                     new ExpressionTranslator().Translate(
-                        options.Specification.Predicate,
+                        options.SpecificationStrategy.Predicate,
                         m,
                         out string expSql,
                         out Dictionary<string, object> expParameters);

@@ -4,7 +4,6 @@
     using Helpers;
     using Queries;
     using Queries.Strategies;
-    using Specifications;
     using System;
     using System.Linq;
     using System.Linq.Expressions;
@@ -135,19 +134,19 @@
                 .SatisfyBy(firstPredicate)
                 .SatisfyBy(secondPredicate);
 
-            Assert.Equal(firstPredicate.And(secondPredicate).ToString(), options.Specification.Predicate.ToString());
+            Assert.Equal(firstPredicate.And(secondPredicate).ToString(), options.SpecificationStrategy.Predicate.ToString());
         }
 
         [Fact]
         public void SatisfyBySpecification()
         {
-            var firstSpec = new Specification<Customer>(x => x.Name.Equals("Random Name"));
-            var secondSpec = new Specification<Customer>(x => x.Id == 1);
+            var firstSpec = new SpecificationQueryStrategy<Customer>(x => x.Name.Equals("Random Name"));
+            var secondSpec = new SpecificationQueryStrategy<Customer>(x => x.Id == 1);
             var options = new QueryOptions<Customer>()
                 .SatisfyBy(firstSpec)
                 .SatisfyBy(secondSpec);
 
-            Assert.Equal(firstSpec.And(secondSpec).Predicate.ToString(), options.Specification.Predicate.ToString());
+            Assert.Equal(firstSpec.And(secondSpec).Predicate.ToString(), options.SpecificationStrategy.Predicate.ToString());
         }
 
         [Fact]

@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Test
 {
-    using Specifications;
+    using Queries.Strategies;
     using Xunit;
 
     public class SpecificationTests
@@ -11,7 +11,7 @@
             public double Price { get; set; }
         }
 
-        class ProductOnSaleSpecification : Specification<Product>
+        class ProductOnSaleSpecification : SpecificationQueryStrategy<Product>
         {
             public ProductOnSaleSpecification() : base(p => p.Price < 100) { }
         }
@@ -20,7 +20,7 @@
         public void FindBySpecification()
         {
             var product = new Product { Price = 99 };
-            var spec = new Specification<Product>(p => p.Price < 100);
+            var spec = new SpecificationQueryStrategy<Product>(p => p.Price < 100);
 
             Assert.True(spec.IsSatisfiedBy(product));
 
@@ -33,7 +33,7 @@
         public void FindByAndCompositeSpecification()
         {
             var product = new Product { Price = 99, Name = "Windows XP Professional" };
-            var spec = new Specification<Product>(p => p.Price < 100).And(new Specification<Product>(p => p.Name == "Windows XP Professional"));
+            var spec = new SpecificationQueryStrategy<Product>(p => p.Price < 100).And(new SpecificationQueryStrategy<Product>(p => p.Name == "Windows XP Professional"));
 
             Assert.True(spec.IsSatisfiedBy(product));
 
@@ -54,7 +54,7 @@
         public void FindByOrCompositeSpecification()
         {
             var product = new Product { Price = 99, Name = "Windows XP Professional" };
-            var spec = new Specification<Product>(p => p.Price < 100).Or(new Specification<Product>(p => p.Name == "Windows XP Professional"));
+            var spec = new SpecificationQueryStrategy<Product>(p => p.Price < 100).Or(new SpecificationQueryStrategy<Product>(p => p.Name == "Windows XP Professional"));
 
             Assert.True(spec.IsSatisfiedBy(product));
 
@@ -76,7 +76,7 @@
         public void FindByNotCompositeSpecification()
         {
             var product = new Product { Price = 99, Name = "Windows XP Professional" };
-            var spec = new Specification<Product>(p => p.Price < 100).Not();
+            var spec = new SpecificationQueryStrategy<Product>(p => p.Price < 100).Not();
 
             Assert.False(spec.IsSatisfiedBy(product));
 

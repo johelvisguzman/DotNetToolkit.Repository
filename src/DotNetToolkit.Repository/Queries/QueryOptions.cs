@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Queries
 {
     using Helpers;
-    using Specifications;
     using Strategies;
     using System;
     using System.Collections.Generic;
@@ -135,14 +134,14 @@
         /// </summary>
         /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> SatisfyBy(ISpecification<T> criteria)
+        public QueryOptions<T> SatisfyBy(ISpecificationQueryStrategy<T> criteria)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
 
-            var predicate = Specification != null ? Specification.Predicate.And(criteria.Predicate) : criteria.Predicate;
+            var predicate = SpecificationStrategy != null ? SpecificationStrategy.Predicate.And(criteria.Predicate) : criteria.Predicate;
 
-            Specification = new Specification<T>(predicate);
+            SpecificationStrategy = new SpecificationQueryStrategy<T>(predicate);
 
             return this;
         }
@@ -157,9 +156,9 @@
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
-            predicate = Specification != null ? Specification.Predicate.And(predicate) : predicate;
+            predicate = SpecificationStrategy != null ? SpecificationStrategy.Predicate.And(predicate) : predicate;
 
-            Specification = new Specification<T>(predicate);
+            SpecificationStrategy = new SpecificationQueryStrategy<T>(predicate);
 
             return this;
         }
@@ -241,7 +240,7 @@
         /// <summary>
         /// Gets the specification.
         /// </summary>
-        public ISpecification<T> Specification { get; private set; }
+        public ISpecificationQueryStrategy<T> SpecificationStrategy { get; private set; }
 
         #endregion
     }
