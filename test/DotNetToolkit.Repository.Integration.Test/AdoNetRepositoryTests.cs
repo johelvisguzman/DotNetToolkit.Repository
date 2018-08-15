@@ -3,8 +3,8 @@
     using AdoNet.Internal;
     using AdoNet.Internal.Schema;
     using Data;
-    using FetchStrategies;
     using Queries;
+    using Queries.Strategies;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
@@ -26,7 +26,7 @@
 
             var addressRepo = new Repository<CustomerAddress>(context);
             var customerRepo = new Repository<Customer>(context);
-            var customerFetchStrategy = new FetchStrategy<Customer>();
+            var customerFetchStrategy = new FetchQueryStrategy<Customer>();
 
             var entity = new Customer
             {
@@ -67,7 +67,7 @@
 
             var addressRepo = new Repository<CustomerAddressWithTwoCompositePrimaryKey>(context);
             var customerRepo = new Repository<CustomerWithTwoCompositePrimaryKey>(context);
-            var customerFetchStrategy = new FetchStrategy<CustomerWithTwoCompositePrimaryKey>();
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithTwoCompositePrimaryKey>();
 
             var entity = new CustomerWithTwoCompositePrimaryKey
             {
@@ -108,7 +108,7 @@
 
             var addressWithForeignKeyAnnotationOnForeignKeyRepo = new Repository<CustomerAddressWithForeignKeyAnnotationOnForeignKey>(context);
             var customerWithForeignKeyAnnotationOnForeignKeyRepo = new Repository<CustomerWithForeignKeyAnnotationOnForeignKey>(context);
-            var customerWithForeignKeyAnnotationOnForeignKeyFetchStrategy = new FetchStrategy<CustomerWithForeignKeyAnnotationOnForeignKey>();
+            var customerWithForeignKeyAnnotationOnForeignKeyFetchStrategy = new FetchQueryStrategy<CustomerWithForeignKeyAnnotationOnForeignKey>();
 
             var customerWithForeignKeyAnnotationOnForeignKey = new CustomerWithForeignKeyAnnotationOnForeignKey
             {
@@ -138,7 +138,7 @@
 
             var addressWithForeignKeyAnnotationOnNavigationPropertyRepo = new Repository<CustomerAddressWithForeignKeyAnnotationOnNavigationProperty>(context);
             var customerWithForeignKeyAnnotationOnNavigationPropertyRepo = new Repository<CustomerWithForeignKeyAnnotationOnNavigationProperty>(context);
-            var customerWithForeignKeyAnnotationOnNavigationPropertyFetchStrategy = new FetchStrategy<CustomerWithForeignKeyAnnotationOnNavigationProperty>();
+            var customerWithForeignKeyAnnotationOnNavigationPropertyFetchStrategy = new FetchQueryStrategy<CustomerWithForeignKeyAnnotationOnNavigationProperty>();
 
             customerKey = 2;
             addressKey = 2;
@@ -181,7 +181,7 @@
 
             var addressRepo = new Repository<CustomerCompositeAddress>(context);
             var customerRepo = new Repository<CustomerWithCompositeAddress>(context);
-            var customerFetchStrategy = new FetchStrategy<CustomerWithCompositeAddress>();
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithCompositeAddress>();
 
             var entity = new CustomerWithCompositeAddress
             {
@@ -220,7 +220,7 @@
             var customerRepo = new Repository<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
-            var fetchStrategy = new FetchStrategy<Customer>();
+            var fetchStrategy = new FetchQueryStrategy<Customer>();
 
             var entity = new Customer
             {
@@ -515,7 +515,7 @@
 
             var addressRepo = new Repository<CustomerAddressWithMultipleAddresses>(context);
             var customerRepo = new Repository<CustomerWithMultipleAddresses>(context);
-            var customerFetchStrategy = new FetchStrategy<CustomerWithMultipleAddresses>().Include(x => x.Addresses);
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Include(x => x.Addresses);
             var options = new QueryOptions<CustomerWithMultipleAddresses>();
             var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Fetch(customerFetchStrategy);
 
@@ -561,7 +561,7 @@
 
             var addressRepo = new Repository<CustomerAddressWithMultipleAddresses>(context);
             var customerRepo = new Repository<CustomerWithMultipleAddresses>(context);
-            var customerFetchStrategy = new FetchStrategy<CustomerWithMultipleAddresses>().Include(x => x.Addresses);
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Include(x => x.Addresses);
             var options = new QueryOptions<CustomerWithMultipleAddresses>();
             var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Fetch(customerFetchStrategy);
 
@@ -607,7 +607,7 @@
 
             var addressRepo = new Repository<CustomerAddressWithMultipleAddresses>(context);
             var customerRepo = new Repository<CustomerWithMultipleAddresses>(context);
-            var customerFetchStrategy = new FetchStrategy<CustomerWithMultipleAddresses>().Include(x => x.Addresses);
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Include(x => x.Addresses);
             var options = new QueryOptions<CustomerWithMultipleAddresses>();
             var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Fetch(customerFetchStrategy);
 
@@ -655,7 +655,7 @@
 
             var addressRepo = new Repository<CustomerAddressWithMultipleAddresses>(context);
             var customerRepo = new Repository<CustomerWithMultipleAddresses>(context);
-            var customerFetchStrategy = new FetchStrategy<CustomerWithMultipleAddresses>().Include(x => x.Addresses);
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Include(x => x.Addresses);
             var options = new QueryOptions<CustomerWithMultipleAddresses>();
             var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Fetch(customerFetchStrategy);
 

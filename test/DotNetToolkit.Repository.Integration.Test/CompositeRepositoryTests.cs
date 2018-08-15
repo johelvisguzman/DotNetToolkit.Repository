@@ -1,10 +1,10 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
-    using System;
-    using System.Threading.Tasks;
     using Data;
     using Factories;
-    using FetchStrategies;
+    using Queries.Strategies;
+    using System;
+    using System.Threading.Tasks;
     using Xunit;
 
     public class CompositeRepositoryTests : TestBase
@@ -42,7 +42,7 @@
             int key2 = 2;
             int randomKey = 3;
 
-            var fetchStrategy = new FetchStrategy<CustomerWithTwoCompositePrimaryKey>();
+            var fetchStrategy = new FetchQueryStrategy<CustomerWithTwoCompositePrimaryKey>();
 
             var entity = new CustomerWithTwoCompositePrimaryKey { Id1 = key1, Id2 = key2, Name = "Random Name" };
 
@@ -78,7 +78,7 @@
             int key3 = 3;
             int randomKey = 4;
 
-            var fetchStrategy = new FetchStrategy<CustomerWithThreeCompositePrimaryKey>();
+            var fetchStrategy = new FetchQueryStrategy<CustomerWithThreeCompositePrimaryKey>();
 
             var entity = new CustomerWithThreeCompositePrimaryKey { Id1 = key1, Id2 = key2, Id3 = key3, Name = "Random Name" };
 
@@ -113,7 +113,7 @@
             int key2 = 2;
             int randomKey = 3;
 
-            var fetchStrategy = new FetchStrategy<CustomerWithTwoCompositePrimaryKey>();
+            var fetchStrategy = new FetchQueryStrategy<CustomerWithTwoCompositePrimaryKey>();
 
             var entity = new CustomerWithTwoCompositePrimaryKey { Id1 = key1, Id2 = key2, Name = "Random Name" };
 
@@ -149,7 +149,7 @@
             int key3 = 3;
             int randomKey = 4;
 
-            var fetchStrategy = new FetchStrategy<CustomerWithThreeCompositePrimaryKey>();
+            var fetchStrategy = new FetchQueryStrategy<CustomerWithThreeCompositePrimaryKey>();
 
             var entity = new CustomerWithThreeCompositePrimaryKey { Id1 = key1, Id2 = key2, Id3 = key3, Name = "Random Name" };
 

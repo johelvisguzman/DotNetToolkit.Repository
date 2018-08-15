@@ -1,8 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.Queries
 {
-    using FetchStrategies;
     using Helpers;
     using Specifications;
+    using Strategies;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -169,7 +169,7 @@
         /// </summary>
         /// <param name="fetchStrategy">The fetch strategy.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> Fetch(IFetchStrategy<T> fetchStrategy)
+        public QueryOptions<T> Fetch(IFetchQueryStrategy<T> fetchStrategy)
         {
             if (fetchStrategy == null)
                 throw new ArgumentNullException(nameof(fetchStrategy));
@@ -177,7 +177,7 @@
             var paths = FetchStrategy != null ? FetchStrategy.IncludePaths : new List<string>();
             var mergedPaths = paths.Union(fetchStrategy.IncludePaths).ToList();
 
-            FetchStrategy = FetchStrategy ?? new FetchStrategy<T>();
+            FetchStrategy = FetchStrategy ?? new FetchQueryStrategy<T>();
 
             mergedPaths.ForEach(path => FetchStrategy.Include(path));
 
@@ -194,7 +194,7 @@
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
 
-            FetchStrategy = FetchStrategy ?? new FetchStrategy<T>();
+            FetchStrategy = FetchStrategy ?? new FetchQueryStrategy<T>();
 
             FetchStrategy.Include(path);
 
@@ -236,7 +236,7 @@
         /// <summary>
         /// Gets the fetch strategy which defines the child objects that should be retrieved when loading the entity.
         /// </summary>
-        public IFetchStrategy<T> FetchStrategy { get; private set; }
+        public IFetchQueryStrategy<T> FetchStrategy { get; private set; }
 
         /// <summary>
         /// Gets the specification.

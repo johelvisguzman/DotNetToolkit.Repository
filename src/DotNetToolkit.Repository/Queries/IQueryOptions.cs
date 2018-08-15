@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Queries
 {
-    using FetchStrategies;
     using Specifications;
+    using Strategies;
     using System.Collections.Generic;
 
     /// <summary>
@@ -28,7 +28,7 @@
         /// <summary>
         /// Gets the fetch strategy which defines the child objects that should be retrieved when loading the entity.
         /// </summary>
-        IFetchStrategy<T> FetchStrategy { get; }
+        IFetchQueryStrategy<T> FetchStrategy { get; }
 
         /// <summary>
         /// Gets the specification.

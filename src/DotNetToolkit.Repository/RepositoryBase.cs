@@ -3,11 +3,11 @@
     using Configuration;
     using Configuration.Conventions;
     using Factories;
-    using FetchStrategies;
     using Helpers;
     using Interceptors;
     using Properties;
     using Queries;
+    using Queries.Strategies;
     using System;
     using System.Collections.Generic;
     using System.Globalization;
@@ -88,7 +88,7 @@
         /// <return>The entity found.</return>
         public TEntity Find(TKey1 key1, TKey2 key2, TKey3 key3)
         {
-            return Find(key1, key2, key3, (IFetchStrategy<TEntity>)null);
+            return Find(key1, key2, key3, (IFetchQueryStrategy<TEntity>)null);
         }
 
         /// <summary>
@@ -99,7 +99,7 @@
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <return>The entity found.</return>
-        public TEntity Find(TKey1 key1, TKey2 key2, TKey3 key3, IFetchStrategy<TEntity> fetchStrategy)
+        public TEntity Find(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
             return InterceptError<TEntity>(() => Context.Find<TEntity>(fetchStrategy, key1, key2, key3));
         }
@@ -139,7 +139,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
-            return FindAsync(key1, key2, key3, (IFetchStrategy<TEntity>)null, cancellationToken);
+            return FindAsync(key1, key2, key3, (IFetchQueryStrategy<TEntity>)null, cancellationToken);
         }
 
         /// <summary>
@@ -151,7 +151,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
             return InterceptErrorAsync<TEntity>(() => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2, key3));
         }
@@ -254,7 +254,7 @@
         /// <return>The entity found.</return>
         public TEntity Find(TKey1 key1, TKey2 key2)
         {
-            return Find(key1, key2, (IFetchStrategy<TEntity>)null);
+            return Find(key1, key2, (IFetchQueryStrategy<TEntity>)null);
         }
 
         /// <summary>
@@ -264,7 +264,7 @@
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <return>The entity found.</return>
-        public TEntity Find(TKey1 key1, TKey2 key2, IFetchStrategy<TEntity> fetchStrategy)
+        public TEntity Find(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
             return InterceptError<TEntity>(() => Context.Find<TEntity>(fetchStrategy, key1, key2));
         }
@@ -301,7 +301,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
-            return FindAsync(key1, key2, (IFetchStrategy<TEntity>)null, cancellationToken);
+            return FindAsync(key1, key2, (IFetchQueryStrategy<TEntity>)null, cancellationToken);
         }
 
         /// <summary>
@@ -312,7 +312,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
             return InterceptErrorAsync<TEntity>(() => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2));
         }
@@ -412,7 +412,7 @@
         /// <return>The entity found.</return>
         public TEntity Find(TKey key)
         {
-            return Find(key, (IFetchStrategy<TEntity>)null);
+            return Find(key, (IFetchQueryStrategy<TEntity>)null);
         }
 
         /// <summary>
@@ -421,7 +421,7 @@
         /// <param name="key">The value of the primary key for the entity to be found.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <return>The entity found.</return>
-        public TEntity Find(TKey key, IFetchStrategy<TEntity> fetchStrategy)
+        public TEntity Find(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
             return InterceptError<TEntity>(() => Context.Find<TEntity>(fetchStrategy, key));
         }
@@ -455,7 +455,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         public Task<TEntity> FindAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
-            return FindAsync(key, (IFetchStrategy<TEntity>)null, cancellationToken);
+            return FindAsync(key, (IFetchQueryStrategy<TEntity>)null, cancellationToken);
         }
 
         /// <summary>
@@ -465,7 +465,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        public Task<TEntity> FindAsync(TKey key, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
             return InterceptErrorAsync<TEntity>(() => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key));
         }

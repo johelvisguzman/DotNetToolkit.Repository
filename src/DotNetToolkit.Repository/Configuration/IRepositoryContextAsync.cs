@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Configuration
 {
-    using FetchStrategies;
     using Queries;
+    using Queries.Strategies;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -31,7 +31,7 @@
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found in the repository.</returns>
-        Task<TEntity> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class;
+        Task<TEntity> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class;
 
         /// <summary>
         /// Asynchronously finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.

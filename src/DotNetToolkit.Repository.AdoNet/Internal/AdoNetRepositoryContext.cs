@@ -2,10 +2,10 @@
 {
     using Configuration;
     using Configuration.Conventions;
-    using FetchStrategies;
     using Helpers;
     using Properties;
     using Queries;
+    using Queries.Strategies;
     using Schema;
     using System;
     using System.Collections.Concurrent;
@@ -1159,7 +1159,7 @@
                 if (paths.Count > 0)
                 {
                     if (fetchStrategy == null)
-                        fetchStrategy = new FetchStrategy<T>();
+                        fetchStrategy = new FetchQueryStrategy<T>();
 
                     foreach (var path in paths)
                     {
@@ -1482,7 +1482,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found in the repository.</returns>
-        public Task<TEntity> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
+        public Task<TEntity> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));
@@ -1795,7 +1795,7 @@
         /// <returns>The entity <see cref="T:System.Linq.IQueryable`1" />.</returns>
         public IQueryable<TEntity> AsQueryable<TEntity>() where TEntity : class
         {
-            return AsQueryable<TEntity>((IFetchStrategy<TEntity>)null);
+            return AsQueryable<TEntity>((IFetchQueryStrategy<TEntity>)null);
         }
 
         /// <summary>
@@ -1804,7 +1804,7 @@
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
         /// <param name="fetchStrategy"></param>
         /// <returns>The entity <see cref="T:System.Linq.IQueryable`1" />.</returns>
-        public IQueryable<TEntity> AsQueryable<TEntity>(IFetchStrategy<TEntity> fetchStrategy) where TEntity : class
+        public IQueryable<TEntity> AsQueryable<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy) where TEntity : class
         {
             var options = new QueryOptions<TEntity>();
 
@@ -1821,7 +1821,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <returns>The entity found in the repository.</returns>
-        public TEntity Find<TEntity>(IFetchStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
+        public TEntity Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));

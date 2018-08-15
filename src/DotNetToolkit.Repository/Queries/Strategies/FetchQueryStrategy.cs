@@ -1,13 +1,13 @@
-﻿namespace DotNetToolkit.Repository.FetchStrategies
+﻿namespace DotNetToolkit.Repository.Queries.Strategies
 {
     using System;
     using System.Collections.Generic;
     using System.Linq.Expressions;
 
     /// <summary>
-    /// An implementation of <see cref="IFetchStrategy{T}" />.
+    /// An implementation of <see cref="IFetchQueryStrategy{T}" />.
     /// </summary>
-    public class FetchStrategy<T> : IFetchStrategy<T>
+    public class FetchQueryStrategy<T> : IFetchQueryStrategy<T>
     {
         #region Fields
 
@@ -18,16 +18,16 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FetchStrategy{T}" /> class.
+        /// Initializes a new instance of the <see cref="FetchQueryStrategy{T}" /> class.
         /// </summary>
-        public FetchStrategy()
+        public FetchQueryStrategy()
         {
             _properties = new List<string>();
         }
 
         #endregion
 
-        #region IFetchStrategy<T> Members
+        #region Implementation of IFetchQueryStrategy<T>
 
         /// <summary>
         /// Gets the collection of related objects to include in the query results.
@@ -41,8 +41,8 @@
         /// Specifies the related objects to include in the query results.
         /// </summary>
         /// <param name="path">A lambda expression representing the path to include.</param>
-        /// <returns>A new <see cref="IFetchStrategy{T}" /> with the defined query path.</returns>
-        public IFetchStrategy<T> Include(Expression<Func<T, object>> path)
+        /// <returns>A new <see cref="IFetchQueryStrategy{T}" /> with the defined query path.</returns>
+        public IFetchQueryStrategy<T> Include(Expression<Func<T, object>> path)
         {
             return Include(path.ToIncludeString());
         }
@@ -51,8 +51,8 @@
         /// Specifies the related objects to include in the query results.
         /// </summary>
         /// <param name="path">The dot-separated list of related objects to return in the query results.</param>
-        /// <returns>A new <see cref="IFetchStrategy{T}" /> with the defined query path.</returns>
-        public IFetchStrategy<T> Include(string path)
+        /// <returns>A new <see cref="IFetchQueryStrategy{T}" /> with the defined query path.</returns>
+        public IFetchQueryStrategy<T> Include(string path)
         {
             _properties.Add(path);
             return this;

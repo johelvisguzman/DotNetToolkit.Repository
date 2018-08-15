@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Test
 {
     using Data;
-    using FetchStrategies;
+    using Queries.Strategies;
     using Xunit;
 
     public class FetchStrategyTests
@@ -9,7 +9,7 @@
         [Fact]
         public void Include()
         {
-            var strategy = new FetchStrategy<Customer>()
+            var strategy = new FetchQueryStrategy<Customer>()
                 .Include(x => x.Address)
                 .Include(x => x.Phone)
                 .Include(x => x.Phone.Customer);
@@ -22,7 +22,7 @@
         [Fact]
         public void Include_Property_Names()
         {
-            var strategy = new FetchStrategy<Customer>()
+            var strategy = new FetchQueryStrategy<Customer>()
                 .Include("Address")
                 .Include("Phone")
                 .Include("Phone.Customer");

@@ -1,8 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.Wrappers
 {
     using Configuration;
-    using FetchStrategies;
     using Queries;
+    using Queries.Strategies;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -118,7 +118,7 @@
         /// </summary>
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
         /// <returns>The entity <see cref="System.Linq.IQueryable{TEntity}" />.</returns>
-        public IQueryable<TEntity> AsQueryable<TEntity>(IFetchStrategy<TEntity> fetchStrategy) where TEntity : class
+        public IQueryable<TEntity> AsQueryable<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy) where TEntity : class
         {
             return _context.AsQueryable<TEntity>(fetchStrategy);
         }
@@ -130,7 +130,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <returns>The entity found in the repository.</returns>
-        public TEntity Find<TEntity>(IFetchStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
+        public TEntity Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
             return _context.Find<TEntity>(fetchStrategy, keyValues);
         }
@@ -240,7 +240,7 @@
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found in the repository.</returns>
-        public Task<TEntity> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
+        public Task<TEntity> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
             if (_context is IRepositoryContextAsync contextAsync)
             {

@@ -1,9 +1,9 @@
 ﻿namespace DotNetToolkit.Repository.Test
 {
     using Data;
-    using FetchStrategies;
     using Helpers;
     using Queries;
+    using Queries.Strategies;
     using Specifications;
     using System;
     using System.Linq;
@@ -163,8 +163,8 @@
             Assert.Contains("Phone.Customer", options.FetchStrategy.IncludePaths);
 
             options = new QueryOptions<Customer>()
-                .Fetch(new FetchStrategy<Customer>().Include("Address"))
-                .Fetch(new FetchStrategy<Customer>().Include("Phone"))
+                .Fetch(new FetchQueryStrategy<Customer>().Include("Address"))
+                .Fetch(new FetchQueryStrategy<Customer>().Include("Phone"))
                 .Fetch("Phone.Customer");
 
             Assert.Contains("Address", options.FetchStrategy.IncludePaths);
@@ -185,8 +185,8 @@
             Assert.Contains("Phone.Customer", options.FetchStrategy.IncludePaths);
 
             options = new QueryOptions<Customer>()
-                .Fetch(new FetchStrategy<Customer>().Include(x => x.Address))
-                .Fetch(new FetchStrategy<Customer>().Include(x => x.Phone))
+                .Fetch(new FetchQueryStrategy<Customer>().Include(x => x.Address))
+                .Fetch(new FetchQueryStrategy<Customer>().Include(x => x.Phone))
                 .Fetch(x => x.Phone.Customer);
 
             Assert.Contains("Address", options.FetchStrategy.IncludePaths);
