@@ -1,10 +1,9 @@
 ﻿namespace DotNetToolkit.Repository.Test
 {
     using Data;
-    using FetchStrategies;
     using Helpers;
     using Queries;
-    using Specifications;
+    using Queries.Strategies;
     using System;
     using System.Linq;
     using System.Linq.Expressions;
@@ -135,19 +134,19 @@
                 .SatisfyBy(firstPredicate)
                 .SatisfyBy(secondPredicate);
 
-            Assert.Equal(firstPredicate.And(secondPredicate).ToString(), options.Specification.Predicate.ToString());
+            Assert.Equal(firstPredicate.And(secondPredicate).ToString(), options.SpecificationStrategy.Predicate.ToString());
         }
 
         [Fact]
         public void SatisfyBySpecification()
         {
-            var firstSpec = new Specification<Customer>(x => x.Name.Equals("Random Name"));
-            var secondSpec = new Specification<Customer>(x => x.Id == 1);
+            var firstSpec = new SpecificationQueryStrategy<Customer>(x => x.Name.Equals("Random Name"));
+            var secondSpec = new SpecificationQueryStrategy<Customer>(x => x.Id == 1);
             var options = new QueryOptions<Customer>()
                 .SatisfyBy(firstSpec)
                 .SatisfyBy(secondSpec);
 
-            Assert.Equal(firstSpec.And(secondSpec).Predicate.ToString(), options.Specification.Predicate.ToString());
+            Assert.Equal(firstSpec.And(secondSpec).Predicate.ToString(), options.SpecificationStrategy.Predicate.ToString());
         }
 
         [Fact]
@@ -163,8 +162,8 @@
             Assert.Contains("Phone.Customer", options.FetchStrategy.IncludePaths);
 
             options = new QueryOptions<Customer>()
-                .Fetch(new FetchStrategy<Customer>().Include("Address"))
-                .Fetch(new FetchStrategy<Customer>().Include("Phone"))
+                .Fetch(new FetchQueryStrategy<Customer>().Include("Address"))
+                .Fetch(new FetchQueryStrategy<Customer>().Include("Phone"))
                 .Fetch("Phone.Customer");
 
             Assert.Contains("Address", options.FetchStrategy.IncludePaths);
@@ -185,8 +184,8 @@
             Assert.Contains("Phone.Customer", options.FetchStrategy.IncludePaths);
 
             options = new QueryOptions<Customer>()
-                .Fetch(new FetchStrategy<Customer>().Include(x => x.Address))
-                .Fetch(new FetchStrategy<Customer>().Include(x => x.Phone))
+                .Fetch(new FetchQueryStrategy<Customer>().Include(x => x.Address))
+                .Fetch(new FetchQueryStrategy<Customer>().Include(x => x.Phone))
                 .Fetch(x => x.Phone.Customer);
 
             Assert.Contains("Address", options.FetchStrategy.IncludePaths);

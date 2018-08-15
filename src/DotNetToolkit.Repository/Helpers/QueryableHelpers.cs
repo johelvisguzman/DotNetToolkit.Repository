@@ -16,8 +16,8 @@
             if (query == null)
                 throw new ArgumentNullException(nameof(query));
 
-            if (options.Specification != null)
-                query = options.Specification.SatisfyingEntitiesFrom(query);
+            if (options.SpecificationStrategy != null)
+                query = options.SpecificationStrategy.SatisfyingEntitiesFrom(query);
 
             var sortings = options.SortingPropertiesMapping.ToDictionary(x => x.Key, x => x.Value);
 

@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.FetchStrategies
+﻿namespace DotNetToolkit.Repository.Helpers
 {
     using Helpers;
     using System;
@@ -7,8 +7,8 @@
     using System.Reflection;
     using System.Text;
 
-    // https://github.com/SharpRepository/SharpRepository/tree/master/SharpRepository.Repository/FetchStrategies/FetchStrategyExtensions.cs
-    internal static class FetchStrategyExtensions
+    // https://github.com/SharpRepository/SharpRepository/tree/master/SharpRepository.Repository/FetchStrategies/FetchQueryStrategyHelper.cs
+    internal static class FetchQueryStrategyHelper
     {
         /// <summary>
         ///  Evaluates the Linq expression and returns the name of the property or the multiple level deep string representation of the Expression (i.e. prop.Collection.Property).

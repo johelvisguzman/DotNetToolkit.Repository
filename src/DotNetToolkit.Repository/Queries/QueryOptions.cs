@@ -1,8 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Queries
 {
-    using FetchStrategies;
     using Helpers;
-    using Specifications;
+    using Strategies;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -13,7 +12,7 @@
     /// </summary>
     /// <typeparam name="T">The entity type of the repository.</typeparam>
     /// <seealso cref="DotNetToolkit.Repository.Queries.IQueryOptions{T}" />
-    public class QueryOptions<T> : IQueryOptions<T> where T : class
+    public class QueryOptions<T> : IQueryOptions<T>
     {
         #region Fields
 
@@ -135,14 +134,14 @@
         /// </summary>
         /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> SatisfyBy(ISpecification<T> criteria)
+        public QueryOptions<T> SatisfyBy(ISpecificationQueryStrategy<T> criteria)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
 
-            var predicate = Specification != null ? Specification.Predicate.And(criteria.Predicate) : criteria.Predicate;
+            var predicate = SpecificationStrategy != null ? SpecificationStrategy.Predicate.And(criteria.Predicate) : criteria.Predicate;
 
-            Specification = new Specification<T>(predicate);
+            SpecificationStrategy = new SpecificationQueryStrategy<T>(predicate);
 
             return this;
         }
@@ -157,9 +156,9 @@
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
-            predicate = Specification != null ? Specification.Predicate.And(predicate) : predicate;
+            predicate = SpecificationStrategy != null ? SpecificationStrategy.Predicate.And(predicate) : predicate;
 
-            Specification = new Specification<T>(predicate);
+            SpecificationStrategy = new SpecificationQueryStrategy<T>(predicate);
 
             return this;
         }
@@ -169,7 +168,7 @@
         /// </summary>
         /// <param name="fetchStrategy">The fetch strategy.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> Fetch(IFetchStrategy<T> fetchStrategy)
+        public QueryOptions<T> Fetch(IFetchQueryStrategy<T> fetchStrategy)
         {
             if (fetchStrategy == null)
                 throw new ArgumentNullException(nameof(fetchStrategy));
@@ -177,7 +176,7 @@
             var paths = FetchStrategy != null ? FetchStrategy.IncludePaths : new List<string>();
             var mergedPaths = paths.Union(fetchStrategy.IncludePaths).ToList();
 
-            FetchStrategy = FetchStrategy ?? new FetchStrategy<T>();
+            FetchStrategy = FetchStrategy ?? new FetchQueryStrategy<T>();
 
             mergedPaths.ForEach(path => FetchStrategy.Include(path));
 
@@ -194,7 +193,7 @@
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
 
-            FetchStrategy = FetchStrategy ?? new FetchStrategy<T>();
+            FetchStrategy = FetchStrategy ?? new FetchQueryStrategy<T>();
 
             FetchStrategy.Include(path);
 
@@ -236,12 +235,12 @@
         /// <summary>
         /// Gets the fetch strategy which defines the child objects that should be retrieved when loading the entity.
         /// </summary>
-        public IFetchStrategy<T> FetchStrategy { get; private set; }
+        public IFetchQueryStrategy<T> FetchStrategy { get; private set; }
 
         /// <summary>
         /// Gets the specification.
         /// </summary>
-        public ISpecification<T> Specification { get; private set; }
+        public ISpecificationQueryStrategy<T> SpecificationStrategy { get; private set; }
 
         #endregion
     }

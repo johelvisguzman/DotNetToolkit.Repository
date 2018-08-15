@@ -1,14 +1,13 @@
 ﻿namespace DotNetToolkit.Repository.Queries
 {
-    using FetchStrategies;
-    using Specifications;
+    using Strategies;
     using System.Collections.Generic;
 
     /// <summary>
     /// Represents a query options which can be used for sorting or paging on queries.
     /// </summary>
     /// <typeparam name="T">The entity type of the repository.</typeparam>
-    public interface IQueryOptions<T> where T : class
+    public interface IQueryOptions<T>
     {
         /// <summary>
         /// Gets the number of rows of the data page to retrieve.
@@ -28,11 +27,11 @@
         /// <summary>
         /// Gets the fetch strategy which defines the child objects that should be retrieved when loading the entity.
         /// </summary>
-        IFetchStrategy<T> FetchStrategy { get; }
+        IFetchQueryStrategy<T> FetchStrategy { get; }
 
         /// <summary>
         /// Gets the specification.
         /// </summary>
-        ISpecification<T> Specification { get; }
+        ISpecificationQueryStrategy<T> SpecificationStrategy { get; }
     }
 }

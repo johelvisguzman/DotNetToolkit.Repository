@@ -2,12 +2,12 @@
 {
     using Configuration;
     using Configuration.Conventions;
-    using FetchStrategies;
     using Helpers;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
     using Properties;
     using Queries;
+    using Queries.Strategies;
     using System;
     using System.Collections;
     using System.Collections.Concurrent;
@@ -317,7 +317,7 @@
         /// <returns>The entity <see cref="System.Linq.IQueryable{TEntity}" />.</returns>
         public IQueryable<TEntity> AsQueryable<TEntity>() where TEntity : class
         {
-            return AsQueryable<TEntity>((IFetchStrategy<TEntity>)null);
+            return AsQueryable<TEntity>((IFetchQueryStrategy<TEntity>)null);
         }
 
         /// <summary>
@@ -325,7 +325,7 @@
         /// </summary>
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
         /// <returns>The entity <see cref="System.Linq.IQueryable{TEntity}" />.</returns>
-        public IQueryable<TEntity> AsQueryable<TEntity>(IFetchStrategy<TEntity> fetchStrategy) where TEntity : class
+        public IQueryable<TEntity> AsQueryable<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy) where TEntity : class
         {
             var entities = OnFileLoaded<TEntity>();
 
@@ -339,7 +339,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <returns>The entity found in the repository.</returns>
-        public virtual TEntity Find<TEntity>(IFetchStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
+        public virtual TEntity Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));

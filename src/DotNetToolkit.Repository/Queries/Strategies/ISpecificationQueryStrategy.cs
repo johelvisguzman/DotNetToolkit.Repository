@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Specifications
+﻿namespace DotNetToolkit.Repository.Queries.Strategies
 {
     using System;
     using System.Linq;
@@ -9,7 +9,7 @@
     /// <see cref="https://en.wikipedia.org/wiki/Specification_pattern" />
     /// </summary>
     /// <typeparam name="T">The type pf the entity.</typeparam>
-    public interface ISpecification<T>
+    public interface ISpecificationQueryStrategy<T>
     {
         /// <summary>
         /// Gets the function to test the entity and determine if it satisfies the specified criteria.

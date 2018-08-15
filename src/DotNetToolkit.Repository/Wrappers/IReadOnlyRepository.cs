@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Wrappers
 {
-    using FetchStrategies;
-    using System;
+    using Queries.Strategies;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -42,7 +41,7 @@
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <return>The entity found.</return>
-        TEntity Find(TKey1 key1, TKey2 key2, TKey3 key3, IFetchStrategy<TEntity> fetchStrategy);
+        TEntity Find(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy);
 
         /// <summary>
         /// Asynchronously determines whether the repository contains an entity with the given composite primary key values.
@@ -73,7 +72,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken());
+        Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken());
     }
 
     /// <summary>
@@ -109,7 +108,7 @@
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <return>The entity found.</return>
-        TEntity Find(TKey1 key1, TKey2 key2, IFetchStrategy<TEntity> fetchStrategy);
+        TEntity Find(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy);
 
         /// <summary>
         /// Asynchronously determines whether the repository contains an entity with the given composite primary key values.
@@ -137,7 +136,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken());
+        Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken());
     }
 
     /// <summary>
@@ -169,7 +168,7 @@
         /// <param name="key">The value of the primary key for the entity to be found.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <return>The entity found.</return>
-        TEntity Find(TKey key, IFetchStrategy<TEntity> fetchStrategy);
+        TEntity Find(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy);
 
         /// <summary>
         /// Asynchronously determines whether the repository contains an entity with the given primary key value.
@@ -194,7 +193,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        Task<TEntity> FindAsync(TKey key, IFetchStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken());
+        Task<TEntity> FindAsync(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken());
     }
 
     /// <summary>

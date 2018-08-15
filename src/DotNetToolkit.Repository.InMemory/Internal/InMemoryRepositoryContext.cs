@@ -2,10 +2,10 @@
 {
     using Configuration;
     using Configuration.Conventions;
-    using FetchStrategies;
     using Helpers;
     using Properties;
     using Queries;
+    using Queries.Strategies;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -206,7 +206,7 @@
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
         /// <param name="fetchStrategy"></param>
         /// <returns>The entity <see cref="T:System.Linq.IQueryable`1" />.</returns>
-        public IQueryable<TEntity> AsQueryable<TEntity>(IFetchStrategy<TEntity> fetchStrategy) where TEntity : class
+        public IQueryable<TEntity> AsQueryable<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy) where TEntity : class
         {
             return AsQueryable<TEntity>();
         }
@@ -218,7 +218,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <returns>The entity found in the repository.</returns>
-        public virtual TEntity Find<TEntity>(IFetchStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
+        public virtual TEntity Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));

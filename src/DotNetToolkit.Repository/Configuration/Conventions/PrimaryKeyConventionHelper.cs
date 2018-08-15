@@ -2,7 +2,7 @@
 {
     using Helpers;
     using Properties;
-    using Specifications;
+    using Queries.Strategies;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
@@ -131,7 +131,7 @@
         /// Returns a specification for getting an entity by it's primary key.
         /// </summary>
         /// <returns>The new specification.</returns>
-        public static ISpecification<TEntity> GetByPrimaryKeySpecification<TEntity>(params object[] keyValues) where TEntity : class
+        public static ISpecificationQueryStrategy<TEntity> GetByPrimaryKeySpecification<TEntity>(params object[] keyValues) where TEntity : class
         {
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));
@@ -159,7 +159,7 @@
 
             var lambda = Expression.Lambda<Func<TEntity, bool>>(exp, parameter);
 
-            return new Specification<TEntity>(lambda);
+            return new SpecificationQueryStrategy<TEntity>(lambda);
         }
 
         /// <summary>

@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Configuration
 {
-    using FetchStrategies;
     using Queries;
+    using Queries.Strategies;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -59,7 +59,7 @@
         /// </summary>
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
         /// <returns>The entity <see cref="System.Linq.IQueryable{TEntity}" />.</returns>
-        IQueryable<TEntity> AsQueryable<TEntity>(IFetchStrategy<TEntity> fetchStrategy) where TEntity : class;
+        IQueryable<TEntity> AsQueryable<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy) where TEntity : class;
 
         /// <summary>
         /// Finds an entity with the given primary key values in the repository.
@@ -68,7 +68,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <returns>The entity found in the repository.</returns>
-        TEntity Find<TEntity>(IFetchStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class;
+        TEntity Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class;
 
         /// <summary>
         /// Finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.

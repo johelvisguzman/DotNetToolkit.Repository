@@ -3,8 +3,8 @@
     using Data;
     using EntityFrameworkCore;
     using Factories;
-    using FetchStrategies;
     using Queries;
+    using Queries.Strategies;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -810,7 +810,7 @@
             int key = 1;
             const string name = "Random Name";
 
-            var fetchStrategy = new FetchStrategy<Customer>();
+            var fetchStrategy = new FetchQueryStrategy<Customer>();
             fetchStrategy.Include(x => x.Address);
 
             var entity = new Customer { Id = key, Name = name };
@@ -1859,7 +1859,7 @@
             int key = 1;
             const string name = "Random Name";
 
-            var fetchStrategy = new FetchStrategy<Customer>();
+            var fetchStrategy = new FetchQueryStrategy<Customer>();
             fetchStrategy.Include(x => x.Address);
 
             var entity = new Customer { Id = key, Name = name };

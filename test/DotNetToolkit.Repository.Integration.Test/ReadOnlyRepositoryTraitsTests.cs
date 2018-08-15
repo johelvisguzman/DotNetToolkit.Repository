@@ -2,9 +2,9 @@
 {
     using Data;
     using Factories;
-    using FetchStrategies;
     using Moq;
     using Queries;
+    using Queries.Strategies;
     using System;
     using System.Collections.Generic;
     using System.Linq.Expressions;
@@ -102,13 +102,13 @@
         {
             int key = 1;
             Expression<Func<Customer, bool>> predicate = x => true;
-            var fetchStrategy = new FetchStrategy<Customer>();
+            var fetchStrategy = new FetchQueryStrategy<Customer>();
             Expression<Func<Customer, string>> selector = x => x.Name;
 
             var mock = new Mock<IRepository<Customer>>();
 
             mock.Setup(x => x.Find(It.IsAny<int>()));
-            mock.Setup(x => x.Find(It.IsAny<int>(), It.IsAny<IFetchStrategy<Customer>>()));
+            mock.Setup(x => x.Find(It.IsAny<int>(), It.IsAny<IFetchQueryStrategy<Customer>>()));
 
             var readOnlyRepo = new ReadOnlyRepository<Customer, int>(mock.Object);
 
