@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Queries.Strategies
 {
+    using Helpers;
     using System;
     using System.Collections.Generic;
     using System.Linq.Expressions;
