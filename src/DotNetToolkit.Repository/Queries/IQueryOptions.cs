@@ -7,7 +7,7 @@
     /// Represents a query options which can be used for sorting or paging on queries.
     /// </summary>
     /// <typeparam name="T">The entity type of the repository.</typeparam>
-    public interface IQueryOptions<T> where T : class
+    public interface IQueryOptions<T>
     {
         /// <summary>
         /// Gets the number of rows of the data page to retrieve.

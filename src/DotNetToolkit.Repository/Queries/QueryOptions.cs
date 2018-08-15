@@ -12,7 +12,7 @@
     /// </summary>
     /// <typeparam name="T">The entity type of the repository.</typeparam>
     /// <seealso cref="DotNetToolkit.Repository.Queries.IQueryOptions{T}" />
-    public class QueryOptions<T> : IQueryOptions<T> where T : class
+    public class QueryOptions<T> : IQueryOptions<T>
     {
         #region Fields
 
