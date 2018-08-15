@@ -231,7 +231,7 @@
             if (!store.ContainsKey(entityType))
                 return default(TEntity);
 
-            var key = PrimaryKeyConventionHelper.MergePrimaryKeyValues(keyValues);
+            var key = PrimaryKeyConventionHelper.Combine(keyValues);
 
             store[entityType].TryGetValue(key, out object entity);
 

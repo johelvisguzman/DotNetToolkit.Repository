@@ -346,7 +346,7 @@
 
             ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
 
-            var key = PrimaryKeyConventionHelper.MergePrimaryKeyValues(keyValues);
+            var key = PrimaryKeyConventionHelper.Combine(keyValues);
             var entityType = typeof(TEntity);
             var context = InvokeOnFileLoaded(entityType).ToDictionary(PrimaryKeyConventionHelper.GetPrimaryKeyValue);
 
