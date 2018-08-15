@@ -74,7 +74,7 @@
         Task<bool> ExistsAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class;
 
         /// <summary>
-        /// Asynchronously returns a new <see cref="Dictionary{TDictionaryKey, TElemen}" /> according to the specified <paramref name="keySelector" />, and an element selector function with entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
+        /// Asynchronously returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, and an element selector function with entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
         /// </summary>
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
         /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
