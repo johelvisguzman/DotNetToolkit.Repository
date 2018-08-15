@@ -79,7 +79,7 @@
         }
 
         /// <summary>
-        /// Gets the primary key value for the specified object. If the primary key is defined as a composite key, then the result will be returned as a tupple.
+        /// Gets the primary key value for the specified object. If the primary key is defined as a composite key, then the result will be returned as a tuple.
         /// </summary>
         /// <returns>The primary key value.</returns>
         public static object GetPrimaryKeyValue(object obj)
@@ -91,14 +91,14 @@
                 .Select(x => x.GetValue(obj, null))
                 .ToArray();
 
-            return MergePrimaryKeyValues(keyValues);
+            return Combine(keyValues);
         }
 
         /// <summary>
-        /// Merges the specified collection of key values into a tupple if there are more than one key; otherwise, it will return the single key object.
+        /// Merges the specified collection of key values into a tuple if there are more than one key; otherwise, it will return the single key object.
         /// </summary>
         /// <returns>The merged primary key value.</returns>
-        public static object MergePrimaryKeyValues(object[] keyValues)
+        public static object Combine(object[] keyValues)
         {
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));

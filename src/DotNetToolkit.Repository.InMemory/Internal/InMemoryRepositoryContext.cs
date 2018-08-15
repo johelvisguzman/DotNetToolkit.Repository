@@ -225,32 +225,13 @@
 
             ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
 
-            object key;
-
-            switch (keyValues.Length)
-            {
-                case 3:
-                    {
-                        key = Tuple.Create(keyValues[0], keyValues[1], keyValues[2]);
-                        break;
-                    }
-                case 2:
-                    {
-                        key = Tuple.Create(keyValues[0], keyValues[1]);
-                        break;
-                    }
-                default:
-                    {
-                        key = keyValues[0];
-                        break;
-                    }
-            }
-
             var entityType = typeof(TEntity);
             var store = InMemoryCache.Instance.GetDatabaseStore(DatabaseName);
 
             if (!store.ContainsKey(entityType))
                 return default(TEntity);
+
+            var key = PrimaryKeyConventionHelper.Combine(keyValues);
 
             store[entityType].TryGetValue(key, out object entity);
 
