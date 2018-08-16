@@ -120,13 +120,28 @@
   <data name="EntityKeyNotFound" xml:space="preserve">
     <value>No entity found in the repository with the '{0}' key.</value>
   </data>
-  <data name="EntityKeyValueTypeInvalid" xml:space="preserve">
-    <value>The instance of entity type '{0}' cannot be added to the in-memory store because the key type '{1}' is an invalid primary key property type.</value>
-  </data>
-  <data name="EntityKeyValueTypeMismatch" xml:space="preserve">
-    <value>The key value was of type '{0}', which does not match the property type of '{1}'.</value>
+  <data name="EntityPrimaryKeyValuesLengthMismatch" xml:space="preserve">
+    <value>The number of primary key values passed must match number of primary key values defined on the entity.</value>
   </data>
   <data name="EntityRequiresPrimaryKey" xml:space="preserve">
     <value>The instance of entity type '{0}' requires a primary key to be defined.</value>
+  </data>
+  <data name="ForeignKeyAttributeOnPropertyNotFoundOnDependentType" xml:space="preserve">
+    <value>The ForeignKeyAttribute on property '{0}' on type '{1}' is not valid. The foreign key name '{2}' was not found on the dependent type '{1}'. The Name value should be a comma separated list of foreign key property names.</value>
+  </data>
+  <data name="InMemoryContext_EntityAlreadyBeingTrackedInStore" xml:space="preserve">
+    <value>The instance of entity type '{0}' cannot be added to the in-memory store because another instance of this type with the same key is already being tracked.</value>
+  </data>
+  <data name="InMemoryContext_EntityKeyValueTypeInvalid" xml:space="preserve">
+    <value>The instance of entity type '{0}' cannot be added to the in-memory store because the key type '{1}' is an invalid primary key property type.</value>
+  </data>
+  <data name="InMemoryContext_EntityNotFoundInStore" xml:space="preserve">
+    <value>Attempted to update or delete an entity that does not exist in the in-memory store.</value>
+  </data>
+  <data name="InMemoryContext_TransactionNotSupported" xml:space="preserve">
+    <value>The repository context does not support transactions.</value>
+  </data>
+  <data name="IRepositoryContextNotAsync" xml:space="preserve">
+    <value>The source IRepositoryContext doesn't implement IRepositoryContextAsync. Only sources that implement IRepositoryContextAsync can be used for asynchronous operations.</value>
   </data>
 </root>

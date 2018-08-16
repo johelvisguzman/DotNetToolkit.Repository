@@ -70,20 +70,11 @@ namespace DotNetToolkit.Repository.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; cannot be added to the in-memory store because the key type &apos;{1}&apos; is an invalid primary key property type..
+        ///   Looks up a localized string similar to The number of primary key values passed must match number of primary key values defined on the entity..
         /// </summary>
-        internal static string EntityKeyValueTypeInvalid {
+        internal static string EntityPrimaryKeyValuesLengthMismatch {
             get {
-                return ResourceManager.GetString("EntityKeyValueTypeInvalid", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The key value was of type &apos;{0}&apos;, which does not match the property type of &apos;{1}&apos;..
-        /// </summary>
-        internal static string EntityKeyValueTypeMismatch {
-            get {
-                return ResourceManager.GetString("EntityKeyValueTypeMismatch", resourceCulture);
+                return ResourceManager.GetString("EntityPrimaryKeyValuesLengthMismatch", resourceCulture);
             }
         }
         
@@ -93,6 +84,60 @@ namespace DotNetToolkit.Repository.Properties {
         internal static string EntityRequiresPrimaryKey {
             get {
                 return ResourceManager.GetString("EntityRequiresPrimaryKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The ForeignKeyAttribute on property &apos;{0}&apos; on type &apos;{1}&apos; is not valid. The foreign key name &apos;{2}&apos; was not found on the dependent type &apos;{1}&apos;. The Name value should be a comma separated list of foreign key property names..
+        /// </summary>
+        internal static string ForeignKeyAttributeOnPropertyNotFoundOnDependentType {
+            get {
+                return ResourceManager.GetString("ForeignKeyAttributeOnPropertyNotFoundOnDependentType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; cannot be added to the in-memory store because another instance of this type with the same key is already being tracked..
+        /// </summary>
+        internal static string InMemoryContext_EntityAlreadyBeingTrackedInStore {
+            get {
+                return ResourceManager.GetString("InMemoryContext_EntityAlreadyBeingTrackedInStore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; cannot be added to the in-memory store because the key type &apos;{1}&apos; is an invalid primary key property type..
+        /// </summary>
+        internal static string InMemoryContext_EntityKeyValueTypeInvalid {
+            get {
+                return ResourceManager.GetString("InMemoryContext_EntityKeyValueTypeInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Attempted to update or delete an entity that does not exist in the in-memory store..
+        /// </summary>
+        internal static string InMemoryContext_EntityNotFoundInStore {
+            get {
+                return ResourceManager.GetString("InMemoryContext_EntityNotFoundInStore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The repository context does not support transactions..
+        /// </summary>
+        internal static string InMemoryContext_TransactionNotSupported {
+            get {
+                return ResourceManager.GetString("InMemoryContext_TransactionNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The source IRepositoryContext doesn&apos;t implement IRepositoryContextAsync. Only sources that implement IRepositoryContextAsync can be used for asynchronous operations..
+        /// </summary>
+        internal static string IRepositoryContextNotAsync {
+            get {
+                return ResourceManager.GetString("IRepositoryContextNotAsync", resourceCulture);
             }
         }
     }

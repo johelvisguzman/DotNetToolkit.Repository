@@ -23,7 +23,7 @@
             <ListBox x:Name="ListBox" ItemsSource="{Binding Workspaces}" SelectedItem="{Binding ActiveItem, Mode=OneWay}" Style="{StaticResource NavigateListBoxStyle}">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">
-                        <i:InvokeCommandAction Command="{Binding Navigator.NavigateToCommand}" CommandParameter="{Binding ElementName=ListBox, Path=SelectedItem}"/>
+                        <i:InvokeCommandAction Command="{Binding Navigator.NavigateToCommand}" CommandParameter="{Binding ElementName=ListBox, Path=SelectedItem}" />
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </ListBox>

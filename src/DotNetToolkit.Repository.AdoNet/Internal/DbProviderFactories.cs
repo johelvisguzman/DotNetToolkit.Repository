@@ -2,7 +2,6 @@
 {
     using Microsoft.DotNet.PlatformAbstractions;
     using Microsoft.Extensions.DependencyModel;
-    using Properties;
     using System;
     using System.Collections.Generic;
     using System.Data.Common;
@@ -11,8 +10,40 @@
     using System.Linq;
     using System.Reflection;
 
+    /// <summary>
+    /// Represents a set of static methods for creating one or more instances of System.Data.Common.DbProviderFactory classes.
+    /// </summary>
     internal static class DbProviderFactories
     {
+        #region Public Methods
+
+        /// <summary>
+        /// Returns an instance of a DbProviderFactory.
+        /// </summary>
+        /// <param name="providerName">Invariant name of a provider.</param>
+        /// <returns>An instance of a DbProviderFactory for a specified provider name.</returns>
+        public static DbProviderFactory GetFactory(string providerName)
+        {
+#if NETFULL
+            return System.Data.Common.DbProviderFactories.GetFactory(providerName);
+#else
+            var providername = providerName.ToLower();
+
+            if (providerName == "system.data.sqlclient")
+                return GetFactory(DataAccessProviderTypes.SqlServer);
+            if (providerName == "system.data.sqlite" || providerName == "microsoft.data.sqlite")
+                return GetFactory(DataAccessProviderTypes.SqLite);
+            if (providerName == "mysql.data.mysqlclient" || providername == "mysql.data")
+                return GetFactory(DataAccessProviderTypes.MySql);
+            if (providerName == "npgsql")
+                return GetFactory(DataAccessProviderTypes.PostgreSql);
+
+            throw new NotSupportedException($"Unsupported Provider Factory specified: {providerName}");
+#endif
+        }
+
+        #endregion
+
         #region Private Methods
 
         private static Type GetTypeFromName(string typeName)
@@ -119,7 +150,7 @@
             }
 
             if (instance == null)
-                throw new InvalidOperationException(string.Format(Resources.UnableToRetrieveDbProviderFactoryForm, dbProviderFactoryTypename));
+                throw new InvalidOperationException($"Unable to retrieve DbProviderFactory for: {dbProviderFactoryTypename}");
 
             return instance as DbProviderFactory;
         }
@@ -148,36 +179,7 @@
                 return System.Data.Common.DbProviderFactories.GetFactory("System.Data.SqlServerCe.4.0");
 #endif
 
-            throw new NotSupportedException(string.Format(Resources.UnsupportedProviderFactory, type.ToString()));
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Returns an instance of a DbProviderFactory.
-        /// </summary>
-        /// <param name="providerName">Invariant name of a provider.</param>
-        /// <returns>An instance of a DbProviderFactory for a specified provider name.</returns>
-        public static DbProviderFactory GetFactory(string providerName)
-        {
-#if NETFULL
-            return System.Data.Common.DbProviderFactories.GetFactory(providerName);
-#else
-            var providername = providerName.ToLower();
-
-            if (providerName == "system.data.sqlclient")
-                return GetFactory(DataAccessProviderTypes.SqlServer);
-            if (providerName == "system.data.sqlite" || providerName == "microsoft.data.sqlite")
-                return GetFactory(DataAccessProviderTypes.SqLite);
-            if (providerName == "mysql.data.mysqlclient" || providername == "mysql.data")
-                return GetFactory(DataAccessProviderTypes.MySql);
-            if (providerName == "npgsql")
-                return GetFactory(DataAccessProviderTypes.PostgreSql);
-
-            throw new NotSupportedException(string.Format(Resources.UnsupportedProviderFactory, providerName));
-#endif
+            throw new NotSupportedException($"Unsupported Provider Factory specified: {type}");
         }
 
         #endregion

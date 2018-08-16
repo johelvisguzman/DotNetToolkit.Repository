@@ -1,8 +1,12 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
-    using AdoNet;
-    using FetchStrategies;
-    using Specifications;
+    using AdoNet.Internal;
+    using AdoNet.Internal.Schema;
+    using Data;
+    using Queries;
+    using Queries.Strategies;
+    using System;
+    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
@@ -12,16 +16,17 @@
     public class AdoNetRepositoryTests
     {
         [Fact]
-        public void GetWithFetchStrategyWithNavigationProperty()
+        public void FindWithNavigationPropertyByKey_OneToOneRelationship()
         {
-            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
             var customerKey = 1;
             var addressKey = 1;
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(providerName, connectionString);
-            var customerRepo = new AdoNetRepository<Customer>(providerName, connectionString);
-            var customerFetchStrategy = new FetchStrategy<Customer>();
+            var addressRepo = new Repository<CustomerAddress>(context);
+            var customerRepo = new Repository<Customer>(context);
+            var customerFetchStrategy = new FetchQueryStrategy<Customer>();
 
             var entity = new Customer
             {
@@ -44,23 +49,66 @@
 
             addressRepo.Add(address);
 
-            TestCustomerAddress(address, customerRepo.Get(customerKey, customerFetchStrategy).Address);
+            TestCustomerAddress(address, customerRepo.Find(customerKey, customerFetchStrategy).Address);
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
-            TestCustomerAddress(address, customerRepo.Get(customerKey).Address);
+            TestCustomerAddress(address, customerRepo.Find(customerKey).Address);
         }
 
         [Fact]
-        public void GetWithFetchStrategyAndForeignKeyAnnotationChanged()
+        public void FindWithCompositeNavigationPropertyByKey_OneToOneRelationship()
         {
-            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
+
+            var customerKey = 1;
+            var addressKey1 = 1;
+            var addressKey2 = 2;
+
+            var addressRepo = new Repository<CustomerAddressWithTwoCompositePrimaryKey>(context);
+            var customerRepo = new Repository<CustomerWithTwoCompositePrimaryKey>(context);
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithTwoCompositePrimaryKey>();
+
+            var entity = new CustomerWithTwoCompositePrimaryKey
+            {
+                Id = customerKey,
+                Name = "Random Name",
+                AddressId1 = addressKey1,
+                AddressId2 = addressKey2
+            };
+
+            var address = new CustomerAddressWithTwoCompositePrimaryKey
+            {
+                Id1 = addressKey1,
+                Id2 = addressKey2,
+                Street = "Street",
+                City = "New City",
+                State = "ST",
+                CustomerId = customerKey,
+                Customer = entity
+            };
+
+            addressRepo.Add(address);
+            customerRepo.Add(entity);
+
+            TestCustomerAddress(address, customerRepo.Find(customerKey, customerFetchStrategy).Address);
+
+            // for one to one, the navigation properties will be included automatically (no need to fetch)
+            TestCustomerAddress(address, customerRepo.Find(customerKey).Address);
+        }
+
+        [Fact]
+        public void FindWithForeignKeyAnnotationChangedByKey_OneToOneRelationship()
+        {
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
             var customerKey = 1;
             var addressKey = 1;
 
-            var addressWithForeignKeyAnnotationOnForeignKeyRepo = new AdoNetRepository<CustomerAddressWithForeignKeyAnnotationOnForeignKey>(providerName, connectionString);
-            var customerWithForeignKeyAnnotationOnForeignKeyRepo = new AdoNetRepository<CustomerWithForeignKeyAnnotationOnForeignKey>(providerName, connectionString);
-            var customerWithForeignKeyAnnotationOnForeignKeyFetchStrategy = new FetchStrategy<CustomerWithForeignKeyAnnotationOnForeignKey>();
+            var addressWithForeignKeyAnnotationOnForeignKeyRepo = new Repository<CustomerAddressWithForeignKeyAnnotationOnForeignKey>(context);
+            var customerWithForeignKeyAnnotationOnForeignKeyRepo = new Repository<CustomerWithForeignKeyAnnotationOnForeignKey>(context);
+            var customerWithForeignKeyAnnotationOnForeignKeyFetchStrategy = new FetchQueryStrategy<CustomerWithForeignKeyAnnotationOnForeignKey>();
 
             var customerWithForeignKeyAnnotationOnForeignKey = new CustomerWithForeignKeyAnnotationOnForeignKey
             {
@@ -83,14 +131,17 @@
 
             addressWithForeignKeyAnnotationOnForeignKeyRepo.Add(addressWithForeignKeyAnnotationOnForeignKey);
 
-            TestCustomerAddress(addressWithForeignKeyAnnotationOnForeignKey, customerWithForeignKeyAnnotationOnForeignKeyRepo.Get(customerKey, customerWithForeignKeyAnnotationOnForeignKeyFetchStrategy).Address);
+            TestCustomerAddress(addressWithForeignKeyAnnotationOnForeignKey, customerWithForeignKeyAnnotationOnForeignKeyRepo.Find(customerKey, customerWithForeignKeyAnnotationOnForeignKeyFetchStrategy).Address);
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
-            TestCustomerAddress(addressWithForeignKeyAnnotationOnForeignKey, customerWithForeignKeyAnnotationOnForeignKeyRepo.Get(customerKey).Address);
+            TestCustomerAddress(addressWithForeignKeyAnnotationOnForeignKey, customerWithForeignKeyAnnotationOnForeignKeyRepo.Find(customerKey).Address);
 
-            var addressWithForeignKeyAnnotationOnNavigationPropertyRepo = new AdoNetRepository<CustomerAddressWithForeignKeyAnnotationOnNavigationProperty>(providerName, connectionString);
-            var customerWithForeignKeyAnnotationOnNavigationPropertyRepo = new AdoNetRepository<CustomerWithForeignKeyAnnotationOnNavigationProperty>(providerName, connectionString);
-            var customerWithForeignKeyAnnotationOnNavigationPropertyFetchStrategy = new FetchStrategy<CustomerWithForeignKeyAnnotationOnNavigationProperty>();
+            var addressWithForeignKeyAnnotationOnNavigationPropertyRepo = new Repository<CustomerAddressWithForeignKeyAnnotationOnNavigationProperty>(context);
+            var customerWithForeignKeyAnnotationOnNavigationPropertyRepo = new Repository<CustomerWithForeignKeyAnnotationOnNavigationProperty>(context);
+            var customerWithForeignKeyAnnotationOnNavigationPropertyFetchStrategy = new FetchQueryStrategy<CustomerWithForeignKeyAnnotationOnNavigationProperty>();
+
+            customerKey = 2;
+            addressKey = 2;
 
             var customerWithForeignKeyAnnotationOnNavigationProperty = new CustomerWithForeignKeyAnnotationOnNavigationProperty
             {
@@ -113,22 +164,63 @@
 
             addressWithForeignKeyAnnotationOnNavigationPropertyRepo.Add(addressWithForeignKeyAnnotationOnNavigationProperty);
 
-            TestCustomerAddress(addressWithForeignKeyAnnotationOnNavigationProperty, customerWithForeignKeyAnnotationOnNavigationPropertyRepo.Get(customerKey, customerWithForeignKeyAnnotationOnNavigationPropertyFetchStrategy).Address);
+            TestCustomerAddress(addressWithForeignKeyAnnotationOnNavigationProperty, customerWithForeignKeyAnnotationOnNavigationPropertyRepo.Find(customerKey, customerWithForeignKeyAnnotationOnNavigationPropertyFetchStrategy).Address);
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
-            TestCustomerAddress(addressWithForeignKeyAnnotationOnNavigationProperty, customerWithForeignKeyAnnotationOnNavigationPropertyRepo.Get(customerKey).Address);
+            TestCustomerAddress(addressWithForeignKeyAnnotationOnNavigationProperty, customerWithForeignKeyAnnotationOnNavigationPropertyRepo.Find(customerKey).Address);
         }
 
         [Fact]
-        public async Task GetWithFetchStrategyWithNavigationPropertyAsync()
+        public void FindWithNavigationPropertyByCompositeKey_OneToOneRelationship()
         {
-            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(providerName, connectionString);
-            var customerRepo = new AdoNetRepository<Customer>(providerName, connectionString);
             var customerKey = 1;
             var addressKey = 1;
-            var fetchStrategy = new FetchStrategy<Customer>();
+
+            var addressRepo = new Repository<CustomerCompositeAddress>(context);
+            var customerRepo = new Repository<CustomerWithCompositeAddress>(context);
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithCompositeAddress>();
+
+            var entity = new CustomerWithCompositeAddress
+            {
+                Id = customerKey,
+                Name = "Random Name",
+                AddressId = addressKey
+            };
+
+            customerRepo.Add(entity);
+
+            var address = new CustomerCompositeAddress
+            {
+                Id = addressKey,
+                Street = "Street",
+                City = "New City",
+                State = "ST",
+                CustomerId = customerKey,
+                Customer = entity
+            };
+
+            addressRepo.Add(address);
+
+            TestCustomerAddress(address, customerRepo.Find(customerKey, customerFetchStrategy).Address);
+
+            // for one to one, the navigation properties will be included automatically (no need to fetch)
+            TestCustomerAddress(address, customerRepo.Find(customerKey).Address);
+        }
+
+        [Fact]
+        public async Task FindWithNavigationPropertyByKeyAsync_OneToOneRelationship()
+        {
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
+
+            var addressRepo = new Repository<CustomerAddress>(context);
+            var customerRepo = new Repository<Customer>(context);
+            var customerKey = 1;
+            var addressKey = 1;
+            var fetchStrategy = new FetchQueryStrategy<Customer>();
 
             var entity = new Customer
             {
@@ -151,28 +243,26 @@
 
             addressRepo.Add(address);
 
-            TestCustomerAddress(address, (await customerRepo.GetAsync(customerKey, fetchStrategy)).Address);
+            TestCustomerAddress(address, (await customerRepo.FindAsync(customerKey, fetchStrategy)).Address);
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
-            TestCustomerAddress(address, (await customerRepo.GetAsync(customerKey)).Address);
+            TestCustomerAddress(address, (await customerRepo.FindAsync(customerKey)).Address);
         }
 
         [Fact]
-        public void FindWithFetchStrategyWithNavigationProperty()
+        public void FindWithNavigationProperty_OneToOneRelationship()
         {
-            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(providerName, connectionString);
-            var customerRepo = new AdoNetRepository<Customer>(providerName, connectionString);
+            var addressRepo = new Repository<CustomerAddress>(context);
+            var customerRepo = new Repository<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
             const string name = "Random Name";
 
-            var spec = new Specification<Customer>(x => x.Name.Equals(name))
-            {
-                FetchStrategy = new FetchStrategy<Customer>()
-            };
+            var options = new QueryOptions<Customer>();
 
             var entity = new Customer
             {
@@ -197,27 +287,25 @@
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(address, customerRepo.Find(x => x.Name.Equals(name)).Address);
-            TestCustomerAddress(address, customerRepo.Find(spec).Address);
+            TestCustomerAddress(address, customerRepo.Find(options).Address);
             TestCustomerAddress(address, customerRepo.Find<CustomerAddress>(x => x.Name.Equals(name), x => x.Address));
-            TestCustomerAddress(address, customerRepo.Find<CustomerAddress>(spec, x => x.Address));
+            TestCustomerAddress(address, customerRepo.Find<CustomerAddress>(options, x => x.Address));
         }
 
         [Fact]
-        public async Task FindWithFetchStrategyWithNavigationPropertyAsync()
+        public async Task FindWithNavigationPropertyAsync_OneToOneRelationship()
         {
-            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(providerName, connectionString);
-            var customerRepo = new AdoNetRepository<Customer>(providerName, connectionString);
+            var addressRepo = new Repository<CustomerAddress>(context);
+            var customerRepo = new Repository<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
             const string name = "Random Name";
 
-            var spec = new Specification<Customer>(x => x.Name.Equals(name))
-            {
-                FetchStrategy = new FetchStrategy<Customer>()
-            };
+            var options = new QueryOptions<Customer>();
 
             var entity = new Customer
             {
@@ -242,27 +330,25 @@
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(address, (await customerRepo.FindAsync(x => x.Name.Equals(name))).Address);
-            TestCustomerAddress(address, (await customerRepo.FindAsync(spec)).Address);
+            TestCustomerAddress(address, (await customerRepo.FindAsync(options)).Address);
             TestCustomerAddress(address, await customerRepo.FindAsync<CustomerAddress>(x => x.Name.Equals(name), x => x.Address));
-            TestCustomerAddress(address, await customerRepo.FindAsync<CustomerAddress>(spec, x => x.Address));
+            TestCustomerAddress(address, await customerRepo.FindAsync<CustomerAddress>(options, x => x.Address));
         }
 
         [Fact]
-        public void FindAlldWithFetchStrategyWithNavigationProperty()
+        public void FindAlldWithNavigationProperty_OneToOneRelationship()
         {
-            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(providerName, connectionString);
-            var customerRepo = new AdoNetRepository<Customer>(providerName, connectionString);
+            var addressRepo = new Repository<CustomerAddress>(context);
+            var customerRepo = new Repository<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
             const string name = "Random Name";
 
-            var spec = new Specification<Customer>(x => x.Name.Equals(name))
-            {
-                FetchStrategy = new FetchStrategy<Customer>()
-            };
+            var options = new QueryOptions<Customer>();
 
             var entity = new Customer
             {
@@ -288,27 +374,25 @@
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(address, customerRepo.FindAll()?.FirstOrDefault()?.Address);
             TestCustomerAddress(address, customerRepo.FindAll(x => x.Name.Equals(name))?.FirstOrDefault()?.Address);
-            TestCustomerAddress(address, customerRepo.FindAll(spec)?.FirstOrDefault()?.Address);
+            TestCustomerAddress(address, customerRepo.FindAll(options)?.FirstOrDefault()?.Address);
             TestCustomerAddress(address, customerRepo.FindAll<CustomerAddress>(x => x.Name.Equals(name), x => x.Address)?.FirstOrDefault());
-            TestCustomerAddress(address, customerRepo.FindAll<CustomerAddress>(spec, x => x.Address)?.FirstOrDefault());
+            TestCustomerAddress(address, customerRepo.FindAll<CustomerAddress>(options, x => x.Address)?.FirstOrDefault());
         }
 
         [Fact]
-        public async Task FindAlldWithFetchStrategyWithNavigationPropertyAsync()
+        public async Task FindAlldWithNavigationPropertyAsync_OneToOneRelationship()
         {
-            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(providerName, connectionString);
-            var customerRepo = new AdoNetRepository<Customer>(providerName, connectionString);
+            var addressRepo = new Repository<CustomerAddress>(context);
+            var customerRepo = new Repository<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
             const string name = "Random Name";
 
-            var spec = new Specification<Customer>(x => x.Name.Equals(name))
-            {
-                FetchStrategy = new FetchStrategy<Customer>()
-            };
+            var options = new QueryOptions<Customer>();
 
             var entity = new Customer
             {
@@ -334,27 +418,25 @@
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(address, (await customerRepo.FindAllAsync())?.FirstOrDefault()?.Address);
             TestCustomerAddress(address, (await customerRepo.FindAllAsync(x => x.Name.Equals(name)))?.FirstOrDefault()?.Address);
-            TestCustomerAddress(address, (await customerRepo.FindAllAsync(spec))?.FirstOrDefault()?.Address);
+            TestCustomerAddress(address, (await customerRepo.FindAllAsync(options))?.FirstOrDefault()?.Address);
             TestCustomerAddress(address, (await customerRepo.FindAllAsync<CustomerAddress>(x => x.Name.Equals(name), x => x.Address))?.FirstOrDefault());
-            TestCustomerAddress(address, (await customerRepo.FindAllAsync<CustomerAddress>(spec, x => x.Address))?.FirstOrDefault());
+            TestCustomerAddress(address, (await customerRepo.FindAllAsync<CustomerAddress>(options, x => x.Address))?.FirstOrDefault());
         }
 
         [Fact]
-        public void ExistWithFetchStrategyWithNavigationProperty()
+        public void ExistWithNavigationProperty_OneToOneRelationship()
         {
-            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(providerName, connectionString);
-            var customerRepo = new AdoNetRepository<Customer>(providerName, connectionString);
+            var addressRepo = new Repository<CustomerAddress>(context);
+            var customerRepo = new Repository<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
             const string street = "Street";
 
-            var spec = new Specification<Customer>(x => x.Address.Street.Equals(street))
-            {
-                FetchStrategy = new FetchStrategy<Customer>()
-            };
+            var options = new QueryOptions<Customer>();
 
             var entity = new Customer
             {
@@ -377,28 +459,26 @@
 
             addressRepo.Add(address);
 
-            Assert.True(customerRepo.Exists(spec));
+            Assert.True(customerRepo.Exists(options));
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             Assert.True(customerRepo.Exists(x => x.Address.Street.Equals(street)));
         }
 
         [Fact]
-        public async Task ExistWithFetchStrategyWithNavigationPropertyAsync()
+        public async Task ExistWithNavigationPropertyAsync_OneToOneRelationship()
         {
-            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
 
-            var addressRepo = new AdoNetRepository<CustomerAddress>(providerName, connectionString);
-            var customerRepo = new AdoNetRepository<Customer>(providerName, connectionString);
+            var addressRepo = new Repository<CustomerAddress>(context);
+            var customerRepo = new Repository<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
             const string street = "Street";
 
-            var spec = new Specification<Customer>(x => x.Address.Street.Equals(street))
-            {
-                FetchStrategy = new FetchStrategy<Customer>()
-            };
+            var options = new QueryOptions<Customer>();
 
             var entity = new Customer
             {
@@ -421,18 +501,207 @@
 
             await addressRepo.AddAsync(address);
 
-            Assert.True(await customerRepo.ExistsAsync(spec));
+            Assert.True(await customerRepo.ExistsAsync(options));
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             Assert.True(await customerRepo.ExistsAsync(x => x.Address.Street.Equals(street)));
         }
 
         [Fact]
-        public void DeleteWithKeyDataAttributeChanged()
+        public void FindWithNavigationProperty_OneToManyRelationship()
         {
-            Data.TestAdoNetConnectionStringFactory.Create(out string providerName, out string connectionString);
+            var context = Data.TestAdoNetContextFactory.Create();
+            var customerKey = 1;
 
-            var repo = new AdoNetRepository<CustomerWithKeyAnnotation>(providerName, connectionString);
+            var addressRepo = new Repository<CustomerAddressWithMultipleAddresses>(context);
+            var customerRepo = new Repository<CustomerWithMultipleAddresses>(context);
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Include(x => x.Addresses);
+            var options = new QueryOptions<CustomerWithMultipleAddresses>();
+            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Fetch(customerFetchStrategy);
+
+            var entity = new CustomerWithMultipleAddresses
+            {
+                Id = customerKey,
+                Name = "Random Name",
+            };
+
+            customerRepo.Add(entity);
+
+            var addresses = new List<CustomerAddressWithMultipleAddresses>();
+
+            for (int i = 0; i < 5; i++)
+            {
+                addresses.Add(new CustomerAddressWithMultipleAddresses()
+                {
+                    Id = i + 1,
+                    Street = $"Street {i}",
+                    City = $"New City {i}",
+                    State = $"ST {i}",
+                    CustomerId = entity.Id,
+                    Customer = entity
+                });
+            }
+
+            addressRepo.Add(addresses);
+
+            Assert.Null(customerRepo.Find(customerKey).Addresses);
+            Assert.Null(customerRepo.Find(options).Addresses);
+            Assert.Null(customerRepo.Find<ICollection<CustomerAddressWithMultipleAddresses>>(options, x => x.Addresses));
+
+            TestCustomerAddress(addresses, customerRepo.Find(customerKey, customerFetchStrategy).Addresses);
+            TestCustomerAddress(addresses, customerRepo.Find(optionsWithFetchStrategy).Addresses);
+            TestCustomerAddress(addresses, customerRepo.Find<ICollection<CustomerAddressWithMultipleAddresses>>(optionsWithFetchStrategy, x => x.Addresses));
+        }
+
+        [Fact]
+        public async void FindWithNavigationPropertyAsync_OneToManyRelationship()
+        {
+            var context = Data.TestAdoNetContextFactory.Create();
+            var customerKey = 1;
+
+            var addressRepo = new Repository<CustomerAddressWithMultipleAddresses>(context);
+            var customerRepo = new Repository<CustomerWithMultipleAddresses>(context);
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Include(x => x.Addresses);
+            var options = new QueryOptions<CustomerWithMultipleAddresses>();
+            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Fetch(customerFetchStrategy);
+
+            var entity = new CustomerWithMultipleAddresses
+            {
+                Id = customerKey,
+                Name = "Random Name",
+            };
+
+            await customerRepo.AddAsync(entity);
+
+            var addresses = new List<CustomerAddressWithMultipleAddresses>();
+
+            for (int i = 0; i < 5; i++)
+            {
+                addresses.Add(new CustomerAddressWithMultipleAddresses()
+                {
+                    Id = i + 1,
+                    Street = $"Street {i}",
+                    City = $"New City {i}",
+                    State = $"ST {i}",
+                    CustomerId = entity.Id,
+                    Customer = entity
+                });
+            }
+
+            await addressRepo.AddAsync(addresses);
+
+            Assert.Null((await customerRepo.FindAsync(customerKey)).Addresses);
+            Assert.Null((await customerRepo.FindAsync(options)).Addresses);
+            Assert.Null(await customerRepo.FindAsync<ICollection<CustomerAddressWithMultipleAddresses>>(options, x => x.Addresses));
+
+            TestCustomerAddress(addresses, (await customerRepo.FindAsync(customerKey, customerFetchStrategy)).Addresses);
+            TestCustomerAddress(addresses, (await customerRepo.FindAsync(optionsWithFetchStrategy)).Addresses);
+            TestCustomerAddress(addresses, await customerRepo.FindAsync<ICollection<CustomerAddressWithMultipleAddresses>>(optionsWithFetchStrategy, x => x.Addresses));
+        }
+
+        [Fact]
+        public void FindAlldWithNavigationProperty_OneToManyRelationship()
+        {
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
+
+            var addressRepo = new Repository<CustomerAddressWithMultipleAddresses>(context);
+            var customerRepo = new Repository<CustomerWithMultipleAddresses>(context);
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Include(x => x.Addresses);
+            var options = new QueryOptions<CustomerWithMultipleAddresses>();
+            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Fetch(customerFetchStrategy);
+
+            var customerKey = 1;
+
+            const string name = "Random Name";
+
+            var entity = new CustomerWithMultipleAddresses
+            {
+                Id = customerKey,
+                Name = name
+            };
+
+            customerRepo.Add(entity);
+
+            var addresses = new List<CustomerAddressWithMultipleAddresses>();
+
+            for (int i = 0; i < 5; i++)
+            {
+                addresses.Add(new CustomerAddressWithMultipleAddresses()
+                {
+                    Id = i + 1,
+                    Street = $"Street {i}",
+                    City = $"New City {i}",
+                    State = $"ST {i}",
+                    CustomerId = entity.Id,
+                    Customer = entity
+                });
+            }
+
+            addressRepo.Add(addresses);
+
+            Assert.Null(customerRepo.FindAll()?.FirstOrDefault()?.Addresses);
+            Assert.Null(customerRepo.FindAll(options)?.FirstOrDefault()?.Addresses);
+
+            TestCustomerAddress(addresses, customerRepo.FindAll(optionsWithFetchStrategy)?.FirstOrDefault()?.Addresses);
+            TestCustomerAddress(addresses, customerRepo.FindAll<ICollection<CustomerAddressWithMultipleAddresses>>(optionsWithFetchStrategy, x => x.Addresses)?.FirstOrDefault());
+        }
+
+        [Fact]
+        public async void FindAlldWithNavigationPropertyAsync_OneToManyRelationship()
+        {
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
+
+            var addressRepo = new Repository<CustomerAddressWithMultipleAddresses>(context);
+            var customerRepo = new Repository<CustomerWithMultipleAddresses>(context);
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Include(x => x.Addresses);
+            var options = new QueryOptions<CustomerWithMultipleAddresses>();
+            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Fetch(customerFetchStrategy);
+
+            var customerKey = 1;
+
+            const string name = "Random Name";
+
+            var entity = new CustomerWithMultipleAddresses
+            {
+                Id = customerKey,
+                Name = name
+            };
+
+            await customerRepo.AddAsync(entity);
+
+            var addresses = new List<CustomerAddressWithMultipleAddresses>();
+
+            for (int i = 0; i < 5; i++)
+            {
+                addresses.Add(new CustomerAddressWithMultipleAddresses()
+                {
+                    Id = i + 1,
+                    Street = $"Street {i}",
+                    City = $"New City {i}",
+                    State = $"ST {i}",
+                    CustomerId = entity.Id,
+                    Customer = entity
+                });
+            }
+
+            await addressRepo.AddAsync(addresses);
+
+            Assert.Null((await customerRepo.FindAllAsync())?.FirstOrDefault()?.Addresses);
+            Assert.Null((await customerRepo.FindAllAsync(options))?.FirstOrDefault()?.Addresses);
+
+            TestCustomerAddress(addresses, (await customerRepo.FindAllAsync(optionsWithFetchStrategy))?.FirstOrDefault()?.Addresses);
+            TestCustomerAddress(addresses, (await customerRepo.FindAllAsync<ICollection<CustomerAddressWithMultipleAddresses>>(optionsWithFetchStrategy, x => x.Addresses))?.FirstOrDefault());
+        }
+
+        [Fact]
+        public void DeleteWithKeyDataAttribute()
+        {
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
+
+            var repo = new Repository<CustomerWithKeyAnnotation>(context);
 
             const string name = "Random Name";
 
@@ -447,7 +716,708 @@
             Assert.False(repo.Exists(entity.Key));
         }
 
+        [Fact]
+        public async Task DeleteWithKeyDataAttributeAsync()
+        {
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
+
+            var repo = new Repository<CustomerWithKeyAnnotation>(context);
+
+            const string name = "Random Name";
+
+            var entity = new CustomerWithKeyAnnotation { Name = name };
+
+            await repo.AddAsync(entity);
+
+            Assert.True(await repo.ExistsAsync(entity.Key));
+
+            await repo.DeleteAsync(entity.Key);
+
+            Assert.False(await repo.ExistsAsync(entity.Key));
+        }
+
+        [Fact]
+        public void FindWithComplexExpressions()
+        {
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
+
+            var repo = new Repository<Customer>(context);
+
+            var numOneVar = 1;
+            var numTwoVar = 2;
+            var numThreeVar = 3;
+
+            const int numOneConst = 1;
+            const int numTwoConst = 2;
+            const int numThreeConst = 3;
+
+            var entities = new List<Customer>
+            {
+                new Customer { Id = 1, Name = "Random Name 1" },
+                new Customer { Id = 2, Name = "Random Name 2" },
+                new Customer { Id = 3, Name = "Random Test Name 3" },
+                new Customer { Id = 4, Name = "Random Name 4" }
+            };
+
+            repo.Add(entities);
+
+            // The ado.net repository should be able translate the expression into a valid sql query string to execute
+            // things like parentheses and operators should be tested
+
+            // property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(1, repo.Find(x => 1 == x.Id).Id);
+            Assert.Equal(1, repo.Find(x => x.Id == 1).Id);
+            Assert.Equal(1, repo.Find(x => 1 == 1).Id);
+            Assert.Null(repo.Find(x => 1 == 2));
+            Assert.Equal(1, repo.Find(x => x.Id == x.Id).Id);
+            Assert.Equal(1, repo.Find(x => numOneVar == x.Id).Id);
+            Assert.Equal(1, repo.Find(x => x.Id == numOneVar).Id);
+            Assert.Equal(1, repo.Find(x => numOneVar == numOneVar).Id);
+            Assert.Equal(1, repo.Find(x => numOneConst == x.Id).Id);
+            Assert.Equal(1, repo.Find(x => x.Id == numOneConst).Id);
+            Assert.Equal(1, repo.Find(x => numOneConst == numOneConst).Id);
+            Assert.Equal(1, repo.Find<int>(x => numOneConst == x.Id, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => 1 == x.Id, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id == 1, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => 1 == 1, x => x.Id));
+            Assert.Equal(0, repo.Find<int>(x => 1 == 2, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id == x.Id, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => numOneVar == x.Id, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id == numOneVar, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id == numOneConst, x => x.Id));
+
+            // boolean
+            Assert.Equal(1, repo.Find(x => true).Id);
+            Assert.Null(repo.Find(x => false));
+            Assert.Equal(1, repo.Find(x => true, x => x.Id));
+            Assert.Equal(0, repo.Find(x => false, x => x.Id));
+
+            // method calls
+            Assert.Equal(1, repo.Find(x => x.Name.StartsWith("Random")).Id);
+            Assert.Equal(2, repo.Find(x => x.Name.Equals("Random Name 2")).Id);
+            Assert.Equal(3, repo.Find(x => x.Name.Contains("Test")).Id);
+            Assert.Equal(4, repo.Find(x => x.Name.EndsWith("4")).Id);
+            Assert.Equal(1, repo.Find(x => x.Id.ToString().StartsWith(numOneVar.ToString())).Id);
+            Assert.Equal(1, repo.Find(x => x.Id.ToString().Equals(numOneVar.ToString())).Id);
+            Assert.Equal(1, repo.Find(x => x.Id.ToString().Contains(numOneVar.ToString())).Id);
+            Assert.Equal(1, repo.Find(x => x.Id.ToString().EndsWith(numOneVar.ToString())).Id);
+            Assert.Equal(1, repo.Find(x => x.Id.ToString().StartsWith(numOneConst.ToString())).Id);
+            Assert.Equal(1, repo.Find(x => x.Id.ToString().Equals(numOneConst.ToString())).Id);
+            Assert.Equal(1, repo.Find(x => x.Id.ToString().Contains(numOneConst.ToString())).Id);
+            Assert.Equal(1, repo.Find(x => x.Id.ToString().EndsWith(numOneConst.ToString())).Id);
+            Assert.Equal(1, repo.Find<int>(x => x.Id.ToString().StartsWith(numOneConst.ToString()), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Name.StartsWith("Random"), x => x.Id));
+            Assert.Equal(2, repo.Find<int>(x => x.Name.Equals("Random Name 2"), x => x.Id));
+            Assert.Equal(3, repo.Find<int>(x => x.Name.Contains("Test"), x => x.Id));
+            Assert.Equal(4, repo.Find<int>(x => x.Name.EndsWith("4"), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id.ToString().StartsWith(numOneVar.ToString()), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id.ToString().Equals(numOneVar.ToString()), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id.ToString().Contains(numOneVar.ToString()), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id.ToString().EndsWith(numOneVar.ToString()), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id.ToString().Equals(numOneConst.ToString()), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id.ToString().Contains(numOneConst.ToString()), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id.ToString().EndsWith(numOneConst.ToString()), x => x.Id));
+
+            // relational and equality operators - property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(1, repo.Find(x => x.Id == 1).Id);
+            Assert.Equal(1, repo.Find(x => x.Id != 2).Id);
+            Assert.Equal(2, repo.Find(x => x.Id > 1).Id);
+            Assert.Equal(3, repo.Find(x => x.Id >= 3).Id);
+            Assert.Equal(1, repo.Find(x => x.Id < 2).Id);
+            Assert.Equal(1, repo.Find(x => x.Id <= 2).Id);
+            Assert.Equal(1, repo.Find(x => x.Id == numOneVar).Id);
+            Assert.Equal(1, repo.Find(x => x.Id != numTwoVar).Id);
+            Assert.Equal(2, repo.Find(x => x.Id > numOneVar).Id);
+            Assert.Equal(3, repo.Find(x => x.Id >= numThreeVar).Id);
+            Assert.Equal(1, repo.Find(x => x.Id < numTwoVar).Id);
+            Assert.Equal(1, repo.Find(x => x.Id <= numTwoVar).Id);
+            Assert.Equal(1, repo.Find(x => x.Id == numOneConst).Id);
+            Assert.Equal(1, repo.Find(x => x.Id != numTwoConst).Id);
+            Assert.Equal(2, repo.Find(x => x.Id > numOneConst).Id);
+            Assert.Equal(3, repo.Find(x => x.Id >= numThreeConst).Id);
+            Assert.Equal(1, repo.Find(x => x.Id < numTwoConst).Id);
+            Assert.Equal(1, repo.Find(x => x.Id <= numTwoConst).Id);
+            Assert.Equal(1, repo.Find<int>(x => x.Id == numOneConst, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id == 1, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id != 2, x => x.Id));
+            Assert.Equal(2, repo.Find<int>(x => x.Id > 1, x => x.Id));
+            Assert.Equal(3, repo.Find<int>(x => x.Id >= 3, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id < 2, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id <= 2, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id == numOneVar, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id != numTwoVar, x => x.Id));
+            Assert.Equal(2, repo.Find<int>(x => x.Id > numOneVar, x => x.Id));
+            Assert.Equal(3, repo.Find<int>(x => x.Id >= numThreeVar, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id < numTwoVar, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id <= numTwoVar, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id != numTwoConst, x => x.Id));
+            Assert.Equal(2, repo.Find<int>(x => x.Id > numOneConst, x => x.Id));
+            Assert.Equal(3, repo.Find<int>(x => x.Id >= numThreeConst, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id < numTwoConst, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id <= numTwoConst, x => x.Id));
+
+            // conditional or operations - property variables on the left and constants on the right (and vice verse)
+            // relational and equality operators
+            Assert.Equal(1, repo.Find(x => (x.Id == 1) || (x.Id >= 1)).Id);
+            Assert.Equal(1, repo.Find(x => (1 == x.Id) || (1 <= x.Id)).Id);
+            Assert.Equal(1, repo.Find(x => (x.Id == numOneVar) || (x.Id >= numOneVar)).Id);
+            Assert.Equal(1, repo.Find(x => (numOneVar == x.Id) || (numOneVar <= x.Id)).Id);
+            Assert.Equal(1, repo.Find(x => (x.Id == numOneConst) || (x.Id >= numOneConst)).Id);
+            Assert.Equal(1, repo.Find(x => (numOneConst == x.Id) || (numOneConst <= x.Id)).Id);
+            Assert.Equal(1, repo.Find<int>(x => (x.Id == numOneConst) || (x.Id >= numOneConst), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (x.Id == 1) || (x.Id >= 1), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (1 == x.Id) || (1 <= x.Id), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (x.Id == numOneVar) || (x.Id >= numOneVar), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (numOneVar == x.Id) || (numOneVar <= x.Id), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (numOneConst == x.Id) || (numOneConst <= x.Id), x => x.Id));
+
+            // logical or operations - property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(1, repo.Find(x => (x.Id == 1) | (x.Id >= 1)).Id);
+            Assert.Equal(1, repo.Find(x => (1 == x.Id) | (1 <= x.Id)).Id);
+            Assert.Equal(1, repo.Find(x => (x.Id == numOneVar) | (x.Id >= numOneVar)).Id);
+            Assert.Equal(1, repo.Find(x => (numOneVar == x.Id) | (numOneVar <= x.Id)).Id);
+            Assert.Equal(1, repo.Find(x => (x.Id == numOneConst) | (x.Id >= numOneConst)).Id);
+            Assert.Equal(1, repo.Find(x => (numOneConst == x.Id) | (numOneConst <= x.Id)).Id);
+            Assert.Equal(1, repo.Find<int>(x => (x.Id == numOneConst) | (x.Id >= numOneConst), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (x.Id == 1) | (x.Id >= 1), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (1 == x.Id) | (1 <= x.Id), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (x.Id == numOneVar) | (x.Id >= numOneVar), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (numOneVar == x.Id) | (numOneVar <= x.Id), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (numOneConst == x.Id) | (numOneConst <= x.Id), x => x.Id));
+
+            // conditional and operations - property variables on the left and constants on the right (and vice verse)
+            // relational and equality operators
+            Assert.Equal(2, repo.Find(x => x.Id > 1 && x.Id < 3).Id);
+            Assert.Equal(2, repo.Find(x => (x.Id > 1) && (x.Id < 3)).Id);
+            Assert.Equal(2, repo.Find(x => x.Id > numOneVar && x.Id < numThreeVar).Id);
+            Assert.Equal(2, repo.Find(x => x.Id > numOneConst && x.Id < numThreeConst).Id);
+            Assert.Equal(2, repo.Find(x => (x.Id > numOneConst) && (x.Id < numThreeConst)).Id);
+            Assert.Equal(2, repo.Find(x => (x.Id > numOneVar) && (x.Id < numThreeVar)).Id);
+            Assert.Equal(2, repo.Find<int>(x => x.Id > numOneConst && x.Id < numThreeConst, x => x.Id));
+            Assert.Equal(2, repo.Find<int>(x => x.Id > 1 && x.Id < 3, x => x.Id));
+            Assert.Equal(2, repo.Find<int>(x => (x.Id > 1) && (x.Id < 3), x => x.Id));
+            Assert.Equal(2, repo.Find<int>(x => x.Id > numOneVar && x.Id < numThreeVar, x => x.Id));
+            Assert.Equal(2, repo.Find<int>(x => (x.Id > numOneVar) && (x.Id < numThreeVar), x => x.Id));
+            Assert.Equal(2, repo.Find<int>(x => (x.Id > numOneConst) && (x.Id < numThreeConst), x => x.Id));
+
+            // logical and operations - property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(1, repo.Find(x => (x.Id == 1) & (x.Id >= 1)).Id);
+            Assert.Equal(1, repo.Find(x => (1 == x.Id) & (1 <= x.Id)).Id);
+            Assert.Equal(1, repo.Find(x => (x.Id == numOneVar) | (x.Id >= numOneVar)).Id);
+            Assert.Equal(1, repo.Find(x => (numOneVar == x.Id) | (numOneVar <= x.Id)).Id);
+            Assert.Equal(1, repo.Find(x => (x.Id == numOneConst) | (x.Id >= numOneConst)).Id);
+            Assert.Equal(1, repo.Find(x => (numOneConst == x.Id) | (numOneConst <= x.Id)).Id);
+            Assert.Equal(1, repo.Find<int>(x => (x.Id == numOneConst) | (x.Id >= numOneConst), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (x.Id == 1) & (x.Id >= 1), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (1 == x.Id) & (1 <= x.Id), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (x.Id == numOneVar) | (x.Id >= numOneVar), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (numOneVar == x.Id) | (numOneVar <= x.Id), x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => (numOneConst == x.Id) | (numOneConst <= x.Id), x => x.Id));
+        }
+
+        [Fact]
+        public async void FindWithComplexExpressionsAsync()
+        {
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
+
+            var repo = new Repository<Customer>(context);
+
+            var numOneVar = 1;
+            var numTwoVar = 2;
+            var numThreeVar = 3;
+
+            const int numOneConst = 1;
+            const int numTwoConst = 2;
+            const int numThreeConst = 3;
+
+            var entities = new List<Customer>
+            {
+                new Customer { Id = 1, Name = "Random Name 1" },
+                new Customer { Id = 2, Name = "Random Name 2" },
+                new Customer { Id = 3, Name = "Random Test Name 3" },
+                new Customer { Id = 4, Name = "Random Name 4" }
+            };
+
+            await repo.AddAsync(entities);
+
+            // The ado.net repository should be able translate the expression into a valid sql query string to execute
+            // things like parentheses and operators should be tested
+
+            // property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(1, (await repo.FindAsync(x => 1 == x.Id)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id == 1)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => 1 == 1)).Id);
+            Assert.Null(await repo.FindAsync(x => 1 == 2));
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id == x.Id)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => numOneVar == x.Id)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id == numOneVar)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => numOneVar == numOneVar)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => numOneConst == x.Id)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id == numOneConst)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => numOneConst == numOneConst)).Id);
+            Assert.Equal(1, await repo.FindAsync<int>(x => numOneConst == x.Id, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => 1 == x.Id, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == 1, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => 1 == 1, x => x.Id));
+            Assert.Equal(0, await repo.FindAsync<int>(x => 1 == 2, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == x.Id, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => 1 == x.Id, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == 1, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => numOneVar == x.Id, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == numOneVar, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == numOneConst, x => x.Id));
+
+            // boolean
+            Assert.Equal(1, (await repo.FindAsync(x => true)).Id);
+            Assert.Null(await repo.FindAsync(x => false));
+            Assert.Equal(1, await repo.FindAsync(x => true, x => x.Id));
+            Assert.Equal(0, await repo.FindAsync(x => false, x => x.Id));
+
+            // method calls
+            Assert.Equal(1, (await repo.FindAsync(x => x.Name.StartsWith("Random"))).Id);
+            Assert.Equal(2, (await repo.FindAsync(x => x.Name.Equals("Random Name 2"))).Id);
+            Assert.Equal(3, (await repo.FindAsync(x => x.Name.Contains("Test"))).Id);
+            Assert.Equal(4, (await repo.FindAsync(x => x.Name.EndsWith("4"))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id.ToString().StartsWith(numOneVar.ToString()))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id.ToString().Equals(numOneVar.ToString()))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id.ToString().Contains(numOneVar.ToString()))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id.ToString().EndsWith(numOneVar.ToString()))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id.ToString().StartsWith(numOneConst.ToString()))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id.ToString().Equals(numOneConst.ToString()))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id.ToString().Contains(numOneConst.ToString()))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id.ToString().EndsWith(numOneConst.ToString()))).Id);
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Name.StartsWith("Random"), x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => x.Name.Equals("Random Name 2"), x => x.Id));
+            Assert.Equal(3, await repo.FindAsync<int>(x => x.Name.Contains("Test"), x => x.Id));
+            Assert.Equal(4, await repo.FindAsync<int>(x => x.Name.EndsWith("4"), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Name.StartsWith("Random"), x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => x.Name.Equals("Random Name 2"), x => x.Id));
+            Assert.Equal(3, await repo.FindAsync<int>(x => x.Name.Contains("Test"), x => x.Id));
+            Assert.Equal(4, await repo.FindAsync<int>(x => x.Name.EndsWith("4"), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id.ToString().StartsWith(numOneVar.ToString()), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id.ToString().Equals(numOneVar.ToString()), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id.ToString().Contains(numOneVar.ToString()), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id.ToString().EndsWith(numOneVar.ToString()), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id.ToString().StartsWith(numOneConst.ToString()), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id.ToString().Equals(numOneConst.ToString()), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id.ToString().Contains(numOneConst.ToString()), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id.ToString().EndsWith(numOneConst.ToString()), x => x.Id));
+
+            // relational and equality operators - property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id == 1)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id != 2)).Id);
+            Assert.Equal(2, (await repo.FindAsync(x => x.Id > 1)).Id);
+            Assert.Equal(3, (await repo.FindAsync(x => x.Id >= 3)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id < 2)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id <= 2)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id == numOneVar)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id != numTwoVar)).Id);
+            Assert.Equal(2, (await repo.FindAsync(x => x.Id > numOneVar)).Id);
+            Assert.Equal(3, (await repo.FindAsync(x => x.Id >= numThreeVar)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id < numTwoVar)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id <= numTwoVar)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id == numOneConst)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id != numTwoConst)).Id);
+            Assert.Equal(2, (await repo.FindAsync(x => x.Id > numOneConst)).Id);
+            Assert.Equal(3, (await repo.FindAsync(x => x.Id >= numThreeConst)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id < numTwoConst)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id <= numTwoConst)).Id);
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == numOneConst, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == 1, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id != 2, x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => x.Id > 1, x => x.Id));
+            Assert.Equal(3, await repo.FindAsync<int>(x => x.Id >= 3, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id < 2, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id <= 2, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == 1, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id != 2, x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => x.Id > 1, x => x.Id));
+            Assert.Equal(3, await repo.FindAsync<int>(x => x.Id >= 3, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id < 2, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id <= 2, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == numOneVar, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id != numTwoVar, x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => x.Id > numOneVar, x => x.Id));
+            Assert.Equal(3, await repo.FindAsync<int>(x => x.Id >= numThreeVar, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id < numTwoVar, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id <= numTwoVar, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id != numTwoConst, x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => x.Id > numOneConst, x => x.Id));
+            Assert.Equal(3, await repo.FindAsync<int>(x => x.Id >= numThreeConst, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id < numTwoConst, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id <= numTwoConst, x => x.Id));
+
+            // conditional or operations - property variables on the left and constants on the right (and vice verse)
+            // relational and equality operators
+            Assert.Equal(1, (await repo.FindAsync(x => (x.Id == 1) || (x.Id >= 1))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (1 == x.Id) || (1 <= x.Id))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (x.Id == numOneVar) || (x.Id >= numOneVar))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (numOneVar == x.Id) || (numOneVar <= x.Id))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (x.Id == numOneConst) || (x.Id >= numOneConst))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (numOneConst == x.Id) || (numOneConst <= x.Id))).Id);
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == numOneConst) || (x.Id >= numOneConst), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == 1) || (x.Id >= 1), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (1 == x.Id) || (1 <= x.Id), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == 1) || (x.Id >= 1), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (1 == x.Id) || (1 <= x.Id), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == numOneVar) || (x.Id >= numOneVar), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (numOneVar == x.Id) || (numOneVar <= x.Id), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (numOneConst == x.Id) || (numOneConst <= x.Id), x => x.Id));
+
+            // logical or operations - property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(1, (await repo.FindAsync(x => (x.Id == 1) | (x.Id >= 1))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (1 == x.Id) | (1 <= x.Id))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (x.Id == numOneVar) | (x.Id >= numOneVar))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (numOneVar == x.Id) | (numOneVar <= x.Id))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (x.Id == numOneConst) | (x.Id >= numOneConst))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (numOneConst == x.Id) | (numOneConst <= x.Id))).Id);
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == numOneConst) | (x.Id >= numOneConst), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == 1) | (x.Id >= 1), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (1 == x.Id) | (1 <= x.Id), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == 1) | (x.Id >= 1), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (1 == x.Id) | (1 <= x.Id), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == numOneVar) | (x.Id >= numOneVar), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (numOneVar == x.Id) | (numOneVar <= x.Id), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (numOneConst == x.Id) | (numOneConst <= x.Id), x => x.Id));
+
+            // conditional and operations - property variables on the left and constants on the right (and vice verse)
+            // relational and equality operators
+            Assert.Equal(2, (await repo.FindAsync(x => x.Id > 1 && x.Id < 3)).Id);
+            Assert.Equal(2, (await repo.FindAsync(x => (x.Id > 1) && (x.Id < 3))).Id);
+            Assert.Equal(2, (await repo.FindAsync(x => x.Id > numOneVar && x.Id < numThreeVar)).Id);
+            Assert.Equal(2, (await repo.FindAsync(x => (x.Id > numOneVar) && (x.Id < numThreeVar))).Id);
+            Assert.Equal(2, (await repo.FindAsync(x => x.Id > numOneConst && x.Id < numThreeConst)).Id);
+            Assert.Equal(2, (await repo.FindAsync(x => (x.Id > numOneConst) && (x.Id < numThreeConst))).Id);
+            Assert.Equal(2, await repo.FindAsync<int>(x => x.Id > numOneConst && x.Id < numThreeConst, x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => x.Id > 1 && x.Id < 3, x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => (x.Id > 1) && (x.Id < 3), x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => x.Id > 1 && x.Id < 3, x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => (x.Id > 1) && (x.Id < 3), x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => x.Id > numOneVar && x.Id < numThreeVar, x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => (x.Id > numOneVar) && (x.Id < numThreeVar), x => x.Id));
+            Assert.Equal(2, await repo.FindAsync<int>(x => (x.Id > numOneConst) && (x.Id < numThreeConst), x => x.Id));
+
+            // logical and operations - property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(1, (await repo.FindAsync(x => (x.Id == 1) & (x.Id >= 1))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (1 == x.Id) & (1 <= x.Id))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (x.Id == numOneVar) & (x.Id >= numOneVar))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (numOneVar == x.Id) & (numOneVar <= x.Id))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (x.Id == numOneConst) & (x.Id >= numOneConst))).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => (numOneConst == x.Id) & (numOneConst <= x.Id))).Id);
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == numOneConst) & (x.Id >= numOneConst), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == 1) & (x.Id >= 1), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (1 == x.Id) & (1 <= x.Id), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == 1) & (x.Id >= 1), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (1 == x.Id) & (1 <= x.Id), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (x.Id == numOneVar) & (x.Id >= numOneVar), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (numOneVar == x.Id) & (numOneVar <= x.Id), x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => (numOneConst == x.Id) & (numOneConst <= x.Id), x => x.Id));
+        }
+
+        [Fact]
+        public void FindAllWithComplexExpressions()
+        {
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
+
+            var repo = new Repository<Customer>(context);
+
+            var entities = new List<Customer>
+            {
+                new Customer { Id = 1, Name = "Random Name 1" },
+                new Customer { Id = 2, Name = "Random Name 2" },
+                new Customer { Id = 3, Name = "Random Test Name 3" },
+                new Customer { Id = 4, Name = "Random Name 4" }
+            };
+
+            repo.Add(entities);
+
+            // The ado.net repository should be able translate the expression into a valid sql query string to execute
+            // things like parentheses and operators should be tested
+
+            // property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(1, repo.FindAll(x => 1 == x.Id).First().Id);
+            Assert.Equal(1, repo.FindAll(x => x.Id == 1).First().Id);
+            Assert.Equal(1, repo.FindAll<int>(x => 1 == x.Id, x => x.Id).First());
+            Assert.Equal(1, repo.FindAll<int>(x => x.Id == 1, x => x.Id).First());
+
+            // boolean
+            Assert.Equal(1, repo.FindAll(x => true).First().Id);
+            Assert.Empty(repo.FindAll(x => false));
+            Assert.Equal(1, repo.FindAll(x => true, x => x.Id).First());
+            Assert.Empty(repo.FindAll(x => false, x => x.Id));
+
+            // method calls
+            Assert.Equal(4, repo.FindAll(x => x.Name.StartsWith("Random")).Count());
+            Assert.Single(repo.FindAll(x => x.Name.Equals("Random Name 2")));
+            Assert.Single(repo.FindAll(x => x.Name.Contains("Test")));
+            Assert.Single(repo.FindAll(x => x.Name.EndsWith("4")));
+            Assert.Equal(4, repo.FindAll<int>(x => x.Name.StartsWith("Random"), x => x.Id).Count());
+            Assert.Single(repo.FindAll<int>(x => x.Name.Equals("Random Name 2"), x => x.Id));
+            Assert.Single(repo.FindAll<int>(x => x.Name.Contains("Test"), x => x.Id));
+            Assert.Single(repo.FindAll<int>(x => x.Name.EndsWith("4"), x => x.Id));
+
+            // relational and equality operators - property variables on the left and constants on the right (and vice verse)
+            Assert.Single(repo.FindAll(x => x.Id == 1));
+            Assert.Equal(3, repo.FindAll(x => x.Id != 2).Count());
+            Assert.Equal(3, repo.FindAll(x => x.Id > 1).Count());
+            Assert.Equal(2, repo.FindAll(x => x.Id >= 3).Count());
+            Assert.Single(repo.FindAll(x => x.Id < 2));
+            Assert.Equal(2, repo.FindAll(x => x.Id <= 2).Count());
+            Assert.Single(repo.FindAll<int>(x => x.Id == 1, x => x.Id));
+            Assert.Equal(3, repo.FindAll<int>(x => x.Id != 2, x => x.Id).Count());
+            Assert.Equal(3, repo.FindAll<int>(x => x.Id > 1, x => x.Id).Count());
+            Assert.Equal(2, repo.FindAll<int>(x => x.Id >= 3, x => x.Id).Count());
+            Assert.Single(repo.FindAll<int>(x => x.Id < 2, x => x.Id));
+            Assert.Equal(2, repo.FindAll<int>(x => x.Id <= 2, x => x.Id).Count());
+
+            // conditional or operations - property variables on the left and constants on the right (and vice verse)
+            // relational and equality operators
+            Assert.Equal(2, repo.FindAll(x => (x.Id == 1) || (x.Id == 4)).Count());
+            Assert.Equal(2, repo.FindAll(x => (1 == x.Id) || (4 == x.Id)).Count());
+            Assert.Equal(2, repo.FindAll<int>(x => (x.Id == 1) || (x.Id == 4), x => x.Id).Count());
+            Assert.Equal(2, repo.FindAll<int>(x => (1 == x.Id) || (4 == x.Id), x => x.Id).Count());
+
+            // logical or operations - property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(2, repo.FindAll(x => (x.Id == 1) | (x.Id == 4)).Count());
+            Assert.Equal(2, repo.FindAll(x => (1 == x.Id) | (4 == x.Id)).Count());
+            Assert.Equal(2, repo.FindAll<int>(x => (x.Id == 1) | (x.Id == 4), x => x.Id).Count());
+            Assert.Equal(2, repo.FindAll<int>(x => (1 == x.Id) | (4 == x.Id), x => x.Id).Count());
+
+            // conditional and operations - property variables on the left and constants on the right (and vice verse)
+            // relational and equality operators
+            Assert.Single(repo.FindAll(x => x.Id > 1 && x.Id < 3));
+            Assert.Single(repo.FindAll(x => (x.Id > 1) && (x.Id < 3)));
+            Assert.Single(repo.FindAll<int>(x => x.Id > 1 && x.Id < 3, x => x.Id));
+            Assert.Single(repo.FindAll<int>(x => (x.Id > 1) && (x.Id < 3), x => x.Id));
+
+            // logical and operations - property variables on the left and constants on the right (and vice verse)
+            Assert.Single(repo.FindAll(x => (x.Id == 1) & (x.Id >= 1)));
+            Assert.Single(repo.FindAll(x => (1 == x.Id) & (1 <= x.Id)));
+            Assert.Single(repo.FindAll<int>(x => (x.Id == 1) & (x.Id >= 1), x => x.Id));
+            Assert.Single(repo.FindAll<int>(x => (1 == x.Id) & (1 <= x.Id), x => x.Id));
+        }
+
+        [Fact]
+        public async void FindAllWithComplexExpressionsAsync()
+        {
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
+
+            var repo = new Repository<Customer>(context);
+
+            var entities = new List<Customer>
+            {
+                new Customer { Id = 1, Name = "Random Name 1" },
+                new Customer { Id = 2, Name = "Random Name 2" },
+                new Customer { Id = 3, Name = "Random Test Name 3" },
+                new Customer { Id = 4, Name = "Random Name 4" }
+            };
+
+            await repo.AddAsync(entities);
+
+            // The ado.net repository should be able translate the expression into a valid sql query string to execute
+            // things like parentheses and operators should be tested
+
+            // property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(1, (await repo.FindAllAsync(x => 1 == x.Id)).First().Id);
+            Assert.Equal(1, (await repo.FindAllAsync(x => x.Id == 1)).First().Id);
+            Assert.Equal(1, (await repo.FindAllAsync<int>(x => 1 == x.Id, x => x.Id)).First());
+            Assert.Equal(1, (await repo.FindAllAsync<int>(x => x.Id == 1, x => x.Id)).First());
+
+            // boolean
+            Assert.Equal(1, (await repo.FindAllAsync(x => true)).First().Id);
+            Assert.Empty(await repo.FindAllAsync(x => false));
+            Assert.Equal(1, (await repo.FindAllAsync(x => true, x => x.Id)).First());
+            Assert.Empty(await repo.FindAllAsync(x => false, x => x.Id));
+
+            // method calls
+            Assert.Equal(4, (await repo.FindAllAsync(x => x.Name.StartsWith("Random"))).Count());
+            Assert.Single(await repo.FindAllAsync(x => x.Name.Equals("Random Name 2")));
+            Assert.Single(await repo.FindAllAsync(x => x.Name.Contains("Test")));
+            Assert.Single(await repo.FindAllAsync(x => x.Name.EndsWith("4")));
+            Assert.Equal(4, (await repo.FindAllAsync<int>(x => x.Name.StartsWith("Random"), x => x.Id)).Count());
+            Assert.Single(await repo.FindAllAsync<int>(x => x.Name.Equals("Random Name 2"), x => x.Id));
+            Assert.Single(await repo.FindAllAsync<int>(x => x.Name.Contains("Test"), x => x.Id));
+            Assert.Single(await repo.FindAllAsync<int>(x => x.Name.EndsWith("4"), x => x.Id));
+
+            // relational and equality operators - property variables on the left and constants on the right (and vice verse)
+            Assert.Single(await repo.FindAllAsync(x => x.Id == 1));
+            Assert.Equal(3, (await repo.FindAllAsync(x => x.Id != 2)).Count());
+            Assert.Equal(3, (await repo.FindAllAsync(x => x.Id > 1)).Count());
+            Assert.Equal(2, (await repo.FindAllAsync(x => x.Id >= 3)).Count());
+            Assert.Single(await repo.FindAllAsync(x => x.Id < 2));
+            Assert.Equal(2, (await repo.FindAllAsync(x => x.Id <= 2)).Count());
+            Assert.Single(await repo.FindAllAsync<int>(x => x.Id == 1, x => x.Id));
+            Assert.Equal(3, (await repo.FindAllAsync<int>(x => x.Id != 2, x => x.Id)).Count());
+            Assert.Equal(3, (await repo.FindAllAsync<int>(x => x.Id > 1, x => x.Id)).Count());
+            Assert.Equal(2, (await repo.FindAllAsync<int>(x => x.Id >= 3, x => x.Id)).Count());
+            Assert.Single(await repo.FindAllAsync<int>(x => x.Id < 2, x => x.Id));
+            Assert.Equal(2, (await repo.FindAllAsync<int>(x => x.Id <= 2, x => x.Id)).Count());
+
+            // conditional or operations - property variables on the left and constants on the right (and vice verse)
+            // relational and equality operators
+            Assert.Equal(2, (await repo.FindAllAsync(x => (x.Id == 1) || (x.Id == 4))).Count());
+            Assert.Equal(2, (await repo.FindAllAsync(x => (1 == x.Id) || (4 == x.Id))).Count());
+            Assert.Equal(2, (await repo.FindAllAsync<int>(x => (x.Id == 1) || (x.Id == 4), x => x.Id)).Count());
+            Assert.Equal(2, (await repo.FindAllAsync<int>(x => (1 == x.Id) || (4 == x.Id), x => x.Id)).Count());
+
+            // logical or operations - property variables on the left and constants on the right (and vice verse)
+            Assert.Equal(2, (await repo.FindAllAsync(x => (x.Id == 1) | (x.Id == 4))).Count());
+            Assert.Equal(2, (await repo.FindAllAsync(x => (1 == x.Id) | (4 == x.Id))).Count());
+            Assert.Equal(2, (await repo.FindAllAsync<int>(x => (x.Id == 1) | (x.Id == 4), x => x.Id)).Count());
+            Assert.Equal(2, (await repo.FindAllAsync<int>(x => (1 == x.Id) | (4 == x.Id), x => x.Id)).Count());
+
+            // conditional and operations - property variables on the left and constants on the right (and vice verse)
+            // relational and equality operators
+            Assert.Single(await repo.FindAllAsync(x => x.Id > 1 && x.Id < 3));
+            Assert.Single(await repo.FindAllAsync(x => (x.Id > 1) && (x.Id < 3)));
+            Assert.Single(await repo.FindAllAsync<int>(x => x.Id > 1 && x.Id < 3, x => x.Id));
+            Assert.Single(await repo.FindAllAsync<int>(x => (x.Id > 1) && (x.Id < 3), x => x.Id));
+
+            // logical and operations - property variables on the left and constants on the right (and vice verse)
+            Assert.Single(await repo.FindAllAsync(x => (x.Id == 1) & (x.Id >= 1)));
+            Assert.Single(await repo.FindAllAsync(x => (1 == x.Id) & (1 <= x.Id)));
+            Assert.Single(await repo.FindAllAsync<int>(x => (x.Id == 1) & (x.Id >= 1), x => x.Id));
+            Assert.Single(await repo.FindAllAsync<int>(x => (1 == x.Id) & (1 <= x.Id), x => x.Id));
+        }
+
+        [Fact]
+        public void ThrowsIfSchemaTableColumnsMismatchOnSaveChanges()
+        {
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
+
+            var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerColumnNameMismatch>(context).Add(new CustomerColumnNameMismatch()));
+            Assert.Equal($"The model '{typeof(CustomerColumnNameMismatch).Name}' has changed since the database was created. Consider updating the database.", ex.Message);
+
+            ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerColumnNameMissing>(context).Add(new CustomerColumnNameMissing()));
+            Assert.Equal($"The model '{typeof(CustomerColumnNameMissing).Name}' has changed since the database was created. Consider updating the database.", ex.Message);
+
+            ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerKeyMismatch>(context).Add(new CustomerKeyMismatch()));
+            Assert.Equal($"The model '{typeof(CustomerKeyMismatch).Name}' has changed since the database was created. Consider updating the database.", ex.Message);
+
+            ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerColumnRequiredMissing>(context).Add(new CustomerColumnRequiredMissing()));
+            Assert.Equal($"The model '{typeof(CustomerColumnRequiredMissing).Name}' has changed since the database was created. Consider updating the database.", ex.Message);
+        }
+
+        [Fact]
+        public void ThrowsIfThrowsIfSchemaTableForeignKeyAttributeOnPropertyNotFoundOnDependentType()
+        {
+            var contextFactory = Data.TestAdoNetContextFactory.Create();
+            var context = contextFactory.Create();
+
+            var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType>(context).Add(new CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType()));
+            Assert.Equal($"The ForeignKeyAttribute on property 'Address' on type '{typeof(CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType).FullName}' is not valid. The foreign key name 'AddressId' was not found on the dependent type '{typeof(CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType).FullName}'. The Name value should be a comma separated list of foreign key property names.", ex.Message);
+
+        }
+
+        [Fact]
+        public void CreateTableOnSaveChanges()
+        {
+            var contextFactory = TestAdoNetContextFactory.Create();
+            var context = (AdoNetRepositoryContext)contextFactory.Create();
+            var schemaHelper = new SchemaTableConfigurationHelper(context);
+
+            Assert.False(schemaHelper.ExexuteTableExists<CustomerNotCreated>());
+            Assert.False(schemaHelper.ExexuteTableExists<CustomerAddressNotCreated>());
+
+            var repo = new Repository<CustomerNotCreated>(context);
+
+            // Needs to create foreign table since the CustomerNotCreated table needs it
+            new Repository<CustomerAddressNotCreated>(context).Add(new CustomerAddressNotCreated
+            {
+                Id1 = 1,
+                Id2 = 1,
+                State = "ST",
+                Street1 = "Street 1",
+                City = "City"
+            });
+
+            repo.Add(new CustomerNotCreated { Name = "Random Name", AddressId1 = 1, AddressId2 = 1 });
+
+            Assert.True(schemaHelper.ExexuteTableExists<CustomerNotCreated>());
+
+            // the customer address is a navigation property of the customer table, and so, it will be created as well
+            Assert.True(schemaHelper.ExexuteTableExists<CustomerAddressNotCreated>());
+
+            schemaHelper.ExecuteTableValidate<CustomerNotCreated>();
+            schemaHelper.ExecuteTableValidate<CustomerAddressNotCreated>();
+        }
+
+        [Fact]
+        public void ThrowsIfUnableToDetermineCompositePrimaryKeyOrderingOnSaveChanges()
+        {
+            var contextFactory = TestAdoNetContextFactory.Create();
+
+            var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering>(contextFactory).Add(new CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering()));
+            Assert.Equal(string.Format(AdoNet.Properties.Resources.UnableToDetermineCompositePrimaryKeyOrdering, "primary", typeof(CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering).FullName), ex.Message);
+        }
+
+        [Fact]
+        public void ThrowsIfUnableToDetermineCompositeForeignKeyOrderingOnSaveChanges()
+        {
+            var contextFactory = TestAdoNetContextFactory.Create();
+
+            var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerWithTwoCompositeForeignKeyAndNoOrdering>(contextFactory).Add(new CustomerWithTwoCompositeForeignKeyAndNoOrdering()));
+            Assert.Equal(string.Format(AdoNet.Properties.Resources.UnableToDetermineCompositePrimaryKeyOrdering, "foreign", typeof(CustomerWithTwoCompositeForeignKeyAndNoOrdering).FullName), ex.Message);
+        }
+
         private static void TestCustomerAddress(CustomerAddress expected, CustomerAddress actual)
+        {
+            Assert.NotNull(expected);
+            Assert.NotNull(actual);
+            Assert.NotEqual(expected, actual);
+
+            // The navigation property should have all the values mapped correctly
+            Assert.Equal(expected.Street, actual.Street);
+            Assert.Equal(expected.City, actual.City);
+            Assert.Equal(expected.State, actual.State);
+
+            // The navigation property should have a key linking back to the main class (customer)
+            Assert.NotEqual(0, actual.CustomerId);
+            Assert.NotEqual(0, expected.CustomerId);
+            Assert.Equal(expected.CustomerId, actual.CustomerId);
+
+            // If the navigation property has also a navigation property linking back to the main class (customer),
+            // then that navigation property should also be mapped correctly
+            Assert.NotNull(expected.Customer);
+            Assert.NotNull(actual.Customer);
+            Assert.Equal(expected.Customer.Id, expected.Customer.Id);
+            Assert.Equal(expected.Customer.Name, expected.Customer.Name);
+            Assert.Equal(expected.Customer.AddressId, expected.Customer.AddressId);
+        }
+
+        private static void TestCustomerAddress(CustomerAddressWithTwoCompositePrimaryKey expected, CustomerAddressWithTwoCompositePrimaryKey actual)
+        {
+            Assert.NotNull(expected);
+            Assert.NotNull(actual);
+            Assert.NotEqual(expected, actual);
+
+            // The navigation property should have all the values mapped correctly
+            Assert.Equal(expected.Street, actual.Street);
+            Assert.Equal(expected.City, actual.City);
+            Assert.Equal(expected.State, actual.State);
+
+            // The navigation property should have a key linking back to the main class (customer)
+            Assert.NotEqual(0, actual.CustomerId);
+            Assert.NotEqual(0, expected.CustomerId);
+            Assert.Equal(expected.CustomerId, actual.CustomerId);
+
+            // If the navigation property has also a navigation property linking back to the main class (customer),
+            // then that navigation property should also be mapped correctly
+            Assert.NotNull(expected.Customer);
+            Assert.NotNull(actual.Customer);
+            Assert.Equal(expected.Customer.Id, expected.Customer.Id);
+            Assert.Equal(expected.Customer.Name, expected.Customer.Name);
+            Assert.Equal(expected.Customer.AddressId1, expected.Customer.AddressId1);
+            Assert.Equal(expected.Customer.AddressId2, expected.Customer.AddressId2);
+        }
+
+        private static void TestCustomerAddress(CustomerCompositeAddress expected, CustomerCompositeAddress actual)
         {
             Assert.NotNull(expected);
             Assert.NotNull(actual);
@@ -522,6 +1492,41 @@
             Assert.Equal(expected.Customer.AddressKey, expected.Customer.AddressKey);
         }
 
+        private static void TestCustomerAddress(IEnumerable<CustomerAddressWithMultipleAddresses> expectedList, IEnumerable<CustomerAddressWithMultipleAddresses> actualList)
+        {
+            Assert.NotEmpty(expectedList);
+            Assert.NotEmpty(actualList);
+            Assert.NotEqual(expectedList, actualList);
+            Assert.Equal(expectedList.Count(), actualList.Count());
+
+            for (var i = 0; i < expectedList.Count(); i++)
+            {
+                var expected = expectedList.ElementAt(i);
+                var actual = actualList.ElementAt(i);
+
+                Assert.NotNull(expected);
+                Assert.NotNull(actual);
+                Assert.NotEqual(expected, actual);
+
+                // The navigation property should have all the values mapped correctly
+                Assert.Equal(expected.Street, actual.Street);
+                Assert.Equal(expected.City, actual.City);
+                Assert.Equal(expected.State, actual.State);
+
+                // The navigation property should have a key linking back to the main class (customer)
+                Assert.NotEqual(0, actual.CustomerId);
+                Assert.NotEqual(0, expected.CustomerId);
+                Assert.Equal(expected.CustomerId, actual.CustomerId);
+
+                // If the navigation property has also a navigation property linking back to the main class (customer),
+                // then that navigation property should also be mapped correctly
+                Assert.NotNull(expected.Customer);
+                Assert.NotNull(actual.Customer);
+                Assert.Equal(expected.Customer.Id, expected.Customer.Id);
+                Assert.Equal(expected.Customer.Name, expected.Customer.Name);
+            }
+        }
+
         class Customer
         {
             public int Id { get; set; }
@@ -562,6 +1567,15 @@
             public CustomerAddressWithForeignKeyAnnotationOnNavigationProperty Address { get; set; }
         }
 
+        [Table("Customers")]
+        class CustomerWithCompositeAddress
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public int AddressId { get; set; }
+            public CustomerCompositeAddress Address { get; set; }
+        }
+
         class CustomerAddress
         {
             public int Id { get; set; }
@@ -570,6 +1584,19 @@
             public string State { get; set; }
             public int CustomerId { get; set; }
             public Customer Customer { get; set; }
+        }
+
+        [Table("CustomerCompositeAddresses")]
+        class CustomerCompositeAddress
+        {
+            [Key]
+            public int Id { get; set; }
+            [Key]
+            public int CustomerId { get; set; }
+            public string Street { get; set; }
+            public string City { get; set; }
+            public string State { get; set; }
+            public CustomerWithCompositeAddress Customer { get; set; }
         }
 
         [Table("CustomerAddresses")]
@@ -596,6 +1623,148 @@
             public int CustomerKey { get; set; }
             [ForeignKey("CustomerId")]
             public CustomerWithForeignKeyAnnotationOnNavigationProperty Customer { get; set; }
+        }
+
+        [Table("CustomersColumnNameMismatch")]
+        class CustomerColumnNameMismatch
+        {
+            public int Id { get; set; }
+            public string MismatchName { get; set; }
+        }
+
+        [Table("CustomersColumnNameMissing")]
+        class CustomerColumnNameMissing
+        {
+            public int Id { get; set; }
+        }
+
+        [Table("CustomersColumnNameMissing")]
+        class CustomerKeyMismatch
+        {
+            public int Id { get; set; }
+            [Key]
+            public int Id1 { get; set; }
+        }
+
+        [Table("CustomersColumnRequiredMissing")]
+        class CustomerColumnRequiredMissing
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+        }
+
+        [Table("CustomersWithTwoCompositePrimaryKey")]
+        class CustomerWithTwoCompositePrimaryKey
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            [ForeignKey("Address")]
+            [Column(Order = 1)]
+            public int AddressId1 { get; set; }
+            [ForeignKey("Address")]
+            [Column(Order = 2)]
+            public int AddressId2 { get; set; }
+            public CustomerAddressWithTwoCompositePrimaryKey Address { get; set; }
+        }
+
+        [Table("CustomersAddressWithTwoCompositePrimaryKey")]
+        class CustomerAddressWithTwoCompositePrimaryKey
+        {
+            [Key]
+            [Column(Order = 1)]
+            public int Id1 { get; set; }
+            [Key]
+            [Column(Order = 2)]
+            public int Id2 { get; set; }
+            public string Street { get; set; }
+            public string City { get; set; }
+            public string State { get; set; }
+            public int CustomerId { get; set; }
+            public CustomerWithTwoCompositePrimaryKey Customer { get; set; }
+        }
+
+        [Table("CustomersNotCreated")]
+        class CustomerNotCreated
+        {
+            public int Id { get; set; }
+            [Required]
+            public string Name { get; set; }
+            [ForeignKey("Address")]
+            [Column(Order = 1)]
+            public int AddressId1 { get; set; }
+            [ForeignKey("Address")]
+            [Column(Order = 2)]
+            public int AddressId2 { get; set; }
+            public CustomerAddressNotCreated Address { get; set; }
+        }
+
+        [Table("CustomersAddressNotCreated")]
+        class CustomerAddressNotCreated
+        {
+            [Key]
+            [Column(Order = 1)]
+            public int Id1 { get; set; }
+            [Key]
+            [Column(Order = 2)]
+            public int Id2 { get; set; }
+            [Required]
+            public string Street1 { get; set; }
+            [Required]
+            public string City { get; set; }
+            [Required]
+            [Column("ST")]
+            [StringLength(2)]
+            public string State { get; set; }
+            public CustomerNotCreated Customer { get; set; }
+        }
+
+        class CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering
+        {
+            [Key]
+            public int Id1 { get; set; }
+            [Key]
+            public int Id2 { get; set; }
+            public string Street1 { get; set; }
+            public string City { get; set; }
+            public string State { get; set; }
+        }
+
+        class CustomerWithTwoCompositeForeignKeyAndNoOrdering
+        {
+            public int Id { get; set; }
+            [Required]
+            public string Name { get; set; }
+            [ForeignKey("Address")]
+            public int AddressId1 { get; set; }
+            [ForeignKey("Address")]
+            public int AddressId2 { get; set; }
+            public CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering Address { get; set; }
+        }
+
+        [Table("CustomersNotCreatedWithForeignKeyAttributeNotFoundOnDependentType")]
+        class CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            [ForeignKey("AddressId")]
+            public CustomerAddress Address { get; set; }
+        }
+
+        class CustomerWithMultipleAddresses
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public ICollection<CustomerAddressWithMultipleAddresses> Addresses { get; set; }
+        }
+
+        class CustomerAddressWithMultipleAddresses
+        {
+            public int Id { get; set; }
+            public string Street { get; set; }
+            public string City { get; set; }
+            public string State { get; set; }
+            public int CustomerId { get; set; }
+            public CustomerWithMultipleAddresses Customer { get; set; }
         }
     }
 }

@@ -9,9 +9,9 @@
 //------------------------------------------------------------------------------
 
 namespace DotNetToolkit.Repository.AdoNet.Properties {
-    using System;
-    
-    
+    using System.Reflection;
+
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -39,7 +39,7 @@ namespace DotNetToolkit.Repository.AdoNet.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DotNetToolkit.Repository.AdoNet.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DotNetToolkit.Repository.AdoNet.Properties.Resources", typeof(Resources).GetTypeInfo().Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -70,6 +70,15 @@ namespace DotNetToolkit.Repository.AdoNet.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The navigation property &apos;{0}&apos; declared on type &apos;{1}&apos; has been configured with conflicting multiplicities..
+        /// </summary>
+        internal static string ConflictingMultiplicities {
+            get {
+                return ResourceManager.GetString("ConflictingMultiplicities", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The connection string does not exist in your configuration file..
         /// </summary>
         internal static string ConnectionStringDoestNotExistInConfigFile {
@@ -79,11 +88,47 @@ namespace DotNetToolkit.Repository.AdoNet.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; cannot be added to the database because another instance of this type with the same key is already being tracked..
+        /// </summary>
+        internal static string EntityAlreadyBeingTrackedInStore {
+            get {
+                return ResourceManager.GetString("EntityAlreadyBeingTrackedInStore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Attempted to update or delete an entity that does not exist in the database..
+        /// </summary>
+        internal static string EntityNotFoundInStore {
+            get {
+                return ResourceManager.GetString("EntityNotFoundInStore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The column name {0} is not valid..
         /// </summary>
         internal static string InvalidColumnName {
             get {
                 return ResourceManager.GetString("InvalidColumnName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The model &apos;{0}&apos; has changed since the database was created. Consider updating the database..
+        /// </summary>
+        internal static string SchemaTableColumnsMismatch {
+            get {
+                return ResourceManager.GetString("SchemaTableColumnsMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to determine composite {0} key ordering for type &apos;{1}&apos;. Use the ColumnAttribute to specify an order for composite primary keys..
+        /// </summary>
+        internal static string UnableToDetermineCompositePrimaryKeyOrdering {
+            get {
+                return ResourceManager.GetString("UnableToDetermineCompositePrimaryKeyOrdering", resourceCulture);
             }
         }
         

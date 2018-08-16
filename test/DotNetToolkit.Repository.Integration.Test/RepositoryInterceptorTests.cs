@@ -1,8 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
+    using Configuration.Interceptors;
     using Data;
-    using InMemory;
-    using Interceptors;
+    using Factories;
     using Moq;
     using System.Collections.Generic;
     using Xunit;
@@ -15,8 +15,8 @@
             var entity = new Customer();
             var mock = new Mock<IRepositoryInterceptor>();
             var interceptors = new List<IRepositoryInterceptor> { mock.Object };
-
-            var repo = new InMemoryRepository<Customer>(interceptors);
+            var contextFactory = new InMemoryRepositoryContextFactory();
+            var repo = new Repository<Customer>(contextFactory.Create(), interceptors);
 
             mock.Verify(x => x.AddExecuting(It.IsAny<Customer>()), Times.Never);
             mock.Verify(x => x.AddExecuted(It.IsAny<Customer>()), Times.Never);
@@ -33,8 +33,8 @@
             var entity = new Customer();
             var mock = new Mock<IRepositoryInterceptor>();
             var interceptors = new List<IRepositoryInterceptor> { mock.Object };
-
-            var repo = new InMemoryRepository<Customer>(interceptors);
+            var contextFactory = new InMemoryRepositoryContextFactory();
+            var repo = new Repository<Customer>(contextFactory.Create(), interceptors);
 
             repo.Add(entity);
 
@@ -53,8 +53,8 @@
             var entity = new Customer();
             var mock = new Mock<IRepositoryInterceptor>();
             var interceptors = new List<IRepositoryInterceptor> { mock.Object };
-
-            var repo = new InMemoryRepository<Customer>(interceptors);
+            var contextFactory = new InMemoryRepositoryContextFactory();
+            var repo = new Repository<Customer>(contextFactory.Create(), interceptors);
 
             repo.Add(entity);
 
@@ -73,7 +73,8 @@
             const string user = "Random User";
 
             var interceptors = new List<IRepositoryInterceptor> { new TestRepositoryTimeStampInterceptor(user) };
-            var repo = new InMemoryRepository<CustomerWithTimeStamp>(interceptors);
+            var contextFactory = new InMemoryRepositoryContextFactory();
+            var repo = new Repository<CustomerWithTimeStamp>(contextFactory.Create(), interceptors);
             var entity = new CustomerWithTimeStamp();
 
             Assert.Null(entity.CreateTime);

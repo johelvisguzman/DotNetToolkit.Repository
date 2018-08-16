@@ -1,25 +1,30 @@
 ﻿namespace DotNetToolkit.Repository
 {
-    using FetchStrategies;
+    using Configuration;
+    using Configuration.Conventions;
+    using Configuration.Interceptors;
+    using Factories;
     using Helpers;
-    using Interceptors;
     using Properties;
     using Queries;
-    using Specifications;
+    using Queries.Strategies;
     using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Wrappers;
 
     /// <summary>
-    /// An implementation of <see cref="IRepository{TEntity, TKey}" />.
+    /// An implementation of <see cref="IRepository{TEntity, TKey1, TKey2, TKey3}" />.
     /// </summary>
-    public abstract class RepositoryBase<TEntity, TKey> : IRepository<TEntity, TKey> where TEntity : class
+    public abstract class RepositoryBase<TEntity, TKey1, TKey2, TKey3> : RepositoryBase<TEntity>, IRepository<TEntity, TKey1, TKey2, TKey3> where TEntity : class
     {
         #region Fields
 
-        private readonly IEnumerable<IRepositoryInterceptor> _interceptors;
+        private IReadOnlyRepository<TEntity, TKey1, TKey2, TKey3> _wrapper;
 
         #endregion
 
@@ -28,310 +33,534 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
-        protected RepositoryBase()
+        /// <param name="factory">The context factory.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        protected RepositoryBase(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors) : base(factory, interceptors) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2, TKey3}" /> class.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        internal RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+
+        #endregion
+
+        #region Implementation of IRepository<TEntity, TKey1, TKey2, TKey3>
+
+        /// <summary>
+        /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey1, TKey2, TKey3}" /> wrapper for the current repository.
+        /// </summary>
+        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
+        public IReadOnlyRepository<TEntity, TKey1, TKey2, TKey3> AsReadOnly()
         {
-            ThrowIfEntityKeyValueTypeMismatch();
+            return _wrapper ?? (_wrapper = new ReadOnlyRepository<TEntity, TKey1, TKey2, TKey3>(this));
         }
+
+        /// <summary>
+        /// Deletes an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        public void Delete(TKey1 key1, TKey2 key2, TKey3 key3)
+        {
+            var entity = Find(key1, key2, key3);
+
+            if (entity == null)
+            {
+                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3));
+
+                Intercept(x => x.Error<TEntity>(ex));
+
+                throw ex;
+            }
+
+            Delete(entity);
+        }
+
+        /// <summary>
+        /// Finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <return>The entity found.</return>
+        public TEntity Find(TKey1 key1, TKey2 key2, TKey3 key3)
+        {
+            return Find(key1, key2, key3, (IFetchQueryStrategy<TEntity>)null);
+        }
+
+        /// <summary>
+        /// Finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <return>The entity found.</return>
+        public TEntity Find(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy)
+        {
+            return InterceptQueryResult<TEntity>(() => Context.Find<TEntity>(fetchStrategy, key1, key2, key3));
+        }
+
+        /// <summary>
+        /// Determines whether the repository contains an entity with the given composite primary key values.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        public bool Exists(TKey1 key1, TKey2 key2, TKey3 key3)
+        {
+            return Find(key1, key2, key3) != null;
+        }
+
+        /// <summary>
+        /// Asynchronously determines whether the repository contains an entity with the given composite primary key values.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        public async Task<bool> ExistsAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return await FindAsync(key1, key2, key3, cancellationToken) != null;
+        }
+
+        /// <summary>
+        /// Asynchronously finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return FindAsync(key1, key2, key3, (IFetchQueryStrategy<TEntity>)null, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return InterceptQueryResultAsync<TEntity>(() => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2, key3));
+        }
+
+        /// <summary>
+        /// Asynchronously deletes an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        public async Task DeleteAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
+        {
+            InterceptError(cancellationToken.ThrowIfCancellationRequested);
+
+            var entity = await FindAsync(key1, key2, key3, cancellationToken);
+
+            if (entity == null)
+            {
+                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3));
+
+                Intercept(x => x.Error<TEntity>(ex));
+
+                throw ex;
+            }
+
+            await DeleteAsync(entity, cancellationToken);
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// An implementation of <see cref="IRepository{TEntity, TKey1, TKey2}" />.
+    /// </summary>
+    public abstract class RepositoryBase<TEntity, TKey1, TKey2> : RepositoryBase<TEntity>, IRepository<TEntity, TKey1, TKey2> where TEntity : class
+    {
+        #region Fields
+
+        private IReadOnlyRepository<TEntity, TKey1, TKey2> _wrapper;
+
+        #endregion
+
+        #region Constructors
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
+        /// <param name="factory">The context factory.</param>
         /// <param name="interceptors">The interceptors.</param>
-        protected RepositoryBase(IEnumerable<IRepositoryInterceptor> interceptors)
-        {
-            _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
-        }
-
-        #endregion
-
-        #region Public Methods
+        protected RepositoryBase(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors) : base(factory, interceptors) { }
 
         /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2}" /> class.
         /// </summary>
-        public abstract void Dispose();
+        /// <param name="context">The context.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        internal RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
 
         #endregion
 
-        #region Internal Methods
+        #region Implementation of IRepository<TEntity, TKey1, TKey2>
 
-        internal void InterceptAddItem(TEntity entity)
+        /// <summary>
+        /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey1, TKey2}" /> wrapper for the current repository.
+        /// </summary>
+        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
+        public IReadOnlyRepository<TEntity, TKey1, TKey2> AsReadOnly()
         {
-            Intercept(x => x.AddExecuting(entity));
-
-            AddItem(entity);
-
-            Intercept(x => x.AddExecuted(entity));
+            return _wrapper ?? (_wrapper = new ReadOnlyRepository<TEntity, TKey1, TKey2>(this));
         }
 
-        internal void InterceptAddItem(IEnumerable<TEntity> entities)
+        /// <summary>
+        /// Deletes an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        public void Delete(TKey1 key1, TKey2 key2)
         {
-            foreach (var entity in entities)
+            var entity = Find(key1, key2);
+
+            if (entity == null)
             {
-                InterceptAddItem(entity);
+                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2));
+
+                Intercept(x => x.Error<TEntity>(ex));
+
+                throw ex;
             }
+
+            Delete(entity);
         }
 
-        internal void InterceptUpdateItem(TEntity entity)
+        /// <summary>
+        /// Finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <return>The entity found.</return>
+        public TEntity Find(TKey1 key1, TKey2 key2)
         {
-            Intercept(x => x.UpdateExecuting(entity));
-
-            UpdateItem(entity);
-
-            Intercept(x => x.UpdateExecuted(entity));
+            return Find(key1, key2, (IFetchQueryStrategy<TEntity>)null);
         }
 
-        internal void InterceptUpdateItem(IEnumerable<TEntity> entities)
+        /// <summary>
+        /// Finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <return>The entity found.</return>
+        public TEntity Find(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
-            foreach (var entity in entities)
+            return InterceptQueryResult<TEntity>(() => Context.Find<TEntity>(fetchStrategy, key1, key2));
+        }
+
+        /// <summary>
+        /// Determines whether the repository contains an entity with the given composite primary key values.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        public bool Exists(TKey1 key1, TKey2 key2)
+        {
+            return Find(key1, key2) != null;
+        }
+
+        /// <summary>
+        /// Asynchronously determines whether the repository contains an entity with the given composite primary key values.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        public async Task<bool> ExistsAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return await FindAsync(key1, key2, cancellationToken) != null;
+        }
+
+        /// <summary>
+        /// Asynchronously finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return FindAsync(key1, key2, (IFetchQueryStrategy<TEntity>)null, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return InterceptQueryResultAsync<TEntity>(() => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2));
+        }
+
+        /// <summary>
+        /// Asynchronously deletes an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        public async Task DeleteAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
+        {
+            InterceptError(cancellationToken.ThrowIfCancellationRequested);
+
+            var entity = await FindAsync(key1, key2, cancellationToken);
+
+            if (entity == null)
             {
-                InterceptUpdateItem(entity);
+                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2));
+
+                Intercept(x => x.Error<TEntity>(ex));
+
+                throw ex;
             }
+
+            await DeleteAsync(entity, cancellationToken);
         }
 
-        internal void InterceptDeleteItem(TEntity entity)
+        #endregion
+    }
+
+    /// <summary>
+    /// An implementation of <see cref="IRepository{TEntity, TKey}" />.
+    /// </summary>
+    public abstract class RepositoryBase<TEntity, TKey> : RepositoryBase<TEntity>, IRepository<TEntity, TKey> where TEntity : class
+    {
+        #region Fields
+
+        private IReadOnlyRepository<TEntity, TKey> _wrapper;
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}"/> class.
+        /// </summary>
+        /// <param name="factory">The context factory.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        protected RepositoryBase(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors) : base(factory, interceptors) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}" /> class.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        internal RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+
+        #endregion
+
+        #region Implementation of IRepository<TEntity, TKey>
+
+        /// <summary>
+        /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey}" /> wrapper for the current repository.
+        /// </summary>
+        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
+        public IReadOnlyRepository<TEntity, TKey> AsReadOnly()
         {
-            Intercept(x => x.DeleteExecuting(entity));
-
-            DeleteItem(entity);
-
-            Intercept(x => x.DeleteExecuted(entity));
+            return _wrapper ?? (_wrapper = new ReadOnlyRepository<TEntity, TKey>(this));
         }
 
-        internal void InterceptDeleteItem(IEnumerable<TEntity> entities)
+        /// <summary>
+        /// Deletes an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key used to match entities against.</param>
+        public void Delete(TKey key)
         {
-            foreach (var entity in entities)
+            var entity = Find(key);
+
+            if (entity == null)
             {
-                InterceptDeleteItem(entity);
+                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
+
+                Intercept(x => x.Error<TEntity>(ex));
+
+                throw ex;
             }
+
+            Delete(entity);
+        }
+
+        /// <summary>
+        /// Finds an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <return>The entity found.</return>
+        public TEntity Find(TKey key)
+        {
+            return Find(key, (IFetchQueryStrategy<TEntity>)null);
+        }
+
+        /// <summary>
+        /// Finds an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <return>The entity found.</return>
+        public TEntity Find(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy)
+        {
+            return InterceptQueryResult<TEntity>(() => Context.Find<TEntity>(fetchStrategy, key));
+        }
+
+        /// <summary>
+        /// Determines whether the repository contains an entity with the given primary key value.
+        /// </summary>
+        /// <param name="key">The value of the primary key used to match entities against.</param>
+        /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        public bool Exists(TKey key)
+        {
+            return Find(key) != null;
+        }
+
+        /// <summary>
+        /// Asynchronously determines whether the repository contains an entity with the given primary key value.
+        /// </summary>
+        /// <param name="key">The value of the primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        public async Task<bool> ExistsAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return await FindAsync(key, cancellationToken) != null;
+        }
+
+        /// <summary>
+        /// Asynchronously finds an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        public Task<TEntity> FindAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return FindAsync(key, (IFetchQueryStrategy<TEntity>)null, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously finds an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        public Task<TEntity> FindAsync(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return InterceptQueryResultAsync<TEntity>(() => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key));
+        }
+
+        /// <summary>
+        /// Asynchronously deletes an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        public async Task DeleteAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
+        {
+            InterceptError(cancellationToken.ThrowIfCancellationRequested);
+
+            var entity = await FindAsync(key, cancellationToken);
+
+            if (entity == null)
+            {
+                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
+
+                Intercept(x => x.Error<TEntity>(ex));
+
+                throw ex;
+            }
+
+            await DeleteAsync(entity, cancellationToken);
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// An implementation of <see cref="IRepositoryBase{TEntity}" />.
+    /// </summary>
+    public abstract class RepositoryBase<TEntity> : IRepositoryBase<TEntity> where TEntity : class
+    {
+        #region Fields
+
+        private bool _canDisposeContext;
+        private IRepositoryContextFactory _contextFactory;
+        private IRepositoryContext _context;
+        private IEnumerable<IRepositoryInterceptor> _interceptors;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets the repository context.
+        /// </summary>
+        internal IRepositoryContext Context
+        {
+            get { return _context ?? (_context = new RepositoryContextAsync(_contextFactory.Create())); }
+        }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity}"/> class.
+        /// </summary>
+        /// <param name="factory">The context factory.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        protected RepositoryBase(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors)
+        {
+            if (factory == null)
+                throw new ArgumentNullException(nameof(factory));
+
+            _contextFactory = factory;
+            _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
+            _canDisposeContext = true;
+
+            ThrowsIfEntityPrimaryKeyMissing();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity}" /> class.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <param name="interceptors">The interceptors.</param>
+        internal RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors)
+        {
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+
+            _context = context;
+            _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
+
+            ThrowsIfEntityPrimaryKeyMissing();
         }
 
         #endregion
 
         #region Protected Methods
-
-        /// <summary>
-        /// A protected overridable method for adding the specified <paramref name="entity" /> into the repository.
-        /// </summary>
-        protected abstract void AddItem(TEntity entity);
-
-        /// <summary>
-        /// A protected overridable method for deleting the specified <paramref name="entity" /> from the repository.
-        /// </summary>
-        protected abstract void DeleteItem(TEntity entity);
-
-        /// <summary>
-        /// A protected overridable method for updating the specified <paramref name="entity" /> in the repository.
-        /// </summary>
-        protected abstract void UpdateItem(TEntity entity);
-
-        /// <summary>
-        /// A protected overridable method for saving changes made in the current unit of work in the repository.
-        /// </summary>
-        protected abstract void SaveChanges();
-
-        /// <summary>
-        /// A protected overridable method for getting an entity query that supplies the specified fetching strategy from the repository.
-        /// </summary>
-        protected abstract IQueryable<TEntity> GetQuery(IFetchStrategy<TEntity> fetchStrategy = null);
-
-        /// <summary>
-        /// Gets an entity query that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
-        protected IQueryable<TEntity> GetQuery(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
-        {
-            IQueryable<TEntity> query;
-
-            if (criteria != null)
-            {
-                query = GetQuery(criteria.FetchStrategy);
-                query = criteria.SatisfyingEntitiesFrom(query);
-            }
-            else
-            {
-                query = GetQuery();
-            }
-
-            if (options != null)
-            {
-                query = options.Apply(query);
-            }
-
-            return query;
-        }
-
-        /// <summary>
-        /// Gets an entity query with the given primary key value from the repository.
-        /// </summary>
-        protected virtual TEntity GetEntity(TKey key, IFetchStrategy<TEntity> fetchStrategy)
-        {
-            return GetEntity(GetByPrimaryKeySpecification(key, fetchStrategy), (IQueryOptions<TEntity>)null);
-        }
-
-        /// <summary>
-        /// Gets an entity query with the given primary key value from the repository.
-        /// </summary>
-        protected TEntity GetEntity(TKey key)
-        {
-            return Get(key, (IFetchStrategy<TEntity>)null);
-        }
-
-        /// <summary>
-        /// Gets an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
-        protected TEntity GetEntity(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
-        {
-            return GetEntity<TEntity>(criteria, options, IdentityExpression<TEntity>.Instance);
-        }
-
-        /// <summary>
-        /// Gets an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
-        protected virtual TResult GetEntity<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
-        {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
-
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
-
-            return GetQuery(criteria, options).Select(selector).FirstOrDefault();
-        }
-
-        /// <summary>
-        /// Gets a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
-        protected IEnumerable<TEntity> GetEntities(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options)
-        {
-            return GetEntities<TEntity>(criteria, options, IdentityExpression<TEntity>.Instance);
-        }
-
-        /// <summary>
-        /// Gets a collection of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
-        protected virtual IEnumerable<TResult> GetEntities<TResult>(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
-        {
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
-
-            return GetQuery(criteria, options).Select(selector).ToList();
-        }
-
-        /// <summary>
-        /// Gets the number of entities that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
-        protected virtual int GetCount(ISpecification<TEntity> criteria)
-        {
-            var predicate = criteria?.Predicate?.Compile();
-
-            return predicate == null ? GetQuery().Count() : GetQuery().Count(predicate);
-        }
-
-        /// <summary>
-        /// Determining whether the repository contains an entity that satisfies the criteria specified by the <paramref name="criteria" /> from the repository.
-        /// </summary>
-        protected virtual bool GetExist(ISpecification<TEntity> criteria)
-        {
-            if (criteria == null)
-                throw new ArgumentNullException(nameof(criteria));
-
-            return Find(criteria) != null;
-        }
-
-        /// <summary>
-        /// Gets a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
-        /// </summary>
-        protected virtual Dictionary<TDictionaryKey, TElement> GetDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options)
-        {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
-            var keySelectFunc = keySelector.Compile();
-            var elementSelectorFunc = elementSelector.Compile();
-
-            return GetQuery(criteria, options).ToDictionary(keySelectFunc, elementSelectorFunc, EqualityComparer<TDictionaryKey>.Default);
-        }
-
-        /// <summary>
-        /// Gets a new <see cref="IGrouping{TGroupKey, TElement}" /> according to the specified <paramref name="keySelector" />, an element selector.
-        /// </summary>
-        protected virtual IEnumerable<IGrouping<TGroupKey, TElement>> GetGroupBy<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options)
-        {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
-            var keySelectFunc = keySelector.Compile();
-            var elementSelectorFunc = elementSelector.Compile();
-
-            return GetQuery(criteria, options).AsEnumerable().GroupBy(keySelectFunc, elementSelectorFunc, EqualityComparer<TGroupKey>.Default);
-        }
-
-        /// <summary>
-        /// Returns a specification for getting an entity by it's primary key.
-        /// </summary>
-        /// <param name="key">The entity's key.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
-        /// <returns>The new specification.</returns>
-        // https://github.com/SharpRepository/SharpRepository/blob/develop/SharpRepository.Repository/RepositoryBase.cs
-        protected virtual ISpecification<TEntity> GetByPrimaryKeySpecification(TKey key, IFetchStrategy<TEntity> fetchStrategy = null)
-        {
-            var propInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<TEntity>();
-            var parameter = Expression.Parameter(typeof(TEntity), "x");
-            var lambda = Expression.Lambda<Func<TEntity, bool>>(
-                Expression.Equal(
-                    Expression.PropertyOrField(parameter, propInfo.Name),
-                    Expression.Constant(key)
-                ),
-                parameter
-            );
-
-            var spec = new Specification<TEntity>(lambda);
-
-            if (fetchStrategy != null)
-            {
-                spec.FetchStrategy = fetchStrategy;
-            }
-
-            return spec;
-        }
-
-        /// <summary>
-        /// Generates a new primary id for the entity.
-        /// </summary>
-        /// <returns>The new generated primary id.</returns>
-        protected virtual TKey GeneratePrimaryKey()
-        {
-            var propertyInfo = ConventionHelper.GetPrimaryKeyPropertyInfo<TEntity>();
-            var propertyType = propertyInfo.PropertyType;
-
-            if (propertyType == typeof(Guid))
-                return (TKey)Convert.ChangeType(Guid.NewGuid(), typeof(TKey));
-
-            if (propertyType == typeof(string))
-                return (TKey)Convert.ChangeType(Guid.NewGuid().ToString("N"), typeof(TKey));
-
-            if (propertyType == typeof(int))
-            {
-                var key = GetQuery()
-                    .Select(x => x.GetPrimaryKeyPropertyValue<TKey>())
-                    .OrderByDescending(x => x)
-                    .FirstOrDefault();
-
-                return (TKey)Convert.ChangeType(Convert.ToInt32(key) + 1, typeof(TKey));
-            }
-
-            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeInvalid, typeof(TEntity), propertyType));
-        }
-
-        /// <summary>
-        /// Throws if the entity key value type does not match the type of the property defined.
-        /// </summary>
-        protected virtual void ThrowIfEntityKeyValueTypeMismatch()
-        {
-            var propertyInfo = typeof(TEntity).GetPrimaryKeyPropertyInfo();
-            if (propertyInfo.PropertyType != typeof(TKey))
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeMismatch, typeof(TKey), propertyInfo.PropertyType));
-        }
 
         /// <summary>
         /// Executes the specified interceptor activity.
@@ -345,30 +574,177 @@
             }
         }
 
-        #endregion
-
-        #region Implementation of IRepositoryQueryable<out TEntity>
-
         /// <summary>
-        /// Returns the entity <see cref="System.Linq.IQueryable{TEntity}" />.
+        /// Intercepts any errors that occurred while performing the specified action.
         /// </summary>
-        public virtual IQueryable<TEntity> AsQueryable()
+        /// <typeparam name="T">The type of the result returned by the specified action.</typeparam>
+        /// <param name="action">The action.</param>
+        /// <returns>The result of the performed action.</returns>
+        protected T InterceptError<T>(Func<T> action)
         {
             try
             {
-                return GetQuery();
+                return action();
             }
             catch (Exception ex)
             {
-                Intercept(x => x.Error(ex));
+                Intercept(x => x.Error<TEntity>(ex));
 
                 throw;
+            }
+            finally
+            {
+                DisposeContext();
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously intercepts any errors that occurred while performing the specified action.
+        /// </summary>
+        /// <typeparam name="T">The type of the result returned by the specified action.</typeparam>
+        /// <param name="action">The action.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the result of the performed action.</returns>
+        protected async Task<T> InterceptErrorAsync<T>(Func<Task<T>> action)
+        {
+            try
+            {
+                return await action();
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error<TEntity>(ex));
+
+                throw;
+            }
+            finally
+            {
+                DisposeContext();
+            }
+        }
+
+        /// <summary>
+        /// Intercepts any errors that occurred while performing the specified action.
+        /// </summary>
+        /// <param name="action">The action.</param>
+        protected void InterceptError(Action action)
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception ex)
+            {
+                Intercept(x => x.Error<TEntity>(ex));
+
+                throw;
+            }
+            finally
+            {
+                DisposeContext();
+            }
+        }
+
+        /// <summary>
+        /// Intercepts the query result that was executed while performing the specified action.
+        /// </summary>
+        /// <typeparam name="T">The type of the result returned by the specified action.</typeparam>
+        /// <param name="action">The action.</param>
+        protected T InterceptQueryResult<T>(Func<QueryResult<T>> action)
+        {
+            var queryResult = InterceptError<QueryResult<T>>(action);
+
+            Intercept(x => x.QueryExecuted<TEntity, T>(queryResult));
+
+            return queryResult.HasResult ? queryResult.Result : default(T);
+        }
+
+        /// <summary>
+        /// Asynchronously intercepts the query result that was executed while performing the specified action.
+        /// </summary>
+        /// <typeparam name="T">The type of the result returned by the specified action.</typeparam>
+        /// <param name="action">The action.</param>
+        protected async Task<T> InterceptQueryResultAsync<T>(Func<Task<QueryResult<T>>> action)
+        {
+            var queryResult = await InterceptErrorAsync<QueryResult<T>>(action);
+
+            Intercept(x => x.QueryExecuted<TEntity, T>(queryResult));
+
+            return queryResult.HasResult ? queryResult.Result : default(T);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void ThrowsIfEntityPrimaryKeyMissing()
+        {
+            if (!PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Any())
+                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityRequiresPrimaryKey, typeof(TEntity).FullName));
+        }
+
+        private void InterceptAddItem(TEntity entity)
+        {
+            Intercept(x => x.AddExecuting(entity));
+
+            Context.Add(entity);
+
+            Intercept(x => x.AddExecuted(entity));
+        }
+
+        private void InterceptAddItem(IEnumerable<TEntity> entities)
+        {
+            foreach (var entity in entities)
+            {
+                InterceptAddItem(entity);
+            }
+        }
+
+        private void InterceptUpdateItem(TEntity entity)
+        {
+            Intercept(x => x.UpdateExecuting(entity));
+
+            Context.Update(entity);
+
+            Intercept(x => x.UpdateExecuted(entity));
+        }
+
+        private void InterceptUpdateItem(IEnumerable<TEntity> entities)
+        {
+            foreach (var entity in entities)
+            {
+                InterceptUpdateItem(entity);
+            }
+        }
+
+        private void InterceptDeleteItem(TEntity entity)
+        {
+            Intercept(x => x.DeleteExecuting(entity));
+
+            Context.Remove(entity);
+
+            Intercept(x => x.DeleteExecuted(entity));
+        }
+
+        private void InterceptDeleteItem(IEnumerable<TEntity> entities)
+        {
+            foreach (var entity in entities)
+            {
+                InterceptDeleteItem(entity);
+            }
+        }
+
+        private void DisposeContext()
+        {
+            if (_canDisposeContext && _context != null)
+            {
+                _context.Dispose();
+                _context = null;
             }
         }
 
         #endregion
 
-        #region Implementation of ICanAggregate<TEntity>
+        #region Implementation of IRepositoryBase<TEntity>
 
         /// <summary>
         /// Returns the number of entities contained in the repository.
@@ -376,26 +752,7 @@
         /// <returns>The number of entities contained in the repository.</returns>
         public int Count()
         {
-            return Count((ISpecification<TEntity>)null);
-        }
-
-        /// <summary>
-        /// Returns the number of entities that satisfies the criteria specified by the <paramref name="criteria" /> in the repository.
-        /// </summary>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
-        /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="criteria" /> in the repository.</returns>
-        public int Count(ISpecification<TEntity> criteria)
-        {
-            try
-            {
-                return GetCount(criteria);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return Count((IQueryOptions<TEntity>)null);
         }
 
         /// <summary>
@@ -405,7 +762,17 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
         public int Count(Expression<Func<TEntity, bool>> predicate)
         {
-            return Count(predicate == null ? null : new Specification<TEntity>(predicate));
+            return Count(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)));
+        }
+
+        /// <summary>
+        /// Returns the number of entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
+        /// </summary>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        public int Count(IQueryOptions<TEntity> options)
+        {
+            return InterceptQueryResult<int>(() => Context.Count<TEntity>(options));
         }
 
         /// <summary>
@@ -413,136 +780,77 @@
         /// </summary>
         /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="options">The options to apply to the query.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector, IQueryOptions<TEntity> options = null)
+        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector)
         {
-            return ToDictionary((ISpecification<TEntity>)null, keySelector, options);
-        }
-
-        /// <summary>
-        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElemen}" /> according to the specified <paramref name="keySelector" />, a comparer, and an element selector function..
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null)
-        {
-            return ToDictionary((ISpecification<TEntity>)null, keySelector, elementSelector, options);
+            return ToDictionary<TDictionaryKey>((IQueryOptions<TEntity>)null, keySelector);
         }
 
         /// <summary>
         /// Returns a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
         /// </summary>
         /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, IQueryOptions<TEntity> options = null)
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector)
         {
-            return ToDictionary(criteria, keySelector, IdentityExpression<TEntity>.Instance, options);
+            return ToDictionary<TDictionaryKey, TEntity>(options, keySelector, IdentityExpression<TEntity>.Instance);
         }
 
         /// <summary>
-        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElemen}" /> according to the specified <paramref name="keySelector" />, a comparer, and an element selector function..
+        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
         /// </summary>
         /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
         /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
-        /// <param name="options">The options to apply to the query.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null)
+        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
-            try
-            {
-                if (keySelector == null)
-                    throw new ArgumentNullException(nameof(keySelector));
-
-                return GetDictionary(criteria, keySelector, elementSelector, options);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return ToDictionary<TDictionaryKey, TElement>((IQueryOptions<TEntity>)null, keySelector, elementSelector);
         }
 
         /// <summary>
-        /// Returns a new <see cref="IGrouping{TGroupKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
+        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, and an element selector function with entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
         /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TEntity>> GroupBy<TGroupKey>(Expression<Func<TEntity, TGroupKey>> keySelector, IQueryOptions<TEntity> options = null)
-        {
-            return GroupBy((ISpecification<TEntity>)null, keySelector, options);
-        }
-
-        /// <summary>
-        /// Returns a new <see cref="IGrouping{TGroupKey, TElemen}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
+        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
         /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
+        /// <param name="options">The options to apply to the query.</param>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TElement>> GroupBy<TGroupKey, TElement>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null)
+        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
-            return GroupBy((ISpecification<TEntity>)null, keySelector, elementSelector, options);
+            return InterceptQueryResult<Dictionary<TDictionaryKey, TElement>>(() => Context.ToDictionary(options, keySelector, elementSelector));
         }
 
         /// <summary>
-        /// Returns a new <see cref="IGrouping{TGroupKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
+        /// Returns a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
         /// </summary>
         /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
+        /// <typeparam name="TResult">The type of the value returned by resultSelector.</typeparam>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TEntity>> GroupBy<TGroupKey>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, IQueryOptions<TEntity> options = null)
+        /// <param name="resultSelector">A transform function to produce a result value from each element.</param>
+        /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains the grouped result.</returns>
+        public IEnumerable<TResult> GroupBy<TGroupKey, TResult>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
-            return GroupBy(criteria, keySelector, IdentityExpression<TEntity>.Instance, options);
+            return GroupBy<TGroupKey, TResult>((IQueryOptions<TEntity>)null, keySelector, resultSelector);
         }
 
         /// <summary>
-        /// Returns a new <see cref="IGrouping{TGroupKey, TElemen}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
+        /// Returns a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
         /// </summary>
         /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
+        /// <typeparam name="TResult">The type of the value returned by resultSelector.</typeparam>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>A new <see cref="IGrouping{TGroupKey, TEntity}" /> that contains keys and values.</returns>
-        public IEnumerable<IGrouping<TGroupKey, TElement>> GroupBy<TGroupKey, TElement>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, IQueryOptions<TEntity> options = null)
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="resultSelector">A transform function to produce a result value from each element.</param>
+        /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        public IEnumerable<TResult> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
-            try
-            {
-                if (keySelector == null)
-                    throw new ArgumentNullException(nameof(keySelector));
-
-                return GetGroupBy(criteria, keySelector, elementSelector, options);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return InterceptQueryResult<IEnumerable<TResult>>(() => Context.GroupBy(options, keySelector, resultSelector));
         }
-
-        #endregion
-
-        #region Implementation of ICanAdd<in TEntity>
 
         /// <summary>
         /// Adds the specified <paramref name="entity" /> into the repository.
@@ -550,21 +858,15 @@
         /// <param name="entity">The entity to add.</param>
         public void Add(TEntity entity)
         {
-            try
+            InterceptError(() =>
             {
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
 
                 InterceptAddItem(entity);
 
-                SaveChanges();
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+                Context.SaveChanges();
+            });
         }
 
         /// <summary>
@@ -573,26 +875,19 @@
         /// <param name="entities">The collection of entities to add.</param>
         public void Add(IEnumerable<TEntity> entities)
         {
-            try
+            InterceptError(() =>
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
 
+                if (!entities.Any())
+                    return;
+
                 InterceptAddItem(entities);
 
-                SaveChanges();
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+                Context.SaveChanges();
+            });
         }
-
-        #endregion
-
-        #region Implementation of ICanUpdate<in TEntity>
 
         /// <summary>
         /// Updates the specified <paramref name="entity" /> into the repository.
@@ -600,21 +895,15 @@
         /// <param name="entity">The entity to update.</param>
         public void Update(TEntity entity)
         {
-            try
+            InterceptError(() =>
             {
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
 
                 InterceptUpdateItem(entity);
 
-                SaveChanges();
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+                Context.SaveChanges();
+            });
         }
 
         /// <summary>
@@ -623,45 +912,18 @@
         /// <param name="entities">The collection of entities to update.</param>
         public void Update(IEnumerable<TEntity> entities)
         {
-            try
+            InterceptError(() =>
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
 
+                if (!entities.Any())
+                    return;
+
                 InterceptUpdateItem(entities);
 
-                SaveChanges();
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
-        }
-
-        #endregion
-
-        #region Implementation of ICanDelete<in TEntity,in TKey>
-
-        /// <summary>
-        /// Deletes an entity with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key">The value of the primary key used to match entities against.</param>
-        public void Delete(TKey key)
-        {
-            var entity = Get(key);
-
-            if (entity == null)
-            {
-                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
-
-                Intercept(x => x.Error(ex));
-
-                throw ex;
-            }
-
-            Delete(entity);
+                Context.SaveChanges();
+            });
         }
 
         /// <summary>
@@ -670,30 +932,33 @@
         /// <param name="entity">The entity to delete.</param>
         public void Delete(TEntity entity)
         {
-            try
+            InterceptError(() =>
             {
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
 
                 InterceptDeleteItem(entity);
 
-                SaveChanges();
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+                Context.SaveChanges();
+            });
         }
 
         /// <summary>
-        /// Deletes all entities in the repository that satisfied the criteria specified by the <paramref name="criteria" />.
+        /// Deletes all the entities in the repository that satisfies the criteria specified by the <paramref name="predicate" />.
         /// </summary>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
-        public void Delete(ISpecification<TEntity> criteria)
+        /// <param name="predicate">A function to filter each entity.</param>
+        public void Delete(Expression<Func<TEntity, bool>> predicate)
         {
-            Delete(FindAll(criteria));
+            Delete(FindAll(predicate));
+        }
+
+        /// <summary>
+        /// Deletes all entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
+        /// </summary>
+        /// <param name="options">The options to apply to the query.</param>
+        public void Delete(IQueryOptions<TEntity> options)
+        {
+            Delete(FindAll(options));
         }
 
         /// <summary>
@@ -702,171 +967,38 @@
         /// <param name="entities">The collection of entities to delete.</param>
         public void Delete(IEnumerable<TEntity> entities)
         {
-            try
+            InterceptError(() =>
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
 
+                if (!entities.Any())
+                    return;
+
                 InterceptDeleteItem(entities);
 
-                SaveChanges();
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+                Context.SaveChanges();
+            });
         }
-
-        #endregion
-
-        #region Implementation of ICanGet<TEntity,in TKey>
-
-        /// <summary>
-        /// Gets an entity with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key">The value of the primary key for the entity to be found.</param>
-        /// <return>The entity found.</return>
-        public TEntity Get(TKey key)
-        {
-            try
-            {
-                if (key == null)
-                    throw new ArgumentNullException(nameof(key));
-
-                return GetEntity(key);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Gets an entity with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key">The value of the primary key for the entity to be found.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
-        /// <return>The entity found.</return>
-        public TEntity Get(TKey key, IFetchStrategy<TEntity> fetchStrategy)
-        {
-            try
-            {
-                if (key == null)
-                    throw new ArgumentNullException(nameof(key));
-
-                return GetEntity(key, fetchStrategy);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Gets a specific projected entity result with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key">The value of the primary key for the entity to be found.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public TResult Get<TResult>(TKey key, Expression<Func<TEntity, TResult>> selector)
-        {
-            return Get(key, selector, (IFetchStrategy<TEntity>)null);
-        }
-
-        /// <summary>
-        /// Gets a specific projected entity result with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key">The value of the primary key for the entity to be found.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
-        /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public TResult Get<TResult>(TKey key, Expression<Func<TEntity, TResult>> selector, IFetchStrategy<TEntity> fetchStrategy)
-        {
-            try
-            {
-                if (key == null)
-                    throw new ArgumentNullException(nameof(key));
-
-                if (selector == null)
-                    throw new ArgumentNullException(nameof(selector));
-
-                var result = GetEntity(key, fetchStrategy);
-                var selectFunc = selector.Compile();
-                var selectedResult = result == null
-                    ? default(TResult)
-                    : new[] { result }.AsEnumerable().Select(selectFunc).First();
-
-                return selectedResult;
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Determines whether the repository contains an entity with the given primary key value
-        /// </summary>
-        /// <param name="key">The value of the primary key used to match entities against.</param>
-        /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
-        public bool Exists(TKey key)
-        {
-            return Get(key) != null;
-        }
-
-        #endregion
-
-        #region Implementation of ICanFind<TEntity>
 
         /// <summary>
         /// Finds the first entity in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The entity that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
-        public TEntity Find(Expression<Func<TEntity, bool>> predicate, IQueryOptions<TEntity> options = null)
+        public TEntity Find(Expression<Func<TEntity, bool>> predicate)
         {
-            if (predicate == null)
-            {
-                var ex = new ArgumentNullException(nameof(predicate));
-
-                Intercept(x => x.Error(ex));
-
-                throw ex;
-            }
-
-            return Find(new Specification<TEntity>(predicate), options);
+            return Find<TEntity>(predicate, IdentityExpression<TEntity>.Instance);
         }
 
         /// <summary>
-        /// Finds the first entity in the repository that satisfies the criteria specified by the <paramref name="criteria" /> in the repository.
+        /// Finds the first entity in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.
         /// </summary>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>The entity that satisfied the criteria specified by the <paramref name="criteria" /> in the repository.</returns>
-        public TEntity Find(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options = null)
+        /// <returns>The entity that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        public TEntity Find(IQueryOptions<TEntity> options)
         {
-            try
-            {
-                if (criteria == null)
-                    throw new ArgumentNullException(nameof(criteria));
-
-                return GetEntity(criteria, options);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return Find<TEntity>(options, IdentityExpression<TEntity>.Instance);
         }
 
         /// <summary>
@@ -874,47 +1006,21 @@
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public TResult Find<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null)
+        public TResult Find<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector)
         {
-            if (predicate == null)
-            {
-                var ex = new ArgumentNullException(nameof(predicate));
-
-                Intercept(x => x.Error(ex));
-
-                throw ex;
-            }
-
-            return Find(new Specification<TEntity>(predicate), selector, options);
+            return Find<TResult>(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)), selector);
         }
 
         /// <summary>
-        /// Finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="criteria" /> in the repository.
+        /// Finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.
         /// </summary>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="options">The options to apply to the query.</param>
+        /// <param name="selector">A function to project each entity into a new form.</param>
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public TResult Find<TResult>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null)
+        public TResult Find<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
-            try
-            {
-                if (criteria == null)
-                    throw new ArgumentNullException(nameof(criteria));
-
-                if (selector == null)
-                    throw new ArgumentNullException(nameof(selector));
-
-                return GetEntity(criteria, options, selector);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return InterceptQueryResult<TResult>(() => Context.Find<TEntity, TResult>(options, selector));
         }
 
         /// <summary>
@@ -923,82 +1029,37 @@
         /// <returns>The collection of entities in the repository.</returns>
         public IEnumerable<TEntity> FindAll()
         {
-            try
-            {
-                return GetEntities(null, null);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return FindAll<TEntity>(IdentityExpression<TEntity>.Instance);
         }
 
         /// <summary>
         /// Finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
-        public IEnumerable<TEntity> FindAll(Expression<Func<TEntity, bool>> predicate, IQueryOptions<TEntity> options = null)
+        public IEnumerable<TEntity> FindAll(Expression<Func<TEntity, bool>> predicate)
         {
-            if (predicate == null)
-            {
-                var ex = new ArgumentNullException(nameof(predicate));
-
-                Intercept(x => x.Error(ex));
-
-                throw ex;
-            }
-
-            return FindAll(new Specification<TEntity>(predicate), options);
+            return FindAll<TEntity>(predicate, IdentityExpression<TEntity>.Instance);
         }
 
         /// <summary>
-        /// Finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="criteria" />.
+        /// Finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
         /// </summary>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="criteria" />.</returns>
-        public IEnumerable<TEntity> FindAll(ISpecification<TEntity> criteria, IQueryOptions<TEntity> options = null)
+        /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
+        public IEnumerable<TEntity> FindAll(IQueryOptions<TEntity> options)
         {
-            try
-            {
-                if (criteria == null)
-                    throw new ArgumentNullException(nameof(criteria));
-
-                return GetEntities(criteria, options);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return FindAll<TEntity>(options, IdentityExpression<TEntity>.Instance);
         }
 
         /// <summary>
         /// Finds the collection of projected entity results in the repository.
         /// </summary>
         /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The collection of projected entity results in the repository.</returns>
-        public IEnumerable<TResult> FindAll<TResult>(Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null)
+        public IEnumerable<TResult> FindAll<TResult>(Expression<Func<TEntity, TResult>> selector)
         {
-            try
-            {
-                if (selector == null)
-                    throw new ArgumentNullException(nameof(selector));
-
-                return GetEntities((ISpecification<TEntity>)null, options, selector);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return FindAll<TResult>((IQueryOptions<TEntity>)null, selector);
         }
 
         /// <summary>
@@ -1006,47 +1067,21 @@
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
-        public IEnumerable<TResult> FindAll<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null)
+        public IEnumerable<TResult> FindAll<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector)
         {
-            if (predicate == null)
-            {
-                var ex = new ArgumentNullException(nameof(predicate));
-
-                Intercept(x => x.Error(ex));
-
-                throw ex;
-            }
-
-            return FindAll(new Specification<TEntity>(predicate), selector, options);
+            return FindAll<TResult>(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)), selector);
         }
 
         /// <summary>
-        /// Finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="criteria" />.
+        /// Finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.
         /// </summary>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="options">The options to apply to the query.</param>
-        /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="criteria" />.</returns>
-        public IEnumerable<TResult> FindAll<TResult>(ISpecification<TEntity> criteria, Expression<Func<TEntity, TResult>> selector, IQueryOptions<TEntity> options = null)
+        /// <param name="selector">A function to project each entity into a new form.</param>
+        /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
+        public IEnumerable<TResult> FindAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
-            try
-            {
-                if (criteria == null)
-                    throw new ArgumentNullException(nameof(criteria));
-
-                if (selector == null)
-                    throw new ArgumentNullException(nameof(selector));
-
-                return GetEntities(criteria, options, selector);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return InterceptQueryResult<IEnumerable<TResult>>(() => Context.FindAll<TEntity, TResult>(options, selector));
         }
 
         /// <summary>
@@ -1056,50 +1091,428 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified predicate; otherwise, <c>false</c>.</returns>
         public bool Exists(Expression<Func<TEntity, bool>> predicate)
         {
-            if (predicate == null)
-            {
-                var ex = new ArgumentNullException(nameof(predicate));
-
-                Intercept(x => x.Error(ex));
-
-                throw ex;
-            }
-
-            return Exists(new Specification<TEntity>(predicate));
+            return Exists(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)));
         }
 
         /// <summary>
-        /// Determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="criteria" />.
+        /// Determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="options" />.
         /// </summary>
-        /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
+        /// <param name="options">The options to apply to the query.</param>
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
-        public bool Exists(ISpecification<TEntity> criteria)
+        public bool Exists(IQueryOptions<TEntity> options)
         {
-            try
-            {
-                if (criteria == null)
-                    throw new ArgumentNullException(nameof(criteria));
-
-                return GetExist(criteria);
-            }
-            catch (Exception ex)
-            {
-                Intercept(x => x.Error(ex));
-
-                throw;
-            }
+            return Find(options) != null;
         }
 
-        #endregion
-
-        #region Nested type: IdentityExpression<TElement>
-
-        protected class IdentityExpression<TElement>
+        /// <summary>
+        /// Asynchronously returns the number of entities contained in the repository.
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The number of entities contained in the repository.</returns>
+        public Task<int> CountAsync(CancellationToken cancellationToken = new CancellationToken())
         {
-            public static Expression<Func<TElement, TElement>> Instance
+            return CountAsync((IQueryOptions<TEntity>)null, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously returns the number of entities that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
+        /// </summary>
+        /// <param name="predicate">A function to filter each entity.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
+        public Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return CountAsync(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)), cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously returns the number of entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
+        /// </summary>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        public Task<int> CountAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return InterceptQueryResultAsync<int>(() => Context.AsAsync().CountAsync<TEntity>(options, cancellationToken));
+        }
+
+        /// <summary>
+        /// Asynchronously returns a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
+        /// </summary>
+        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        public Task<Dictionary<TDictionaryKey, TEntity>> ToDictionaryAsync<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ToDictionaryAsync<TDictionaryKey>((IQueryOptions<TEntity>)null, keySelector, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously returns a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
+        /// </summary>
+        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        public Task<Dictionary<TDictionaryKey, TEntity>> ToDictionaryAsync<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ToDictionaryAsync<TDictionaryKey, TEntity>(options, keySelector, IdentityExpression<TEntity>.Instance, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
+        /// </summary>
+        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
+        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        public Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ToDictionaryAsync<TDictionaryKey, TElement>((IQueryOptions<TEntity>)null, keySelector, elementSelector, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, and an element selector function with entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
+        /// </summary>
+        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
+        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        public Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return InterceptQueryResultAsync<Dictionary<TDictionaryKey, TElement>>(() => Context.AsAsync().ToDictionaryAsync(options, keySelector, elementSelector, cancellationToken));
+        }
+
+        /// <summary>
+        /// Asynchronously returns a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
+        /// </summary>
+        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
+        /// <typeparam name="TResult">The type of the value returned by resultSelector.</typeparam>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="resultSelector">A transform function to produce a result value from each element.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains the grouped result.</returns>
+        public Task<IEnumerable<TResult>> GroupByAsync<TGroupKey, TResult>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return GroupByAsync<TGroupKey, TResult>((IQueryOptions<TEntity>)null, keySelector, resultSelector, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously returns a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
+        /// </summary>
+        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
+        /// <typeparam name="TResult">The type of the value returned by resultSelector.</typeparam>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="keySelector">A function to extract a key from each entity.</param>
+        /// <param name="resultSelector">A transform function to produce a result value from each element.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        public Task<IEnumerable<TResult>> GroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return InterceptQueryResultAsync<IEnumerable<TResult>>(() => Context.AsAsync().GroupByAsync(options, keySelector, resultSelector, cancellationToken));
+        }
+
+        /// <summary>
+        /// Asynchronously adds the specified <paramref name="entity" /> into the repository.
+        /// </summary>
+        /// <param name="entity">The entity to add.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        public Task AddAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return InterceptErrorAsync(() =>
             {
-                get { return x => x; }
-            }
+                if (entity == null)
+                    throw new ArgumentNullException(nameof(entity));
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                InterceptAddItem(entity);
+
+                return Context.AsAsync().SaveChangesAsync(cancellationToken);
+            });
+        }
+
+        /// <summary>
+        /// Asynchronously adds the specified <paramref name="entities" /> collection into the repository.
+        /// </summary>
+        /// <param name="entities">The collection of entities to add.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        public Task AddAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return InterceptErrorAsync(() =>
+            {
+                if (entities == null)
+                    throw new ArgumentNullException(nameof(entities));
+
+                if (!entities.Any())
+                    return Task.FromResult(0);
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                InterceptAddItem(entities);
+
+                return Context.AsAsync().SaveChangesAsync(cancellationToken);
+            });
+        }
+
+        /// <summary>
+        /// Asynchronously updates the specified <paramref name="entity" /> in the repository.
+        /// </summary>
+        /// <param name="entity">The entity to update.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        public Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return InterceptErrorAsync(() =>
+            {
+                if (entity == null)
+                    throw new ArgumentNullException(nameof(entity));
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                InterceptUpdateItem(entity);
+
+                return Context.AsAsync().SaveChangesAsync(cancellationToken);
+            });
+        }
+
+        /// <summary>
+        /// Asynchronously updates the specified <paramref name="entities" /> collection in the repository.
+        /// </summary>
+        /// <param name="entities">The collection of entities to update.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        public Task UpdateAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return InterceptErrorAsync(() =>
+            {
+                if (entities == null)
+                    throw new ArgumentNullException(nameof(entities));
+
+                if (!entities.Any())
+                    return Task.FromResult(0);
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                InterceptUpdateItem(entities);
+
+                return Context.AsAsync().SaveChangesAsync(cancellationToken);
+            });
+        }
+
+        /// <summary>
+        /// Asynchronously deletes the specified <paramref name="entity" /> into the repository.
+        /// </summary>
+        /// <param name="entity">The entity to delete.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        public Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return InterceptErrorAsync(() =>
+            {
+                if (entity == null)
+                    throw new ArgumentNullException(nameof(entity));
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                InterceptDeleteItem(entity);
+
+                return Context.AsAsync().SaveChangesAsync(cancellationToken);
+            });
+        }
+
+        /// <summary>
+        /// Asynchronously deletes all the entities in the repository that satisfies the criteria specified by the <paramref name="predicate" />.
+        /// </summary>
+        /// <param name="predicate">A function to filter each entity.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        public async Task DeleteAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
+        {
+            var entitiesInDb = await FindAllAsync(predicate, cancellationToken);
+
+            await DeleteAsync(entitiesInDb, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously deletes all entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
+        /// </summary>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        public async Task DeleteAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        {
+            var entitiesInDb = await FindAllAsync(options, cancellationToken);
+
+            await DeleteAsync(entitiesInDb, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously deletes the specified <paramref name="entities" /> collection into the repository.
+        /// </summary>
+        /// <param name="entities">The collection of entities to delete.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        public Task DeleteAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return InterceptErrorAsync(() =>
+            {
+                if (entities == null)
+                    throw new ArgumentNullException(nameof(entities));
+
+                if (!entities.Any())
+                    return Task.FromResult(0);
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                InterceptDeleteItem(entities);
+
+                return Context.AsAsync().SaveChangesAsync(cancellationToken);
+            });
+        }
+
+        /// <summary>
+        /// Asynchronously finds the first entity in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
+        /// </summary>
+        /// <param name="predicate">A function to filter each entity.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
+        public Task<TEntity> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return FindAsync<TEntity>(predicate, IdentityExpression<TEntity>.Instance, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously finds the first entity in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.
+        /// </summary>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        public Task<TEntity> FindAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return FindAsync<TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
+        /// </summary>
+        /// <param name="predicate">A function to filter each entity.</param>
+        /// <param name="selector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
+        public Task<TResult> FindAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return FindAsync<TResult>(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)), selector, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.
+        /// </summary>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="selector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
+        public Task<TResult> FindAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return InterceptQueryResultAsync<TResult>(() => Context.AsAsync().FindAsync<TEntity, TResult>(options, selector, cancellationToken));
+        }
+
+        /// <summary>
+        /// Asynchronously finds the collection of entities in the repository.
+        /// </summary>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of entities in the repository.</returns>
+        public Task<IEnumerable<TEntity>> FindAllAsync(CancellationToken cancellationToken = new CancellationToken())
+        {
+            return FindAllAsync<TEntity>(IdentityExpression<TEntity>.Instance, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
+        /// </summary>
+        /// <param name="predicate">A function to filter each entity.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
+        public Task<IEnumerable<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return FindAllAsync<TEntity>(predicate, IdentityExpression<TEntity>.Instance, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
+        /// </summary>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
+        public Task<IEnumerable<TEntity>> FindAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return FindAllAsync<TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously finds the collection of projected entity results in the repository.
+        /// </summary>
+        /// <param name="selector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository.</returns>
+        public Task<IEnumerable<TResult>> FindAllAsync<TResult>(Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return FindAllAsync<TResult>((IQueryOptions<TEntity>)null, selector, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
+        /// </summary>
+        /// <param name="predicate">A function to filter each entity.</param>
+        /// <param name="selector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
+        public Task<IEnumerable<TResult>> FindAllAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return FindAllAsync<TResult>(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)), selector, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.
+        /// </summary>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="selector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
+        public Task<IEnumerable<TResult>> FindAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return InterceptQueryResultAsync<IEnumerable<TResult>>(() => Context.AsAsync().FindAllAsync<TEntity, TResult>(options, selector, cancellationToken));
+        }
+
+        /// <summary>
+        /// Asynchronously determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="predicate" />.
+        /// </summary>
+        /// <param name="predicate">The predicate used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified predicate; otherwise, <c>false</c>.</returns>
+        public Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExistsAsync(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)), cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="options" />.
+        /// </summary>
+        /// <param name="options">The options to apply to the query.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
+        public async Task<bool> ExistsAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return await FindAsync(options, cancellationToken) != null;
         }
 
         #endregion
