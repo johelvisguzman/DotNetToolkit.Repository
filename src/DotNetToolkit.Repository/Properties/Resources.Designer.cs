@@ -97,6 +97,42 @@ namespace DotNetToolkit.Repository.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; cannot be added to the in-memory store because another instance of this type with the same key is already being tracked..
+        /// </summary>
+        internal static string InMemoryContext_EntityAlreadyBeingTrackedInStore {
+            get {
+                return ResourceManager.GetString("InMemoryContext_EntityAlreadyBeingTrackedInStore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; cannot be added to the in-memory store because the key type &apos;{1}&apos; is an invalid primary key property type..
+        /// </summary>
+        internal static string InMemoryContext_EntityKeyValueTypeInvalid {
+            get {
+                return ResourceManager.GetString("InMemoryContext_EntityKeyValueTypeInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Attempted to update or delete an entity that does not exist in the in-memory store..
+        /// </summary>
+        internal static string InMemoryContext_EntityNotFoundInStore {
+            get {
+                return ResourceManager.GetString("InMemoryContext_EntityNotFoundInStore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The repository context does not support transactions..
+        /// </summary>
+        internal static string InMemoryContext_TransactionNotSupported {
+            get {
+                return ResourceManager.GetString("InMemoryContext_TransactionNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The source IRepositoryContext doesn&apos;t implement IRepositoryContextAsync. Only sources that implement IRepositoryContextAsync can be used for asynchronous operations..
         /// </summary>
         internal static string IRepositoryContextNotAsync {

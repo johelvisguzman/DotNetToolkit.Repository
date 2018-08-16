@@ -2,7 +2,7 @@
 {
     using Configuration.Interceptors;
     using Data;
-    using InMemory;
+    using Factories;
     using Moq;
     using System.Collections.Generic;
     using Xunit;

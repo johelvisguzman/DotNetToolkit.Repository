@@ -1,7 +1,6 @@
-﻿namespace DotNetToolkit.Repository.InMemory
+﻿namespace DotNetToolkit.Repository.Configuration
 {
-    using Configuration;
-    using Configuration.Conventions;
+    using Conventions;
     using Helpers;
     using Properties;
     using Queries;
@@ -95,7 +94,7 @@
         /// <returns>The transaction.</returns>
         public ITransactionManager BeginTransaction()
         {
-            throw new NotSupportedException(Resources.TransactionNotSupported);
+            throw new NotSupportedException(Resources.InMemoryContext_TransactionNotSupported);
         }
 
         /// <summary>
@@ -154,7 +153,7 @@
                         if (context.ContainsKey(key))
                         {
                             throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
-                                Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
+                                Resources.InMemoryContext_EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
                         }
 
                         var primeryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
@@ -168,7 +167,7 @@
                     }
                     else if (!context.ContainsKey(key))
                     {
-                        throw new InvalidOperationException(Resources.EntityNotFoundInStore);
+                        throw new InvalidOperationException(Resources.InMemoryContext_EntityNotFoundInStore);
                     }
 
                     if (entitySet.State == EntityState.Removed)
@@ -414,7 +413,7 @@
                 return Convert.ToInt32(key) + 1;
             }
 
-            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeInvalid, entityType.FullName, propertyType));
+            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.InMemoryContext_EntityKeyValueTypeInvalid, entityType.FullName, propertyType));
         }
 
         #endregion
