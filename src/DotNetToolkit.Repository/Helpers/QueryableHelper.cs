@@ -6,7 +6,7 @@
     using System.Linq;
     using System.Reflection;
 
-    internal static class QueryableHelpers
+    internal static class QueryableHelper
     {
         public static IQueryable<T> Apply<T>(this IQueryOptions<T> options, IQueryable<T> query) where T : class
         {

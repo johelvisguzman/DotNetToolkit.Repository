@@ -50,6 +50,18 @@
                 throw new ArgumentException(DotNetToolkit.Repository.Properties.Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
         }
 
+        private IQueryable<TEntity> AsQueryable<TEntity>() where TEntity : class
+        {
+            return _context.Set<TEntity>().AsQueryable();
+        }
+
+        private IQueryable<TEntity> AsQueryable<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy) where TEntity : class
+        {
+            var query = AsQueryable<TEntity>();
+
+            return fetchStrategy == null ? query : fetchStrategy.IncludePaths.Aggregate(query, (current, path) => current.Include(path));
+        }
+
         private IQueryable<TEntity> GetQuery<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
         {
             return options != null ? options.Apply(AsQueryable<TEntity>(options.FetchStrategy)) : AsQueryable<TEntity>();
@@ -132,29 +144,6 @@
         public int SaveChanges()
         {
             return _context.SaveChanges();
-        }
-
-        /// <summary>
-        /// Returns the entity <see cref="T:System.Linq.IQueryable`1" />.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <returns>The entity <see cref="T:System.Linq.IQueryable`1" />.</returns>
-        public IQueryable<TEntity> AsQueryable<TEntity>() where TEntity : class
-        {
-            return _context.Set<TEntity>().AsQueryable();
-        }
-
-        /// <summary>
-        /// Returns the entity <see cref="T:System.Linq.IQueryable`1" /> using the specified fetching strategy.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <param name="fetchStrategy"></param>
-        /// <returns>The entity <see cref="T:System.Linq.IQueryable`1" />.</returns>
-        public IQueryable<TEntity> AsQueryable<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy) where TEntity : class
-        {
-            var query = AsQueryable<TEntity>();
-
-            return fetchStrategy == null ? query : fetchStrategy.IncludePaths.Aggregate(query, (current, path) => current.Include(path));
         }
 
         /// <summary>

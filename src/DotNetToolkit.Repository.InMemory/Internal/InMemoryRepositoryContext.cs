@@ -69,9 +69,20 @@
                 throw new ArgumentException(DotNetToolkit.Repository.Properties.Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
         }
 
+        private IQueryable<TEntity> AsQueryable<TEntity>() where TEntity : class
+        {
+            var entityType = typeof(TEntity);
+            var store = InMemoryCache.Instance.GetDatabaseStore(DatabaseName);
+
+            if (!store.ContainsKey(entityType))
+                return Enumerable.Empty<TEntity>().AsQueryable();
+
+            return store[entityType].Select(x => (TEntity)Convert.ChangeType(x.Value, entityType)).AsQueryable();
+        }
+
         private IQueryable<TEntity> GetQuery<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
         {
-            return options != null ? options.Apply(AsQueryable<TEntity>(options.FetchStrategy)) : AsQueryable<TEntity>();
+            return options != null ? options.Apply(AsQueryable<TEntity>()) : AsQueryable<TEntity>();
         }
 
         #endregion
@@ -182,33 +193,6 @@
             }
 
             return count;
-        }
-
-        /// <summary>
-        /// Returns the entity <see cref="T:System.Linq.IQueryable`1" />.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <returns>The entity <see cref="T:System.Linq.IQueryable`1" />.</returns>
-        public virtual IQueryable<TEntity> AsQueryable<TEntity>() where TEntity : class
-        {
-            var entityType = typeof(TEntity);
-            var store = InMemoryCache.Instance.GetDatabaseStore(DatabaseName);
-
-            if (!store.ContainsKey(entityType))
-                return Enumerable.Empty<TEntity>().AsQueryable();
-
-            return store[entityType].Select(x => (TEntity)Convert.ChangeType(x.Value, entityType)).AsQueryable();
-        }
-
-        /// <summary>
-        /// Returns the entity <see cref="T:System.Linq.IQueryable`1" /> using the specified fetching strategy.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <param name="fetchStrategy"></param>
-        /// <returns>The entity <see cref="T:System.Linq.IQueryable`1" />.</returns>
-        public IQueryable<TEntity> AsQueryable<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy) where TEntity : class
-        {
-            return AsQueryable<TEntity>();
         }
 
         /// <summary>

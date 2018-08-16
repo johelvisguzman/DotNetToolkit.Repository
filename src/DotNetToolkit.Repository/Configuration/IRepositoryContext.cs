@@ -4,7 +4,6 @@
     using Queries.Strategies;
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Linq.Expressions;
     using Transactions;
 
@@ -46,20 +45,6 @@
         /// </summary>
         /// <returns>The number of state entries written to the database.</returns>
         int SaveChanges();
-
-        /// <summary>
-        /// Returns the entity <see cref="System.Linq.IQueryable{TEntity}" />.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <returns>The entity <see cref="System.Linq.IQueryable{TEntity}" />.</returns>
-        IQueryable<TEntity> AsQueryable<TEntity>() where TEntity : class;
-
-        /// <summary>
-        /// Returns the entity <see cref="System.Linq.IQueryable{TEntity}" /> using the specified fetching strategy.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <returns>The entity <see cref="System.Linq.IQueryable{TEntity}" />.</returns>
-        IQueryable<TEntity> AsQueryable<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy) where TEntity : class;
 
         /// <summary>
         /// Finds an entity with the given primary key values in the repository.

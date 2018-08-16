@@ -104,26 +104,6 @@
         }
 
         /// <summary>
-        /// Returns the entity <see cref="System.Linq.IQueryable{TEntity}" />.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <returns>The entity <see cref="System.Linq.IQueryable{TEntity}" />.</returns>
-        public IQueryable<TEntity> AsQueryable<TEntity>() where TEntity : class
-        {
-            return _context.AsQueryable<TEntity>();
-        }
-
-        /// <summary>
-        /// Returns the entity <see cref="System.Linq.IQueryable{TEntity}" /> using the specified fetching strategy.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <returns>The entity <see cref="System.Linq.IQueryable{TEntity}" />.</returns>
-        public IQueryable<TEntity> AsQueryable<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy) where TEntity : class
-        {
-            return _context.AsQueryable<TEntity>(fetchStrategy);
-        }
-
-        /// <summary>
         /// Finds an entity with the given primary key values in the repository.
         /// </summary>
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>

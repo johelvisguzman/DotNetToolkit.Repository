@@ -75,9 +75,16 @@
                 throw new ArgumentException(DotNetToolkit.Repository.Properties.Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
         }
 
+        private IQueryable<TEntity> AsQueryable<TEntity>() where TEntity : class
+        {
+            var entities = OnFileLoaded<TEntity>();
+
+            return entities.AsQueryable();
+        }
+
         private IQueryable<TEntity> GetQuery<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
         {
-            return options != null ? options.Apply(AsQueryable<TEntity>(options.FetchStrategy)) : AsQueryable<TEntity>();
+            return options != null ? options.Apply(AsQueryable<TEntity>()) : AsQueryable<TEntity>();
         }
 
         private void InvokeOnFileSaved(Type type, IEnumerable entities)
@@ -308,28 +315,6 @@
             }
 
             return count;
-        }
-
-        /// <summary>
-        /// Returns the entity <see cref="System.Linq.IQueryable{TEntity}" />.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <returns>The entity <see cref="System.Linq.IQueryable{TEntity}" />.</returns>
-        public IQueryable<TEntity> AsQueryable<TEntity>() where TEntity : class
-        {
-            return AsQueryable<TEntity>((IFetchQueryStrategy<TEntity>)null);
-        }
-
-        /// <summary>
-        /// Returns the entity <see cref="System.Linq.IQueryable{TEntity}" /> using the specified fetching strategy.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <returns>The entity <see cref="System.Linq.IQueryable{TEntity}" />.</returns>
-        public IQueryable<TEntity> AsQueryable<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy) where TEntity : class
-        {
-            var entities = OnFileLoaded<TEntity>();
-
-            return entities.AsQueryable();
         }
 
         /// <summary>
