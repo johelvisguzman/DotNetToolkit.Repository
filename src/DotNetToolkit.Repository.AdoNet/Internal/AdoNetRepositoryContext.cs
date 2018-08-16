@@ -135,7 +135,7 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The command parameters.</param>
         /// <returns>The number of rows affected.</returns>
-        public virtual int ExecuteNonQuery(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
+        public virtual QueryResult<int> ExecuteNonQuery(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
         {
             using (var command = CreateCommand(cmdText, cmdType, parameters))
             {
@@ -150,7 +150,7 @@
                 if (ownsConnection)
                     connection.Dispose();
 
-                return result;
+                return new QueryResult<int>(result);
             }
         }
 
@@ -160,7 +160,7 @@
         /// <param name="cmdText">The command text.</param>
         /// <param name="parameters">The command parameters.</param>
         /// <returns>The number of rows affected.</returns>
-        public int ExecuteNonQuery(string cmdText, Dictionary<string, object> parameters = null)
+        public QueryResult<int> ExecuteNonQuery(string cmdText, Dictionary<string, object> parameters = null)
         {
             return ExecuteNonQuery(cmdText, CommandType.Text, parameters);
         }
@@ -203,7 +203,7 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The command parameters.</param>
         /// <returns>The first column of the first row in the result set returned by the query.</returns>
-        public virtual T ExecuteScalar<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
+        public virtual QueryResult<T> ExecuteScalar<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
         {
             using (var command = CreateCommand(cmdText, cmdType, parameters))
             {
@@ -218,7 +218,7 @@
                 if (ownsConnection)
                     connection.Dispose();
 
-                return result;
+                return new QueryResult<T>(result);
             }
         }
 
@@ -229,7 +229,7 @@
         /// <param name="cmdText">The command text.</param>
         /// <param name="parameters">The command parameters.</param>
         /// <returns>The first column of the first row in the result set returned by the query.</returns>
-        public T ExecuteScalar<T>(string cmdText, Dictionary<string, object> parameters = null)
+        public QueryResult<T> ExecuteScalar<T>(string cmdText, Dictionary<string, object> parameters = null)
         {
             return ExecuteScalar<T>(cmdText, CommandType.Text, parameters);
         }
@@ -243,7 +243,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>An entity which has been projected into a new form.</returns>
-        public virtual T ExecuteObject<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
+        public virtual QueryResult<T> ExecuteObject<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
         {
             using (var reader = ExecuteReader(cmdText, cmdType, parameters))
             {
@@ -254,7 +254,9 @@
                     list.Add(projector(reader));
                 }
 
-                return list.FirstOrDefault();
+                var result = list.FirstOrDefault();
+
+                return new QueryResult<T>(result);
             }
         }
 
@@ -266,7 +268,7 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The command parameters.</param>
         /// <returns>An entity which has been projected into a new form.</returns>
-        public T ExecuteObject<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters) where T : class
+        public QueryResult<T> ExecuteObject<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters) where T : class
         {
             return ExecuteObject<T>(cmdText, cmdType, parameters, Mapper<T>.Map);
         }
@@ -279,7 +281,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>An entity which has been projected into a new form.</returns>
-        public T ExecuteObject<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
+        public QueryResult<T> ExecuteObject<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
         {
             return ExecuteObject<T>(cmdText, CommandType.Text, parameters, projector);
         }
@@ -291,7 +293,7 @@
         /// <param name="cmdText">The command text.</param>
         /// <param name="parameters">The command parameters.</param>
         /// <returns>An entity which has been projected into a new form.</returns>
-        public T ExecuteObject<T>(string cmdText, Dictionary<string, object> parameters) where T : class
+        public QueryResult<T> ExecuteObject<T>(string cmdText, Dictionary<string, object> parameters) where T : class
         {
             return ExecuteObject<T>(cmdText, parameters, Mapper<T>.Map);
         }
@@ -304,7 +306,7 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>An entity which has been projected into a new form.</returns>
-        public T ExecuteObject<T>(string cmdText, CommandType cmdType, Func<DbDataReader, T> projector)
+        public QueryResult<T> ExecuteObject<T>(string cmdText, CommandType cmdType, Func<DbDataReader, T> projector)
         {
             return ExecuteObject<T>(cmdText, cmdType, null, projector);
         }
@@ -316,7 +318,7 @@
         /// <param name="cmdText">The command text.</param>
         /// <param name="cmdType">The command type.</param>
         /// <returns>An entity which has been projected into a new form.</returns>
-        public T ExecuteObject<T>(string cmdText, CommandType cmdType) where T : class
+        public QueryResult<T> ExecuteObject<T>(string cmdText, CommandType cmdType) where T : class
         {
             return ExecuteObject<T>(cmdText, cmdType, Mapper<T>.Map);
         }
@@ -328,7 +330,7 @@
         /// <param name="cmdText">The command text.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>An entity which has been projected into a new form.</returns>
-        public T ExecuteObject<T>(string cmdText, Func<DbDataReader, T> projector)
+        public QueryResult<T> ExecuteObject<T>(string cmdText, Func<DbDataReader, T> projector)
         {
             return ExecuteObject<T>(cmdText, CommandType.Text, projector);
         }
@@ -339,7 +341,7 @@
         /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
         /// <param name="cmdText">The command text.</param>
         /// <returns>An entity which has been projected into a new form.</returns>
-        public T ExecuteObject<T>(string cmdText) where T : class
+        public QueryResult<T> ExecuteObject<T>(string cmdText) where T : class
         {
             return ExecuteObject<T>(cmdText, Mapper<T>.Map);
         }
@@ -353,7 +355,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public virtual IEnumerable<T> ExecuteList<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
+        public virtual QueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
         {
             using (var reader = ExecuteReader(cmdText, cmdType, parameters))
             {
@@ -364,7 +366,7 @@
                     list.Add(projector(reader));
                 }
 
-                return list;
+                return new QueryResult<IEnumerable<T>>(list);
             }
         }
 
@@ -376,7 +378,7 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The command parameters.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public IEnumerable<T> ExecuteList<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters) where T : class
+        public QueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters) where T : class
         {
             return ExecuteList<T>(cmdText, cmdType, parameters, Mapper<T>.Map);
         }
@@ -389,7 +391,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public IEnumerable<T> ExecuteList<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
+        public QueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
         {
             return ExecuteList<T>(cmdText, CommandType.Text, parameters, projector);
         }
@@ -401,7 +403,7 @@
         /// <param name="cmdText">The command text.</param>
         /// <param name="parameters">The command parameters.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public IEnumerable<T> ExecuteList<T>(string cmdText, Dictionary<string, object> parameters) where T : class
+        public QueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, Dictionary<string, object> parameters) where T : class
         {
             return ExecuteList<T>(cmdText, parameters, Mapper<T>.Map);
         }
@@ -414,7 +416,7 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public IEnumerable<T> ExecuteList<T>(string cmdText, CommandType cmdType, Func<DbDataReader, T> projector)
+        public QueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, CommandType cmdType, Func<DbDataReader, T> projector)
         {
             return ExecuteList<T>(cmdText, cmdType, null, projector);
         }
@@ -426,7 +428,7 @@
         /// <param name="cmdText">The command text.</param>
         /// <param name="cmdType">The command type.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public IEnumerable<T> ExecuteList<T>(string cmdText, CommandType cmdType) where T : class
+        public QueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, CommandType cmdType) where T : class
         {
             return ExecuteList<T>(cmdText, cmdType, Mapper<T>.Map);
         }
@@ -438,7 +440,7 @@
         /// <param name="cmdText">The command text.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public IEnumerable<T> ExecuteList<T>(string cmdText, Func<DbDataReader, T> projector)
+        public QueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, Func<DbDataReader, T> projector)
         {
             return ExecuteList<T>(cmdText, CommandType.Text, projector);
         }
@@ -449,39 +451,9 @@
         /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
         /// <param name="cmdText">The command text.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public IEnumerable<T> ExecuteList<T>(string cmdText) where T : class
+        public QueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText) where T : class
         {
             return ExecuteList<T>(cmdText, Mapper<T>.Map);
-        }
-
-        /// <summary>
-        /// Executes the query, and returns a new <see cref="DataTable " />.
-        /// </summary>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <returns>A new <see cref="DataTable" />.</returns>
-        public virtual DataTable ExecuteDataTable(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
-        {
-            using (var reader = ExecuteReader(cmdText, cmdType, parameters))
-            {
-                var dt = new DataTable();
-
-                dt.Load(reader);
-
-                return dt;
-            }
-        }
-
-        /// <summary>
-        /// Executes the query, and returns a new <see cref="DataTable " />.
-        /// </summary>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <returns>A new <see cref="DataTable" />.</returns>
-        public DataTable ExecuteDataTable(string cmdText, Dictionary<string, object> parameters = null)
-        {
-            return ExecuteDataTable(cmdText, CommandType.Text, parameters);
         }
 
         /// <summary>
@@ -495,7 +467,7 @@
         /// <param name="keyProjector">A function to extract a key from each entity.</param>
         /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public virtual Dictionary<TDictionaryKey, TElement> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector)
+        public virtual QueryResult<Dictionary<TDictionaryKey, TElement>> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector)
         {
             using (var reader = ExecuteReader(cmdText, cmdType, parameters))
             {
@@ -506,7 +478,7 @@
                     dict.Add(keyProjector(reader.GetValue(0)), elementProjector(reader.GetValue(1)));
                 }
 
-                return dict;
+                return new QueryResult<Dictionary<TDictionaryKey, TElement>>(dict);
             }
         }
 
@@ -520,7 +492,7 @@
         /// <param name="keyProjector">A function to extract a key from each entity.</param>
         /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TElement> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector)
+        public QueryResult<Dictionary<TDictionaryKey, TElement>> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector)
         {
             return ExecuteDictionary<TDictionaryKey, TElement>(cmdText, cmdType, null, keyProjector, elementProjector);
         }
@@ -535,7 +507,7 @@
         /// <param name="keyProjector">A function to extract a key from each entity.</param>
         /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TElement> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, Dictionary<string, object> parameters, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector)
+        public QueryResult<Dictionary<TDictionaryKey, TElement>> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, Dictionary<string, object> parameters, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector)
         {
             return ExecuteDictionary<TDictionaryKey, TElement>(cmdText, CommandType.Text, parameters, keyProjector, elementProjector);
         }
@@ -549,7 +521,7 @@
         /// <param name="keyProjector">A function to extract a key from each entity.</param>
         /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TElement> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector)
+        public QueryResult<Dictionary<TDictionaryKey, TElement>> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector)
         {
             return ExecuteDictionary<TDictionaryKey, TElement>(cmdText, null, keyProjector, elementProjector);
         }
@@ -563,7 +535,7 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The command parameters.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TElement> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
+        public QueryResult<Dictionary<TDictionaryKey, TElement>> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
         {
             return ExecuteDictionary<TDictionaryKey, TElement>(cmdText, cmdType, parameters, ConvertType<TDictionaryKey>(), ConvertType<TElement>());
         }
@@ -576,7 +548,7 @@
         /// <param name="cmdText">The command text.</param>
         /// <param name="parameters">The command parameters.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TElement> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, Dictionary<string, object> parameters = null)
+        public QueryResult<Dictionary<TDictionaryKey, TElement>> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, Dictionary<string, object> parameters = null)
         {
             return ExecuteDictionary<TDictionaryKey, TElement>(cmdText, CommandType.Text, parameters);
         }
@@ -589,7 +561,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
-        public virtual async Task<int> ExecuteNonQueryAsync(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<QueryResult<int>> ExecuteNonQueryAsync(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var command = CreateCommand(cmdText, cmdType, parameters))
             {
@@ -604,7 +576,7 @@
                 if (ownsConnection)
                     connection.Dispose();
 
-                return result;
+                return new QueryResult<int>(result);
             }
         }
 
@@ -615,7 +587,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
-        public Task<int> ExecuteNonQueryAsync(string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        public Task<QueryResult<int>> ExecuteNonQueryAsync(string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteNonQueryAsync(cmdText, CommandType.Text, parameters, cancellationToken);
         }
@@ -661,7 +633,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the first column of the first row in the result set returned by the query.</returns>
-        public virtual async Task<T> ExecuteScalarAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<QueryResult<T>> ExecuteScalarAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var command = CreateCommand(cmdText, cmdType, parameters))
             {
@@ -676,7 +648,7 @@
                 if (ownsConnection)
                     connection.Dispose();
 
-                return result;
+                return new QueryResult<T>(result);
             }
         }
 
@@ -688,7 +660,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the first column of the first row in the result set returned by the query.</returns>
-        public Task<T> ExecuteScalarAsync<T>(string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        public Task<QueryResult<T>> ExecuteScalarAsync<T>(string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteScalarAsync<T>(cmdText, CommandType.Text, parameters, cancellationToken);
         }
@@ -703,7 +675,7 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing an entity which has been projected into a new form.</returns>
-        public virtual async Task<T> ExecuteObjectAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<QueryResult<T>> ExecuteObjectAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var reader = await ExecuteReaderAsync(cmdText, cmdType, parameters, cancellationToken))
             {
@@ -714,7 +686,9 @@
                     list.Add(projector(reader));
                 }
 
-                return list.FirstOrDefault();
+                var result = list.FirstOrDefault();
+
+                return new QueryResult<T>(result);
             }
         }
 
@@ -727,7 +701,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing an entity which has been projected into a new form.</returns>
-        public Task<T> ExecuteObjectAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        public Task<QueryResult<T>> ExecuteObjectAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken()) where T : class
         {
             return ExecuteObjectAsync<T>(cmdText, cmdType, parameters, Mapper<T>.Map, cancellationToken);
         }
@@ -741,7 +715,7 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing an entity which has been projected into a new form.</returns>
-        public Task<T> ExecuteObjectAsync<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<QueryResult<T>> ExecuteObjectAsync<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteObjectAsync<T>(cmdText, CommandType.Text, parameters, projector, cancellationToken);
         }
@@ -754,7 +728,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing an entity which has been projected into a new form.</returns>
-        public Task<T> ExecuteObjectAsync<T>(string cmdText, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        public Task<QueryResult<T>> ExecuteObjectAsync<T>(string cmdText, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken()) where T : class
         {
             return ExecuteObjectAsync<T>(cmdText, parameters, Mapper<T>.Map, cancellationToken);
         }
@@ -768,7 +742,7 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing an entity which has been projected into a new form.</returns>
-        public Task<T> ExecuteObjectAsync<T>(string cmdText, CommandType cmdType, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<QueryResult<T>> ExecuteObjectAsync<T>(string cmdText, CommandType cmdType, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteObjectAsync<T>(cmdText, cmdType, null, projector, cancellationToken);
         }
@@ -781,7 +755,7 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing an entity which has been projected into a new form.</returns>
-        public Task<T> ExecuteObjectAsync<T>(string cmdText, CommandType cmdType, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        public Task<QueryResult<T>> ExecuteObjectAsync<T>(string cmdText, CommandType cmdType, CancellationToken cancellationToken = new CancellationToken()) where T : class
         {
             return ExecuteObjectAsync<T>(cmdText, cmdType, Mapper<T>.Map, cancellationToken);
         }
@@ -794,7 +768,7 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing an entity which has been projected into a new form.</returns>
-        public Task<T> ExecuteObjectAsync<T>(string cmdText, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<QueryResult<T>> ExecuteObjectAsync<T>(string cmdText, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteObjectAsync<T>(cmdText, CommandType.Text, projector, cancellationToken);
         }
@@ -806,7 +780,7 @@
         /// <param name="cmdText">The command text.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing an entity which has been projected into a new form.</returns>
-        public Task<T> ExecuteObjectAsync<T>(string cmdText, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        public Task<QueryResult<T>> ExecuteObjectAsync<T>(string cmdText, CancellationToken cancellationToken = new CancellationToken()) where T : class
         {
             return ExecuteObjectAsync<T>(cmdText, Mapper<T>.Map, cancellationToken);
         }
@@ -821,7 +795,7 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
-        public virtual async Task<IEnumerable<T>> ExecuteListAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<QueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var reader = await ExecuteReaderAsync(cmdText, cmdType, parameters, cancellationToken))
             {
@@ -832,7 +806,7 @@
                     list.Add(projector(reader));
                 }
 
-                return list;
+                return new QueryResult<IEnumerable<T>>(list);
             }
         }
 
@@ -845,7 +819,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
-        public Task<IEnumerable<T>> ExecuteListAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        public Task<QueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken()) where T : class
         {
             return ExecuteListAsync<T>(cmdText, cmdType, parameters, Mapper<T>.Map, cancellationToken);
         }
@@ -859,7 +833,7 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
-        public Task<IEnumerable<T>> ExecuteListAsync<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<QueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteListAsync<T>(cmdText, CommandType.Text, parameters, projector, cancellationToken);
         }
@@ -872,7 +846,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
-        public Task<IEnumerable<T>> ExecuteListAsync<T>(string cmdText, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        public Task<QueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken()) where T : class
         {
             return ExecuteListAsync<T>(cmdText, parameters, Mapper<T>.Map, cancellationToken);
         }
@@ -886,7 +860,7 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
-        public Task<IEnumerable<T>> ExecuteListAsync<T>(string cmdText, CommandType cmdType, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<QueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, CommandType cmdType, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteListAsync<T>(cmdText, cmdType, null, projector, cancellationToken);
         }
@@ -899,7 +873,7 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
-        public Task<IEnumerable<T>> ExecuteListAsync<T>(string cmdText, CommandType cmdType, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        public Task<QueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, CommandType cmdType, CancellationToken cancellationToken = new CancellationToken()) where T : class
         {
             return ExecuteListAsync<T>(cmdText, cmdType, Mapper<T>.Map, cancellationToken);
         }
@@ -912,7 +886,7 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
-        public Task<IEnumerable<T>> ExecuteListAsync<T>(string cmdText, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<QueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteListAsync<T>(cmdText, CommandType.Text, projector, cancellationToken);
         }
@@ -924,41 +898,9 @@
         /// <param name="cmdText">The command text.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
-        public Task<IEnumerable<T>> ExecuteListAsync<T>(string cmdText, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        public Task<QueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, CancellationToken cancellationToken = new CancellationToken()) where T : class
         {
             return ExecuteListAsync<T>(cmdText, Mapper<T>.Map, cancellationToken);
-        }
-
-        /// <summary>
-        /// Asynchronously executes the query, and returns a new <see cref="DataTable " />.
-        /// </summary>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="DataTable" />.</returns>
-        public virtual async Task<DataTable> ExecuteDataTableAsync(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
-        {
-            using (var reader = await ExecuteReaderAsync(cmdText, cmdType, parameters, cancellationToken))
-            {
-                var dt = new DataTable();
-
-                dt.Load(reader);
-
-                return dt;
-            }
-        }
-
-        /// <summary>
-        /// Asynchronously executes the query, and returns a new <see cref="DataTable " />.
-        /// </summary>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="DataTable" />.</returns>
-        public Task<DataTable> ExecuteDataTableAsync(string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return ExecuteDataTableAsync(cmdText, CommandType.Text, parameters, cancellationToken);
         }
 
         /// <summary>
@@ -973,7 +915,7 @@
         /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public virtual async Task<Dictionary<TDictionaryKey, TElement>> ExecuteDictionaryAsync<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<QueryResult<Dictionary<TDictionaryKey, TElement>>> ExecuteDictionaryAsync<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var reader = await ExecuteReaderAsync(cmdText, cmdType, parameters, cancellationToken))
             {
@@ -984,7 +926,7 @@
                     dict.Add(keyProjector(reader.GetValue(0)), elementProjector(reader.GetValue(1)));
                 }
 
-                return dict;
+                return new QueryResult<Dictionary<TDictionaryKey, TElement>>(dict);
             }
         }
 
@@ -999,7 +941,7 @@
         /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Task<Dictionary<TDictionaryKey, TElement>> ExecuteDictionaryAsync<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<QueryResult<Dictionary<TDictionaryKey, TElement>>> ExecuteDictionaryAsync<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteDictionaryAsync<TDictionaryKey, TElement>(cmdText, cmdType, null, keyProjector, elementProjector, cancellationToken);
         }
@@ -1015,7 +957,7 @@
         /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Task<Dictionary<TDictionaryKey, TElement>> ExecuteDictionaryAsync<TDictionaryKey, TElement>(string cmdText, Dictionary<string, object> parameters, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<QueryResult<Dictionary<TDictionaryKey, TElement>>> ExecuteDictionaryAsync<TDictionaryKey, TElement>(string cmdText, Dictionary<string, object> parameters, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteDictionaryAsync<TDictionaryKey, TElement>(cmdText, CommandType.Text, parameters, keyProjector, elementProjector, cancellationToken);
         }
@@ -1030,7 +972,7 @@
         /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Task<Dictionary<TDictionaryKey, TElement>> ExecuteDictionaryAsync<TDictionaryKey, TElement>(string cmdText, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<QueryResult<Dictionary<TDictionaryKey, TElement>>> ExecuteDictionaryAsync<TDictionaryKey, TElement>(string cmdText, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteDictionaryAsync<TDictionaryKey, TElement>(cmdText, null, keyProjector, elementProjector, cancellationToken);
         }
@@ -1045,7 +987,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Task<Dictionary<TDictionaryKey, TElement>> ExecuteDictionaryAsync<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        public Task<QueryResult<Dictionary<TDictionaryKey, TElement>>> ExecuteDictionaryAsync<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteDictionaryAsync<TDictionaryKey, TElement>(cmdText, cmdType, parameters, ConvertType<TDictionaryKey>(), ConvertType<TElement>(), cancellationToken);
         }
@@ -1059,7 +1001,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Task<Dictionary<TDictionaryKey, TElement>> ExecuteDictionaryAsync<TDictionaryKey, TElement>(string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        public Task<QueryResult<Dictionary<TDictionaryKey, TElement>>> ExecuteDictionaryAsync<TDictionaryKey, TElement>(string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteDictionaryAsync<TDictionaryKey, TElement>(cmdText, CommandType.Text, parameters, cancellationToken);
         }
@@ -1392,7 +1334,7 @@
 
         #endregion
 
-        #region Implementation of IContextAsync
+        #region Implementation of IRepositoryContextAsync
 
         /// <summary>
         /// Saves all changes made in this context to the database.
@@ -1482,7 +1424,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found in the repository.</returns>
-        public Task<TEntity> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
+        public Task<QueryResult<TEntity>> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));
@@ -1506,7 +1448,7 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public Task<TResult> FindAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public Task<QueryResult<TResult>> FindAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -1530,7 +1472,7 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public Task<IEnumerable<TResult>> FindAllAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public Task<QueryResult<IEnumerable<TResult>>> FindAllAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
@@ -1549,7 +1491,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public async Task<int> CountAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public async Task<QueryResult<int>> CountAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             PrepareQuery(options, out Mapper mapper);
 
@@ -1562,7 +1504,7 @@
                     count++;
                 }
 
-                return count;
+                return new QueryResult<int>(count);
             }
         }
 
@@ -1573,7 +1515,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
-        public async Task<bool> ExistsAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public async Task<QueryResult<bool>> ExistsAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -1591,7 +1533,7 @@
                     break;
                 }
 
-                return hasRows;
+                return new QueryResult<bool>(hasRows);
             }
         }
 
@@ -1606,7 +1548,7 @@
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="T:System.Collections.Generic.Dictionary`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public async Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public async Task<QueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -1628,7 +1570,7 @@
                     dict.Add(mapper.Map<TEntity, TDictionaryKey>(reader, keySelectFunc), mapper.Map<TEntity, TElement>(reader, elementSelectorFunc));
                 }
 
-                return dict;
+                return new QueryResult<Dictionary<TDictionaryKey, TElement>>(dict);
             }
         }
 
@@ -1643,7 +1585,7 @@
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="T:System.Linq.IGrouping`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public async Task<IEnumerable<TResult>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public async Task<QueryResult<IEnumerable<TResult>>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -1654,14 +1596,17 @@
             var keySelectFunc = keySelector.Compile();
             var resultSelectorFunc = resultSelector.Compile();
 
-            return (await FindAllAsync<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken))
+            var result = (await FindAllAsync<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken))
+                .Result
                 .GroupBy(keySelectFunc, resultSelectorFunc)
                 .ToList();
+
+            return new QueryResult<IEnumerable<TResult>>(result);
         }
 
         #endregion
 
-        #region Implementation of IContext
+        #region Implementation of IRepositoryContext
 
         /// <summary>
         /// Begins the transaction.
@@ -1795,7 +1740,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <returns>The entity found in the repository.</returns>
-        public TEntity Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
+        public QueryResult<TEntity> Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));
@@ -1818,7 +1763,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public TResult Find<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
+        public QueryResult<TResult> Find<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -1841,7 +1786,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public IEnumerable<TResult> FindAll<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
+        public QueryResult<IEnumerable<TResult>> FindAll<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
         {
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
@@ -1859,7 +1804,7 @@
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public int Count<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
+        public QueryResult<int> Count<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
         {
             PrepareQuery(options, out Mapper mapper);
 
@@ -1872,7 +1817,7 @@
                     count++;
                 }
 
-                return count;
+                return new QueryResult<int>(count);
             }
         }
 
@@ -1882,7 +1827,7 @@
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
-        public bool Exists<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
+        public QueryResult<bool> Exists<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -1900,7 +1845,7 @@
                     break;
                 }
 
-                return hasRows;
+                return new QueryResult<bool>(hasRows);
             }
         }
 
@@ -1914,7 +1859,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <returns>A new <see cref="T:System.Collections.Generic.Dictionary`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public Dictionary<TDictionaryKey, TElement> ToDictionary<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector) where TEntity : class
+        public QueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector) where TEntity : class
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -1936,7 +1881,7 @@
                     dict.Add(mapper.Map<TEntity, TDictionaryKey>(reader, keySelectFunc), mapper.Map<TEntity, TElement>(reader, elementSelectorFunc));
                 }
 
-                return dict;
+                return new QueryResult<Dictionary<TDictionaryKey, TElement>>(dict);
             }
         }
 
@@ -1950,7 +1895,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <returns>A new <see cref="T:System.Linq.IGrouping`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public IEnumerable<TResult> GroupBy<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector) where TEntity : class
+        public QueryResult<IEnumerable<TResult>> GroupBy<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector) where TEntity : class
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -1961,9 +1906,12 @@
             var keySelectFunc = keySelector.Compile();
             var resultSelectorFunc = resultSelector.Compile();
 
-            return FindAll<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance)
+            var result = FindAll<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance)
+                .Result
                 .GroupBy(keySelectFunc, resultSelectorFunc)
                 .ToList();
+
+            return new QueryResult<IEnumerable<TResult>>(result);
         }
 
         #endregion

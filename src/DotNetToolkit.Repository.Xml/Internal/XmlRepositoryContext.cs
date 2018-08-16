@@ -319,7 +319,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <returns>The entity found in the repository.</returns>
-        public virtual TEntity Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
+        public virtual QueryResult<TEntity> Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));
@@ -331,11 +331,12 @@
             var context = InvokeOnFileLoaded(entityType).ToDictionary(PrimaryKeyConventionHelper.GetPrimaryKeyValue);
 
             if (!context.ContainsKey(key))
-                return default(TEntity);
+                return new QueryResult<TEntity>(default(TEntity));
 
             var entity = context[key];
+            var result = (TEntity)Convert.ChangeType(entity, entityType);
 
-            return (TEntity)Convert.ChangeType(entity, entityType);
+            return new QueryResult<TEntity>(result);
         }
 
         /// <summary>
@@ -346,7 +347,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public TResult Find<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
+        public QueryResult<TResult> Find<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -354,7 +355,9 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            return GetQuery(options).Select(selector).FirstOrDefault();
+            var result = GetQuery(options).Select(selector).FirstOrDefault();
+
+            return new QueryResult<TResult>(result);
         }
 
         /// <summary>
@@ -365,12 +368,14 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public IEnumerable<TResult> FindAll<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
+        public QueryResult<IEnumerable<TResult>> FindAll<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
         {
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            return GetQuery(options).Select(selector).ToList();
+            var result = GetQuery(options).Select(selector).ToList();
+
+            return new QueryResult<IEnumerable<TResult>>(result);
         }
 
         /// <summary>
@@ -378,7 +383,7 @@
         /// </summary>
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
         /// <returns>The collection of entities in the repository.</returns>
-        public IEnumerable<TEntity> FindAll<TEntity>() where TEntity : class
+        public QueryResult<IEnumerable<TEntity>> FindAll<TEntity>() where TEntity : class
         {
             return FindAll<TEntity, TEntity>((IQueryOptions<TEntity>)null, IdentityExpression<TEntity>.Instance);
         }
@@ -389,9 +394,11 @@
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public int Count<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
+        public QueryResult<int> Count<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
         {
-            return GetQuery(options).Count();
+            var result = GetQuery(options).Count();
+
+            return new QueryResult<int>(result);
         }
 
         /// <summary>
@@ -400,12 +407,14 @@
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
-        public bool Exists<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
+        public QueryResult<bool> Exists<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            return GetQuery(options).Any();
+            var result = GetQuery(options).Any();
+
+            return new QueryResult<bool>(result);
         }
 
         /// <summary>
@@ -418,7 +427,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <returns>A new <see cref="T:System.Collections.Generic.Dictionary`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public Dictionary<TDictionaryKey, TElement> ToDictionary<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector) where TEntity : class
+        public QueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector) where TEntity : class
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -428,8 +437,9 @@
 
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
+            var result = GetQuery(options).ToDictionary(keySelectFunc, elementSelectorFunc);
 
-            return GetQuery(options).ToDictionary(keySelectFunc, elementSelectorFunc);
+            return new QueryResult<Dictionary<TDictionaryKey, TElement>>(result);
         }
 
         /// <summary>
@@ -442,7 +452,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <returns>A new <see cref="T:System.Linq.IGrouping`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public IEnumerable<TResult> GroupBy<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector) where TEntity : class
+        public QueryResult<IEnumerable<TResult>> GroupBy<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector) where TEntity : class
         {
             if (keySelector == null)
                 throw new ArgumentNullException(nameof(keySelector));
@@ -453,7 +463,9 @@
             var keySelectFunc = keySelector.Compile();
             var resultSelectorFunc = resultSelector.Compile();
 
-            return GetQuery(options).GroupBy(keySelectFunc, resultSelectorFunc).ToList();
+            var result = GetQuery(options).GroupBy(keySelectFunc, resultSelectorFunc).ToList();
+
+            return new QueryResult<IEnumerable<TResult>>(result);
         }
 
         #endregion
