@@ -2,9 +2,9 @@
 {
     using Configuration;
     using Configuration.Conventions;
+    using Configuration.Interceptors;
     using Factories;
     using Helpers;
-    using Interceptors;
     using Properties;
     using Queries;
     using Queries.Strategies;

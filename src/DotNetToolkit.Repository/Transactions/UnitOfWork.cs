@@ -1,8 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.Transactions
 {
     using Configuration;
+    using Configuration.Interceptors;
     using Factories;
-    using Interceptors;
     using System;
     using System.Collections.Generic;
     using System.Linq;

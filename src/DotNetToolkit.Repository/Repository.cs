@@ -1,9 +1,9 @@
 ﻿namespace DotNetToolkit.Repository
 {
     using Configuration;
-    using Interceptors;
-    using System.Collections.Generic;
+    using Configuration.Interceptors;
     using Factories;
+    using System.Collections.Generic;
 
     /// <summary>
     /// An implementation of <see cref="IRepository{TEntity, TKey1, TKey2, TKey3}" />.
