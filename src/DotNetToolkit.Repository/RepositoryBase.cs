@@ -71,7 +71,7 @@
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3));
 
-                Intercept(x => x.Error(ex));
+                Intercept(x => x.Error<TEntity>(ex));
 
                 throw ex;
             }
@@ -101,7 +101,7 @@
         /// <return>The entity found.</return>
         public TEntity Find(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
-            return InterceptError<TEntity>(() => Context.Find<TEntity>(fetchStrategy, key1, key2, key3));
+            return InterceptQueryResult<TEntity>(() => Context.Find<TEntity>(fetchStrategy, key1, key2, key3));
         }
 
         /// <summary>
@@ -153,7 +153,7 @@
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync<TEntity>(() => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2, key3));
+            return InterceptQueryResultAsync<TEntity>(() => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2, key3));
         }
 
         /// <summary>
@@ -174,7 +174,7 @@
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3));
 
-                Intercept(x => x.Error(ex));
+                Intercept(x => x.Error<TEntity>(ex));
 
                 throw ex;
             }
@@ -238,7 +238,7 @@
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2));
 
-                Intercept(x => x.Error(ex));
+                Intercept(x => x.Error<TEntity>(ex));
 
                 throw ex;
             }
@@ -266,7 +266,7 @@
         /// <return>The entity found.</return>
         public TEntity Find(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
-            return InterceptError<TEntity>(() => Context.Find<TEntity>(fetchStrategy, key1, key2));
+            return InterceptQueryResult<TEntity>(() => Context.Find<TEntity>(fetchStrategy, key1, key2));
         }
 
         /// <summary>
@@ -314,7 +314,7 @@
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync<TEntity>(() => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2));
+            return InterceptQueryResultAsync<TEntity>(() => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2));
         }
 
         /// <summary>
@@ -334,7 +334,7 @@
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2));
 
-                Intercept(x => x.Error(ex));
+                Intercept(x => x.Error<TEntity>(ex));
 
                 throw ex;
             }
@@ -397,7 +397,7 @@
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
 
-                Intercept(x => x.Error(ex));
+                Intercept(x => x.Error<TEntity>(ex));
 
                 throw ex;
             }
@@ -423,7 +423,7 @@
         /// <return>The entity found.</return>
         public TEntity Find(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
-            return InterceptError<TEntity>(() => Context.Find<TEntity>(fetchStrategy, key));
+            return InterceptQueryResult<TEntity>(() => Context.Find<TEntity>(fetchStrategy, key));
         }
 
         /// <summary>
@@ -467,7 +467,7 @@
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         public Task<TEntity> FindAsync(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync<TEntity>(() => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key));
+            return InterceptQueryResultAsync<TEntity>(() => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key));
         }
 
         /// <summary>
@@ -486,7 +486,7 @@
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
 
-                Intercept(x => x.Error(ex));
+                Intercept(x => x.Error<TEntity>(ex));
 
                 throw ex;
             }
@@ -588,7 +588,7 @@
             }
             catch (Exception ex)
             {
-                Intercept(x => x.Error(ex));
+                Intercept(x => x.Error<TEntity>(ex));
 
                 throw;
             }
@@ -612,7 +612,7 @@
             }
             catch (Exception ex)
             {
-                Intercept(x => x.Error(ex));
+                Intercept(x => x.Error<TEntity>(ex));
 
                 throw;
             }
@@ -634,7 +634,7 @@
             }
             catch (Exception ex)
             {
-                Intercept(x => x.Error(ex));
+                Intercept(x => x.Error<TEntity>(ex));
 
                 throw;
             }
@@ -642,6 +642,34 @@
             {
                 DisposeContext();
             }
+        }
+
+        /// <summary>
+        /// Intercepts the query result that was executed while performing the specified action.
+        /// </summary>
+        /// <typeparam name="T">The type of the result returned by the specified action.</typeparam>
+        /// <param name="action">The action.</param>
+        protected T InterceptQueryResult<T>(Func<QueryResult<T>> action)
+        {
+            var queryResult = InterceptError<QueryResult<T>>(action);
+
+            Intercept(x => x.QueryExecuted<TEntity, T>(queryResult));
+
+            return queryResult.HasResult ? queryResult.Result : default(T);
+        }
+
+        /// <summary>
+        /// Asynchronously intercepts the query result that was executed while performing the specified action.
+        /// </summary>
+        /// <typeparam name="T">The type of the result returned by the specified action.</typeparam>
+        /// <param name="action">The action.</param>
+        protected async Task<T> InterceptQueryResultAsync<T>(Func<Task<QueryResult<T>>> action)
+        {
+            var queryResult = await InterceptErrorAsync<QueryResult<T>>(action);
+
+            Intercept(x => x.QueryExecuted<TEntity, T>(queryResult));
+
+            return queryResult.HasResult ? queryResult.Result : default(T);
         }
 
         #endregion
@@ -744,7 +772,7 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public int Count(IQueryOptions<TEntity> options)
         {
-            return InterceptError<int>(() => Context.Count<TEntity>(options));
+            return InterceptQueryResult<int>(() => Context.Count<TEntity>(options));
         }
 
         /// <summary>
@@ -794,7 +822,7 @@
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
-            return InterceptError<Dictionary<TDictionaryKey, TElement>>(() => Context.ToDictionary(options, keySelector, elementSelector));
+            return InterceptQueryResult<Dictionary<TDictionaryKey, TElement>>(() => Context.ToDictionary(options, keySelector, elementSelector));
         }
 
         /// <summary>
@@ -821,7 +849,7 @@
         /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public IEnumerable<TResult> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
-            return InterceptError<IEnumerable<TResult>>(() => Context.GroupBy(options, keySelector, resultSelector));
+            return InterceptQueryResult<IEnumerable<TResult>>(() => Context.GroupBy(options, keySelector, resultSelector));
         }
 
         /// <summary>
@@ -992,7 +1020,7 @@
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public TResult Find<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
-            return InterceptError<TResult>(() => Context.Find<TEntity, TResult>(options, selector));
+            return InterceptQueryResult<TResult>(() => Context.Find<TEntity, TResult>(options, selector));
         }
 
         /// <summary>
@@ -1053,7 +1081,7 @@
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public IEnumerable<TResult> FindAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
-            return InterceptError<IEnumerable<TResult>>(() => Context.FindAll<TEntity, TResult>(options, selector));
+            return InterceptQueryResult<IEnumerable<TResult>>(() => Context.FindAll<TEntity, TResult>(options, selector));
         }
 
         /// <summary>
@@ -1073,7 +1101,7 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
         public bool Exists(IQueryOptions<TEntity> options)
         {
-            return InterceptError<bool>(() => Context.Exists<TEntity>(options));
+            return Find(options) != null;
         }
 
         /// <summary>
@@ -1105,7 +1133,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public Task<int> CountAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync<int>(() => Context.AsAsync().CountAsync<TEntity>(options, cancellationToken));
+            return InterceptQueryResultAsync<int>(() => Context.AsAsync().CountAsync<TEntity>(options, cancellationToken));
         }
 
         /// <summary>
@@ -1159,7 +1187,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync<Dictionary<TDictionaryKey, TElement>>(() => Context.AsAsync().ToDictionaryAsync(options, keySelector, elementSelector, cancellationToken));
+            return InterceptQueryResultAsync<Dictionary<TDictionaryKey, TElement>>(() => Context.AsAsync().ToDictionaryAsync(options, keySelector, elementSelector, cancellationToken));
         }
 
         /// <summary>
@@ -1188,7 +1216,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public Task<IEnumerable<TResult>> GroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync<IEnumerable<TResult>>(() => Context.AsAsync().GroupByAsync(options, keySelector, resultSelector, cancellationToken));
+            return InterceptQueryResultAsync<IEnumerable<TResult>>(() => Context.AsAsync().GroupByAsync(options, keySelector, resultSelector, cancellationToken));
         }
 
         /// <summary>
@@ -1395,7 +1423,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public Task<TResult> FindAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync<TResult>(() => Context.AsAsync().FindAsync<TEntity, TResult>(options, selector, cancellationToken));
+            return InterceptQueryResultAsync<TResult>(() => Context.AsAsync().FindAsync<TEntity, TResult>(options, selector, cancellationToken));
         }
 
         /// <summary>
@@ -1462,7 +1490,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public Task<IEnumerable<TResult>> FindAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync<IEnumerable<TResult>>(() => Context.AsAsync().FindAllAsync<TEntity, TResult>(options, selector, cancellationToken));
+            return InterceptQueryResultAsync<IEnumerable<TResult>>(() => Context.AsAsync().FindAllAsync<TEntity, TResult>(options, selector, cancellationToken));
         }
 
         /// <summary>
@@ -1482,9 +1510,9 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
-        public Task<bool> ExistsAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<bool> ExistsAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync<bool>(() => Context.AsAsync().ExistsAsync<TEntity>(options, cancellationToken));
+            return await FindAsync(options, cancellationToken) != null;
         }
 
         #endregion

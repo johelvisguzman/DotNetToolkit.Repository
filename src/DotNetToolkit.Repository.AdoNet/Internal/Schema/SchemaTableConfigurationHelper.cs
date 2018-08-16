@@ -301,15 +301,15 @@
             var sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName";
             var parameters = new Dictionary<string, object> { { "@tableName", tableName } };
 
-            return _context.ExecuteList<SchemaTableColumn>(sql, parameters);
+            return _context.ExecuteList<SchemaTableColumn>(sql, parameters)?.Result;
         }
 
-        private Task<IEnumerable<SchemaTableColumn>> GetSchemaTableColumnsAsync(string tableName, CancellationToken cancellationToken)
+        private async Task<IEnumerable<SchemaTableColumn>> GetSchemaTableColumnsAsync(string tableName, CancellationToken cancellationToken)
         {
             var sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName";
             var parameters = new Dictionary<string, object> { { "@tableName", tableName } };
 
-            return _context.ExecuteListAsync<SchemaTableColumn>(sql, parameters, cancellationToken);
+            return (await _context.ExecuteListAsync<SchemaTableColumn>(sql, parameters, cancellationToken))?.Result;
         }
 
         private Dictionary<string, string> GetSchemaTableColumnConstraintsMapping(string tableName, string[] columns)
@@ -333,7 +333,7 @@
 
             try
             {
-                return _context.ExecuteDictionary<string, string>(sql, parameters);
+                return _context.ExecuteDictionary<string, string>(sql, parameters)?.Result;
             }
             catch (Exception ex)
             {

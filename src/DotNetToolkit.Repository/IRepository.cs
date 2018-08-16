@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Wrappers;
