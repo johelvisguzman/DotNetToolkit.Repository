@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Interceptors
+﻿namespace DotNetToolkit.Repository.Configuration.Interceptors
 {
     using System;
 

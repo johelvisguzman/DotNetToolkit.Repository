@@ -1,8 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
+    using Configuration.Interceptors;
     using Data;
     using InMemory;
-    using Interceptors;
     using Moq;
     using System.Collections.Generic;
     using Xunit;

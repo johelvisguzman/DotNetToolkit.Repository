@@ -1,9 +1,9 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Data
 {
-    using Interceptors;
     using System;
+    using Configuration.Interceptors;
 
-    public class TestRepositoryTimeStampInterceptor : RepositoryInterceptor
+    public class TestRepositoryTimeStampInterceptor : RepositoryInterceptorBase
     {
         private readonly string _user;
 
