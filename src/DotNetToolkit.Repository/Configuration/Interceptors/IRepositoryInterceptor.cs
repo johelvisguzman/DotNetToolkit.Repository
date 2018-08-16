@@ -52,7 +52,8 @@
         /// <summary>
         /// An activity method which is executed when an error/exception occurs in the repository.
         /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="ex">The ex.</param>
-        void Error(Exception ex);
+        void Error<TEntity>(Exception ex);
     }
 }

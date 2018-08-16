@@ -71,7 +71,7 @@
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3));
 
-                Intercept(x => x.Error(ex));
+                Intercept(x => x.Error<TEntity>(ex));
 
                 throw ex;
             }
@@ -174,7 +174,7 @@
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3));
 
-                Intercept(x => x.Error(ex));
+                Intercept(x => x.Error<TEntity>(ex));
 
                 throw ex;
             }
@@ -238,7 +238,7 @@
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2));
 
-                Intercept(x => x.Error(ex));
+                Intercept(x => x.Error<TEntity>(ex));
 
                 throw ex;
             }
@@ -334,7 +334,7 @@
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2));
 
-                Intercept(x => x.Error(ex));
+                Intercept(x => x.Error<TEntity>(ex));
 
                 throw ex;
             }
@@ -397,7 +397,7 @@
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
 
-                Intercept(x => x.Error(ex));
+                Intercept(x => x.Error<TEntity>(ex));
 
                 throw ex;
             }
@@ -486,7 +486,7 @@
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
 
-                Intercept(x => x.Error(ex));
+                Intercept(x => x.Error<TEntity>(ex));
 
                 throw ex;
             }
@@ -588,7 +588,7 @@
             }
             catch (Exception ex)
             {
-                Intercept(x => x.Error(ex));
+                Intercept(x => x.Error<TEntity>(ex));
 
                 throw;
             }
@@ -612,7 +612,7 @@
             }
             catch (Exception ex)
             {
-                Intercept(x => x.Error(ex));
+                Intercept(x => x.Error<TEntity>(ex));
 
                 throw;
             }
@@ -634,7 +634,7 @@
             }
             catch (Exception ex)
             {
-                Intercept(x => x.Error(ex));
+                Intercept(x => x.Error<TEntity>(ex));
 
                 throw;
             }
