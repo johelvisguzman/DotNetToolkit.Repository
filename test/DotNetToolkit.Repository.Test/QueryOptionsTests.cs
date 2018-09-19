@@ -20,18 +20,18 @@
 
             var options = new QueryOptions<Customer>();
 
-            Assert.Equal(-1, options.PageIndex);
-            Assert.Equal(-1, options.PageSize);
+            Assert.Equal(-1, ((IQueryOptions<Customer>)options).PageIndex);
+            Assert.Equal(-1, ((IQueryOptions<Customer>)options).PageSize);
 
             options = options.Page(pageIndex, pageSize);
 
-            Assert.Equal(pageIndex, options.PageIndex);
-            Assert.Equal(pageSize, options.PageSize);
+            Assert.Equal(pageIndex, ((IQueryOptions<Customer>)options).PageIndex);
+            Assert.Equal(pageSize, ((IQueryOptions<Customer>)options).PageSize);
 
             options = options.Page(pageIndex);
 
-            Assert.Equal(pageIndex, options.PageIndex);
-            Assert.Equal(pageSize, options.PageSize);
+            Assert.Equal(pageIndex, ((IQueryOptions<Customer>)options).PageIndex);
+            Assert.Equal(pageSize, ((IQueryOptions<Customer>)options).PageSize);
 
             var ex = Assert.Throws<ArgumentException>(() => options.Page(0, 1));
             Assert.Equal("Cannot be lower than 1.\r\nParameter name: pageIndex", ex.Message);
@@ -44,8 +44,8 @@
 
             options = new QueryOptions<Customer>().Page(pageIndex);
 
-            Assert.Equal(pageIndex, options.PageIndex);
-            Assert.Equal(defaultPageSize, options.PageSize);
+            Assert.Equal(pageIndex, ((IQueryOptions<Customer>)options).PageIndex);
+            Assert.Equal(defaultPageSize, ((IQueryOptions<Customer>)options).PageSize);
         }
 
         [Fact]
@@ -53,19 +53,19 @@
         {
             var options = new QueryOptions<Customer>();
 
-            Assert.Empty(options.SortingPropertiesMapping);
+            Assert.Empty(((IQueryOptions<Customer>)options).SortingPropertiesMapping);
 
             options = options.SortBy(x => x.Id);
 
-            Assert.Equal(1, options.SortingPropertiesMapping.Count);
-            Assert.Equal("Id", options.SortingPropertiesMapping.ElementAt(0).Key);
-            Assert.Equal(SortOrder.Ascending, options.SortingPropertiesMapping.ElementAt(0).Value);
+            Assert.Equal(1, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.Count);
+            Assert.Equal("Id", ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(0).Key);
+            Assert.Equal(SortOrder.Ascending, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(0).Value);
 
             options = options.SortBy("Id");
 
-            Assert.Equal(1, options.SortingPropertiesMapping.Count);
-            Assert.Equal("Id", options.SortingPropertiesMapping.ElementAt(0).Key);
-            Assert.Equal(SortOrder.Ascending, options.SortingPropertiesMapping.ElementAt(0).Value);
+            Assert.Equal(1, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.Count);
+            Assert.Equal("Id", ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(0).Key);
+            Assert.Equal(SortOrder.Ascending, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(0).Value);
         }
 
         [Fact]
@@ -73,19 +73,19 @@
         {
             var options = new QueryOptions<Customer>();
 
-            Assert.Empty(options.SortingPropertiesMapping);
+            Assert.Empty(((IQueryOptions<Customer>)options).SortingPropertiesMapping);
 
             options = options.SortByDescending(x => x.Id);
 
-            Assert.Equal(1, options.SortingPropertiesMapping.Count);
-            Assert.Equal("Id", options.SortingPropertiesMapping.ElementAt(0).Key);
-            Assert.Equal(SortOrder.Descending, options.SortingPropertiesMapping.ElementAt(0).Value);
+            Assert.Equal(1, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.Count);
+            Assert.Equal("Id", ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(0).Key);
+            Assert.Equal(SortOrder.Descending, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(0).Value);
 
             options = options.SortByDescending("Id");
 
-            Assert.Equal(1, options.SortingPropertiesMapping.Count);
-            Assert.Equal("Id", options.SortingPropertiesMapping.ElementAt(0).Key);
-            Assert.Equal(SortOrder.Descending, options.SortingPropertiesMapping.ElementAt(0).Value);
+            Assert.Equal(1, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.Count);
+            Assert.Equal("Id", ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(0).Key);
+            Assert.Equal(SortOrder.Descending, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(0).Value);
         }
 
         [Fact]
@@ -95,15 +95,15 @@
 
             options = options.SortBy(x => x.Id).SortBy(x => x.Name);
 
-            Assert.Equal(2, options.SortingPropertiesMapping.Count);
-            Assert.Equal("Name", options.SortingPropertiesMapping.ElementAt(1).Key);
-            Assert.Equal(SortOrder.Ascending, options.SortingPropertiesMapping.ElementAt(1).Value);
+            Assert.Equal(2, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.Count);
+            Assert.Equal("Name", ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(1).Key);
+            Assert.Equal(SortOrder.Ascending, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(1).Value);
 
             options = options.SortBy("Id").SortBy("Name");
 
-            Assert.Equal(2, options.SortingPropertiesMapping.Count);
-            Assert.Equal("Name", options.SortingPropertiesMapping.ElementAt(1).Key);
-            Assert.Equal(SortOrder.Ascending, options.SortingPropertiesMapping.ElementAt(1).Value);
+            Assert.Equal(2, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.Count);
+            Assert.Equal("Name", ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(1).Key);
+            Assert.Equal(SortOrder.Ascending, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(1).Value);
         }
 
         [Fact]
@@ -113,15 +113,15 @@
 
             options = options.SortByDescending(x => x.Id).SortByDescending(x => x.Name);
 
-            Assert.Equal(2, options.SortingPropertiesMapping.Count);
-            Assert.Equal("Name", options.SortingPropertiesMapping.ElementAt(1).Key);
-            Assert.Equal(SortOrder.Descending, options.SortingPropertiesMapping.ElementAt(1).Value);
+            Assert.Equal(2, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.Count);
+            Assert.Equal("Name", ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(1).Key);
+            Assert.Equal(SortOrder.Descending, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(1).Value);
 
             options = options.SortByDescending("Id").SortByDescending("Name");
 
-            Assert.Equal(2, options.SortingPropertiesMapping.Count);
-            Assert.Equal("Name", options.SortingPropertiesMapping.ElementAt(1).Key);
-            Assert.Equal(SortOrder.Descending, options.SortingPropertiesMapping.ElementAt(1).Value);
+            Assert.Equal(2, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.Count);
+            Assert.Equal("Name", ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(1).Key);
+            Assert.Equal(SortOrder.Descending, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(1).Value);
         }
 
         [Fact]
@@ -134,7 +134,7 @@
                 .SatisfyBy(firstPredicate)
                 .SatisfyBy(secondPredicate);
 
-            Assert.Equal(firstPredicate.And(secondPredicate).ToString(), options.SpecificationStrategy.Predicate.ToString());
+            Assert.Equal(firstPredicate.And(secondPredicate).ToString(), ((IQueryOptions<Customer>)options).SpecificationStrategy.Predicate.ToString());
         }
 
         [Fact]
@@ -146,7 +146,7 @@
                 .SatisfyBy(firstSpec)
                 .SatisfyBy(secondSpec);
 
-            Assert.Equal(firstSpec.And(secondSpec).Predicate.ToString(), options.SpecificationStrategy.Predicate.ToString());
+            Assert.Equal(firstSpec.And(secondSpec).Predicate.ToString(), ((IQueryOptions<Customer>)options).SpecificationStrategy.Predicate.ToString());
         }
 
         [Fact]
@@ -157,18 +157,18 @@
                 .Fetch("Phone")
                 .Fetch("Phone.Customer");
 
-            Assert.Contains("Address", options.FetchStrategy.IncludePaths);
-            Assert.Contains("Phone", options.FetchStrategy.IncludePaths);
-            Assert.Contains("Phone.Customer", options.FetchStrategy.IncludePaths);
+            Assert.Contains("Address", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
+            Assert.Contains("Phone", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
+            Assert.Contains("Phone.Customer", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
 
             options = new QueryOptions<Customer>()
                 .Fetch(new FetchQueryStrategy<Customer>().Include("Address"))
                 .Fetch(new FetchQueryStrategy<Customer>().Include("Phone"))
                 .Fetch("Phone.Customer");
 
-            Assert.Contains("Address", options.FetchStrategy.IncludePaths);
-            Assert.Contains("Phone", options.FetchStrategy.IncludePaths);
-            Assert.Contains("Phone.Customer", options.FetchStrategy.IncludePaths);
+            Assert.Contains("Address", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
+            Assert.Contains("Phone", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
+            Assert.Contains("Phone.Customer", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
         }
 
         [Fact]
@@ -179,18 +179,18 @@
                 .Fetch(x => x.Phone)
                 .Fetch(x => x.Phone.Customer);
 
-            Assert.Contains("Address", options.FetchStrategy.IncludePaths);
-            Assert.Contains("Phone", options.FetchStrategy.IncludePaths);
-            Assert.Contains("Phone.Customer", options.FetchStrategy.IncludePaths);
+            Assert.Contains("Address", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
+            Assert.Contains("Phone", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
+            Assert.Contains("Phone.Customer", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
 
             options = new QueryOptions<Customer>()
                 .Fetch(new FetchQueryStrategy<Customer>().Include(x => x.Address))
                 .Fetch(new FetchQueryStrategy<Customer>().Include(x => x.Phone))
                 .Fetch(x => x.Phone.Customer);
 
-            Assert.Contains("Address", options.FetchStrategy.IncludePaths);
-            Assert.Contains("Phone", options.FetchStrategy.IncludePaths);
-            Assert.Contains("Phone.Customer", options.FetchStrategy.IncludePaths);
+            Assert.Contains("Address", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
+            Assert.Contains("Phone", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
+            Assert.Contains("Phone.Customer", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
         }
     }
 }
