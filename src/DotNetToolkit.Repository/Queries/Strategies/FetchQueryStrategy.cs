@@ -33,7 +33,7 @@
         /// <summary>
         /// Gets the collection of related objects to include in the query results.
         /// </summary>
-        public IEnumerable<string> IncludePaths
+        IEnumerable<string> IFetchQueryStrategy<T>.IncludePaths
         {
             get { return _properties; }
         }
