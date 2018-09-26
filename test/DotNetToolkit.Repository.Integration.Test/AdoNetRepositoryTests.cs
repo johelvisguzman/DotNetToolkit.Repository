@@ -515,9 +515,9 @@
 
             var addressRepo = new Repository<CustomerAddressWithMultipleAddresses>(context);
             var customerRepo = new Repository<CustomerWithMultipleAddresses>(context);
-            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Include(x => x.Addresses);
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
             var options = new QueryOptions<CustomerWithMultipleAddresses>();
-            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Fetch(customerFetchStrategy);
+            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
 
             var entity = new CustomerWithMultipleAddresses
             {
@@ -561,9 +561,9 @@
 
             var addressRepo = new Repository<CustomerAddressWithMultipleAddresses>(context);
             var customerRepo = new Repository<CustomerWithMultipleAddresses>(context);
-            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Include(x => x.Addresses);
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
             var options = new QueryOptions<CustomerWithMultipleAddresses>();
-            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Fetch(customerFetchStrategy);
+            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
 
             var entity = new CustomerWithMultipleAddresses
             {
@@ -607,9 +607,9 @@
 
             var addressRepo = new Repository<CustomerAddressWithMultipleAddresses>(context);
             var customerRepo = new Repository<CustomerWithMultipleAddresses>(context);
-            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Include(x => x.Addresses);
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
             var options = new QueryOptions<CustomerWithMultipleAddresses>();
-            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Fetch(customerFetchStrategy);
+            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
 
             var customerKey = 1;
 
@@ -655,9 +655,9 @@
 
             var addressRepo = new Repository<CustomerAddressWithMultipleAddresses>(context);
             var customerRepo = new Repository<CustomerWithMultipleAddresses>(context);
-            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Include(x => x.Addresses);
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
             var options = new QueryOptions<CustomerWithMultipleAddresses>();
-            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Fetch(customerFetchStrategy);
+            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
 
             var customerKey = 1;
 

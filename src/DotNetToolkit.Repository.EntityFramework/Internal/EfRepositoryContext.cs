@@ -59,7 +59,7 @@
         {
             var query = AsQueryable<TEntity>();
 
-            return fetchStrategy == null ? query : fetchStrategy.IncludePaths.Aggregate(query, (current, path) => current.Include(path));
+            return fetchStrategy == null ? query : fetchStrategy.PropertyPaths.Aggregate(query, (current, path) => current.Include(path));
         }
 
         private IQueryable<TEntity> GetQuery<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
@@ -168,8 +168,8 @@
             }
 
             var options = new QueryOptions<TEntity>()
-                .SatisfyBy(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
-                .Fetch(fetchStrategy);
+                .Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
+                .Include(fetchStrategy);
 
             return Find<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance);
         }
@@ -331,8 +331,8 @@
             }
 
             var options = new QueryOptions<TEntity>()
-                .SatisfyBy(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
-                .Fetch(fetchStrategy);
+                .Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
+                .Include(fetchStrategy);
 
             return await FindAsync<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken);
         }

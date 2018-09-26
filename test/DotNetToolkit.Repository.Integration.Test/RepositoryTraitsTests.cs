@@ -811,7 +811,7 @@
             const string name = "Random Name";
 
             var fetchStrategy = new FetchQueryStrategy<Customer>();
-            fetchStrategy.Include(x => x.Address);
+            fetchStrategy.Fetch(x => x.Address);
 
             var entity = new Customer { Id = key, Name = name };
 
@@ -1860,7 +1860,7 @@
             const string name = "Random Name";
 
             var fetchStrategy = new FetchQueryStrategy<Customer>();
-            fetchStrategy.Include(x => x.Address);
+            fetchStrategy.Fetch(x => x.Address);
 
             var entity = new Customer { Id = key, Name = name };
 
