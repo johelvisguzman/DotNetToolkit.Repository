@@ -43,9 +43,9 @@
         /// </summary>
         /// <param name="path">A lambda expression representing the path to include.</param>
         /// <returns>A new <see cref="IFetchQueryStrategy{T}" /> with the defined query path.</returns>
-        public IFetchQueryStrategy<T> Include(Expression<Func<T, object>> path)
+        public IFetchQueryStrategy<T> Fetch(Expression<Func<T, object>> path)
         {
-            return Include(path.ToIncludeString());
+            return Fetch(path.ToIncludeString());
         }
 
         /// <summary>
@@ -53,7 +53,7 @@
         /// </summary>
         /// <param name="path">The dot-separated list of related objects to return in the query results.</param>
         /// <returns>A new <see cref="IFetchQueryStrategy{T}" /> with the defined query path.</returns>
-        public IFetchQueryStrategy<T> Include(string path)
+        public IFetchQueryStrategy<T> Fetch(string path)
         {
             _properties.Add(path);
             return this;

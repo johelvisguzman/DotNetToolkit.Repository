@@ -183,7 +183,7 @@
 
             _fetchStrategy = _fetchStrategy ?? new FetchQueryStrategy<T>();
 
-            mergedPaths.ForEach(path => _fetchStrategy.Include(path));
+            mergedPaths.ForEach(path => _fetchStrategy.Fetch(path));
 
             return this;
         }
@@ -200,7 +200,7 @@
 
             _fetchStrategy = _fetchStrategy ?? new FetchQueryStrategy<T>();
 
-            _fetchStrategy.Include(path);
+            _fetchStrategy.Fetch(path);
 
             return this;
         }

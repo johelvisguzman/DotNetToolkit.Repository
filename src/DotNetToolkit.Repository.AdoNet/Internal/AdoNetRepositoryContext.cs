@@ -1105,7 +1105,7 @@
 
                     foreach (var path in paths)
                     {
-                        fetchStrategy.Include(path);
+                        fetchStrategy.Fetch(path);
                     }
                 }
             }
