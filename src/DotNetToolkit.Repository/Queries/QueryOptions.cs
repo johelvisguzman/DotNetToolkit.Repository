@@ -178,8 +178,8 @@
             if (fetchStrategy == null)
                 throw new ArgumentNullException(nameof(fetchStrategy));
 
-            var paths = _fetchStrategy != null ? ((IFetchQueryStrategy<T>)_fetchStrategy).IncludePaths : new List<string>();
-            var mergedPaths = paths.Union(fetchStrategy.IncludePaths).ToList();
+            var paths = _fetchStrategy != null ? ((IFetchQueryStrategy<T>)_fetchStrategy).PropertyPaths : new List<string>();
+            var mergedPaths = paths.Union(fetchStrategy.PropertyPaths).ToList();
 
             _fetchStrategy = _fetchStrategy ?? new FetchQueryStrategy<T>();
 

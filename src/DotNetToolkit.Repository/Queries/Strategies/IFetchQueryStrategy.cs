@@ -13,7 +13,7 @@
         /// <summary>
         /// Gets the collection of related objects to include in the query results.
         /// </summary>
-        IEnumerable<string> IncludePaths { get; }
+        IEnumerable<string> PropertyPaths { get; }
 
         /// <summary>
         /// Specifies the related objects to include in the query results.

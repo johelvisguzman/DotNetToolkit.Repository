@@ -1088,7 +1088,7 @@
 
             // Check to see if we can automatically include some navigation properties (this seems to be the behavior of entity framework as well).
             // Only supports a one to one table join for now...
-            if (fetchStrategy == null || !fetchStrategy.IncludePaths.Any())
+            if (fetchStrategy == null || !fetchStrategy.PropertyPaths.Any())
             {
                 // Assumes we want to perform a join when the navigation property from the primary table has also a navigation property of
                 // the same type as the primary table
@@ -1116,13 +1116,13 @@
 
             // Append join tables from fetchStrategy
             // Only supports a one to one table join for now...
-            if (fetchStrategy != null && fetchStrategy.IncludePaths.Any())
+            if (fetchStrategy != null && fetchStrategy.PropertyPaths.Any())
             {
                 var joinStatementSb = new StringBuilder();
 
                 sb.Append($"SELECT\n\t{columns}");
 
-                foreach (var path in fetchStrategy.IncludePaths)
+                foreach (var path in fetchStrategy.PropertyPaths)
                 {
                     var joinTablePropertyInfo = mainTableProperties.Single(x => x.Name.Equals(path));
                     var joinTableType = joinTablePropertyInfo.PropertyType.IsGenericCollection()

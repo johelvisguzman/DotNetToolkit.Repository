@@ -157,18 +157,18 @@
                 .Fetch("Phone")
                 .Fetch("Phone.Customer");
 
-            Assert.Contains("Address", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
-            Assert.Contains("Phone", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
-            Assert.Contains("Phone.Customer", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
+            Assert.Contains("Address", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
+            Assert.Contains("Phone", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
+            Assert.Contains("Phone.Customer", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
 
             options = new QueryOptions<Customer>()
                 .Fetch(new FetchQueryStrategy<Customer>().Fetch("Address"))
                 .Fetch(new FetchQueryStrategy<Customer>().Fetch("Phone"))
                 .Fetch("Phone.Customer");
 
-            Assert.Contains("Address", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
-            Assert.Contains("Phone", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
-            Assert.Contains("Phone.Customer", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
+            Assert.Contains("Address", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
+            Assert.Contains("Phone", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
+            Assert.Contains("Phone.Customer", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
         }
 
         [Fact]
@@ -179,18 +179,18 @@
                 .Fetch(x => x.Phone)
                 .Fetch(x => x.Phone.Customer);
 
-            Assert.Contains("Address", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
-            Assert.Contains("Phone", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
-            Assert.Contains("Phone.Customer", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
+            Assert.Contains("Address", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
+            Assert.Contains("Phone", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
+            Assert.Contains("Phone.Customer", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
 
             options = new QueryOptions<Customer>()
                 .Fetch(new FetchQueryStrategy<Customer>().Fetch(x => x.Address))
                 .Fetch(new FetchQueryStrategy<Customer>().Fetch(x => x.Phone))
                 .Fetch(x => x.Phone.Customer);
 
-            Assert.Contains("Address", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
-            Assert.Contains("Phone", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
-            Assert.Contains("Phone.Customer", ((IQueryOptions<Customer>)options).FetchStrategy.IncludePaths);
+            Assert.Contains("Address", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
+            Assert.Contains("Phone", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
+            Assert.Contains("Phone.Customer", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
         }
     }
 }

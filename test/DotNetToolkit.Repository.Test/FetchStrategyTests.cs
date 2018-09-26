@@ -14,9 +14,9 @@
                 .Fetch(x => x.Phone)
                 .Fetch(x => x.Phone.Customer);
 
-            Assert.Contains("Address", strategy.IncludePaths);
-            Assert.Contains("Phone", strategy.IncludePaths);
-            Assert.Contains("Phone.Customer", strategy.IncludePaths);
+            Assert.Contains("Address", strategy.PropertyPaths);
+            Assert.Contains("Phone", strategy.PropertyPaths);
+            Assert.Contains("Phone.Customer", strategy.PropertyPaths);
         }
 
         [Fact]
@@ -27,9 +27,9 @@
                 .Fetch("Phone")
                 .Fetch("Phone.Customer");
 
-            Assert.Contains("Address", strategy.IncludePaths);
-            Assert.Contains("Phone", strategy.IncludePaths);
-            Assert.Contains("Phone.Customer", strategy.IncludePaths);
+            Assert.Contains("Address", strategy.PropertyPaths);
+            Assert.Contains("Phone", strategy.PropertyPaths);
+            Assert.Contains("Phone.Customer", strategy.PropertyPaths);
         }
     }
 }

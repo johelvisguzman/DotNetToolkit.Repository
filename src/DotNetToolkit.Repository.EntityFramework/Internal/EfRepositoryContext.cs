@@ -59,7 +59,7 @@
         {
             var query = AsQueryable<TEntity>();
 
-            return fetchStrategy == null ? query : fetchStrategy.IncludePaths.Aggregate(query, (current, path) => current.Include(path));
+            return fetchStrategy == null ? query : fetchStrategy.PropertyPaths.Aggregate(query, (current, path) => current.Include(path));
         }
 
         private IQueryable<TEntity> GetQuery<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
