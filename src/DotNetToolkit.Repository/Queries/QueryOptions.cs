@@ -135,11 +135,11 @@
         }
 
         /// <summary>
-        /// Applies a criteria that is used for matching entities against and combine it with the current specified predicate using the logical "and".
+        /// Includes a specification strategy/criteria that is used for matching entities against and combine it with the current specified predicate using the logical "and".
         /// </summary>
         /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> SatisfyBy(ISpecificationQueryStrategy<T> criteria)
+        public QueryOptions<T> Include(ISpecificationQueryStrategy<T> criteria)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
@@ -169,11 +169,11 @@
         }
 
         /// <summary>
-        /// Applies the fetch strategy which defines the child objects that should be retrieved when loading the entity.
+        /// Includes the fetch strategy which defines the child objects that should be retrieved when loading the entity and combines it with the current property pahts collection.
         /// </summary>
         /// <param name="fetchStrategy">The fetch strategy.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> Fetch(IFetchQueryStrategy<T> fetchStrategy)
+        public QueryOptions<T> Include(IFetchQueryStrategy<T> fetchStrategy)
         {
             if (fetchStrategy == null)
                 throw new ArgumentNullException(nameof(fetchStrategy));

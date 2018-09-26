@@ -143,8 +143,8 @@
             var firstSpec = new SpecificationQueryStrategy<Customer>(x => x.Name.Equals("Random Name"));
             var secondSpec = new SpecificationQueryStrategy<Customer>(x => x.Id == 1);
             var options = new QueryOptions<Customer>()
-                .SatisfyBy(firstSpec)
-                .SatisfyBy(secondSpec);
+                .Include(firstSpec)
+                .Include(secondSpec);
 
             Assert.Equal(firstSpec.And(secondSpec).Predicate.ToString(), ((IQueryOptions<Customer>)options).SpecificationStrategy.Predicate.ToString());
         }
@@ -162,8 +162,8 @@
             Assert.Contains("Phone.Customer", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
 
             options = new QueryOptions<Customer>()
-                .Fetch(new FetchQueryStrategy<Customer>().Fetch("Address"))
-                .Fetch(new FetchQueryStrategy<Customer>().Fetch("Phone"))
+                .Include(new FetchQueryStrategy<Customer>().Fetch("Address"))
+                .Include(new FetchQueryStrategy<Customer>().Fetch("Phone"))
                 .Fetch("Phone.Customer");
 
             Assert.Contains("Address", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
@@ -184,8 +184,8 @@
             Assert.Contains("Phone.Customer", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
 
             options = new QueryOptions<Customer>()
-                .Fetch(new FetchQueryStrategy<Customer>().Fetch(x => x.Address))
-                .Fetch(new FetchQueryStrategy<Customer>().Fetch(x => x.Phone))
+                .Include(new FetchQueryStrategy<Customer>().Fetch(x => x.Address))
+                .Include(new FetchQueryStrategy<Customer>().Fetch(x => x.Phone))
                 .Fetch(x => x.Phone.Customer);
 
             Assert.Contains("Address", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);

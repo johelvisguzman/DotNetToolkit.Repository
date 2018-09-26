@@ -168,8 +168,8 @@
             }
 
             var options = new QueryOptions<TEntity>()
-                .SatisfyBy(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
-                .Fetch(fetchStrategy);
+                .Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
+                .Include(fetchStrategy);
 
             return Find<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance);
         }
@@ -331,8 +331,8 @@
             }
 
             var options = new QueryOptions<TEntity>()
-                .SatisfyBy(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
-                .Fetch(fetchStrategy);
+                .Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
+                .Include(fetchStrategy);
 
             return await FindAsync<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken);
         }

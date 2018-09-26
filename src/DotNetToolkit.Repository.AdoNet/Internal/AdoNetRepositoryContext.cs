@@ -1431,10 +1431,10 @@
 
             ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
 
-            var options = new QueryOptions<TEntity>().SatisfyBy(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
+            var options = new QueryOptions<TEntity>().Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
 
             if (fetchStrategy != null)
-                options.Fetch(fetchStrategy);
+                options.Include(fetchStrategy);
 
             return FindAsync<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken);
         }
@@ -1747,10 +1747,10 @@
 
             ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
 
-            var options = new QueryOptions<TEntity>().SatisfyBy(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
+            var options = new QueryOptions<TEntity>().Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
 
             if (fetchStrategy != null)
-                options.Fetch(fetchStrategy);
+                options.Include(fetchStrategy);
 
             return Find<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance);
         }
