@@ -10,9 +10,11 @@
     using Queries.Strategies;
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
     using Wrappers;
@@ -42,7 +44,7 @@
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        internal RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+        protected RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
 
         #endregion
 
@@ -210,7 +212,7 @@
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        internal RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+        protected RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
 
         #endregion
 
@@ -370,7 +372,7 @@
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        internal RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+        protected RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
 
         #endregion
 
@@ -500,14 +502,18 @@
     /// <summary>
     /// An implementation of <see cref="IRepositoryBase{TEntity}" />.
     /// </summary>
+    [ComVisible(false)]
+#if !NETSTANDARD1_3
+    [Browsable(false)]
+#endif
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public abstract class RepositoryBase<TEntity> : IRepositoryBase<TEntity> where TEntity : class
     {
         #region Fields
 
-        private bool _canDisposeContext;
-        private IRepositoryContextFactory _contextFactory;
+        private readonly IRepositoryContextFactory _contextFactory;
         private IRepositoryContext _context;
-        private IEnumerable<IRepositoryInterceptor> _interceptors;
+        private readonly IEnumerable<IRepositoryInterceptor> _interceptors;
 
         #endregion
 
@@ -530,14 +536,13 @@
         /// </summary>
         /// <param name="factory">The context factory.</param>
         /// <param name="interceptors">The interceptors.</param>
-        protected RepositoryBase(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors)
+        internal RepositoryBase(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors)
         {
             if (factory == null)
                 throw new ArgumentNullException(nameof(factory));
 
             _contextFactory = factory;
             _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
-            _canDisposeContext = true;
 
             ThrowsIfEntityPrimaryKeyMissing();
         }
@@ -735,7 +740,7 @@
 
         private void DisposeContext()
         {
-            if (_canDisposeContext && _context != null)
+            if (_contextFactory != null && _context != null)
             {
                 _context.Dispose();
                 _context = null;

@@ -3,8 +3,10 @@
     using Queries;
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -13,6 +15,11 @@
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <seealso cref="System.IDisposable" />
+    [ComVisible(false)]
+#if !NETSTANDARD1_3
+    [Browsable(false)]
+#endif
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public interface IReadOnlyRepositoryBase<TEntity> where TEntity : class
     {
         /// <summary>

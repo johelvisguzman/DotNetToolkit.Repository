@@ -13,7 +13,7 @@
     /// <typeparam name="TKey2">The type of the second part of the composite primary key.</typeparam>
     /// <typeparam name="TKey3">The type of the third part of the composite primary key.</typeparam>
     /// <seealso cref="DotNetToolkit.Repository.IRepository{TEntity, TKey1, TKey2, TKey3}" />
-    public class Repository<TEntity, TKey1, TKey2, TKey3> : RepositoryBase<TEntity, TKey1, TKey2, TKey3> where TEntity : class
+    public sealed class Repository<TEntity, TKey1, TKey2, TKey3> : RepositoryBase<TEntity, TKey1, TKey2, TKey3> where TEntity : class
     {
         #region Constructors
 
@@ -53,7 +53,7 @@
     /// <typeparam name="TKey1">The type of the first part of the composite primary key.</typeparam>
     /// <typeparam name="TKey2">The type of the second part of the composite primary key.</typeparam>
     /// <seealso cref="DotNetToolkit.Repository.IRepository{TEntity, TKey1, TKey2}" />
-    public class Repository<TEntity, TKey1, TKey2> : RepositoryBase<TEntity, TKey1, TKey2> where TEntity : class
+    public sealed class Repository<TEntity, TKey1, TKey2> : RepositoryBase<TEntity, TKey1, TKey2> where TEntity : class
     {
         #region Constructors
 
@@ -92,7 +92,7 @@
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <typeparam name="TKey">The type of the key.</typeparam>
     /// <seealso cref="DotNetToolkit.Repository.IRepository{TEntity, TKey}" />
-    public class Repository<TEntity, TKey> : RepositoryBase<TEntity, TKey> where TEntity : class
+    public sealed class Repository<TEntity, TKey> : RepositoryBase<TEntity, TKey> where TEntity : class
     {
         #region Constructors
 
@@ -130,7 +130,7 @@
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <seealso cref="DotNetToolkit.Repository.IRepository{TEntity}" />
-    public class Repository<TEntity> : RepositoryBase<TEntity, int>, IRepository<TEntity> where TEntity : class
+    public sealed class Repository<TEntity> : RepositoryBase<TEntity, int>, IRepository<TEntity> where TEntity : class
     {
         #region Constructors
 
