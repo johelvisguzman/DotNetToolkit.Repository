@@ -530,7 +530,7 @@
         /// </summary>
         /// <param name="factory">The context factory.</param>
         /// <param name="interceptors">The interceptors.</param>
-        protected RepositoryBase(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors)
+        internal RepositoryBase(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors)
         {
             if (factory == null)
                 throw new ArgumentNullException(nameof(factory));
