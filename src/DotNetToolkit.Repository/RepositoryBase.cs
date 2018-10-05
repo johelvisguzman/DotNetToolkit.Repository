@@ -42,7 +42,7 @@
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        internal RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+        protected RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
 
         #endregion
 
@@ -210,7 +210,7 @@
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        internal RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+        protected RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
 
         #endregion
 
@@ -370,7 +370,7 @@
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="interceptors">The interceptors.</param>
-        internal RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+        protected RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
 
         #endregion
 
