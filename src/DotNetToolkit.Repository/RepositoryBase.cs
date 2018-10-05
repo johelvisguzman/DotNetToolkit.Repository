@@ -504,10 +504,9 @@
     {
         #region Fields
 
-        private bool _canDisposeContext;
-        private IRepositoryContextFactory _contextFactory;
+        private readonly IRepositoryContextFactory _contextFactory;
         private IRepositoryContext _context;
-        private IEnumerable<IRepositoryInterceptor> _interceptors;
+        private readonly IEnumerable<IRepositoryInterceptor> _interceptors;
 
         #endregion
 
@@ -537,7 +536,6 @@
 
             _contextFactory = factory;
             _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
-            _canDisposeContext = true;
 
             ThrowsIfEntityPrimaryKeyMissing();
         }
@@ -735,7 +733,7 @@
 
         private void DisposeContext()
         {
-            if (_canDisposeContext && _context != null)
+            if (_contextFactory != null && _context != null)
             {
                 _context.Dispose();
                 _context = null;
