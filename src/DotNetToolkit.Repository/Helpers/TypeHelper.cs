@@ -3,6 +3,7 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
 
     internal static class TypeHelper
@@ -41,6 +42,30 @@
         public static bool IsEnumerable(this Type type)
         {
             return typeof(IEnumerable).IsAssignableFrom(type);
+        }
+
+        /// <summary>
+        /// Determines whether or not the specified type implements the specified interface type.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="interfaceType">The interface type to check</param>
+        /// <returns><c>true</c> if specified type implements the specified interface type; otherwise, <c>false</c>.</returns>
+        public static bool ImplementsInterface(this Type type, Type interfaceType)
+        {
+            return interfaceType.IsAssignableFrom(type) ||
+                   type.IsGenericType(interfaceType) ||
+                   type.GetTypeInfo().ImplementedInterfaces.Any(@interface => @interface.IsGenericType(interfaceType));
+        }
+
+        /// <summary>
+        /// Determines whether or not the specified type is a generic type of the specified interface type.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="genericType">The generic type to check</param>
+        /// <returns><c>true</c> if the specified type is a generic type of the specified interface type; otherwise, <c>false</c>.</returns>
+        public static bool IsGenericType(this Type type, Type genericType)
+        {
+            return type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == genericType;
         }
     }
 }
