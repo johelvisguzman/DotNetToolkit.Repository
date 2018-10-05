@@ -10,9 +10,11 @@
     using Queries.Strategies;
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
     using Wrappers;
@@ -500,6 +502,11 @@
     /// <summary>
     /// An implementation of <see cref="IRepositoryBase{TEntity}" />.
     /// </summary>
+    [ComVisible(false)]
+#if !NETSTANDARD1_3
+    [Browsable(false)]
+#endif
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public abstract class RepositoryBase<TEntity> : IRepositoryBase<TEntity> where TEntity : class
     {
         #region Fields
