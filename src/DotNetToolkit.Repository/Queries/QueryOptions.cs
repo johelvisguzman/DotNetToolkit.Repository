@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Queries
 {
+    using Extensions;
     using Helpers;
     using Strategies;
     using System;

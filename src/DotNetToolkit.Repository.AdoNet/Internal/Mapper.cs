@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
     using Configuration.Conventions;
+    using Extensions;
     using Helpers;
     using Properties;
     using System;

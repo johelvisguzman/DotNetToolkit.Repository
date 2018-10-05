@@ -3,6 +3,7 @@
     using Configuration;
     using Configuration.Conventions;
     using Configuration.Interceptors;
+    using Extensions;
     using Factories;
     using Helpers;
     using Properties;

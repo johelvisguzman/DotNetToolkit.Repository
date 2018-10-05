@@ -2,6 +2,7 @@
 {
     using Configuration;
     using Configuration.Conventions;
+    using Extensions;
     using Helpers;
     using Properties;
     using Queries;
@@ -1139,7 +1140,7 @@
                         var joinTableAlias = m.GenerateTableAlias(joinTableType);
                         var joinTableColumnNames = string.Join(",\n\t",
                             joinTableProperties
-                                .Where(PropertyInfoHelper.IsPrimitive)
+                                .Where(Extensions.PropertyInfoExtensions.IsPrimitive)
                                 .Select(x =>
                                 {
                                     var colAlias = m.GenerateColumnAlias(x);

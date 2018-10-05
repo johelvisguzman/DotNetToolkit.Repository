@@ -1,12 +1,13 @@
-﻿namespace DotNetToolkit.Repository.Helpers
+﻿namespace DotNetToolkit.Repository.Extensions
 {
-    using Configuration.Conventions;
-    using Queries;
     using System;
     using System.Linq;
     using System.Reflection;
+    using Configuration.Conventions;
+    using Helpers;
+    using Queries;
 
-    internal static class QueryableHelper
+    internal static class QueryableExtensions
     {
         public static IQueryable<T> Apply<T>(this IQueryOptions<T> options, IQueryable<T> query) where T : class
         {

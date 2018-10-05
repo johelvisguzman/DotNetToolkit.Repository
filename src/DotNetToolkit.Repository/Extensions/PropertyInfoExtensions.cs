@@ -1,9 +1,9 @@
-﻿namespace DotNetToolkit.Repository.Helpers
+﻿namespace DotNetToolkit.Repository.Extensions
 {
     using System;
     using System.Reflection;
 
-    internal static class PropertyInfoHelper
+    internal static class PropertyInfoExtensions
     {
         /// <summary>
         /// Determines if the specified property is a complex type.

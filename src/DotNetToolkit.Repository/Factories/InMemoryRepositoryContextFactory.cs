@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Factories
 {
     using Configuration;
+    using Internal;
     using System;
 
     /// <summary>
