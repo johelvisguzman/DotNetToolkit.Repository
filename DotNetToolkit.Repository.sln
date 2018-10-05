@@ -29,6 +29,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{257E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetToolkit.Repository.Wpf.Demo", "samples\DotNetToolkit.Repository.Wpf.Demo\DotNetToolkit.Repository.Wpf.Demo.csproj", "{14409451-ED11-4DEF-8A89-783834F8316C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetToolkit.Repository.Microsoft.DependencyInjection", "src\DotNetToolkit.Repository.Microsoft.DependencyInjection\DotNetToolkit.Repository.Microsoft.DependencyInjection.csproj", "{21EECEDF-7AD0-4456-87D0-ABA47AE3368C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -74,6 +76,10 @@ Global
 		{14409451-ED11-4DEF-8A89-783834F8316C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{14409451-ED11-4DEF-8A89-783834F8316C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14409451-ED11-4DEF-8A89-783834F8316C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21EECEDF-7AD0-4456-87D0-ABA47AE3368C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21EECEDF-7AD0-4456-87D0-ABA47AE3368C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21EECEDF-7AD0-4456-87D0-ABA47AE3368C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21EECEDF-7AD0-4456-87D0-ABA47AE3368C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -89,6 +95,7 @@ Global
 		{AE291CF3-4753-4454-9A7B-DE6137A76C4C} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{77973BF2-E352-43C9-8CF2-99E01142B2A8} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{14409451-ED11-4DEF-8A89-783834F8316C} = {257E837B-5B99-44D7-9647-1C2FE0A07520}
+		{21EECEDF-7AD0-4456-87D0-ABA47AE3368C} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96973E0C-81D1-42DE-9F78-7103241B4E07}

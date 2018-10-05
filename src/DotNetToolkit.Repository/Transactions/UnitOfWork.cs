@@ -2,11 +2,11 @@
 {
     using Configuration;
     using Configuration.Interceptors;
-    using Factories;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using Factories;
 
     /// <summary>
     /// An implementation of <see cref="IUnitOfWork" />.
@@ -29,28 +29,26 @@
         /// Initializes a new instance of the <see cref="UnitOfWork" /> class.
         /// </summary>
         /// <param name="factory">The repository context factory.</param>
-        public UnitOfWork(IRepositoryContextFactory factory) : this(factory, (IEnumerable<IRepositoryInterceptor>)null) { }
+        public UnitOfWork(IRepositoryContextFactory factory) : this(new RepositoryConfigurationOptions(factory)) { }
 
+#if !NETSTANDARD
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UnitOfWork" /> class and uses the data from the App.config file to configure the repositories.
+        /// </summary>
+        public UnitOfWork() : this(Internal.ConfigFile.ConfigurationHelper.GetRequiredConfigurationOptions()) { }
+#endif
         /// <summary>
         /// Initializes a new instance of the <see cref="UnitOfWork" /> class.
         /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        /// <param name="interceptor">The interceptor.</param>
-        public UnitOfWork(IRepositoryContextFactory factory, IRepositoryInterceptor interceptor) : this(factory, new List<IRepositoryInterceptor> { interceptor }) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UnitOfWork" /> class.
-        /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        public UnitOfWork(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors)
+        /// <param name="configuration">The repository configuration.</param>
+        internal UnitOfWork(IRepositoryConfigurationOptions configuration)
         {
-            if (factory == null)
-                throw new ArgumentNullException(nameof(factory));
+            if (configuration == null)
+                throw new ArgumentNullException(nameof(configuration));
 
-            _context = factory.Create();
+            _context = configuration.GetContextFactory().Create();
             _transactionManager = _context.BeginTransaction();
-            _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
+            _interceptors = configuration.GetInterceptors();
         }
 
         #endregion

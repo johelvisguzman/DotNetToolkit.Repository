@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Factories
 {
+    using Configuration;
     using Configuration.Interceptors;
     using System;
     using System.Collections.Generic;
@@ -24,27 +25,25 @@
         /// Initializes a new instance of the <see cref="RepositoryFactory" /> class.
         /// </summary>
         /// <param name="factory">The repository context factory.</param>
-        public RepositoryFactory(IRepositoryContextFactory factory) : this(factory, (IEnumerable<IRepositoryInterceptor>)null) { }
+        public RepositoryFactory(IRepositoryContextFactory factory) : this(new RepositoryConfigurationOptions(factory)) { }
 
+#if !NETSTANDARD
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryFactory" /> class and uses the data from the App.config file to configure the repositories.
+        /// </summary>
+        public RepositoryFactory() : this(Internal.ConfigFile.ConfigurationHelper.GetRequiredConfigurationOptions()) { }
+#endif
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryFactory" /> class.
         /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        /// <param name="interceptor">The interceptor.</param>
-        public RepositoryFactory(IRepositoryContextFactory factory, IRepositoryInterceptor interceptor) : this(factory, new List<IRepositoryInterceptor> { interceptor }) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryFactory" /> class.
-        /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        public RepositoryFactory(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors)
+        /// <param name="configuration">The repository configuration.</param>
+        internal RepositoryFactory(IRepositoryConfigurationOptions configuration)
         {
-            if (factory == null)
-                throw new ArgumentNullException(nameof(factory));
+            if (configuration == null)
+                throw new ArgumentNullException(nameof(configuration));
 
-            _factory = factory;
-            _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
+            _factory = configuration.GetContextFactory();
+            _interceptors = configuration.GetInterceptors();
         }
 
         #endregion

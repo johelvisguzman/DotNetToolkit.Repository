@@ -1,9 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.Factories
 {
-    using Configuration.Interceptors;
+    using Configuration;
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
+    using System.Reflection;
     using Transactions;
 
     /// <summary>
@@ -14,8 +13,7 @@
     {
         #region Fields
 
-        private readonly IRepositoryContextFactory _factory;
-        private readonly IEnumerable<IRepositoryInterceptor> _interceptors;
+        private readonly IRepositoryConfigurationOptions _configuration;
 
         #endregion
 
@@ -25,27 +23,24 @@
         /// Initializes a new instance of the <see cref="UnitOfWorkFactory" /> class.
         /// </summary>
         /// <param name="factory">The repository context factory.</param>
-        public UnitOfWorkFactory(IRepositoryContextFactory factory) : this(factory, (IEnumerable<IRepositoryInterceptor>)null) { }
+        public UnitOfWorkFactory(IRepositoryContextFactory factory) : this(new RepositoryConfigurationOptions(factory)) { }
 
+#if !NETSTANDARD
         /// <summary>
-        /// Initializes a new instance of the <see cref="UnitOfWorkFactory" /> class.
+        /// Initializes a new instance of the <see cref="UnitOfWorkFactory" /> class and uses the data from the App.config file to configure the repositories.
         /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        /// <param name="interceptor">The interceptor.</param>
-        public UnitOfWorkFactory(IRepositoryContextFactory factory, IRepositoryInterceptor interceptor) : this(factory, new List<IRepositoryInterceptor> { interceptor }) { }
-
+        public UnitOfWorkFactory() : this(Internal.ConfigFile.ConfigurationHelper.GetRequiredConfigurationOptions()) { }
+#endif
         /// <summary>
-        /// Initializes a new instance of the <see cref="UnitOfWorkFactory" /> class.
+        /// Initializes a new instance of the <see cref="RepositoryFactory" /> class.
         /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        public UnitOfWorkFactory(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors)
+        /// <param name="configuration">The repository configuration.</param>
+        internal UnitOfWorkFactory(IRepositoryConfigurationOptions configuration)
         {
-            if (factory == null)
-                throw new ArgumentNullException(nameof(factory));
+            if (configuration == null)
+                throw new ArgumentNullException(nameof(configuration));
 
-            _factory = factory;
-            _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
+            _configuration = configuration;
         }
 
         #endregion
@@ -68,14 +63,9 @@
         /// <returns>The new repository.</returns>
         public T CreateInstance<T>() where T : class
         {
-            var args = new List<object> { _factory };
-
-            if (_interceptors.Any())
-                args.Add(_interceptors);
-
             try
             {
-                return (T)Activator.CreateInstance(typeof(T), args.ToArray());
+                return (T)Activator.CreateInstance(typeof(T), BindingFlags.NonPublic | BindingFlags.Instance, null, new object[] { _configuration }, null);
             }
             catch (Exception ex)
             {

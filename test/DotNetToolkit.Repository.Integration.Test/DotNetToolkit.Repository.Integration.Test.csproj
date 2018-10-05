@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\..\build\common.props" />
 
@@ -17,8 +17,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="EntityFramework.SqlServerCompact" Version="6.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="1.1.5" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.1.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
     <PackageReference Include="Moq" Version="4.5.28" />
     <PackageReference Include="xunit" Version="2.3.1" />
@@ -32,6 +39,7 @@
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.EntityFrameworkCore\DotNetToolkit.Repository.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.EntityFramework\DotNetToolkit.Repository.EntityFramework.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Json\DotNetToolkit.Repository.Json.csproj" />
+    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Microsoft.DependencyInjection\DotNetToolkit.Repository.Microsoft.DependencyInjection.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Xml\DotNetToolkit.Repository.Xml.csproj" />
   </ItemGroup>
 
