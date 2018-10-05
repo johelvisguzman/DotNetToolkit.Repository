@@ -2,6 +2,7 @@
 {
     using Configuration;
     using Configuration.Conventions;
+    using Extensions;
     using Helpers;
     using Properties;
     using Queries;

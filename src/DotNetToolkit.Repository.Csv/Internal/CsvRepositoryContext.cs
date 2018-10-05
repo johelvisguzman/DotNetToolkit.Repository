@@ -3,6 +3,7 @@
     using Configuration;
     using Configuration.Conventions;
     using CsvHelper;
+    using Extensions;
     using Helpers;
     using Properties;
     using Queries;

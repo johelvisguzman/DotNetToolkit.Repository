@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Helpers
+﻿namespace DotNetToolkit.Repository.Extensions
 {
     using System;
     using System.Collections;
@@ -6,7 +6,7 @@
     using System.Linq;
     using System.Reflection;
 
-    internal static class TypeHelper
+    internal static class TypeExtensions
     {
         /// <summary>
         /// Gets the default value of the specified type.
@@ -54,7 +54,7 @@
         {
             return interfaceType.IsAssignableFrom(type) ||
                    type.IsGenericType(interfaceType) ||
-                   type.GetTypeInfo().ImplementedInterfaces.Any(@interface => @interface.IsGenericType(interfaceType));
+                   type.GetTypeInfo().ImplementedInterfaces.Any(@interface => IsGenericType(@interface, interfaceType));
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Configuration
 {
     using Conventions;
+    using Extensions;
     using Helpers;
     using Properties;
     using Queries;

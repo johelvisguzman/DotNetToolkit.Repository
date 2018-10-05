@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal.Schema
 {
     using Configuration.Conventions;
-    using Helpers;
+    using Extensions;
     using Properties;
     using System;
     using System.Collections.Generic;

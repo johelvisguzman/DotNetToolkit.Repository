@@ -1,10 +1,10 @@
-﻿namespace DotNetToolkit.Repository.Helpers
+﻿namespace DotNetToolkit.Repository.Extensions
 {
+    using System;
     using Configuration;
     using Properties;
-    using System;
 
-    internal static class RepositoryContextHelper
+    internal static class RepositoryContextExtensions
     {
         public static IRepositoryContextAsync AsAsync(this IRepositoryContext source)
         {

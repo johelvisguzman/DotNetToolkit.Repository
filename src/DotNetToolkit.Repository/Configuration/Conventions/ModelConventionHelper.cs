@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Conventions
 {
+    using Extensions;
     using Helpers;
     using System;
     using System.ComponentModel.DataAnnotations.Schema;
