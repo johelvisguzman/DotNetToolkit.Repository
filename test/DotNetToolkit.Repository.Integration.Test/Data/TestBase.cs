@@ -1,15 +1,11 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Data
 {
-    using Csv;
     using EntityFrameworkCore;
     using Factories;
-    using Json;
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-    using Xml;
     using Xunit;
 
     public abstract class TestBase
@@ -63,9 +59,6 @@
 
                     // the in-memory context will not support transactions currently
                     if (typeof(InMemoryRepositoryContextFactory).IsAssignableFrom(type) ||
-                        typeof(CsvRepositoryContextFactory).IsAssignableFrom(type) ||
-                        typeof(JsonRepositoryContextFactory).IsAssignableFrom(type) ||
-                        typeof(XmlRepositoryContextFactory).IsAssignableFrom(type) ||
                         typeof(EfCoreRepositoryContextFactory<TestEfCoreDbContext>).IsAssignableFrom(type))
                         return;
 
@@ -80,10 +73,7 @@
                 TestAdoNetContextFactory.Create(),
                 TestEfCoreDbContextFactory.Create(),
                 TestEfDbContextFactory.Create(),
-                new InMemoryRepositoryContextFactory(Guid.NewGuid().ToString()),
-                new CsvRepositoryContextFactory(Path.GetTempPath() + Guid.NewGuid().ToString("N")),
-                new JsonRepositoryContextFactory(Path.GetTempPath() + Guid.NewGuid().ToString("N")),
-                new XmlRepositoryContextFactory(Path.GetTempPath() + Guid.NewGuid().ToString("N"))
+                new InMemoryRepositoryContextFactory(Guid.NewGuid().ToString())
             };
         }
     }

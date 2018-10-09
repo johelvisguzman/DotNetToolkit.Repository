@@ -35,12 +35,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.AdoNet\DotNetToolkit.Repository.AdoNet.csproj" />
-    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Csv\DotNetToolkit.Repository.Csv.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.EntityFrameworkCore\DotNetToolkit.Repository.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.EntityFramework\DotNetToolkit.Repository.EntityFramework.csproj" />
-    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Json\DotNetToolkit.Repository.Json.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Microsoft.DependencyInjection\DotNetToolkit.Repository.Microsoft.DependencyInjection.csproj" />
-    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Xml\DotNetToolkit.Repository.Xml.csproj" />
   </ItemGroup>
 
 </Project>
