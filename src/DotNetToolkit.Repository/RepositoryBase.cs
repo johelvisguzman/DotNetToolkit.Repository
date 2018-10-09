@@ -659,8 +659,6 @@
         {
             var queryResult = InterceptError<QueryResult<T>>(action);
 
-            Intercept(x => x.QueryExecuted<TEntity, T>(queryResult));
-
             return queryResult.HasResult ? queryResult.Result : default(T);
         }
 
@@ -672,8 +670,6 @@
         protected async Task<T> InterceptQueryResultAsync<T>(Func<Task<QueryResult<T>>> action)
         {
             var queryResult = await InterceptErrorAsync<QueryResult<T>>(action);
-
-            Intercept(x => x.QueryExecuted<TEntity, T>(queryResult));
 
             return queryResult.HasResult ? queryResult.Result : default(T);
         }
