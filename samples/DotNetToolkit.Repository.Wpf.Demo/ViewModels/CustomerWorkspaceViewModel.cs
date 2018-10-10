@@ -5,6 +5,7 @@
     using DotNetToolkit.Wpf.Mvvm;
     using Factories;
     using Infrastructure;
+    using InMemory;
     using Models;
     using System;
     using System.Collections.ObjectModel;
