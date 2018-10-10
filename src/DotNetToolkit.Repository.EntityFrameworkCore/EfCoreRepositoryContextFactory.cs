@@ -42,6 +42,18 @@
             _contextOptions = optionsBuilder.Options;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EfCoreRepositoryContextFactory{TDbContext}"/> class.
+        /// </summary>
+        /// <param name="contextOptions">The context options.</param>
+        public EfCoreRepositoryContextFactory(DbContextOptions contextOptions)
+        {
+            if (contextOptions == null)
+                throw new ArgumentNullException(nameof(contextOptions));
+
+            _contextOptions = contextOptions;
+        }
+
         #endregion
 
         #region Implementation of IRepositoryContextFactory
