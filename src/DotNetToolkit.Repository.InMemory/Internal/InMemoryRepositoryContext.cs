@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Internal
+﻿namespace DotNetToolkit.Repository.InMemory.Internal
 {
     using Configuration;
     using Configuration.Conventions;

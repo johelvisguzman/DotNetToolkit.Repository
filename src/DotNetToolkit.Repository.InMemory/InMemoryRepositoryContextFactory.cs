@@ -1,6 +1,7 @@
-﻿namespace DotNetToolkit.Repository.Factories
+﻿namespace DotNetToolkit.Repository.InMemory
 {
     using Configuration;
+    using Factories;
     using Internal;
     using System;
 
