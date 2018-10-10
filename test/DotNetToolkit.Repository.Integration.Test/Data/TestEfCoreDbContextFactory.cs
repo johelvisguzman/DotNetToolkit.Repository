@@ -8,11 +8,10 @@
     {
         public static EfCoreRepositoryContextFactory<TestEfCoreDbContext> Create()
         {
-            var contextOptionsBuilder = new DbContextOptionsBuilder<TestEfCoreDbContext>();
-
-            contextOptionsBuilder.UseInMemoryDatabase(Guid.NewGuid().ToString());
-
-            return new EfCoreRepositoryContextFactory<TestEfCoreDbContext>(contextOptionsBuilder.Options);
+            return new EfCoreRepositoryContextFactory<TestEfCoreDbContext>(options =>
+            {
+                options.UseInMemoryDatabase(Guid.NewGuid().ToString());
+            });
         }
     }
 }
