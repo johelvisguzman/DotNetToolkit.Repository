@@ -68,9 +68,7 @@
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
         public void Delete(TKey1 key1, TKey2 key2, TKey3 key3)
         {
-            var entity = Find(key1, key2, key3);
-
-            if (entity == null)
+            if (!TryDelete(key1, key2, key3))
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3));
 
@@ -78,8 +76,25 @@
 
                 throw ex;
             }
+        }
+
+        /// <summary>
+        /// Deletes an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <returns><c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
+        public bool TryDelete(TKey1 key1, TKey2 key2, TKey3 key3)
+        {
+            var entity = Find(key1, key2, key3);
+
+            if (entity == null)
+                return false;
 
             Delete(entity);
+
+            return true;
         }
 
         /// <summary>
@@ -169,11 +184,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
-            InterceptError(cancellationToken.ThrowIfCancellationRequested);
-
-            var entity = await FindAsync(key1, key2, key3, cancellationToken);
-
-            if (entity == null)
+            if (!await TryDeleteAsync(key1, key2, key3, cancellationToken))
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3));
 
@@ -181,8 +192,28 @@
 
                 throw ex;
             }
+        }
+
+        /// <summary>
+        /// Asynchronously deletes an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
+        public async Task<bool> TryDeleteAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
+        {
+            InterceptError(cancellationToken.ThrowIfCancellationRequested);
+
+            var entity = await FindAsync(key1, key2, key3, cancellationToken);
+
+            if (entity == null)
+                return false;
 
             await DeleteAsync(entity, cancellationToken);
+
+            return true;
         }
 
         #endregion
@@ -235,9 +266,7 @@
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         public void Delete(TKey1 key1, TKey2 key2)
         {
-            var entity = Find(key1, key2);
-
-            if (entity == null)
+            if (!TryDelete(key1, key2))
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2));
 
@@ -245,8 +274,24 @@
 
                 throw ex;
             }
+        }
+
+        /// <summary>
+        /// Deletes an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <returns><c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
+        public bool TryDelete(TKey1 key1, TKey2 key2)
+        {
+            var entity = Find(key1, key2);
+
+            if (entity == null)
+                return false;
 
             Delete(entity);
+
+            return true;
         }
 
         /// <summary>
@@ -329,11 +374,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
-            InterceptError(cancellationToken.ThrowIfCancellationRequested);
-
-            var entity = await FindAsync(key1, key2, cancellationToken);
-
-            if (entity == null)
+            if (!await TryDeleteAsync(key1, key2, cancellationToken))
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2));
 
@@ -341,8 +382,27 @@
 
                 throw ex;
             }
+        }
+
+        /// <summary>
+        /// Asynchronously deletes an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
+        public async Task<bool> TryDeleteAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
+        {
+            InterceptError(cancellationToken.ThrowIfCancellationRequested);
+
+            var entity = await FindAsync(key1, key2, cancellationToken);
+
+            if (entity == null)
+                return false;
 
             await DeleteAsync(entity, cancellationToken);
+
+            return true;
         }
 
         #endregion
@@ -394,9 +454,7 @@
         /// <param name="key">The value of the primary key used to match entities against.</param>
         public void Delete(TKey key)
         {
-            var entity = Find(key);
-
-            if (entity == null)
+            if (!TryDelete(key))
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
 
@@ -404,8 +462,23 @@
 
                 throw ex;
             }
+        }
+
+        /// <summary>
+        /// Deletes an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns><c>true</c> is able to successfully delete an entity with the given primary key; otherwise, <c>false</c>.</returns>
+        public bool TryDelete(TKey key)
+        {
+            var entity = Find(key);
+
+            if (entity == null)
+                return false;
 
             Delete(entity);
+
+            return true;
         }
 
         /// <summary>
@@ -481,11 +554,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
-            InterceptError(cancellationToken.ThrowIfCancellationRequested);
-
-            var entity = await FindAsync(key, cancellationToken);
-
-            if (entity == null)
+            if (!await TryDeleteAsync(key, cancellationToken))
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
 
@@ -493,8 +562,26 @@
 
                 throw ex;
             }
+        }
+
+        /// <summary>
+        ///  Asynchronously deletes an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given primary key; otherwise, <c>false</c>.</returns>
+        public async Task<bool> TryDeleteAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
+        {
+            InterceptError(cancellationToken.ThrowIfCancellationRequested);
+
+            var entity = await FindAsync(key, cancellationToken);
+
+            if (entity == null)
+                return false;
 
             await DeleteAsync(entity, cancellationToken);
+
+            return true;
         }
 
         #endregion

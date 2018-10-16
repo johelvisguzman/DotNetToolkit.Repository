@@ -58,6 +58,18 @@
         }
 
         [Fact]
+        public void DeleteWithId()
+        {
+            ForAllRepositoryFactories(TestDeleteWithId);
+        }
+
+        [Fact]
+        public void TryDelete()
+        {
+            ForAllRepositoryFactories(TestTryDelete);
+        }
+
+        [Fact]
         public void DeleteRange()
         {
             ForAllRepositoryFactories(TestDeleteRange);
@@ -219,6 +231,18 @@
         public void DeleteAsync()
         {
             ForAllRepositoryFactoriesAsync(TestDeleteAsync);
+        }
+
+        [Fact]
+        public void DeleteWithIdAsync()
+        {
+            ForAllRepositoryFactoriesAsync(TestDeleteWithIdAsync);
+        }
+
+        [Fact]
+        public void TryDeleteAsync()
+        {
+            ForAllRepositoryFactoriesAsync(TestTryDeleteAsync);
         }
 
         [Fact]
@@ -477,6 +501,42 @@
             repo.Delete(entityInDb);
 
             Assert.False(repo.Exists(x => x.Name.Equals(name)));
+        }
+
+        private static void TestDeleteWithId(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<Customer>();
+
+            const int id = 1;
+
+            var entity = new Customer { Id = id };
+
+            Assert.False(repo.Exists(id));
+
+            var ex = Assert.Throws<InvalidOperationException>(() => repo.Delete(id));
+            Assert.Equal($"No entity found in the repository with the '{id}' key.", ex.Message);
+
+            repo.Add(entity);
+
+            Assert.True(repo.Exists(id));
+
+            repo.Delete(id);
+
+            Assert.False(repo.Exists(id));
+        }
+        private static void TestTryDelete(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<Customer>();
+
+            const int id = 1;
+
+            var entity = new Customer { Id = id };
+
+            Assert.False(repo.TryDelete(id));
+
+            repo.Add(entity);
+
+            Assert.True(repo.TryDelete(id));
         }
 
         private static void TestDeleteRange(IRepositoryFactory repoFactory)
@@ -1526,6 +1586,43 @@
             await repo.DeleteAsync(entityInDb);
 
             Assert.False(await repo.ExistsAsync(x => x.Name.Equals(name)));
+        }
+
+        private static async Task TestDeleteWithIdAsync(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<Customer>();
+
+            const int id = 1;
+
+            var entity = new Customer { Id = id };
+
+            Assert.False(await repo.ExistsAsync(id));
+
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => repo.DeleteAsync(id));
+            Assert.Equal($"No entity found in the repository with the '{id}' key.", ex.Message);
+
+            await repo.AddAsync(entity);
+
+            Assert.True(await repo.ExistsAsync(id));
+
+            await repo.DeleteAsync(id);
+
+            Assert.False(await repo.ExistsAsync(id));
+        }
+
+        private static async Task TestTryDeleteAsync(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<Customer>();
+
+            const int id = 1;
+
+            var entity = new Customer { Id = id };
+
+            Assert.False(await repo.TryDeleteAsync(id));
+
+            await repo.AddAsync(entity);
+
+            Assert.True(await repo.TryDeleteAsync(id));
         }
 
         private static async Task TestDeleteRangeAsync(IRepositoryFactory repoFactory)

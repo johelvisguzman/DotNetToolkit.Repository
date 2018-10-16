@@ -31,6 +31,15 @@
         void Delete(TKey1 key1, TKey2 key2, TKey3 key3);
 
         /// <summary>
+        /// Deletes an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <returns><c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
+        bool TryDelete(TKey1 key1, TKey2 key2, TKey3 key3);
+
+        /// <summary>
         /// Asynchronously deletes an entity with the given composite primary key values in the repository.
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
@@ -39,6 +48,16 @@
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         Task DeleteAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken());
+
+        /// <summary>
+        /// Asynchronously deletes an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
+        Task<bool> TryDeleteAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken());
     }
 
     /// <summary>
@@ -66,6 +85,14 @@
         void Delete(TKey1 key1, TKey2 key2);
 
         /// <summary>
+        /// Deletes an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <returns><c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
+        bool TryDelete(TKey1 key1, TKey2 key2);
+
+        /// <summary>
         /// Asynchronously deletes an entity with the given composite primary key values in the repository.
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
@@ -73,6 +100,15 @@
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         Task DeleteAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken());
+
+        /// <summary>
+        /// Asynchronously deletes an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
+        Task<bool> TryDeleteAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken());
     }
 
     /// <summary>
@@ -98,12 +134,27 @@
         void Delete(TKey key);
 
         /// <summary>
+        /// Deletes an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns><c>true</c> is able to successfully delete an entity with the given primary key; otherwise, <c>false</c>.</returns>
+        bool TryDelete(TKey key);
+
+        /// <summary>
         /// Asynchronously deletes an entity with the given primary key value in the repository.
         /// </summary>
         /// <param name="key">The value of the primary key used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         Task DeleteAsync(TKey key, CancellationToken cancellationToken = new CancellationToken());
+
+        /// <summary>
+        ///  Asynchronously deletes an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given primary key; otherwise, <c>false</c>.</returns>
+        Task<bool> TryDeleteAsync(TKey key, CancellationToken cancellationToken = new CancellationToken());
     }
 
     /// <summary>
