@@ -1,9 +1,6 @@
 ﻿namespace DotNetToolkit.Repository
 {
-    using Configuration;
-    using Configuration.Interceptors;
-    using Factories;
-    using System.Collections.Generic;
+    using Configuration.Options;
 
     /// <summary>
     /// An implementation of <see cref="IRepository{TEntity, TKey1, TKey2, TKey3}" />.
@@ -18,30 +15,10 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Repository{TEntity, TKey1, TKey2, TKey3}" /> class.
+        /// Initializes a new instance of the <see cref="Repository{TEntity, TKey1, TKey2, TKey3}"/> class.
         /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        public Repository(IRepositoryContextFactory factory) : this(factory, (IEnumerable<IRepositoryInterceptor>)null) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Repository{TEntity, TKey1, TKey2, TKey3}" /> class.
-        /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        public Repository(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors) : base(factory, interceptors) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Repository{TEntity, TKey1, TKey2, TKey3}" /> class.
-        /// </summary>
-        /// <param name="context">The repository context.</param>
-        internal Repository(IRepositoryContext context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Repository{TEntity, TKey1, TKey2, TKey3}" /> class.
-        /// </summary>
-        /// <param name="context">The repository context.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        internal Repository(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+        /// <param name="options">The repository options.</param>
+        public Repository(RepositoryOptions options) : base(options) { }
 
         #endregion
     }
@@ -58,30 +35,10 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Repository{TEntity, TKey1, TKey2}" /> class.
+        /// Initializes a new instance of the <see cref="Repository{TEntity, TKey1, TKey2}"/> class.
         /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        public Repository(IRepositoryContextFactory factory) : this(factory, (IEnumerable<IRepositoryInterceptor>)null) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Repository{TEntity, TKey1, TKey2}" /> class.
-        /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        public Repository(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors) : base(factory, interceptors) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Repository{TEntity, TKey1, TKey2}" /> class.
-        /// </summary>
-        /// <param name="context">The repository context.</param>
-        internal Repository(IRepositoryContext context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Repository{TEntity, TKey1, TKey2}" /> class.
-        /// </summary>
-        /// <param name="context">The repository context.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        internal Repository(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+        /// <param name="options">The repository options.</param>
+        public Repository(RepositoryOptions options) : base(options) { }
 
         #endregion
     }
@@ -97,30 +54,10 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Repository{TEntity, TKey}" /> class.
+        /// Initializes a new instance of the <see cref="Repository{TEntity, TKey}"/> class.
         /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        public Repository(IRepositoryContextFactory factory) : this(factory, (IEnumerable<IRepositoryInterceptor>)null) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Repository{TEntity, TKey}" /> class.
-        /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        public Repository(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors) : base(factory, interceptors) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Repository{TEntity, TKey}" /> class.
-        /// </summary>
-        /// <param name="context">The repository context.</param>
-        internal Repository(IRepositoryContext context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Repository{TEntity, TKey}" /> class.
-        /// </summary>
-        /// <param name="context">The repository context.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        internal Repository(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+        /// <param name="options">The repository options.</param>
+        public Repository(RepositoryOptions options) : base(options) { }
 
         #endregion
     }
@@ -135,30 +72,10 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Repository{TEntity}" /> class.
+        /// Initializes a new instance of the <see cref="Repository{TEntity}"/> class.
         /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        public Repository(IRepositoryContextFactory factory) : this(factory, (IEnumerable<IRepositoryInterceptor>)null) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Repository{TEntity}" /> class.
-        /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        public Repository(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors) : base(factory, interceptors) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Repository{TEntity}" /> class.
-        /// </summary>
-        /// <param name="context">The repository context.</param>
-        internal Repository(IRepositoryContext context) : this(context, (IEnumerable<IRepositoryInterceptor>)null) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Repository{TEntity}" /> class.
-        /// </summary>
-        /// <param name="context">The repository context.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        internal Repository(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+        /// <param name="options">The repository options.</param>
+        public Repository(RepositoryOptions options) : base(options) { }
 
         #endregion
     }

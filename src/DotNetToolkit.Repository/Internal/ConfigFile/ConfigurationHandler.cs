@@ -1,9 +1,10 @@
-﻿namespace DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.Internal
+﻿#if NETSTANDARD2_0
+
+namespace DotNetToolkit.Repository.Internal.ConfigFile
 {
     using Configuration.Interceptors;
     using Factories;
-    using global::Microsoft.Extensions.Configuration;
-    using global::Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Configuration;
     using System;
     using System.Collections.Generic;
     using System.Globalization;
@@ -14,7 +15,6 @@
         #region Fields
 
         private readonly IConfigurationSection _root;
-        private readonly IServiceCollection _services;
 
         private const string RepositorySectionKey = "repository";
         private const string DefaultContextFactorySectionKey = "defaultContextFactory";
@@ -29,27 +29,22 @@
 
         #region Constructors
 
-        public ConfigurationHandler(IConfiguration config, IServiceCollection services)
+        public ConfigurationHandler(IConfiguration config)
         {
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
-
-            if (services == null)
-                throw new ArgumentNullException(nameof(services));
 
             _root = config.GetSection(RepositorySectionKey);
 
             if (_root == null)
                 throw new InvalidOperationException("Unable to find a configuration for the repositories.");
-
-            _services = services;
         }
 
         #endregion
 
         #region Public Methods
 
-        public ConfigurationHandler AddContextFactory()
+        public IRepositoryContextFactory GetDefaultContextFactory()
         {
             var defaultContextFactorySection = _root.GetSection(DefaultContextFactorySectionKey);
 
@@ -76,74 +71,80 @@
 
                 var contextFactoryType = Type.GetType(defaultContextFactorySection[TypeKey], throwOnError: true);
 
-                AddScopedService<IRepositoryContextFactory>(contextFactoryType, args.ToArray());
+                return CreateInstance<IRepositoryContextFactory>(contextFactoryType, args.ToArray());
             }
 
-            return this;
+            return null;
         }
 
-        public ConfigurationHandler AddInterceptors()
+        public IEnumerable<IRepositoryInterceptor> GetInterceptors()
         {
+            var interceptors = new List<IRepositoryInterceptor>();
             var interceptorCollectionSection = _root.GetSection(InterceptorCollectionSectionKey);
 
             if (interceptorCollectionSection != null)
             {
+                var defaultFactory = RepositoryInterceptorProvider.GetDefaultFactory();
+
                 foreach (var interceptorCollectionSectionChildren in interceptorCollectionSection.GetChildren())
                 {
                     var interceptorSection = interceptorCollectionSectionChildren.GetSection(InterceptorSectionKey);
 
                     if (interceptorSection != null)
                     {
-                        var parameterCollectionSection = interceptorSection.GetSection(ParameterCollectionSectionKey);
-                        var args = new List<object>();
-
-                        if (parameterCollectionSection != null)
-                        {
-                            foreach (var parameterCollectionSectionChildren in parameterCollectionSection.GetChildren())
-                            {
-                                var parameterSection = parameterCollectionSectionChildren.GetSection(ParameterSectionKey);
-
-                                if (parameterSection != null)
-                                {
-                                    var parameterType = Type.GetType(parameterSection[TypeKey], throwOnError: true);
-                                    var parameterValue = Convert.ChangeType(parameterSection[ValueKey], parameterType, CultureInfo.InvariantCulture);
-
-                                    args.Add(parameterValue);
-                                }
-                            }
-                        }
-
                         var interceptorType = Type.GetType(interceptorSection[TypeKey], throwOnError: true);
 
-                        AddScopedService<IRepositoryInterceptor>(interceptorType, args.ToArray());
+                        if (defaultFactory != null)
+                        {
+                            interceptors.Add((IRepositoryInterceptor)defaultFactory(interceptorType));
+                        }
+                        else
+                        {
+                            var parameterCollectionSection = interceptorSection.GetSection(ParameterCollectionSectionKey);
+                            var args = new List<object>();
+
+                            if (parameterCollectionSection != null)
+                            {
+                                foreach (var parameterCollectionSectionChildren in parameterCollectionSection.GetChildren())
+                                {
+                                    var parameterSection = parameterCollectionSectionChildren.GetSection(ParameterSectionKey);
+
+                                    if (parameterSection != null)
+                                    {
+                                        var parameterType = Type.GetType(parameterSection[TypeKey], throwOnError: true);
+                                        var parameterValue = Convert.ChangeType(parameterSection[ValueKey], parameterType, CultureInfo.InvariantCulture);
+
+                                        args.Add(parameterValue);
+                                    }
+                                }
+                            }
+
+                            interceptors.Add(CreateInstance<IRepositoryInterceptor>(interceptorType, args.ToArray()));
+                        }
                     }
                 }
             }
 
-            return this;
+            return interceptors;
         }
 
         #endregion
 
         #region Private Methods
 
-        private void AddScopedService<TService>(Type implementationType, params object[] args)
+        private TService CreateInstance<TService>(Type implementationType, object[] args)
         {
             if (implementationType == null)
                 throw new ArgumentNullException(nameof(implementationType));
 
             if (args.Any())
-            {
-                _services.AddScoped(typeof(TService), sp => Activator.CreateInstance(implementationType, args));
-                _services.AddScoped(implementationType, sp => Activator.CreateInstance(implementationType, args));
-            }
-            else
-            {
-                _services.AddScoped(typeof(TService), implementationType);
-                _services.AddScoped(implementationType);
-            }
+                return (TService)Activator.CreateInstance(implementationType, args);
+
+            return (TService)Activator.CreateInstance(implementationType);
         }
 
         #endregion
     }
 }
+
+#endif

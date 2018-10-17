@@ -1,8 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Factories
 {
-    using Configuration;
+    using Configuration.Options;
     using System;
-    using System.Reflection;
     using Transactions;
 
     /// <summary>
@@ -13,7 +12,7 @@
     {
         #region Fields
 
-        private readonly IRepositoryConfigurationOptions _configuration;
+        private readonly RepositoryOptions _options;
 
         #endregion
 
@@ -22,25 +21,29 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="UnitOfWorkFactory" /> class.
         /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        public UnitOfWorkFactory(IRepositoryContextFactory factory) : this(new RepositoryConfigurationOptions(factory)) { }
-
-#if !NETSTANDARD
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UnitOfWorkFactory" /> class and uses the data from the App.config file to configure the repositories.
-        /// </summary>
-        public UnitOfWorkFactory() : this(Internal.ConfigFile.ConfigurationHelper.GetRequiredConfigurationOptions()) { }
-#endif
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryFactory" /> class.
-        /// </summary>
-        /// <param name="configuration">The repository configuration.</param>
-        internal UnitOfWorkFactory(IRepositoryConfigurationOptions configuration)
+        /// <param name="optionsAction">A builder action used to create or modify options for this unit of work factory.</param>
+        public UnitOfWorkFactory(Action<RepositoryOptionsBuilder> optionsAction)
         {
-            if (configuration == null)
-                throw new ArgumentNullException(nameof(configuration));
+            if (optionsAction == null)
+                throw new ArgumentNullException(nameof(optionsAction));
 
-            _configuration = configuration;
+            var optionsBuilder = new RepositoryOptionsBuilder();
+
+            optionsAction(optionsBuilder);
+
+            _options = optionsBuilder.Options;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UnitOfWorkFactory" /> class.
+        /// </summary>
+        /// <param name="options">The repository options.</param>
+        public UnitOfWorkFactory(RepositoryOptions options)
+        {
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
+
+            _options = options;
         }
 
         #endregion
@@ -63,14 +66,7 @@
         /// <returns>The new repository.</returns>
         public T CreateInstance<T>() where T : class
         {
-            try
-            {
-                return (T)Activator.CreateInstance(typeof(T), BindingFlags.NonPublic | BindingFlags.Instance, null, new object[] { _configuration }, null);
-            }
-            catch (Exception ex)
-            {
-                throw ex.InnerException ?? ex;
-            }
+            return (T)Activator.CreateInstance(typeof(T), new object[] { _options });
         }
 
         #endregion

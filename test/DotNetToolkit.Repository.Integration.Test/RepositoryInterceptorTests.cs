@@ -1,12 +1,13 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
     using Configuration.Interceptors;
+    using Configuration.Options;
     using Data;
     using InMemory;
     using Moq;
-    using System.Collections.Generic;
     using Xunit;
 
+    [Collection("Sequential")]
     public class RepositoryInterceptorTests
     {
         [Fact]
@@ -14,9 +15,13 @@
         {
             var entity = new Customer();
             var mock = new Mock<IRepositoryInterceptor>();
-            var interceptors = new List<IRepositoryInterceptor> { mock.Object };
-            var contextFactory = new InMemoryRepositoryContextFactory();
-            var repo = new Repository<Customer>(contextFactory.Create(), interceptors);
+
+            var options = new RepositoryOptionsBuilder()
+                .UseInMemoryDatabase()
+                .UseInterceptor(mock.Object)
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             mock.Verify(x => x.AddExecuting(It.IsAny<Customer>()), Times.Never);
             mock.Verify(x => x.AddExecuted(It.IsAny<Customer>()), Times.Never);
@@ -32,9 +37,13 @@
         {
             var entity = new Customer();
             var mock = new Mock<IRepositoryInterceptor>();
-            var interceptors = new List<IRepositoryInterceptor> { mock.Object };
-            var contextFactory = new InMemoryRepositoryContextFactory();
-            var repo = new Repository<Customer>(contextFactory.Create(), interceptors);
+
+            var options = new RepositoryOptionsBuilder()
+                .UseInMemoryDatabase()
+                .UseInterceptor(mock.Object)
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             repo.Add(entity);
 
@@ -52,9 +61,13 @@
         {
             var entity = new Customer();
             var mock = new Mock<IRepositoryInterceptor>();
-            var interceptors = new List<IRepositoryInterceptor> { mock.Object };
-            var contextFactory = new InMemoryRepositoryContextFactory();
-            var repo = new Repository<Customer>(contextFactory.Create(), interceptors);
+
+            var options = new RepositoryOptionsBuilder()
+                .UseInMemoryDatabase()
+                .UseInterceptor(mock.Object)
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             repo.Add(entity);
 
@@ -72,10 +85,13 @@
         {
             const string user = "Random User";
 
-            var interceptors = new List<IRepositoryInterceptor> { new TestRepositoryTimeStampInterceptor(user) };
-            var contextFactory = new InMemoryRepositoryContextFactory();
-            var repo = new Repository<CustomerWithTimeStamp>(contextFactory.Create(), interceptors);
             var entity = new CustomerWithTimeStamp();
+            var options = new RepositoryOptionsBuilder()
+                .UseInMemoryDatabase()
+                .UseInterceptor(new TestRepositoryTimeStampInterceptor(user))
+                .Options;
+
+            var repo = new Repository<CustomerWithTimeStamp>(options);
 
             Assert.Null(entity.CreateTime);
             Assert.Null(entity.ModTime);

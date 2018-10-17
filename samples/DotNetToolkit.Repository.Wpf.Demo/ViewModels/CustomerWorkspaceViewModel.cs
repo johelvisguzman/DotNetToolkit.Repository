@@ -47,7 +47,7 @@
             DisplayName = "Customers";
             _navigator = NavigationController.Instance;
 
-            _repositoryFactory = new RepositoryFactory(new InMemoryRepositoryContextFactory());
+            _repositoryFactory = new RepositoryFactory(options => options.UseInMemoryDatabase());
         }
 
         #endregion
