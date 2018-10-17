@@ -82,6 +82,12 @@
         }
 
         [Fact]
+        public void FindWithId()
+        {
+            ForAllRepositoryFactories(TestFindWithId);
+        }
+
+        [Fact]
         public void FindWithSortingOptionsAscending()
         {
             ForAllRepositoryFactories(TestFindWithSortingOptionsAscending);
@@ -139,6 +145,12 @@
         public void Exists()
         {
             ForAllRepositoryFactories(TestExists);
+        }
+
+        [Fact]
+        public void ExistsWithId()
+        {
+            ForAllRepositoryFactories(TestExistsWithId);
         }
 
         [Fact]
@@ -258,6 +270,12 @@
         }
 
         [Fact]
+        public void FindWithIdAsync()
+        {
+            ForAllRepositoryFactoriesAsync(TestFindWithIdAsync);
+        }
+
+        [Fact]
         public void FindWithSortingOptionsAscendingAsync()
         {
             ForAllRepositoryFactoriesAsync(TestFindWithSortingOptionsAscendingAsync);
@@ -315,6 +333,12 @@
         public void ExistsAsync()
         {
             ForAllRepositoryFactoriesAsync(TestExistsAsync);
+        }
+
+        [Fact]
+        public void ExistsWithIdAsync()
+        {
+            ForAllRepositoryFactoriesAsync(TestExistsWithIdAsync);
         }
 
         [Fact]
@@ -582,6 +606,21 @@
             Assert.NotNull(repo.Find(options));
             Assert.Equal(name, repo.Find<string>(x => x.Name.Equals(name), x => x.Name));
             Assert.Equal(name, repo.Find<string>(options, x => x.Name));
+        }
+
+        private static void TestFindWithId(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<Customer>();
+
+            const int id = 1;
+
+            var entity = new Customer { Id = id };
+
+            Assert.Null(repo.Find(id));
+
+            repo.Add(entity);
+
+            Assert.NotNull(repo.Find(id));
         }
 
         private static void TestFindWithSortingOptionsDescending(IRepositoryFactory repoFactory)
@@ -920,6 +959,21 @@
 
             Assert.True(repo.Exists(x => x.Name.Equals(name)));
             Assert.True(repo.Exists(options));
+        }
+
+        private static void TestExistsWithId(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<Customer>();
+
+            const int id = 1;
+
+            var entity = new Customer { Id = id };
+
+            Assert.False(repo.Exists(id));
+
+            repo.Add(entity);
+
+            Assert.True(repo.Exists(id));
         }
 
         private static void TestToDictionary(IRepositoryFactory repoFactory)
@@ -1670,6 +1724,21 @@
             Assert.Equal(name, await repo.FindAsync<string>(options, x => x.Name));
         }
 
+        private static async Task TestFindWithIdAsync(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<Customer>();
+
+            const int id = 1;
+
+            var entity = new Customer { Id = id };
+
+            Assert.Null(await repo.FindAsync(id));
+
+            await repo.AddAsync(entity);
+
+            Assert.NotNull(await repo.FindAsync(id));
+        }
+
         private static async Task TestFindWithSortingOptionsDescendingAsync(IRepositoryFactory repoFactory)
         {
             var repo = repoFactory.Create<Customer>();
@@ -2006,6 +2075,21 @@
 
             Assert.True(await repo.ExistsAsync(x => x.Name.Equals(name)));
             Assert.True(await repo.ExistsAsync(options));
+        }
+
+        private static async Task TestExistsWithIdAsync(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<Customer>();
+
+            const int id = 1;
+
+            var entity = new Customer { Id = id };
+
+            Assert.False(await repo.ExistsAsync(id));
+
+            await repo.AddAsync(entity);
+
+            Assert.True(await repo.ExistsAsync(id));
         }
 
         private static async Task TestToDictionaryAsync(IRepositoryFactory repoFactory)
