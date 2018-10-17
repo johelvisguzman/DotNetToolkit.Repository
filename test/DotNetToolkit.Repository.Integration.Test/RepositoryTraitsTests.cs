@@ -58,6 +58,18 @@
         }
 
         [Fact]
+        public void DeleteWithId()
+        {
+            ForAllRepositoryFactories(TestDeleteWithId);
+        }
+
+        [Fact]
+        public void TryDelete()
+        {
+            ForAllRepositoryFactories(TestTryDelete);
+        }
+
+        [Fact]
         public void DeleteRange()
         {
             ForAllRepositoryFactories(TestDeleteRange);
@@ -67,6 +79,12 @@
         public void Find()
         {
             ForAllRepositoryFactories(TestFind);
+        }
+
+        [Fact]
+        public void FindWithId()
+        {
+            ForAllRepositoryFactories(TestFindWithId);
         }
 
         [Fact]
@@ -127,6 +145,12 @@
         public void Exists()
         {
             ForAllRepositoryFactories(TestExists);
+        }
+
+        [Fact]
+        public void ExistsWithId()
+        {
+            ForAllRepositoryFactories(TestExistsWithId);
         }
 
         [Fact]
@@ -222,6 +246,18 @@
         }
 
         [Fact]
+        public void DeleteWithIdAsync()
+        {
+            ForAllRepositoryFactoriesAsync(TestDeleteWithIdAsync);
+        }
+
+        [Fact]
+        public void TryDeleteAsync()
+        {
+            ForAllRepositoryFactoriesAsync(TestTryDeleteAsync);
+        }
+
+        [Fact]
         public void DeleteRangeAsync()
         {
             ForAllRepositoryFactoriesAsync(TestDeleteRangeAsync);
@@ -231,6 +267,12 @@
         public void FindAsync()
         {
             ForAllRepositoryFactoriesAsync(TestFindAsync);
+        }
+
+        [Fact]
+        public void FindWithIdAsync()
+        {
+            ForAllRepositoryFactoriesAsync(TestFindWithIdAsync);
         }
 
         [Fact]
@@ -291,6 +333,12 @@
         public void ExistsAsync()
         {
             ForAllRepositoryFactoriesAsync(TestExistsAsync);
+        }
+
+        [Fact]
+        public void ExistsWithIdAsync()
+        {
+            ForAllRepositoryFactoriesAsync(TestExistsWithIdAsync);
         }
 
         [Fact]
@@ -479,6 +527,42 @@
             Assert.False(repo.Exists(x => x.Name.Equals(name)));
         }
 
+        private static void TestDeleteWithId(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<Customer>();
+
+            const int id = 1;
+
+            var entity = new Customer { Id = id };
+
+            Assert.False(repo.Exists(id));
+
+            var ex = Assert.Throws<InvalidOperationException>(() => repo.Delete(id));
+            Assert.Equal($"No entity found in the repository with the '{id}' key.", ex.Message);
+
+            repo.Add(entity);
+
+            Assert.True(repo.Exists(id));
+
+            repo.Delete(id);
+
+            Assert.False(repo.Exists(id));
+        }
+        private static void TestTryDelete(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<Customer>();
+
+            const int id = 1;
+
+            var entity = new Customer { Id = id };
+
+            Assert.False(repo.TryDelete(id));
+
+            repo.Add(entity);
+
+            Assert.True(repo.TryDelete(id));
+        }
+
         private static void TestDeleteRange(IRepositoryFactory repoFactory)
         {
             var repo = repoFactory.Create<Customer>();
@@ -522,6 +606,21 @@
             Assert.NotNull(repo.Find(options));
             Assert.Equal(name, repo.Find<string>(x => x.Name.Equals(name), x => x.Name));
             Assert.Equal(name, repo.Find<string>(options, x => x.Name));
+        }
+
+        private static void TestFindWithId(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<Customer>();
+
+            const int id = 1;
+
+            var entity = new Customer { Id = id };
+
+            Assert.Null(repo.Find(id));
+
+            repo.Add(entity);
+
+            Assert.NotNull(repo.Find(id));
         }
 
         private static void TestFindWithSortingOptionsDescending(IRepositoryFactory repoFactory)
@@ -860,6 +959,21 @@
 
             Assert.True(repo.Exists(x => x.Name.Equals(name)));
             Assert.True(repo.Exists(options));
+        }
+
+        private static void TestExistsWithId(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<Customer>();
+
+            const int id = 1;
+
+            var entity = new Customer { Id = id };
+
+            Assert.False(repo.Exists(id));
+
+            repo.Add(entity);
+
+            Assert.True(repo.Exists(id));
         }
 
         private static void TestToDictionary(IRepositoryFactory repoFactory)
@@ -1528,6 +1642,43 @@
             Assert.False(await repo.ExistsAsync(x => x.Name.Equals(name)));
         }
 
+        private static async Task TestDeleteWithIdAsync(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<Customer>();
+
+            const int id = 1;
+
+            var entity = new Customer { Id = id };
+
+            Assert.False(await repo.ExistsAsync(id));
+
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => repo.DeleteAsync(id));
+            Assert.Equal($"No entity found in the repository with the '{id}' key.", ex.Message);
+
+            await repo.AddAsync(entity);
+
+            Assert.True(await repo.ExistsAsync(id));
+
+            await repo.DeleteAsync(id);
+
+            Assert.False(await repo.ExistsAsync(id));
+        }
+
+        private static async Task TestTryDeleteAsync(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<Customer>();
+
+            const int id = 1;
+
+            var entity = new Customer { Id = id };
+
+            Assert.False(await repo.TryDeleteAsync(id));
+
+            await repo.AddAsync(entity);
+
+            Assert.True(await repo.TryDeleteAsync(id));
+        }
+
         private static async Task TestDeleteRangeAsync(IRepositoryFactory repoFactory)
         {
             var repo = repoFactory.Create<Customer>();
@@ -1571,6 +1722,21 @@
             Assert.NotNull(await repo.FindAsync(options));
             Assert.Equal(name, await repo.FindAsync<string>(x => x.Name.Equals(name), x => x.Name));
             Assert.Equal(name, await repo.FindAsync<string>(options, x => x.Name));
+        }
+
+        private static async Task TestFindWithIdAsync(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<Customer>();
+
+            const int id = 1;
+
+            var entity = new Customer { Id = id };
+
+            Assert.Null(await repo.FindAsync(id));
+
+            await repo.AddAsync(entity);
+
+            Assert.NotNull(await repo.FindAsync(id));
         }
 
         private static async Task TestFindWithSortingOptionsDescendingAsync(IRepositoryFactory repoFactory)
@@ -1909,6 +2075,21 @@
 
             Assert.True(await repo.ExistsAsync(x => x.Name.Equals(name)));
             Assert.True(await repo.ExistsAsync(options));
+        }
+
+        private static async Task TestExistsWithIdAsync(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<Customer>();
+
+            const int id = 1;
+
+            var entity = new Customer { Id = id };
+
+            Assert.False(await repo.ExistsAsync(id));
+
+            await repo.AddAsync(entity);
+
+            Assert.True(await repo.ExistsAsync(id));
         }
 
         private static async Task TestToDictionaryAsync(IRepositoryFactory repoFactory)

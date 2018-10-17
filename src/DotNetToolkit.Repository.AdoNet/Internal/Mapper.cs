@@ -154,9 +154,10 @@
                 if (value == DBNull.Value)
                     value = null;
 
-                if (SqlPropertiesMapping.ContainsKey(name) && !r.IsDBNull(r.GetOrdinal(name)))
+                if (SqlPropertiesMapping.ContainsKey(name))
                 {
-                    SqlPropertiesMapping[name].SetValue(entity, value);
+                    if (!r.IsDBNull(r.GetOrdinal(name)))
+                        SqlPropertiesMapping[name].SetValue(entity, value);
                 }
                 else if (joinTableInstances.Any())
                 {
