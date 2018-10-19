@@ -3,6 +3,7 @@
     using Configuration.Options;
     using Factories;
     using System;
+    using System.Data.Common;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryOptionsContextFactoryExtensions" />.
@@ -11,6 +12,7 @@
     {
         private string _nameOrConnectionString;
         private string _providerName;
+        private DbConnection _existingConnection;
         private AdoNetRepositoryContextFactory _contextFactory;
 
         /// <summary>
@@ -47,6 +49,20 @@
         }
 
         /// <summary>
+        /// Returns the extension instance with an existing connection.
+        /// </summary>
+        /// <param name="existingConnection">The existing connection.</param>
+        public AdoNetRepositoryOptionsExtension WithConnection(DbConnection existingConnection)
+        {
+            if (existingConnection == null)
+                throw new ArgumentNullException(nameof(existingConnection));
+
+            _existingConnection = existingConnection;
+
+            return this;
+        }
+
+        /// <summary>
         /// Gets the configured repository context factory.
         /// </summary>
         public IRepositoryContextFactory ContextFactory
@@ -55,9 +71,12 @@
             {
                 if (_contextFactory == null)
                 {
-                    _contextFactory = !string.IsNullOrEmpty(_providerName)
-                        ? new AdoNetRepositoryContextFactory(_providerName, _nameOrConnectionString)
-                        : new AdoNetRepositoryContextFactory(_nameOrConnectionString);
+                    if (_existingConnection != null)
+                        _contextFactory = new AdoNetRepositoryContextFactory(_existingConnection);
+                    else if (!string.IsNullOrEmpty(_providerName))
+                        _contextFactory = new AdoNetRepositoryContextFactory(_providerName, _nameOrConnectionString);
+                    else
+                        _contextFactory = new AdoNetRepositoryContextFactory(_nameOrConnectionString);
                 }
 
                 return _contextFactory;
