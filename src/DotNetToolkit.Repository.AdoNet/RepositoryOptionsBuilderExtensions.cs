@@ -2,6 +2,7 @@
 {
     using Configuration.Options;
     using System;
+    using System.Data.Common;
 
     /// <summary>
     /// Contains various extension methods for <see cref="RepositoryOptionsBuilder" />
@@ -48,6 +49,27 @@
                 throw new ArgumentNullException(nameof(connectionString));
 
             var extension = (source.Options.FindExtension<AdoNetRepositoryOptionsExtension>() ?? new AdoNetRepositoryOptionsExtension()).WithProvider(providerName, connectionString);
+
+            source.Options.AddOrUpdateExtension<AdoNetRepositoryOptionsExtension>(extension);
+
+            return source;
+        }
+
+        /// <summary>
+        /// Configures the context to use ado.net with an existing connection.
+        /// </summary>
+        /// <param name="source">The repository options builder.</param>
+        /// <param name="existingConnection">The existing connection.</param>
+        /// <returns>The same builder instance.</returns>
+        public static RepositoryOptionsBuilder UseAdoNet(this RepositoryOptionsBuilder source, DbConnection existingConnection)
+        {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+
+            if (existingConnection == null)
+                throw new ArgumentNullException(nameof(existingConnection));
+
+            var extension = (source.Options.FindExtension<AdoNetRepositoryOptionsExtension>() ?? new AdoNetRepositoryOptionsExtension()).WithConnection(existingConnection);
 
             source.Options.AddOrUpdateExtension<AdoNetRepositoryOptionsExtension>(extension);
 

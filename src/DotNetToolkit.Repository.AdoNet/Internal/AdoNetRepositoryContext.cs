@@ -35,6 +35,7 @@
         private readonly DbProviderFactory _factory;
         private readonly string _connectionString;
         private DbConnection _connection;
+        private readonly bool _ownsConnection;
 
         private readonly BlockingCollection<EntitySet> _items = new BlockingCollection<EntitySet>();
         private readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, PropertyInfo>> _sqlPropertiesMapping = new ConcurrentDictionary<Type, ConcurrentDictionary<string, PropertyInfo>>();
@@ -71,6 +72,7 @@
 
             _factory = DbProviderFactories.GetFactory(css.ProviderName);
             _connectionString = css.ConnectionString;
+            _ownsConnection = true;
             _schemaConfigHelper = new SchemaTableConfigurationHelper(this);
         }
 
@@ -89,6 +91,24 @@
 
             _factory = DbProviderFactories.GetFactory(providerName);
             _connectionString = connectionString;
+            _ownsConnection = true;
+            _schemaConfigHelper = new SchemaTableConfigurationHelper(this);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryContext" /> class.
+        /// </summary>
+        /// <param name="existingConnection">The existing connection.</param>
+        public AdoNetRepositoryContext(DbConnection existingConnection)
+        {
+            if (existingConnection == null)
+                throw new ArgumentNullException(nameof(existingConnection));
+
+            if (existingConnection.State == ConnectionState.Closed)
+                existingConnection.Open();
+
+            _connection = existingConnection;
+            _ownsConnection = false;
             _schemaConfigHelper = new SchemaTableConfigurationHelper(this);
         }
 
@@ -102,7 +122,9 @@
         /// <returns>The new command.</returns>
         public virtual DbCommand CreateCommand()
         {
-            var command = _factory.CreateCommand();
+            var command = _ownsConnection
+                ? _factory.CreateCommand()
+                : _connection.CreateCommand();
 
             DbConnection connection;
 
@@ -1020,9 +1042,11 @@
             if (_transaction != null)
                 throw new InvalidOperationException("Unable to create a new connection. A transaction has already been started.");
 
-            _connection = _factory.CreateConnection();
-
-            _connection.ConnectionString = _connectionString;
+            if (_ownsConnection)
+            {
+                _connection = _factory.CreateConnection();
+                _connection.ConnectionString = _connectionString;
+            }
 
             return _connection;
         }
@@ -1664,7 +1688,7 @@
             {
                 var rows = 0;
                 var connection = command.Connection;
-                var ownsConnection = command.Transaction == null;
+                var ownsConnection = _ownsConnection && command.Transaction == null;
 
                 if (connection.State == ConnectionState.Closed)
                     connection.Open();
@@ -1924,7 +1948,7 @@
         /// </summary>
         public void Dispose()
         {
-            if (_connection != null)
+            if (_ownsConnection && _connection != null)
             {
                 _connection.Dispose();
                 _connection = null;
