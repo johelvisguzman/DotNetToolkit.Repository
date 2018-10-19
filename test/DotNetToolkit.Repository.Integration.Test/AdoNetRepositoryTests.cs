@@ -2,7 +2,9 @@
 {
     using AdoNet.Internal;
     using AdoNet.Internal.Schema;
+    using Configuration.Options;
     using Data;
+    using Factories;
     using Queries;
     using Queries.Strategies;
     using System;
@@ -18,14 +20,17 @@
         [Fact]
         public void FindWithNavigationPropertyByKey_OneToOneRelationship()
         {
-            var contextFactory = Data.TestAdoNetContextFactory.Create();
-            var context = contextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
 
             var customerKey = 1;
             var addressKey = 1;
 
-            var addressRepo = new Repository<CustomerAddress>(context);
-            var customerRepo = new Repository<Customer>(context);
+            var repoFactory = new RepositoryFactory(options);
+
+            var addressRepo = repoFactory.Create<CustomerAddress>();
+            var customerRepo = repoFactory.Create<Customer>();
             var customerFetchStrategy = new FetchQueryStrategy<Customer>();
 
             var entity = new Customer
@@ -58,15 +63,18 @@
         [Fact]
         public void FindWithCompositeNavigationPropertyByKey_OneToOneRelationship()
         {
-            var contextFactory = Data.TestAdoNetContextFactory.Create();
-            var context = contextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
 
             var customerKey = 1;
             var addressKey1 = 1;
             var addressKey2 = 2;
 
-            var addressRepo = new Repository<CustomerAddressWithTwoCompositePrimaryKey>(context);
-            var customerRepo = new Repository<CustomerWithTwoCompositePrimaryKey>(context);
+            var repoFactory = new RepositoryFactory(options);
+
+            var addressRepo = repoFactory.Create<CustomerAddressWithTwoCompositePrimaryKey>();
+            var customerRepo = repoFactory.Create<CustomerWithTwoCompositePrimaryKey>();
             var customerFetchStrategy = new FetchQueryStrategy<CustomerWithTwoCompositePrimaryKey>();
 
             var entity = new CustomerWithTwoCompositePrimaryKey
@@ -100,14 +108,17 @@
         [Fact]
         public void FindWithForeignKeyAnnotationChangedByKey_OneToOneRelationship()
         {
-            var contextFactory = Data.TestAdoNetContextFactory.Create();
-            var context = contextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
 
             var customerKey = 1;
             var addressKey = 1;
 
-            var addressWithForeignKeyAnnotationOnForeignKeyRepo = new Repository<CustomerAddressWithForeignKeyAnnotationOnForeignKey>(context);
-            var customerWithForeignKeyAnnotationOnForeignKeyRepo = new Repository<CustomerWithForeignKeyAnnotationOnForeignKey>(context);
+            var repoFactory = new RepositoryFactory(options);
+
+            var addressWithForeignKeyAnnotationOnForeignKeyRepo = repoFactory.Create<CustomerAddressWithForeignKeyAnnotationOnForeignKey>();
+            var customerWithForeignKeyAnnotationOnForeignKeyRepo = repoFactory.Create<CustomerWithForeignKeyAnnotationOnForeignKey>();
             var customerWithForeignKeyAnnotationOnForeignKeyFetchStrategy = new FetchQueryStrategy<CustomerWithForeignKeyAnnotationOnForeignKey>();
 
             var customerWithForeignKeyAnnotationOnForeignKey = new CustomerWithForeignKeyAnnotationOnForeignKey
@@ -136,8 +147,8 @@
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(addressWithForeignKeyAnnotationOnForeignKey, customerWithForeignKeyAnnotationOnForeignKeyRepo.Find(customerKey).Address);
 
-            var addressWithForeignKeyAnnotationOnNavigationPropertyRepo = new Repository<CustomerAddressWithForeignKeyAnnotationOnNavigationProperty>(context);
-            var customerWithForeignKeyAnnotationOnNavigationPropertyRepo = new Repository<CustomerWithForeignKeyAnnotationOnNavigationProperty>(context);
+            var addressWithForeignKeyAnnotationOnNavigationPropertyRepo = repoFactory.Create<CustomerAddressWithForeignKeyAnnotationOnNavigationProperty>();
+            var customerWithForeignKeyAnnotationOnNavigationPropertyRepo = repoFactory.Create<CustomerWithForeignKeyAnnotationOnNavigationProperty>();
             var customerWithForeignKeyAnnotationOnNavigationPropertyFetchStrategy = new FetchQueryStrategy<CustomerWithForeignKeyAnnotationOnNavigationProperty>();
 
             customerKey = 2;
@@ -173,14 +184,17 @@
         [Fact]
         public void FindWithNavigationPropertyByCompositeKey_OneToOneRelationship()
         {
-            var contextFactory = Data.TestAdoNetContextFactory.Create();
-            var context = contextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
 
             var customerKey = 1;
             var addressKey = 1;
 
-            var addressRepo = new Repository<CustomerCompositeAddress>(context);
-            var customerRepo = new Repository<CustomerWithCompositeAddress>(context);
+            var repoFactory = new RepositoryFactory(options);
+
+            var addressRepo = repoFactory.Create<CustomerCompositeAddress>();
+            var customerRepo = repoFactory.Create<CustomerWithCompositeAddress>();
             var customerFetchStrategy = new FetchQueryStrategy<CustomerWithCompositeAddress>();
 
             var entity = new CustomerWithCompositeAddress
@@ -213,13 +227,17 @@
         [Fact]
         public async Task FindWithNavigationPropertyByKeyAsync_OneToOneRelationship()
         {
-            var contextFactory = Data.TestAdoNetContextFactory.Create();
-            var context = contextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
 
-            var addressRepo = new Repository<CustomerAddress>(context);
-            var customerRepo = new Repository<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
+
+            var repoFactory = new RepositoryFactory(options);
+
+            var addressRepo = repoFactory.Create<CustomerAddress>();
+            var customerRepo = repoFactory.Create<Customer>();
             var fetchStrategy = new FetchQueryStrategy<Customer>();
 
             var entity = new Customer
@@ -252,17 +270,21 @@
         [Fact]
         public void FindWithNavigationProperty_OneToOneRelationship()
         {
-            var contextFactory = Data.TestAdoNetContextFactory.Create();
-            var context = contextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
 
-            var addressRepo = new Repository<CustomerAddress>(context);
-            var customerRepo = new Repository<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
+            var repoFactory = new RepositoryFactory(options);
+
+            var addressRepo = repoFactory.Create<CustomerAddress>();
+            var customerRepo = repoFactory.Create<Customer>();
+
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>();
+            var queryOptions = new QueryOptions<Customer>();
 
             var entity = new Customer
             {
@@ -287,25 +309,29 @@
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(address, customerRepo.Find(x => x.Name.Equals(name)).Address);
-            TestCustomerAddress(address, customerRepo.Find(options).Address);
+            TestCustomerAddress(address, customerRepo.Find(queryOptions).Address);
             TestCustomerAddress(address, customerRepo.Find<CustomerAddress>(x => x.Name.Equals(name), x => x.Address));
-            TestCustomerAddress(address, customerRepo.Find<CustomerAddress>(options, x => x.Address));
+            TestCustomerAddress(address, customerRepo.Find<CustomerAddress>(queryOptions, x => x.Address));
         }
 
         [Fact]
         public async Task FindWithNavigationPropertyAsync_OneToOneRelationship()
         {
-            var contextFactory = Data.TestAdoNetContextFactory.Create();
-            var context = contextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
 
-            var addressRepo = new Repository<CustomerAddress>(context);
-            var customerRepo = new Repository<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
+            var repoFactory = new RepositoryFactory(options);
+
+            var addressRepo = repoFactory.Create<CustomerAddress>();
+            var customerRepo = repoFactory.Create<Customer>();
+
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>();
+            var queryOptions = new QueryOptions<Customer>();
 
             var entity = new Customer
             {
@@ -330,25 +356,29 @@
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(address, (await customerRepo.FindAsync(x => x.Name.Equals(name))).Address);
-            TestCustomerAddress(address, (await customerRepo.FindAsync(options)).Address);
+            TestCustomerAddress(address, (await customerRepo.FindAsync(queryOptions)).Address);
             TestCustomerAddress(address, await customerRepo.FindAsync<CustomerAddress>(x => x.Name.Equals(name), x => x.Address));
-            TestCustomerAddress(address, await customerRepo.FindAsync<CustomerAddress>(options, x => x.Address));
+            TestCustomerAddress(address, await customerRepo.FindAsync<CustomerAddress>(queryOptions, x => x.Address));
         }
 
         [Fact]
         public void FindAlldWithNavigationProperty_OneToOneRelationship()
         {
-            var contextFactory = Data.TestAdoNetContextFactory.Create();
-            var context = contextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
 
-            var addressRepo = new Repository<CustomerAddress>(context);
-            var customerRepo = new Repository<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
+            var repoFactory = new RepositoryFactory(options);
+
+            var addressRepo = repoFactory.Create<CustomerAddress>();
+            var customerRepo = repoFactory.Create<Customer>();
+
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>();
+            var queryOptions = new QueryOptions<Customer>();
 
             var entity = new Customer
             {
@@ -374,25 +404,29 @@
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(address, customerRepo.FindAll()?.FirstOrDefault()?.Address);
             TestCustomerAddress(address, customerRepo.FindAll(x => x.Name.Equals(name))?.FirstOrDefault()?.Address);
-            TestCustomerAddress(address, customerRepo.FindAll(options)?.FirstOrDefault()?.Address);
+            TestCustomerAddress(address, customerRepo.FindAll(queryOptions)?.FirstOrDefault()?.Address);
             TestCustomerAddress(address, customerRepo.FindAll<CustomerAddress>(x => x.Name.Equals(name), x => x.Address)?.FirstOrDefault());
-            TestCustomerAddress(address, customerRepo.FindAll<CustomerAddress>(options, x => x.Address)?.FirstOrDefault());
+            TestCustomerAddress(address, customerRepo.FindAll<CustomerAddress>(queryOptions, x => x.Address)?.FirstOrDefault());
         }
 
         [Fact]
         public async Task FindAlldWithNavigationPropertyAsync_OneToOneRelationship()
         {
-            var contextFactory = Data.TestAdoNetContextFactory.Create();
-            var context = contextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
 
-            var addressRepo = new Repository<CustomerAddress>(context);
-            var customerRepo = new Repository<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
+            var repoFactory = new RepositoryFactory(options);
+
+            var addressRepo = repoFactory.Create<CustomerAddress>();
+            var customerRepo = repoFactory.Create<Customer>();
+
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>();
+            var queryOptions = new QueryOptions<Customer>();
 
             var entity = new Customer
             {
@@ -418,25 +452,29 @@
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(address, (await customerRepo.FindAllAsync())?.FirstOrDefault()?.Address);
             TestCustomerAddress(address, (await customerRepo.FindAllAsync(x => x.Name.Equals(name)))?.FirstOrDefault()?.Address);
-            TestCustomerAddress(address, (await customerRepo.FindAllAsync(options))?.FirstOrDefault()?.Address);
+            TestCustomerAddress(address, (await customerRepo.FindAllAsync(queryOptions))?.FirstOrDefault()?.Address);
             TestCustomerAddress(address, (await customerRepo.FindAllAsync<CustomerAddress>(x => x.Name.Equals(name), x => x.Address))?.FirstOrDefault());
-            TestCustomerAddress(address, (await customerRepo.FindAllAsync<CustomerAddress>(options, x => x.Address))?.FirstOrDefault());
+            TestCustomerAddress(address, (await customerRepo.FindAllAsync<CustomerAddress>(queryOptions, x => x.Address))?.FirstOrDefault());
         }
 
         [Fact]
         public void ExistWithNavigationProperty_OneToOneRelationship()
         {
-            var contextFactory = Data.TestAdoNetContextFactory.Create();
-            var context = contextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
 
-            var addressRepo = new Repository<CustomerAddress>(context);
-            var customerRepo = new Repository<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
+            var repoFactory = new RepositoryFactory(options);
+
+            var addressRepo = repoFactory.Create<CustomerAddress>();
+            var customerRepo = repoFactory.Create<Customer>();
+
             const string street = "Street";
 
-            var options = new QueryOptions<Customer>();
+            var queryOptions = new QueryOptions<Customer>();
 
             var entity = new Customer
             {
@@ -459,7 +497,7 @@
 
             addressRepo.Add(address);
 
-            Assert.True(customerRepo.Exists(options));
+            Assert.True(customerRepo.Exists(queryOptions));
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             Assert.True(customerRepo.Exists(x => x.Address.Street.Equals(street)));
@@ -468,17 +506,21 @@
         [Fact]
         public async Task ExistWithNavigationPropertyAsync_OneToOneRelationship()
         {
-            var contextFactory = Data.TestAdoNetContextFactory.Create();
-            var context = contextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
 
-            var addressRepo = new Repository<CustomerAddress>(context);
-            var customerRepo = new Repository<Customer>(context);
             var customerKey = 1;
             var addressKey = 1;
 
+            var repoFactory = new RepositoryFactory(options);
+
+            var addressRepo = repoFactory.Create<CustomerAddress>();
+            var customerRepo = repoFactory.Create<Customer>();
+
             const string street = "Street";
 
-            var options = new QueryOptions<Customer>();
+            var queryOptions = new QueryOptions<Customer>();
 
             var entity = new Customer
             {
@@ -501,7 +543,7 @@
 
             await addressRepo.AddAsync(address);
 
-            Assert.True(await customerRepo.ExistsAsync(options));
+            Assert.True(await customerRepo.ExistsAsync(queryOptions));
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             Assert.True(await customerRepo.ExistsAsync(x => x.Address.Street.Equals(street)));
@@ -510,13 +552,18 @@
         [Fact]
         public void FindWithNavigationProperty_OneToManyRelationship()
         {
-            var context = Data.TestAdoNetContextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
+
             var customerKey = 1;
 
-            var addressRepo = new Repository<CustomerAddressWithMultipleAddresses>(context);
-            var customerRepo = new Repository<CustomerWithMultipleAddresses>(context);
+            var repoFactory = new RepositoryFactory(options);
+
+            var addressRepo = repoFactory.Create<CustomerAddressWithMultipleAddresses>();
+            var customerRepo = repoFactory.Create<CustomerWithMultipleAddresses>();
             var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
-            var options = new QueryOptions<CustomerWithMultipleAddresses>();
+            var queryOptions = new QueryOptions<CustomerWithMultipleAddresses>();
             var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
 
             var entity = new CustomerWithMultipleAddresses
@@ -545,8 +592,8 @@
             addressRepo.Add(addresses);
 
             Assert.Null(customerRepo.Find(customerKey).Addresses);
-            Assert.Null(customerRepo.Find(options).Addresses);
-            Assert.Null(customerRepo.Find<ICollection<CustomerAddressWithMultipleAddresses>>(options, x => x.Addresses));
+            Assert.Null(customerRepo.Find(queryOptions).Addresses);
+            Assert.Null(customerRepo.Find<ICollection<CustomerAddressWithMultipleAddresses>>(queryOptions, x => x.Addresses));
 
             TestCustomerAddress(addresses, customerRepo.Find(customerKey, customerFetchStrategy).Addresses);
             TestCustomerAddress(addresses, customerRepo.Find(optionsWithFetchStrategy).Addresses);
@@ -556,13 +603,18 @@
         [Fact]
         public async void FindWithNavigationPropertyAsync_OneToManyRelationship()
         {
-            var context = Data.TestAdoNetContextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
+
             var customerKey = 1;
 
-            var addressRepo = new Repository<CustomerAddressWithMultipleAddresses>(context);
-            var customerRepo = new Repository<CustomerWithMultipleAddresses>(context);
+            var repoFactory = new RepositoryFactory(options);
+
+            var addressRepo = repoFactory.Create<CustomerAddressWithMultipleAddresses>();
+            var customerRepo = repoFactory.Create<CustomerWithMultipleAddresses>();
             var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
-            var options = new QueryOptions<CustomerWithMultipleAddresses>();
+            var queryOptions = new QueryOptions<CustomerWithMultipleAddresses>();
             var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
 
             var entity = new CustomerWithMultipleAddresses
@@ -591,8 +643,8 @@
             await addressRepo.AddAsync(addresses);
 
             Assert.Null((await customerRepo.FindAsync(customerKey)).Addresses);
-            Assert.Null((await customerRepo.FindAsync(options)).Addresses);
-            Assert.Null(await customerRepo.FindAsync<ICollection<CustomerAddressWithMultipleAddresses>>(options, x => x.Addresses));
+            Assert.Null((await customerRepo.FindAsync(queryOptions)).Addresses);
+            Assert.Null(await customerRepo.FindAsync<ICollection<CustomerAddressWithMultipleAddresses>>(queryOptions, x => x.Addresses));
 
             TestCustomerAddress(addresses, (await customerRepo.FindAsync(customerKey, customerFetchStrategy)).Addresses);
             TestCustomerAddress(addresses, (await customerRepo.FindAsync(optionsWithFetchStrategy)).Addresses);
@@ -602,16 +654,19 @@
         [Fact]
         public void FindAlldWithNavigationProperty_OneToManyRelationship()
         {
-            var contextFactory = Data.TestAdoNetContextFactory.Create();
-            var context = contextFactory.Create();
-
-            var addressRepo = new Repository<CustomerAddressWithMultipleAddresses>(context);
-            var customerRepo = new Repository<CustomerWithMultipleAddresses>(context);
-            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
-            var options = new QueryOptions<CustomerWithMultipleAddresses>();
-            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
 
             var customerKey = 1;
+
+            var repoFactory = new RepositoryFactory(options);
+
+            var addressRepo = repoFactory.Create<CustomerAddressWithMultipleAddresses>();
+            var customerRepo = repoFactory.Create<CustomerWithMultipleAddresses>();
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
+            var queryOptions = new QueryOptions<CustomerWithMultipleAddresses>();
+            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
 
             const string name = "Random Name";
 
@@ -641,7 +696,7 @@
             addressRepo.Add(addresses);
 
             Assert.Null(customerRepo.FindAll()?.FirstOrDefault()?.Addresses);
-            Assert.Null(customerRepo.FindAll(options)?.FirstOrDefault()?.Addresses);
+            Assert.Null(customerRepo.FindAll(queryOptions)?.FirstOrDefault()?.Addresses);
 
             TestCustomerAddress(addresses, customerRepo.FindAll(optionsWithFetchStrategy)?.FirstOrDefault()?.Addresses);
             TestCustomerAddress(addresses, customerRepo.FindAll<ICollection<CustomerAddressWithMultipleAddresses>>(optionsWithFetchStrategy, x => x.Addresses)?.FirstOrDefault());
@@ -650,16 +705,19 @@
         [Fact]
         public async void FindAlldWithNavigationPropertyAsync_OneToManyRelationship()
         {
-            var contextFactory = Data.TestAdoNetContextFactory.Create();
-            var context = contextFactory.Create();
-
-            var addressRepo = new Repository<CustomerAddressWithMultipleAddresses>(context);
-            var customerRepo = new Repository<CustomerWithMultipleAddresses>(context);
-            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
-            var options = new QueryOptions<CustomerWithMultipleAddresses>();
-            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
 
             var customerKey = 1;
+
+            var repoFactory = new RepositoryFactory(options);
+
+            var addressRepo = repoFactory.Create<CustomerAddressWithMultipleAddresses>();
+            var customerRepo = repoFactory.Create<CustomerWithMultipleAddresses>();
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
+            var queryOptions = new QueryOptions<CustomerWithMultipleAddresses>();
+            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
 
             const string name = "Random Name";
 
@@ -689,7 +747,7 @@
             await addressRepo.AddAsync(addresses);
 
             Assert.Null((await customerRepo.FindAllAsync())?.FirstOrDefault()?.Addresses);
-            Assert.Null((await customerRepo.FindAllAsync(options))?.FirstOrDefault()?.Addresses);
+            Assert.Null((await customerRepo.FindAllAsync(queryOptions))?.FirstOrDefault()?.Addresses);
 
             TestCustomerAddress(addresses, (await customerRepo.FindAllAsync(optionsWithFetchStrategy))?.FirstOrDefault()?.Addresses);
             TestCustomerAddress(addresses, (await customerRepo.FindAllAsync<ICollection<CustomerAddressWithMultipleAddresses>>(optionsWithFetchStrategy, x => x.Addresses))?.FirstOrDefault());
@@ -698,10 +756,13 @@
         [Fact]
         public void DeleteWithKeyDataAttribute()
         {
-            var contextFactory = Data.TestAdoNetContextFactory.Create();
-            var context = contextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
 
-            var repo = new Repository<CustomerWithKeyAnnotation>(context);
+            var repoFactory = new RepositoryFactory(options);
+
+            var repo = repoFactory.Create<CustomerWithKeyAnnotation>();
 
             const string name = "Random Name";
 
@@ -719,10 +780,13 @@
         [Fact]
         public async Task DeleteWithKeyDataAttributeAsync()
         {
-            var contextFactory = Data.TestAdoNetContextFactory.Create();
-            var context = contextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
 
-            var repo = new Repository<CustomerWithKeyAnnotation>(context);
+            var repoFactory = new RepositoryFactory(options);
+
+            var repo = repoFactory.Create<CustomerWithKeyAnnotation>();
 
             const string name = "Random Name";
 
@@ -740,10 +804,13 @@
         [Fact]
         public void FindWithComplexExpressions()
         {
-            var contextFactory = Data.TestAdoNetContextFactory.Create();
-            var context = contextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
 
-            var repo = new Repository<Customer>(context);
+            var repoFactory = new RepositoryFactory(options);
+
+            var repo = repoFactory.Create<Customer>();
 
             var numOneVar = 1;
             var numTwoVar = 2;
@@ -920,10 +987,13 @@
         [Fact]
         public async void FindWithComplexExpressionsAsync()
         {
-            var contextFactory = Data.TestAdoNetContextFactory.Create();
-            var context = contextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
 
-            var repo = new Repository<Customer>(context);
+            var repoFactory = new RepositoryFactory(options);
+
+            var repo = repoFactory.Create<Customer>();
 
             var numOneVar = 1;
             var numTwoVar = 2;
@@ -1120,10 +1190,13 @@
         [Fact]
         public void FindAllWithComplexExpressions()
         {
-            var contextFactory = Data.TestAdoNetContextFactory.Create();
-            var context = contextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
 
-            var repo = new Repository<Customer>(context);
+            var repoFactory = new RepositoryFactory(options);
+
+            var repo = repoFactory.Create<Customer>();
 
             var entities = new List<Customer>
             {
@@ -1204,10 +1277,13 @@
         [Fact]
         public async void FindAllWithComplexExpressionsAsync()
         {
-            var contextFactory = Data.TestAdoNetContextFactory.Create();
-            var context = contextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
 
-            var repo = new Repository<Customer>(context);
+            var repoFactory = new RepositoryFactory(options);
+
+            var repo = repoFactory.Create<Customer>();
 
             var entities = new List<Customer>
             {
@@ -1288,29 +1364,33 @@
         [Fact]
         public void ThrowsIfSchemaTableColumnsMismatchOnSaveChanges()
         {
-            var contextFactory = Data.TestAdoNetContextFactory.Create();
-            var context = contextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .Options;
 
-            var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerColumnNameMismatch>(context).Add(new CustomerColumnNameMismatch()));
+            var repoFactory = new RepositoryFactory(options);
+
+            var ex = Assert.Throws<InvalidOperationException>(() => repoFactory.Create<CustomerColumnNameMismatch>().Add(new CustomerColumnNameMismatch()));
             Assert.Equal($"The model '{typeof(CustomerColumnNameMismatch).Name}' has changed since the database was created. Consider updating the database.", ex.Message);
 
-            ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerColumnNameMissing>(context).Add(new CustomerColumnNameMissing()));
+            ex = Assert.Throws<InvalidOperationException>(() => repoFactory.Create<CustomerColumnNameMissing>().Add(new CustomerColumnNameMissing()));
             Assert.Equal($"The model '{typeof(CustomerColumnNameMissing).Name}' has changed since the database was created. Consider updating the database.", ex.Message);
 
-            ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerKeyMismatch>(context).Add(new CustomerKeyMismatch()));
+            ex = Assert.Throws<InvalidOperationException>(() => repoFactory.Create<CustomerKeyMismatch>().Add(new CustomerKeyMismatch()));
             Assert.Equal($"The model '{typeof(CustomerKeyMismatch).Name}' has changed since the database was created. Consider updating the database.", ex.Message);
 
-            ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerColumnRequiredMissing>(context).Add(new CustomerColumnRequiredMissing()));
+            ex = Assert.Throws<InvalidOperationException>(() => repoFactory.Create<CustomerColumnRequiredMissing>().Add(new CustomerColumnRequiredMissing()));
             Assert.Equal($"The model '{typeof(CustomerColumnRequiredMissing).Name}' has changed since the database was created. Consider updating the database.", ex.Message);
         }
 
         [Fact]
         public void ThrowsIfThrowsIfSchemaTableForeignKeyAttributeOnPropertyNotFoundOnDependentType()
         {
-            var contextFactory = Data.TestAdoNetContextFactory.Create();
-            var context = contextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(TestAdoNetContextFactory.Create())
+                .Options;
 
-            var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType>(context).Add(new CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType()));
+            var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType>(options).Add(new CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType()));
             Assert.Equal($"The ForeignKeyAttribute on property 'Address' on type '{typeof(CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType).FullName}' is not valid. The foreign key name 'AddressId' was not found on the dependent type '{typeof(CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType).FullName}'. The Name value should be a comma separated list of foreign key property names.", ex.Message);
 
         }
@@ -1319,23 +1399,30 @@
         public void CreateTableOnSaveChanges()
         {
             var contextFactory = TestAdoNetContextFactory.Create();
+
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(contextFactory)
+                .Options;
+
             var context = (AdoNetRepositoryContext)contextFactory.Create();
             var schemaHelper = new SchemaTableConfigurationHelper(context);
+            var repoFactory = new RepositoryFactory(options);
 
             Assert.False(schemaHelper.ExexuteTableExists<CustomerNotCreated>());
             Assert.False(schemaHelper.ExexuteTableExists<CustomerAddressNotCreated>());
 
-            var repo = new Repository<CustomerNotCreated>(context);
+            var repo = repoFactory.Create<CustomerNotCreated>();
 
             // Needs to create foreign table since the CustomerNotCreated table needs it
-            new Repository<CustomerAddressNotCreated>(context).Add(new CustomerAddressNotCreated
-            {
-                Id1 = 1,
-                Id2 = 1,
-                State = "ST",
-                Street1 = "Street 1",
-                City = "City"
-            });
+            repoFactory.Create<CustomerAddressNotCreated>()
+                .Add(new CustomerAddressNotCreated
+                {
+                    Id1 = 1,
+                    Id2 = 1,
+                    State = "ST",
+                    Street1 = "Street 1",
+                    City = "City"
+                });
 
             repo.Add(new CustomerNotCreated { Name = "Random Name", AddressId1 = 1, AddressId2 = 1 });
 
@@ -1351,18 +1438,22 @@
         [Fact]
         public void ThrowsIfUnableToDetermineCompositePrimaryKeyOrderingOnSaveChanges()
         {
-            var contextFactory = TestAdoNetContextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(TestAdoNetContextFactory.Create())
+                .Options;
 
-            var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering>(contextFactory).Add(new CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering()));
+            var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering>(options).Add(new CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering()));
             Assert.Equal(string.Format(AdoNet.Properties.Resources.UnableToDetermineCompositePrimaryKeyOrdering, "primary", typeof(CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering).FullName), ex.Message);
         }
 
         [Fact]
         public void ThrowsIfUnableToDetermineCompositeForeignKeyOrderingOnSaveChanges()
         {
-            var contextFactory = TestAdoNetContextFactory.Create();
+            var options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(TestAdoNetContextFactory.Create())
+                .Options;
 
-            var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerWithTwoCompositeForeignKeyAndNoOrdering>(contextFactory).Add(new CustomerWithTwoCompositeForeignKeyAndNoOrdering()));
+            var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerWithTwoCompositeForeignKeyAndNoOrdering>(options).Add(new CustomerWithTwoCompositeForeignKeyAndNoOrdering()));
             Assert.Equal(string.Format(AdoNet.Properties.Resources.UnableToDetermineCompositePrimaryKeyOrdering, "foreign", typeof(CustomerWithTwoCompositeForeignKeyAndNoOrdering).FullName), ex.Message);
         }
 

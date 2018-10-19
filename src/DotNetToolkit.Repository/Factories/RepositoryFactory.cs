@@ -1,21 +1,17 @@
 ﻿namespace DotNetToolkit.Repository.Factories
 {
-    using Configuration;
-    using Configuration.Interceptors;
+    using Configuration.Options;
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
 
     /// <summary>
-    /// 
+    /// An implementation of <see cref="IRepositoryFactory" />.
     /// </summary>
     /// <seealso cref="DotNetToolkit.Repository.Factories.IRepositoryFactory" />
     public class RepositoryFactory : IRepositoryFactory
     {
         #region Fields
 
-        private readonly IRepositoryContextFactory _factory;
-        private readonly IEnumerable<IRepositoryInterceptor> _interceptors;
+        private readonly RepositoryOptions _options;
 
         #endregion
 
@@ -24,26 +20,29 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryFactory" /> class.
         /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        public RepositoryFactory(IRepositoryContextFactory factory) : this(new RepositoryConfigurationOptions(factory)) { }
+        /// <param name="optionsAction">A builder action used to create or modify options for this repository factory.</param>
+        public RepositoryFactory(Action<RepositoryOptionsBuilder> optionsAction)
+        {
+            if (optionsAction == null)
+                throw new ArgumentNullException(nameof(optionsAction));
 
-#if !NETSTANDARD
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryFactory" /> class and uses the data from the App.config file to configure the repositories.
-        /// </summary>
-        public RepositoryFactory() : this(Internal.ConfigFile.ConfigurationHelper.GetRequiredConfigurationOptions()) { }
-#endif
+            var optionsBuilder = new RepositoryOptionsBuilder();
+
+            optionsAction(optionsBuilder);
+
+            _options = optionsBuilder.Options;
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryFactory" /> class.
         /// </summary>
-        /// <param name="configuration">The repository configuration.</param>
-        internal RepositoryFactory(IRepositoryConfigurationOptions configuration)
+        /// <param name="options">The repository options.</param>
+        public RepositoryFactory(RepositoryOptions options)
         {
-            if (configuration == null)
-                throw new ArgumentNullException(nameof(configuration));
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
 
-            _factory = configuration.GetContextFactory();
-            _interceptors = configuration.GetInterceptors();
+            _options = options;
         }
 
         #endregion
@@ -103,19 +102,7 @@
         /// <returns>The new repository.</returns>
         public T CreateInstance<T>() where T : class
         {
-            var args = new List<object> { _factory };
-
-            if (_interceptors.Any())
-                args.Add(_interceptors);
-
-            try
-            {
-                return (T)Activator.CreateInstance(typeof(T), args.ToArray());
-            }
-            catch (Exception ex)
-            {
-                throw ex.InnerException ?? ex;
-            }
+            return (T)Activator.CreateInstance(typeof(T), new object[] { _options });
         }
 
         #endregion

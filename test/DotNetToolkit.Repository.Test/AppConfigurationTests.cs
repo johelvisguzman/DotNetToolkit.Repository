@@ -33,12 +33,12 @@
 
             Assert.Equal(2, parameters.Length);
             Assert.Equal(paramName, parameters.ElementAt(0));
-            Assert.Equal(true, parameters.ElementAt(1));
+            Assert.True((bool)parameters.ElementAt(1));
 
             var interceptors = interceptorElementCollection.GetTypedValues().ToList();
             var interceptor = (TestRepositoryInterceptor)interceptors[0];
 
-            Assert.Equal(1, interceptors.Count);
+            Assert.Single(interceptors);
             Assert.Equal(paramName, interceptor.P1);
         }
 
@@ -60,9 +60,9 @@
             var interceptors = interceptorElementCollection.GetTypedValues().ToList();
             var interceptor = (TestRepositoryInterceptor)interceptors[0];
 
-            Assert.Equal(1, interceptors.Count);
+            Assert.Single(interceptors);
             Assert.Equal(paramName, interceptor.P1);
-            Assert.Equal(true, interceptor.P2);
+            Assert.True(interceptor.P2);
         }
     }
 }

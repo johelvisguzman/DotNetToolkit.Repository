@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Data
 {
+    using Configuration.Options;
     using EntityFrameworkCore;
     using Factories;
     using InMemory;
@@ -22,7 +23,11 @@
                     if (contextConfigurationTypeExceptionList != null && contextConfigurationTypeExceptionList.Contains(type))
                         return;
 
-                    action(new RepositoryFactory(x));
+                    var options = new RepositoryOptionsBuilder()
+                        .UseInternalContextFactory(x)
+                        .Options;
+
+                    action(new RepositoryFactory(options));
                 });
         }
 
@@ -37,8 +42,12 @@
                     if (contextTypeExceptionList != null && contextTypeExceptionList.Contains(type))
                         return;
 
+                    var options = new RepositoryOptionsBuilder()
+                        .UseInternalContextFactory(x)
+                        .Options;
+
                     // Perform test
-                    var task = Record.ExceptionAsync(() => action(new RepositoryFactory(x)));
+                    var task = Record.ExceptionAsync(() => action(new RepositoryFactory(options)));
 
                     // Checks to see if we have any un-handled exception
                     if (task != null)
@@ -58,12 +67,16 @@
                 {
                     var type = x.GetType();
 
+                    var options = new RepositoryOptionsBuilder()
+                        .UseInternalContextFactory(x)
+                        .Options;
+
                     // the in-memory context will not support transactions currently
                     if (typeof(InMemoryRepositoryContextFactory).IsAssignableFrom(type) ||
                         typeof(EfCoreRepositoryContextFactory<TestEfCoreDbContext>).IsAssignableFrom(type))
                         return;
 
-                    action(new UnitOfWorkFactory(x));
+                    action(new UnitOfWorkFactory(options));
                 });
         }
 

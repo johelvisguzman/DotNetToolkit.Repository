@@ -7,6 +7,8 @@
         public string P1 { get; }
         public bool P2 { get; }
 
+        public TestRepositoryInterceptor() { }
+
         public TestRepositoryInterceptor(string p1, bool p2)
         {
             P1 = p1;

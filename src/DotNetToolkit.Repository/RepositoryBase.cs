@@ -3,9 +3,11 @@
     using Configuration;
     using Configuration.Conventions;
     using Configuration.Interceptors;
+    using Configuration.Options;
     using Extensions;
     using Factories;
     using Helpers;
+    using Internal;
     using Properties;
     using Queries;
     using Queries.Strategies;
@@ -34,18 +36,10 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2, TKey3}"/> class.
         /// </summary>
-        /// <param name="factory">The context factory.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        protected RepositoryBase(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors) : base(factory, interceptors) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2, TKey3}" /> class.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        protected RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+        /// <param name="options">The repository options.</param>
+        protected RepositoryBase(RepositoryOptions options) : base(options) { }
 
         #endregion
 
@@ -233,18 +227,10 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2}"/> class.
         /// </summary>
-        /// <param name="factory">The context factory.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        protected RepositoryBase(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors) : base(factory, interceptors) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2}" /> class.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        protected RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+        /// <param name="options">The repository options.</param>
+        protected RepositoryBase(RepositoryOptions options) : base(options) { }
 
         #endregion
 
@@ -424,16 +410,8 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
-        /// <param name="factory">The context factory.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        protected RepositoryBase(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors) : base(factory, interceptors) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}" /> class.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        protected RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors) : base(context, interceptors) { }
+        /// <param name="options">The repository options.</param>
+        protected RepositoryBase(RepositoryOptions options) : base(options) { }
 
         #endregion
 
@@ -599,9 +577,10 @@
     {
         #region Fields
 
+        private readonly RepositoryOptions _options;
         private readonly IRepositoryContextFactory _contextFactory;
         private IRepositoryContext _context;
-        private readonly IEnumerable<IRepositoryInterceptor> _interceptors;
+        private IEnumerable<IRepositoryInterceptor> _interceptors;
 
         #endregion
 
@@ -622,33 +601,34 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity}"/> class.
         /// </summary>
-        /// <param name="factory">The context factory.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        internal RepositoryBase(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors)
+        /// <param name="options">The repository options.</param>
+        internal RepositoryBase(RepositoryOptions options)
         {
-            if (factory == null)
-                throw new ArgumentNullException(nameof(factory));
-
-            _contextFactory = factory;
-            _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
 
             ThrowsIfEntityPrimaryKeyMissing();
-        }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity}" /> class.
-        /// </summary>
-        /// <param name="context">The context.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        internal RepositoryBase(IRepositoryContext context, IEnumerable<IRepositoryInterceptor> interceptors)
-        {
-            if (context == null)
-                throw new ArgumentNullException(nameof(context));
+            var optionsBuilder = new RepositoryOptionsBuilder(options);
 
-            _context = context;
-            _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
+            OnConfiguring(optionsBuilder);
 
-            ThrowsIfEntityPrimaryKeyMissing();
+            // The shared context that is set up by the unit of work
+            var contextExtension = optionsBuilder.Options.FindExtension<Internal.RepositoryOptionsContextExtension>();
+            if (contextExtension != null)
+            {
+                _context = contextExtension.Context;
+            }
+            else
+            {
+                var contextFactoryExtension = optionsBuilder.Options.FindExtension<IRepositoryOptionsContextFactoryExtensions>();
+                if (contextFactoryExtension == null)
+                    throw new InvalidOperationException("No context provider has been configured for this repository.");
+
+                _contextFactory = contextFactoryExtension.ContextFactory;
+            }
+
+            _options = optionsBuilder.Options;
         }
 
         #endregion
@@ -656,12 +636,18 @@
         #region Protected Methods
 
         /// <summary>
+        /// Override this method to configure the repository.
+        /// </summary>
+        /// <param name="optionsBuilder">A builder used to create or modify options for this repository.</param>
+        protected virtual void OnConfiguring(RepositoryOptionsBuilder optionsBuilder) { }
+
+        /// <summary>
         /// Executes the specified interceptor activity.
         /// </summary>
         /// <param name="action">The action to be executed.</param>
         protected void Intercept(Action<IRepositoryInterceptor> action)
         {
-            foreach (var interceptor in _interceptors)
+            foreach (var interceptor in GetInterceptors())
             {
                 action(interceptor);
             }
@@ -820,6 +806,22 @@
             {
                 InterceptDeleteItem(entity);
             }
+        }
+
+        private IEnumerable<IRepositoryInterceptor> GetInterceptors()
+        {
+            if (_interceptors == null)
+            {
+                var coreExtension = _options.FindExtension<RepositoryOptionsCoreExtension>();
+
+                _interceptors = coreExtension != null
+                           ? coreExtension.Interceptors
+                                .Select(lazyInterceptor => lazyInterceptor.Value)
+                                .Where(value => value != null)
+                           : Enumerable.Empty<IRepositoryInterceptor>();
+            }
+
+            return _interceptors;
         }
 
         private void DisposeContext()

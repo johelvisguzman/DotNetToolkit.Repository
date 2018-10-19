@@ -1,14 +1,13 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
-    using Configuration;
     using Configuration.Interceptors;
+    using Configuration.Options;
     using Data;
-    using Extensions.Microsoft.DependencyInjection;
     using Factories;
     using InMemory;
-    using Microsoft.Extensions.DependencyInjection;
+    using Internal;
+    using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Reflection;
     using Xunit;
 
@@ -17,69 +16,47 @@
         [Fact]
         public void CanConfigureRepositoriesWithDefaultContextFactoryFromAppConfig()
         {
-            var repoFactory = new RepositoryFactory(Internal.ConfigFile.ConfigurationHelper.GetRequiredConfigurationOptions());
+            var options = new RepositoryOptionsBuilder()
+                .UseConfiguration()
+                .Options;
 
+            var repoFactory = new RepositoryFactory(options);
             var repo = repoFactory.Create<Customer>();
+            var contextFactory = GetContextFactoryFromPrivateField<RepositoryBase<Customer>>(repo);
 
-            TestContextFactoryFromPrivateField<RepositoryBase<Customer>, InMemoryRepositoryContextFactory>(repo);
+            Assert.True(contextFactory is InMemoryRepositoryContextFactory);
         }
 
         [Fact]
         public void CanConfigureRepositoriesWithInterceptorsFromAppConfig()
         {
-            var repoFactory = new RepositoryFactory(Internal.ConfigFile.ConfigurationHelper.GetRequiredConfigurationOptions());
+            var options = new RepositoryOptionsBuilder()
+                .UseConfiguration()
+                .Options;
 
+            var repoFactory = new RepositoryFactory(options);
             var repo = repoFactory.Create<Customer>();
+            var interceptors = GetLazyInterceptorsOptionsFromPrivateField<RepositoryBase<Customer>>(repo);
 
-            TestInterceptorsFromPrivateField<RepositoryBase<Customer>>(repo);
+            Assert.Single(interceptors);
         }
 
-        [Fact]
-        public void CanConfigureRepositoriesWithDependencyInjectionAndConfiguration()
+        private static IEnumerable<Lazy<IRepositoryInterceptor>> GetLazyInterceptorsOptionsFromPrivateField<T>(object obj)
         {
-            var services = new ServiceCollection();
-            var config = TestConfigurationHelper.GetConfiguration();
-
-            services.AddRepositories(config);
-
-            var provider = services.BuildServiceProvider();
-
-            var repo = provider.GetService<IRepository<Customer>>();
-
-            TestContextFactoryFromPrivateField<RepositoryBase<Customer>, InMemoryRepositoryContextFactory>(repo);
-            TestInterceptorsFromPrivateField<RepositoryBase<Customer>>(repo);
-
-            repo = provider.GetService<ITestCustomerRepository>();
-
-            TestContextFactoryFromPrivateField<RepositoryBase<Customer>, InMemoryRepositoryContextFactory>(repo);
-            TestInterceptorsFromPrivateField<RepositoryBase<Customer>>(repo);
-
-            Assert.NotNull(provider.GetService<IRepositoryContextFactory>());
-            Assert.NotNull(provider.GetService<IRepositoryConfigurationOptions>());
-            Assert.NotNull(provider.GetService<IRepositoryInterceptor>());
-            Assert.NotNull(provider.GetService<TestRepositoryInterceptor>());
-            Assert.NotNull(provider.GetService<IRepositoryFactory>());
-        }
-
-        private static void TestInterceptorsFromPrivateField<T>(object obj)
-        {
-            var interceptors = (IEnumerable<IRepositoryInterceptor>)typeof(T)
-                .GetField("_interceptors", BindingFlags.NonPublic | BindingFlags.Instance)
+            var options = (RepositoryOptions)typeof(T)
+                .GetField("_options", BindingFlags.NonPublic | BindingFlags.Instance)
                 .GetValue(obj);
 
-            var interceptor = (TestRepositoryInterceptor)interceptors.ElementAt(0);
-
-            Assert.Equal("random param", interceptor.P1);
-            Assert.Equal(true, interceptor.P2);
+            return options.FindExtension<RepositoryOptionsCoreExtension>().Interceptors;
         }
 
-        private static void TestContextFactoryFromPrivateField<T, TCompareToType>(object obj)
+        private static IRepositoryContextFactory GetContextFactoryFromPrivateField<T>(object obj)
         {
             var contextFactory = (IRepositoryContextFactory)typeof(T)
                 .GetField("_contextFactory", BindingFlags.NonPublic | BindingFlags.Instance)
                 .GetValue(obj);
 
-            Assert.True(contextFactory is TCompareToType);
+            return contextFactory;
         }
     }
 }

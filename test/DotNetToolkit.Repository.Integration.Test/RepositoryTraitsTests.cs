@@ -8,6 +8,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Xunit;
 
@@ -2628,9 +2629,9 @@
 
         private static void TestThrowsIfModelHasNoId(IRepositoryFactory repoFactory)
         {
-            var ex = Assert.Throws<InvalidOperationException>(() => repoFactory.Create<CustomerWithNoId>());
+            var ex = Assert.Throws<TargetInvocationException>(() => repoFactory.Create<CustomerWithNoId>());
 
-            Assert.Equal($"The instance of entity type '{typeof(CustomerWithNoId).FullName}' requires a primary key to be defined.", ex.Message);
+            Assert.Equal($"The instance of entity type '{typeof(CustomerWithNoId).FullName}' requires a primary key to be defined.", ex.InnerException?.Message);
         }
     }
 }

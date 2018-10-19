@@ -13,4 +13,9 @@
             P2 = p2;
         }
     }
+
+    public class TestRepositoryInterceptor2 : RepositoryInterceptorBase
+    {
+        public TestRepositoryInterceptor2() { }
+    }
 }

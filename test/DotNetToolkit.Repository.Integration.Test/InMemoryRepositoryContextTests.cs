@@ -1,9 +1,9 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
+    using Configuration.Options;
     using Data;
     using InMemory;
     using System;
-    using System.Linq;
     using Xunit;
 
     public class InMemoryRepositoryContextTests : TestBase
@@ -11,63 +11,47 @@
         [Fact]
         public void CanScoped()
         {
-            var databaseName = Guid.NewGuid().ToString();
+            var options = new RepositoryOptionsBuilder()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
 
-            using (var context = new InMemoryRepositoryContextFactory(databaseName).Create())
-            {
-                var repo = new Repository<Customer>(context);
-                var entity = new Customer { Name = "Random Name" };
+            var repo1 = new Repository<Customer>(options);
+            var entity1 = new Customer { Name = "Random Name" };
 
-                repo.Add(entity);
+            repo1.Add(entity1);
 
-                Assert.NotNull(repo.Find(x => x.Name.Equals("Random Name")));
-                Assert.Equal(1, entity.Id);
-            }
+            Assert.NotNull(repo1.Find(x => x.Name.Equals("Random Name")));
+            Assert.Equal(1, entity1.Id);
 
-            using (var context = new InMemoryRepositoryContextFactory(databaseName).Create())
-            {
-                var repo = new Repository<Customer>(context);
-                var entity = new Customer { Name = "Random Name" };
+            var repo2 = new Repository<Customer>(options);
+            var entity2 = new Customer { Name = "Random Name" };
 
-                repo.Add(entity);
+            repo2.Add(entity2);
 
-                Assert.Equal(2, entity.Id);
-                Assert.Equal(2, repo.Count(x => x.Name.Equals("Random Name")));
-            }
+            Assert.Equal(2, entity2.Id);
+            Assert.Equal(2, repo2.Count(x => x.Name.Equals("Random Name")));
 
-            using (var context = new InMemoryRepositoryContextFactory(Guid.NewGuid().ToString()).Create())
-            {
-                var repo = new Repository<Customer>(context);
-                var entity = new Customer { Name = "Random Name" };
+            options = new RepositoryOptionsBuilder()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
 
-                repo.Add(entity);
+            var repo3 = new Repository<Customer>(options);
+            var entity3 = new Customer { Name = "Random Name" };
 
-                Assert.NotNull(repo.Find(x => x.Name.Equals("Random Name")));
-                Assert.Equal(1, entity.Id);
-            }
+            repo3.Add(entity3);
+
+            Assert.NotNull(repo3.Find(x => x.Name.Equals("Random Name")));
+            Assert.Equal(1, entity3.Id);
         }
 
         [Fact]
         public void ThrowsIfDeleteWhenEntityNoInStore()
         {
-            GetRepositoryContextFactories().OfType<InMemoryRepositoryContextFactory>().ToList().ForEach(TestThrowsIfDeleteWhenEntityNoInStore);
-        }
+            var options = new RepositoryOptionsBuilder()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
 
-        [Fact]
-        public void ThrowsIfUpdateWhenEntityNoInStore()
-        {
-            GetRepositoryContextFactories().OfType<InMemoryRepositoryContextFactory>().ToList().ForEach(TestThrowsIfUpdateWhenEntityNoInStore);
-        }
-
-        [Fact]
-        public void ThrowsIfAddingEntityOfSameTypeWithSamePrimaryKeyValue()
-        {
-            GetRepositoryContextFactories().OfType<InMemoryRepositoryContextFactory>().ToList().ForEach(TestThrowsIfAddingEntityOfSameTypeWithSamePrimaryKeyValue);
-        }
-
-        private static void TestThrowsIfDeleteWhenEntityNoInStore(InMemoryRepositoryContextFactory contextFactory)
-        {
-            var repo = new Repository<Customer>(contextFactory.Create());
+            var repo = new Repository<Customer>(options);
 
             var entity = new Customer { Name = "Random Name" };
 
@@ -75,9 +59,14 @@
             Assert.Equal("Attempted to update or delete an entity that does not exist in the in-memory store.", ex.Message);
         }
 
-        private static void TestThrowsIfUpdateWhenEntityNoInStore(InMemoryRepositoryContextFactory contextFactory)
+        [Fact]
+        public void ThrowsIfUpdateWhenEntityNoInStore()
         {
-            var repo = new Repository<Customer>(contextFactory.Create());
+            var options = new RepositoryOptionsBuilder()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             var entity = new Customer { Name = "Random Name" };
 
@@ -85,9 +74,14 @@
             Assert.Equal("Attempted to update or delete an entity that does not exist in the in-memory store.", ex.Message);
         }
 
-        private static void TestThrowsIfAddingEntityOfSameTypeWithSamePrimaryKeyValue(InMemoryRepositoryContextFactory contextFactory)
+        [Fact]
+        public void ThrowsIfAddingEntityOfSameTypeWithSamePrimaryKeyValue()
         {
-            var repo = new Repository<Customer>(contextFactory.Create());
+            var options = new RepositoryOptionsBuilder()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             var entity = new Customer { Name = "Random Name" };
 
