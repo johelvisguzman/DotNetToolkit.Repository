@@ -163,7 +163,7 @@
             using (var command = CreateCommand(cmdText, cmdType, parameters))
             {
                 var connection = command.Connection;
-                var ownsConnection = command.Transaction == null;
+                var ownsConnection = _ownsConnection && command.Transaction == null;
 
                 if (connection.State == ConnectionState.Closed)
                     connection.Open();
@@ -199,7 +199,7 @@
         {
             var command = CreateCommand(cmdText, cmdType, parameters);
             var connection = command.Connection;
-            var ownsConnection = command.Transaction == null;
+            var ownsConnection = _ownsConnection && command.Transaction == null;
 
             if (connection.State == ConnectionState.Closed)
                 connection.Open();
@@ -231,7 +231,7 @@
             using (var command = CreateCommand(cmdText, cmdType, parameters))
             {
                 var connection = command.Connection;
-                var ownsConnection = command.Transaction == null;
+                var ownsConnection = _ownsConnection && command.Transaction == null;
 
                 if (connection.State == ConnectionState.Closed)
                     connection.Open();
@@ -589,7 +589,7 @@
             using (var command = CreateCommand(cmdText, cmdType, parameters))
             {
                 var connection = command.Connection;
-                var ownsConnection = command.Transaction == null;
+                var ownsConnection = _ownsConnection && command.Transaction == null;
 
                 if (connection.State == ConnectionState.Closed)
                     await connection.OpenAsync(cancellationToken);
@@ -627,7 +627,7 @@
         {
             var command = CreateCommand(cmdText, cmdType, parameters);
             var connection = command.Connection;
-            var ownsConnection = command.Transaction == null;
+            var ownsConnection = _ownsConnection && command.Transaction == null;
 
             if (connection.State == ConnectionState.Closed)
                 await connection.OpenAsync(cancellationToken);
@@ -661,7 +661,7 @@
             using (var command = CreateCommand(cmdText, cmdType, parameters))
             {
                 var connection = command.Connection;
-                var ownsConnection = command.Transaction == null;
+                var ownsConnection = _ownsConnection && command.Transaction == null;
 
                 if (connection.State == ConnectionState.Closed)
                     await connection.OpenAsync(cancellationToken);
@@ -1371,7 +1371,7 @@
             {
                 var rows = 0;
                 var connection = command.Connection;
-                var ownsConnection = command.Transaction == null;
+                var ownsConnection = _ownsConnection && command.Transaction == null;
 
                 if (connection.State == ConnectionState.Closed)
                     await connection.OpenAsync(cancellationToken);
@@ -1639,11 +1639,7 @@
         /// <returns>The transaction.</returns>
         public ITransactionManager BeginTransaction()
         {
-            var connection = CreateConnection();
-
-            connection.Open();
-
-            _transaction = connection.BeginTransaction();
+            _transaction = CreateConnection().BeginTransaction();
 
             return new AdoNetTransactionManager(_transaction);
         }

@@ -22,7 +22,8 @@
         #region Fields
 
         private readonly AdoNetRepositoryContext _context;
-        private readonly Dictionary<Type, string> _multiplicitiesMapping = new Dictionary<Type, string>();
+        private readonly Dictionary<Type, bool> _tableCreationMapping = new Dictionary<Type, bool>();
+        private readonly Dictionary<Type, Tuple<string, Type>> _foreignTableCreationMapping = new Dictionary<Type, Tuple<string, Type>>();
 
         #endregion
 
@@ -149,6 +150,30 @@
         #endregion
 
         #region Private Methods
+
+        private bool ExexuteTableExists(Type entityType)
+        {
+            if (entityType == null)
+                throw new ArgumentNullException(nameof(entityType));
+
+            var tableName = entityType.GetTableName();
+            var sql = @"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @tableName";
+            var parameters = new Dictionary<string, object> { { "@tableName", tableName } };
+
+            using (var reader = _context.ExecuteReader(sql, parameters))
+            {
+                var hasRows = false;
+
+                while (reader.Read())
+                {
+                    hasRows = true;
+
+                    break;
+                }
+
+                return hasRows;
+            }
+        }
 
         private void ExecuteTableValidate(Type entityType)
         {
@@ -346,19 +371,74 @@
             if (entityType == null)
                 throw new ArgumentNullException(nameof(entityType));
 
-            var sql = PrepareCreateTableQuery(entityType);
-
-            _context.ExecuteNonQuery(sql);
+            foreach (var item in GetPreparedCreateTableQueriesMapping(entityType))
+            {
+                if (!ExexuteTableExists(item.Key))
+                {
+                    _context.ExecuteNonQuery(item.Value);
+                }
+            }
         }
 
-        private Task ExecuteTableCreateAsync(Type entityType, CancellationToken cancellationToken)
+        private async Task ExecuteTableCreateAsync(Type entityType, CancellationToken cancellationToken)
         {
             if (entityType == null)
                 throw new ArgumentNullException(nameof(entityType));
 
+            foreach (var item in GetPreparedCreateTableQueriesMapping(entityType))
+            {
+                if (!await ExecuteTableExistsAsync(item.Key, cancellationToken: cancellationToken))
+                {
+                    await _context.ExecuteNonQueryAsync(item.Value, cancellationToken: cancellationToken);
+                }
+            }
+        }
+
+        private Dictionary<Type, string> GetPreparedCreateTableQueriesMapping(Type entityType)
+        {
+            _tableCreationMapping[entityType] = true;
+
+            var tableCreationMapping = new Dictionary<Type, string>();
             var sql = PrepareCreateTableQuery(entityType);
 
-            return _context.ExecuteNonQueryAsync(sql, cancellationToken: cancellationToken);
+            // Determines if we need to create a table for the current type and any navigation properties.
+            // If the navigation properties depend on the current type, then current type should be created first;
+            // otherwise, create the foreign tables sequentially
+            foreach (var item in _foreignTableCreationMapping)
+            {
+                var requiredType = item.Value.Item2;
+
+                if (requiredType != default(Type))
+                {
+                    if (_foreignTableCreationMapping.ContainsKey(requiredType))
+                    {
+                        var m = _foreignTableCreationMapping[requiredType];
+                        var foreignRequiredType = m.Item2;
+                        var foreignRequiredSql = m.Item1;
+
+                        if (foreignRequiredType == entityType)
+                            tableCreationMapping.Add(entityType, sql);
+
+                        tableCreationMapping.Add(requiredType, foreignRequiredSql);
+                    }
+                    else if (requiredType == entityType && !tableCreationMapping.ContainsKey(entityType))
+                    {
+                        tableCreationMapping.Add(entityType, sql);
+                    }
+                }
+
+                if (!tableCreationMapping.ContainsKey(item.Key))
+                {
+                    tableCreationMapping.Add(item.Key, item.Value.Item1);
+                }
+            }
+
+            if (!tableCreationMapping.ContainsKey(entityType))
+            {
+                tableCreationMapping.Add(entityType, sql);
+            }
+
+            return tableCreationMapping;
         }
 
         private string PrepareCreateTableQuery(Type entityType)
@@ -375,29 +455,7 @@
             }
 
             // Check if has composite foreign keys (more than one key for a given navigation property), and if so, it needs to defined an ordering
-            var foreignNavigationPropertyInfos = entityType.GetRuntimeProperties().Where(x => x.IsComplex());
-            var foreignKeyPropertyInfosMapping = new Dictionary<string, PropertyInfo>();
-
-            foreach (var pi in foreignNavigationPropertyInfos)
-            {
-                var foreignKeyPropertyInfos = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(entityType, pi.PropertyType);
-                if (foreignKeyPropertyInfos.Any())
-                {
-                    if (foreignKeyPropertyInfos.Count() > 1)
-                    {
-                        var keysHaveNoOrdering = foreignKeyPropertyInfos.Any(x => x.GetCustomAttribute<ColumnAttribute>() == null);
-                        if (keysHaveNoOrdering)
-                            throw new InvalidOperationException(string.Format(Resources.UnableToDetermineCompositePrimaryKeyOrdering, "foreign", entityType.FullName));
-                    }
-
-                    var dict = foreignKeyPropertyInfos.ToDictionary(ModelConventionHelper.GetColumnName, x => pi);
-
-                    foreach (var item in dict)
-                    {
-                        foreignKeyPropertyInfosMapping.Add(item.Key, item.Value);
-                    }
-                }
-            }
+            var keyMappingFromSource = GetForeignKeyPropertyInfosMapping(entityType, false);
 
             var propertiesMapping = entityType
                 .GetRuntimeProperties()
@@ -413,6 +471,61 @@
             var sb = new StringBuilder();
 
             sb.Append($"CREATE TABLE {tableName} (");
+
+            Action<string, PropertyInfo, bool> foreignKeyConstraintAction = (foreignKeyName, foreignNavigationPropertyInfo, getFromForeign) =>
+            {
+                //var foreignNavigationPropertyInfo = keyMappingsFromForeign[foreignKeyName];
+                var foreignNavigationType = foreignNavigationPropertyInfo.PropertyType;
+
+                // The current type has the principal
+                var hasPrincipal = foreignNavigationPropertyInfo.GetCustomAttribute<RequiredAttribute>() != null;
+
+                // The dependent type has the principal
+                var dependent = GetForeignKeyPropertyInfosMapping(foreignNavigationType, getFromForeign)
+                    .SingleOrDefault(x => x.Key == foreignKeyName && x.Value.PropertyType == entityType)
+                    .Value;
+
+                bool? dependentHasPrincipal = null;
+
+                if (dependent != null)
+                {
+                    dependentHasPrincipal = dependent.GetCustomAttribute<RequiredAttribute>() != null;
+
+                    if (!dependentHasPrincipal == true && !hasPrincipal)
+                    {
+                        throw new InvalidOperationException(
+                            string.Format(Resources.UnableToDeterminePrincipal, foreignNavigationType.FullName, entityType.FullName));
+                    }
+                }
+
+                if (!_tableCreationMapping.ContainsKey(foreignNavigationType))
+                {
+                    _tableCreationMapping[foreignNavigationType] = true;
+
+                    var sql = PrepareCreateTableQuery(foreignNavigationType);
+
+                    if (dependentHasPrincipal == true)
+                        _foreignTableCreationMapping[foreignNavigationType] = Tuple.Create(sql, entityType);
+                    else
+                        _foreignTableCreationMapping[foreignNavigationType] = Tuple.Create(sql, default(Type));
+                }
+
+                if (hasPrincipal)
+                {
+                    var foreignNavigationTableName = foreignNavigationType.GetTableName();
+                    var foreignPrimaryKeyColumnNames = PrimaryKeyConventionHelper
+                        .GetPrimaryKeyPropertyInfos(foreignNavigationType)
+                        .Select(x => x.GetColumnName());
+                    var foreignPrimaryKeyColumnName = foreignPrimaryKeyColumnNames.ElementAt(foreignKeyOrder++);
+
+                    if (!foreignKeyConstraints.ContainsKey(foreignNavigationTableName))
+                    {
+                        foreignKeyConstraints[foreignNavigationTableName] = new List<Tuple<string, string>>();
+                    }
+
+                    foreignKeyConstraints[foreignNavigationTableName].Add(Tuple.Create(foreignKeyName, foreignPrimaryKeyColumnName)); /**/
+                }
+            };
 
             foreach (var item in propertiesMapping)
             {
@@ -452,34 +565,10 @@
                 {
                     primaryKeyConstraints.Add(item.Key);
                 }
-                else if (foreignKeyPropertyInfosMapping.ContainsKey(item.Key))
+                else if (keyMappingFromSource.ContainsKey(item.Key))
                 {
-                    var foreignNavigationPropertyInfo = foreignKeyPropertyInfosMapping[item.Key];
-                    var foreignNavigationType = foreignNavigationPropertyInfo.PropertyType;
-
-                    if (_multiplicitiesMapping.ContainsKey(foreignNavigationType))
-                        throw new InvalidOperationException(string.Format(Resources.ConflictingMultiplicities,
-                            _multiplicitiesMapping[foreignNavigationType], foreignNavigationType.FullName));
-
-                    _multiplicitiesMapping[entityType] = foreignNavigationPropertyInfo.Name;
-
-                    // In order to do a foreign key constraint, we need to ensure that the foreign table exists
-                    if (!ExexuteTableExists(foreignNavigationType))
-                    {
-                        ExexuteTableCreate(foreignNavigationType);
-                    }
-
-                    var foreignNavigationTableName = foreignNavigationType.GetTableName();
-                    var foreignPrimaryKeyColumnNames = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(foreignNavigationType)
-                        .Select(x => x.GetColumnName());
-                    var foreignPrimaryKeyColumnName = foreignPrimaryKeyColumnNames.ElementAt(foreignKeyOrder++);
-
-                    if (!foreignKeyConstraints.ContainsKey(foreignNavigationTableName))
-                    {
-                        foreignKeyConstraints[foreignNavigationTableName] = new List<Tuple<string, string>>();
-                    }
-
-                    foreignKeyConstraints[foreignNavigationTableName].Add(Tuple.Create(item.Key, foreignPrimaryKeyColumnName));
+                    // by the column name
+                    foreignKeyConstraintAction(item.Key, keyMappingFromSource[item.Key], true);
                 }
 
                 sb.Length -= 1;
@@ -489,6 +578,19 @@
             if (primaryKeyConstraints.Count > 0)
             {
                 sb.Append($"\n\tCONSTRAINT PK_{tableName} PRIMARY KEY({string.Join(", ", primaryKeyConstraints)}),");
+            }
+
+            if (!foreignKeyConstraints.Any())
+            {
+                var primaryKeyPropertyInfo = primaryKeyPropertyInfosMapping.First().Value;
+                var primaryKeyName = primaryKeyPropertyInfo.GetColumnName();
+
+                var keyMappingFromForeign = GetForeignKeyPropertyInfosMapping(entityType, true);
+
+                // check by naming convention if no foreign key column was found
+                var key = $"{entityType.Name}{primaryKeyName}";
+                if (keyMappingFromForeign.ContainsKey(key))
+                    foreignKeyConstraintAction(key, keyMappingFromForeign[key], false);
             }
 
             if (foreignKeyConstraints.Count > 0)
@@ -506,33 +608,42 @@
             }
 
             sb.Length -= 1;
-            sb.Append("\n)");
+            sb.Append("\n);");
 
             return sb.ToString();
         }
 
-        private bool ExexuteTableExists(Type entityType)
+        private static Dictionary<string, PropertyInfo> GetForeignKeyPropertyInfosMapping(Type entityType, bool getFromForeign)
         {
-            if (entityType == null)
-                throw new ArgumentNullException(nameof(entityType));
+            var foreignNavigationPropertyInfos = entityType.GetRuntimeProperties().Where(x => x.IsComplex());
+            var foreignKeyPropertyInfosMapping = new Dictionary<string, PropertyInfo>();
 
-            var tableName = entityType.GetTableName();
-            var sql = @"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @tableName";
-            var parameters = new Dictionary<string, object> { { "@tableName", tableName } };
-
-            using (var reader = _context.ExecuteReader(sql, parameters))
+            foreach (var pi in foreignNavigationPropertyInfos)
             {
-                var hasRows = false;
+                var foreignKeyPropertyInfos = getFromForeign
+                    ? ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(pi.PropertyType, entityType)
+                    : ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(entityType, pi.PropertyType);
 
-                while (reader.Read())
+                if (foreignKeyPropertyInfos.Any())
                 {
-                    hasRows = true;
+                    if (foreignKeyPropertyInfos.Count() > 1)
+                    {
+                        var keysHaveNoOrdering = foreignKeyPropertyInfos.Any(x => x.GetCustomAttribute<ColumnAttribute>() == null);
+                        if (keysHaveNoOrdering)
+                            throw new InvalidOperationException(string.Format(
+                                Resources.UnableToDetermineCompositePrimaryKeyOrdering, "foreign", entityType.FullName));
+                    }
 
-                    break;
+                    var dict = foreignKeyPropertyInfos.ToDictionary(ModelConventionHelper.GetColumnName, x => pi);
+
+                    foreach (var item in dict)
+                    {
+                        foreignKeyPropertyInfosMapping.Add(item.Key, item.Value);
+                    }
                 }
-
-                return hasRows;
             }
+
+            return foreignKeyPropertyInfosMapping;
         }
 
         private async Task<bool> ExecuteTableExistsAsync(Type entityType, CancellationToken cancellationToken)
