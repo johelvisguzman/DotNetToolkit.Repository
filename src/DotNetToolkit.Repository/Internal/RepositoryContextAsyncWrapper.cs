@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Wrappers
+﻿namespace DotNetToolkit.Repository.Internal
 {
     using Configuration;
     using Queries;
@@ -17,7 +17,7 @@
     /// </summary>
     /// <seealso cref="IRepositoryContextAsync" />
     [ComVisible(false)]
-    internal class RepositoryContextAsync : IRepositoryContextAsync
+    internal class RepositoryContextAsyncWrapper : IRepositoryContextAsync
     {
         #region Fields
 
@@ -28,10 +28,10 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryContextAsync"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryContextAsyncWrapper"/> class.
         /// </summary>
         /// <param name="context">The underlying repository context.</param>
-        public RepositoryContextAsync(IRepositoryContext context)
+        public RepositoryContextAsyncWrapper(IRepositoryContext context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));

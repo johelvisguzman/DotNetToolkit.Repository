@@ -20,19 +20,12 @@
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
-    using Wrappers;
 
     /// <summary>
     /// An implementation of <see cref="IRepository{TEntity, TKey1, TKey2, TKey3}" />.
     /// </summary>
     public abstract class RepositoryBase<TEntity, TKey1, TKey2, TKey3> : RepositoryBase<TEntity>, IRepository<TEntity, TKey1, TKey2, TKey3> where TEntity : class
     {
-        #region Fields
-
-        private IReadOnlyRepository<TEntity, TKey1, TKey2, TKey3> _wrapper;
-
-        #endregion
-
         #region Constructors
 
         /// <summary>
@@ -44,15 +37,6 @@
         #endregion
 
         #region Implementation of IRepository<TEntity, TKey1, TKey2, TKey3>
-
-        /// <summary>
-        /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey1, TKey2, TKey3}" /> wrapper for the current repository.
-        /// </summary>
-        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
-        public IReadOnlyRepository<TEntity, TKey1, TKey2, TKey3> AsReadOnly()
-        {
-            return _wrapper ?? (_wrapper = new ReadOnlyRepository<TEntity, TKey1, TKey2, TKey3>(this));
-        }
 
         /// <summary>
         /// Deletes an entity with the given composite primary key values in the repository.
@@ -218,12 +202,6 @@
     /// </summary>
     public abstract class RepositoryBase<TEntity, TKey1, TKey2> : RepositoryBase<TEntity>, IRepository<TEntity, TKey1, TKey2> where TEntity : class
     {
-        #region Fields
-
-        private IReadOnlyRepository<TEntity, TKey1, TKey2> _wrapper;
-
-        #endregion
-
         #region Constructors
 
         /// <summary>
@@ -235,15 +213,6 @@
         #endregion
 
         #region Implementation of IRepository<TEntity, TKey1, TKey2>
-
-        /// <summary>
-        /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey1, TKey2}" /> wrapper for the current repository.
-        /// </summary>
-        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
-        public IReadOnlyRepository<TEntity, TKey1, TKey2> AsReadOnly()
-        {
-            return _wrapper ?? (_wrapper = new ReadOnlyRepository<TEntity, TKey1, TKey2>(this));
-        }
 
         /// <summary>
         /// Deletes an entity with the given composite primary key values in the repository.
@@ -399,12 +368,6 @@
     /// </summary>
     public abstract class RepositoryBase<TEntity, TKey> : RepositoryBase<TEntity>, IRepository<TEntity, TKey> where TEntity : class
     {
-        #region Fields
-
-        private IReadOnlyRepository<TEntity, TKey> _wrapper;
-
-        #endregion
-
         #region Constructors
 
         /// <summary>
@@ -417,16 +380,7 @@
 
         #region Implementation of IRepository<TEntity, TKey>
 
-        /// <summary>
-        /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey}" /> wrapper for the current repository.
-        /// </summary>
-        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
-        public IReadOnlyRepository<TEntity, TKey> AsReadOnly()
-        {
-            return _wrapper ?? (_wrapper = new ReadOnlyRepository<TEntity, TKey>(this));
-        }
-
-        /// <summary>
+       /// <summary>
         /// Deletes an entity with the given primary key value in the repository.
         /// </summary>
         /// <param name="key">The value of the primary key used to match entities against.</param>
@@ -591,7 +545,7 @@
         /// </summary>
         internal IRepositoryContext Context
         {
-            get { return _context ?? (_context = new RepositoryContextAsync(_contextFactory.Create())); }
+            get { return _context ?? (_context = new RepositoryContextAsyncWrapper(_contextFactory.Create())); }
         }
 
         #endregion
