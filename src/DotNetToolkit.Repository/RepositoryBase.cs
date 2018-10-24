@@ -595,11 +595,11 @@
         /// <param name="optionsBuilder">A builder used to create or modify options for this repository.</param>
         protected virtual void OnConfiguring(RepositoryOptionsBuilder optionsBuilder) { }
 
-        /// <summary>
-        /// Executes the specified interceptor activity.
-        /// </summary>
-        /// <param name="action">The action to be executed.</param>
-        protected void Intercept(Action<IRepositoryInterceptor> action)
+        #endregion
+
+        #region Internal Methods
+
+        internal void Intercept(Action<IRepositoryInterceptor> action)
         {
             foreach (var interceptor in GetInterceptors())
             {
@@ -607,13 +607,7 @@
             }
         }
 
-        /// <summary>
-        /// Intercepts any errors that occurred while performing the specified action.
-        /// </summary>
-        /// <typeparam name="T">The type of the result returned by the specified action.</typeparam>
-        /// <param name="action">The action.</param>
-        /// <returns>The result of the performed action.</returns>
-        protected T InterceptError<T>(Func<T> action)
+        internal T InterceptError<T>(Func<T> action)
         {
             try
             {
@@ -631,13 +625,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously intercepts any errors that occurred while performing the specified action.
-        /// </summary>
-        /// <typeparam name="T">The type of the result returned by the specified action.</typeparam>
-        /// <param name="action">The action.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the result of the performed action.</returns>
-        protected async Task<T> InterceptErrorAsync<T>(Func<Task<T>> action)
+        internal async Task<T> InterceptErrorAsync<T>(Func<Task<T>> action)
         {
             try
             {
@@ -655,11 +643,7 @@
             }
         }
 
-        /// <summary>
-        /// Intercepts any errors that occurred while performing the specified action.
-        /// </summary>
-        /// <param name="action">The action.</param>
-        protected void InterceptError(Action action)
+        internal void InterceptError(Action action)
         {
             try
             {
@@ -677,24 +661,14 @@
             }
         }
 
-        /// <summary>
-        /// Intercepts the query result that was executed while performing the specified action.
-        /// </summary>
-        /// <typeparam name="T">The type of the result returned by the specified action.</typeparam>
-        /// <param name="action">The action.</param>
-        protected T InterceptQueryResult<T>(Func<QueryResult<T>> action)
+        internal T InterceptQueryResult<T>(Func<QueryResult<T>> action)
         {
             var queryResult = InterceptError<QueryResult<T>>(action);
 
             return queryResult.HasResult ? queryResult.Result : default(T);
         }
 
-        /// <summary>
-        /// Asynchronously intercepts the query result that was executed while performing the specified action.
-        /// </summary>
-        /// <typeparam name="T">The type of the result returned by the specified action.</typeparam>
-        /// <param name="action">The action.</param>
-        protected async Task<T> InterceptQueryResultAsync<T>(Func<Task<QueryResult<T>>> action)
+        internal async Task<T> InterceptQueryResultAsync<T>(Func<Task<QueryResult<T>>> action)
         {
             var queryResult = await InterceptErrorAsync<QueryResult<T>>(action);
 
