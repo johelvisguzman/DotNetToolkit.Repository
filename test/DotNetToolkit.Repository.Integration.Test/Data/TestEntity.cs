@@ -33,14 +33,17 @@
         public string City { get; set; }
         public string State { get; set; }
         public int CustomerId { get; set; }
+        [Required]
         public Customer Customer { get; set; }
     }
 
     public class CustomerWithTwoCompositePrimaryKey
     {
         [Key]
+        [Column(Order = 1)]
         public int Id1 { get; set; }
         [Key]
+        [Column(Order = 2)]
         public int Id2 { get; set; }
         public string Name { get; set; }
     }
@@ -48,10 +51,13 @@
     public class CustomerWithThreeCompositePrimaryKey
     {
         [Key]
+        [Column(Order = 1)]
         public int Id1 { get; set; }
         [Key]
+        [Column(Order = 2)]
         public int Id2 { get; set; }
         [Key]
+        [Column(Order = 3)]
         public int Id3 { get; set; }
         public string Name { get; set; }
     }

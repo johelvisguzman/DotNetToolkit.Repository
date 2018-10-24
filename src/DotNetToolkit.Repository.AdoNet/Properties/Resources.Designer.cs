@@ -133,6 +133,15 @@ namespace DotNetToolkit.Repository.AdoNet.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to determine the principal end of an association between the types &apos;{0}&apos; and &apos;{1}&apos;. The principal end of this association must be explicitly configured using data annotations..
+        /// </summary>
+        internal static string UnableToDeterminePrincipal {
+            get {
+                return ResourceManager.GetString("UnableToDeterminePrincipal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to retrieve DbProviderFactory for: {0.
         /// </summary>
         internal static string UnableToRetrieveDbProviderFactoryForm {

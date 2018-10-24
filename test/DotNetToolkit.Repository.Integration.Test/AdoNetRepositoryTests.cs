@@ -13,8 +13,6 @@
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Data;
-    using System.Data.SqlServerCe;
-    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
     using Xunit;
@@ -24,54 +22,8 @@
         [Fact]
         public void CanUseExistingConnection()
         {
-            var currentFile = TestPathHelper.GetTempFileName();
-
-            var provider = "System.Data.SqlServerCe.4.0";
-            var connectionString = $"Data Source={currentFile};Persist Security Info=False";
-
-            if (File.Exists(currentFile))
-                File.Delete(currentFile);
-
-            new SqlCeEngine(connectionString).CreateDatabase();
-
-            /* TODO: MULTIPLICITY ISSUE WHEN CREATING CUSTOMERS
-               I was not able to get by without creating the CustomerAddresses and Customers.
-               There seems to be an issue with the SchemaTableConfigurationHelper... Needs to comeback to it */
-            var factory = DbProviderFactories.GetFactory(provider);
-
-            var connection = factory.CreateConnection();
-
-            connection.ConnectionString = connectionString;
-            connection.Open();
-
-            using (var command = factory.CreateCommand())
-            {
-                command.CommandType = CommandType.Text;
-                command.Connection = connection;
-                command.CommandText = @"CREATE TABLE CustomerAddresses (
-                                            Id int IDENTITY PRIMARY KEY,
-                                            Street nvarchar (100),
-                                            City nvarchar (100),
-                                            State nvarchar (2),
-                                            CustomerId int)";
-
-                command.ExecuteNonQuery();
-            }
-
-            using (var command = factory.CreateCommand())
-            {
-                command.CommandType = CommandType.Text;
-                command.Connection = connection;
-                command.CommandText = @"CREATE TABLE Customers (
-                                            Id int IDENTITY PRIMARY KEY,
-                                            Name nvarchar (100),
-                                            AddressId int)";
-
-                command.ExecuteNonQuery();
-            }
-
             var optionsBulder = new RepositoryOptionsBuilder()
-                .UseAdoNet(connection);
+                .UseAdoNet(TestAdoNetContextFactory.CreateConnection());
 
             var repo = new Repository<Data.Customer>(optionsBulder.Options);
 
@@ -159,8 +111,8 @@
                 Customer = entity
             };
 
-            addressRepo.Add(address);
             customerRepo.Add(entity);
+            addressRepo.Add(address);
 
             TestCustomerAddress(address, customerRepo.Find(customerKey, customerFetchStrategy).Address);
 
@@ -1427,11 +1379,56 @@
         [Fact]
         public void ThrowsIfSchemaTableColumnsMismatchOnSaveChanges()
         {
+            var connection = TestAdoNetContextFactory.CreateConnection();
             var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseAdoNet(connection)
                 .Options;
 
             var repoFactory = new RepositoryFactory(options);
+
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandType = CommandType.Text;
+                command.Connection = connection;
+                command.CommandText = @"CREATE TABLE CustomersColumnNameMismatch (
+                                        Id int IDENTITY PRIMARY KEY,
+                                        Name nvarchar (100))";
+
+                command.ExecuteNonQuery();
+            }
+
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandType = CommandType.Text;
+                command.Connection = connection;
+                command.CommandText = @"CREATE TABLE CustomersColumnNameMissing (
+                                        Id int IDENTITY PRIMARY KEY,
+                                        Name nvarchar (100))";
+
+                command.ExecuteNonQuery();
+            }
+
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandType = CommandType.Text;
+                command.Connection = connection;
+                command.CommandText = @"CREATE TABLE CustomersKeyMismatch (
+                                        Id int,
+                                        Id1 int IDENTITY PRIMARY KEY)";
+
+                command.ExecuteNonQuery();
+            }
+
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandType = CommandType.Text;
+                command.Connection = connection;
+                command.CommandText = @"CREATE TABLE CustomersColumnRequiredMissing (
+                                        Id int IDENTITY PRIMARY KEY,
+                                        Name nvarchar (100) NOT NULL)";
+
+                command.ExecuteNonQuery();
+            }
 
             var ex = Assert.Throws<InvalidOperationException>(() => repoFactory.Create<CustomerColumnNameMismatch>().Add(new CustomerColumnNameMismatch()));
             Assert.Equal($"The model '{typeof(CustomerColumnNameMismatch).Name}' has changed since the database was created. Consider updating the database.", ex.Message);
@@ -1450,59 +1447,128 @@
         public void ThrowsIfThrowsIfSchemaTableForeignKeyAttributeOnPropertyNotFoundOnDependentType()
         {
             var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(TestAdoNetContextFactory.Create())
+                .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
                 .Options;
 
             var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType>(options).Add(new CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType()));
             Assert.Equal($"The ForeignKeyAttribute on property 'Address' on type '{typeof(CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType).FullName}' is not valid. The foreign key name 'AddressId' was not found on the dependent type '{typeof(CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType).FullName}'. The Name value should be a comma separated list of foreign key property names.", ex.Message);
-
         }
 
         [Fact]
         public void CreateTableOnSaveChanges()
         {
+            //
             var contextFactory = TestAdoNetContextFactory.Create();
-
+            var schemaHelper = new SchemaTableConfigurationHelper((AdoNetRepositoryContext)contextFactory.Create());
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(contextFactory)
                 .Options;
+            var classARepo = new Repository<ClassA>(options);
 
-            var context = (AdoNetRepositoryContext)contextFactory.Create();
-            var schemaHelper = new SchemaTableConfigurationHelper(context);
-            var repoFactory = new RepositoryFactory(options);
+            Assert.False(schemaHelper.ExexuteTableExists<ClassB>());
+            Assert.False(schemaHelper.ExexuteTableExists<ClassC>());
+            Assert.Equal(0, classARepo.Count());
 
-            Assert.False(schemaHelper.ExexuteTableExists<CustomerNotCreated>());
-            Assert.False(schemaHelper.ExexuteTableExists<CustomerAddressNotCreated>());
+            classARepo.Add(new ClassA());
 
-            var repo = repoFactory.Create<CustomerNotCreated>();
+            Assert.True(schemaHelper.ExexuteTableExists<ClassB>());
+            Assert.True(schemaHelper.ExexuteTableExists<ClassC>());
+            Assert.Equal(1, classARepo.Count());
 
-            // Needs to create foreign table since the CustomerNotCreated table needs it
-            repoFactory.Create<CustomerAddressNotCreated>()
-                .Add(new CustomerAddressNotCreated
-                {
-                    Id1 = 1,
-                    Id2 = 1,
-                    State = "ST",
-                    Street1 = "Street 1",
-                    City = "City"
-                });
+            //
+            contextFactory = TestAdoNetContextFactory.Create();
+            schemaHelper = new SchemaTableConfigurationHelper((AdoNetRepositoryContext)contextFactory.Create());
+            options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(contextFactory)
+                .Options;
 
-            repo.Add(new CustomerNotCreated { Name = "Random Name", AddressId1 = 1, AddressId2 = 1 });
+            Assert.False(schemaHelper.ExexuteTableExists<ClassA>());
+            Assert.False(schemaHelper.ExexuteTableExists<ClassC>());
 
-            Assert.True(schemaHelper.ExexuteTableExists<CustomerNotCreated>());
+            var ex = Assert.Throws<System.Data.SqlServerCe.SqlCeException>(() => new Repository<ClassB>(options).Add(new ClassB()));
+            Assert.Equal("A foreign key value cannot be inserted because a corresponding primary key value does not exist. [ Foreign key constraint name = FK_ClassAs ]", ex.Message);
 
-            // the customer address is a navigation property of the customer table, and so, it will be created as well
-            Assert.True(schemaHelper.ExexuteTableExists<CustomerAddressNotCreated>());
+            Assert.True(schemaHelper.ExexuteTableExists<ClassA>());
+            Assert.True(schemaHelper.ExexuteTableExists<ClassC>());
 
-            schemaHelper.ExecuteTableValidate<CustomerNotCreated>();
-            schemaHelper.ExecuteTableValidate<CustomerAddressNotCreated>();
+            new Repository<ClassA>(options).Add(new ClassA { Id = 1 });
+
+            var classBRepo = new Repository<ClassB>(options);
+
+            Assert.Equal(0, classBRepo.Count());
+
+            classBRepo.Add(new ClassB() { ClassAId = 1 });
+
+            Assert.Equal(1, classBRepo.Count());
+
+            //
+            contextFactory = TestAdoNetContextFactory.Create();
+            schemaHelper = new SchemaTableConfigurationHelper((AdoNetRepositoryContext)contextFactory.Create());
+            options = new RepositoryOptionsBuilder()
+                .UseInternalContextFactory(contextFactory)
+                .Options;
+
+            Assert.False(schemaHelper.ExexuteTableExists<ClassA>());
+            Assert.False(schemaHelper.ExexuteTableExists<ClassB>());
+
+            ex = Assert.Throws<System.Data.SqlServerCe.SqlCeException>(() => new Repository<ClassC>(options).Add(new ClassC()));
+            Assert.Equal("A foreign key value cannot be inserted because a corresponding primary key value does not exist. [ Foreign key constraint name = FK_ClassBs ]", ex.Message);
+
+            Assert.True(schemaHelper.ExexuteTableExists<ClassA>());
+            Assert.True(schemaHelper.ExexuteTableExists<ClassB>());
+
+            ex = Assert.Throws<System.Data.SqlServerCe.SqlCeException>(() => new Repository<ClassB>(options).Add(new ClassB { Id = 1 }));
+            Assert.Equal("A foreign key value cannot be inserted because a corresponding primary key value does not exist. [ Foreign key constraint name = FK_ClassAs ]", ex.Message);
+
+            new Repository<ClassA>(options).Add(new ClassA { Id = 1 });
+            new Repository<ClassB>(options).Add(new ClassB { Id = 1, ClassAId = 1 });
+
+            var classCRepo = new Repository<ClassC>(options);
+
+            Assert.Equal(0, classCRepo.Count());
+
+            classCRepo.Add(new ClassC() { ClassBId = 1 });
+
+            Assert.Equal(1, classCRepo.Count());
+        }
+
+        [Fact]
+        public void ThrowsIfUnableToDeterminePrincipalOnSaveChanges()
+        {
+            var options = new RepositoryOptionsBuilder()
+                .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
+                .Options;
+
+            var ex = Assert.Throws<InvalidOperationException>(() => new Repository<ClassD>(options).Add(new ClassD()));
+            Assert.Equal($"Unable to determine the principal end of an association between the types '{typeof(ClassE).FullName}' and '{typeof(ClassD).FullName}'. The principal end of this association must be explicitly configured using data annotations.", ex.Message);
+
+            options = new RepositoryOptionsBuilder()
+                .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
+                .Options;
+
+            ex = Assert.Throws<InvalidOperationException>(() => new Repository<ClassE>(options).Add(new ClassE()));
+            Assert.Equal($"Unable to determine the principal end of an association between the types '{typeof(ClassD).FullName}' and '{typeof(ClassE).FullName}'. The principal end of this association must be explicitly configured using data annotations.", ex.Message);
+
+            options = new RepositoryOptionsBuilder()
+                .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
+                .Options;
+
+            ex = Assert.Throws<InvalidOperationException>(() => new Repository<ClassF>(options).Add(new ClassF()));
+            Assert.Equal($"Unable to determine the principal end of an association between the types '{typeof(ClassG).FullName}' and '{typeof(ClassF).FullName}'. The principal end of this association must be explicitly configured using data annotations.", ex.Message);
+
+            options = new RepositoryOptionsBuilder()
+                .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
+                .Options;
+
+            ex = Assert.Throws<InvalidOperationException>(() => new Repository<ClassG>(options).Add(new ClassG()));
+            Assert.Equal($"Unable to determine the principal end of an association between the types '{typeof(ClassF).FullName}' and '{typeof(ClassG).FullName}'. The principal end of this association must be explicitly configured using data annotations.", ex.Message);
         }
 
         [Fact]
         public void ThrowsIfUnableToDetermineCompositePrimaryKeyOrderingOnSaveChanges()
         {
             var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(TestAdoNetContextFactory.Create())
+                .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
                 .Options;
 
             var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering>(options).Add(new CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering()));
@@ -1513,7 +1579,7 @@
         public void ThrowsIfUnableToDetermineCompositeForeignKeyOrderingOnSaveChanges()
         {
             var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(TestAdoNetContextFactory.Create())
+                .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
                 .Options;
 
             var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerWithTwoCompositeForeignKeyAndNoOrdering>(options).Add(new CustomerWithTwoCompositeForeignKeyAndNoOrdering()));
@@ -1737,6 +1803,7 @@
             public string City { get; set; }
             public string State { get; set; }
             public int CustomerId { get; set; }
+            [Required]
             public Customer Customer { get; set; }
         }
 
@@ -1744,8 +1811,10 @@
         class CustomerCompositeAddress
         {
             [Key]
+            [Column(Order = 1)]
             public int Id { get; set; }
             [Key]
+            [Column(Order = 2)]
             public int CustomerId { get; set; }
             public string Street { get; set; }
             public string City { get; set; }
@@ -1763,6 +1832,7 @@
             [ForeignKey("Customer")]
             [Column("CustomerId")]
             public int CustomerKey { get; set; }
+            [Required]
             public CustomerWithForeignKeyAnnotationOnForeignKey Customer { get; set; }
         }
 
@@ -1834,6 +1904,7 @@
             public string City { get; set; }
             public string State { get; set; }
             public int CustomerId { get; set; }
+            [Required]
             public CustomerWithTwoCompositePrimaryKey Customer { get; set; }
         }
 
@@ -1919,6 +1990,71 @@
             public string State { get; set; }
             public int CustomerId { get; set; }
             public CustomerWithMultipleAddresses Customer { get; set; }
+        }
+
+        class ClassA
+        {
+            [Key]
+            [DatabaseGenerated(DatabaseGeneratedOption.None)]
+            public int Id { get; set; }
+            public string NameA { get; set; }
+            public ClassB ClassB { get; set; }
+        }
+
+        class ClassB
+        {
+            [Key]
+            [DatabaseGenerated(DatabaseGeneratedOption.None)]
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public int ClassAId { get; set; }
+            public int ClassCId { get; set; }
+            [Required]
+            public ClassA ClassA { get; set; }
+            public ClassC ClassC { get; set; }
+        }
+
+        class ClassC
+        {
+            [Key]
+            [DatabaseGenerated(DatabaseGeneratedOption.None)]
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public int ClassBId { get; set; }
+            [Required]
+            public ClassB ClassB { get; set; }
+        }
+
+        class ClassD
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public int ClassEId { get; set; }
+            public ClassE ClassE { get; set; }
+        }
+
+        class ClassE
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public int ClassDId { get; set; }
+            public ClassD ClassD { get; set; }
+        }
+
+        class ClassF
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public int ClassGId { get; set; }
+            public ClassG ClassG { get; set; }
+        }
+
+        class ClassG
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public int ClassFId { get; set; }
+            public ClassF ClassF { get; set; }
         }
     }
 }

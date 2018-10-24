@@ -163,7 +163,7 @@
             using (var command = CreateCommand(cmdText, cmdType, parameters))
             {
                 var connection = command.Connection;
-                var ownsConnection = command.Transaction == null;
+                var ownsConnection = _ownsConnection && command.Transaction == null;
 
                 if (connection.State == ConnectionState.Closed)
                     connection.Open();
@@ -199,7 +199,7 @@
         {
             var command = CreateCommand(cmdText, cmdType, parameters);
             var connection = command.Connection;
-            var ownsConnection = command.Transaction == null;
+            var ownsConnection = _ownsConnection && command.Transaction == null;
 
             if (connection.State == ConnectionState.Closed)
                 connection.Open();
@@ -231,7 +231,7 @@
             using (var command = CreateCommand(cmdText, cmdType, parameters))
             {
                 var connection = command.Connection;
-                var ownsConnection = command.Transaction == null;
+                var ownsConnection = _ownsConnection && command.Transaction == null;
 
                 if (connection.State == ConnectionState.Closed)
                     connection.Open();
@@ -589,7 +589,7 @@
             using (var command = CreateCommand(cmdText, cmdType, parameters))
             {
                 var connection = command.Connection;
-                var ownsConnection = command.Transaction == null;
+                var ownsConnection = _ownsConnection && command.Transaction == null;
 
                 if (connection.State == ConnectionState.Closed)
                     await connection.OpenAsync(cancellationToken);
@@ -627,7 +627,7 @@
         {
             var command = CreateCommand(cmdText, cmdType, parameters);
             var connection = command.Connection;
-            var ownsConnection = command.Transaction == null;
+            var ownsConnection = _ownsConnection && command.Transaction == null;
 
             if (connection.State == ConnectionState.Closed)
                 await connection.OpenAsync(cancellationToken);
@@ -661,7 +661,7 @@
             using (var command = CreateCommand(cmdText, cmdType, parameters))
             {
                 var connection = command.Connection;
-                var ownsConnection = command.Transaction == null;
+                var ownsConnection = _ownsConnection && command.Transaction == null;
 
                 if (connection.State == ConnectionState.Closed)
                     await connection.OpenAsync(cancellationToken);
@@ -1357,6 +1357,26 @@
                 throw new ArgumentException(DotNetToolkit.Repository.Properties.Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
         }
 
+        private async Task OnSchemaValidationAsync(Type entityType, CancellationToken cancellationToken)
+        {
+            // Performs some schema validation for this type (either creates the table if does not exist, or validates)
+            if (!_schemaValidationTypeMapping.ContainsKey(entityType))
+            {
+                try { await _schemaConfigHelper.ExecuteSchemaValidateAsync(entityType, cancellationToken); }
+                finally { _schemaValidationTypeMapping[entityType] = true; }
+            }
+        }
+
+        private void OnSchemaValidation(Type entityType)
+        {
+            // Performs some schema validation for this type (either creates the table if does not exist, or validates)
+            if (!_schemaValidationTypeMapping.ContainsKey(entityType))
+            {
+                try { _schemaConfigHelper.ExecuteSchemaValidate(entityType); }
+                finally { _schemaValidationTypeMapping[entityType] = true; }
+            }
+        }
+
         #endregion
 
         #region Implementation of IRepositoryContextAsync
@@ -1371,7 +1391,7 @@
             {
                 var rows = 0;
                 var connection = command.Connection;
-                var ownsConnection = command.Transaction == null;
+                var ownsConnection = _ownsConnection && command.Transaction == null;
 
                 if (connection.State == ConnectionState.Closed)
                     await connection.OpenAsync(cancellationToken);
@@ -1382,12 +1402,7 @@
                     {
                         var entityType = entitySet.Entity.GetType();
 
-                        // Performs some schema validation for this type (either creates the table if does not exist, or validates)
-                        if (!_schemaValidationTypeMapping.ContainsKey(entityType))
-                        {
-                            try { await _schemaConfigHelper.ExecuteSchemaValidateAsync(entityType, cancellationToken); }
-                            finally { _schemaValidationTypeMapping[entityType] = true; }
-                        }
+                        await OnSchemaValidationAsync(entityType, cancellationToken);
 
                         var primeryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
                         var isIdentity = primeryKeyPropertyInfo.IsColumnIdentity();
@@ -1473,7 +1488,7 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public Task<QueryResult<TResult>> FindAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public async Task<QueryResult<TResult>> FindAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -1485,7 +1500,9 @@
 
             PrepareQuery(options, out Mapper mapper);
 
-            return ExecuteObjectAsync<TResult>(mapper.Sql, mapper.Parameters, reader => mapper.Map<TEntity, TResult>(reader, selectorFunc), cancellationToken);
+            await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
+
+            return await ExecuteObjectAsync<TResult>(mapper.Sql, mapper.Parameters, reader => mapper.Map<TEntity, TResult>(reader, selectorFunc), cancellationToken);
         }
 
         /// <summary>
@@ -1497,7 +1514,7 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public Task<QueryResult<IEnumerable<TResult>>> FindAllAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public async Task<QueryResult<IEnumerable<TResult>>> FindAllAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
@@ -1506,7 +1523,9 @@
 
             PrepareQuery(options, out Mapper mapper);
 
-            return ExecuteListAsync<TResult>(mapper.Sql, mapper.Parameters, reader => mapper.Map<TEntity, TResult>(reader, selectorFunc), cancellationToken);
+            await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
+
+            return await ExecuteListAsync<TResult>(mapper.Sql, mapper.Parameters, reader => mapper.Map<TEntity, TResult>(reader, selectorFunc), cancellationToken);
         }
 
         /// <summary>
@@ -1519,6 +1538,8 @@
         public async Task<QueryResult<int>> CountAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             PrepareQuery(options, out Mapper mapper);
+
+            await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
 
             using (var reader = await ExecuteReaderAsync(mapper.Sql, mapper.Parameters, cancellationToken))
             {
@@ -1546,6 +1567,8 @@
                 throw new ArgumentNullException(nameof(options));
 
             PrepareQuery(options, out Mapper mapper);
+
+            await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
 
             using (var reader = await ExecuteReaderAsync(mapper.Sql, mapper.Parameters, cancellationToken))
             {
@@ -1585,6 +1608,8 @@
             var elementSelectorFunc = elementSelector.Compile();
 
             PrepareQuery(options, out Mapper mapper);
+
+            await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
 
             using (var reader = await ExecuteReaderAsync(mapper.Sql, mapper.Parameters, cancellationToken))
             {
@@ -1639,11 +1664,7 @@
         /// <returns>The transaction.</returns>
         public ITransactionManager BeginTransaction()
         {
-            var connection = CreateConnection();
-
-            connection.Open();
-
-            _transaction = connection.BeginTransaction();
+            _transaction = CreateConnection().BeginTransaction();
 
             return new AdoNetTransactionManager(_transaction);
         }
@@ -1699,12 +1720,7 @@
                     {
                         var entityType = entitySet.Entity.GetType();
 
-                        // Performs some schema validation for this type (either creates the table if does not exist, or validates)
-                        if (!_schemaValidationTypeMapping.ContainsKey(entityType))
-                        {
-                            try { _schemaConfigHelper.ExecuteSchemaValidate(entityType); }
-                            finally { _schemaValidationTypeMapping[entityType] = true; }
-                        }
+                        OnSchemaValidation(entityType);
 
                         var primeryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
                         var isIdentity = primeryKeyPropertyInfo.IsColumnIdentity();
@@ -1800,6 +1816,8 @@
 
             PrepareQuery(options, out Mapper mapper);
 
+            OnSchemaValidation(typeof(TEntity));
+
             return ExecuteObject<TResult>(mapper.Sql, mapper.Parameters, reader => mapper.Map<TEntity, TResult>(reader, selectorFunc));
         }
 
@@ -1820,6 +1838,8 @@
 
             PrepareQuery(options, out Mapper mapper);
 
+            OnSchemaValidation(typeof(TEntity));
+
             return ExecuteList<TResult>(mapper.Sql, mapper.Parameters, reader => mapper.Map<TEntity, TResult>(reader, selectorFunc));
         }
 
@@ -1832,6 +1852,8 @@
         public QueryResult<int> Count<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
         {
             PrepareQuery(options, out Mapper mapper);
+
+            OnSchemaValidation(typeof(TEntity));
 
             using (var reader = ExecuteReader(mapper.Sql, mapper.Parameters))
             {
@@ -1858,6 +1880,8 @@
                 throw new ArgumentNullException(nameof(options));
 
             PrepareQuery(options, out Mapper mapper);
+
+            OnSchemaValidation(typeof(TEntity));
 
             using (var reader = ExecuteReader(mapper.Sql, mapper.Parameters))
             {
@@ -1896,6 +1920,8 @@
             var elementSelectorFunc = elementSelector.Compile();
 
             PrepareQuery(options, out Mapper mapper);
+
+            OnSchemaValidation(typeof(TEntity));
 
             using (var reader = ExecuteReader(mapper.Sql, mapper.Parameters))
             {

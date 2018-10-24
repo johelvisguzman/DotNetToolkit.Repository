@@ -24,7 +24,8 @@
 
             modelBuilder.Entity<Customer>()
                 .HasOne(s => s.Address)
-                .WithOne(ad => ad.Customer);
+                .WithOne(ad => ad.Customer)
+                .HasForeignKey<Customer>(x => x.AddressId);
 
             modelBuilder.Entity<CustomerWithTwoCompositePrimaryKey>()
                 .HasKey(e => new { e.Id1, e.Id2 });
