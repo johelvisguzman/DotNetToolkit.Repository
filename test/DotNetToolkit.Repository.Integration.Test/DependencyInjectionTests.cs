@@ -6,7 +6,6 @@
     using EntityFrameworkCore;
     using Extensions.Microsoft.DependencyInjection;
     using Factories;
-    using Internal;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Infrastructure;
     using Microsoft.Extensions.DependencyInjection;
@@ -47,6 +46,8 @@
             Assert.Equal(3, provider.GetServices<IRepositoryInterceptor>().Count());
             Assert.NotNull(provider.GetService<IRepository<Customer>>());
             Assert.NotNull(provider.GetService<ITestCustomerRepository>());
+            Assert.NotNull(provider.GetService<IService<Customer>>());
+            Assert.NotNull(provider.GetService<ITestCustomerService>());
             Assert.NotNull(provider.GetService<IRepositoryFactory>());
             Assert.NotNull(provider.GetService<RepositoryOptions>());
             Assert.NotNull(provider.GetService<IUnitOfWork>());
@@ -56,6 +57,33 @@
             Assert.Null(provider.GetService<IRepository<Customer, int>>());
             Assert.Null(provider.GetService<IRepository<Customer, int, int>>());
             Assert.Null(provider.GetService<IRepository<Customer, int, int, int>>());
+            Assert.Null(provider.GetService<IService<Customer, int>>());
+            Assert.Null(provider.GetService<IService<Customer, int, int>>());
+            Assert.Null(provider.GetService<IService<Customer, int, int, int>>());
+        }
+
+        [Fact]
+        public void DependencyInjectionCanConfigureServices()
+        {
+            var services = new ServiceCollection();
+
+            services.AddRepositories(options =>
+            {
+                options.UseEntityFrameworkCore<TestEfCoreDbContext>(opt =>
+                {
+                    opt.UseInMemoryDatabase(Guid.NewGuid().ToString())
+                        // don't raise the error warning us that the in memory db doesn't support transactions
+                        .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+                });
+            });
+
+            var provider = services.BuildServiceProvider();
+
+            var service = provider.GetService<IService<Customer>>();
+
+            service.Create(new Customer());
+
+            Assert.Equal(1, service.GetCount());
         }
 
         [Fact]

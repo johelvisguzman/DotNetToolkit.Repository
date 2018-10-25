@@ -39,6 +39,7 @@
 
             var interfaceTypesToScan = new[]
             {
+                typeof(IService<>),
                 typeof(IRepository<>),
                 typeof(IRepositoryInterceptor)
             };

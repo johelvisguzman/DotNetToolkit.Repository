@@ -33,6 +33,29 @@
             ForAllRepositoryFactoriesAsync(TestGetWithThreeCompositePrimaryKeyAsync);
         }
 
+        [Fact]
+        public void DeleteWithTwoCompositePrimaryKey()
+        {
+            ForAllRepositoryFactories(TestDeleteWithTwoCompositePrimaryKey);
+        }
+
+        [Fact]
+        public void DeleteWithThreeCompositePrimaryKey()
+        {
+            ForAllRepositoryFactories(TestDeleteWithThreeCompositePrimaryKey);
+        }
+
+        [Fact]
+        public void DeleteWithTwoCompositePrimaryKeyAsync()
+        {
+            ForAllRepositoryFactoriesAsync(TestDeleteWithTwoCompositePrimaryKeyAsync);
+        }
+
+        [Fact]
+        public void DeleteWithThreeCompositePrimaryKeyAsync()
+        {
+            ForAllRepositoryFactoriesAsync(TestDeleteWithThreeCompositePrimaryKeyAsync);
+        }
 
         private static void TestGetWithTwoCompositePrimaryKey(IRepositoryFactory repoFactory)
         {
@@ -174,6 +197,88 @@
             Assert.Null(await repo.FindAsync(key1, key2, randomKey, fetchStrategy));
             Assert.NotNull(await repo.FindAsync(key1, key2, key3));
             Assert.NotNull(await repo.FindAsync(key1, key2, key3, fetchStrategy));
+        }
+
+        private static void TestDeleteWithTwoCompositePrimaryKey(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<CustomerWithTwoCompositePrimaryKey, int, int>();
+
+            int key1 = 1;
+            int key2 = 2;
+
+            var entity = new CustomerWithTwoCompositePrimaryKey { Id1 = key1, Id2 = key2, Name = "Random Name" };
+
+            Assert.False(repo.Exists(key1, key2));
+
+            repo.Add(entity);
+
+            Assert.True(repo.Exists(key1, key2));
+
+            repo.Delete(key1, key2);
+
+            Assert.False(repo.Exists(key1, key2));
+        }
+
+        private static void TestDeleteWithThreeCompositePrimaryKey(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<CustomerWithThreeCompositePrimaryKey, int, int, int>();
+
+            int key1 = 1;
+            int key2 = 2;
+            int key3 = 3;
+
+            var entity = new CustomerWithThreeCompositePrimaryKey { Id1 = key1, Id2 = key2, Id3 = key3, Name = "Random Name" };
+
+            Assert.False(repo.Exists(key1, key2, key3));
+
+            repo.Add(entity);
+
+            Assert.True(repo.Exists(key1, key2, key3));
+
+            repo.Delete(key1, key2, key3);
+
+            Assert.False(repo.Exists(key1, key2, key3));
+        }
+
+        private static async Task TestDeleteWithTwoCompositePrimaryKeyAsync(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<CustomerWithTwoCompositePrimaryKey, int, int>();
+
+            int key1 = 1;
+            int key2 = 2;
+
+            var entity = new CustomerWithTwoCompositePrimaryKey { Id1 = key1, Id2 = key2, Name = "Random Name" };
+
+            Assert.False(await repo.ExistsAsync(key1, key2));
+
+            await repo.AddAsync(entity);
+
+            Assert.True(await repo.ExistsAsync(key1, key2));
+
+            await repo.DeleteAsync(key1, key2);
+
+            Assert.False(await repo.ExistsAsync(key1, key2));
+        }
+
+        private static async Task TestDeleteWithThreeCompositePrimaryKeyAsync(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<CustomerWithThreeCompositePrimaryKey, int, int, int>();
+
+            int key1 = 1;
+            int key2 = 2;
+            int key3 = 3;
+
+            var entity = new CustomerWithThreeCompositePrimaryKey { Id1 = key1, Id2 = key2, Id3 = key3, Name = "Random Name" };
+
+            Assert.False(await repo.ExistsAsync(key1, key2, key3));
+
+            await repo.AddAsync(entity);
+
+            Assert.True(await repo.ExistsAsync(key1, key2, key3));
+
+            await repo.DeleteAsync(key1, key2, key3);
+
+            Assert.False(await repo.ExistsAsync(key1, key2, key3));
         }
     }
 }
