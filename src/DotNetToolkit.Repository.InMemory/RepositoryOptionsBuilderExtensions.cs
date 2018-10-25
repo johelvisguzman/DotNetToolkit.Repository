@@ -18,9 +18,7 @@
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            var extension = source.Options.FindExtension<InMemoryRepositoryOptionsExtension>() ?? new InMemoryRepositoryOptionsExtension();
-
-            source.Options.AddOrUpdateExtension<InMemoryRepositoryOptionsExtension>(extension);
+            source.Options.AddInternalContextFactory(new InMemoryRepositoryContextFactory());
 
             return source;
         }
@@ -36,9 +34,7 @@
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            var extension = (source.Options.FindExtension<InMemoryRepositoryOptionsExtension>() ?? new InMemoryRepositoryOptionsExtension()).WithDatabaseName(databaseName);
-
-            source.Options.AddOrUpdateExtension<InMemoryRepositoryOptionsExtension>(extension);
+            source.Options.AddInternalContextFactory(new InMemoryRepositoryContextFactory(databaseName));
 
             return source;
         }

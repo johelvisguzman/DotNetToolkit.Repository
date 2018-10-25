@@ -23,9 +23,7 @@
             if (nameOrConnectionString == null)
                 throw new ArgumentNullException(nameof(nameOrConnectionString));
 
-            var extension = (source.Options.FindExtension<AdoNetRepositoryOptionsExtension>() ?? new AdoNetRepositoryOptionsExtension()).WithConnectionString(nameOrConnectionString);
-
-            source.Options.AddOrUpdateExtension<AdoNetRepositoryOptionsExtension>(extension);
+            source.Options.AddInternalContextFactory(new AdoNetRepositoryContextFactory(nameOrConnectionString));
 
             return source;
         }
@@ -48,9 +46,7 @@
             if (connectionString == null)
                 throw new ArgumentNullException(nameof(connectionString));
 
-            var extension = (source.Options.FindExtension<AdoNetRepositoryOptionsExtension>() ?? new AdoNetRepositoryOptionsExtension()).WithProvider(providerName, connectionString);
-
-            source.Options.AddOrUpdateExtension<AdoNetRepositoryOptionsExtension>(extension);
+            source.Options.AddInternalContextFactory(new AdoNetRepositoryContextFactory(providerName, connectionString));
 
             return source;
         }
@@ -69,9 +65,7 @@
             if (existingConnection == null)
                 throw new ArgumentNullException(nameof(existingConnection));
 
-            var extension = (source.Options.FindExtension<AdoNetRepositoryOptionsExtension>() ?? new AdoNetRepositoryOptionsExtension()).WithConnection(existingConnection);
-
-            source.Options.AddOrUpdateExtension<AdoNetRepositoryOptionsExtension>(extension);
+            source.Options.AddInternalContextFactory(new AdoNetRepositoryContextFactory(existingConnection));
 
             return source;
         }

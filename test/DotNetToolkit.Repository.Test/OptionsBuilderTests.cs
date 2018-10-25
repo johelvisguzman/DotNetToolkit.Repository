@@ -3,7 +3,6 @@
     using Configuration.Options;
     using Data;
     using InMemory;
-    using Internal;
     using System.Linq;
     using Xunit;
 
@@ -15,13 +14,9 @@
             var optionsBuilder = new RepositoryOptionsBuilder()
                 .UseInterceptor(new TestRepositoryInterceptor("Random Param", false));
 
-            Assert.Single(optionsBuilder.Options.Extensions);
+            Assert.Single(optionsBuilder.Options.Interceptors);
 
-            var coreExtension = optionsBuilder.Options.FindExtension<RepositoryOptionsCoreExtension>();
-
-            Assert.Single(coreExtension.Interceptors);
-
-            Assert.True(coreExtension.ContainsInterceptorOfType(typeof(TestRepositoryInterceptor)));
+            Assert.True(optionsBuilder.Options.ContainsInterceptorOfType(typeof(TestRepositoryInterceptor)));
         }
 
         [Fact]
@@ -31,13 +26,9 @@
                 .UseInterceptor(new TestRepositoryInterceptor("Random Param", false))
                 .UseInterceptor(new TestRepositoryInterceptor("Another Random Param", true));
 
-            Assert.Single(optionsBuilder.Options.Extensions);
+            Assert.Single(optionsBuilder.Options.Interceptors);
 
-            var coreExtension = optionsBuilder.Options.FindExtension<RepositoryOptionsCoreExtension>();
-
-            Assert.Single(coreExtension.Interceptors);
-
-            Assert.True(coreExtension.ContainsInterceptorOfType(typeof(TestRepositoryInterceptor)));
+            Assert.True(optionsBuilder.Options.ContainsInterceptorOfType(typeof(TestRepositoryInterceptor)));
         }
 
 
@@ -48,14 +39,10 @@
                 .UseInterceptor(new TestRepositoryInterceptor("Random Param", false))
                 .UseInterceptor(new TestRepositoryInterceptor2());
 
-            Assert.Single(optionsBuilder.Options.Extensions);
+            Assert.Equal(2, optionsBuilder.Options.Interceptors.Count());
 
-            var coreExtension = optionsBuilder.Options.FindExtension<RepositoryOptionsCoreExtension>();
-
-            Assert.Equal(2, coreExtension.Interceptors.Count());
-
-            Assert.True(coreExtension.ContainsInterceptorOfType(typeof(TestRepositoryInterceptor)));
-            Assert.True(coreExtension.ContainsInterceptorOfType(typeof(TestRepositoryInterceptor2)));
+            Assert.True(optionsBuilder.Options.ContainsInterceptorOfType(typeof(TestRepositoryInterceptor)));
+            Assert.True(optionsBuilder.Options.ContainsInterceptorOfType(typeof(TestRepositoryInterceptor2)));
         }
 
         [Fact]
@@ -64,7 +51,7 @@
             var optionsBuilder = new RepositoryOptionsBuilder()
                 .UseInMemoryDatabase();
 
-            Assert.Single(optionsBuilder.Options.Extensions);
+            Assert.True(optionsBuilder.Options.ContextFactory is InMemoryRepositoryContextFactory);
         }
     }
 }

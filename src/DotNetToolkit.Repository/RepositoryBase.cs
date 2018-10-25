@@ -380,7 +380,7 @@
 
         #region Implementation of IRepository<TEntity, TKey>
 
-       /// <summary>
+        /// <summary>
         /// Deletes an entity with the given primary key value in the repository.
         /// </summary>
         /// <param name="key">The value of the primary key used to match entities against.</param>
@@ -568,18 +568,18 @@
             OnConfiguring(optionsBuilder);
 
             // The shared context that is set up by the unit of work
-            var contextExtension = optionsBuilder.Options.FindExtension<Internal.RepositoryOptionsContextExtension>();
-            if (contextExtension != null)
+            var context = optionsBuilder.Options.Context;
+            if (context != null)
             {
-                _context = contextExtension.Context;
+                _context = context;
             }
             else
             {
-                var contextFactoryExtension = optionsBuilder.Options.FindExtension<IRepositoryOptionsContextFactoryExtensions>();
-                if (contextFactoryExtension == null)
+                var contextFactory = optionsBuilder.Options.ContextFactory;
+                if (contextFactory == null)
                     throw new InvalidOperationException("No context provider has been configured for this repository.");
 
-                _contextFactory = contextFactoryExtension.ContextFactory;
+                _contextFactory = contextFactory;
             }
 
             _options = optionsBuilder.Options;
@@ -740,13 +740,11 @@
         {
             if (_interceptors == null)
             {
-                var coreExtension = _options.FindExtension<RepositoryOptionsCoreExtension>();
-
-                _interceptors = coreExtension != null
-                           ? coreExtension.Interceptors
-                                .Select(lazyInterceptor => lazyInterceptor.Value)
-                                .Where(value => value != null)
-                           : Enumerable.Empty<IRepositoryInterceptor>();
+                _interceptors = _options.Interceptors.Any()
+                    ? _options.Interceptors
+                        .Select(lazyInterceptor => lazyInterceptor.Value)
+                        .Where(value => value != null)
+                    : Enumerable.Empty<IRepositoryInterceptor>();
             }
 
             return _interceptors;

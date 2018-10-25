@@ -47,7 +47,7 @@
                 .GetField("_options", BindingFlags.NonPublic | BindingFlags.Instance)
                 .GetValue(obj);
 
-            return options.FindExtension<RepositoryOptionsCoreExtension>().Interceptors;
+            return options.Interceptors;
         }
 
         private static IRepositoryContextFactory GetContextFactoryFromPrivateField<T>(object obj)

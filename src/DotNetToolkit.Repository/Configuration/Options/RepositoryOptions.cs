@@ -1,109 +1,99 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Options
 {
+    using Factories;
+    using Interceptors;
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryOptions" />.
     /// </summary>
     public class RepositoryOptions : IRepositoryOptions
     {
-        private Dictionary<Type, IRepositoryOptionsExtensions> _extensions = new Dictionary<Type, IRepositoryOptionsExtensions>();
+        #region Fields
+
+        private Dictionary<Type, Lazy<IRepositoryInterceptor>> _interceptors = new Dictionary<Type, Lazy<IRepositoryInterceptor>>();
+        private IRepositoryContextFactory _contextFactory;
+        private IRepositoryContext _context;
+
+        #endregion
+
+        #region Properties
 
         /// <summary>
-        /// Gets the repository extensions that store the configured options.
+        /// Gets the configured interceptors.
         /// </summary>
-        public IEnumerable<IRepositoryOptionsExtensions> Extensions { get { return _extensions.Values; } }
+        public virtual IEnumerable<Lazy<IRepositoryInterceptor>> Interceptors { get { return _interceptors.Values; } }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryOptions"/> class.
+        /// Gets the configured internal context factory.
         /// </summary>
-        public RepositoryOptions() { }
+        internal virtual IRepositoryContextFactory ContextFactory { get { return _contextFactory; } }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity}"/> class.
+        /// Gets the configured internal shared context.
         /// </summary>
-        /// <param name="options">The options to copy to this instance.</param>
-        public RepositoryOptions(RepositoryOptions options)
+        internal virtual IRepositoryContext Context { get { return _context; } }
+
+        /// <summary>
+        /// Gets a value indicating whether any options have been configured.
+        /// </summary>
+        public virtual bool IsConfigured
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            Map(options, this);
+            get
+            {
+                return Context != null ||
+                       ContextFactory != null ||
+                       Interceptors.Any();
+            }
         }
 
+        #endregion
+
+        #region Internal Methods
+
         /// <summary>
-        /// Adds the specified extension to the collection.
+        /// Returns the option instance with a configured interceptor.
         /// </summary>
-        /// <typeparam name="TExtension">The type of the extension to add.</typeparam>
-        /// <param name="extension">The extension.</param>
-        public virtual void AddOrUpdateExtension<TExtension>(TExtension extension) where TExtension : class, IRepositoryOptionsExtensions
+        /// <param name="underlyingType">The type of interceptor.</param>
+        /// <param name="interceptorFactory">The interceptor factory.</param>
+        /// <returns>The same option instance.</returns>
+        internal virtual RepositoryOptions AddInterceptor(Type underlyingType, Func<IRepositoryInterceptor> interceptorFactory)
         {
-            if (extension == null)
-                throw new ArgumentNullException(nameof(extension));
+            if (underlyingType == null)
+                throw new ArgumentNullException(nameof(underlyingType));
 
-            var key = typeof(TExtension);
+            if (interceptorFactory == null)
+                throw new ArgumentNullException(nameof(interceptorFactory));
 
-            if (_extensions.ContainsKey(key))
-                _extensions[key] = extension;
+            var lazy = new Lazy<IRepositoryInterceptor>(interceptorFactory);
+
+            if (_interceptors.ContainsKey(underlyingType))
+                _interceptors[underlyingType] = lazy;
             else
-                _extensions.Add(key, extension);
+                _interceptors.Add(underlyingType, lazy);
+
+            return this;
         }
 
         /// <summary>
-        /// Removes the specified extension to the collection.
+        /// Determines whether the specified interceptor exists within the collection.
         /// </summary>
-        /// <typeparam name="TExtension">The type of the extension to remove.</typeparam>
-        public virtual bool TryRemoveExtensions<TExtension>() where TExtension : class, IRepositoryOptionsExtensions
+        /// <returns><c>true</c> if able to find an interceptor of the specified type; otherwise, <c>false</c>.</returns>
+        internal virtual bool ContainsInterceptorOfType(Type type)
         {
-            if (_extensions.TryGetValue(typeof(TExtension), out _))
-            {
-                _extensions.Remove(typeof(TExtension));
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
 
-                return true;
-            }
-
-            var result = false;
-
-            foreach (var extensionType in _extensions.Keys.ToList())
-            {
-                if (typeof(TExtension).IsAssignableFrom(extensionType))
-                {
-                    _extensions.Remove(extensionType);
-
-                    result = true;
-                }
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Gets the extension of the specified type. Returns null if no extension of the specified type is configured.
-        /// </summary>
-        /// <typeparam name="TExtension">The type of the extension to get.</typeparam>
-        /// <returns>The extension, or null if none was found.</returns>
-        public virtual TExtension FindExtension<TExtension>() where TExtension : class, IRepositoryOptionsExtensions
-        {
-            if (this._extensions.TryGetValue(typeof(TExtension), out var optionsExtension))
-                return (TExtension)optionsExtension;
-
-            foreach (var extensionType in _extensions.Keys)
-            {
-                if (typeof(TExtension).IsAssignableFrom(extensionType))
-                    return (TExtension)_extensions[extensionType];
-            }
-
-            return default(TExtension);
+            return _interceptors.ContainsKey(type);
         }
 
         /// <summary>
         /// Clones the current configured options to a new instance.
         /// </summary>
         /// <returns>The new clone instance.</returns>
-        public RepositoryOptions Clone()
+        internal virtual RepositoryOptions Clone()
         {
             var clone = new RepositoryOptions();
 
@@ -111,6 +101,40 @@
 
             return clone;
         }
+
+        /// <summary>
+        /// Returns the option instance with a configured internal context factory.
+        /// </summary>
+        /// <param name="contextFactory">The context factory.</param>
+        /// <returns>The same option instance.</returns>
+        internal virtual RepositoryOptions AddInternalContextFactory(IRepositoryContextFactory contextFactory)
+        {
+            if (contextFactory == null)
+                throw new ArgumentNullException(nameof(contextFactory));
+
+            _contextFactory = contextFactory;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Returns the option instance with a configured internal shared context (usually setup by the unit of work).
+        /// </summary>
+        /// <param name="sharedContext">The context.</param>
+        /// <returns>The same option instance.</returns>
+        internal virtual RepositoryOptions AddInternalSharedContext(IRepositoryContext sharedContext)
+        {
+            if (sharedContext == null)
+                throw new ArgumentNullException(nameof(sharedContext));
+
+            _context = sharedContext;
+
+            return this;
+        }
+
+        #endregion
+
+        #region Private Methods
 
         private void Map(RepositoryOptions source, RepositoryOptions target)
         {
@@ -120,7 +144,11 @@
             if (target == null)
                 throw new ArgumentNullException(nameof(target));
 
-            target._extensions = source._extensions.ToDictionary(x => x.Key, x => x.Value);
+            target._interceptors = source._interceptors.ToDictionary(x => x.Key, x => x.Value);
+            target._contextFactory = source._contextFactory;
+            target._context = source._context;
         }
+
+        #endregion
     }
 }
