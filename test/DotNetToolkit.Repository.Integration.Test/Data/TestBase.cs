@@ -80,6 +80,36 @@
                 });
         }
 
+        protected static void ForAllUnitOfWorkFactoriesAsync(Func<IUnitOfWorkFactory, Task> action)
+        {
+            GetRepositoryContextFactories()
+                .ToList()
+                .ForEach(async x =>
+                {
+                    var type = x.GetType();
+
+                    var options = new RepositoryOptionsBuilder()
+                        .UseInternalContextFactory(x)
+                        .Options;
+
+                    // the in-memory context will not support transactions currently
+                    if (typeof(InMemoryRepositoryContextFactory).IsAssignableFrom(type) ||
+                        typeof(EfCoreRepositoryContextFactory<TestEfCoreDbContext>).IsAssignableFrom(type))
+                        return;
+
+                    // Perform test
+                    var task = Record.ExceptionAsync(() => action(new UnitOfWorkFactory(options)));
+
+                    // Checks to see if we have any un-handled exception
+                    if (task != null)
+                    {
+                        var ex = await task;
+
+                        Assert.Null(ex);
+                    }
+                });
+        }
+
         protected static IEnumerable<IRepositoryContextFactory> GetRepositoryContextFactories()
         {
             return new List<IRepositoryContextFactory>

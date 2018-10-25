@@ -24,6 +24,10 @@
     /// <summary>
     /// An implementation of <see cref="IRepository{TEntity, TKey1, TKey2, TKey3}" />.
     /// </summary>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    /// <typeparam name="TKey1">The type of the first part of the composite primary key.</typeparam>
+    /// <typeparam name="TKey2">The type of the second part of the composite primary key.</typeparam>
+    /// <typeparam name="TKey3">The type of the third part of the composite primary key.</typeparam>
     public abstract class RepositoryBase<TEntity, TKey1, TKey2, TKey3> : RepositoryBase<TEntity>, IRepository<TEntity, TKey1, TKey2, TKey3> where TEntity : class
     {
         #region Constructors
@@ -200,6 +204,9 @@
     /// <summary>
     /// An implementation of <see cref="IRepository{TEntity, TKey1, TKey2}" />.
     /// </summary>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    /// <typeparam name="TKey1">The type of the first part of the composite primary key.</typeparam>
+    /// <typeparam name="TKey2">The type of the second part of the composite primary key.</typeparam>
     public abstract class RepositoryBase<TEntity, TKey1, TKey2> : RepositoryBase<TEntity>, IRepository<TEntity, TKey1, TKey2> where TEntity : class
     {
         #region Constructors
@@ -366,6 +373,8 @@
     /// <summary>
     /// An implementation of <see cref="IRepository{TEntity, TKey}" />.
     /// </summary>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    /// <typeparam name="TKey">The type of the key.</typeparam>
     public abstract class RepositoryBase<TEntity, TKey> : RepositoryBase<TEntity>, IRepository<TEntity, TKey> where TEntity : class
     {
         #region Constructors
