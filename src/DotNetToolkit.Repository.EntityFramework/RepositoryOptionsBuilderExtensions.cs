@@ -20,9 +20,7 @@
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            var extension = source.Options.FindExtension<EfRepositoryOptionsExtension<TDbContext>>() ?? new EfRepositoryOptionsExtension<TDbContext>();
-
-            source.Options.AddOrUpdateExtension<EfRepositoryOptionsExtension<TDbContext>>(extension);
+            source.Options.AddInternalContextFactory(new EfRepositoryContextFactory<TDbContext>());
 
             return source;
         }
@@ -38,9 +36,7 @@
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            var extension = (source.Options.FindExtension<EfRepositoryOptionsExtension<TDbContext>>() ?? new EfRepositoryOptionsExtension<TDbContext>()).WithConnectionString(nameOrConnectionString);
-
-            source.Options.AddOrUpdateExtension<EfRepositoryOptionsExtension<TDbContext>>(extension);
+            source.Options.AddInternalContextFactory(new EfRepositoryContextFactory<TDbContext>(nameOrConnectionString));
 
             return source;
         }
@@ -56,9 +52,7 @@
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            var extension = (source.Options.FindExtension<EfRepositoryOptionsExtension<TDbContext>>() ?? new EfRepositoryOptionsExtension<TDbContext>()).WithConnection(existingConnection);
-
-            source.Options.AddOrUpdateExtension<EfRepositoryOptionsExtension<TDbContext>>(extension);
+            source.Options.AddInternalContextFactory(new EfRepositoryContextFactory<TDbContext>(existingConnection));
 
             return source;
         }

@@ -19,9 +19,7 @@
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            var extension = source.Options.FindExtension<EfCoreRepositoryOptionsExtension<TDbContext>>() ?? new EfCoreRepositoryOptionsExtension<TDbContext>();
-
-            source.Options.AddOrUpdateExtension<EfCoreRepositoryOptionsExtension<TDbContext>>(extension);
+            source.Options.AddInternalContextFactory(new EfCoreRepositoryContextFactory<TDbContext>());
 
             return source;
         }
@@ -61,9 +59,7 @@
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            var extension = (source.Options.FindExtension<EfCoreRepositoryOptionsExtension<TDbContext>>() ?? new EfCoreRepositoryOptionsExtension<TDbContext>()).WithDbContextOptions(options);
-
-            source.Options.AddOrUpdateExtension<EfCoreRepositoryOptionsExtension<TDbContext>>(extension);
+            source.Options.AddInternalContextFactory(new EfCoreRepositoryContextFactory<TDbContext>(options));
 
             return source;
         }

@@ -4,7 +4,6 @@
     using Configuration.Options;
     using Factories;
     using global::Microsoft.Extensions.DependencyInjection;
-    using Internal;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -58,7 +57,6 @@
 
             optionsAction(optionsBuilder);
 
-            var coreExtension = optionsBuilder.Options.FindExtension<RepositoryOptionsCoreExtension>();
             var registeredInterceptorTypes = new List<Type>();
 
             foreach (var t in serviceTypesMapping)
@@ -70,7 +68,7 @@
                 {
                     if (serviceType == typeof(IRepositoryInterceptor))
                     {
-                        if (services.Any(x => x.ServiceType == implementationType) || (coreExtension != null && coreExtension.ContainsInterceptorOfType(implementationType)))
+                        if (services.Any(x => x.ServiceType == implementationType) || optionsBuilder.Options.ContainsInterceptorOfType(implementationType))
                             continue;
 
                         services.AddScoped(implementationType, implementationType);
@@ -92,8 +90,8 @@
             {
                 var serviceOptionsBuilder = new RepositoryOptionsBuilder(optionsBuilder.Options);
 
-                var contextFactoryExtension = serviceOptionsBuilder.Options.FindExtension<IRepositoryOptionsContextFactoryExtensions>();
-                if (contextFactoryExtension == null)
+                var contextFactory = serviceOptionsBuilder.Options.ContextFactory;
+                if (contextFactory == null)
                     throw new InvalidOperationException("No context provider has been configured.");
 
                 foreach (var interceptorType in registeredInterceptorTypes)

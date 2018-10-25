@@ -97,18 +97,16 @@
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            var contextFactoryExtension = options.FindExtension<IRepositoryOptionsContextFactoryExtensions>();
-            if (contextFactoryExtension == null)
+            var contextFactory = options.ContextFactory;
+            if (contextFactory == null)
                 throw new InvalidOperationException("No context provider has been configured for this unit of work.");
-
-            var contextFactory = contextFactoryExtension.ContextFactory;
 
             _context = contextFactory.Create();
             _transactionManager = _context.BeginTransaction();
 
             // The shared context for the repositories to use
             _options = options.Clone();
-            _options.AddOrUpdateExtension<Internal.RepositoryOptionsContextExtension>(new Internal.RepositoryOptionsContextExtension(_context));
+            _options.AddInternalSharedContext(_context);
         }
         #endregion
 

@@ -3,7 +3,6 @@
     using Factories;
     using Interceptors;
     using System;
-    using System.Linq;
 
     /// <summary>
     /// Represents a builder used to create or modify options for a repository.
@@ -21,7 +20,7 @@
         /// <summary>
         /// Gets a value indicating whether any options have been configured.
         /// </summary>
-        public virtual bool IsConfigured { get { return Options.Extensions.Any<IRepositoryOptionsExtensions>(); } }
+        public virtual bool IsConfigured { get { return Options.IsConfigured; } }
 
         /// <summary>
         /// Gets the options being configured.
@@ -56,14 +55,17 @@
 
         #region Internal Methods
 
-        // TODO: This will probably need to be removed in a future update/release
+        /// <summary>
+        /// Configures the repository with an internal context factory.
+        /// </summary>
+        /// <param name="contextFactory">The context factory.</param>
+        /// <returns>The same builder instance.</returns>
         internal virtual RepositoryOptionsBuilder UseInternalContextFactory(IRepositoryContextFactory contextFactory)
         {
             if (contextFactory == null)
                 throw new ArgumentNullException(nameof(contextFactory));
 
-            _options.TryRemoveExtensions<IRepositoryOptionsContextFactoryExtensions>();
-            _options.AddOrUpdateExtension<IRepositoryOptionsContextFactoryExtensions>(new Internal.RepositoryOptionsContextFactoryExtension(contextFactory));
+            _options.AddInternalContextFactory(contextFactory);
 
             return this;
         }
@@ -139,9 +141,7 @@
             if (interceptorFactory == null)
                 throw new ArgumentNullException(nameof(interceptorFactory));
 
-            var extension = (_options.FindExtension<Internal.RepositoryOptionsCoreExtension>() ?? new Internal.RepositoryOptionsCoreExtension()).WithInterceptor(underlyingType, interceptorFactory);
-
-            _options.AddOrUpdateExtension<Internal.RepositoryOptionsCoreExtension>(extension);
+            _options.AddInterceptor(underlyingType, interceptorFactory);
 
             return this;
         }
