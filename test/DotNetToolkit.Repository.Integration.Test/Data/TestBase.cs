@@ -4,15 +4,24 @@
     using EntityFrameworkCore;
     using Factories;
     using InMemory;
+    using Logging;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Xunit;
+    using Xunit.Abstractions;
 
     public abstract class TestBase
     {
-        protected static void ForAllRepositoryFactories(Action<IRepositoryFactory> action, params Type[] contextConfigurationTypeExceptionList)
+        protected TestBase(ITestOutputHelper testOutputHelper)
+        {
+            TestXUnitLoggerProvider = new TestXUnitLoggerProvider(testOutputHelper);
+        }
+
+        protected ILoggerProvider TestXUnitLoggerProvider { get; }
+
+        protected void ForAllRepositoryFactories(Action<IRepositoryFactory> action, params Type[] contextConfigurationTypeExceptionList)
         {
             GetRepositoryContextFactories()
                 .ToList()
@@ -25,13 +34,14 @@
 
                     var options = new RepositoryOptionsBuilder()
                         .UseInternalContextFactory(x)
+                        .UseLoggerProvider(TestXUnitLoggerProvider)
                         .Options;
 
                     action(new RepositoryFactory(options));
                 });
         }
 
-        protected static void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactory, Task> action, params Type[] contextTypeExceptionList)
+        protected void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactory, Task> action, params Type[] contextTypeExceptionList)
         {
             GetRepositoryContextFactories()
                 .ToList()
@@ -44,6 +54,7 @@
 
                     var options = new RepositoryOptionsBuilder()
                         .UseInternalContextFactory(x)
+                        .UseLoggerProvider(TestXUnitLoggerProvider)
                         .Options;
 
                     // Perform test
@@ -59,7 +70,7 @@
                 });
         }
 
-        protected static void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory> action)
+        protected void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory> action)
         {
             GetRepositoryContextFactories()
                 .ToList()
@@ -69,6 +80,7 @@
 
                     var options = new RepositoryOptionsBuilder()
                         .UseInternalContextFactory(x)
+                        .UseLoggerProvider(TestXUnitLoggerProvider)
                         .Options;
 
                     // the in-memory context will not support transactions currently
@@ -80,7 +92,7 @@
                 });
         }
 
-        protected static void ForAllUnitOfWorkFactoriesAsync(Func<IUnitOfWorkFactory, Task> action)
+        protected void ForAllUnitOfWorkFactoriesAsync(Func<IUnitOfWorkFactory, Task> action)
         {
             GetRepositoryContextFactories()
                 .ToList()
@@ -90,6 +102,7 @@
 
                     var options = new RepositoryOptionsBuilder()
                         .UseInternalContextFactory(x)
+                        .UseLoggerProvider(TestXUnitLoggerProvider)
                         .Options;
 
                     // the in-memory context will not support transactions currently

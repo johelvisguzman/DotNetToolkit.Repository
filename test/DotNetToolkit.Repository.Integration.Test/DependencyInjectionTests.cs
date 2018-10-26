@@ -15,14 +15,17 @@
     using System.Reflection;
     using Transactions;
     using Xunit;
+    using Xunit.Abstractions;
 
     /* Need to make this sequential because the .AddRepositories extension
      * will scan for specific interfaces to register and we don't want to pick up anything from the other running tests
      * (ei: The mock stuff that is being done in RepositoryInterceptorTests.cs)
      */
     [Collection("Sequential")]
-    public class DependencyInjectionTests
+    public class DependencyInjectionTests : TestBase
     {
+        public DependencyInjectionTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+
         [Fact]
         public void DependencyInjectionCanConfigureRepositoriesServices()
         {
@@ -36,6 +39,7 @@
                         // don't raise the error warning us that the in memory db doesn't support transactions
                         .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
                 });
+                options.UseLoggerProvider(TestXUnitLoggerProvider);
             });
 
             var provider = services.BuildServiceProvider();
@@ -75,6 +79,7 @@
                         // don't raise the error warning us that the in memory db doesn't support transactions
                         .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
                 });
+                options.UseLoggerProvider(TestXUnitLoggerProvider);
             });
 
             var provider = services.BuildServiceProvider();
@@ -99,6 +104,7 @@
                         // don't raise the error warning us that the in memory db doesn't support transactions
                         .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
                 });
+                options.UseLoggerProvider(TestXUnitLoggerProvider);
             });
 
             var provider = services.BuildServiceProvider();
@@ -126,6 +132,7 @@
                         // don't raise the error warning us that the in memory db doesn't support transactions
                         .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
                 });
+                options.UseLoggerProvider(TestXUnitLoggerProvider);
             });
 
             var provider = services.BuildServiceProvider();
@@ -152,6 +159,7 @@
                         // don't raise the error warning us that the in memory db doesn't support transactions
                         .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
                 });
+                options.UseLoggerProvider(TestXUnitLoggerProvider);
             });
 
             var provider = services.BuildServiceProvider();

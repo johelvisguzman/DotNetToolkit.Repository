@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Options
 {
     using Interceptors;
+    using Logging;
     using System;
     using System.Collections.Generic;
 
@@ -13,5 +14,10 @@
         /// Gets the configured interceptors.
         /// </summary>
         IEnumerable<Lazy<IRepositoryInterceptor>> Interceptors { get; }
+
+        /// <summary>
+        /// Gets the configured logger provider.
+        /// </summary>
+        ILoggerProvider LoggerProvider { get; }
     }
 }

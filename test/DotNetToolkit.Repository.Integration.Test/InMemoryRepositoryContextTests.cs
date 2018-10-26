@@ -5,14 +5,18 @@
     using InMemory;
     using System;
     using Xunit;
+    using Xunit.Abstractions;
 
     public class InMemoryRepositoryContextTests : TestBase
     {
+        public InMemoryRepositoryContextTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+
         [Fact]
         public void CanScoped()
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var repo1 = new Repository<Customer>(options);
@@ -33,6 +37,7 @@
 
             options = new RepositoryOptionsBuilder()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var repo3 = new Repository<Customer>(options);
@@ -49,6 +54,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var repo = new Repository<Customer>(options);
@@ -64,6 +70,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var repo = new Repository<Customer>(options);
@@ -79,6 +86,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var repo = new Repository<Customer>(options);

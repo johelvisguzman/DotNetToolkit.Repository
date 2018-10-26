@@ -14,6 +14,7 @@
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
+    using Logging;
     using Transactions;
 
     /// <summary>
@@ -41,6 +42,11 @@
         /// Gets the item types in-memory that have not yet been saved. This collection is cleared after the context is saved.
         /// </summary>
         internal IEnumerable<Type> ItemTypes { get { return _items.Select(x => x.Entity.GetType()); } }
+
+        /// <summary>
+        /// Gets the repository context logger.
+        /// </summary>
+        public ILogger Logger { get; private set; } = NullLogger.Instance;
 
         #endregion
 
@@ -97,6 +103,18 @@
         public ITransactionManager BeginTransaction()
         {
             throw new NotSupportedException(Resources.InMemoryContext_TransactionNotSupported);
+        }
+
+        /// <summary>
+        /// Sets the repository context logger provider to use.
+        /// </summary>
+        /// <param name="loggerProvider">The logger provider.</param>
+        public void UseLoggerProvider(ILoggerProvider loggerProvider)
+        {
+            if (loggerProvider == null)
+                throw new ArgumentNullException(nameof(loggerProvider));
+
+            Logger = loggerProvider.Create(GetType().FullName);
         }
 
         /// <summary>

@@ -16,16 +16,21 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Xunit;
+    using Xunit.Abstractions;
 
-    public class AdoNetRepositoryTests
+    public class AdoNetRepositoryTests : TestBase
     {
+        public AdoNetRepositoryTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+
         [Fact]
         public void CanUseExistingConnection()
         {
-            var optionsBulder = new RepositoryOptionsBuilder()
-                .UseAdoNet(TestAdoNetContextFactory.CreateConnection());
+            var options = new RepositoryOptionsBuilder()
+                .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
+                .Options;
 
-            var repo = new Repository<Data.Customer>(optionsBulder.Options);
+            var repo = new Repository<Data.Customer>(options);
 
             repo.Add(new Data.Customer());
 
@@ -37,6 +42,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var customerKey = 1;
@@ -80,6 +86,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var customerKey = 1;
@@ -125,6 +132,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var customerKey = 1;
@@ -201,6 +209,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var customerKey = 1;
@@ -244,6 +253,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var customerKey = 1;
@@ -287,6 +297,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var customerKey = 1;
@@ -334,6 +345,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var customerKey = 1;
@@ -381,6 +393,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var customerKey = 1;
@@ -429,6 +442,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var customerKey = 1;
@@ -477,6 +491,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var customerKey = 1;
@@ -523,6 +538,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var customerKey = 1;
@@ -569,6 +585,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var customerKey = 1;
@@ -620,6 +637,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var customerKey = 1;
@@ -671,6 +689,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var customerKey = 1;
@@ -722,6 +741,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var customerKey = 1;
@@ -773,6 +793,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var repoFactory = new RepositoryFactory(options);
@@ -797,6 +818,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var repoFactory = new RepositoryFactory(options);
@@ -821,6 +843,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var repoFactory = new RepositoryFactory(options);
@@ -1004,6 +1027,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var repoFactory = new RepositoryFactory(options);
@@ -1207,6 +1231,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var repoFactory = new RepositoryFactory(options);
@@ -1294,6 +1319,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var repoFactory = new RepositoryFactory(options);
@@ -1382,6 +1408,7 @@
             var connection = TestAdoNetContextFactory.CreateConnection();
             var options = new RepositoryOptionsBuilder()
                 .UseAdoNet(connection)
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var repoFactory = new RepositoryFactory(options);
@@ -1462,17 +1489,18 @@
             var schemaHelper = new SchemaTableConfigurationHelper((AdoNetRepositoryContext)contextFactory.Create());
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(contextFactory)
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
             var classARepo = new Repository<ClassA>(options);
 
-            Assert.False(schemaHelper.ExexuteTableExists<ClassB>());
-            Assert.False(schemaHelper.ExexuteTableExists<ClassC>());
+            Assert.False(schemaHelper.ExecuteTableExists<ClassB>());
+            Assert.False(schemaHelper.ExecuteTableExists<ClassC>());
             Assert.Equal(0, classARepo.Count());
 
             classARepo.Add(new ClassA());
 
-            Assert.True(schemaHelper.ExexuteTableExists<ClassB>());
-            Assert.True(schemaHelper.ExexuteTableExists<ClassC>());
+            Assert.True(schemaHelper.ExecuteTableExists<ClassB>());
+            Assert.True(schemaHelper.ExecuteTableExists<ClassC>());
             Assert.Equal(1, classARepo.Count());
 
             //
@@ -1480,16 +1508,17 @@
             schemaHelper = new SchemaTableConfigurationHelper((AdoNetRepositoryContext)contextFactory.Create());
             options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(contextFactory)
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
-            Assert.False(schemaHelper.ExexuteTableExists<ClassA>());
-            Assert.False(schemaHelper.ExexuteTableExists<ClassC>());
+            Assert.False(schemaHelper.ExecuteTableExists<ClassA>());
+            Assert.False(schemaHelper.ExecuteTableExists<ClassC>());
 
             var ex = Assert.Throws<System.Data.SqlServerCe.SqlCeException>(() => new Repository<ClassB>(options).Add(new ClassB()));
             Assert.Equal("A foreign key value cannot be inserted because a corresponding primary key value does not exist. [ Foreign key constraint name = FK_ClassAs ]", ex.Message);
 
-            Assert.True(schemaHelper.ExexuteTableExists<ClassA>());
-            Assert.True(schemaHelper.ExexuteTableExists<ClassC>());
+            Assert.True(schemaHelper.ExecuteTableExists<ClassA>());
+            Assert.True(schemaHelper.ExecuteTableExists<ClassC>());
 
             new Repository<ClassA>(options).Add(new ClassA { Id = 1 });
 
@@ -1506,16 +1535,17 @@
             schemaHelper = new SchemaTableConfigurationHelper((AdoNetRepositoryContext)contextFactory.Create());
             options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(contextFactory)
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
-            Assert.False(schemaHelper.ExexuteTableExists<ClassA>());
-            Assert.False(schemaHelper.ExexuteTableExists<ClassB>());
+            Assert.False(schemaHelper.ExecuteTableExists<ClassA>());
+            Assert.False(schemaHelper.ExecuteTableExists<ClassB>());
 
             ex = Assert.Throws<System.Data.SqlServerCe.SqlCeException>(() => new Repository<ClassC>(options).Add(new ClassC()));
             Assert.Equal("A foreign key value cannot be inserted because a corresponding primary key value does not exist. [ Foreign key constraint name = FK_ClassBs ]", ex.Message);
 
-            Assert.True(schemaHelper.ExexuteTableExists<ClassA>());
-            Assert.True(schemaHelper.ExexuteTableExists<ClassB>());
+            Assert.True(schemaHelper.ExecuteTableExists<ClassA>());
+            Assert.True(schemaHelper.ExecuteTableExists<ClassB>());
 
             ex = Assert.Throws<System.Data.SqlServerCe.SqlCeException>(() => new Repository<ClassB>(options).Add(new ClassB { Id = 1 }));
             Assert.Equal("A foreign key value cannot be inserted because a corresponding primary key value does not exist. [ Foreign key constraint name = FK_ClassAs ]", ex.Message);
@@ -1537,6 +1567,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var ex = Assert.Throws<InvalidOperationException>(() => new Repository<ClassD>(options).Add(new ClassD()));
@@ -1544,6 +1575,7 @@
 
             options = new RepositoryOptionsBuilder()
                 .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             ex = Assert.Throws<InvalidOperationException>(() => new Repository<ClassE>(options).Add(new ClassE()));
@@ -1551,6 +1583,7 @@
 
             options = new RepositoryOptionsBuilder()
                 .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             ex = Assert.Throws<InvalidOperationException>(() => new Repository<ClassF>(options).Add(new ClassF()));
@@ -1558,6 +1591,7 @@
 
             options = new RepositoryOptionsBuilder()
                 .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             ex = Assert.Throws<InvalidOperationException>(() => new Repository<ClassG>(options).Add(new ClassG()));
@@ -1569,6 +1603,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering>(options).Add(new CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering()));
@@ -1580,6 +1615,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerWithTwoCompositeForeignKeyAndNoOrdering>(options).Add(new CustomerWithTwoCompositeForeignKeyAndNoOrdering()));

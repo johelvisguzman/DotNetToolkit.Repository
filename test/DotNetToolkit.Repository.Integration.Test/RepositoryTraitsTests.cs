@@ -11,9 +11,12 @@
     using System.Reflection;
     using System.Threading.Tasks;
     using Xunit;
+    using Xunit.Abstractions;
 
     public class RepositoryTraitsTests : TestBase
     {
+        public RepositoryTraitsTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+
         [Fact]
         public void Add()
         {

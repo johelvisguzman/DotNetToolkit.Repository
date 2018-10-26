@@ -54,9 +54,9 @@
             if (entityType == null)
                 throw new ArgumentNullException(nameof(entityType));
 
-            if (!ExexuteTableExists(entityType))
+            if (!ExecuteTableExists(entityType))
             {
-                ExexuteTableCreate(entityType);
+                ExecuteTableCreate(entityType);
             }
             else
             {
@@ -69,18 +69,18 @@
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <returns><c>true</c> if the table exists; otherwise, <c>false</c>.</returns>
-        public bool ExexuteTableExists<TEntity>() where TEntity : class
+        public bool ExecuteTableExists<TEntity>() where TEntity : class
         {
-            return ExexuteTableExists(typeof(TEntity));
+            return ExecuteTableExists(typeof(TEntity));
         }
 
         /// <summary>
         /// Creates the table.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        public void ExexuteTableCreate<TEntity>() where TEntity : class
+        public void ExecuteTableCreate<TEntity>() where TEntity : class
         {
-            ExexuteTableCreate(typeof(TEntity));
+            ExecuteTableCreate(typeof(TEntity));
         }
 
         /// <summary>
@@ -151,7 +151,7 @@
 
         #region Private Methods
 
-        private bool ExexuteTableExists(Type entityType)
+        private bool ExecuteTableExists(Type entityType)
         {
             if (entityType == null)
                 throw new ArgumentNullException(nameof(entityType));
@@ -366,14 +366,14 @@
             }
         }
 
-        private void ExexuteTableCreate(Type entityType)
+        private void ExecuteTableCreate(Type entityType)
         {
             if (entityType == null)
                 throw new ArgumentNullException(nameof(entityType));
 
             foreach (var item in GetPreparedCreateTableQueriesMapping(entityType))
             {
-                if (!ExexuteTableExists(item.Key))
+                if (!ExecuteTableExists(item.Key))
                 {
                     _context.ExecuteNonQuery(item.Value);
                 }
@@ -529,7 +529,7 @@
 
             foreach (var item in propertiesMapping)
             {
-                sb.Append("\n\t");
+                sb.Append($"{Environment.NewLine}\t");
 
                 // Name
                 sb.Append($"{item.Key} ");
@@ -577,7 +577,7 @@
 
             if (primaryKeyConstraints.Count > 0)
             {
-                sb.Append($"\n\tCONSTRAINT PK_{tableName} PRIMARY KEY({string.Join(", ", primaryKeyConstraints)}),");
+                sb.Append($"{Environment.NewLine}\tCONSTRAINT PK_{tableName} PRIMARY KEY({string.Join(", ", primaryKeyConstraints)}),");
             }
 
             if (!foreignKeyConstraints.Any())
@@ -603,12 +603,12 @@
                         foreignNavigationTablePrimaryKeysMapping.Select(x => x.Item2);
                     var foreignKeyColumnNames = foreignNavigationTablePrimaryKeysMapping.Select(x => x.Item1);
 
-                    sb.Append($"\n\tCONSTRAINT FK_{foreignNavigationTableName} FOREIGN KEY({string.Join(", ", foreignKeyColumnNames)}) REFERENCES {foreignNavigationTableName}({string.Join(", ", foreignNavigationTablePrimaryKeyColumnNames)}) ");
+                    sb.Append($"{Environment.NewLine}\tCONSTRAINT FK_{foreignNavigationTableName} FOREIGN KEY({string.Join(", ", foreignKeyColumnNames)}) REFERENCES {foreignNavigationTableName}({string.Join(", ", foreignNavigationTablePrimaryKeyColumnNames)}) ");
                 }
             }
 
             sb.Length -= 1;
-            sb.Append("\n);");
+            sb.Append($"{Environment.NewLine});");
 
             return sb.ToString();
         }

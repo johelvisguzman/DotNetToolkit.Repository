@@ -4,6 +4,7 @@
     using Configuration.Conventions;
     using Extensions;
     using Helpers;
+    using Logging;
     using Queries;
     using Queries.Strategies;
     using System;
@@ -27,6 +28,15 @@
 
         #endregion
 
+        #region Properties
+
+        /// <summary>
+        /// Gets the repository context logger.
+        /// </summary>
+        public ILogger Logger { get; private set; } = NullLogger.Instance;
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -39,6 +49,7 @@
                 throw new ArgumentNullException(nameof(context));
 
             _context = context;
+            _context.Database.Log = s => Logger.Debug(s.TrimEnd(Environment.NewLine.ToCharArray()));
         }
 
         #endregion
@@ -79,6 +90,18 @@
         public ITransactionManager BeginTransaction()
         {
             return new EfTransactionManager(_context.Database.BeginTransaction());
+        }
+
+        /// <summary>
+        /// Sets the repository context logger provider to use.
+        /// </summary>
+        /// <param name="loggerProvider">The logger provider.</param>
+        public void UseLoggerProvider(ILoggerProvider loggerProvider)
+        {
+            if (loggerProvider == null)
+                throw new ArgumentNullException(nameof(loggerProvider));
+
+            Logger = loggerProvider.Create(typeof(DbContext).FullName);
         }
 
         /// <summary>

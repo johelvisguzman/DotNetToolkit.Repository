@@ -3,9 +3,12 @@
     using Data;
     using Factories;
     using Xunit;
+    using Xunit.Abstractions;
 
     public class RepositoryFactoryTests : TestBase
     {
+        public RepositoryFactoryTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+
         [Fact]
         public void Create()
         {

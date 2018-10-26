@@ -10,6 +10,7 @@
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
+    using Logging;
     using Transactions;
 
     /// <summary>
@@ -62,6 +63,15 @@
         public ITransactionManager BeginTransaction()
         {
             return _context.BeginTransaction();
+        }
+
+        /// <summary>
+        /// Sets the repository context logger provider to use.
+        /// </summary>
+        /// <param name="loggerProvider">The logger provider.</param>
+        public void UseLoggerProvider(ILoggerProvider loggerProvider)
+        {
+            _context.UseLoggerProvider(loggerProvider);
         }
 
         /// <summary>
