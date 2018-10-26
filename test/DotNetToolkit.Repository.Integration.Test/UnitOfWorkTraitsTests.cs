@@ -4,9 +4,12 @@
     using Factories;
     using System;
     using Xunit;
+    using Xunit.Abstractions;
 
     public class UnitOfWorkTraitsTests : TestBase
     {
+        public UnitOfWorkTraitsTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+
         [Fact]
         public void DisposeRollBackUnComittedChanges()
         {

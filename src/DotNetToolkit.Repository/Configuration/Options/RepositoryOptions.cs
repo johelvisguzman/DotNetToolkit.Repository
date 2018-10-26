@@ -2,6 +2,7 @@
 {
     using Factories;
     using Interceptors;
+    using Logging;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -16,6 +17,7 @@
         private Dictionary<Type, Lazy<IRepositoryInterceptor>> _interceptors = new Dictionary<Type, Lazy<IRepositoryInterceptor>>();
         private IRepositoryContextFactory _contextFactory;
         private IRepositoryContext _context;
+        private ILoggerProvider _loggerProvider;
 
         #endregion
 
@@ -25,6 +27,11 @@
         /// Gets the configured interceptors.
         /// </summary>
         public virtual IEnumerable<Lazy<IRepositoryInterceptor>> Interceptors { get { return _interceptors.Values; } }
+
+        /// <summary>
+        /// Gets the configured logger provider.
+        /// </summary>
+        public ILoggerProvider LoggerProvider { get { return _loggerProvider; } }
 
         /// <summary>
         /// Gets the configured internal context factory.
@@ -45,6 +52,7 @@
             {
                 return Context != null ||
                        ContextFactory != null ||
+                       LoggerProvider != null ||
                        Interceptors.Any();
             }
         }
@@ -132,6 +140,21 @@
             return this;
         }
 
+        /// <summary>
+        /// Returns the option instance with a configured logger provider for logging messages within the repository.
+        /// </summary>
+        /// <param name="loggerProvider">The logger factory.</param>
+        /// <returns>The same option instance.</returns>
+        internal virtual RepositoryOptions AddLoggerProvider(ILoggerProvider loggerProvider)
+        {
+            if (loggerProvider == null)
+                throw new ArgumentNullException(nameof(loggerProvider));
+
+            _loggerProvider = loggerProvider;
+
+            return this;
+        }
+
         #endregion
 
         #region Private Methods
@@ -145,6 +168,7 @@
                 throw new ArgumentNullException(nameof(target));
 
             target._interceptors = source._interceptors.ToDictionary(x => x.Key, x => x.Value);
+            target._loggerProvider = source._loggerProvider;
             target._contextFactory = source._contextFactory;
             target._context = source._context;
         }

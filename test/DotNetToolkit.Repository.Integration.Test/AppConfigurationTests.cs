@@ -5,19 +5,22 @@
     using Data;
     using Factories;
     using InMemory;
-    using Internal;
     using System;
     using System.Collections.Generic;
     using System.Reflection;
     using Xunit;
+    using Xunit.Abstractions;
 
-    public class AppConfigurationTests
+    public class AppConfigurationTests : TestBase
     {
+        public AppConfigurationTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+
         [Fact]
         public void CanConfigureRepositoriesWithDefaultContextFactoryFromAppConfig()
         {
             var options = new RepositoryOptionsBuilder()
                 .UseConfiguration()
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var repoFactory = new RepositoryFactory(options);
@@ -32,6 +35,7 @@
         {
             var options = new RepositoryOptionsBuilder()
                 .UseConfiguration()
+                .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
             var repoFactory = new RepositoryFactory(options);

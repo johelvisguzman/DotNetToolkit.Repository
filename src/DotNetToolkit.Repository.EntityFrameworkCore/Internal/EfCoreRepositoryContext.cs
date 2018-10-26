@@ -13,6 +13,7 @@
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
+    using Logging;
     using Transactions;
 
     /// <summary>
@@ -24,6 +25,15 @@
         #region Fields
 
         private readonly DbContext _context;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets the repository context logger.
+        /// </summary>
+        public ILogger Logger { get; private set; } = NullLogger.Instance;
 
         #endregion
 
@@ -39,6 +49,7 @@
                 throw new ArgumentNullException(nameof(context));
 
             _context = context;
+            _context.ConfigureLogging(s => Logger.Debug(s.TrimEnd(Environment.NewLine.ToCharArray())));
         }
 
         #endregion
@@ -79,6 +90,18 @@
         public ITransactionManager BeginTransaction()
         {
             return new EfCoreTransactionManager(_context.Database.BeginTransaction());
+        }
+
+        /// <summary>
+        /// Sets the repository context logger provider to use.
+        /// </summary>
+        /// <param name="loggerProvider">The logger provider.</param>
+        public void UseLoggerProvider(ILoggerProvider loggerProvider)
+        {
+            if (loggerProvider == null)
+                throw new ArgumentNullException(nameof(loggerProvider));
+
+            Logger = loggerProvider.Create(typeof(DbContext).FullName);
         }
 
         /// <summary>

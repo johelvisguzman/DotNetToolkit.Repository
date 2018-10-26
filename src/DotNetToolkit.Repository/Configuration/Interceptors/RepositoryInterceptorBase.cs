@@ -1,7 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Interceptors
 {
-    using System;
-
     /// <summary>
     /// An implementation of <see cref="IRepositoryInterceptor" />.
     /// </summary>
@@ -51,13 +49,6 @@
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="entity">The entity.</param>
         public virtual void UpdateExecuted<TEntity>(TEntity entity) { }
-
-        /// <summary>
-        /// An activity method which is executed when an error/exception occurs in the repository.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <param name="ex">The ex.</param>
-        public virtual void Error<TEntity>(Exception ex) { }
 
         #endregion
     }

@@ -4,6 +4,7 @@
     using Configuration.Conventions;
     using Extensions;
     using Helpers;
+    using Logging;
     using Properties;
     using Queries;
     using Queries.Strategies;
@@ -41,6 +42,15 @@
         private readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, PropertyInfo>> _sqlPropertiesMapping = new ConcurrentDictionary<Type, ConcurrentDictionary<string, PropertyInfo>>();
         private readonly ConcurrentDictionary<Type, bool> _schemaValidationTypeMapping = new ConcurrentDictionary<Type, bool>();
         private readonly SchemaTableConfigurationHelper _schemaConfigHelper;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets the repository context logger.
+        /// </summary>
+        public ILogger Logger { get; private set; } = NullLogger.Instance;
 
         #endregion
 
@@ -173,6 +183,9 @@
                 if (ownsConnection)
                     connection.Dispose();
 
+                if (Logger.IsEnabled(LogLevel.Debug))
+                    Logger.Debug(FormatExecutedDebugQuery("ExecuteNonQuery", parameters, result, cmdText));
+
                 return new QueryResult<int>(result);
             }
         }
@@ -204,7 +217,12 @@
             if (connection.State == ConnectionState.Closed)
                 connection.Open();
 
-            return command.ExecuteReader(ownsConnection ? CommandBehavior.CloseConnection : CommandBehavior.Default);
+            var reader = command.ExecuteReader(ownsConnection ? CommandBehavior.CloseConnection : CommandBehavior.Default);
+
+            if (Logger.IsEnabled(LogLevel.Debug))
+                Logger.Debug(FormatExecutedDebugQuery("ExecuteReader", parameters, null, cmdText));
+
+            return reader;
         }
 
         /// <summary>
@@ -240,6 +258,9 @@
 
                 if (ownsConnection)
                     connection.Dispose();
+
+                if (Logger.IsEnabled(LogLevel.Debug))
+                    Logger.Debug(FormatExecutedDebugQuery($"ExecuteScalar<{typeof(T).FullName}>", parameters, result, cmdText));
 
                 return new QueryResult<T>(result);
             }
@@ -599,6 +620,9 @@
                 if (ownsConnection)
                     connection.Dispose();
 
+                if (Logger.IsEnabled(LogLevel.Debug))
+                    Logger.Debug(FormatExecutedDebugQuery("ExecuteNonQueryAsync", parameters, result, cmdText));
+
                 return new QueryResult<int>(result);
             }
         }
@@ -632,7 +656,12 @@
             if (connection.State == ConnectionState.Closed)
                 await connection.OpenAsync(cancellationToken);
 
-            return await command.ExecuteReaderAsync(ownsConnection ? CommandBehavior.CloseConnection : CommandBehavior.Default, cancellationToken);
+            var reader = await command.ExecuteReaderAsync(ownsConnection ? CommandBehavior.CloseConnection : CommandBehavior.Default, cancellationToken);
+
+            if (Logger.IsEnabled(LogLevel.Debug))
+                Logger.Debug(FormatExecutedDebugQuery("ExecuteReaderAsync", parameters, null, cmdText));
+
+            return reader;
         }
 
         /// <summary>
@@ -670,6 +699,9 @@
 
                 if (ownsConnection)
                     connection.Dispose();
+
+                if (Logger.IsEnabled(LogLevel.Debug))
+                    Logger.Debug(FormatExecutedDebugQuery($"ExecuteScalarAsync<{typeof(T).FullName}>", parameters, result, cmdText));
 
                 return new QueryResult<T>(result);
             }
@@ -1103,7 +1135,7 @@
             var fetchStrategy = options?.FetchStrategy;
 
             // Default select
-            var columns = string.Join(",\n\t", m.SqlPropertiesMapping.Select(x =>
+            var columns = string.Join($",{Environment.NewLine}\t", m.SqlPropertiesMapping.Select(x =>
             {
                 var colAlias = m.GenerateColumnAlias(x.Value);
                 var colName = x.Value.GetColumnName();
@@ -1145,7 +1177,7 @@
             {
                 var joinStatementSb = new StringBuilder();
 
-                sb.Append($"SELECT\n\t{columns}");
+                sb.Append($"SELECT{Environment.NewLine}\t{columns}");
 
                 foreach (var path in fetchStrategy.PropertyPaths)
                 {
@@ -1162,7 +1194,7 @@
                         var joinTableProperties = joinTableType.GetRuntimeProperties().ToList();
                         var joinTableName = joinTableType.GetTableName();
                         var joinTableAlias = m.GenerateTableAlias(joinTableType);
-                        var joinTableColumnNames = string.Join(",\n\t",
+                        var joinTableColumnNames = string.Join($",{Environment.NewLine}\t",
                             joinTableProperties
                                 .Where(Extensions.PropertyInfoExtensions.IsPrimitive)
                                 .Select(x =>
@@ -1174,22 +1206,22 @@
                                 }));
 
 
-                        sb.Append(",\n\t");
+                        sb.Append($",{Environment.NewLine}\t");
                         sb.Append(joinTableColumnNames);
 
-                        joinStatementSb.Append("\n");
+                        joinStatementSb.Append(Environment.NewLine);
                         joinStatementSb.Append($"LEFT OUTER JOIN [{joinTableName}] AS [{joinTableAlias}] ON [{mainTableAlias}].[{mainTablePrimaryKeyName}] = [{joinTableAlias}].[{joinTableForeignKeyName}]");
 
                         m.SqlNavigationPropertiesMapping.Add(joinTableType, joinTableProperties.ToDictionary(ModelConventionHelper.GetColumnName, x => x));
                     }
                 }
 
-                sb.Append($"\nFROM [{mainTableName}] AS [{mainTableAlias}]");
+                sb.Append($"{Environment.NewLine}FROM [{mainTableName}] AS [{mainTableAlias}]");
                 sb.Append(joinStatementSb);
             }
             else
             {
-                sb.Append($"SELECT\n\t{columns}\nFROM [{mainTableName}] AS [{mainTableAlias}]");
+                sb.Append($"SELECT{Environment.NewLine}\t{columns}{Environment.NewLine}FROM [{mainTableName}] AS [{mainTableAlias}]");
             }
 
             if (options != null)
@@ -1206,7 +1238,7 @@
                         out string expSql,
                         out Dictionary<string, object> expParameters);
 
-                    sb.Append("\nWHERE ");
+                    sb.Append($"{Environment.NewLine}WHERE ");
                     sb.Append(expSql);
 
                     foreach (var item in expParameters)
@@ -1230,7 +1262,7 @@
                     }
                 }
 
-                sb.Append("\n");
+                sb.Append(Environment.NewLine);
                 sb.Append("ORDER BY ");
 
                 foreach (var sorting in sortings)
@@ -1255,9 +1287,9 @@
 
                 if (options.PageSize != -1)
                 {
-                    sb.Append("\n");
+                    sb.Append(Environment.NewLine);
                     sb.Append($"OFFSET {options.PageSize} * ({options.PageIndex} - 1) ROWS");
-                    sb.Append("\n");
+                    sb.Append(Environment.NewLine);
                     sb.Append($"FETCH NEXT {options.PageSize} ROWS ONLY");
                 }
             }
@@ -1302,7 +1334,7 @@
                         var columnNames = string.Join(", ", properties.Select(x => x.Value.GetColumnName())).TrimEnd();
                         var values = string.Join(", ", properties.Select(x => $"@{x.Value.GetColumnName()}")).TrimEnd();
 
-                        sql = $"INSERT INTO [{tableName}] ({columnNames})\nVALUES ({values})";
+                        sql = $"INSERT INTO [{tableName}] ({columnNames}){Environment.NewLine}VALUES ({values})";
 
                         foreach (var pi in properties)
                         {
@@ -1319,7 +1351,7 @@
                         if (!existInDb)
                             throw new InvalidOperationException(Resources.EntityNotFoundInStore);
 
-                        sql = $"DELETE FROM [{tableName}]\nWHERE {primeryKeyColumnName} = @{primeryKeyColumnName}";
+                        sql = $"DELETE FROM [{tableName}]{Environment.NewLine}WHERE {primeryKeyColumnName} = @{primeryKeyColumnName}";
 
                         parameters.Add($"@{primeryKeyColumnName}", primeryKeyPropertyInfo.GetValue(entitySet.Entity, null));
 
@@ -1330,13 +1362,13 @@
                         if (!existInDb)
                             throw new InvalidOperationException(Resources.EntityNotFoundInStore);
 
-                        var values = string.Join(",\n\t", properties.Select(x =>
+                        var values = string.Join($",{Environment.NewLine}\t", properties.Select(x =>
                         {
                             var columnName = x.Value.GetColumnName();
                             return columnName + " = " + $"@{columnName}";
                         }));
 
-                        sql = $"UPDATE [{tableName}]\nSET {values}\nWHERE {primeryKeyColumnName} = @{primeryKeyColumnName}";
+                        sql = $"UPDATE [{tableName}]{Environment.NewLine}SET {values}{Environment.NewLine}WHERE {primeryKeyColumnName} = @{primeryKeyColumnName}";
 
                         foreach (var pi in properties)
                         {
@@ -1375,6 +1407,28 @@
                 try { _schemaConfigHelper.ExecuteSchemaValidate(entityType); }
                 finally { _schemaValidationTypeMapping[entityType] = true; }
             }
+        }
+
+        private static string FormatExecutedDebugQuery(string commandName, Dictionary<string, object> parameters, object result, string sql)
+        {
+            var sb = new StringBuilder();
+
+            sb.Append($"Executed [ Command = {commandName}");
+            if (parameters != null && parameters.Count > 0)
+            {
+                sb.Append(", ");
+                sb.Append($"Parameters = {parameters.ToDebugString()}");
+            }
+            if (result != null)
+            {
+                sb.Append(", ");
+                sb.Append($"Result = {result}");
+            }
+            sb.Append(" ]");
+            sb.Append(Environment.NewLine);
+            sb.Append(sql.Indent(3));
+
+            return sb.ToString();
         }
 
         #endregion
@@ -1427,6 +1481,9 @@
 
                         rows += await command.ExecuteNonQueryAsync(cancellationToken);
 
+                        if (Logger.IsEnabled(LogLevel.Debug))
+                            Logger.Debug($"Executed [ Command = ExecuteNonQuery, Parameters = {parameters.ToDebugString()}, Result = {rows} ]{Environment.NewLine}{sql.Indent(3)}");
+
                         // Checks to see if the model needs to be updated with the new key returned from the database
                         if (entitySet.State == EntityState.Added && isIdentity)
                         {
@@ -1435,6 +1492,9 @@
 
                             var newKey = await command.ExecuteScalarAsync(cancellationToken);
                             var convertedKeyValue = Convert.ChangeType(newKey, primeryKeyPropertyInfo.PropertyType);
+
+                            if (Logger.IsEnabled(LogLevel.Debug))
+                                Logger.Debug($"Executed [ Command = ExecuteScalar, Result = {convertedKeyValue} ]{Environment.NewLine}{command.CommandText.Indent(3)}");
 
                             primeryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
                         }
@@ -1666,7 +1726,19 @@
         {
             _transaction = CreateConnection().BeginTransaction();
 
-            return new AdoNetTransactionManager(_transaction);
+            return new AdoNetTransactionManager(_transaction, Logger);
+        }
+
+        /// <summary>
+        /// Sets the repository context logger provider to use.
+        /// </summary>
+        /// <param name="loggerProvider">The logger provider.</param>
+        public void UseLoggerProvider(ILoggerProvider loggerProvider)
+        {
+            if (loggerProvider == null)
+                throw new ArgumentNullException(nameof(loggerProvider));
+
+            Logger = loggerProvider.Create(GetType().FullName);
         }
 
         /// <summary>
@@ -1722,7 +1794,8 @@
 
                         OnSchemaValidation(entityType);
 
-                        var primeryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+                        var primeryKeyPropertyInfo =
+                            PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
                         var isIdentity = primeryKeyPropertyInfo.IsColumnIdentity();
 
                         // Checks if the entity exist in the database
@@ -1745,6 +1818,9 @@
 
                         rows += command.ExecuteNonQuery();
 
+                        if (Logger.IsEnabled(LogLevel.Debug))
+                            Logger.Debug($"Executed [ Command = ExecuteNonQuery, Parameters = {parameters.ToDebugString()}, Result = {rows} ]{Environment.NewLine}{sql.Indent(3)}");
+
                         // Checks to see if the model needs to be updated with the new key returned from the database
                         if (entitySet.State == EntityState.Added && isIdentity)
                         {
@@ -1753,6 +1829,9 @@
 
                             var newKey = command.ExecuteScalar();
                             var convertedKeyValue = Convert.ChangeType(newKey, primeryKeyPropertyInfo.PropertyType);
+
+                            if (Logger.IsEnabled(LogLevel.Debug))
+                                Logger.Debug($"Executed [ Command = ExecuteScalar, Result = {convertedKeyValue} ]{Environment.NewLine}{command.CommandText.Indent(3)}");
 
                             primeryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
                         }

@@ -6,9 +6,12 @@
     using System;
     using System.Threading.Tasks;
     using Xunit;
+    using Xunit.Abstractions;
 
     public class CompositeRepositoryTests : TestBase
     {
+        public CompositeRepositoryTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+
         [Fact]
         public void GetWithTwoCompositePrimaryKey()
         {

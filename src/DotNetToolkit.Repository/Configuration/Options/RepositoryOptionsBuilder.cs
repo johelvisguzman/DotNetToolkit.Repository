@@ -2,6 +2,7 @@
 {
     using Factories;
     using Interceptors;
+    using Logging;
     using System;
 
     /// <summary>
@@ -37,6 +38,8 @@
         public RepositoryOptionsBuilder()
         {
             _options = new RepositoryOptions();
+
+            Initialize();
         }
 
         /// <summary>
@@ -49,30 +52,13 @@
                 throw new ArgumentNullException(nameof(options));
 
             _options = options.Clone();
+
+            Initialize();
         }
 
         #endregion
 
-        #region Internal Methods
-
-        /// <summary>
-        /// Configures the repository with an internal context factory.
-        /// </summary>
-        /// <param name="contextFactory">The context factory.</param>
-        /// <returns>The same builder instance.</returns>
-        internal virtual RepositoryOptionsBuilder UseInternalContextFactory(IRepositoryContextFactory contextFactory)
-        {
-            if (contextFactory == null)
-                throw new ArgumentNullException(nameof(contextFactory));
-
-            _options.AddInternalContextFactory(contextFactory);
-
-            return this;
-        }
-
-        #endregion
-
-        #region Implementation of RepositoryOptionsBuilder
+        #region Public Methods
 
 #if !NETSTANDARD1_3
         /// <summary>
@@ -166,6 +152,53 @@
         public RepositoryOptionsBuilder UseInterceptor<TInterceptor>(TInterceptor interceptor) where TInterceptor : class, IRepositoryInterceptor
         {
             return UseInterceptor<TInterceptor>(() => interceptor);
+        }
+
+        /// <summary>
+        /// Configures the repository with logger provider for logging messages within the repository.
+        /// </summary>
+        /// <param name="loggerProvider">The logger provider.</param>
+        /// <returns>The same builder instance.</returns>
+        public RepositoryOptionsBuilder UseLoggerProvider(ILoggerProvider loggerProvider)
+        {
+            if (loggerProvider == null)
+                throw new ArgumentNullException(nameof(loggerProvider));
+
+            _options.AddLoggerProvider(loggerProvider);
+
+            return this;
+        }
+
+        #endregion
+
+        #region Internal Methods
+
+        /// <summary>
+        /// Configures the repository with an internal context factory.
+        /// </summary>
+        /// <param name="contextFactory">The context factory.</param>
+        /// <returns>The same builder instance.</returns>
+        internal virtual RepositoryOptionsBuilder UseInternalContextFactory(IRepositoryContextFactory contextFactory)
+        {
+            if (contextFactory == null)
+                throw new ArgumentNullException(nameof(contextFactory));
+
+            _options.AddInternalContextFactory(contextFactory);
+
+            return this;
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void Initialize()
+        {
+            if (_options.LoggerProvider == null)
+            {
+                // Sets the default logger provider (prints all messages levels)
+                UseLoggerProvider(new ConsoleLoggerProvider(LogLevel.Debug));
+            }
         }
 
         #endregion

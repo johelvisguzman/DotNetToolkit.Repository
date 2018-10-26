@@ -13,9 +13,12 @@
     using System.Data.SqlServerCe;
     using System.IO;
     using Xunit;
+    using Xunit.Abstractions;
 
-    public class RepositoryOptionsBuilderTests
+    public class RepositoryOptionsBuilderTests : TestBase
     {
+        public RepositoryOptionsBuilderTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+
         [Fact]
         public void ConfigureAdoNet()
         {
@@ -66,10 +69,12 @@
                 }
             }
 
-            var optionsBulder = new RepositoryOptionsBuilder()
-                .UseAdoNet(provider, connectionString);
+            var options = new RepositoryOptionsBuilder()
+                .UseAdoNet(provider, connectionString)
+                .UseLoggerProvider(TestXUnitLoggerProvider)
+                .Options;
 
-            var repo = new Repository<Customer>(optionsBulder.Options);
+            var repo = new Repository<Customer>(options);
 
             repo.Add(new Customer());
 
@@ -79,10 +84,12 @@
         [Fact]
         public void ConfigureInMemoryDatabase()
         {
-            var optionsBulder = new RepositoryOptionsBuilder()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString());
+            var options = new RepositoryOptionsBuilder()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
+                .Options;
 
-            var repo = new Repository<Customer>(optionsBulder.Options);
+            var repo = new Repository<Customer>(options);
 
             repo.Add(new Customer());
 
@@ -92,10 +99,12 @@
         [Fact]
         public void ConfigureEntityFrameworkCore()
         {
-            var optionsBulder = new RepositoryOptionsBuilder()
-                .UseEntityFrameworkCore<TestEfCoreDbContext>(options => options.UseInMemoryDatabase(Guid.NewGuid().ToString()));
+            var options = new RepositoryOptionsBuilder()
+                .UseEntityFrameworkCore<TestEfCoreDbContext>(opt => opt.UseInMemoryDatabase(Guid.NewGuid().ToString()))
+                .UseLoggerProvider(TestXUnitLoggerProvider)
+                .Options;
 
-            var repo = new Repository<Customer>(optionsBulder.Options);
+            var repo = new Repository<Customer>(options);
 
             repo.Add(new Customer());
 
@@ -112,10 +121,12 @@
             conn.ConnectionString = connectionString;
             conn.Open();
 
-            var optionsBulder = new RepositoryOptionsBuilder()
-                .UseEntityFramework<TestEfDbContext>(conn);
+            var options = new RepositoryOptionsBuilder()
+                .UseEntityFramework<TestEfDbContext>(conn)
+                .UseLoggerProvider(TestXUnitLoggerProvider)
+                .Options;
 
-            var repo = new Repository<Customer>(optionsBulder.Options);
+            var repo = new Repository<Customer>(options);
 
             repo.Add(new Customer());
 

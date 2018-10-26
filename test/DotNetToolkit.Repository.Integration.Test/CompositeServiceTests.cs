@@ -5,9 +5,12 @@
     using Queries.Strategies;
     using System.Threading.Tasks;
     using Xunit;
+    using Xunit.Abstractions;
 
     public class CompositeServiceTests : TestBase
     {
+        public CompositeServiceTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+
         [Fact]
         public void GetWithTwoCompositePrimaryKey()
         {

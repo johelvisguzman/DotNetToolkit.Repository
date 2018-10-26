@@ -9,9 +9,12 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Xunit;
+    using Xunit.Abstractions;
 
     public class ServiceTraitsTests : TestBase
     {
+        public ServiceTraitsTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+
         [Fact]
         public void Create()
         {

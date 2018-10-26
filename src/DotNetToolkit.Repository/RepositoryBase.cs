@@ -8,6 +8,7 @@
     using Factories;
     using Helpers;
     using Internal;
+    using Logging;
     using Properties;
     using Queries;
     using Queries.Strategies;
@@ -17,6 +18,7 @@
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
@@ -54,7 +56,7 @@
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3));
 
-                Intercept(x => x.Error<TEntity>(ex));
+                Logger.Error(ex);
 
                 throw ex;
             }
@@ -170,7 +172,7 @@
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3));
 
-                Intercept(x => x.Error<TEntity>(ex));
+                Logger.Error(ex);
 
                 throw ex;
             }
@@ -232,7 +234,7 @@
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2));
 
-                Intercept(x => x.Error<TEntity>(ex));
+                Logger.Error(ex);
 
                 throw ex;
             }
@@ -340,7 +342,7 @@
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2));
 
-                Intercept(x => x.Error<TEntity>(ex));
+                Logger.Error(ex);
 
                 throw ex;
             }
@@ -399,7 +401,7 @@
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
 
-                Intercept(x => x.Error<TEntity>(ex));
+                Logger.Error(ex);
 
                 throw ex;
             }
@@ -499,7 +501,7 @@
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
 
-                Intercept(x => x.Error<TEntity>(ex));
+                Logger.Error(ex);
 
                 throw ex;
             }
@@ -554,8 +556,22 @@
         /// </summary>
         internal IRepositoryContext Context
         {
-            get { return _context ?? (_context = new RepositoryContextAsyncWrapper(_contextFactory.Create())); }
+            get
+            {
+                if (_context == null)
+                {
+                    _context = new RepositoryContextAsyncWrapper(_contextFactory.Create());
+                    _context.UseLoggerProvider(_options.LoggerProvider);
+                }
+
+                return _context;
+            }
         }
+
+        /// <summary>
+        /// Gets the repository logger.
+        /// </summary>
+        internal ILogger Logger { get; }
 
         #endregion
 
@@ -576,11 +592,17 @@
 
             OnConfiguring(optionsBuilder);
 
+            if (optionsBuilder.Options.LoggerProvider == null)
+                throw new InvalidOperationException("No logger provider has been configured for this repository.");
+
+            Logger = optionsBuilder.Options.LoggerProvider.Create($"DotNetToolkit.Repository<{typeof(TEntity).Name}>");
+
             // The shared context that is set up by the unit of work
             var context = optionsBuilder.Options.Context;
             if (context != null)
             {
                 _context = context;
+                _context.UseLoggerProvider(optionsBuilder.Options.LoggerProvider);
             }
             else
             {
@@ -624,7 +646,7 @@
             }
             catch (Exception ex)
             {
-                Intercept(x => x.Error<TEntity>(ex));
+                Logger.Error(ex);
 
                 throw;
             }
@@ -642,7 +664,25 @@
             }
             catch (Exception ex)
             {
-                Intercept(x => x.Error<TEntity>(ex));
+                Logger.Error(ex);
+
+                throw;
+            }
+            finally
+            {
+                DisposeContext();
+            }
+        }
+
+        internal Task InterceptErrorAsync(Func<Task> action)
+        {
+            try
+            {
+                return action();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex);
 
                 throw;
             }
@@ -660,7 +700,7 @@
             }
             catch (Exception ex)
             {
-                Intercept(x => x.Error<TEntity>(ex));
+                Logger.Error(ex);
 
                 throw;
             }
@@ -670,16 +710,24 @@
             }
         }
 
-        internal T InterceptQueryResult<T>(Func<QueryResult<T>> action)
+        internal T InterceptQueryResult<T>(Func<QueryResult<T>> action, [CallerMemberName] string methodName = null)
         {
+            Logger.Debug($"Executing QueryResult<{typeof(T).Name}> [ Method = {methodName} ]");
+
             var queryResult = InterceptError<QueryResult<T>>(action);
+
+            Logger.Debug($"Executed QueryResult<{typeof(T).Name}> [ Method = {methodName}, HasResult = {queryResult.HasResult} ]");
 
             return queryResult.HasResult ? queryResult.Result : default(T);
         }
 
-        internal async Task<T> InterceptQueryResultAsync<T>(Func<Task<QueryResult<T>>> action)
+        internal async Task<T> InterceptQueryResultAsync<T>(Func<Task<QueryResult<T>>> action, [CallerMemberName] string methodName = null)
         {
+            Logger.Debug($"Executing QueryResult<{typeof(T).Name}> [ Method = {methodName} ]");
+
             var queryResult = await InterceptErrorAsync<QueryResult<T>>(action);
+
+            Logger.Debug($"Executed QueryResult<{typeof(T).Name}> [ Method = {methodName}, HasResult = {queryResult.HasResult} ]");
 
             return queryResult.HasResult ? queryResult.Result : default(T);
         }
@@ -705,6 +753,9 @@
 
         private void InterceptAddItem(IEnumerable<TEntity> entities)
         {
+            if (!entities.Any())
+                Logger.Debug("There are no items in the collection.");
+
             foreach (var entity in entities)
             {
                 InterceptAddItem(entity);
@@ -722,6 +773,9 @@
 
         private void InterceptUpdateItem(IEnumerable<TEntity> entities)
         {
+            if (!entities.Any())
+                Logger.Debug("There are no items in the collection.");
+
             foreach (var entity in entities)
             {
                 InterceptUpdateItem(entity);
@@ -739,6 +793,9 @@
 
         private void InterceptDeleteItem(IEnumerable<TEntity> entities)
         {
+            if (!entities.Any())
+                Logger.Debug("There are no items in the collection.");
+
             foreach (var entity in entities)
             {
                 InterceptDeleteItem(entity);
@@ -889,9 +946,13 @@
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
 
+                Logger.Debug("Adding an entity to the repository");
+
                 InterceptAddItem(entity);
 
                 Context.SaveChanges();
+
+                Logger.Info("Added an entity to the repository");
             });
         }
 
@@ -906,12 +967,13 @@
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
 
-                if (!entities.Any())
-                    return;
+                Logger.Debug("Adding a collection of entities to the repository");
 
                 InterceptAddItem(entities);
 
                 Context.SaveChanges();
+
+                Logger.Info("Added a collection of entities to the repository");
             });
         }
 
@@ -926,9 +988,13 @@
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
 
+                Logger.Debug("Updating an entity in the repository");
+
                 InterceptUpdateItem(entity);
 
                 Context.SaveChanges();
+
+                Logger.Info("Updated an entity in the repository");
             });
         }
 
@@ -943,12 +1009,13 @@
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
 
-                if (!entities.Any())
-                    return;
+                Logger.Debug("Updating a collection of entities in the repository");
 
                 InterceptUpdateItem(entities);
 
                 Context.SaveChanges();
+
+                Logger.Info("Updated a collection of entities in the repository");
             });
         }
 
@@ -963,9 +1030,13 @@
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
 
+                Logger.Debug("Deleting an entity from the repository");
+
                 InterceptDeleteItem(entity);
 
                 Context.SaveChanges();
+
+                Logger.Info("Deleted an entity from the repository");
             });
         }
 
@@ -998,12 +1069,13 @@
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
 
-                if (!entities.Any())
-                    return;
+                Logger.Debug("Deleting a collection of entities from the repository");
 
                 InterceptDeleteItem(entities);
 
                 Context.SaveChanges();
+
+                Logger.Info("Deleted a collection of entities from the repository");
             });
         }
 
@@ -1253,16 +1325,20 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public Task AddAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync(() =>
+            return InterceptErrorAsync(async () =>
             {
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
+
+                Logger.Debug("Adding an entity to the repository");
 
                 cancellationToken.ThrowIfCancellationRequested();
 
                 InterceptAddItem(entity);
 
-                return Context.AsAsync().SaveChangesAsync(cancellationToken);
+                await Context.AsAsync().SaveChangesAsync(cancellationToken);
+
+                Logger.Info("Added an entity to the repository");
             });
         }
 
@@ -1274,19 +1350,20 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public Task AddAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync(() =>
+            return InterceptErrorAsync(async () =>
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
 
-                if (!entities.Any())
-                    return Task.FromResult(0);
+                Logger.Debug("Adding a collection of entities to the repository");
 
                 cancellationToken.ThrowIfCancellationRequested();
 
                 InterceptAddItem(entities);
 
-                return Context.AsAsync().SaveChangesAsync(cancellationToken);
+                await Context.AsAsync().SaveChangesAsync(cancellationToken);
+
+                Logger.Info("Added a collection of entities to the repository");
             });
         }
 
@@ -1298,16 +1375,20 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync(() =>
+            return InterceptErrorAsync(async () =>
             {
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
+
+                Logger.Debug("Updating an entity in the repository");
 
                 cancellationToken.ThrowIfCancellationRequested();
 
                 InterceptUpdateItem(entity);
 
-                return Context.AsAsync().SaveChangesAsync(cancellationToken);
+                await Context.AsAsync().SaveChangesAsync(cancellationToken);
+
+                Logger.Info("Updated an entity in the repository");
             });
         }
 
@@ -1319,19 +1400,20 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public Task UpdateAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync(() =>
+            return InterceptErrorAsync(async () =>
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
 
-                if (!entities.Any())
-                    return Task.FromResult(0);
+                Logger.Debug("Updating a collection of entities in the repository");
 
                 cancellationToken.ThrowIfCancellationRequested();
 
                 InterceptUpdateItem(entities);
 
-                return Context.AsAsync().SaveChangesAsync(cancellationToken);
+                await Context.AsAsync().SaveChangesAsync(cancellationToken);
+
+                Logger.Info("Updated a collection of entities in the repository");
             });
         }
 
@@ -1343,16 +1425,20 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync(() =>
+            return InterceptErrorAsync(async () =>
             {
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
+
+                Logger.Debug("Deleting an entity from the repository");
 
                 cancellationToken.ThrowIfCancellationRequested();
 
                 InterceptDeleteItem(entity);
 
-                return Context.AsAsync().SaveChangesAsync(cancellationToken);
+                await Context.AsAsync().SaveChangesAsync(cancellationToken);
+
+                Logger.Info("Deleted an entity from the repository");
             });
         }
 
@@ -1390,19 +1476,20 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public Task DeleteAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync(() =>
+            return InterceptErrorAsync(async () =>
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
 
-                if (!entities.Any())
-                    return Task.FromResult(0);
+                Logger.Debug("Deleting a collection of entities from the repository");
 
                 cancellationToken.ThrowIfCancellationRequested();
 
                 InterceptDeleteItem(entities);
 
-                return Context.AsAsync().SaveChangesAsync(cancellationToken);
+                await Context.AsAsync().SaveChangesAsync(cancellationToken);
+
+                Logger.Info("Deleted a collection of entities from the repository");
             });
         }
 
