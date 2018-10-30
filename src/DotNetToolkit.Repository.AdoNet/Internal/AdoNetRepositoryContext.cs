@@ -2,9 +2,9 @@
 {
     using Configuration;
     using Configuration.Conventions;
+    using Configuration.Logging;
     using Extensions;
     using Helpers;
-    using Logging;
     using Properties;
     using Queries;
     using Queries.Strategies;

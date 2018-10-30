@@ -2,6 +2,7 @@
 {
     using Configuration;
     using Configuration.Conventions;
+    using Configuration.Logging;
     using Extensions;
     using Helpers;
     using Properties;
@@ -14,7 +15,6 @@
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
-    using Logging;
     using Transactions;
 
     /// <summary>

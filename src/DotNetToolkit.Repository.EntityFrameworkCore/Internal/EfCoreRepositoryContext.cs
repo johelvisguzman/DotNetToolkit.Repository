@@ -2,6 +2,7 @@
 {
     using Configuration;
     using Configuration.Conventions;
+    using Configuration.Logging;
     using Extensions;
     using Helpers;
     using Microsoft.EntityFrameworkCore;
@@ -13,7 +14,6 @@
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
-    using Logging;
     using Transactions;
 
     /// <summary>

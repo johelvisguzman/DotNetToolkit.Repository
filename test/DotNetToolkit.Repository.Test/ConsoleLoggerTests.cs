@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Test
 {
-    using Logging;
+    using Configuration.Logging;
     using Xunit;
 
     public class ConsoleLoggerTests
