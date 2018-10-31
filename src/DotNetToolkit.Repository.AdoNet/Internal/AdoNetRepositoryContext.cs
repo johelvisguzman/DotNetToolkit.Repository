@@ -173,7 +173,7 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The command parameters.</param>
         /// <returns>The number of rows affected.</returns>
-        public virtual QueryResult<int> ExecuteNonQuery(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
+        public virtual int ExecuteNonQuery(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
         {
             using (var command = CreateCommand(cmdText, cmdType, parameters))
             {
@@ -191,7 +191,7 @@
                 if (ownsConnection)
                     connection.Dispose();
 
-                return new QueryResult<int>(result);
+                return result;
             }
         }
 
@@ -201,7 +201,7 @@
         /// <param name="cmdText">The command text.</param>
         /// <param name="parameters">The command parameters.</param>
         /// <returns>The number of rows affected.</returns>
-        public QueryResult<int> ExecuteNonQuery(string cmdText, Dictionary<string, object> parameters = null)
+        public int ExecuteNonQuery(string cmdText, Dictionary<string, object> parameters = null)
         {
             return ExecuteNonQuery(cmdText, CommandType.Text, parameters);
         }
@@ -249,7 +249,7 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The command parameters.</param>
         /// <returns>The first column of the first row in the result set returned by the query.</returns>
-        public virtual QueryResult<T> ExecuteScalar<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
+        public virtual T ExecuteScalar<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
         {
             using (var command = CreateCommand(cmdText, cmdType, parameters))
             {
@@ -260,14 +260,14 @@
                     connection.Open();
 
                 if (Logger.IsEnabled(LogLevel.Debug))
-                    Logger.Debug(FormatExecutingDebugQuery($"ExecuteScalar<{typeof(T).FullName}>", parameters, cmdText));
+                    Logger.Debug(FormatExecutingDebugQuery("ExecuteScalar", parameters, cmdText));
 
                 var result = ConvertValue<T>(command.ExecuteScalar());
 
                 if (ownsConnection)
                     connection.Dispose();
 
-                return new QueryResult<T>(result);
+                return result;
             }
         }
 
@@ -278,7 +278,7 @@
         /// <param name="cmdText">The command text.</param>
         /// <param name="parameters">The command parameters.</param>
         /// <returns>The first column of the first row in the result set returned by the query.</returns>
-        public QueryResult<T> ExecuteScalar<T>(string cmdText, Dictionary<string, object> parameters = null)
+        public T ExecuteScalar<T>(string cmdText, Dictionary<string, object> parameters = null)
         {
             return ExecuteScalar<T>(cmdText, CommandType.Text, parameters);
         }
@@ -628,7 +628,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
-        public virtual async Task<QueryResult<int>> ExecuteNonQueryAsync(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<int> ExecuteNonQueryAsync(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var command = CreateCommand(cmdText, cmdType, parameters))
             {
@@ -646,7 +646,7 @@
                 if (ownsConnection)
                     connection.Dispose();
 
-                return new QueryResult<int>(result);
+                return result;
             }
         }
 
@@ -657,7 +657,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
-        public Task<QueryResult<int>> ExecuteNonQueryAsync(string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        public Task<int> ExecuteNonQueryAsync(string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteNonQueryAsync(cmdText, CommandType.Text, parameters, cancellationToken);
         }
@@ -708,7 +708,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the first column of the first row in the result set returned by the query.</returns>
-        public virtual async Task<QueryResult<T>> ExecuteScalarAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<T> ExecuteScalarAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var command = CreateCommand(cmdText, cmdType, parameters))
             {
@@ -719,14 +719,14 @@
                     await connection.OpenAsync(cancellationToken);
 
                 if (Logger.IsEnabled(LogLevel.Debug))
-                    Logger.Debug(FormatExecutingDebugQuery($"ExecuteScalarAsync<{typeof(T).FullName}>", parameters, cmdText));
+                    Logger.Debug(FormatExecutingDebugQuery("ExecuteScalarAsync", parameters, cmdText));
 
                 var result = ConvertValue<T>(await command.ExecuteScalarAsync(cancellationToken));
 
                 if (ownsConnection)
                     connection.Dispose();
 
-                return new QueryResult<T>(result);
+                return result;
             }
         }
 
@@ -738,7 +738,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the first column of the first row in the result set returned by the query.</returns>
-        public Task<QueryResult<T>> ExecuteScalarAsync<T>(string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        public Task<T> ExecuteScalarAsync<T>(string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteScalarAsync<T>(cmdText, CommandType.Text, parameters, cancellationToken);
         }
