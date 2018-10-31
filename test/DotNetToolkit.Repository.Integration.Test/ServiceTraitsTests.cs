@@ -965,16 +965,16 @@
             expectedDictionaryByElementSelector.Add(entity.Id, entity.Name);
 
             Assert.False(expectedDictionary.All(x => service.GetDictionary(y => y.Id).ContainsKey(x.Key)));
-            Assert.False(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).ContainsKey(x.Key)));
+            Assert.False(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).Result.ContainsKey(x.Key)));
             Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(y => y.Id, y => y.Name).Contains(x)));
-            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Contains(x)));
+            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
 
             service.Create(entity);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionary(y => y.Id).ContainsKey(x.Key)));
-            Assert.True(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).ContainsKey(x.Key)));
+            Assert.True(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionary(y => y.Id, y => y.Name).Contains(x)));
-            Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Contains(x)));
+            Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
         }
 
         private static void TestGetDictionaryWithPagingOptionsSortAscending(IUnitOfWorkFactory uowFactory)
@@ -993,13 +993,17 @@
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
 
             Assert.False(expectedDictionary.All(x => service.GetDictionary(y => y.Id).ContainsKey(x.Key)));
-            Assert.False(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).ContainsKey(x.Key)));
+            Assert.False(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).Result.ContainsKey(x.Key)));
             Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(y => y.Id, y => y.Name).Contains(x)));
-            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Contains(x)));
+            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
 
             service.Create(entities);
 
-            var entitiesInDb = service.GetDictionary(options, x => x.Id);
+            var queryResult = service.GetDictionary(options, x => x.Id);
+
+            Assert.Equal(21, queryResult.Total);
+
+            var entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 0", entitiesInDb.ElementAt(0).Value.Name);
@@ -1023,13 +1027,17 @@
             expectedDictionaryByElementSelector.Add(entities[4].Id, entities[4].Name);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionary(y => y.Id).ContainsKey(x.Key)));
-            Assert.True(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).ContainsKey(x.Key)));
+            Assert.True(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionary(y => y.Id, y => y.Name).Contains(x)));
-            Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Contains(x)));
+            Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
 
             options = options.Page(2);
 
-            entitiesInDb = service.GetDictionary(options, x => x.Id);
+            queryResult = service.GetDictionary(options, x => x.Id);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 5", entitiesInDb.ElementAt(0).Value.Name);
@@ -1053,13 +1061,17 @@
             expectedDictionaryByElementSelector.Add(entities[4].Id, entities[4].Name);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionary(y => y.Id).ContainsKey(x.Key)));
-            Assert.False(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).ContainsKey(x.Key)));
+            Assert.False(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionary(y => y.Id, y => y.Name).Contains(x)));
-            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Contains(x)));
+            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
 
             options = options.Page(3);
 
-            entitiesInDb = service.GetDictionary(options, x => x.Id);
+            queryResult = service.GetDictionary(options, x => x.Id);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 10", entitiesInDb.ElementAt(0).Value.Name);
@@ -1083,13 +1095,17 @@
             expectedDictionaryByElementSelector.Add(entities[4].Id, entities[4].Name);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionary(y => y.Id).ContainsKey(x.Key)));
-            Assert.False(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).ContainsKey(x.Key)));
+            Assert.False(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionary(y => y.Id, y => y.Name).Contains(x)));
-            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Contains(x)));
+            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
 
             options = options.Page(4);
 
-            entitiesInDb = service.GetDictionary(options, x => x.Id);
+            queryResult = service.GetDictionary(options, x => x.Id);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 15", entitiesInDb.ElementAt(0).Value.Name);
@@ -1113,13 +1129,17 @@
             expectedDictionaryByElementSelector.Add(entities[4].Id, entities[4].Name);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionary(y => y.Id).ContainsKey(x.Key)));
-            Assert.False(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).ContainsKey(x.Key)));
+            Assert.False(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionary(y => y.Id, y => y.Name).Contains(x)));
-            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Contains(x)));
+            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
 
             options = options.Page(5);
 
-            entitiesInDb = service.GetDictionary(options, x => x.Id);
+            queryResult = service.GetDictionary(options, x => x.Id);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Single(entitiesInDb);
             Assert.Equal("Random Name 20", entitiesInDb.ElementAt(0).Value.Name);
@@ -1131,9 +1151,9 @@
             expectedDictionaryByElementSelector.Add(entities[20].Id, entities[20].Name);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionary(y => y.Id).ContainsKey(x.Key)));
-            Assert.True(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).ContainsKey(x.Key)));
+            Assert.True(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionary(y => y.Id, y => y.Name).Contains(x)));
-            Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Contains(x)));
+            Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
         }
 
         private static void TestGetDictionaryWithPagingOptionsSortDescending(IUnitOfWorkFactory uowFactory)
@@ -1153,13 +1173,17 @@
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
 
             Assert.False(expectedDictionary.All(x => service.GetDictionary(y => y.Id).ContainsKey(x.Key)));
-            Assert.False(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).ContainsKey(x.Key)));
+            Assert.False(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).Result.ContainsKey(x.Key)));
             Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(y => y.Id, y => y.Name).Contains(x)));
-            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Contains(x)));
+            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
 
             service.Create(entities);
 
-            var entitiesInDb = service.GetDictionary(options, x => x.Id);
+            var queryResult = service.GetDictionary(options, x => x.Id);
+
+            Assert.Equal(21, queryResult.Total);
+
+            var entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 20", entitiesInDb.ElementAt(0).Value.Name);
@@ -1183,13 +1207,17 @@
             expectedDictionaryByElementSelector.Add(entities[4].Id, entities[4].Name);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionary(y => y.Id).ContainsKey(x.Key)));
-            Assert.False(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).ContainsKey(x.Key)));
+            Assert.False(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionary(y => y.Id, y => y.Name).Contains(x)));
-            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Contains(x)));
+            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
 
             options = options.Page(2);
 
-            entitiesInDb = service.GetDictionary(options, x => x.Id);
+            queryResult = service.GetDictionary(options, x => x.Id);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 15", entitiesInDb.ElementAt(0).Value.Name);
@@ -1213,13 +1241,17 @@
             expectedDictionaryByElementSelector.Add(entities[4].Id, entities[4].Name);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionary(y => y.Id).ContainsKey(x.Key)));
-            Assert.False(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).ContainsKey(x.Key)));
+            Assert.False(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionary(y => y.Id, y => y.Name).Contains(x)));
-            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Contains(x)));
+            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
 
             options = options.Page(3);
 
-            entitiesInDb = service.GetDictionary(options, x => x.Id);
+            queryResult = service.GetDictionary(options, x => x.Id);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 10", entitiesInDb.ElementAt(0).Value.Name);
@@ -1243,13 +1275,17 @@
             expectedDictionaryByElementSelector.Add(entities[4].Id, entities[4].Name);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionary(y => y.Id).ContainsKey(x.Key)));
-            Assert.False(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).ContainsKey(x.Key)));
+            Assert.False(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionary(y => y.Id, y => y.Name).Contains(x)));
-            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Contains(x)));
+            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
 
             options = options.Page(4);
 
-            entitiesInDb = service.GetDictionary(options, x => x.Id);
+            queryResult = service.GetDictionary(options, x => x.Id);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 5", entitiesInDb.ElementAt(0).Value.Name);
@@ -1273,13 +1309,17 @@
             expectedDictionaryByElementSelector.Add(entities[4].Id, entities[4].Name);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionary(y => y.Id).ContainsKey(x.Key)));
-            Assert.False(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).ContainsKey(x.Key)));
+            Assert.False(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionary(y => y.Id, y => y.Name).Contains(x)));
-            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Contains(x)));
+            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
 
             options = options.Page(5);
 
-            entitiesInDb = service.GetDictionary(options, x => x.Id);
+            queryResult = service.GetDictionary(options, x => x.Id);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Single(entitiesInDb);
             Assert.Equal("Random Name 0", entitiesInDb.ElementAt(0).Value.Name);
@@ -1291,9 +1331,9 @@
             expectedDictionaryByElementSelector.Add(entities[0].Id, entities[0].Name);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionary(y => y.Id).ContainsKey(x.Key)));
-            Assert.True(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).ContainsKey(x.Key)));
+            Assert.True(expectedDictionary.All(x => service.GetDictionary(options, y => y.Id).Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionary(y => y.Id, y => y.Name).Contains(x)));
-            Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Contains(x)));
+            Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
         }
 
         private static void TestGetGroupBy(IUnitOfWorkFactory uowFactory)
@@ -1308,16 +1348,15 @@
                 new Customer {Name = name}
             };
 
-            var expectedGroup = entities.GroupBy(y => y.Id);
             var expectedGetGroupByElementSelector = entities.GroupBy(y => y.Id, y => y.Name);
 
             Assert.False(expectedGetGroupByElementSelector.All(x => service.GetGroupBy(y => y.Id, (key, g) => key).Contains(x.Key)));
-            Assert.False(expectedGetGroupByElementSelector.All(x => service.GetGroupBy(options, y => y.Id, (key, g) => key).Contains(x.Key)));
+            Assert.False(expectedGetGroupByElementSelector.All(x => service.GetGroupBy(options, y => y.Id, (key, g) => key).Result.Contains(x.Key)));
 
             service.Create(entities);
 
             Assert.True(expectedGetGroupByElementSelector.All(x => service.GetGroupBy(y => y.Id, (key, g) => key).Contains(x.Key)));
-            Assert.True(expectedGetGroupByElementSelector.All(x => service.GetGroupBy(options, y => y.Id, (key, g) => key).Contains(x.Key)));
+            Assert.True(expectedGetGroupByElementSelector.All(x => service.GetGroupBy(options, y => y.Id, (key, g) => key).Result.Contains(x.Key)));
         }
 
         private static void TestGetGroupByWithSortingOptionsAscending(IUnitOfWorkFactory uowFactory)
@@ -1334,7 +1373,7 @@
 
             service.Create(entities);
 
-            Assert.Equal("Random Name 2", service.GetGroupBy(options, y => y.Name, (key, g) => key).First());
+            Assert.Equal("Random Name 2", service.GetGroupBy(options, y => y.Name, (key, g) => key).Result.First());
             Assert.Equal("Random Name 2", service.GetGroupBy(y => y.Name, (key, g) => key).First());
         }
 
@@ -1353,7 +1392,7 @@
             service.Create(entities);
 
             Assert.Equal("Random Name 2", service.GetGroupBy(y => y.Name, (key, g) => key).First());
-            Assert.Equal("Random Name 1", service.GetGroupBy(options, y => y.Name, (key, g) => key).First());
+            Assert.Equal("Random Name 1", service.GetGroupBy(options, y => y.Name, (key, g) => key).Result.First());
         }
 
         private static void TestGetGroupByWithPagingOptionsSortAscending(IUnitOfWorkFactory uowFactory)
@@ -1370,7 +1409,12 @@
             service.Create(entities);
 
             var options = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
-            var entitiesInDb = service.GetGroupBy(options, y => y.Name, (key, g) => key);
+
+            var queryResult = service.GetGroupBy(options, y => y.Name, (key, g) => key);
+
+            Assert.Equal(21, queryResult.Total);
+
+            var entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 0", entitiesInDb.ElementAt(0));
@@ -1381,7 +1425,11 @@
 
             options = options.Page(2);
 
-            entitiesInDb = service.GetGroupBy(options, y => y.Name, (key, g) => key);
+            queryResult = service.GetGroupBy(options, y => y.Name, (key, g) => key);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 5", entitiesInDb.ElementAt(0));
@@ -1392,7 +1440,11 @@
 
             options = options.Page(3);
 
-            entitiesInDb = service.GetGroupBy(options, y => y.Name, (key, g) => key);
+            queryResult = service.GetGroupBy(options, y => y.Name, (key, g) => key);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 10", entitiesInDb.ElementAt(0));
@@ -1403,7 +1455,11 @@
 
             options = options.Page(4);
 
-            entitiesInDb = service.GetGroupBy(options, y => y.Name, (key, g) => key);
+            queryResult = service.GetGroupBy(options, y => y.Name, (key, g) => key);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 15", entitiesInDb.ElementAt(0));
@@ -1414,7 +1470,11 @@
 
             options = options.Page(5);
 
-            entitiesInDb = service.GetGroupBy(options, y => y.Name, (key, g) => key);
+            queryResult = service.GetGroupBy(options, y => y.Name, (key, g) => key);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Single(entitiesInDb);
             Assert.Equal("Random Name 20", entitiesInDb.ElementAt(0));
@@ -1434,7 +1494,12 @@
             service.Create(entities);
 
             var options = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
-            var entitiesInDb = service.GetGroupBy(options, y => y.Name, (key, g) => key);
+
+            var queryResult = service.GetGroupBy(options, y => y.Name, (key, g) => key);
+
+            Assert.Equal(21, queryResult.Total);
+
+            var entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 20", entitiesInDb.ElementAt(0));
@@ -1445,7 +1510,11 @@
 
             options = options.Page(2);
 
-            entitiesInDb = service.GetGroupBy(options, y => y.Name, (key, g) => key);
+            queryResult = service.GetGroupBy(options, y => y.Name, (key, g) => key);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 15", entitiesInDb.ElementAt(0));
@@ -1456,7 +1525,11 @@
 
             options = options.Page(3);
 
-            entitiesInDb = service.GetGroupBy(options, y => y.Name, (key, g) => key);
+            queryResult = service.GetGroupBy(options, y => y.Name, (key, g) => key);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 10", entitiesInDb.ElementAt(0));
@@ -1467,7 +1540,11 @@
 
             options = options.Page(4);
 
-            entitiesInDb = service.GetGroupBy(options, y => y.Name, (key, g) => key);
+            queryResult = service.GetGroupBy(options, y => y.Name, (key, g) => key);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 5", entitiesInDb.ElementAt(0));
@@ -1478,7 +1555,11 @@
 
             options = options.Page(5);
 
-            entitiesInDb = service.GetGroupBy(options, y => y.Name, (key, g) => key);
+            queryResult = service.GetGroupBy(options, y => y.Name, (key, g) => key);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Single(entitiesInDb);
             Assert.Equal("Random Name 0", entitiesInDb.ElementAt(0));
@@ -2074,16 +2155,16 @@
             expectedDictionaryByElementSelector.Add(entity.Id, entity.Name);
 
             Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(y => y.Id).Result.ContainsKey(x.Key)));
-            Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.ContainsKey(x.Key)));
+            Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.Result.ContainsKey(x.Key)));
             Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(y => y.Id, y => y.Name).Result.Contains(x)));
-            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Contains(x)));
+            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
 
             await service.CreateAsync(entity);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionaryAsync(y => y.Id).Result.ContainsKey(x.Key)));
-            Assert.True(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.ContainsKey(x.Key)));
+            Assert.True(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(y => y.Id, y => y.Name).Result.Contains(x)));
-            Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Contains(x)));
+            Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
         }
 
         private static async Task TestGetDictionaryWithPagingOptionsSortAscendingAsync(IUnitOfWorkFactory uowFactory)
@@ -2102,13 +2183,17 @@
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
 
             Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(y => y.Id).Result.ContainsKey(x.Key)));
-            Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.ContainsKey(x.Key)));
+            Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.Result.ContainsKey(x.Key)));
             Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(y => y.Id, y => y.Name).Result.Contains(x)));
-            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Contains(x)));
+            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
 
             await service.CreateAsync(entities);
 
-            var entitiesInDb = await service.GetDictionaryAsync(options, x => x.Id);
+            var queryResult = await service.GetDictionaryAsync(options, x => x.Id);
+
+            Assert.Equal(21, queryResult.Total);
+
+            var entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 0", entitiesInDb.ElementAt(0).Value.Name);
@@ -2132,13 +2217,17 @@
             expectedDictionaryByElementSelector.Add(entities[4].Id, entities[4].Name);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionaryAsync(y => y.Id).Result.ContainsKey(x.Key)));
-            Assert.True(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.ContainsKey(x.Key)));
+            Assert.True(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(y => y.Id, y => y.Name).Result.Contains(x)));
-            Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Contains(x)));
+            Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
 
             options = options.Page(2);
 
-            entitiesInDb = await service.GetDictionaryAsync(options, x => x.Id);
+            queryResult = await service.GetDictionaryAsync(options, x => x.Id);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 5", entitiesInDb.ElementAt(0).Value.Name);
@@ -2162,13 +2251,17 @@
             expectedDictionaryByElementSelector.Add(entities[4].Id, entities[4].Name);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionaryAsync(y => y.Id).Result.ContainsKey(x.Key)));
-            Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.ContainsKey(x.Key)));
+            Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(y => y.Id, y => y.Name).Result.Contains(x)));
-            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Contains(x)));
+            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
 
             options = options.Page(3);
 
-            entitiesInDb = await service.GetDictionaryAsync(options, x => x.Id);
+            queryResult = await service.GetDictionaryAsync(options, x => x.Id);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 10", entitiesInDb.ElementAt(0).Value.Name);
@@ -2192,13 +2285,17 @@
             expectedDictionaryByElementSelector.Add(entities[4].Id, entities[4].Name);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionaryAsync(y => y.Id).Result.ContainsKey(x.Key)));
-            Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.ContainsKey(x.Key)));
+            Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(y => y.Id, y => y.Name).Result.Contains(x)));
-            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Contains(x)));
+            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
 
             options = options.Page(4);
 
-            entitiesInDb = await service.GetDictionaryAsync(options, x => x.Id);
+            queryResult = await service.GetDictionaryAsync(options, x => x.Id);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 15", entitiesInDb.ElementAt(0).Value.Name);
@@ -2222,13 +2319,17 @@
             expectedDictionaryByElementSelector.Add(entities[4].Id, entities[4].Name);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionaryAsync(y => y.Id).Result.ContainsKey(x.Key)));
-            Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.ContainsKey(x.Key)));
+            Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(y => y.Id, y => y.Name).Result.Contains(x)));
-            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Contains(x)));
+            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
 
             options = options.Page(5);
 
-            entitiesInDb = await service.GetDictionaryAsync(options, x => x.Id);
+            queryResult = await service.GetDictionaryAsync(options, x => x.Id);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Single(entitiesInDb);
             Assert.Equal("Random Name 20", entitiesInDb.ElementAt(0).Value.Name);
@@ -2240,9 +2341,9 @@
             expectedDictionaryByElementSelector.Add(entities[20].Id, entities[20].Name);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionaryAsync(y => y.Id).Result.ContainsKey(x.Key)));
-            Assert.True(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.ContainsKey(x.Key)));
+            Assert.True(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(y => y.Id, y => y.Name).Result.Contains(x)));
-            Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Contains(x)));
+            Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
         }
 
         private static async Task TestGetDictionaryWithPagingOptionsSortDescendingAsync(IUnitOfWorkFactory uowFactory)
@@ -2262,13 +2363,17 @@
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
 
             Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(y => y.Id).Result.ContainsKey(x.Key)));
-            Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.ContainsKey(x.Key)));
+            Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.Result.ContainsKey(x.Key)));
             Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(y => y.Id, y => y.Name).Result.Contains(x)));
-            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Contains(x)));
+            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
 
             await service.CreateAsync(entities);
 
-            var entitiesInDb = await service.GetDictionaryAsync(options, x => x.Id);
+            var queryResult = await service.GetDictionaryAsync(options, x => x.Id);
+
+            Assert.Equal(21, queryResult.Total);
+
+            var entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 20", entitiesInDb.ElementAt(0).Value.Name);
@@ -2292,13 +2397,17 @@
             expectedDictionaryByElementSelector.Add(entities[4].Id, entities[4].Name);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionaryAsync(y => y.Id).Result.ContainsKey(x.Key)));
-            Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.ContainsKey(x.Key)));
+            Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(y => y.Id, y => y.Name).Result.Contains(x)));
-            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Contains(x)));
+            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
 
             options = options.Page(2);
 
-            entitiesInDb = await service.GetDictionaryAsync(options, x => x.Id);
+            queryResult = await service.GetDictionaryAsync(options, x => x.Id);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 15", entitiesInDb.ElementAt(0).Value.Name);
@@ -2322,13 +2431,17 @@
             expectedDictionaryByElementSelector.Add(entities[4].Id, entities[4].Name);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionaryAsync(y => y.Id).Result.ContainsKey(x.Key)));
-            Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.ContainsKey(x.Key)));
+            Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(y => y.Id, y => y.Name).Result.Contains(x)));
-            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Contains(x)));
+            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
 
             options = options.Page(3);
 
-            entitiesInDb = await service.GetDictionaryAsync(options, x => x.Id);
+            queryResult = await service.GetDictionaryAsync(options, x => x.Id);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 10", entitiesInDb.ElementAt(0).Value.Name);
@@ -2352,13 +2465,17 @@
             expectedDictionaryByElementSelector.Add(entities[4].Id, entities[4].Name);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionaryAsync(y => y.Id).Result.ContainsKey(x.Key)));
-            Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.ContainsKey(x.Key)));
+            Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(y => y.Id, y => y.Name).Result.Contains(x)));
-            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Contains(x)));
+            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
 
             options = options.Page(4);
 
-            entitiesInDb = await service.GetDictionaryAsync(options, x => x.Id);
+            queryResult = await service.GetDictionaryAsync(options, x => x.Id);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 5", entitiesInDb.ElementAt(0).Value.Name);
@@ -2382,13 +2499,17 @@
             expectedDictionaryByElementSelector.Add(entities[4].Id, entities[4].Name);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionaryAsync(y => y.Id).Result.ContainsKey(x.Key)));
-            Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.ContainsKey(x.Key)));
+            Assert.False(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(y => y.Id, y => y.Name).Result.Contains(x)));
-            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Contains(x)));
+            Assert.False(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
 
             options = options.Page(5);
 
-            entitiesInDb = await service.GetDictionaryAsync(options, x => x.Id);
+            queryResult = await service.GetDictionaryAsync(options, x => x.Id);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Single(entitiesInDb);
             Assert.Equal("Random Name 0", entitiesInDb.ElementAt(0).Value.Name);
@@ -2400,9 +2521,9 @@
             expectedDictionaryByElementSelector.Add(entities[0].Id, entities[0].Name);
 
             Assert.True(expectedDictionary.All(x => service.GetDictionaryAsync(y => y.Id).Result.ContainsKey(x.Key)));
-            Assert.True(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.ContainsKey(x.Key)));
+            Assert.True(expectedDictionary.All(x => service.GetDictionaryAsync(options, y => y.Id).Result.Result.ContainsKey(x.Key)));
             Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(y => y.Id, y => y.Name).Result.Contains(x)));
-            Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Contains(x)));
+            Assert.True(expectedDictionaryByElementSelector.All(x => service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
         }
 
         private static async Task TestGetGroupByAsync(IUnitOfWorkFactory uowFactory)
@@ -2417,16 +2538,15 @@
                 new Customer {Name = name}
             };
 
-            var expectedGroup = entities.GroupBy(y => y.Id);
             var expectedGetGroupByElementSelector = entities.GroupBy(y => y.Id, y => y.Name);
 
             Assert.False(expectedGetGroupByElementSelector.All(x => service.GetGroupByAsync(y => y.Id, (key, g) => key).Result.Contains(x.Key)));
-            Assert.False(expectedGetGroupByElementSelector.All(x => service.GetGroupByAsync(options, y => y.Id, (key, g) => key).Result.Contains(x.Key)));
+            Assert.False(expectedGetGroupByElementSelector.All(x => service.GetGroupByAsync(options, y => y.Id, (key, g) => key).Result.Result.Contains(x.Key)));
 
             await service.CreateAsync(entities);
 
             Assert.True(expectedGetGroupByElementSelector.All(x => service.GetGroupByAsync(y => y.Id, (key, g) => key).Result.Contains(x.Key)));
-            Assert.True(expectedGetGroupByElementSelector.All(x => service.GetGroupByAsync(options, y => y.Id, (key, g) => key).Result.Contains(x.Key)));
+            Assert.True(expectedGetGroupByElementSelector.All(x => service.GetGroupByAsync(options, y => y.Id, (key, g) => key).Result.Result.Contains(x.Key)));
         }
 
         private static async Task TestGetGroupByWithSortingOptionsAscendingAsync(IUnitOfWorkFactory uowFactory)
@@ -2443,7 +2563,7 @@
 
             await service.CreateAsync(entities);
 
-            Assert.Equal("Random Name 2", (await service.GetGroupByAsync(options, y => y.Name, (key, g) => key)).First());
+            Assert.Equal("Random Name 2", (await service.GetGroupByAsync(options, y => y.Name, (key, g) => key)).Result.First());
             Assert.Equal("Random Name 2", (await service.GetGroupByAsync(y => y.Name, (key, g) => key)).First());
         }
 
@@ -2462,7 +2582,7 @@
             await service.CreateAsync(entities);
 
             Assert.Equal("Random Name 2", (await service.GetGroupByAsync(y => y.Name, (key, g) => key)).First());
-            Assert.Equal("Random Name 1", (await service.GetGroupByAsync(options, y => y.Name, (key, g) => key)).First());
+            Assert.Equal("Random Name 1", (await service.GetGroupByAsync(options, y => y.Name, (key, g) => key)).Result.First());
         }
 
         private static async Task TestGetGroupByWithPagingOptionsSortAscendingAsync(IUnitOfWorkFactory uowFactory)
@@ -2479,7 +2599,12 @@
             await service.CreateAsync(entities);
 
             var options = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
-            var entitiesInDb = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
+
+            var queryResult = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
+
+            Assert.Equal(21, queryResult.Total);
+
+            var entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 0", entitiesInDb.ElementAt(0));
@@ -2490,7 +2615,11 @@
 
             options = options.Page(2);
 
-            entitiesInDb = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
+            queryResult = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 5", entitiesInDb.ElementAt(0));
@@ -2501,7 +2630,11 @@
 
             options = options.Page(3);
 
-            entitiesInDb = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
+            queryResult = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 10", entitiesInDb.ElementAt(0));
@@ -2512,7 +2645,11 @@
 
             options = options.Page(4);
 
-            entitiesInDb = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
+            queryResult = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 15", entitiesInDb.ElementAt(0));
@@ -2523,7 +2660,11 @@
 
             options = options.Page(5);
 
-            entitiesInDb = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
+            queryResult = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Single(entitiesInDb);
             Assert.Equal("Random Name 20", entitiesInDb.ElementAt(0));
@@ -2543,7 +2684,12 @@
             await service.CreateAsync(entities);
 
             var options = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
-            var entitiesInDb = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
+
+            var queryResult = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
+
+            Assert.Equal(21, queryResult.Total);
+
+            var entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 20", entitiesInDb.ElementAt(0));
@@ -2554,7 +2700,11 @@
 
             options = options.Page(2);
 
-            entitiesInDb = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
+            queryResult = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 15", entitiesInDb.ElementAt(0));
@@ -2565,7 +2715,11 @@
 
             options = options.Page(3);
 
-            entitiesInDb = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
+            queryResult = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 10", entitiesInDb.ElementAt(0));
@@ -2576,7 +2730,11 @@
 
             options = options.Page(4);
 
-            entitiesInDb = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
+            queryResult = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Equal(5, entitiesInDb.Count());
             Assert.Equal("Random Name 5", entitiesInDb.ElementAt(0));
@@ -2587,7 +2745,11 @@
 
             options = options.Page(5);
 
-            entitiesInDb = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
+            queryResult = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
+
+            Assert.Equal(21, queryResult.Total);
+
+            entitiesInDb = queryResult.Result;
 
             Assert.Single(entitiesInDb);
             Assert.Equal("Random Name 0", entitiesInDb.ElementAt(0));

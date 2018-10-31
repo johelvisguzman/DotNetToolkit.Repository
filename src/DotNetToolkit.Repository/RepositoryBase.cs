@@ -3,6 +3,7 @@
     using Configuration;
     using Configuration.Conventions;
     using Configuration.Interceptors;
+    using Configuration.Logging;
     using Configuration.Options;
     using Extensions;
     using Factories;
@@ -21,7 +22,6 @@
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
-    using Configuration.Logging;
 
     /// <summary>
     /// An implementation of <see cref="IRepository{TEntity, TKey1, TKey2, TKey3}" />.
@@ -716,7 +716,7 @@
 
             var queryResult = InterceptError<QueryResult<T>>(action);
 
-            Logger.Debug($"Executed QueryResult [ Method = {methodName} ]");
+            Logger.Debug("Executed QueryResult [ Method = {methodName} ]");
 
             return queryResult.Result;
         }
@@ -727,7 +727,7 @@
 
             var queryResult = await InterceptErrorAsync<QueryResult<T>>(action);
 
-            Logger.Debug($"Executed QueryResult [ Method = {methodName} ]");
+            Logger.Debug("Executed QueryResult [ Method = {methodName} ]");
 
             return queryResult.Result;
         }
@@ -866,7 +866,7 @@
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
         public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector)
         {
-            return ToDictionary<TDictionaryKey>((IQueryOptions<TEntity>)null, keySelector);
+            return ToDictionary<TDictionaryKey>((IQueryOptions<TEntity>)null, keySelector).Result;
         }
 
         /// <summary>
@@ -876,7 +876,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector)
+        public IQueryResult<Dictionary<TDictionaryKey, TEntity>> ToDictionary<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector)
         {
             return ToDictionary<TDictionaryKey, TEntity>(options, keySelector, IdentityExpression<TEntity>.Instance);
         }
@@ -891,7 +891,7 @@
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
         public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
-            return ToDictionary<TDictionaryKey, TElement>((IQueryOptions<TEntity>)null, keySelector, elementSelector);
+            return ToDictionary<TDictionaryKey, TElement>((IQueryOptions<TEntity>)null, keySelector, elementSelector).Result;
         }
 
         /// <summary>
@@ -903,9 +903,15 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
+        public IQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
-            return InterceptQueryResult<Dictionary<TDictionaryKey, TElement>>(() => Context.ToDictionary(options, keySelector, elementSelector));
+            Logger.Debug("Executing QueryResult [ Method = ToDictionary ]");
+
+            var queryResult = InterceptError<QueryResult<Dictionary<TDictionaryKey, TElement>>>(() => Context.ToDictionary(options, keySelector, elementSelector));
+
+            Logger.Debug("Executed QueryResult [ Method = ToDictionary ]");
+
+            return queryResult;
         }
 
         /// <summary>
@@ -918,7 +924,7 @@
         /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains the grouped result.</returns>
         public IEnumerable<TResult> GroupBy<TGroupKey, TResult>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
-            return GroupBy<TGroupKey, TResult>((IQueryOptions<TEntity>)null, keySelector, resultSelector);
+            return GroupBy<TGroupKey, TResult>((IQueryOptions<TEntity>)null, keySelector, resultSelector).Result;
         }
 
         /// <summary>
@@ -930,9 +936,15 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="resultSelector">A transform function to produce a result value from each element.</param>
         /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public IEnumerable<TResult> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
+        public IQueryResult<IEnumerable<TResult>> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
-            return InterceptQueryResult<IEnumerable<TResult>>(() => Context.GroupBy(options, keySelector, resultSelector));
+            Logger.Debug("Executing QueryResult [ Method = GroupBy ]");
+
+            var queryResult = InterceptError<QueryResult<IEnumerable<TResult>>>(() => Context.GroupBy(options, keySelector, resultSelector));
+
+            Logger.Debug("Executed QueryResult [ Method = GroupBy ]");
+
+            return queryResult;
         }
 
         /// <summary>
@@ -1183,7 +1195,7 @@
 
             var queryResult = InterceptError<QueryResult<IEnumerable<TResult>>>(() => Context.FindAll<TEntity, TResult>(options, selector));
 
-            Logger.Debug($"Executed QueryResult [ Method = FindAll ]");
+            Logger.Debug("Executed QueryResult [ Method = FindAll ]");
 
             return queryResult;
         }
@@ -1247,9 +1259,9 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Task<Dictionary<TDictionaryKey, TEntity>> ToDictionaryAsync<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<Dictionary<TDictionaryKey, TEntity>> ToDictionaryAsync<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return ToDictionaryAsync<TDictionaryKey>((IQueryOptions<TEntity>)null, keySelector, cancellationToken);
+            return (await ToDictionaryAsync<TDictionaryKey>((IQueryOptions<TEntity>)null, keySelector, cancellationToken)).Result;
         }
 
         /// <summary>
@@ -1260,7 +1272,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public Task<Dictionary<TDictionaryKey, TEntity>> ToDictionaryAsync<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<IQueryResult<Dictionary<TDictionaryKey, TEntity>>> ToDictionaryAsync<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ToDictionaryAsync<TDictionaryKey, TEntity>(options, keySelector, IdentityExpression<TEntity>.Instance, cancellationToken);
         }
@@ -1274,9 +1286,9 @@
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return ToDictionaryAsync<TDictionaryKey, TElement>((IQueryOptions<TEntity>)null, keySelector, elementSelector, cancellationToken);
+            return (await ToDictionaryAsync<TDictionaryKey, TElement>((IQueryOptions<TEntity>)null, keySelector, elementSelector, cancellationToken)).Result;
         }
 
         /// <summary>
@@ -1289,9 +1301,16 @@
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<IQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptQueryResultAsync<Dictionary<TDictionaryKey, TElement>>(() => Context.AsAsync().ToDictionaryAsync(options, keySelector, elementSelector, cancellationToken));
+            Logger.Debug("Executing QueryResult [ Method = ToDictionaryAsync ]");
+
+            var queryResult = await InterceptErrorAsync<QueryResult<Dictionary<TDictionaryKey, TElement>>>(() => Context.AsAsync().ToDictionaryAsync(options, keySelector, elementSelector, cancellationToken));
+
+            Logger.Debug("Executed QueryResult [ Method = ToDictionaryAsync ]");
+
+            return queryResult;
+
         }
 
         /// <summary>
@@ -1303,9 +1322,9 @@
         /// <param name="resultSelector">A transform function to produce a result value from each element.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains the grouped result.</returns>
-        public Task<IEnumerable<TResult>> GroupByAsync<TGroupKey, TResult>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<IEnumerable<TResult>> GroupByAsync<TGroupKey, TResult>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return GroupByAsync<TGroupKey, TResult>((IQueryOptions<TEntity>)null, keySelector, resultSelector, cancellationToken);
+            return (await GroupByAsync<TGroupKey, TResult>((IQueryOptions<TEntity>)null, keySelector, resultSelector, cancellationToken)).Result;
         }
 
         /// <summary>
@@ -1318,9 +1337,15 @@
         /// <param name="resultSelector">A transform function to produce a result value from each element.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public Task<IEnumerable<TResult>> GroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<IQueryResult<IEnumerable<TResult>>> GroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptQueryResultAsync<IEnumerable<TResult>>(() => Context.AsAsync().GroupByAsync(options, keySelector, resultSelector, cancellationToken));
+            Logger.Debug("Executing QueryResult [ Method = GroupByAsync ]");
+
+            var queryResult = await InterceptErrorAsync<QueryResult<IEnumerable<TResult>>>(() => Context.AsAsync().GroupByAsync(options, keySelector, resultSelector, cancellationToken));
+
+            Logger.Debug("Executed QueryResult [ Method = GroupByAsync ]");
+
+            return queryResult;
         }
 
         /// <summary>
@@ -1613,7 +1638,7 @@
 
             var queryResult = await InterceptErrorAsync<QueryResult<IEnumerable<TResult>>>(() => Context.AsAsync().FindAllAsync<TEntity, TResult>(options, selector, cancellationToken));
 
-            Logger.Debug($"Executed QueryResult [ Method = FindAllAsync ]");
+            Logger.Debug("Executed QueryResult [ Method = FindAllAsync ]");
 
             return queryResult;
         }
