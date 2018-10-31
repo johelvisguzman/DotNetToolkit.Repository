@@ -106,7 +106,7 @@ namespace DotNetToolkit.Repository.AdoNet.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The column name {0} is not valid..
+        ///   Looks up a localized string similar to The column name &apos;{0}&apos; is not valid..
         /// </summary>
         internal static string InvalidColumnName {
             get {

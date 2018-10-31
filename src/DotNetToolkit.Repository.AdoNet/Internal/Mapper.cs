@@ -39,6 +39,13 @@
                 .Where(x => x.IsPrimitive() && x.IsColumnMapped())
                 .OrderBy(x => x.GetColumnOrder())
                 .ToDictionary(x => x.GetColumnName(), x => x);
+
+            GenerateTableAlias(entityType);
+
+            foreach (var x in SqlPropertiesMapping)
+            {
+                GenerateColumnAlias(x.Value);
+            }
         }
 
         #endregion

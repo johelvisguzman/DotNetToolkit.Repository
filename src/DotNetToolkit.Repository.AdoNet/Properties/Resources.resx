@@ -127,7 +127,7 @@
     <value>Cannot be null or an empty string.</value>
   </data>
   <data name="InvalidColumnName" xml:space="preserve">
-    <value>The column name {0} is not valid.</value>
+    <value>The column name '{0}' is not valid.</value>
   </data>
   <data name="ConnectionStringDoestNotExistInConfigFile" xml:space="preserve">
     <value>The connection string does not exist in your configuration file.</value>
