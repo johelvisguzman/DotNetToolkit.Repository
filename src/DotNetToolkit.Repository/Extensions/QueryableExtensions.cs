@@ -1,37 +1,46 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
-    using System;
-    using System.Linq;
-    using System.Reflection;
     using Configuration.Conventions;
     using Helpers;
     using Queries;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
 
     internal static class QueryableExtensions
     {
-        public static IQueryable<T> Apply<T>(this IQueryOptions<T> options, IQueryable<T> query) where T : class
+        public static IQueryable<T> ApplySpecificationOptions<T>(this IQueryable<T> query, IQueryOptions<T> options) where T : class
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
             if (query == null)
                 throw new ArgumentNullException(nameof(query));
 
-            if (options.SpecificationStrategy != null)
+            if (options != null && options.SpecificationStrategy != null)
                 query = options.SpecificationStrategy.SatisfyingEntitiesFrom(query);
 
-            var sortings = options.SortingPropertiesMapping.ToDictionary(x => x.Key, x => x.Value);
+            return query;
+        }
+
+        public static IOrderedQueryable<T> ApplySortingOptions<T>(this IQueryable<T> query, IQueryOptions<T> options) where T : class
+        {
+            if (query == null)
+                throw new ArgumentNullException(nameof(query));
+
+            var sorting = new Dictionary<string, SortOrder>();
+
+            if (options != null)
+                sorting = options.SortingPropertiesMapping.ToDictionary(x => x.Key, x => x.Value);
 
             // Sorts on the composite key by default if no sorting is provided
-            if (!sortings.Any())
+            if (!sorting.Any())
             {
                 foreach (var primaryKeyPropertyInfo in PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<T>())
                 {
-                    sortings.Add(primaryKeyPropertyInfo.Name, SortOrder.Ascending);
+                    sorting.Add(primaryKeyPropertyInfo.Name, SortOrder.Ascending);
                 }
             }
 
-            var primarySorting = sortings.ElementAt(0);
+            var primarySorting = sorting.ElementAt(0);
             var primarySortingOrder = primarySorting.Value;
             var primarySortingProperty = primarySorting.Key;
 
@@ -39,20 +48,26 @@
                 ? query.OrderByDescending(primarySortingProperty)
                 : query.OrderBy(primarySortingProperty);
 
-            for (var i = 1; i < sortings.Count; i++)
+            for (var i = 1; i < sorting.Count; i++)
             {
-                var sorting = sortings.ElementAt(i);
-                var sortingOrder = sorting.Value;
-                var sortingProperty = sorting.Key;
+                var sort = sorting.ElementAt(i);
+                var sortOrder = sort.Value;
+                var sortProperty = sort.Key;
 
-                sortedQuery = sortingOrder == SortOrder.Descending
-                    ? sortedQuery.ThenByDescending(sortingProperty)
-                    : sortedQuery.ThenBy(sortingProperty);
+                sortedQuery = sortOrder == SortOrder.Descending
+                    ? sortedQuery.ThenByDescending(sortProperty)
+                    : sortedQuery.ThenBy(sortProperty);
             }
 
-            query = sortedQuery;
+            return sortedQuery;
+        }
 
-            if (options.PageSize != -1)
+        public static IQueryable<T> ApplyPagingOptions<T>(this IQueryable<T> query, IQueryOptions<T> options)
+        {
+            if (query == null)
+                throw new ArgumentNullException(nameof(query));
+
+            if (options != null && options.PageSize != -1)
             {
                 query = query.Skip((options.PageIndex - 1) * options.PageSize).Take(options.PageSize);
             }

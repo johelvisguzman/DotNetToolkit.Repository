@@ -62,23 +62,6 @@
                 throw new ArgumentException(DotNetToolkit.Repository.Properties.Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
         }
 
-        private IQueryable<TEntity> AsQueryable<TEntity>() where TEntity : class
-        {
-            return _context.Set<TEntity>().AsQueryable();
-        }
-
-        private IQueryable<TEntity> AsQueryable<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy) where TEntity : class
-        {
-            var query = AsQueryable<TEntity>();
-
-            return fetchStrategy == null ? query : fetchStrategy.PropertyPaths.Aggregate(query, (current, path) => current.Include(path));
-        }
-
-        private IQueryable<TEntity> GetQuery<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
-        {
-            return options != null ? options.Apply(AsQueryable<TEntity>(options.FetchStrategy)) : AsQueryable<TEntity>();
-        }
-
         #endregion
 
         #region Implementation of IContext
@@ -214,7 +197,14 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            var result = GetQuery(options).Select(selector).FirstOrDefault();
+            var result = _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options)
+                .ApplyPagingOptions(options)
+                .Select(selector)
+                .FirstOrDefault();
 
             return new QueryResult<TResult>(result);
         }
@@ -232,9 +222,39 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            var result = GetQuery(options).Select(selector).ToList();
+            var query = _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options);
 
-            return new QueryResult<IEnumerable<TResult>>(result);
+            IEnumerable<TResult> result;
+            int total;
+
+            if (options != null && options.PageSize != -1)
+            {
+                // Tries to get the count in one query
+                var data = query
+                    .ApplyPagingOptions(options)
+                    .Select(selector)
+                    .Select(x => new
+                    {
+                        Result = x,
+                        Total = query.Count()
+                    })
+                    .ToList();
+
+                result = data.Select(x => x.Result);
+                total = data.FirstOrDefault()?.Total ?? 0;
+            }
+            else
+            {
+                // Gets the total count from memory
+                result = query.Select(selector).ToList();
+                total = result.Count();
+            }
+
+            return new QueryResult<IEnumerable<TResult>>(result, total);
         }
 
         /// <summary>
@@ -245,7 +265,13 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public QueryResult<int> Count<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
         {
-            var result = GetQuery(options).Count();
+            var result = _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options)
+                .ApplyPagingOptions(options)
+                .Count();
 
             return new QueryResult<int>(result);
         }
@@ -261,7 +287,13 @@
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            var result = GetQuery(options).Any();
+            var result = _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options)
+                .ApplyPagingOptions(options)
+                .Any();
 
             return new QueryResult<bool>(result);
         }
@@ -287,7 +319,13 @@
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            var result = GetQuery(options).ToDictionary(keySelectFunc, elementSelectorFunc);
+            var result = _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options)
+                .ApplyPagingOptions(options)
+                .ToDictionary(keySelectFunc, elementSelectorFunc);
 
             return new QueryResult<Dictionary<TDictionaryKey, TElement>>(result);
         }
@@ -313,7 +351,14 @@
             var keySelectFunc = keySelector.Compile();
             var resultSelectorFunc = resultSelector.Compile();
 
-            var result = GetQuery(options).GroupBy(keySelectFunc, resultSelectorFunc).ToList();
+            var result = _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options)
+                .ApplyPagingOptions(options)
+                .GroupBy(keySelectFunc, resultSelectorFunc)
+                .ToList();
 
             return new QueryResult<IEnumerable<TResult>>(result);
         }
@@ -378,7 +423,14 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            var result = await GetQuery(options).Select(selector).FirstOrDefaultAsync(cancellationToken);
+            var result = await _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options)
+                .ApplyPagingOptions(options)
+                .Select(selector)
+                .FirstOrDefaultAsync(cancellationToken);
 
             return new QueryResult<TResult>(result);
         }
@@ -397,9 +449,39 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            var result = await GetQuery(options).Select(selector).ToListAsync(cancellationToken);
+            var query = _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options);
 
-            return new QueryResult<IEnumerable<TResult>>(result);
+            IEnumerable<TResult> result;
+            int total;
+
+            if (options != null && options.PageSize != -1)
+            {
+                // Tries to get the count in one query
+                var data = await query
+                    .ApplyPagingOptions(options)
+                    .Select(selector)
+                    .Select(x => new
+                    {
+                        Result = x,
+                        Total = query.Count()
+                    })
+                    .ToListAsync(cancellationToken);
+
+                result = data.Select(x => x.Result);
+                total = data.FirstOrDefault()?.Total ?? 0;
+            }
+            else
+            {
+                // Gets the total count from memory
+                result = await query.Select(selector).ToListAsync(cancellationToken);
+                total = result.Count();
+            }
+
+            return new QueryResult<IEnumerable<TResult>>(result, total);
         }
 
         /// <summary>
@@ -411,7 +493,13 @@
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public async Task<QueryResult<int>> CountAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            var result = await GetQuery(options).CountAsync(cancellationToken);
+            var result = await _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options)
+                .ApplyPagingOptions(options)
+                .CountAsync(cancellationToken);
 
             return new QueryResult<int>(result);
         }
@@ -428,7 +516,13 @@
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            var result = await GetQuery(options).AnyAsync(cancellationToken);
+            var result = await _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options)
+                .ApplyPagingOptions(options)
+                .AnyAsync(cancellationToken);
 
             return new QueryResult<bool>(result);
         }
@@ -455,7 +549,13 @@
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            var result = await GetQuery(options).ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken);
+            var result = await _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options)
+                .ApplyPagingOptions(options)
+                .ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken);
 
             return new QueryResult<Dictionary<TDictionaryKey, TElement>>(result);
         }

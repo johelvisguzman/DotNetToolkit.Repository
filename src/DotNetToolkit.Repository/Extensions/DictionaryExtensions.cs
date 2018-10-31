@@ -10,7 +10,12 @@
             if (dictionary == null || dictionary.Count == 0)
                 return "{ }";
 
-            return "{ " + string.Join(", ", dictionary.Select(kv => kv.Key + " = " + kv.Value).ToArray()) + " }";
+            return "{ " + string.Join(", ", dictionary.Select(kv =>
+            {
+                if (kv.Value is string)
+                    return kv.Key + " = '" + kv.Value + "'";
+                return kv.Key + " = " + kv.Value;
+            }).ToArray()) + " }";
         }
     }
 }

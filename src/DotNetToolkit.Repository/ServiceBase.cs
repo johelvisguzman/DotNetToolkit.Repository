@@ -22,7 +22,7 @@
     public abstract class ServiceBase<TEntity, TKey1, TKey2, TKey3> : ServiceBase<TEntity>, IService<TEntity, TKey1, TKey2, TKey3> where TEntity : class
     {
         #region Constructors
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ServiceBase{TEntity, TKey1, TKey2, TKey3}"/> class.
         /// </summary>
@@ -502,7 +502,7 @@
             using (var uow = UnitOfWorkFactory.Create())
             {
                 var result = uow.Create<TEntity, TKey1, TKey2>().TryDelete(key1, key2);
-                
+
                 uow.Commit();
 
                 return result;
@@ -1207,7 +1207,7 @@
         /// </summary>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public virtual IEnumerable<TEntity> GetAll(IQueryOptions<TEntity> options)
+        public virtual IQueryResult<IEnumerable<TEntity>> GetAll(IQueryOptions<TEntity> options)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -1260,7 +1260,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public virtual IEnumerable<TResult> GetAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
+        public virtual IQueryResult<IEnumerable<TResult>> GetAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -1608,7 +1608,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public virtual Task<IEnumerable<TEntity>> GetAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        public virtual Task<IQueryResult<IEnumerable<TEntity>>> GetAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -1670,7 +1670,7 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public virtual Task<IEnumerable<TResult>> GetAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        public virtual Task<IQueryResult<IEnumerable<TResult>>> GetAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             cancellationToken.ThrowIfCancellationRequested();
 

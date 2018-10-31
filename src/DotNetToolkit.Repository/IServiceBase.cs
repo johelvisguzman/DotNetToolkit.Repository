@@ -182,7 +182,7 @@
         /// </summary>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        IEnumerable<TEntity> GetAll(IQueryOptions<TEntity> options);
+        IQueryResult<IEnumerable<TEntity>> GetAll(IQueryOptions<TEntity> options);
 
         /// <summary>
         /// Finds the collection of projected entity results in the repository.
@@ -205,7 +205,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        IEnumerable<TResult> GetAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector);
+        IQueryResult<IEnumerable<TResult>> GetAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector);
 
         /// <summary>
         /// Determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="predicate" />.
@@ -355,7 +355,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        Task<IEnumerable<TEntity>> GetAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken());
+        Task<IQueryResult<IEnumerable<TEntity>>> GetAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken());
 
         /// <summary>
         /// Asynchronously finds the collection of projected entity results in the repository.
@@ -381,7 +381,7 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        Task<IEnumerable<TResult>> GetAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken());
+        Task<IQueryResult<IEnumerable<TResult>>> GetAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken());
 
         /// <summary>
         /// Asynchronously determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="predicate" />.

@@ -87,11 +87,6 @@
             return store[entityType].Select(x => (TEntity)Convert.ChangeType(x.Value, entityType)).AsQueryable();
         }
 
-        private IQueryable<TEntity> GetQuery<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
-        {
-            return options != null ? options.Apply(AsQueryable<TEntity>()) : AsQueryable<TEntity>();
-        }
-
         #endregion
 
         #region Implementation of IContext
@@ -259,7 +254,12 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            var result = GetQuery(options).Select(selector).FirstOrDefault();
+            var result = AsQueryable<TEntity>()
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(options)
+                .ApplyPagingOptions(options)
+                .Select(selector)
+                .FirstOrDefault();
 
             return new QueryResult<TResult>(result);
         }
@@ -277,9 +277,37 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            var result = GetQuery(options).Select(selector).ToList();
+            var query = AsQueryable<TEntity>()
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(options);
 
-            return new QueryResult<IEnumerable<TResult>>(result);
+            IEnumerable<TResult> result;
+            int total;
+
+            if (options != null && options.PageSize != -1)
+            {
+                // Tries to get the count in one query
+                var data = query
+                    .ApplyPagingOptions(options)
+                    .Select(selector)
+                    .Select(x => new
+                    {
+                        Result = x,
+                        Total = query.Count()
+                    })
+                    .ToList();
+
+                result = data.Select(x => x.Result);
+                total = data.FirstOrDefault()?.Total ?? 0;
+            }
+            else
+            {
+                // Gets the total count from memory
+                result = query.Select(selector).ToList();
+                total = result.Count();
+            }
+
+            return new QueryResult<IEnumerable<TResult>>(result, total);
         }
 
         /// <summary>
@@ -300,7 +328,11 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public QueryResult<int> Count<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
         {
-            var result = GetQuery(options).Count();
+            var result = AsQueryable<TEntity>()
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(options)
+                .ApplyPagingOptions(options)
+                .Count();
 
             return new QueryResult<int>(result);
         }
@@ -316,7 +348,11 @@
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            var result = GetQuery(options).Any();
+            var result = AsQueryable<TEntity>()
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(options)
+                .ApplyPagingOptions(options)
+                .Any();
 
             return new QueryResult<bool>(result);
         }
@@ -342,7 +378,11 @@
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            var result = GetQuery(options).ToDictionary(keySelectFunc, elementSelectorFunc);
+            var result = AsQueryable<TEntity>()
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(options)
+                .ApplyPagingOptions(options)
+                .ToDictionary(keySelectFunc, elementSelectorFunc);
 
             return new QueryResult<Dictionary<TDictionaryKey, TElement>>(result);
         }
@@ -368,7 +408,12 @@
             var keySelectFunc = keySelector.Compile();
             var resultSelectorFunc = resultSelector.Compile();
 
-            var result = GetQuery(options).GroupBy(keySelectFunc, resultSelectorFunc).ToList();
+            var result = AsQueryable<TEntity>()
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(options)
+                .ApplyPagingOptions(options)
+                .GroupBy(keySelectFunc, resultSelectorFunc)
+                .ToList();
 
             return new QueryResult<IEnumerable<TResult>>(result);
         }

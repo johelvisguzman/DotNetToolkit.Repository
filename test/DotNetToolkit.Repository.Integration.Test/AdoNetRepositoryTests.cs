@@ -432,9 +432,9 @@
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(address, customerRepo.FindAll()?.FirstOrDefault()?.Address);
             TestCustomerAddress(address, customerRepo.FindAll(x => x.Name.Equals(name))?.FirstOrDefault()?.Address);
-            TestCustomerAddress(address, customerRepo.FindAll(queryOptions)?.FirstOrDefault()?.Address);
+            TestCustomerAddress(address, customerRepo.FindAll(queryOptions).Result?.FirstOrDefault()?.Address);
             TestCustomerAddress(address, customerRepo.FindAll<CustomerAddress>(x => x.Name.Equals(name), x => x.Address)?.FirstOrDefault());
-            TestCustomerAddress(address, customerRepo.FindAll<CustomerAddress>(queryOptions, x => x.Address)?.FirstOrDefault());
+            TestCustomerAddress(address, customerRepo.FindAll<CustomerAddress>(queryOptions, x => x.Address).Result?.FirstOrDefault());
         }
 
         [Fact]
@@ -481,9 +481,9 @@
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(address, (await customerRepo.FindAllAsync())?.FirstOrDefault()?.Address);
             TestCustomerAddress(address, (await customerRepo.FindAllAsync(x => x.Name.Equals(name)))?.FirstOrDefault()?.Address);
-            TestCustomerAddress(address, (await customerRepo.FindAllAsync(queryOptions))?.FirstOrDefault()?.Address);
+            TestCustomerAddress(address, (await customerRepo.FindAllAsync(queryOptions)).Result?.FirstOrDefault()?.Address);
             TestCustomerAddress(address, (await customerRepo.FindAllAsync<CustomerAddress>(x => x.Name.Equals(name), x => x.Address))?.FirstOrDefault());
-            TestCustomerAddress(address, (await customerRepo.FindAllAsync<CustomerAddress>(queryOptions, x => x.Address))?.FirstOrDefault());
+            TestCustomerAddress(address, (await customerRepo.FindAllAsync<CustomerAddress>(queryOptions, x => x.Address)).Result?.FirstOrDefault());
         }
 
         [Fact]
@@ -730,10 +730,10 @@
             addressRepo.Add(addresses);
 
             Assert.Null(customerRepo.FindAll()?.FirstOrDefault()?.Addresses);
-            Assert.Null(customerRepo.FindAll(queryOptions)?.FirstOrDefault()?.Addresses);
+            Assert.Null(customerRepo.FindAll(queryOptions).Result?.FirstOrDefault()?.Addresses);
 
-            TestCustomerAddress(addresses, customerRepo.FindAll(optionsWithFetchStrategy)?.FirstOrDefault()?.Addresses);
-            TestCustomerAddress(addresses, customerRepo.FindAll<ICollection<CustomerAddressWithMultipleAddresses>>(optionsWithFetchStrategy, x => x.Addresses)?.FirstOrDefault());
+            TestCustomerAddress(addresses, customerRepo.FindAll(optionsWithFetchStrategy).Result?.FirstOrDefault()?.Addresses);
+            TestCustomerAddress(addresses, customerRepo.FindAll<ICollection<CustomerAddressWithMultipleAddresses>>(optionsWithFetchStrategy, x => x.Addresses).Result?.FirstOrDefault());
         }
 
         [Fact]
@@ -782,10 +782,10 @@
             await addressRepo.AddAsync(addresses);
 
             Assert.Null((await customerRepo.FindAllAsync())?.FirstOrDefault()?.Addresses);
-            Assert.Null((await customerRepo.FindAllAsync(queryOptions))?.FirstOrDefault()?.Addresses);
+            Assert.Null((await customerRepo.FindAllAsync(queryOptions)).Result?.FirstOrDefault()?.Addresses);
 
-            TestCustomerAddress(addresses, (await customerRepo.FindAllAsync(optionsWithFetchStrategy))?.FirstOrDefault()?.Addresses);
-            TestCustomerAddress(addresses, (await customerRepo.FindAllAsync<ICollection<CustomerAddressWithMultipleAddresses>>(optionsWithFetchStrategy, x => x.Addresses))?.FirstOrDefault());
+            TestCustomerAddress(addresses, (await customerRepo.FindAllAsync(optionsWithFetchStrategy)).Result?.FirstOrDefault()?.Addresses);
+            TestCustomerAddress(addresses, (await customerRepo.FindAllAsync<ICollection<CustomerAddressWithMultipleAddresses>>(optionsWithFetchStrategy, x => x.Addresses)).Result?.FirstOrDefault());
         }
 
         [Fact]

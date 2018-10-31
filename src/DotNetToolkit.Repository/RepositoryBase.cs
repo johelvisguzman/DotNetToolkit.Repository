@@ -712,24 +712,24 @@
 
         internal T InterceptQueryResult<T>(Func<QueryResult<T>> action, [CallerMemberName] string methodName = null)
         {
-            Logger.Debug($"Executing QueryResult<{typeof(T).Name}> [ Method = {methodName} ]");
+            Logger.Debug($"Executing QueryResult [ Method = {methodName} ]");
 
             var queryResult = InterceptError<QueryResult<T>>(action);
 
-            Logger.Debug($"Executed QueryResult<{typeof(T).Name}> [ Method = {methodName}, HasResult = {queryResult.HasResult} ]");
+            Logger.Debug($"Executed QueryResult [ Method = {methodName} ]");
 
-            return queryResult.HasResult ? queryResult.Result : default(T);
+            return queryResult.Result;
         }
 
         internal async Task<T> InterceptQueryResultAsync<T>(Func<Task<QueryResult<T>>> action, [CallerMemberName] string methodName = null)
         {
-            Logger.Debug($"Executing QueryResult<{typeof(T).Name}> [ Method = {methodName} ]");
+            Logger.Debug($"Executing QueryResult [ Method = {methodName} ]");
 
             var queryResult = await InterceptErrorAsync<QueryResult<T>>(action);
 
-            Logger.Debug($"Executed QueryResult<{typeof(T).Name}> [ Method = {methodName}, HasResult = {queryResult.HasResult} ]");
+            Logger.Debug($"Executed QueryResult [ Method = {methodName} ]");
 
-            return queryResult.HasResult ? queryResult.Result : default(T);
+            return queryResult.Result;
         }
 
         #endregion
@@ -1055,7 +1055,7 @@
         /// <param name="options">The options to apply to the query.</param>
         public void Delete(IQueryOptions<TEntity> options)
         {
-            Delete(FindAll(options));
+            Delete(FindAll(options).Result);
         }
 
         /// <summary>
@@ -1145,7 +1145,7 @@
         /// </summary>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public IEnumerable<TEntity> FindAll(IQueryOptions<TEntity> options)
+        public IQueryResult<IEnumerable<TEntity>> FindAll(IQueryOptions<TEntity> options)
         {
             return FindAll<TEntity>(options, IdentityExpression<TEntity>.Instance);
         }
@@ -1157,7 +1157,7 @@
         /// <returns>The collection of projected entity results in the repository.</returns>
         public IEnumerable<TResult> FindAll<TResult>(Expression<Func<TEntity, TResult>> selector)
         {
-            return FindAll<TResult>((IQueryOptions<TEntity>)null, selector);
+            return FindAll<TResult>((IQueryOptions<TEntity>)null, selector).Result;
         }
 
         /// <summary>
@@ -1168,7 +1168,7 @@
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
         public IEnumerable<TResult> FindAll<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector)
         {
-            return FindAll<TResult>(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)), selector);
+            return FindAll<TResult>(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)), selector).Result;
         }
 
         /// <summary>
@@ -1177,9 +1177,15 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public IEnumerable<TResult> FindAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
+        public IQueryResult<IEnumerable<TResult>> FindAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
-            return InterceptQueryResult<IEnumerable<TResult>>(() => Context.FindAll<TEntity, TResult>(options, selector));
+            Logger.Debug("Executing QueryResult [ Method = FindAll ]");
+
+            var queryResult = InterceptError<QueryResult<IEnumerable<TResult>>>(() => Context.FindAll<TEntity, TResult>(options, selector));
+
+            Logger.Debug($"Executed QueryResult [ Method = FindAll ]");
+
+            return queryResult;
         }
 
         /// <summary>
@@ -1463,7 +1469,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            var entitiesInDb = await FindAllAsync(options, cancellationToken);
+            var entitiesInDb = (await FindAllAsync(options, cancellationToken)).Result;
 
             await DeleteAsync(entitiesInDb, cancellationToken);
         }
@@ -1566,7 +1572,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public Task<IEnumerable<TEntity>> FindAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        public Task<IQueryResult<IEnumerable<TEntity>>> FindAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             return FindAllAsync<TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken);
         }
@@ -1577,9 +1583,9 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository.</returns>
-        public Task<IEnumerable<TResult>> FindAllAsync<TResult>(Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<IEnumerable<TResult>> FindAllAsync<TResult>(Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return FindAllAsync<TResult>((IQueryOptions<TEntity>)null, selector, cancellationToken);
+            return (await FindAllAsync<TResult>((IQueryOptions<TEntity>)null, selector, cancellationToken)).Result;
         }
 
         /// <summary>
@@ -1589,9 +1595,9 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
-        public Task<IEnumerable<TResult>> FindAllAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<IEnumerable<TResult>> FindAllAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return FindAllAsync<TResult>(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)), selector, cancellationToken);
+            return (await FindAllAsync<TResult>(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)), selector, cancellationToken)).Result;
         }
 
         /// <summary>
@@ -1601,9 +1607,15 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public Task<IEnumerable<TResult>> FindAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<IQueryResult<IEnumerable<TResult>>> FindAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptQueryResultAsync<IEnumerable<TResult>>(() => Context.AsAsync().FindAllAsync<TEntity, TResult>(options, selector, cancellationToken));
+            Logger.Debug("Executing QueryResult [ Method = FindAllAsync ]");
+
+            var queryResult = await InterceptErrorAsync<QueryResult<IEnumerable<TResult>>>(() => Context.AsAsync().FindAllAsync<TEntity, TResult>(options, selector, cancellationToken));
+
+            Logger.Debug($"Executed QueryResult [ Method = FindAllAsync ]");
+
+            return queryResult;
         }
 
         /// <summary>

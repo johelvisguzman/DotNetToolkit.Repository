@@ -128,9 +128,14 @@
 
         public Type GetTableTypeByColumnAlias(string columnAlias)
         {
-            var tableName = _columnAliasTableNameMapping[columnAlias];
+            if (_columnAliasTableNameMapping.ContainsKey(columnAlias))
+            {
+                var tableName = _columnAliasTableNameMapping[columnAlias];
 
-            return _tableNameAndTypeMapping[tableName];
+                return _tableNameAndTypeMapping[tableName];
+            }
+
+            return null;
         }
 
         public TElement Map<T, TElement>(DbDataReader r, Func<T, TElement> elementSelector)
