@@ -319,15 +319,37 @@
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            var result = _context.Set<TEntity>()
+            var query = _context.Set<TEntity>()
                 .AsQueryable()
                 .ApplySpecificationOptions(options)
                 .ApplyFetchingOptions(options)
-                .ApplySortingOptions(options)
-                .ApplyPagingOptions(options)
-                .ToDictionary(keySelectFunc, elementSelectorFunc);
+                .ApplySortingOptions(options);
 
-            return new QueryResult<Dictionary<TDictionaryKey, TElement>>(result);
+            Dictionary<TDictionaryKey, TElement> result;
+            int total;
+
+            if (options != null && options.PageSize != -1)
+            {
+                // Tries to get the count in one query
+                var data = query
+                    .ApplyPagingOptions(options)
+                    .Select(x => new
+                    {
+                        Result = x,
+                        Total = query.Count()
+                    });
+
+                result = data.Select(x => x.Result).ToDictionary(keySelectFunc, elementSelectorFunc);
+                total = data.FirstOrDefault()?.Total ?? 0;
+            }
+            else
+            {
+                // Gets the total count from memory
+                result = query.ToDictionary(keySelectFunc, elementSelectorFunc);
+                total = result.Count;
+            }
+
+            return new QueryResult<Dictionary<TDictionaryKey, TElement>>(result, total);
         }
 
         /// <summary>
@@ -351,16 +373,37 @@
             var keySelectFunc = keySelector.Compile();
             var resultSelectorFunc = resultSelector.Compile();
 
-            var result = _context.Set<TEntity>()
+            var query = _context.Set<TEntity>()
                 .AsQueryable()
                 .ApplySpecificationOptions(options)
                 .ApplyFetchingOptions(options)
-                .ApplySortingOptions(options)
-                .ApplyPagingOptions(options)
-                .GroupBy(keySelectFunc, resultSelectorFunc)
-                .ToList();
+                .ApplySortingOptions(options);
 
-            return new QueryResult<IEnumerable<TResult>>(result);
+            IEnumerable<TResult> result;
+            int total;
+
+            if (options != null && options.PageSize != -1)
+            {
+                // Tries to get the count in one query
+                var data = query
+                    .ApplyPagingOptions(options)
+                    .Select(x => new
+                    {
+                        Result = x,
+                        Total = query.Count()
+                    });
+
+                result = data.Select(x => x.Result).GroupBy(keySelectFunc, resultSelectorFunc).ToList();
+                total = data.FirstOrDefault()?.Total ?? 0;
+            }
+            else
+            {
+                // Gets the total count from memory
+                result = query.GroupBy(keySelectFunc, resultSelectorFunc).ToList();
+                total = result.Count();
+            }
+
+            return new QueryResult<IEnumerable<TResult>>(result, total);
         }
 
         #endregion
@@ -549,15 +592,37 @@
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            var result = await _context.Set<TEntity>()
+            var query = _context.Set<TEntity>()
                 .AsQueryable()
                 .ApplySpecificationOptions(options)
                 .ApplyFetchingOptions(options)
-                .ApplySortingOptions(options)
-                .ApplyPagingOptions(options)
-                .ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken);
+                .ApplySortingOptions(options);
 
-            return new QueryResult<Dictionary<TDictionaryKey, TElement>>(result);
+            Dictionary<TDictionaryKey, TElement> result;
+            int total;
+
+            if (options != null && options.PageSize != -1)
+            {
+                // Tries to get the count in one query
+                var data = query
+                    .ApplyPagingOptions(options)
+                    .Select(x => new
+                    {
+                        Result = x,
+                        Total = query.Count()
+                    });
+
+                result = await data.Select(x => x.Result).ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken);
+                total = data.FirstOrDefault()?.Total ?? 0;
+            }
+            else
+            {
+                // Gets the total count from memory
+                result = await query.ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken);
+                total = result.Count;
+            }
+
+            return new QueryResult<Dictionary<TDictionaryKey, TElement>>(result, total);
         }
 
         /// <summary>

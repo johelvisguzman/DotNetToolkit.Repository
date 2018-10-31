@@ -1426,20 +1426,38 @@
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            _queryBuilder.PrepareDefaultSelectQuery(options, out Mapper mapper);
+            _queryBuilder.PrepareDefaultSelectQuery(options, out Mapper mapper, true);
 
             await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
 
             using (var reader = await ExecuteReaderAsync(mapper.Sql, mapper.Parameters, cancellationToken))
             {
                 var dict = new Dictionary<TDictionaryKey, TElement>();
+                var foundCrossJoinCountColumn = false;
+                var total = 0;
 
                 while (reader.Read())
                 {
+                    // TODO: NEEDS TO FIGURE OUT ANOTHER WAY TO DO THIS
+                    for (var i = 0; i < reader.FieldCount; i++)
+                    {
+                        var name = reader.GetName(i);
+
+                        if (name.Equals(QueryBuilder.CrossJoinCountColumnName))
+                        {
+                            total = (int)reader[name];
+                            foundCrossJoinCountColumn = true;
+                            break;
+                        }
+                    }
+
                     dict.Add(mapper.Map<TEntity, TDictionaryKey>(reader, keySelectFunc), mapper.Map<TEntity, TElement>(reader, elementSelectorFunc));
                 }
 
-                return new QueryResult<Dictionary<TDictionaryKey, TElement>>(dict);
+                if (!foundCrossJoinCountColumn)
+                    total = dict.Count;
+
+                return new QueryResult<Dictionary<TDictionaryKey, TElement>>(dict, total);
             }
         }
 
@@ -1465,12 +1483,13 @@
             var keySelectFunc = keySelector.Compile();
             var resultSelectorFunc = resultSelector.Compile();
 
-            var result = (await FindAllAsync<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken))
-                .Result
+            var queryResult = await FindAllAsync<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken);
+
+            var result = queryResult.Result
                 .GroupBy(keySelectFunc, resultSelectorFunc)
                 .ToList();
 
-            return new QueryResult<IEnumerable<TResult>>(result);
+            return new QueryResult<IEnumerable<TResult>>(result, queryResult.Total.GetValueOrDefault());
         }
 
         #endregion
@@ -1749,20 +1768,38 @@
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            _queryBuilder.PrepareDefaultSelectQuery(options, out Mapper mapper);
+            _queryBuilder.PrepareDefaultSelectQuery(options, out Mapper mapper, true);
 
             OnSchemaValidation(typeof(TEntity));
 
             using (var reader = ExecuteReader(mapper.Sql, mapper.Parameters))
             {
                 var dict = new Dictionary<TDictionaryKey, TElement>();
+                var foundCrossJoinCountColumn = false;
+                var total = 0;
 
                 while (reader.Read())
                 {
+                    // TODO: NEEDS TO FIGURE OUT ANOTHER WAY TO DO THIS
+                    for (var i = 0; i < reader.FieldCount; i++)
+                    {
+                        var name = reader.GetName(i);
+
+                        if (name.Equals(QueryBuilder.CrossJoinCountColumnName))
+                        {
+                            total = (int)reader[name];
+                            foundCrossJoinCountColumn = true;
+                            break;
+                        }
+                    }
+
                     dict.Add(mapper.Map<TEntity, TDictionaryKey>(reader, keySelectFunc), mapper.Map<TEntity, TElement>(reader, elementSelectorFunc));
                 }
 
-                return new QueryResult<Dictionary<TDictionaryKey, TElement>>(dict);
+                if (!foundCrossJoinCountColumn)
+                    total = dict.Count;
+
+                return new QueryResult<Dictionary<TDictionaryKey, TElement>>(dict, total);
             }
         }
 
@@ -1787,12 +1824,13 @@
             var keySelectFunc = keySelector.Compile();
             var resultSelectorFunc = resultSelector.Compile();
 
-            var result = FindAll<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance)
-                .Result
+            var queryResult = FindAll<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance);
+
+            var result = queryResult.Result
                 .GroupBy(keySelectFunc, resultSelectorFunc)
                 .ToList();
 
-            return new QueryResult<IEnumerable<TResult>>(result);
+            return new QueryResult<IEnumerable<TResult>>(result, queryResult.Total.GetValueOrDefault());
         }
 
         #endregion
