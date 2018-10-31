@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal.Schema
 {
     using Configuration.Conventions;
+    using Configuration.Logging;
     using Extensions;
     using Properties;
     using System;
@@ -340,15 +341,18 @@
         private Dictionary<string, string> GetSchemaTableColumnConstraintsMapping(string tableName, string[] columns)
         {
             // Gets all the constraints
-            var sql = @"SELECT
-                            INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.COLUMN_NAME,
-                            INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_TYPE
-                        FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE
-                        JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS
-                          ON INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_NAME = INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.CONSTRAINT_NAME
-                        WHERE
-                            INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.TABLE_NAME = @tableName AND
-                            INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.COLUMN_NAME IN (@column)";
+            var sb = new StringBuilder();
+
+            sb.AppendLine("SELECT");
+            sb.AppendLine("\tINFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.COLUMN_NAME,");
+            sb.AppendLine("\tINFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_TYPE");
+            sb.AppendLine("FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE");
+            sb.AppendLine("JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS ON INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_NAME = INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.CONSTRAINT_NAME");
+            sb.AppendLine("WHERE");
+            sb.AppendLine("\tINFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.TABLE_NAME = @tableName AND");
+            sb.Append("\tINFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.COLUMN_NAME IN (@column)");
+
+            var sql = sb.ToString();
 
             var parameters = new Dictionary<string, object>
             {
@@ -362,6 +366,8 @@
             }
             catch (Exception ex)
             {
+                _context.Logger.Error(ex);
+
                 return null;
             }
         }

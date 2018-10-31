@@ -5,7 +5,6 @@
     using Configuration.Logging;
     using Extensions;
     using Helpers;
-    using Properties;
     using Queries;
     using Queries.Strategies;
     using Schema;
@@ -15,10 +14,8 @@
     using System.Configuration;
     using System.Data;
     using System.Data.Common;
-    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
-    using System.Reflection;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -39,11 +36,10 @@
         private readonly bool _ownsConnection;
 
         private readonly BlockingCollection<EntitySet> _items = new BlockingCollection<EntitySet>();
-        private readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, PropertyInfo>> _sqlPropertiesMapping = new ConcurrentDictionary<Type, ConcurrentDictionary<string, PropertyInfo>>();
         private readonly ConcurrentDictionary<Type, bool> _schemaValidationTypeMapping = new ConcurrentDictionary<Type, bool>();
         private readonly SchemaTableConfigurationHelper _schemaConfigHelper;
 
-        private readonly string _crossJoinCountColumnName;
+        private readonly QueryBuilder _queryBuilder = new QueryBuilder();
 
         #endregion
 
@@ -86,7 +82,6 @@
             _connectionString = css.ConnectionString;
             _ownsConnection = true;
             _schemaConfigHelper = new SchemaTableConfigurationHelper(this);
-            _crossJoinCountColumnName = "Counter_" + Guid.NewGuid().ToString("N");
         }
 
         /// <summary>
@@ -106,7 +101,6 @@
             _connectionString = connectionString;
             _ownsConnection = true;
             _schemaConfigHelper = new SchemaTableConfigurationHelper(this);
-            _crossJoinCountColumnName = "Counter_" + Guid.NewGuid().ToString("N");
         }
 
         /// <summary>
@@ -124,7 +118,6 @@
             _connection = existingConnection;
             _ownsConnection = false;
             _schemaConfigHelper = new SchemaTableConfigurationHelper(this);
-            _crossJoinCountColumnName = "Counter_" + Guid.NewGuid().ToString("N");
         }
 
         #endregion
@@ -419,7 +412,7 @@
                     {
                         var name = reader.GetName(i);
 
-                        if (name.Equals(_crossJoinCountColumnName))
+                        if (name.Equals(QueryBuilder.CrossJoinCountColumnName))
                         {
                             total = (int)reader[name];
                             foundCrossJoinCountColumn = true;
@@ -888,7 +881,7 @@
                     {
                         var name = reader.GetName(i);
 
-                        if (name.Equals(_crossJoinCountColumnName))
+                        if (name.Equals(QueryBuilder.CrossJoinCountColumnName))
                         {
                             total = (int)reader[name];
                             foundCrossJoinCountColumn = true;
@@ -1162,317 +1155,6 @@
             return ConvertValue<TElement>;
         }
 
-        private void PrepareQuery<T>(IQueryOptions<T> options, out Mapper mapper, bool allowCrossJoinTotalCount = false) where T : class
-        {
-            var parameters = new Dictionary<string, object>();
-            var sb = new StringBuilder();
-            var joinStatementSb = new StringBuilder();
-            var mainTableType = typeof(T);
-            var mainTableName = mainTableType.GetTableName();
-            var m = new Mapper(mainTableType);
-            var mainTableAlias = m.GenerateTableAlias(mainTableType);
-            var mainTableProperties = mainTableType.GetRuntimeProperties().ToList();
-            var mainTablePrimaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<T>().First();
-            var mainTablePrimaryKeyName = mainTablePrimaryKeyPropertyInfo.GetColumnName();
-            var fetchStrategy = options?.FetchStrategy;
-
-            const string CrossJoinTableName = "temp1";
-
-            // Default select
-            var columns = string.Join($",{Environment.NewLine}\t", m.SqlPropertiesMapping.Select(x =>
-            {
-                var colAlias = m.GenerateColumnAlias(x.Value);
-                var colName = x.Value.GetColumnName();
-
-                return $"[{mainTableAlias}].[{colName}] AS [{colAlias}]";
-            }));
-
-            // Check to see if we can automatically include some navigation properties (this seems to be the behavior of entity framework as well).
-            // Only supports a one to one table join for now...
-            if (fetchStrategy == null || !fetchStrategy.PropertyPaths.Any())
-            {
-                // Assumes we want to perform a join when the navigation property from the primary table has also a navigation property of
-                // the same type as the primary table
-                // Only do a join when the primary table has a foreign key property for the join table
-                var paths = mainTableProperties
-                    .Where(x => x.IsComplex() && PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(x.PropertyType).Any())
-                    .Select(x => x.Name)
-                    .ToList();
-
-                if (paths.Count > 0)
-                {
-                    if (fetchStrategy == null)
-                        fetchStrategy = new FetchQueryStrategy<T>();
-
-                    foreach (var path in paths)
-                    {
-                        fetchStrategy.Fetch(path);
-                    }
-                }
-            }
-
-            // -----------------------------------------------------------------------------------------------------------
-            // Select clause
-            // -----------------------------------------------------------------------------------------------------------
-
-            // Append join tables from fetchStrategy
-            // Only supports a one to one table join for now...
-            if (fetchStrategy != null && fetchStrategy.PropertyPaths.Any())
-            {
-                sb.Append($"SELECT{Environment.NewLine}\t{columns}");
-
-                foreach (var path in fetchStrategy.PropertyPaths)
-                {
-                    var joinTablePropertyInfo = mainTableProperties.Single(x => x.Name.Equals(path));
-                    var joinTableType = joinTablePropertyInfo.PropertyType.IsGenericCollection()
-                        ? joinTablePropertyInfo.PropertyType.GetGenericArguments().First()
-                        : joinTablePropertyInfo.PropertyType;
-                    var joinTableForeignKeyPropertyInfo = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(joinTableType, mainTableType).FirstOrDefault();
-
-                    // Only do a join when the primary table has a foreign key property for the join table
-                    if (joinTableForeignKeyPropertyInfo != null)
-                    {
-                        var joinTableForeignKeyName = joinTableForeignKeyPropertyInfo.GetColumnName();
-                        var joinTableProperties = joinTableType.GetRuntimeProperties().ToList();
-                        var joinTableName = joinTableType.GetTableName();
-                        var joinTableAlias = m.GenerateTableAlias(joinTableType);
-                        var joinTableColumnNames = string.Join($",{Environment.NewLine}\t",
-                            joinTableProperties
-                                .Where(Extensions.PropertyInfoExtensions.IsPrimitive)
-                                .Select(x =>
-                                {
-                                    var colAlias = m.GenerateColumnAlias(x);
-                                    var colName = x.GetColumnName();
-
-                                    return $"[{joinTableAlias}].[{colName}] AS [{colAlias}]";
-                                }));
-
-
-                        sb.Append($",{Environment.NewLine}\t");
-                        sb.Append(joinTableColumnNames);
-
-                        joinStatementSb.Append(Environment.NewLine);
-                        joinStatementSb.Append($"LEFT OUTER JOIN [{joinTableName}] AS [{joinTableAlias}] ON [{mainTableAlias}].[{mainTablePrimaryKeyName}] = [{joinTableAlias}].[{joinTableForeignKeyName}]");
-
-                        m.SqlNavigationPropertiesMapping.Add(joinTableType, joinTableProperties.ToDictionary(ModelConventionHelper.GetColumnName, x => x));
-                    }
-                }
-
-                if (options != null && options.PageSize != -1 && allowCrossJoinTotalCount)
-                {
-                    sb.Append(",");
-                    sb.Append(Environment.NewLine);
-                    sb.Append($"\t[{CrossJoinTableName}].[{_crossJoinCountColumnName}] AS [{_crossJoinCountColumnName}]");
-                }
-
-                sb.Append(Environment.NewLine);
-                sb.Append($"FROM [{mainTableName}] AS [{mainTableAlias}]");
-
-                if (joinStatementSb.Length > 0)
-                {
-                    joinStatementSb.Remove(0, Environment.NewLine.Length);
-
-                    sb.Append(Environment.NewLine);
-                    sb.Append(joinStatementSb);
-                }
-            }
-            else
-            {
-                sb.Append($"SELECT{Environment.NewLine}\t{columns}{Environment.NewLine}FROM [{mainTableName}] AS [{mainTableAlias}]");
-            }
-
-            if (options != null)
-            {
-                // -----------------------------------------------------------------------------------------------------------
-                // Where clause
-                // -----------------------------------------------------------------------------------------------------------
-
-                if (options.SpecificationStrategy != null)
-                {
-                    new ExpressionTranslator().Translate(
-                        options.SpecificationStrategy.Predicate,
-                        m,
-                        out string expSql,
-                        out Dictionary<string, object> expParameters);
-
-                    sb.Append($"{Environment.NewLine}WHERE ");
-                    sb.Append(expSql);
-
-                    foreach (var item in expParameters)
-                    {
-                        parameters.Add(item.Key, item.Value);
-                    }
-                }
-
-                // -----------------------------------------------------------------------------------------------------------
-                // Sorting clause
-                // -----------------------------------------------------------------------------------------------------------
-
-                var sorting = options.SortingPropertiesMapping.ToDictionary(x => x.Key, x => x.Value);
-
-                if (!sorting.Any())
-                {
-                    // Sorts on the Id key by default if no sorting is provided
-                    foreach (var primaryKeyPropertyInfo in PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<T>())
-                    {
-                        sorting.Add(primaryKeyPropertyInfo.Name, SortOrder.Ascending);
-                    }
-                }
-
-                if (options.PageSize != -1 && allowCrossJoinTotalCount)
-                {
-                    sb.Append(Environment.NewLine);
-                    sb.Append("CROSS JOIN (");
-                    sb.Append(Environment.NewLine);
-                    sb.Append($"\tSELECT COUNT(*) AS [{_crossJoinCountColumnName}]");
-                    sb.Append(Environment.NewLine);
-                    sb.Append($"\tFROM [{mainTableName}] AS [{mainTableAlias}]");
-
-                    if (joinStatementSb.Length > 0)
-                    {
-                        sb.Append(Environment.NewLine);
-                        sb.Append("\t");
-                        sb.Append(joinStatementSb);
-                    }
-
-                    if (options.SpecificationStrategy != null)
-                    {
-                        new ExpressionTranslator().Translate(
-                            options.SpecificationStrategy.Predicate,
-                            m,
-                            out string expSql,
-                            out _);
-
-                        sb.Append(Environment.NewLine);
-                        sb.Append("WHERE ");
-                        sb.Append(expSql);
-                    }
-
-                    sb.Append(Environment.NewLine);
-                    sb.Append($") AS [{CrossJoinTableName}]");
-                }
-
-                sb.Append(Environment.NewLine);
-                sb.Append("ORDER BY ");
-
-                foreach (var sort in sorting)
-                {
-                    var sortOrder = sort.Value;
-                    var sortProperty = sort.Key;
-                    var lambda = ExpressionHelper.GetExpression<T>(sortProperty);
-                    var tableType = ExpressionHelper.GetMemberExpression(lambda).Expression.Type;
-                    var tableName = m.GetTableName(tableType);
-                    var tableAlias = m.GetTableAlias(tableName);
-                    var sortingPropertyInfo = ExpressionHelper.GetPropertyInfo(lambda);
-                    var columnAlias = m.GetColumnAlias(sortingPropertyInfo);
-
-                    sb.Append($"[{tableAlias}].[{columnAlias}] {(sortOrder == SortOrder.Descending ? "DESC" : "ASC")}, ");
-                }
-
-                sb.Remove(sb.Length - 2, 2);
-
-                // -----------------------------------------------------------------------------------------------------------
-                // Paging clause
-                // -----------------------------------------------------------------------------------------------------------
-
-                if (options.PageSize != -1)
-                {
-                    sb.Append(Environment.NewLine);
-                    sb.Append($"OFFSET {options.PageSize} * ({options.PageIndex} - 1) ROWS");
-                    sb.Append(Environment.NewLine);
-                    sb.Append($"FETCH NEXT {options.PageSize} ROWS ONLY");
-                }
-            }
-
-            // Setup mapper object
-            m.Sql = sb.ToString();
-            m.Parameters = parameters;
-
-            mapper = m;
-        }
-
-        private void PrepareEntitySetQuery(EntitySet entitySet, bool existInDb, bool isIdentity, PropertyInfo primeryKeyPropertyInfo, out string sql, out Dictionary<string, object> parameters)
-        {
-            var entityType = entitySet.Entity.GetType();
-            var tableName = entityType.GetTableName();
-            var primeryKeyColumnName = primeryKeyPropertyInfo.GetColumnName();
-
-            if (!_sqlPropertiesMapping.ContainsKey(entityType))
-            {
-                var dict = entityType
-                    .GetRuntimeProperties()
-                    .Where(x => x.IsPrimitive() && x.IsColumnMapped())
-                    .OrderBy(x => x.GetColumnOrder())
-                    .ToDictionary(x => x.GetColumnName(), x => x);
-
-                _sqlPropertiesMapping[entityType] = new ConcurrentDictionary<string, PropertyInfo>(dict);
-            }
-
-            var sqlPropertiesMapping = _sqlPropertiesMapping[entityType];
-            var properties = (isIdentity ? sqlPropertiesMapping.Where(x => !x.Key.Equals(primeryKeyColumnName)) : sqlPropertiesMapping).ToList();
-
-            sql = string.Empty;
-            parameters = new Dictionary<string, object>();
-
-            switch (entitySet.State)
-            {
-                case EntityState.Added:
-                    {
-                        if (existInDb)
-                            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
-
-                        var columnNames = string.Join(", ", properties.Select(x => x.Value.GetColumnName())).TrimEnd();
-                        var values = string.Join(", ", properties.Select(x => $"@{x.Value.GetColumnName()}")).TrimEnd();
-
-                        sql = $"INSERT INTO [{tableName}] ({columnNames}){Environment.NewLine}VALUES ({values})";
-
-                        foreach (var pi in properties)
-                        {
-                            parameters.Add($"@{pi.Value.GetColumnName()}", pi.Value.GetValue(entitySet.Entity, null));
-                        }
-
-                        if (isIdentity)
-                            parameters.Add($"@{primeryKeyColumnName}", primeryKeyPropertyInfo.GetValue(entitySet.Entity, null));
-
-                        break;
-                    }
-                case EntityState.Removed:
-                    {
-                        if (!existInDb)
-                            throw new InvalidOperationException(Resources.EntityNotFoundInStore);
-
-                        sql = $"DELETE FROM [{tableName}]{Environment.NewLine}WHERE {primeryKeyColumnName} = @{primeryKeyColumnName}";
-
-                        parameters.Add($"@{primeryKeyColumnName}", primeryKeyPropertyInfo.GetValue(entitySet.Entity, null));
-
-                        break;
-                    }
-                case EntityState.Modified:
-                    {
-                        if (!existInDb)
-                            throw new InvalidOperationException(Resources.EntityNotFoundInStore);
-
-                        var values = string.Join($",{Environment.NewLine}\t", properties.Select(x =>
-                        {
-                            var columnName = x.Value.GetColumnName();
-                            return columnName + " = " + $"@{columnName}";
-                        }));
-
-                        sql = $"UPDATE [{tableName}]{Environment.NewLine}SET {values}{Environment.NewLine}WHERE {primeryKeyColumnName} = @{primeryKeyColumnName}";
-
-                        foreach (var pi in properties)
-                        {
-                            parameters.Add($"@{pi.Value.GetColumnName()}", pi.Value.GetValue(entitySet.Entity, null));
-                        }
-
-                        if (isIdentity)
-                            parameters.Add($"@{primeryKeyColumnName}", primeryKeyPropertyInfo.GetValue(entitySet.Entity, null));
-
-                        break;
-                    }
-            }
-        }
-
         private void ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(object[] keyValues) where TEntity : class
         {
             if (keyValues.Length != PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Count())
@@ -1550,7 +1232,7 @@
                         var existInDb = await command.ExecuteObjectExistAsync(entitySet.Entity, cancellationToken);
 
                         // Prepare the sql statement
-                        PrepareEntitySetQuery(
+                        _queryBuilder.PrepareEntitySetQuery(
                             entitySet,
                             existInDb,
                             isIdentity,
@@ -1580,7 +1262,7 @@
 
                             var newKey = await command.ExecuteScalarAsync(cancellationToken);
                             var convertedKeyValue = Convert.ChangeType(newKey, primeryKeyPropertyInfo.PropertyType);
-                            
+
                             primeryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
                         }
                     }
@@ -1643,7 +1325,7 @@
 
             var selectorFunc = selector.Compile();
 
-            PrepareQuery(options, out Mapper mapper);
+            _queryBuilder.PrepareDefaultSelectQuery(options, out Mapper mapper);
 
             await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
 
@@ -1666,7 +1348,7 @@
 
             var selectorFunc = selector.Compile();
 
-            PrepareQuery(options, out Mapper mapper, true);
+            _queryBuilder.PrepareDefaultSelectQuery(options, out Mapper mapper, true);
 
             await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
 
@@ -1682,21 +1364,13 @@
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public async Task<QueryResult<int>> CountAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            PrepareQuery(options, out Mapper mapper);
+            _queryBuilder.PrepareCountQuery(options, out Mapper mapper);
 
-            await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
+            OnSchemaValidation(typeof(TEntity));
 
-            using (var reader = await ExecuteReaderAsync(mapper.Sql, mapper.Parameters, cancellationToken))
-            {
-                var count = 0;
+            var result = await ExecuteScalarAsync<int>(mapper.Sql, mapper.Parameters, cancellationToken);
 
-                while (reader.Read())
-                {
-                    count++;
-                }
-
-                return new QueryResult<int>(count);
-            }
+            return new QueryResult<int>(result);
         }
 
         /// <summary>
@@ -1711,7 +1385,7 @@
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            PrepareQuery(options, out Mapper mapper);
+            _queryBuilder.PrepareDefaultSelectQuery(options, out Mapper mapper);
 
             await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
 
@@ -1752,7 +1426,7 @@
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            PrepareQuery(options, out Mapper mapper);
+            _queryBuilder.PrepareDefaultSelectQuery(options, out Mapper mapper);
 
             await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
 
@@ -1887,7 +1561,7 @@
                         var existInDb = command.ExecuteObjectExist(entitySet.Entity);
 
                         // Prepare the sql statement
-                        PrepareEntitySetQuery(
+                        _queryBuilder.PrepareEntitySetQuery(
                             entitySet,
                             existInDb,
                             isIdentity,
@@ -1917,7 +1591,7 @@
 
                             var newKey = command.ExecuteScalar();
                             var convertedKeyValue = Convert.ChangeType(newKey, primeryKeyPropertyInfo.PropertyType);
-                            
+
                             primeryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
                         }
                     }
@@ -1978,7 +1652,7 @@
 
             var selectorFunc = selector.Compile();
 
-            PrepareQuery(options, out Mapper mapper);
+            _queryBuilder.PrepareDefaultSelectQuery(options, out Mapper mapper);
 
             OnSchemaValidation(typeof(TEntity));
 
@@ -2000,7 +1674,7 @@
 
             var selectorFunc = selector.Compile();
 
-            PrepareQuery(options, out Mapper mapper, true);
+            _queryBuilder.PrepareDefaultSelectQuery(options, out Mapper mapper, true);
 
             OnSchemaValidation(typeof(TEntity));
 
@@ -2015,21 +1689,13 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public QueryResult<int> Count<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
         {
-            PrepareQuery(options, out Mapper mapper);
+            _queryBuilder.PrepareCountQuery(options, out Mapper mapper);
 
             OnSchemaValidation(typeof(TEntity));
 
-            using (var reader = ExecuteReader(mapper.Sql, mapper.Parameters))
-            {
-                var count = 0;
+            var result = ExecuteScalar<int>(mapper.Sql, mapper.Parameters);
 
-                while (reader.Read())
-                {
-                    count++;
-                }
-
-                return new QueryResult<int>(count);
-            }
+            return new QueryResult<int>(result);
         }
 
         /// <summary>
@@ -2043,7 +1709,7 @@
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            PrepareQuery(options, out Mapper mapper);
+            _queryBuilder.PrepareDefaultSelectQuery(options, out Mapper mapper);
 
             OnSchemaValidation(typeof(TEntity));
 
@@ -2083,7 +1749,7 @@
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            PrepareQuery(options, out Mapper mapper);
+            _queryBuilder.PrepareDefaultSelectQuery(options, out Mapper mapper);
 
             OnSchemaValidation(typeof(TEntity));
 
@@ -2147,59 +1813,6 @@
             _transaction = null;
 
             GC.SuppressFinalize(this);
-        }
-
-        #endregion
-
-        #region Nested type: EntitySet
-
-        /// <summary>
-        /// Represents an internal entity set in the in-memory store, which holds the entity and it's state representing the operation that was performed at the time.
-        /// </summary>
-        private class EntitySet
-        {
-            #region Constructors
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="EntitySet" /> class.
-            /// </summary>
-            /// <param name="entity">The entity.</param>
-            /// <param name="state">The state.</param>
-            public EntitySet(object entity, EntityState state)
-            {
-                Entity = entity;
-                State = state;
-            }
-
-            #endregion
-
-            #region Properties
-
-            /// <summary>
-            /// Gets the entity.
-            /// </summary>
-            public object Entity { get; }
-
-            /// <summary>
-            /// Gets the state.
-            /// </summary>
-            public EntityState State { get; }
-
-            #endregion
-        }
-
-        #endregion
-
-        #region Nested type: EntityState
-
-        /// <summary>
-        /// Represents an internal state for an entity in the in-memory store.
-        /// </summary>
-        private enum EntityState
-        {
-            Added,
-            Removed,
-            Modified
         }
 
         #endregion
