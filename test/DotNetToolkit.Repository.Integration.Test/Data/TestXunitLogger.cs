@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Data
 {
-    using Logging;
+    using Configuration.Logging;
     using System;
     using Xunit.Abstractions;
 

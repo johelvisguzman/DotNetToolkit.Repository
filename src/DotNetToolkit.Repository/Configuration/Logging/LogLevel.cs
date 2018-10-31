@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Logging
+﻿namespace DotNetToolkit.Repository.Configuration.Logging
 {
     /// <summary>
     /// Represents logging levels.

@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Internal
 {
     using Configuration;
+    using Configuration.Logging;
     using Queries;
     using Queries.Strategies;
     using System;
@@ -10,7 +11,6 @@
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
-    using Logging;
     using Transactions;
 
     /// <summary>

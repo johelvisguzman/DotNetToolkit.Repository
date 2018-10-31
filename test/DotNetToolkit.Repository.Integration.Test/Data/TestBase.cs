@@ -1,10 +1,10 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Data
 {
+    using Configuration.Logging;
     using Configuration.Options;
     using EntityFrameworkCore;
     using Factories;
     using InMemory;
-    using Logging;
     using System;
     using System.Collections.Generic;
     using System.Linq;

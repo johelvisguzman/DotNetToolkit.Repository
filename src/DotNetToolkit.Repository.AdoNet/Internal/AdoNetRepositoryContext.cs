@@ -2,9 +2,9 @@
 {
     using Configuration;
     using Configuration.Conventions;
+    using Configuration.Logging;
     using Extensions;
     using Helpers;
-    using Logging;
     using Properties;
     using Queries;
     using Queries.Strategies;
@@ -42,6 +42,8 @@
         private readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, PropertyInfo>> _sqlPropertiesMapping = new ConcurrentDictionary<Type, ConcurrentDictionary<string, PropertyInfo>>();
         private readonly ConcurrentDictionary<Type, bool> _schemaValidationTypeMapping = new ConcurrentDictionary<Type, bool>();
         private readonly SchemaTableConfigurationHelper _schemaConfigHelper;
+
+        private readonly string _crossJoinCountColumnName;
 
         #endregion
 
@@ -84,6 +86,7 @@
             _connectionString = css.ConnectionString;
             _ownsConnection = true;
             _schemaConfigHelper = new SchemaTableConfigurationHelper(this);
+            _crossJoinCountColumnName = "Counter_" + Guid.NewGuid().ToString("N");
         }
 
         /// <summary>
@@ -103,6 +106,7 @@
             _connectionString = connectionString;
             _ownsConnection = true;
             _schemaConfigHelper = new SchemaTableConfigurationHelper(this);
+            _crossJoinCountColumnName = "Counter_" + Guid.NewGuid().ToString("N");
         }
 
         /// <summary>
@@ -120,6 +124,7 @@
             _connection = existingConnection;
             _ownsConnection = false;
             _schemaConfigHelper = new SchemaTableConfigurationHelper(this);
+            _crossJoinCountColumnName = "Counter_" + Guid.NewGuid().ToString("N");
         }
 
         #endregion
@@ -168,7 +173,7 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The command parameters.</param>
         /// <returns>The number of rows affected.</returns>
-        public virtual QueryResult<int> ExecuteNonQuery(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
+        public virtual int ExecuteNonQuery(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
         {
             using (var command = CreateCommand(cmdText, cmdType, parameters))
             {
@@ -178,15 +183,15 @@
                 if (connection.State == ConnectionState.Closed)
                     connection.Open();
 
+                if (Logger.IsEnabled(LogLevel.Debug))
+                    Logger.Debug(FormatExecutingDebugQuery("ExecuteNonQuery", parameters, cmdText));
+
                 var result = command.ExecuteNonQuery();
 
                 if (ownsConnection)
                     connection.Dispose();
 
-                if (Logger.IsEnabled(LogLevel.Debug))
-                    Logger.Debug(FormatExecutedDebugQuery("ExecuteNonQuery", parameters, result, cmdText));
-
-                return new QueryResult<int>(result);
+                return result;
             }
         }
 
@@ -196,7 +201,7 @@
         /// <param name="cmdText">The command text.</param>
         /// <param name="parameters">The command parameters.</param>
         /// <returns>The number of rows affected.</returns>
-        public QueryResult<int> ExecuteNonQuery(string cmdText, Dictionary<string, object> parameters = null)
+        public int ExecuteNonQuery(string cmdText, Dictionary<string, object> parameters = null)
         {
             return ExecuteNonQuery(cmdText, CommandType.Text, parameters);
         }
@@ -217,10 +222,10 @@
             if (connection.State == ConnectionState.Closed)
                 connection.Open();
 
-            var reader = command.ExecuteReader(ownsConnection ? CommandBehavior.CloseConnection : CommandBehavior.Default);
-
             if (Logger.IsEnabled(LogLevel.Debug))
-                Logger.Debug(FormatExecutedDebugQuery("ExecuteReader", parameters, null, cmdText));
+                Logger.Debug(FormatExecutingDebugQuery("ExecuteReader", parameters, cmdText));
+
+            var reader = command.ExecuteReader(ownsConnection ? CommandBehavior.CloseConnection : CommandBehavior.Default);
 
             return reader;
         }
@@ -244,7 +249,7 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The command parameters.</param>
         /// <returns>The first column of the first row in the result set returned by the query.</returns>
-        public virtual QueryResult<T> ExecuteScalar<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
+        public virtual T ExecuteScalar<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
         {
             using (var command = CreateCommand(cmdText, cmdType, parameters))
             {
@@ -254,15 +259,15 @@
                 if (connection.State == ConnectionState.Closed)
                     connection.Open();
 
+                if (Logger.IsEnabled(LogLevel.Debug))
+                    Logger.Debug(FormatExecutingDebugQuery("ExecuteScalar", parameters, cmdText));
+
                 var result = ConvertValue<T>(command.ExecuteScalar());
 
                 if (ownsConnection)
                     connection.Dispose();
 
-                if (Logger.IsEnabled(LogLevel.Debug))
-                    Logger.Debug(FormatExecutedDebugQuery($"ExecuteScalar<{typeof(T).FullName}>", parameters, result, cmdText));
-
-                return new QueryResult<T>(result);
+                return result;
             }
         }
 
@@ -273,7 +278,7 @@
         /// <param name="cmdText">The command text.</param>
         /// <param name="parameters">The command parameters.</param>
         /// <returns>The first column of the first row in the result set returned by the query.</returns>
-        public QueryResult<T> ExecuteScalar<T>(string cmdText, Dictionary<string, object> parameters = null)
+        public T ExecuteScalar<T>(string cmdText, Dictionary<string, object> parameters = null)
         {
             return ExecuteScalar<T>(cmdText, CommandType.Text, parameters);
         }
@@ -404,13 +409,31 @@
             using (var reader = ExecuteReader(cmdText, cmdType, parameters))
             {
                 var list = new List<T>();
+                var foundCrossJoinCountColumn = false;
+                var total = 0;
 
                 while (reader.Read())
                 {
+                    // TODO: NEEDS TO FIGURE OUT ANOTHER WAY TO DO THIS
+                    for (var i = 0; i < reader.FieldCount; i++)
+                    {
+                        var name = reader.GetName(i);
+
+                        if (name.Equals(_crossJoinCountColumnName))
+                        {
+                            total = (int)reader[name];
+                            foundCrossJoinCountColumn = true;
+                            break;
+                        }
+                    }
+
                     list.Add(projector(reader));
                 }
 
-                return new QueryResult<IEnumerable<T>>(list);
+                if (!foundCrossJoinCountColumn)
+                    total = list.Count;
+
+                return new QueryResult<IEnumerable<T>>(list, total);
             }
         }
 
@@ -605,7 +628,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
-        public virtual async Task<QueryResult<int>> ExecuteNonQueryAsync(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<int> ExecuteNonQueryAsync(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var command = CreateCommand(cmdText, cmdType, parameters))
             {
@@ -615,15 +638,15 @@
                 if (connection.State == ConnectionState.Closed)
                     await connection.OpenAsync(cancellationToken);
 
+                if (Logger.IsEnabled(LogLevel.Debug))
+                    Logger.Debug(FormatExecutingDebugQuery("ExecuteNonQueryAsync", parameters, cmdText));
+
                 var result = await command.ExecuteNonQueryAsync(cancellationToken);
 
                 if (ownsConnection)
                     connection.Dispose();
 
-                if (Logger.IsEnabled(LogLevel.Debug))
-                    Logger.Debug(FormatExecutedDebugQuery("ExecuteNonQueryAsync", parameters, result, cmdText));
-
-                return new QueryResult<int>(result);
+                return result;
             }
         }
 
@@ -634,7 +657,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
-        public Task<QueryResult<int>> ExecuteNonQueryAsync(string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        public Task<int> ExecuteNonQueryAsync(string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteNonQueryAsync(cmdText, CommandType.Text, parameters, cancellationToken);
         }
@@ -656,10 +679,10 @@
             if (connection.State == ConnectionState.Closed)
                 await connection.OpenAsync(cancellationToken);
 
-            var reader = await command.ExecuteReaderAsync(ownsConnection ? CommandBehavior.CloseConnection : CommandBehavior.Default, cancellationToken);
-
             if (Logger.IsEnabled(LogLevel.Debug))
-                Logger.Debug(FormatExecutedDebugQuery("ExecuteReaderAsync", parameters, null, cmdText));
+                Logger.Debug(FormatExecutingDebugQuery("ExecuteReaderAsync", parameters, cmdText));
+
+            var reader = await command.ExecuteReaderAsync(ownsConnection ? CommandBehavior.CloseConnection : CommandBehavior.Default, cancellationToken);
 
             return reader;
         }
@@ -685,7 +708,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the first column of the first row in the result set returned by the query.</returns>
-        public virtual async Task<QueryResult<T>> ExecuteScalarAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<T> ExecuteScalarAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var command = CreateCommand(cmdText, cmdType, parameters))
             {
@@ -695,15 +718,15 @@
                 if (connection.State == ConnectionState.Closed)
                     await connection.OpenAsync(cancellationToken);
 
+                if (Logger.IsEnabled(LogLevel.Debug))
+                    Logger.Debug(FormatExecutingDebugQuery("ExecuteScalarAsync", parameters, cmdText));
+
                 var result = ConvertValue<T>(await command.ExecuteScalarAsync(cancellationToken));
 
                 if (ownsConnection)
                     connection.Dispose();
 
-                if (Logger.IsEnabled(LogLevel.Debug))
-                    Logger.Debug(FormatExecutedDebugQuery($"ExecuteScalarAsync<{typeof(T).FullName}>", parameters, result, cmdText));
-
-                return new QueryResult<T>(result);
+                return result;
             }
         }
 
@@ -715,7 +738,7 @@
         /// <param name="parameters">The command parameters.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the first column of the first row in the result set returned by the query.</returns>
-        public Task<QueryResult<T>> ExecuteScalarAsync<T>(string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        public Task<T> ExecuteScalarAsync<T>(string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteScalarAsync<T>(cmdText, CommandType.Text, parameters, cancellationToken);
         }
@@ -855,13 +878,31 @@
             using (var reader = await ExecuteReaderAsync(cmdText, cmdType, parameters, cancellationToken))
             {
                 var list = new List<T>();
+                var foundCrossJoinCountColumn = false;
+                var total = 0;
 
                 while (reader.Read())
                 {
+                    // TODO: NEEDS TO FIGURE OUT ANOTHER WAY TO DO THIS
+                    for (var i = 0; i < reader.FieldCount; i++)
+                    {
+                        var name = reader.GetName(i);
+
+                        if (name.Equals(_crossJoinCountColumnName))
+                        {
+                            total = (int)reader[name];
+                            foundCrossJoinCountColumn = true;
+                            break;
+                        }
+                    }
+
                     list.Add(projector(reader));
                 }
 
-                return new QueryResult<IEnumerable<T>>(list);
+                if (!foundCrossJoinCountColumn)
+                    total = list.Count;
+
+                return new QueryResult<IEnumerable<T>>(list, total);
             }
         }
 
@@ -1121,10 +1162,11 @@
             return ConvertValue<TElement>;
         }
 
-        private void PrepareQuery<T>(IQueryOptions<T> options, out Mapper mapper) where T : class
+        private void PrepareQuery<T>(IQueryOptions<T> options, out Mapper mapper, bool allowCrossJoinTotalCount = false) where T : class
         {
             var parameters = new Dictionary<string, object>();
             var sb = new StringBuilder();
+            var joinStatementSb = new StringBuilder();
             var mainTableType = typeof(T);
             var mainTableName = mainTableType.GetTableName();
             var m = new Mapper(mainTableType);
@@ -1133,6 +1175,8 @@
             var mainTablePrimaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<T>().First();
             var mainTablePrimaryKeyName = mainTablePrimaryKeyPropertyInfo.GetColumnName();
             var fetchStrategy = options?.FetchStrategy;
+
+            const string CrossJoinTableName = "temp1";
 
             // Default select
             var columns = string.Join($",{Environment.NewLine}\t", m.SqlPropertiesMapping.Select(x =>
@@ -1175,8 +1219,6 @@
             // Only supports a one to one table join for now...
             if (fetchStrategy != null && fetchStrategy.PropertyPaths.Any())
             {
-                var joinStatementSb = new StringBuilder();
-
                 sb.Append($"SELECT{Environment.NewLine}\t{columns}");
 
                 foreach (var path in fetchStrategy.PropertyPaths)
@@ -1216,8 +1258,23 @@
                     }
                 }
 
-                sb.Append($"{Environment.NewLine}FROM [{mainTableName}] AS [{mainTableAlias}]");
-                sb.Append(joinStatementSb);
+                if (options != null && options.PageSize != -1 && allowCrossJoinTotalCount)
+                {
+                    sb.Append(",");
+                    sb.Append(Environment.NewLine);
+                    sb.Append($"\t[{CrossJoinTableName}].[{_crossJoinCountColumnName}] AS [{_crossJoinCountColumnName}]");
+                }
+
+                sb.Append(Environment.NewLine);
+                sb.Append($"FROM [{mainTableName}] AS [{mainTableAlias}]");
+
+                if (joinStatementSb.Length > 0)
+                {
+                    joinStatementSb.Remove(0, Environment.NewLine.Length);
+
+                    sb.Append(Environment.NewLine);
+                    sb.Append(joinStatementSb);
+                }
             }
             else
             {
@@ -1251,32 +1308,65 @@
                 // Sorting clause
                 // -----------------------------------------------------------------------------------------------------------
 
-                var sortings = options.SortingPropertiesMapping.ToDictionary(x => x.Key, x => x.Value);
+                var sorting = options.SortingPropertiesMapping.ToDictionary(x => x.Key, x => x.Value);
 
-                if (!sortings.Any())
+                if (!sorting.Any())
                 {
                     // Sorts on the Id key by default if no sorting is provided
                     foreach (var primaryKeyPropertyInfo in PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<T>())
                     {
-                        sortings.Add(primaryKeyPropertyInfo.Name, SortOrder.Ascending);
+                        sorting.Add(primaryKeyPropertyInfo.Name, SortOrder.Ascending);
                     }
+                }
+
+                if (options.PageSize != -1 && allowCrossJoinTotalCount)
+                {
+                    sb.Append(Environment.NewLine);
+                    sb.Append("CROSS JOIN (");
+                    sb.Append(Environment.NewLine);
+                    sb.Append($"\tSELECT COUNT(*) AS [{_crossJoinCountColumnName}]");
+                    sb.Append(Environment.NewLine);
+                    sb.Append($"\tFROM [{mainTableName}] AS [{mainTableAlias}]");
+
+                    if (joinStatementSb.Length > 0)
+                    {
+                        sb.Append(Environment.NewLine);
+                        sb.Append("\t");
+                        sb.Append(joinStatementSb);
+                    }
+
+                    if (options.SpecificationStrategy != null)
+                    {
+                        new ExpressionTranslator().Translate(
+                            options.SpecificationStrategy.Predicate,
+                            m,
+                            out string expSql,
+                            out _);
+
+                        sb.Append(Environment.NewLine);
+                        sb.Append("WHERE ");
+                        sb.Append(expSql);
+                    }
+
+                    sb.Append(Environment.NewLine);
+                    sb.Append($") AS [{CrossJoinTableName}]");
                 }
 
                 sb.Append(Environment.NewLine);
                 sb.Append("ORDER BY ");
 
-                foreach (var sorting in sortings)
+                foreach (var sort in sorting)
                 {
-                    var sortingOrder = sorting.Value;
-                    var sortingProperty = sorting.Key;
-                    var lambda = ExpressionHelper.GetExpression<T>(sortingProperty);
+                    var sortOrder = sort.Value;
+                    var sortProperty = sort.Key;
+                    var lambda = ExpressionHelper.GetExpression<T>(sortProperty);
                     var tableType = ExpressionHelper.GetMemberExpression(lambda).Expression.Type;
                     var tableName = m.GetTableName(tableType);
                     var tableAlias = m.GetTableAlias(tableName);
                     var sortingPropertyInfo = ExpressionHelper.GetPropertyInfo(lambda);
                     var columnAlias = m.GetColumnAlias(sortingPropertyInfo);
 
-                    sb.Append($"[{tableAlias}].[{columnAlias}] {(sortingOrder == SortOrder.Descending ? "DESC" : "ASC")}, ");
+                    sb.Append($"[{tableAlias}].[{columnAlias}] {(sortOrder == SortOrder.Descending ? "DESC" : "ASC")}, ");
                 }
 
                 sb.Remove(sb.Length - 2, 2);
@@ -1409,20 +1499,15 @@
             }
         }
 
-        private static string FormatExecutedDebugQuery(string commandName, Dictionary<string, object> parameters, object result, string sql)
+        private static string FormatExecutingDebugQuery(string commandName, Dictionary<string, object> parameters, string sql)
         {
             var sb = new StringBuilder();
 
-            sb.Append($"Executed [ Command = {commandName}");
+            sb.Append($"Executing [ Command = {commandName}");
             if (parameters != null && parameters.Count > 0)
             {
                 sb.Append(", ");
                 sb.Append($"Parameters = {parameters.ToDebugString()}");
-            }
-            if (result != null)
-            {
-                sb.Append(", ");
-                sb.Append($"Result = {result}");
             }
             sb.Append(" ]");
             sb.Append(Environment.NewLine);
@@ -1479,10 +1564,10 @@
                         command.Parameters.Clear();
                         command.AddParmeters(parameters);
 
-                        rows += await command.ExecuteNonQueryAsync(cancellationToken);
-
                         if (Logger.IsEnabled(LogLevel.Debug))
-                            Logger.Debug($"Executed [ Command = ExecuteNonQuery, Parameters = {parameters.ToDebugString()}, Result = {rows} ]{Environment.NewLine}{sql.Indent(3)}");
+                            Logger.Debug(FormatExecutingDebugQuery("ExecuteNonQueryAsync", parameters, sql));
+
+                        rows += await command.ExecuteNonQueryAsync(cancellationToken);
 
                         // Checks to see if the model needs to be updated with the new key returned from the database
                         if (entitySet.State == EntityState.Added && isIdentity)
@@ -1490,12 +1575,12 @@
                             command.CommandText = "SELECT @@IDENTITY";
                             command.Parameters.Clear();
 
+                            if (Logger.IsEnabled(LogLevel.Debug))
+                                Logger.Debug(FormatExecutingDebugQuery("ExecuteScalarAsync", null, command.CommandText));
+
                             var newKey = await command.ExecuteScalarAsync(cancellationToken);
                             var convertedKeyValue = Convert.ChangeType(newKey, primeryKeyPropertyInfo.PropertyType);
-
-                            if (Logger.IsEnabled(LogLevel.Debug))
-                                Logger.Debug($"Executed [ Command = ExecuteScalar, Result = {convertedKeyValue} ]{Environment.NewLine}{command.CommandText.Indent(3)}");
-
+                            
                             primeryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
                         }
                     }
@@ -1581,7 +1666,7 @@
 
             var selectorFunc = selector.Compile();
 
-            PrepareQuery(options, out Mapper mapper);
+            PrepareQuery(options, out Mapper mapper, true);
 
             await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
 
@@ -1819,7 +1904,7 @@
                         rows += command.ExecuteNonQuery();
 
                         if (Logger.IsEnabled(LogLevel.Debug))
-                            Logger.Debug($"Executed [ Command = ExecuteNonQuery, Parameters = {parameters.ToDebugString()}, Result = {rows} ]{Environment.NewLine}{sql.Indent(3)}");
+                            Logger.Debug(FormatExecutingDebugQuery("ExecuteNonQuery", parameters, sql));
 
                         // Checks to see if the model needs to be updated with the new key returned from the database
                         if (entitySet.State == EntityState.Added && isIdentity)
@@ -1827,12 +1912,12 @@
                             command.CommandText = "SELECT @@IDENTITY";
                             command.Parameters.Clear();
 
+                            if (Logger.IsEnabled(LogLevel.Debug))
+                                Logger.Debug(FormatExecutingDebugQuery("ExecuteScalar", null, command.CommandText));
+
                             var newKey = command.ExecuteScalar();
                             var convertedKeyValue = Convert.ChangeType(newKey, primeryKeyPropertyInfo.PropertyType);
-
-                            if (Logger.IsEnabled(LogLevel.Debug))
-                                Logger.Debug($"Executed [ Command = ExecuteScalar, Result = {convertedKeyValue} ]{Environment.NewLine}{command.CommandText.Indent(3)}");
-
+                            
                             primeryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
                         }
                     }
@@ -1915,7 +2000,7 @@
 
             var selectorFunc = selector.Compile();
 
-            PrepareQuery(options, out Mapper mapper);
+            PrepareQuery(options, out Mapper mapper, true);
 
             OnSchemaValidation(typeof(TEntity));
 
