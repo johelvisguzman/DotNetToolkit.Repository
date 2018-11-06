@@ -297,7 +297,7 @@
                                 }
                             case SchemaTableConstraintType.PrimaryKey:
                                 {
-                                    if (primaryKeyPropertiesMapping.ContainsKey(columnName))
+                                    if (!primaryKeyPropertiesMapping.ContainsKey(columnName))
                                         error["PrimaryKey_Mismatch"] = true;
 
                                     break;
