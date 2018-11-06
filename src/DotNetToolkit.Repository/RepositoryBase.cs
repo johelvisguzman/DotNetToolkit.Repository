@@ -674,11 +674,11 @@
             }
         }
 
-        internal Task InterceptErrorAsync(Func<Task> action)
+        internal async Task InterceptErrorAsync(Func<Task> action)
         {
             try
             {
-                return action();
+                await action();
             }
             catch (Exception ex)
             {
