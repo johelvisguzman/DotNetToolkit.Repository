@@ -42,15 +42,6 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public virtual bool GetExists(TKey1 key1, TKey2 key2, TKey3 key3)
         {
-            if (key1 == null)
-                throw new ArgumentNullException(nameof(key1));
-
-            if (key2 == null)
-                throw new ArgumentNullException(nameof(key2));
-
-            if (key3 == null)
-                throw new ArgumentNullException(nameof(key3));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity, TKey1, TKey2, TKey3>().Exists(key1, key2, key3);
@@ -66,15 +57,6 @@
         /// <return>The entity found.</return>
         public virtual TEntity Get(TKey1 key1, TKey2 key2, TKey3 key3)
         {
-            if (key1 == null)
-                throw new ArgumentNullException(nameof(key1));
-
-            if (key2 == null)
-                throw new ArgumentNullException(nameof(key2));
-
-            if (key3 == null)
-                throw new ArgumentNullException(nameof(key3));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity, TKey1, TKey2, TKey3>().Find(key1, key2, key3);
@@ -91,18 +73,6 @@
         /// <return>The entity found.</return>
         public virtual TEntity Get(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
-            if (key1 == null)
-                throw new ArgumentNullException(nameof(key1));
-
-            if (key2 == null)
-                throw new ArgumentNullException(nameof(key2));
-
-            if (key3 == null)
-                throw new ArgumentNullException(nameof(key3));
-
-            if (fetchStrategy == null)
-                throw new ArgumentNullException(nameof(fetchStrategy));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity, TKey1, TKey2, TKey3>().Find(key1, key2, key3, fetchStrategy);
@@ -117,22 +87,11 @@
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
-        public virtual Task<bool> GetExistsAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<bool> GetExistsAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (key1 == null)
-                throw new ArgumentNullException(nameof(key1));
-
-            if (key2 == null)
-                throw new ArgumentNullException(nameof(key2));
-
-            if (key3 == null)
-                throw new ArgumentNullException(nameof(key3));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().ExistsAsync(key1, key2, key3, cancellationToken);
+                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().ExistsAsync(key1, key2, key3, cancellationToken);
             }
         }
 
@@ -144,22 +103,11 @@
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        public virtual Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (key1 == null)
-                throw new ArgumentNullException(nameof(key1));
-
-            if (key2 == null)
-                throw new ArgumentNullException(nameof(key2));
-
-            if (key3 == null)
-                throw new ArgumentNullException(nameof(key3));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync(key1, key2, key3, cancellationToken);
+                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync(key1, key2, key3, cancellationToken);
             }
         }
 
@@ -172,25 +120,11 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        public virtual Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (key1 == null)
-                throw new ArgumentNullException(nameof(key1));
-
-            if (key2 == null)
-                throw new ArgumentNullException(nameof(key2));
-
-            if (key3 == null)
-                throw new ArgumentNullException(nameof(key3));
-
-            if (fetchStrategy == null)
-                throw new ArgumentNullException(nameof(fetchStrategy));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync(key1, key2, key3, fetchStrategy, cancellationToken);
+                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync(key1, key2, key3, fetchStrategy, cancellationToken);
             }
         }
 
@@ -202,15 +136,6 @@
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
         public virtual void Delete(TKey1 key1, TKey2 key2, TKey3 key3)
         {
-            if (key1 == null)
-                throw new ArgumentNullException(nameof(key1));
-
-            if (key2 == null)
-                throw new ArgumentNullException(nameof(key2));
-
-            if (key3 == null)
-                throw new ArgumentNullException(nameof(key3));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 uow.Create<TEntity, TKey1, TKey2, TKey3>().Delete(key1, key2, key3);
@@ -227,15 +152,6 @@
         /// <returns><c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
         public virtual bool TryDelete(TKey1 key1, TKey2 key2, TKey3 key3)
         {
-            if (key1 == null)
-                throw new ArgumentNullException(nameof(key1));
-
-            if (key2 == null)
-                throw new ArgumentNullException(nameof(key2));
-
-            if (key3 == null)
-                throw new ArgumentNullException(nameof(key3));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().TryDelete(key1, key2, key3);
@@ -256,17 +172,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public virtual async Task DeleteAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (key1 == null)
-                throw new ArgumentNullException(nameof(key1));
-
-            if (key2 == null)
-                throw new ArgumentNullException(nameof(key2));
-
-            if (key3 == null)
-                throw new ArgumentNullException(nameof(key3));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 await uow.Create<TEntity, TKey1, TKey2, TKey3>().DeleteAsync(key1, key2, key3, cancellationToken);
@@ -284,17 +189,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
         public virtual async Task<bool> TryDeleteAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (key1 == null)
-                throw new ArgumentNullException(nameof(key1));
-
-            if (key2 == null)
-                throw new ArgumentNullException(nameof(key2));
-
-            if (key3 == null)
-                throw new ArgumentNullException(nameof(key3));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().TryDeleteAsync(key1, key2, key3, cancellationToken);
@@ -336,12 +230,6 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public virtual bool GetExists(TKey1 key1, TKey2 key2)
         {
-            if (key1 == null)
-                throw new ArgumentNullException(nameof(key1));
-
-            if (key2 == null)
-                throw new ArgumentNullException(nameof(key2));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity, TKey1, TKey2>().Exists(key1, key2);
@@ -356,12 +244,6 @@
         /// <return>The entity found.</return>
         public virtual TEntity Get(TKey1 key1, TKey2 key2)
         {
-            if (key1 == null)
-                throw new ArgumentNullException(nameof(key1));
-
-            if (key2 == null)
-                throw new ArgumentNullException(nameof(key2));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity, TKey1, TKey2>().Find(key1, key2);
@@ -377,15 +259,6 @@
         /// <return>The entity found.</return>
         public virtual TEntity Get(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
-            if (key1 == null)
-                throw new ArgumentNullException(nameof(key1));
-
-            if (key2 == null)
-                throw new ArgumentNullException(nameof(key2));
-
-            if (fetchStrategy == null)
-                throw new ArgumentNullException(nameof(fetchStrategy));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity, TKey1, TKey2>().Find(key1, key2, fetchStrategy);
@@ -399,19 +272,11 @@
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
-        public virtual Task<bool> GetExistsAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<bool> GetExistsAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (key1 == null)
-                throw new ArgumentNullException(nameof(key1));
-
-            if (key2 == null)
-                throw new ArgumentNullException(nameof(key2));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().ExistsAsync(key1, key2, cancellationToken);
+                return await uow.Create<TEntity, TKey1, TKey2>().ExistsAsync(key1, key2, cancellationToken);
             }
         }
 
@@ -422,19 +287,11 @@
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        public virtual Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (key1 == null)
-                throw new ArgumentNullException(nameof(key1));
-
-            if (key2 == null)
-                throw new ArgumentNullException(nameof(key2));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().FindAsync(key1, key2, cancellationToken);
+                return await uow.Create<TEntity, TKey1, TKey2>().FindAsync(key1, key2, cancellationToken);
             }
         }
 
@@ -446,22 +303,11 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        public virtual Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (key1 == null)
-                throw new ArgumentNullException(nameof(key1));
-
-            if (key2 == null)
-                throw new ArgumentNullException(nameof(key2));
-
-            if (fetchStrategy == null)
-                throw new ArgumentNullException(nameof(fetchStrategy));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().FindAsync(key1, key2, fetchStrategy, cancellationToken);
+                return await uow.Create<TEntity, TKey1, TKey2>().FindAsync(key1, key2, fetchStrategy, cancellationToken);
             }
         }
 
@@ -472,12 +318,6 @@
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         public virtual void Delete(TKey1 key1, TKey2 key2)
         {
-            if (key1 == null)
-                throw new ArgumentNullException(nameof(key1));
-
-            if (key2 == null)
-                throw new ArgumentNullException(nameof(key2));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 uow.Create<TEntity, TKey1, TKey2>().Delete(key1, key2);
@@ -493,12 +333,6 @@
         /// <returns><c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
         public virtual bool TryDelete(TKey1 key1, TKey2 key2)
         {
-            if (key1 == null)
-                throw new ArgumentNullException(nameof(key1));
-
-            if (key2 == null)
-                throw new ArgumentNullException(nameof(key2));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 var result = uow.Create<TEntity, TKey1, TKey2>().TryDelete(key1, key2);
@@ -518,14 +352,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public virtual async Task DeleteAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (key1 == null)
-                throw new ArgumentNullException(nameof(key1));
-
-            if (key2 == null)
-                throw new ArgumentNullException(nameof(key2));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 await uow.Create<TEntity, TKey1, TKey2>().DeleteAsync(key1, key2, cancellationToken);
@@ -542,14 +368,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
         public virtual async Task<bool> TryDeleteAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (key1 == null)
-                throw new ArgumentNullException(nameof(key1));
-
-            if (key2 == null)
-                throw new ArgumentNullException(nameof(key2));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 var result = await uow.Create<TEntity, TKey1, TKey2>().TryDeleteAsync(key1, key2, cancellationToken);
@@ -589,9 +407,6 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public virtual bool GetExists(TKey key)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity, TKey>().Exists(key);
@@ -605,9 +420,6 @@
         /// <return>The entity found.</return>
         public virtual TEntity Get(TKey key)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity, TKey>().Find(key);
@@ -622,12 +434,6 @@
         /// <return>The entity found.</return>
         public virtual TEntity Get(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            if (fetchStrategy == null)
-                throw new ArgumentNullException(nameof(fetchStrategy));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity, TKey>().Find(key, fetchStrategy);
@@ -640,16 +446,11 @@
         /// <param name="key">The value of the primary key used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
-        public virtual Task<bool> GetExistsAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<bool> GetExistsAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().ExistsAsync(key, cancellationToken);
+                return await uow.Create<TEntity, TKey>().ExistsAsync(key, cancellationToken);
             }
         }
 
@@ -659,16 +460,11 @@
         /// <param name="key">The value of the primary key for the entity to be found.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        public virtual Task<TEntity> GetAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<TEntity> GetAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().FindAsync(key, cancellationToken);
+                return await uow.Create<TEntity, TKey>().FindAsync(key, cancellationToken);
             }
         }
 
@@ -679,19 +475,11 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        public virtual Task<TEntity> GetAsync(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<TEntity> GetAsync(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            if (fetchStrategy == null)
-                throw new ArgumentNullException(nameof(fetchStrategy));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().FindAsync(key, fetchStrategy, cancellationToken);
+                return await uow.Create<TEntity, TKey>().FindAsync(key, fetchStrategy, cancellationToken);
             }
         }
 
@@ -701,9 +489,6 @@
         /// <param name="key">The value of the primary key used to match entities against.</param>
         public virtual void Delete(TKey key)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 uow.Create<TEntity, TKey>().Delete(key);
@@ -718,9 +503,6 @@
         /// <returns><c>true</c> is able to successfully delete an entity with the given primary key; otherwise, <c>false</c>.</returns>
         public virtual bool TryDelete(TKey key)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 var result = uow.Create<TEntity, TKey>().TryDelete(key);
@@ -739,11 +521,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public virtual async Task DeleteAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 await uow.Create<TEntity, TKey>().DeleteAsync(key, cancellationToken);
@@ -759,11 +536,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given primary key; otherwise, <c>false</c>.</returns>
         public virtual async Task<bool> TryDeleteAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 var result = await uow.Create<TEntity, TKey>().TryDeleteAsync(key, cancellationToken);
@@ -820,9 +592,6 @@
         /// <param name="entity">The entity to add.</param>
         public virtual void Create(TEntity entity)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 uow.Create<TEntity>().Add(entity);
@@ -836,9 +605,6 @@
         /// <param name="entities">The collection of entities to add.</param>
         public virtual void Create(IEnumerable<TEntity> entities)
         {
-            if (entities == null)
-                throw new ArgumentNullException(nameof(entities));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 uow.Create<TEntity>().Add(entities);
@@ -852,9 +618,6 @@
         /// <param name="entity">The entity to delete.</param>
         public virtual void Delete(TEntity entity)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 uow.Create<TEntity>().Delete(entity);
@@ -868,9 +631,6 @@
         /// <param name="predicate">A function to filter each entity.</param>
         public virtual void Delete(Expression<Func<TEntity, bool>> predicate)
         {
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 uow.Create<TEntity>().Delete(predicate);
@@ -884,9 +644,6 @@
         /// <param name="options">The options to apply to the query.</param>
         public virtual void Delete(IQueryOptions<TEntity> options)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 uow.Create<TEntity>().Delete(options);
@@ -900,9 +657,6 @@
         /// <param name="entities">The collection of entities to delete.</param>
         public virtual void Delete(IEnumerable<TEntity> entities)
         {
-            if (entities == null)
-                throw new ArgumentNullException(nameof(entities));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 uow.Create<TEntity>().Delete(entities);
@@ -916,9 +670,6 @@
         /// <param name="entity">The entity to update.</param>
         public virtual void Update(TEntity entity)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 uow.Create<TEntity>().Update(entity);
@@ -932,9 +683,6 @@
         /// <param name="entities">The collection of entities to update.</param>
         public virtual void Update(IEnumerable<TEntity> entities)
         {
-            if (entities == null)
-                throw new ArgumentNullException(nameof(entities));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 uow.Create<TEntity>().Update(entities);
@@ -950,11 +698,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public virtual async Task CreateAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 await uow.Create<TEntity>().AddAsync(entity, cancellationToken);
@@ -970,11 +713,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public virtual async Task CreateAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (entities == null)
-                throw new ArgumentNullException(nameof(entities));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 await uow.Create<TEntity>().AddAsync(entities, cancellationToken);
@@ -990,11 +728,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public virtual async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 await uow.Create<TEntity>().DeleteAsync(entity, cancellationToken);
@@ -1010,11 +743,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public virtual async Task DeleteAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 await uow.Create<TEntity>().DeleteAsync(predicate, cancellationToken);
@@ -1030,11 +758,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public virtual async Task DeleteAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 await uow.Create<TEntity>().DeleteAsync(options, cancellationToken);
@@ -1050,11 +773,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public virtual async Task DeleteAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (entities == null)
-                throw new ArgumentNullException(nameof(entities));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 await uow.Create<TEntity>().DeleteAsync(entities, cancellationToken);
@@ -1070,11 +788,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public virtual async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 await uow.Create<TEntity>().UpdateAsync(entity, cancellationToken);
@@ -1090,11 +803,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public virtual async Task UpdateAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (entities == null)
-                throw new ArgumentNullException(nameof(entities));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 await uow.Create<TEntity>().UpdateAsync(entities, cancellationToken);
@@ -1109,9 +817,6 @@
         /// <returns>The entity that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
         public virtual TEntity Get(Expression<Func<TEntity, bool>> predicate)
         {
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity>().Find(predicate);
@@ -1125,9 +830,6 @@
         /// <returns>The entity that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public virtual TEntity Get(IQueryOptions<TEntity> options)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity>().Find(options);
@@ -1142,12 +844,6 @@
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public virtual TResult Get<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector)
         {
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
-
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity>().Find<TResult>(predicate, selector);
@@ -1162,12 +858,6 @@
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public virtual TResult Get<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity>().Find<TResult>(options, selector);
@@ -1193,9 +883,6 @@
         /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
         public virtual IEnumerable<TEntity> GetAll(Expression<Func<TEntity, bool>> predicate)
         {
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity>().FindAll(predicate);
@@ -1209,9 +896,6 @@
         /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public virtual IQueryResult<IEnumerable<TEntity>> GetAll(IQueryOptions<TEntity> options)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity>().FindAll(options);
@@ -1225,9 +909,6 @@
         /// <returns>The collection of projected entity results in the repository.</returns>
         public virtual IEnumerable<TResult> GetAll<TResult>(Expression<Func<TEntity, TResult>> selector)
         {
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity>().FindAll<TResult>(selector);
@@ -1242,12 +923,6 @@
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
         public virtual IEnumerable<TResult> GetAll<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector)
         {
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
-
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity>().FindAll<TResult>(predicate, selector);
@@ -1262,12 +937,6 @@
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public virtual IQueryResult<IEnumerable<TResult>> GetAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity>().FindAll<TResult>(options, selector);
@@ -1281,9 +950,6 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified predicate; otherwise, <c>false</c>.</returns>
         public virtual bool GetExists(Expression<Func<TEntity, bool>> predicate)
         {
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity>().Exists(predicate);
@@ -1297,9 +963,6 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
         public virtual bool GetExists(IQueryOptions<TEntity> options)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity>().Exists(options);
@@ -1325,9 +988,6 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
         public virtual int GetCount(Expression<Func<TEntity, bool>> predicate)
         {
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity>().Count(predicate);
@@ -1341,9 +1001,6 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public virtual int GetCount(IQueryOptions<TEntity> options)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity>().Count(options);
@@ -1358,9 +1015,6 @@
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
         public virtual Dictionary<TDictionaryKey, TEntity> GetDictionary<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector)
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity>().ToDictionary<TDictionaryKey>(keySelector);
@@ -1376,12 +1030,6 @@
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public virtual IQueryResult<Dictionary<TDictionaryKey, TEntity>> GetDictionary<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity>().ToDictionary<TDictionaryKey>(options, keySelector);
@@ -1398,12 +1046,6 @@
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
         public virtual Dictionary<TDictionaryKey, TElement> GetDictionary<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
-            if (elementSelector == null)
-                throw new ArgumentNullException(nameof(elementSelector));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity>().ToDictionary<TDictionaryKey, TElement>(keySelector, elementSelector);
@@ -1421,15 +1063,6 @@
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public virtual IQueryResult<Dictionary<TDictionaryKey, TElement>> GetDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
-            if (elementSelector == null)
-                throw new ArgumentNullException(nameof(elementSelector));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity>().ToDictionary<TDictionaryKey, TElement>(options, keySelector, elementSelector);
@@ -1446,12 +1079,6 @@
         /// <returns>A new <see cref="IGrouping{TKey,TElement}" /> that contains keys and values.</returns>
         public virtual IEnumerable<TResult> GetGroupBy<TGroupKey, TResult>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
-            if (resultSelector == null)
-                throw new ArgumentNullException(nameof(resultSelector));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity>().GroupBy<TGroupKey, TResult>(keySelector, resultSelector);
@@ -1469,15 +1096,6 @@
         /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public virtual IQueryResult<IEnumerable<TResult>> GetGroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
-            if (resultSelector == null)
-                throw new ArgumentNullException(nameof(resultSelector));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
                 return uow.Create<TEntity>().GroupBy<TGroupKey, TResult>(options, keySelector, resultSelector);
@@ -1490,16 +1108,11 @@
         /// <param name="predicate">A function to filter each entity.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  entity that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
-        public virtual Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity>().FindAsync(predicate, cancellationToken);
+                return await uow.Create<TEntity>().FindAsync(predicate, cancellationToken);
             }
         }
 
@@ -1509,16 +1122,11 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  entity that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public virtual Task<TEntity> GetAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<TEntity> GetAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity>().FindAsync(options, cancellationToken);
+                return await uow.Create<TEntity>().FindAsync(options, cancellationToken);
             }
         }
 
@@ -1529,19 +1137,11 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public virtual Task<TResult> GetAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<TResult> GetAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
-
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity>().FindAsync<TResult>(predicate, selector, cancellationToken);
+                return await uow.Create<TEntity>().FindAsync<TResult>(predicate, selector, cancellationToken);
             }
         }
 
@@ -1552,19 +1152,11 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public virtual Task<TResult> GetAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<TResult> GetAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity>().FindAsync<TResult>(options, selector, cancellationToken);
+                return await uow.Create<TEntity>().FindAsync<TResult>(options, selector, cancellationToken);
             }
         }
 
@@ -1573,13 +1165,11 @@
         /// </summary>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of entities in the repository.</returns>
-        public virtual Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity>().FindAllAsync(cancellationToken);
+                return await uow.Create<TEntity>().FindAllAsync(cancellationToken);
             }
         }
 
@@ -1589,16 +1179,11 @@
         /// <param name="predicate">A function to filter each entity.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
-        public virtual Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity>().FindAllAsync(cancellationToken);
+                return await uow.Create<TEntity>().FindAllAsync(cancellationToken);
             }
         }
 
@@ -1608,16 +1193,11 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public virtual Task<IQueryResult<IEnumerable<TEntity>>> GetAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<IQueryResult<IEnumerable<TEntity>>> GetAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity>().FindAllAsync(options, cancellationToken);
+                return await uow.Create<TEntity>().FindAllAsync(options, cancellationToken);
             }
         }
 
@@ -1627,16 +1207,11 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of projected entity results in the repository.</returns>
-        public virtual Task<IEnumerable<TResult>> GetAllAsync<TResult>(Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<IEnumerable<TResult>> GetAllAsync<TResult>(Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity>().FindAllAsync<TResult>(selector, cancellationToken);
+                return await uow.Create<TEntity>().FindAllAsync<TResult>(selector, cancellationToken);
             }
         }
 
@@ -1647,19 +1222,11 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
-        public virtual Task<IEnumerable<TResult>> GetAllAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<IEnumerable<TResult>> GetAllAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
-
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity>().FindAllAsync<TResult>(predicate, selector, cancellationToken);
+                return await uow.Create<TEntity>().FindAllAsync<TResult>(predicate, selector, cancellationToken);
             }
         }
 
@@ -1670,19 +1237,11 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public virtual Task<IQueryResult<IEnumerable<TResult>>> GetAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<IQueryResult<IEnumerable<TResult>>> GetAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity>().FindAllAsync<TResult>(options, selector, cancellationToken);
+                return await uow.Create<TEntity>().FindAllAsync<TResult>(options, selector, cancellationToken);
             }
         }
 
@@ -1692,16 +1251,11 @@
         /// <param name="predicate">The predicate used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified predicate; otherwise, <c>false</c>.</returns>
-        public virtual Task<bool> GetExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<bool> GetExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity>().ExistsAsync(predicate, cancellationToken);
+                return await uow.Create<TEntity>().ExistsAsync(predicate, cancellationToken);
             }
         }
 
@@ -1711,16 +1265,11 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
-        public virtual Task<bool> GetExistsAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<bool> GetExistsAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity>().ExistsAsync(options, cancellationToken);
+                return await uow.Create<TEntity>().ExistsAsync(options, cancellationToken);
             }
         }
 
@@ -1729,13 +1278,11 @@
         /// </summary>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  number of entities contained in the repository.</returns>
-        public virtual Task<int> GetCountAsync(CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<int> GetCountAsync(CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity>().CountAsync(cancellationToken);
+                return await uow.Create<TEntity>().CountAsync(cancellationToken);
             }
         }
 
@@ -1745,16 +1292,11 @@
         /// <param name="predicate">A function to filter each entity.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  number of entities that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
-        public virtual Task<int> GetCountAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<int> GetCountAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity>().CountAsync(predicate, cancellationToken);
+                return await uow.Create<TEntity>().CountAsync(predicate, cancellationToken);
             }
         }
 
@@ -1764,16 +1306,11 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public virtual Task<int> GetCountAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<int> GetCountAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity>().CountAsync(options, cancellationToken);
+                return await uow.Create<TEntity>().CountAsync(options, cancellationToken);
             }
         }
 
@@ -1784,16 +1321,11 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public virtual Task<Dictionary<TDictionaryKey, TEntity>> GetDictionaryAsync<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<Dictionary<TDictionaryKey, TEntity>> GetDictionaryAsync<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity>().ToDictionaryAsync<TDictionaryKey>(keySelector, cancellationToken);
+                return await uow.Create<TEntity>().ToDictionaryAsync<TDictionaryKey>(keySelector, cancellationToken);
             }
         }
 
@@ -1805,19 +1337,11 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public virtual Task<IQueryResult<Dictionary<TDictionaryKey, TEntity>>> GetDictionaryAsync<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<IQueryResult<Dictionary<TDictionaryKey, TEntity>>> GetDictionaryAsync<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity>().ToDictionaryAsync<TDictionaryKey>(options, keySelector, cancellationToken);
+                return await uow.Create<TEntity>().ToDictionaryAsync<TDictionaryKey>(options, keySelector, cancellationToken);
             }
         }
 
@@ -1830,19 +1354,11 @@
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public virtual Task<Dictionary<TDictionaryKey, TElement>> GetDictionaryAsync<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<Dictionary<TDictionaryKey, TElement>> GetDictionaryAsync<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
-            if (elementSelector == null)
-                throw new ArgumentNullException(nameof(elementSelector));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity>().ToDictionaryAsync<TDictionaryKey, TElement>(keySelector, elementSelector, cancellationToken);
+                return await uow.Create<TEntity>().ToDictionaryAsync<TDictionaryKey, TElement>(keySelector, elementSelector, cancellationToken);
             }
         }
 
@@ -1856,22 +1372,11 @@
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public virtual Task<IQueryResult<Dictionary<TDictionaryKey, TElement>>> GetDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<IQueryResult<Dictionary<TDictionaryKey, TElement>>> GetDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
-            if (elementSelector == null)
-                throw new ArgumentNullException(nameof(elementSelector));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity>().ToDictionaryAsync<TDictionaryKey, TElement>(options, keySelector, elementSelector, cancellationToken);
+                return await uow.Create<TEntity>().ToDictionaryAsync<TDictionaryKey, TElement>(options, keySelector, elementSelector, cancellationToken);
             }
         }
 
@@ -1884,19 +1389,11 @@
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IGrouping{TKey,TElement}" /> that contains keys and values.</returns>
-        public virtual Task<IEnumerable<TResult>> GetGroupByAsync<TGroupKey, TResult>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<IEnumerable<TResult>> GetGroupByAsync<TGroupKey, TResult>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
-            if (resultSelector == null)
-                throw new ArgumentNullException(nameof(resultSelector));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity>().GroupByAsync<TGroupKey, TResult>(keySelector, resultSelector, cancellationToken);
+                return await uow.Create<TEntity>().GroupByAsync<TGroupKey, TResult>(keySelector, resultSelector, cancellationToken);
             }
         }
 
@@ -1910,22 +1407,11 @@
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public virtual Task<IQueryResult<IEnumerable<TResult>>> GetGroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<IQueryResult<IEnumerable<TResult>>> GetGroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
-            if (resultSelector == null)
-                throw new ArgumentNullException(nameof(resultSelector));
-
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity>().GroupByAsync<TGroupKey, TResult>(options, keySelector, resultSelector, cancellationToken);
+                return await uow.Create<TEntity>().GroupByAsync<TGroupKey, TResult>(options, keySelector, resultSelector, cancellationToken);
             }
         }
 
