@@ -31,6 +31,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmarks", "benchmarks", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetToolkit.Repository.Performance", "benchmarks\DotNetToolkit.Repository.Performance\DotNetToolkit.Repository.Performance.csproj", "{2700614E-A941-42C9-B86F-22D8A47690F3}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{5E7CD03E-40D9-430A-97F0-26F02C0A5370}"
+	ProjectSection(SolutionItems) = preProject
+		docs\benchmarks.md = docs\benchmarks.md
+		docs\index.md = docs\index.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
