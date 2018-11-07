@@ -13,7 +13,10 @@ The repository needs to be manually configured with a RepositoryOptions object, 
 with an ORM framework like Entity Framework. The RepositoryOptions object is built using the RepositoryOptionsBuilder.
 
 ```csharp
-var options = new RepositoryOptionsBuilder().Options;
+var options = new RepositoryOptionsBuilder()
+    .UseInMemoryDatabase()
+    .Options;
+
 var repo = new Repository<Customer>(options);
 ```
 
