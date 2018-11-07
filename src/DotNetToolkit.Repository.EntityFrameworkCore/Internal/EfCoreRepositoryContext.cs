@@ -228,31 +228,18 @@
                 .ApplyFetchingOptions(options)
                 .ApplySortingOptions(options);
 
-            IEnumerable<TResult> result;
-            int total;
+            var data = query
+                .ApplyPagingOptions(options)
+                .Select(selector)
+                .Select(x => new
+                {
+                    Result = x,
+                    Total = query.Count()
+                })
+                .ToList();
 
-            if (options != null && options.PageSize != -1)
-            {
-                // Tries to get the count in one query
-                var data = query
-                    .ApplyPagingOptions(options)
-                    .Select(selector)
-                    .Select(x => new
-                    {
-                        Result = x,
-                        Total = query.Count()
-                    })
-                    .ToList();
-
-                result = data.Select(x => x.Result);
-                total = data.FirstOrDefault()?.Total ?? 0;
-            }
-            else
-            {
-                // Gets the total count from memory
-                result = query.Select(selector).ToList();
-                total = result.Count();
-            }
+            var result = data.Select(x => x.Result);
+            var total = data.FirstOrDefault()?.Total ?? 0;
 
             return new QueryResult<IEnumerable<TResult>>(result, total);
         }
@@ -379,29 +366,16 @@
                 .ApplyFetchingOptions(options)
                 .ApplySortingOptions(options);
 
-            IEnumerable<TResult> result;
-            int total;
+            var data = query
+                .ApplyPagingOptions(options)
+                .Select(x => new
+                {
+                    Result = x,
+                    Total = query.Count()
+                });
 
-            if (options != null && options.PageSize != -1)
-            {
-                // Tries to get the count in one query
-                var data = query
-                    .ApplyPagingOptions(options)
-                    .Select(x => new
-                    {
-                        Result = x,
-                        Total = query.Count()
-                    });
-
-                result = data.Select(x => x.Result).GroupBy(keySelectFunc, resultSelectorFunc).ToList();
-                total = data.FirstOrDefault()?.Total ?? 0;
-            }
-            else
-            {
-                // Gets the total count from memory
-                result = query.GroupBy(keySelectFunc, resultSelectorFunc).ToList();
-                total = result.Count();
-            }
+            var result = data.Select(x => x.Result).GroupBy(keySelectFunc, resultSelectorFunc).ToList();
+            var total = data.FirstOrDefault()?.Total ?? 0;
 
             return new QueryResult<IEnumerable<TResult>>(result, total);
         }
@@ -498,31 +472,18 @@
                 .ApplyFetchingOptions(options)
                 .ApplySortingOptions(options);
 
-            IEnumerable<TResult> result;
-            int total;
+            var data = await query
+                .ApplyPagingOptions(options)
+                .Select(selector)
+                .Select(x => new
+                {
+                    Result = x,
+                    Total = query.Count()
+                })
+                .ToListAsync(cancellationToken);
 
-            if (options != null && options.PageSize != -1)
-            {
-                // Tries to get the count in one query
-                var data = await query
-                    .ApplyPagingOptions(options)
-                    .Select(selector)
-                    .Select(x => new
-                    {
-                        Result = x,
-                        Total = query.Count()
-                    })
-                    .ToListAsync(cancellationToken);
-
-                result = data.Select(x => x.Result);
-                total = data.FirstOrDefault()?.Total ?? 0;
-            }
-            else
-            {
-                // Gets the total count from memory
-                result = await query.Select(selector).ToListAsync(cancellationToken);
-                total = result.Count();
-            }
+            var result = data.Select(x => x.Result);
+            var total = data.FirstOrDefault()?.Total ?? 0;
 
             return new QueryResult<IEnumerable<TResult>>(result, total);
         }
@@ -613,7 +574,7 @@
                     });
 
                 result = await data.Select(x => x.Result).ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken);
-                total = data.FirstOrDefault()?.Total ?? 0;
+                total = (await data.FirstOrDefaultAsync(cancellationToken))?.Total ?? 0;
             }
             else
             {
