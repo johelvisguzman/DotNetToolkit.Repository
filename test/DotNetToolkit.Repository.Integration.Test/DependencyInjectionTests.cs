@@ -49,8 +49,14 @@
             Assert.NotNull(provider.GetService<TestRepositoryInterceptor>());
             Assert.Equal(3, provider.GetServices<IRepositoryInterceptor>().Count());
             Assert.NotNull(provider.GetService<IRepository<Customer>>());
+            Assert.NotNull(provider.GetService<IRepository<Customer, int>>());
+            Assert.NotNull(provider.GetService<IRepository<Customer, int, int>>());
+            Assert.NotNull(provider.GetService<IRepository<Customer, int, int, int>>());
             Assert.NotNull(provider.GetService<ITestCustomerRepository>());
             Assert.NotNull(provider.GetService<IService<Customer>>());
+            Assert.NotNull(provider.GetService<IService<Customer, int>>());
+            Assert.NotNull(provider.GetService<IService<Customer, int, int>>());
+            Assert.NotNull(provider.GetService<IService<Customer, int, int, int>>());
             Assert.NotNull(provider.GetService<ITestCustomerService>());
             Assert.NotNull(provider.GetService<IRepositoryFactory>());
             Assert.NotNull(provider.GetService<RepositoryOptions>());
@@ -58,12 +64,6 @@
             Assert.NotNull(provider.GetService<IUnitOfWorkFactory>());
             Assert.Null(provider.GetService<RepositoryOptionsBuilder>());
             Assert.Null(provider.GetService<IRepositoryOptions>());
-            Assert.Null(provider.GetService<IRepository<Customer, int>>());
-            Assert.Null(provider.GetService<IRepository<Customer, int, int>>());
-            Assert.Null(provider.GetService<IRepository<Customer, int, int, int>>());
-            Assert.Null(provider.GetService<IService<Customer, int>>());
-            Assert.Null(provider.GetService<IService<Customer, int, int>>());
-            Assert.Null(provider.GetService<IService<Customer, int, int, int>>());
         }
 
         [Fact]

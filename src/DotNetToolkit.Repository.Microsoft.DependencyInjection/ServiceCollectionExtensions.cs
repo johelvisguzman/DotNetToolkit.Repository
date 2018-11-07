@@ -40,7 +40,13 @@
             var interfaceTypesToScan = new[]
             {
                 typeof(IService<>),
+                typeof(IService<,>),
+                typeof(IService<,,>),
+                typeof(IService<,,,>),
                 typeof(IRepository<>),
+                typeof(IRepository<,>),
+                typeof(IRepository<,,>),
+                typeof(IRepository<,,,>),
                 typeof(IRepositoryInterceptor)
             };
 
@@ -63,7 +69,8 @@
             foreach (var t in serviceTypesMapping)
             {
                 var serviceType = t.Key;
-                var implementationTypes = t.Where(x => x.IsGenericType == t.Key.IsGenericType);
+                var implementationTypes = t.Where(x => x.IsGenericType == serviceType.IsGenericType &&
+                                                       x.GetGenericArguments().Length == serviceType.GetGenericArguments().Length);
 
                 foreach (var implementationType in implementationTypes)
                 {
