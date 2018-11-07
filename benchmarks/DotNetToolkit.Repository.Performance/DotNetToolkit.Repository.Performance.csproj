@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\build\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net461</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputType>Exe</OutputType>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <RootNamespace>DotNetToolkit.Repository.Performance</RootNamespace>
+    <AssemblyName>DotNetToolkit.Repository.Performance</AssemblyName>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;1705;1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;1705;1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.11.2" />
+    <PackageReference Include="EntityFramework.SqlServerCompact" Version="6.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.1.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.AdoNet\DotNetToolkit.Repository.AdoNet.csproj" />
+    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.EntityFrameworkCore\DotNetToolkit.Repository.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.EntityFramework\DotNetToolkit.Repository.EntityFramework.csproj" />
+    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.InMemory\DotNetToolkit.Repository.InMemory.csproj" />
+    <ProjectReference Include="..\..\src\DotNetToolkit.Repository\DotNetToolkit.Repository.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Configuration" />
+  </ItemGroup>
+
+</Project>
