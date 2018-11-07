@@ -248,6 +248,7 @@
 
                 if (options != null && options.PageSize != -1 && allowCrossJoinTotalCount)
                 {
+                    // Cross join counter column
                     sb.Append(",");
                     sb.Append(Environment.NewLine);
                     sb.Append($"\t[{CrossJoinTableName}].[{CrossJoinCountColumnName}] AS [{CrossJoinCountColumnName}]");
@@ -271,6 +272,42 @@
 
             if (options != null)
             {
+                // -----------------------------------------------------------------------------------------------------------
+                // Cross Join clause
+                // -----------------------------------------------------------------------------------------------------------
+
+                if (options.PageSize != -1 && allowCrossJoinTotalCount)
+                {
+                    sb.Append(Environment.NewLine);
+                    sb.Append("CROSS JOIN (");
+                    sb.Append(Environment.NewLine);
+                    sb.Append($"\tSELECT COUNT(*) AS [{CrossJoinCountColumnName}]");
+                    sb.Append(Environment.NewLine);
+                    sb.Append($"\tFROM [{mainTableName}] AS [{mainTableAlias}]");
+
+                    if (joinStatementSb.Length > 0)
+                    {
+                        sb.Append(Environment.NewLine);
+                        sb.Append("\t");
+                        sb.Append(joinStatementSb);
+                    }
+
+                    if (options.SpecificationStrategy != null)
+                    {
+                        new ExpressionTranslator().Translate(
+                            options.SpecificationStrategy.Predicate,
+                            m,
+                            out string expSql,
+                            out _);
+
+                        sb.Append(Environment.NewLine);
+                        sb.Append($"\tWHERE {expSql}");
+                    }
+
+                    sb.Append(Environment.NewLine);
+                    sb.Append($") AS [{CrossJoinTableName}]");
+                }
+
                 // -----------------------------------------------------------------------------------------------------------
                 // Where clause
                 // -----------------------------------------------------------------------------------------------------------
@@ -305,39 +342,6 @@
                     {
                         sorting.Add(primaryKeyPropertyInfo.Name, SortOrder.Ascending);
                     }
-                }
-
-                if (options.PageSize != -1 && allowCrossJoinTotalCount)
-                {
-                    sb.Append(Environment.NewLine);
-                    sb.Append("CROSS JOIN (");
-                    sb.Append(Environment.NewLine);
-                    sb.Append($"\tSELECT COUNT(*) AS [{CrossJoinCountColumnName}]");
-                    sb.Append(Environment.NewLine);
-                    sb.Append($"\tFROM [{mainTableName}] AS [{mainTableAlias}]");
-
-                    if (joinStatementSb.Length > 0)
-                    {
-                        sb.Append(Environment.NewLine);
-                        sb.Append("\t");
-                        sb.Append(joinStatementSb);
-                    }
-
-                    if (options.SpecificationStrategy != null)
-                    {
-                        new ExpressionTranslator().Translate(
-                            options.SpecificationStrategy.Predicate,
-                            m,
-                            out string expSql,
-                            out _);
-
-                        sb.Append(Environment.NewLine);
-                        sb.Append("WHERE ");
-                        sb.Append(expSql);
-                    }
-
-                    sb.Append(Environment.NewLine);
-                    sb.Append($") AS [{CrossJoinTableName}]");
                 }
 
                 sb.Append(Environment.NewLine);
