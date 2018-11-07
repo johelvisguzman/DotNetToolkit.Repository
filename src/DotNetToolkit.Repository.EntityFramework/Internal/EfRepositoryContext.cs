@@ -110,7 +110,25 @@
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
-            _context.Entry(entity).State = EntityState.Modified;
+            var entry = _context.Entry(entity);
+
+            if (entry.State == EntityState.Detached)
+            {
+                var keyValues = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>()
+                    .Select(x => x.GetValue(entity, null))
+                    .ToArray();
+
+                var entityInDb = _context.Set<TEntity>().Find(keyValues);
+
+                if (entityInDb != null)
+                {
+                    _context.Entry(entityInDb).CurrentValues.SetValues(entity);
+                }
+            }
+            else
+            {
+                entry.State = EntityState.Modified;
+            }
         }
 
         /// <summary>
