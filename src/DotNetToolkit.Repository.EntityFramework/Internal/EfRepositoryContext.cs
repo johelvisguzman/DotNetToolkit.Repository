@@ -114,9 +114,7 @@
 
             if (entry.State == EntityState.Detached)
             {
-                var keyValues = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>()
-                    .Select(x => x.GetValue(entity, null))
-                    .ToArray();
+                var keyValues = PrimaryKeyConventionHelper.GetPrimaryKeyValues(entity);
 
                 var entityInDb = _context.Set<TEntity>().Find(keyValues);
 
@@ -143,9 +141,7 @@
 
             if (_context.Entry(entity).State == EntityState.Detached)
             {
-                var keyValues = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>()
-                    .Select(x => x.GetValue(entity, null))
-                    .ToArray();
+                var keyValues = PrimaryKeyConventionHelper.GetPrimaryKeyValues(entity);
 
                 var entityInDb = _context.Set<TEntity>().Find(keyValues);
 

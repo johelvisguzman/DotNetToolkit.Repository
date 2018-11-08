@@ -79,10 +79,10 @@
         }
 
         /// <summary>
-        /// Gets the primary key value for the specified object. If the primary key is defined as a composite key, then the result will be returned as a tuple.
+        /// Gets the collection of primary key values for the specified object.
         /// </summary>
         /// <returns>The primary key value.</returns>
-        public static object GetPrimaryKeyValue(object obj)
+        public static object[] GetPrimaryKeyValues(object obj)
         {
             if (obj == null)
                 throw new ArgumentNullException(nameof(obj));
@@ -91,7 +91,19 @@
                 .Select(x => x.GetValue(obj, null))
                 .ToArray();
 
-            return Combine(keyValues);
+            return keyValues;
+        }
+
+        /// <summary>
+        /// Gets the primary key value for the specified object. If the primary key is defined as a composite key, then the result will be returned as a tuple.
+        /// </summary>
+        /// <returns>The primary key value.</returns>
+        public static object GetPrimaryKeyValue(object obj)
+        {
+            if (obj == null)
+                throw new ArgumentNullException(nameof(obj));
+
+            return Combine(GetPrimaryKeyValues(obj));
         }
 
         /// <summary>
