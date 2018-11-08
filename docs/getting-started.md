@@ -91,3 +91,19 @@ namespace MyApplicationDemo
     }
 }
 ```
+
+**Dependency Injection**
+
+For ASP.NET Core applications, DotNetToolkit.Repository also provides a dependency injection package which will register all repositories, interceptors and services automatically. The AddRepositories service extension will scan for all IRepository<...>, IService<...> and IRepositoryInterceptor implementations in all the executing assemblies, and will register them so that you don't have to. Additionlly, a IRepositoryFactory, IUnitOfWork, IUnitOfWorkFactory and RepositoryOptions service will be registered as well.
+
+```csharp
+public void ConfigureServices(IServiceCollection services)
+{
+        services.AddMvc();
+	
+	services.AddRepositories(options => 
+	{
+		options.UseInMemoryDatabase();
+	});
+}
+```
