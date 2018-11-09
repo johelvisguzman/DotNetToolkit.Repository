@@ -69,16 +69,26 @@
 
         #region Implementation of ISpecificationQueryStrategy<T>
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets the function to test the entity and determine if it satisfies the specified criteria.
+        /// </summary>
         public Expression<Func<T, bool>> Predicate { get; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Returns a collection of entities that satisfied the criteria specified by the <see cref="ISpecificationQueryStrategyQueryStrategy{T}.Predicate" /> from the query.
+        /// </summary>
+        /// <param name="query">The entity query.</param>
+        /// <returns>The collection of entities that satisfied the criteria specified by the <see cref="ISpecificationQueryStrategyQueryStrategy{T}.Predicate" /> from the query.</returns>
         public virtual IQueryable<T> SatisfyingEntitiesFrom(IQueryable<T> query)
         {
             return Predicate == null ? query : query.Where(Predicate);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Determines wheter the entity that satisfied the criteria specified by the <see cref="ISpecificationQueryStrategyQueryStrategy{T}.Predicate" />.
+        /// </summary>
+        /// <param name="entity">The entity to test.</param>
+        /// <returns><c>true</c> if the entity satisfied the criteria specified by the <see cref="ISpecificationQueryStrategyQueryStrategy{T}.Predicate" />; otherwise, <c>false</c>.</returns>
         public bool IsSatisfiedBy(T entity)
         {
             return Predicate == null || new[] { entity }.AsQueryable().Any(Predicate);

@@ -47,7 +47,12 @@
 
         #region Implementation of IRepository<TEntity, TKey1, TKey2, TKey3>
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Deletes an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
         public void Delete(TKey1 key1, TKey2 key2, TKey3 key3)
         {
             if (!TryDelete(key1, key2, key3))
@@ -60,7 +65,13 @@
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Deletes an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <returns><c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
         public bool TryDelete(TKey1 key1, TKey2 key2, TKey3 key3)
         {
             var entity = Find(key1, key2, key3);
@@ -73,43 +84,91 @@
             return true;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <return>The entity found.</return>
         public TEntity Find(TKey1 key1, TKey2 key2, TKey3 key3)
         {
             return Find(key1, key2, key3, (IFetchQueryStrategy<TEntity>)null);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <return>The entity found.</return>
         public TEntity Find(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
             return InterceptQueryResult<TEntity>(() => Context.Find<TEntity>(fetchStrategy, key1, key2, key3));
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Determines whether the repository contains an entity with the given composite primary key values.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public bool Exists(TKey1 key1, TKey2 key2, TKey3 key3)
         {
             return Find(key1, key2, key3) != null;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Asynchronously determines whether the repository contains an entity with the given composite primary key values.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public async Task<bool> ExistsAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
             return await FindAsync(key1, key2, key3, cancellationToken) != null;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Asynchronously finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
             return FindAsync(key1, key2, key3, (IFetchQueryStrategy<TEntity>)null, cancellationToken);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Asynchronously finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
             return InterceptQueryResultAsync<TEntity>(() => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2, key3));
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Asynchronously deletes an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
             if (!await TryDeleteAsync(key1, key2, key3, cancellationToken))
@@ -122,7 +181,14 @@
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Asynchronously deletes an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
         public async Task<bool> TryDeleteAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
             InterceptError(cancellationToken.ThrowIfCancellationRequested);
@@ -163,7 +229,11 @@
 
         #region Implementation of IRepository<TEntity, TKey1, TKey2>
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Deletes an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         public void Delete(TKey1 key1, TKey2 key2)
         {
             if (!TryDelete(key1, key2))
@@ -176,7 +246,12 @@
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Deletes an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <returns><c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
         public bool TryDelete(TKey1 key1, TKey2 key2)
         {
             var entity = Find(key1, key2);
@@ -189,43 +264,84 @@
             return true;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <return>The entity found.</return>
         public TEntity Find(TKey1 key1, TKey2 key2)
         {
             return Find(key1, key2, (IFetchQueryStrategy<TEntity>)null);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <return>The entity found.</return>
         public TEntity Find(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
             return InterceptQueryResult<TEntity>(() => Context.Find<TEntity>(fetchStrategy, key1, key2));
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Determines whether the repository contains an entity with the given composite primary key values.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public bool Exists(TKey1 key1, TKey2 key2)
         {
             return Find(key1, key2) != null;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Asynchronously determines whether the repository contains an entity with the given composite primary key values.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public async Task<bool> ExistsAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
             return await FindAsync(key1, key2, cancellationToken) != null;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Asynchronously finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
             return FindAsync(key1, key2, (IFetchQueryStrategy<TEntity>)null, cancellationToken);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Asynchronously finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
             return InterceptQueryResultAsync<TEntity>(() => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2));
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Asynchronously deletes an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
             if (!await TryDeleteAsync(key1, key2, cancellationToken))
@@ -238,7 +354,13 @@
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Asynchronously deletes an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
         public async Task<bool> TryDeleteAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
             InterceptError(cancellationToken.ThrowIfCancellationRequested);
@@ -278,7 +400,10 @@
 
         #region Implementation of IRepository<TEntity, TKey>
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Deletes an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key used to match entities against.</param>
         public void Delete(TKey key)
         {
             if (!TryDelete(key))
@@ -291,7 +416,11 @@
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Deletes an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns><c>true</c> is able to successfully delete an entity with the given primary key; otherwise, <c>false</c>.</returns>
         public bool TryDelete(TKey key)
         {
             var entity = Find(key);
@@ -304,43 +433,77 @@
             return true;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Finds an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <return>The entity found.</return>
         public TEntity Find(TKey key)
         {
             return Find(key, (IFetchQueryStrategy<TEntity>)null);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Finds an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <return>The entity found.</return>
         public TEntity Find(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
             return InterceptQueryResult<TEntity>(() => Context.Find<TEntity>(fetchStrategy, key));
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Determines whether the repository contains an entity with the given primary key value.
+        /// </summary>
+        /// <param name="key">The value of the primary key used to match entities against.</param>
+        /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public bool Exists(TKey key)
         {
             return Find(key) != null;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Asynchronously determines whether the repository contains an entity with the given primary key value.
+        /// </summary>
+        /// <param name="key">The value of the primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public async Task<bool> ExistsAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
             return await FindAsync(key, cancellationToken) != null;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Asynchronously finds an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         public Task<TEntity> FindAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
             return FindAsync(key, (IFetchQueryStrategy<TEntity>)null, cancellationToken);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Asynchronously finds an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         public Task<TEntity> FindAsync(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
             return InterceptQueryResultAsync<TEntity>(() => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key));
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Asynchronously deletes an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key used to match entities against.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
             if (!await TryDeleteAsync(key, cancellationToken))
@@ -353,7 +516,12 @@
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        ///  Asynchronously deletes an entity with the given primary key value in the repository.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given primary key; otherwise, <c>false</c>.</returns>
         public async Task<bool> TryDeleteAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
             InterceptError(cancellationToken.ThrowIfCancellationRequested);

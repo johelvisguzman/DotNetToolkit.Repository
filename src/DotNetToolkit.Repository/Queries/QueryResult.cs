@@ -8,13 +8,17 @@
     {
         private readonly TResult _result;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets the result.
+        /// </summary>
         public TResult Result
         {
             get { return HasResult ? _result : default(TResult); }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets the total number of records.
+        /// </summary>
         public int? Total { get; }
 
         /// <summary>

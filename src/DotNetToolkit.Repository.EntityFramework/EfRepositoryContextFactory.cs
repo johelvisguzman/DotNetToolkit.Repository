@@ -57,7 +57,10 @@
 
         #region Implementation of IRepositoryContextFactory
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Create a new repository context.
+        /// </summary>
+        /// <returns>The new repository context.</returns>
         public IRepositoryContext Create()
         {
             TDbContext underlyingContext;
