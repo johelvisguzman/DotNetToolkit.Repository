@@ -49,7 +49,6 @@
                 throw new ArgumentNullException(nameof(context));
 
             _context = context;
-            _context.Database.Log = s => Logger.Debug(s.TrimEnd(Environment.NewLine.ToCharArray()));
         }
 
         #endregion
@@ -64,7 +63,7 @@
 
         #endregion
 
-        #region Implementation of IContext
+        #region Implementation of IRepositoryContext
 
         /// <summary>
         /// Begins the transaction.
@@ -85,6 +84,8 @@
                 throw new ArgumentNullException(nameof(loggerProvider));
 
             Logger = loggerProvider.Create(typeof(DbContext).FullName);
+
+            _context.Database.Log = s => Logger.Debug(s.TrimEnd(Environment.NewLine.ToCharArray()));
         }
 
         /// <summary>
@@ -396,7 +397,7 @@
 
         #endregion
 
-        #region #region Implementation of IContextAsync
+        #region Implementation of IRepositoryContextAsync
 
         /// <summary>
         /// Asynchronously saves all changes made in this context to the database.
