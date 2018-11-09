@@ -9,7 +9,11 @@
 
         private NullLoggerProvider() { }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Creates a new <see cref="ILogger"/> instance.
+        /// </summary>
+        /// <param name="categoryName">The category name for messages produced by the logger.</param>
+        /// <returns>The <see cref="ILogger"/>.</returns>
         public ILogger Create(string categoryName)
         {
             return NullLogger.Instance;
