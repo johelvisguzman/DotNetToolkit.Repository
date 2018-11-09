@@ -70,6 +70,15 @@ namespace DotNetToolkit.Repository.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The repository primary key type(s) constraint must match the number of primary key type(s) and ordering defined on the entity..
+        /// </summary>
+        internal static string EntityPrimaryKeyTypesMismatch {
+            get {
+                return ResourceManager.GetString("EntityPrimaryKeyTypesMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The number of primary key values passed must match number of primary key values defined on the entity..
         /// </summary>
         internal static string EntityPrimaryKeyValuesLengthMismatch {
@@ -138,6 +147,15 @@ namespace DotNetToolkit.Repository.Properties {
         internal static string IRepositoryContextNotAsync {
             get {
                 return ResourceManager.GetString("IRepositoryContextNotAsync", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to determine composite primary key ordering for type &apos;{0}&apos;. Use the ColumnAttribute to specify an order for composite primary keys..
+        /// </summary>
+        internal static string UnableToDetermineCompositePrimaryKeyOrdering {
+            get {
+                return ResourceManager.GetString("UnableToDetermineCompositePrimaryKeyOrdering", resourceCulture);
             }
         }
     }

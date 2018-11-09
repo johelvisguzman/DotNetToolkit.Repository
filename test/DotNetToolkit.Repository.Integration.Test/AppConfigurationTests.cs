@@ -25,7 +25,7 @@
 
             var repoFactory = new RepositoryFactory(options);
             var repo = repoFactory.Create<Customer>();
-            var contextFactory = GetContextFactoryFromPrivateField<Internal.RepositoryBase<Customer>>(repo);
+            var contextFactory = GetContextFactoryFromPrivateField<InternalRepositoryBase<Customer>>(repo);
 
             Assert.True(contextFactory is InMemoryRepositoryContextFactory);
         }
@@ -40,7 +40,7 @@
 
             var repoFactory = new RepositoryFactory(options);
             var repo = repoFactory.Create<Customer>();
-            var interceptors = GetLazyInterceptorsOptionsFromPrivateField<Internal.RepositoryBase<Customer>>(repo);
+            var interceptors = GetLazyInterceptorsOptionsFromPrivateField<InternalRepositoryBase<Customer>>(repo);
 
             Assert.Single(interceptors);
         }
