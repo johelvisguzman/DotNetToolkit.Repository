@@ -24,21 +24,13 @@
             _categoryName = categoryName;
         }
 
-        /// <summary>
-        /// Checks if the given <paramref name="logLevel"/> is enabled.
-        /// </summary>
-        /// <param name="logLevel">level to be checked.</param>
-        /// <returns><c>true</c> if enabled.</returns>
+        /// <inheritdoc />
         public virtual bool IsEnabled(LogLevel logLevel)
         {
             return logLevel >= _minLogLevel;
         }
 
-        /// <summary>
-        /// Logs a message with a specified <paramref name="logLevel"/> severity.
-        /// </summary>
-        /// <param name="logLevel">The log level severity.</param>
-        /// <param name="message">The message to log.</param>
+        /// <inheritdoc />
         public virtual void Log(LogLevel logLevel, string message)
         {
             if (!IsEnabled(logLevel))

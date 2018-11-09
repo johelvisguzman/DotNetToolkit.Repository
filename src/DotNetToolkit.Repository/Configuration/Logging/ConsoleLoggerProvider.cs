@@ -1,8 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Logging
 {
-    /// <summary>
-    /// An implementation of <see cref="ILoggerProvider" />.
-    /// </summary>
+    /// <inheritdoc />
     public class ConsoleLoggerProvider : ILoggerProvider
     {
         private readonly LogLevel _minLogLevel;
@@ -16,11 +14,7 @@
             _minLogLevel = minLogLevel;
         }
 
-        /// <summary>
-        /// Creates a new <see cref="ILogger"/> instance.
-        /// </summary>
-        /// <param name="categoryName">The category name for messages produced by the logger.</param>
-        /// <returns>The <see cref="ILogger"/>.</returns>
+        /// <inheritdoc />
         public ILogger Create(string categoryName)
         {
             return new ConsoleLogger(_minLogLevel, categoryName);

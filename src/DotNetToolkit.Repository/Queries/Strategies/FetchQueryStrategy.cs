@@ -30,29 +30,19 @@
 
         #region Implementation of IFetchQueryStrategy<T>
 
-        /// <summary>
-        /// Gets the collection of related objects to include in the query results.
-        /// </summary>
+        /// <inheritdoc />
         IEnumerable<string> IFetchQueryStrategy<T>.PropertyPaths
         {
             get { return _properties; }
         }
 
-        /// <summary>
-        /// Specifies the related objects to include in the query results.
-        /// </summary>
-        /// <param name="path">A lambda expression representing the path to include.</param>
-        /// <returns>A new <see cref="IFetchQueryStrategy{T}" /> with the defined query path.</returns>
+        /// <inheritdoc />
         public IFetchQueryStrategy<T> Fetch(Expression<Func<T, object>> path)
         {
             return Fetch(path.ToIncludeString());
         }
 
-        /// <summary>
-        /// Specifies the related objects to include in the query results.
-        /// </summary>
-        /// <param name="path">The dot-separated list of related objects to return in the query results.</param>
-        /// <returns>A new <see cref="IFetchQueryStrategy{T}" /> with the defined query path.</returns>
+        /// <inheritdoc />
         public IFetchQueryStrategy<T> Fetch(string path)
         {
             _properties.Add(path);

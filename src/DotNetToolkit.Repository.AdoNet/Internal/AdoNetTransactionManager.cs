@@ -51,9 +51,7 @@
 
         #region Implementation of IDisposable
 
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
+        /// <inheritdoc />
         public void Dispose()
         {
             Transaction.Dispose();
@@ -65,9 +63,7 @@
 
         #region Implementation of ITransaction
 
-        /// <summary>
-        /// Commits all changes made to the database in the current transaction.
-        /// </summary>
+        /// <inheritdoc />
         public void Commit()
         {
             Transaction.Commit();
@@ -75,9 +71,7 @@
             _logger.Debug("Committed transaction");
         }
 
-        /// <summary>
-        /// Discards all changes made to the database in the current transaction.
-        /// </summary>
+        /// <inheritdoc />
         public void Rollback()
         {
             Transaction.Rollback();

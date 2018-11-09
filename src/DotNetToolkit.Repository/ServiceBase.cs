@@ -48,10 +48,7 @@
 
         #region Implementation of IService<TEntity, TKey1, TKey2, TKey3>
 
-        /// <summary>
-        /// Creates the specified <paramref name="entity" /> into the repository.
-        /// </summary>
-        /// <param name="entity">The entity to add.</param>
+        /// <inheritdoc />
         public virtual void Create(TEntity entity)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -61,10 +58,7 @@
             }
         }
 
-        /// <summary>
-        /// Creates the specified <paramref name="entities" /> collection into the repository.
-        /// </summary>
-        /// <param name="entities">The collection of entities to add.</param>
+        /// <inheritdoc />
         public virtual void Create(IEnumerable<TEntity> entities)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -74,13 +68,7 @@
             }
         }
 
-        /// <summary>
-        /// Deletes an entity with the given composite primary key values in the repository.
-        /// </summary>
-        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
-        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
-        /// <returns><c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual bool TryDelete(TKey1 key1, TKey2 key2, TKey3 key3)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -93,12 +81,7 @@
             }
         }
 
-        /// <summary>
-        /// Deletes an entity with the given composite primary key values in the repository.
-        /// </summary>
-        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
-        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <inheritdoc />
         public virtual void Delete(TKey1 key1, TKey2 key2, TKey3 key3)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -108,10 +91,7 @@
             }
         }
 
-        /// <summary>
-        /// Deletes the specified <paramref name="entity" /> into the repository.
-        /// </summary>
-        /// <param name="entity">The entity to delete.</param>
+        /// <inheritdoc />
         public virtual void Delete(TEntity entity)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -121,10 +101,7 @@
             }
         }
 
-        /// <summary>
-        /// Deletes all the entities in the repository that satisfies the criteria specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
+        /// <inheritdoc />
         public virtual void Delete(Expression<Func<TEntity, bool>> predicate)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -134,10 +111,7 @@
             }
         }
 
-        /// <summary>
-        /// Deletes all entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
+        /// <inheritdoc />
         public virtual void Delete(IQueryOptions<TEntity> options)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -147,10 +121,7 @@
             }
         }
 
-        /// <summary>
-        /// Deletes the specified <paramref name="entities" /> collection into the repository.
-        /// </summary>
-        /// <param name="entities">The collection of entities to delete.</param>
+        /// <inheritdoc />
         public virtual void Delete(IEnumerable<TEntity> entities)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -160,10 +131,7 @@
             }
         }
 
-        /// <summary>
-        /// Updates the specified <paramref name="entity" /> in the repository.
-        /// </summary>
-        /// <param name="entity">The entity to update.</param>
+        /// <inheritdoc />
         public virtual void Update(TEntity entity)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -173,10 +141,7 @@
             }
         }
 
-        /// <summary>
-        /// Updates the specified <paramref name="entities" /> collection in the repository.
-        /// </summary>
-        /// <param name="entities">The collection of entities to update.</param>
+        /// <inheritdoc />
         public virtual void Update(IEnumerable<TEntity> entities)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -186,13 +151,7 @@
             }
         }
 
-        /// <summary>
-        /// Gets an entity with the given composite primary key values in the repository.
-        /// </summary>
-        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
-        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
-        /// <return>The entity found.</return>
+        /// <inheritdoc />
         public virtual TEntity Get(TKey1 key1, TKey2 key2, TKey3 key3)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -201,14 +160,7 @@
             }
         }
 
-        /// <summary>
-        /// Gets an entity with the given composite primary key values in the repository.
-        /// </summary>
-        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
-        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
-        /// <return>The entity found.</return>
+        /// <inheritdoc />
         public virtual TEntity Get(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -217,11 +169,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the first entity in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <returns>The entity that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual TEntity Get(Expression<Func<TEntity, bool>> predicate)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -230,11 +178,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the first entity in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <returns>The entity that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual TEntity Get(IQueryOptions<TEntity> options)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -243,12 +187,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual TResult Get<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -257,12 +196,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual TResult Get<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -271,10 +205,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the collection of entities in the repository.
-        /// </summary>
-        /// <returns>The collection of entities in the repository.</returns>
+        /// <inheritdoc />
         public virtual IEnumerable<TEntity> GetAll()
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -283,11 +214,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
+        /// <inheritdoc />
         public virtual IEnumerable<TEntity> GetAll(Expression<Func<TEntity, bool>> predicate)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -296,11 +223,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
+        /// <inheritdoc />
         public virtual IQueryResult<IEnumerable<TEntity>> GetAll(IQueryOptions<TEntity> options)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -309,11 +232,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the collection of projected entity results in the repository.
-        /// </summary>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <returns>The collection of projected entity results in the repository.</returns>
+        /// <inheritdoc />
         public virtual IEnumerable<TResult> GetAll<TResult>(Expression<Func<TEntity, TResult>> selector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -322,12 +241,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
+        /// <inheritdoc />
         public virtual IEnumerable<TResult> GetAll<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -336,12 +250,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
+        /// <inheritdoc />
         public virtual IQueryResult<IEnumerable<TResult>> GetAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -350,13 +259,7 @@
             }
         }
 
-        /// <summary>
-        /// Determines whether the repository contains an entity with the given composite primary key values.
-        /// </summary>
-        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
-        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
-        /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual bool GetExists(TKey1 key1, TKey2 key2, TKey3 key3)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -365,11 +268,7 @@
             }
         }
 
-        /// <summary>
-        /// Determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">The predicate used to match entities against.</param>
-        /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified predicate; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual bool GetExists(Expression<Func<TEntity, bool>> predicate)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -378,11 +277,7 @@
             }
         }
 
-        /// <summary>
-        /// Determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual bool GetExists(IQueryOptions<TEntity> options)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -391,10 +286,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns the number of entities contained in the repository.
-        /// </summary>
-        /// <returns>The number of entities contained in the repository.</returns>
+        /// <inheritdoc />
         public virtual int GetCount()
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -403,11 +295,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns the number of entities that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual int GetCount(Expression<Func<TEntity, bool>> predicate)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -416,11 +304,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns the number of entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual int GetCount(IQueryOptions<TEntity> options)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -429,12 +313,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        /// <inheritdoc />
         public virtual Dictionary<TDictionaryKey, TEntity> GetDictionary<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -443,13 +322,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual IQueryResult<Dictionary<TDictionaryKey, TEntity>> GetDictionary<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -458,14 +331,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
-        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        /// <inheritdoc />
         public virtual Dictionary<TDictionaryKey, TElement> GetDictionary<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -474,15 +340,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, and an element selector function with entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
-        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual IQueryResult<Dictionary<TDictionaryKey, TElement>> GetDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -491,14 +349,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TResult">The type of the value returned by resultSelector.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="resultSelector">A function to project each entity into a new form</param>
-        /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains keys and values.</returns>
+        /// <inheritdoc />
         public virtual IEnumerable<TResult> GetGroupBy<TGroupKey, TResult>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -507,15 +358,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TResult">The type of the value returned by resultSelector.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="resultSelector">A function to project each entity into a new form</param>
-        /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual IQueryResult<IEnumerable<TResult>> GetGroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -524,12 +367,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously creates the specified <paramref name="entity" /> into the repository.
-        /// </summary>
-        /// <param name="entity">The entity to add.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task CreateAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -539,12 +377,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously creates the specified <paramref name="entities" /> collection into the repository.
-        /// </summary>
-        /// <param name="entities">The collection of entities to add.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task CreateAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -554,14 +387,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously deletes an entity with the given composite primary key values in the repository.
-        /// </summary>
-        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
-        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual async Task<bool> TryDeleteAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -574,14 +400,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously deletes an entity with the given composite primary key values in the repository.
-        /// </summary>
-        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
-        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task DeleteAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -591,12 +410,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously deletes the specified <paramref name="entity" /> into the repository.
-        /// </summary>
-        /// <param name="entity">The entity to delete.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -606,12 +420,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously deletes all the entities in the repository that satisfies the criteria specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task DeleteAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -621,12 +430,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously deletes all entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task DeleteAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -636,12 +440,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously deletes the specified <paramref name="entities" /> collection into the repository.
-        /// </summary>
-        /// <param name="entities">The collection of entities to delete.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task DeleteAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -651,12 +450,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously updates the specified <paramref name="entity" /> in the repository.
-        /// </summary>
-        /// <param name="entity">The entity to update.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -666,12 +460,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously updates the specified <paramref name="entities" /> collection in the repository.
-        /// </summary>
-        /// <param name="entities">The collection of entities to update.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task UpdateAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -681,14 +470,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds an entity with the given composite primary key values in the repository.
-        /// </summary>
-        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
-        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        /// <inheritdoc />
         public virtual async Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -697,15 +479,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds an entity with the given composite primary key values in the repository.
-        /// </summary>
-        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
-        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <inheritdoc />
         public virtual async Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -714,12 +488,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the first entity in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  entity that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -728,12 +497,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the first entity in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  entity that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<TEntity> GetAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -742,13 +506,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<TResult> GetAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -757,13 +515,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<TResult> GetAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -772,11 +524,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the collection of entities in the repository.
-        /// </summary>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of entities in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -785,12 +533,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
+        /// <inheritdoc />
         public virtual async Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -799,12 +542,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
+        /// <inheritdoc />
         public virtual async Task<IQueryResult<IEnumerable<TEntity>>> GetAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -813,12 +551,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the collection of projected entity results in the repository.
-        /// </summary>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of projected entity results in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<IEnumerable<TResult>> GetAllAsync<TResult>(Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -827,13 +560,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
+        /// <inheritdoc />
         public virtual async Task<IEnumerable<TResult>> GetAllAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -842,13 +569,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
+        /// <inheritdoc />
         public virtual async Task<IQueryResult<IEnumerable<TResult>>> GetAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -857,14 +578,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously determines whether the repository contains an entity with the given composite primary key values.
-        /// </summary>
-        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
-        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual async Task<bool> GetExistsAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -873,12 +587,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">The predicate used to match entities against.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified predicate; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual async Task<bool> GetExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -887,12 +596,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual async Task<bool> GetExistsAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -901,11 +605,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns the number of entities contained in the repository.
-        /// </summary>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  number of entities contained in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<int> GetCountAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -914,12 +614,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns the number of entities that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  number of entities that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<int> GetCountAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -928,12 +623,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns the number of entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<int> GetCountAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -942,13 +632,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        /// <inheritdoc />
         public virtual async Task<Dictionary<TDictionaryKey, TEntity>> GetDictionaryAsync<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -957,14 +641,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<IQueryResult<Dictionary<TDictionaryKey, TEntity>>> GetDictionaryAsync<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -973,15 +650,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        /// <inheritdoc />
         public virtual async Task<Dictionary<TDictionaryKey, TElement>> GetDictionaryAsync<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -990,16 +659,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, and an element selector function with entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<IQueryResult<Dictionary<TDictionaryKey, TElement>>> GetDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1008,15 +668,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TResult">The type of the value returned by resultSelector.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="resultSelector">A function to project each entity into a new form</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains keys and values.</returns>
+        /// <inheritdoc />
         public virtual async Task<IEnumerable<TResult>> GetGroupByAsync<TGroupKey, TResult>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1025,16 +677,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TResult">The type of the value returned by resultSelector.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="resultSelector">A function to project each entity into a new form</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<IQueryResult<IEnumerable<TResult>>> GetGroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1083,10 +726,7 @@
 
         #region Implementation of IService<TEntity, TKey1, TKey2>
 
-        /// <summary>
-        /// Creates the specified <paramref name="entity" /> into the repository.
-        /// </summary>
-        /// <param name="entity">The entity to add.</param>
+        /// <inheritdoc />
         public virtual void Create(TEntity entity)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1096,10 +736,7 @@
             }
         }
 
-        /// <summary>
-        /// Creates the specified <paramref name="entities" /> collection into the repository.
-        /// </summary>
-        /// <param name="entities">The collection of entities to add.</param>
+        /// <inheritdoc />
         public virtual void Create(IEnumerable<TEntity> entities)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1109,12 +746,7 @@
             }
         }
 
-        /// <summary>
-        /// Deletes an entity with the given composite primary key values in the repository.
-        /// </summary>
-        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
-        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <returns><c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual bool TryDelete(TKey1 key1, TKey2 key2)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1127,11 +759,7 @@
             }
         }
 
-        /// <summary>
-        /// Deletes an entity with the given composite primary key values in the repository.
-        /// </summary>
-        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
-        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <inheritdoc />
         public virtual void Delete(TKey1 key1, TKey2 key2)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1141,10 +769,7 @@
             }
         }
 
-        /// <summary>
-        /// Deletes the specified <paramref name="entity" /> into the repository.
-        /// </summary>
-        /// <param name="entity">The entity to delete.</param>
+        /// <inheritdoc />
         public virtual void Delete(TEntity entity)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1154,10 +779,7 @@
             }
         }
 
-        /// <summary>
-        /// Deletes all the entities in the repository that satisfies the criteria specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
+        /// <inheritdoc />
         public virtual void Delete(Expression<Func<TEntity, bool>> predicate)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1167,10 +789,7 @@
             }
         }
 
-        /// <summary>
-        /// Deletes all entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
+        /// <inheritdoc />
         public virtual void Delete(IQueryOptions<TEntity> options)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1180,10 +799,7 @@
             }
         }
 
-        /// <summary>
-        /// Deletes the specified <paramref name="entities" /> collection into the repository.
-        /// </summary>
-        /// <param name="entities">The collection of entities to delete.</param>
+        /// <inheritdoc />
         public virtual void Delete(IEnumerable<TEntity> entities)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1193,10 +809,7 @@
             }
         }
 
-        /// <summary>
-        /// Updates the specified <paramref name="entity" /> in the repository.
-        /// </summary>
-        /// <param name="entity">The entity to update.</param>
+        /// <inheritdoc />
         public virtual void Update(TEntity entity)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1206,10 +819,7 @@
             }
         }
 
-        /// <summary>
-        /// Updates the specified <paramref name="entities" /> collection in the repository.
-        /// </summary>
-        /// <param name="entities">The collection of entities to update.</param>
+        /// <inheritdoc />
         public virtual void Update(IEnumerable<TEntity> entities)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1219,12 +829,7 @@
             }
         }
 
-        /// <summary>
-        /// Gets an entity with the given composite primary key values in the repository.
-        /// </summary>
-        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
-        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <return>The entity found.</return>
+        /// <inheritdoc />
         public virtual TEntity Get(TKey1 key1, TKey2 key2)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1233,13 +838,7 @@
             }
         }
 
-        /// <summary>
-        /// Gets an entity with the given composite primary key values in the repository.
-        /// </summary>
-        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
-        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
-        /// <return>The entity found.</return>
+        /// <inheritdoc />
         public virtual TEntity Get(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1248,11 +847,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the first entity in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <returns>The entity that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual TEntity Get(Expression<Func<TEntity, bool>> predicate)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1261,11 +856,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the first entity in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <returns>The entity that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual TEntity Get(IQueryOptions<TEntity> options)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1274,12 +865,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual TResult Get<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1288,12 +874,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual TResult Get<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1302,10 +883,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the collection of entities in the repository.
-        /// </summary>
-        /// <returns>The collection of entities in the repository.</returns>
+        /// <inheritdoc />
         public virtual IEnumerable<TEntity> GetAll()
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1314,11 +892,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
+        /// <inheritdoc />
         public virtual IEnumerable<TEntity> GetAll(Expression<Func<TEntity, bool>> predicate)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1327,11 +901,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
+        /// <inheritdoc />
         public virtual IQueryResult<IEnumerable<TEntity>> GetAll(IQueryOptions<TEntity> options)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1340,11 +910,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the collection of projected entity results in the repository.
-        /// </summary>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <returns>The collection of projected entity results in the repository.</returns>
+        /// <inheritdoc />
         public virtual IEnumerable<TResult> GetAll<TResult>(Expression<Func<TEntity, TResult>> selector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1353,12 +919,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
+        /// <inheritdoc />
         public virtual IEnumerable<TResult> GetAll<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1367,12 +928,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
+        /// <inheritdoc />
         public virtual IQueryResult<IEnumerable<TResult>> GetAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1381,12 +937,7 @@
             }
         }
 
-        /// <summary>
-        /// Determines whether the repository contains an entity with the given composite primary key values.
-        /// </summary>
-        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
-        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual bool GetExists(TKey1 key1, TKey2 key2)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1395,11 +946,7 @@
             }
         }
 
-        /// <summary>
-        /// Determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">The predicate used to match entities against.</param>
-        /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified predicate; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual bool GetExists(Expression<Func<TEntity, bool>> predicate)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1408,11 +955,7 @@
             }
         }
 
-        /// <summary>
-        /// Determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual bool GetExists(IQueryOptions<TEntity> options)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1421,10 +964,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns the number of entities contained in the repository.
-        /// </summary>
-        /// <returns>The number of entities contained in the repository.</returns>
+        /// <inheritdoc />
         public virtual int GetCount()
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1433,11 +973,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns the number of entities that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual int GetCount(Expression<Func<TEntity, bool>> predicate)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1446,11 +982,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns the number of entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual int GetCount(IQueryOptions<TEntity> options)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1459,12 +991,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        /// <inheritdoc />
         public virtual Dictionary<TDictionaryKey, TEntity> GetDictionary<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1473,13 +1000,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual IQueryResult<Dictionary<TDictionaryKey, TEntity>> GetDictionary<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1488,14 +1009,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
-        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        /// <inheritdoc />
         public virtual Dictionary<TDictionaryKey, TElement> GetDictionary<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1504,15 +1018,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, and an element selector function with entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
-        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual IQueryResult<Dictionary<TDictionaryKey, TElement>> GetDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1521,14 +1027,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TResult">The type of the value returned by resultSelector.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="resultSelector">A function to project each entity into a new form</param>
-        /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains keys and values.</returns>
+        /// <inheritdoc />
         public virtual IEnumerable<TResult> GetGroupBy<TGroupKey, TResult>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1537,15 +1036,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TResult">The type of the value returned by resultSelector.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="resultSelector">A function to project each entity into a new form</param>
-        /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual IQueryResult<IEnumerable<TResult>> GetGroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1554,12 +1045,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously creates the specified <paramref name="entity" /> into the repository.
-        /// </summary>
-        /// <param name="entity">The entity to add.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task CreateAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1569,12 +1055,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously creates the specified <paramref name="entities" /> collection into the repository.
-        /// </summary>
-        /// <param name="entities">The collection of entities to add.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task CreateAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1584,13 +1065,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously deletes an entity with the given composite primary key values in the repository.
-        /// </summary>
-        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
-        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual async Task<bool> TryDeleteAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1603,13 +1078,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously deletes an entity with the given composite primary key values in the repository.
-        /// </summary>
-        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
-        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task DeleteAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1619,12 +1088,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously deletes the specified <paramref name="entity" /> into the repository.
-        /// </summary>
-        /// <param name="entity">The entity to delete.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1634,12 +1098,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously deletes all the entities in the repository that satisfies the criteria specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task DeleteAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1649,12 +1108,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously deletes all entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task DeleteAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1664,12 +1118,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously deletes the specified <paramref name="entities" /> collection into the repository.
-        /// </summary>
-        /// <param name="entities">The collection of entities to delete.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task DeleteAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1679,12 +1128,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously updates the specified <paramref name="entity" /> in the repository.
-        /// </summary>
-        /// <param name="entity">The entity to update.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1694,12 +1138,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously updates the specified <paramref name="entities" /> collection in the repository.
-        /// </summary>
-        /// <param name="entities">The collection of entities to update.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task UpdateAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1709,13 +1148,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds an entity with the given composite primary key values in the repository.
-        /// </summary>
-        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
-        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        /// <inheritdoc />
         public async Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1724,14 +1157,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds an entity with the given composite primary key values in the repository.
-        /// </summary>
-        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
-        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <inheritdoc />
         public virtual async Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1740,12 +1166,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the first entity in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  entity that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1754,12 +1175,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the first entity in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  entity that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<TEntity> GetAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1768,13 +1184,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<TResult> GetAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1783,13 +1193,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<TResult> GetAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1798,11 +1202,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the collection of entities in the repository.
-        /// </summary>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of entities in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1811,12 +1211,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
+        /// <inheritdoc />
         public virtual async Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1825,12 +1220,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
+        /// <inheritdoc />
         public virtual async Task<IQueryResult<IEnumerable<TEntity>>> GetAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1839,12 +1229,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the collection of projected entity results in the repository.
-        /// </summary>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of projected entity results in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<IEnumerable<TResult>> GetAllAsync<TResult>(Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1853,13 +1238,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
+        /// <inheritdoc />
         public virtual async Task<IEnumerable<TResult>> GetAllAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1868,13 +1247,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
+        /// <inheritdoc />
         public virtual async Task<IQueryResult<IEnumerable<TResult>>> GetAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1883,13 +1256,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously determines whether the repository contains an entity with the given composite primary key values.
-        /// </summary>
-        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
-        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual async Task<bool> GetExistsAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1898,12 +1265,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">The predicate used to match entities against.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified predicate; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual async Task<bool> GetExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1912,12 +1274,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual async Task<bool> GetExistsAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1926,11 +1283,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns the number of entities contained in the repository.
-        /// </summary>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  number of entities contained in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<int> GetCountAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1939,12 +1292,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns the number of entities that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  number of entities that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<int> GetCountAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1953,12 +1301,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns the number of entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<int> GetCountAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1967,13 +1310,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        /// <inheritdoc />
         public virtual async Task<Dictionary<TDictionaryKey, TEntity>> GetDictionaryAsync<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1982,14 +1319,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<IQueryResult<Dictionary<TDictionaryKey, TEntity>>> GetDictionaryAsync<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -1998,15 +1328,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        /// <inheritdoc />
         public virtual async Task<Dictionary<TDictionaryKey, TElement>> GetDictionaryAsync<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2015,16 +1337,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, and an element selector function with entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<IQueryResult<Dictionary<TDictionaryKey, TElement>>> GetDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2033,15 +1346,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TResult">The type of the value returned by resultSelector.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="resultSelector">A function to project each entity into a new form</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains keys and values.</returns>
+        /// <inheritdoc />
         public virtual async Task<IEnumerable<TResult>> GetGroupByAsync<TGroupKey, TResult>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2050,16 +1355,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TResult">The type of the value returned by resultSelector.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="resultSelector">A function to project each entity into a new form</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<IQueryResult<IEnumerable<TResult>>> GetGroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2107,10 +1403,7 @@
 
         #region Implementation of IService<TEntity, TKey>
 
-        /// <summary>
-        /// Creates the specified <paramref name="entity" /> into the repository.
-        /// </summary>
-        /// <param name="entity">The entity to add.</param>
+        /// <inheritdoc />
         public virtual void Create(TEntity entity)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2120,10 +1413,7 @@
             }
         }
 
-        /// <summary>
-        /// Creates the specified <paramref name="entities" /> collection into the repository.
-        /// </summary>
-        /// <param name="entities">The collection of entities to add.</param>
+        /// <inheritdoc />
         public virtual void Create(IEnumerable<TEntity> entities)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2133,11 +1423,7 @@
             }
         }
 
-        /// <summary>
-        /// Deletes an entity with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns><c>true</c> is able to successfully delete an entity with the given primary key; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual bool TryDelete(TKey key)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2150,10 +1436,7 @@
             }
         }
 
-        /// <summary>
-        /// Deletes an entity with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key">The value of the primary key used to match entities against.</param>
+        /// <inheritdoc />
         public virtual void Delete(TKey key)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2163,10 +1446,7 @@
             }
         }
 
-        /// <summary>
-        /// Deletes the specified <paramref name="entity" /> into the repository.
-        /// </summary>
-        /// <param name="entity">The entity to delete.</param>
+        /// <inheritdoc />
         public virtual void Delete(TEntity entity)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2176,10 +1456,7 @@
             }
         }
 
-        /// <summary>
-        /// Deletes all the entities in the repository that satisfies the criteria specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
+        /// <inheritdoc />
         public virtual void Delete(Expression<Func<TEntity, bool>> predicate)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2189,10 +1466,7 @@
             }
         }
 
-        /// <summary>
-        /// Deletes all entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
+        /// <inheritdoc />
         public virtual void Delete(IQueryOptions<TEntity> options)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2202,10 +1476,7 @@
             }
         }
 
-        /// <summary>
-        /// Deletes the specified <paramref name="entities" /> collection into the repository.
-        /// </summary>
-        /// <param name="entities">The collection of entities to delete.</param>
+        /// <inheritdoc />
         public virtual void Delete(IEnumerable<TEntity> entities)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2215,10 +1486,7 @@
             }
         }
 
-        /// <summary>
-        /// Updates the specified <paramref name="entity" /> in the repository.
-        /// </summary>
-        /// <param name="entity">The entity to update.</param>
+        /// <inheritdoc />
         public virtual void Update(TEntity entity)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2228,10 +1496,7 @@
             }
         }
 
-        /// <summary>
-        /// Updates the specified <paramref name="entities" /> collection in the repository.
-        /// </summary>
-        /// <param name="entities">The collection of entities to update.</param>
+        /// <inheritdoc />
         public virtual void Update(IEnumerable<TEntity> entities)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2241,11 +1506,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds an entity with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key">The value of the primary key for the entity to be found.</param>
-        /// <return>The entity found.</return>
+        /// <inheritdoc />
         public virtual TEntity Get(TKey key)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2254,12 +1515,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds an entity with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key">The value of the primary key for the entity to be found.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
-        /// <return>The entity found.</return>
+        /// <inheritdoc />
         public virtual TEntity Get(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2268,11 +1524,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the first entity in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <returns>The entity that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual TEntity Get(Expression<Func<TEntity, bool>> predicate)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2281,11 +1533,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the first entity in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <returns>The entity that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual TEntity Get(IQueryOptions<TEntity> options)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2294,12 +1542,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual TResult Get<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2308,12 +1551,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual TResult Get<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2322,10 +1560,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the collection of entities in the repository.
-        /// </summary>
-        /// <returns>The collection of entities in the repository.</returns>
+        /// <inheritdoc />
         public virtual IEnumerable<TEntity> GetAll()
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2334,11 +1569,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
+        /// <inheritdoc />
         public virtual IEnumerable<TEntity> GetAll(Expression<Func<TEntity, bool>> predicate)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2347,11 +1578,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
+        /// <inheritdoc />
         public virtual IQueryResult<IEnumerable<TEntity>> GetAll(IQueryOptions<TEntity> options)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2360,11 +1587,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the collection of projected entity results in the repository.
-        /// </summary>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <returns>The collection of projected entity results in the repository.</returns>
+        /// <inheritdoc />
         public virtual IEnumerable<TResult> GetAll<TResult>(Expression<Func<TEntity, TResult>> selector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2373,12 +1596,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
+        /// <inheritdoc />
         public virtual IEnumerable<TResult> GetAll<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2387,12 +1605,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
+        /// <inheritdoc />
         public virtual IQueryResult<IEnumerable<TResult>> GetAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2401,11 +1614,7 @@
             }
         }
 
-        /// <summary>
-        /// Determines whether the repository contains an entity with the given primary key value.
-        /// </summary>
-        /// <param name="key">The value of the primary key used to match entities against.</param>
-        /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual bool GetExists(TKey key)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2414,11 +1623,7 @@
             }
         }
 
-        /// <summary>
-        /// Determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">The predicate used to match entities against.</param>
-        /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified predicate; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual bool GetExists(Expression<Func<TEntity, bool>> predicate)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2427,11 +1632,7 @@
             }
         }
 
-        /// <summary>
-        /// Determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual bool GetExists(IQueryOptions<TEntity> options)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2440,10 +1641,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns the number of entities contained in the repository.
-        /// </summary>
-        /// <returns>The number of entities contained in the repository.</returns>
+        /// <inheritdoc />
         public virtual int GetCount()
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2452,11 +1650,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns the number of entities that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual int GetCount(Expression<Func<TEntity, bool>> predicate)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2465,11 +1659,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns the number of entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual int GetCount(IQueryOptions<TEntity> options)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2478,12 +1668,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        /// <inheritdoc />
         public virtual Dictionary<TDictionaryKey, TEntity> GetDictionary<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2492,13 +1677,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual IQueryResult<Dictionary<TDictionaryKey, TEntity>> GetDictionary<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2507,14 +1686,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
-        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        /// <inheritdoc />
         public virtual Dictionary<TDictionaryKey, TElement> GetDictionary<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2523,15 +1695,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, and an element selector function with entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
-        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual IQueryResult<Dictionary<TDictionaryKey, TElement>> GetDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2540,14 +1704,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TResult">The type of the value returned by resultSelector.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="resultSelector">A function to project each entity into a new form</param>
-        /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains keys and values.</returns>
+        /// <inheritdoc />
         public virtual IEnumerable<TResult> GetGroupBy<TGroupKey, TResult>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2556,15 +1713,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TResult">The type of the value returned by resultSelector.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="resultSelector">A function to project each entity into a new form</param>
-        /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual IQueryResult<IEnumerable<TResult>> GetGroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2573,12 +1722,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously creates the specified <paramref name="entity" /> into the repository.
-        /// </summary>
-        /// <param name="entity">The entity to add.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task CreateAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2588,12 +1732,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously creates the specified <paramref name="entities" /> collection into the repository.
-        /// </summary>
-        /// <param name="entities">The collection of entities to add.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task CreateAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2603,27 +1742,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously deletes the specified <paramref name="entity" /> into the repository.
-        /// </summary>
-        /// <param name="entity">The entity to delete.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        public virtual async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
-        {
-            using (var uow = UnitOfWorkFactory.Create())
-            {
-                await uow.Create<TEntity, TKey>().DeleteAsync(entity, cancellationToken);
-                uow.Commit();
-            }
-        }
-
-        /// <summary>
-        ///  Asynchronously deletes an entity with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given primary key; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual async Task<bool> TryDeleteAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2636,12 +1755,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously deletes an entity with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key">The value of the primary key used to match entities against.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task DeleteAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2651,12 +1765,17 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously deletes all the entities in the repository that satisfies the criteria specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
+        public virtual async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                await uow.Create<TEntity, TKey>().DeleteAsync(entity, cancellationToken);
+                uow.Commit();
+            }
+        }
+
+        /// <inheritdoc />
         public virtual async Task DeleteAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2666,12 +1785,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously deletes all entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task DeleteAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2681,12 +1795,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously deletes the specified <paramref name="entities" /> collection into the repository.
-        /// </summary>
-        /// <param name="entities">The collection of entities to delete.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task DeleteAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2696,12 +1805,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously updates the specified <paramref name="entity" /> in the repository.
-        /// </summary>
-        /// <param name="entity">The entity to update.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2711,12 +1815,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously updates the specified <paramref name="entities" /> collection in the repository.
-        /// </summary>
-        /// <param name="entities">The collection of entities to update.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        /// <inheritdoc />
         public virtual async Task UpdateAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2726,13 +1825,8 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds an entity with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key">The value of the primary key for the entity to be found.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        public virtual async Task<TEntity> GetAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
+        /// <inheritdoc />
+        public async Task<TEntity> GetAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
@@ -2740,13 +1834,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds an entity with the given primary key value in the repository.
-        /// </summary>
-        /// <param name="key">The value of the primary key for the entity to be found.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <inheritdoc />
         public virtual async Task<TEntity> GetAsync(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2755,12 +1843,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the first entity in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  entity that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2769,12 +1852,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the first entity in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  entity that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<TEntity> GetAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2783,13 +1861,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<TResult> GetAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2798,13 +1870,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<TResult> GetAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2813,11 +1879,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the collection of entities in the repository.
-        /// </summary>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of entities in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2826,12 +1888,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
+        /// <inheritdoc />
         public virtual async Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2840,12 +1897,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
+        /// <inheritdoc />
         public virtual async Task<IQueryResult<IEnumerable<TEntity>>> GetAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2854,12 +1906,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the collection of projected entity results in the repository.
-        /// </summary>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of projected entity results in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<IEnumerable<TResult>> GetAllAsync<TResult>(Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2868,13 +1915,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
+        /// <inheritdoc />
         public virtual async Task<IEnumerable<TResult>> GetAllAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2883,13 +1924,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
+        /// <inheritdoc />
         public virtual async Task<IQueryResult<IEnumerable<TResult>>> GetAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2898,12 +1933,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously determines whether the repository contains an entity with the given primary key value.
-        /// </summary>
-        /// <param name="key">The value of the primary key used to match entities against.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual async Task<bool> GetExistsAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2912,12 +1942,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="predicate" />.
-        /// </summary>
-        /// <param name="predicate">The predicate used to match entities against.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified predicate; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual async Task<bool> GetExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2926,12 +1951,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="options" />.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public virtual async Task<bool> GetExistsAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2940,11 +1960,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns the number of entities contained in the repository.
-        /// </summary>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  number of entities contained in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<int> GetCountAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2953,12 +1969,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns the number of entities that satisfies the criteria specified by the <paramref name="predicate" /> in the repository.
-        /// </summary>
-        /// <param name="predicate">A function to filter each entity.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  number of entities that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<int> GetCountAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2967,12 +1978,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns the number of entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the  number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<int> GetCountAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2981,13 +1987,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        /// <inheritdoc />
         public virtual async Task<Dictionary<TDictionaryKey, TEntity>> GetDictionaryAsync<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -2996,14 +1996,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> according to the specified <paramref name="keySelector" />.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<IQueryResult<Dictionary<TDictionaryKey, TEntity>>> GetDictionaryAsync<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -3012,15 +2005,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
+        /// <inheritdoc />
         public virtual async Task<Dictionary<TDictionaryKey, TElement>> GetDictionaryAsync<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -3029,16 +2014,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keySelector" />, and an element selector function with entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<IQueryResult<Dictionary<TDictionaryKey, TElement>>> GetDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -3047,15 +2023,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TResult">The type of the value returned by resultSelector.</typeparam>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="resultSelector">A function to project each entity into a new form</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains keys and values.</returns>
+        /// <inheritdoc />
         public virtual async Task<IEnumerable<TResult>> GetGroupByAsync<TGroupKey, TResult>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
@@ -3064,16 +2032,7 @@
             }
         }
 
-        /// <summary>
-        /// Asynchronously returns a new <see cref="IEnumerable{TResult}" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TResult">The type of the value returned by resultSelector.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="resultSelector">A function to project each entity into a new form</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public virtual async Task<IQueryResult<IEnumerable<TResult>>> GetGroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
