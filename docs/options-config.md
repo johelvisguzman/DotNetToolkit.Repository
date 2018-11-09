@@ -5,14 +5,6 @@ The RepositoryOptions object is built using the RepositoryOptionsBuilder.
 
 Currently the following are supported:
 
-|                                      Providers |
-|----------------------------------------------- |
-| Entity Framework 6                             |
-| Entity Framework Core                          |
-| Pure Ado.NET (for testing purposes only)       |
-| In Memory Database (for testing purposes only) |
-
-
 ```csharp
 var options = new RepositoryOptionsBuilder()
     .UseEntityFramework<AppDbContext>(...) // for entity framework 6
