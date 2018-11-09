@@ -5,12 +5,19 @@ The RepositoryOptions object is built using the RepositoryOptionsBuilder.
 
 Currently the following are supported:
 
-|                                      Providers |
-|----------------------------------------------- |
-| Entity Framework 6                             |
-| Entity Framework Core                          |
-| Pure Ado.NET (for testing purposes only)       |
-| In Memory Database (for testing purposes only) |
+| Package | NuGet Stable  |
+| ------- | ------------- |
+[DotNetToolkit.Repository.EntityFramework](https://www.nuget.org/packages/DotNetToolkit.Repository.EntityFramework/) | [![DotNetToolkit.Repository.EntityFramework](https://img.shields.io/nuget/v/DotNetToolkit.Repository.EntityFramework.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.EntityFramework/) |
+[DotNetToolkit.Repository.EntityFrameworkCore](https://www.nuget.org/packages/DotNetToolkit.Repository.EntityFrameworkCore/) | [![DotNetToolkit.Repository.EntityFrameworkCore](https://img.shields.io/nuget/v/DotNetToolkit.Repository.EntityFrameworkCore.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.EntityFrameworkCore/) |
+[DotNetToolkit.Repository.AdoNet](https://www.nuget.org/packages/DotNetToolkit.Repository.AdoNet/) | [![DotNetToolkit.Repository.AdoNet](https://img.shields.io/nuget/v/DotNetToolkit.Repository.AdoNet.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.AdoNet/) |
+[DotNetToolkit.Repository.InMemory](https://www.nuget.org/packages/DotNetToolkit.Repository.InMemory/) | [![DotNetToolkit.Repository.InMemory](https://img.shields.io/nuget/v/DotNetToolkit.Repository.InMemory.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.InMemory/) |
+
+
+
+
+
+
+
 
 
 ```csharp
