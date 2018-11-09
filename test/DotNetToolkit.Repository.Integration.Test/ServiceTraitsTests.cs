@@ -375,6 +375,12 @@
             ForAllUnitOfWorkFactoriesAsync(TestGetGroupByWithPagingOptionsSortDescendingAsync);
         }
 
+        [Fact]
+        public void ThrowsIfEntityPrimaryKeyTypesMismatch()
+        {
+            ForAllUnitOfWorkFactories(TestThrowsIfEntityPrimaryKeyTypesMismatch);
+        }
+
         private static void TestCreate(IUnitOfWorkFactory uowFactory)
         {
             var service = new Service<Customer>(uowFactory);
@@ -2753,6 +2759,12 @@
 
             Assert.Single(entitiesInDb);
             Assert.Equal("Random Name 0", entitiesInDb.ElementAt(0));
+        }
+
+        private static void TestThrowsIfEntityPrimaryKeyTypesMismatch(IUnitOfWorkFactory uowFactory)
+        {
+            var ex = Assert.Throws<InvalidOperationException>(() => new Service<Customer, string>(uowFactory));
+            Assert.Equal("The repository primary key type(s) constraint must match the number of primary key type(s) and ordering defined on the entity.", ex.Message);
         }
     }
 }

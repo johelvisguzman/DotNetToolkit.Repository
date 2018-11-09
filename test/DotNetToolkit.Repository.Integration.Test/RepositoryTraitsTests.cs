@@ -399,6 +399,12 @@
             ForAllRepositoryFactories(TestThrowsIfModelHasNoId);
         }
 
+        [Fact]
+        public void ThrowsIfEntityPrimaryKeyTypesMismatch()
+        {
+            ForAllRepositoryFactories(TestThrowsIfEntityPrimaryKeyTypesMismatch);
+        }
+
         private static void TestAdd(IRepositoryFactory repoFactory)
         {
             var repo = repoFactory.Create<Customer>();
@@ -2812,6 +2818,12 @@
             var ex = Assert.Throws<TargetInvocationException>(() => repoFactory.Create<CustomerWithNoId>());
 
             Assert.Equal($"The instance of entity type '{typeof(CustomerWithNoId).FullName}' requires a primary key to be defined.", ex.InnerException?.Message);
+        }
+
+        private static void TestThrowsIfEntityPrimaryKeyTypesMismatch(IRepositoryFactory repoFactory)
+        {
+            var ex = Assert.Throws<TargetInvocationException>(() => repoFactory.Create<Customer, string>());
+            Assert.Equal("The repository primary key type(s) constraint must match the number of primary key type(s) and ordering defined on the entity.", ex.InnerException?.Message);
         }
     }
 }

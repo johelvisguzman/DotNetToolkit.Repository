@@ -6,6 +6,7 @@
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
@@ -17,6 +18,10 @@
         /// </summary>
         /// <param name="entityType">The entity type to get the primary key from.</param>
         /// <returns>The composite primary key property infos.</returns>
+        /// <remarks>
+        /// If the entity type is defined with a composite primary key collection,
+        /// then the list of keys found will be returned ordered as defined by their specified <see cref="ColumnAttribute"/> attribute.
+        /// </remarks>
         public static IEnumerable<PropertyInfo> GetPrimaryKeyPropertyInfos(Type entityType)
         {
             if (entityType == null)
@@ -29,6 +34,14 @@
             var propertyInfos = entityType
                 .GetRuntimeProperties()
                 .Where(x => x.IsColumnMapped() && x.GetCustomAttribute<KeyAttribute>() != null)
+                .OrderBy(x =>
+                {
+                    var columnAttribute = x.GetCustomAttribute<ColumnAttribute>();
+                    if (columnAttribute != null && columnAttribute.Order > 0)
+                        return columnAttribute.Order;
+
+                    return int.MaxValue;
+                })
                 .ToList();
 
             // Gets by naming convention
@@ -172,6 +185,43 @@
             var lambda = Expression.Lambda<Func<TEntity, bool>>(exp, parameter);
 
             return new SpecificationQueryStrategy<TEntity>(lambda);
+        }
+
+        /// <summary>
+        /// Throws an exception if the specified key type collection does not match the ones defined for the entity.
+        /// </summary>
+        /// <param name="keyTypes">The key type collection to check against.</param>
+        public static void ThrowsIfInvalidPrimaryKeyDefinition<TEntity>(params Type[] keyTypes) where TEntity : class
+        {
+            if (keyTypes == null)
+                throw new ArgumentNullException(nameof(keyTypes));
+
+            var definedKeyInfos = GetPrimaryKeyPropertyInfos<TEntity>();
+
+            if (definedKeyInfos.Count() > 1)
+            {
+                var hasNoKeyOrdering = definedKeyInfos.Any(x =>
+                {
+                    var columnAttribute = x.GetCustomAttribute<ColumnAttribute>();
+                    if (columnAttribute == null)
+                        return true;
+
+                    return columnAttribute.Order <= 0;
+                });
+
+                if (hasNoKeyOrdering)
+                {
+                    throw new InvalidOperationException(string.Format(
+                        Resources.UnableToDetermineCompositePrimaryKeyOrdering, typeof(TEntity).FullName));
+                }
+            }
+
+            var definedKeyTypes = definedKeyInfos
+                .Select(x => x.PropertyType)
+                .ToArray();
+
+            if (keyTypes.Length != definedKeyTypes.Length || definedKeyTypes.Where((t, i) => t != keyTypes[i]).Any())
+                throw new InvalidOperationException(Resources.EntityPrimaryKeyTypesMismatch);
         }
 
         /// <summary>

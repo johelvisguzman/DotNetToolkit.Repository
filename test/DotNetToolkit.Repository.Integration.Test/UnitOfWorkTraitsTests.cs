@@ -110,8 +110,8 @@
 
             Assert.NotNull(uow.Create<Customer>());
             Assert.NotNull(uow.Create<Customer, int>());
-            Assert.NotNull(uow.Create<CustomerWithTwoCompositePrimaryKey, int, int>());
-            Assert.NotNull(uow.Create<CustomerWithThreeCompositePrimaryKey, int, int, int>());
+            Assert.NotNull(uow.Create<CustomerWithTwoCompositePrimaryKey, int, string>());
+            Assert.NotNull(uow.Create<CustomerWithThreeCompositePrimaryKey, int, string, int>());
             Assert.NotNull(uow.CreateInstance<Repository<Customer>>());
         }
 

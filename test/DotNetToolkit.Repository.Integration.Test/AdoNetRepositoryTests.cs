@@ -95,7 +95,7 @@
 
             var repoFactory = new RepositoryFactory(options);
 
-            var addressRepo = repoFactory.Create<CustomerAddressWithTwoCompositePrimaryKey>();
+            var addressRepo = repoFactory.Create<CustomerAddressWithTwoCompositePrimaryKey, int, int>();
             var customerRepo = repoFactory.Create<CustomerWithTwoCompositePrimaryKey>();
             var customerFetchStrategy = new FetchQueryStrategy<CustomerWithTwoCompositePrimaryKey>();
 
@@ -217,7 +217,7 @@
 
             var repoFactory = new RepositoryFactory(options);
 
-            var addressRepo = repoFactory.Create<CustomerCompositeAddress>();
+            var addressRepo = repoFactory.Create<CustomerCompositeAddress, int, int>();
             var customerRepo = repoFactory.Create<CustomerWithCompositeAddress>();
             var customerFetchStrategy = new FetchQueryStrategy<CustomerWithCompositeAddress>();
 

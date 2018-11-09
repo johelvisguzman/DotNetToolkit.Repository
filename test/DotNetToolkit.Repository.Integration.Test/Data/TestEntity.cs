@@ -37,6 +37,26 @@
         public Customer Customer { get; set; }
     }
 
+    public class CustomerWithTwoCompositePrimaryKeyAndNoOrder
+    {
+        [Key]
+        public int Id1 { get; set; }
+        [Key]
+        public string Id2 { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class CustomerWithThreeCompositePrimaryKeyAndNoOrder
+    {
+        [Key]
+        public int Id1 { get; set; }
+        [Key]
+        public string Id2 { get; set; }
+        [Key]
+        public int Id3 { get; set; }
+        public string Name { get; set; }
+    }
+
     public class CustomerWithTwoCompositePrimaryKey
     {
         [Key]
@@ -44,7 +64,7 @@
         public int Id1 { get; set; }
         [Key]
         [Column(Order = 2)]
-        public int Id2 { get; set; }
+        public string Id2 { get; set; }
         public string Name { get; set; }
     }
 
@@ -55,7 +75,7 @@
         public int Id1 { get; set; }
         [Key]
         [Column(Order = 2)]
-        public int Id2 { get; set; }
+        public string Id2 { get; set; }
         [Key]
         [Column(Order = 3)]
         public int Id3 { get; set; }

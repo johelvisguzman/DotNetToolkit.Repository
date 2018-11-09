@@ -277,7 +277,7 @@
                     var canBeNull = !propertyInfo.PropertyType.IsValueType || Nullable.GetUnderlyingType(propertyInfo.PropertyType) != null;
                     if (canBeNull && schemaTableColumn.IsNullable == "NO")
                     {
-                        if (requiredAttribute == null)
+                        if (requiredAttribute == null && !primaryKeyPropertiesMapping.ContainsKey(columnName))
                             error["IsNullable_Mismatch"] = true;
                     }
 
