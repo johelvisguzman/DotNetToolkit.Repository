@@ -8,11 +8,14 @@
     public class Repository_Add_Benchmarks : BenchmarkBase
     {
         private IRepository<Customer> _repo;
-        
+        private Customer _customer;
+
         [IterationSetup]
         public void Setup()
         {
             BaseSetup();
+
+            _customer = new Customer { Name = "Random Name" };
 
             _repo = new Repository<Customer>(BuildOptions(Provider));
         }
@@ -26,25 +29,25 @@
         [BenchmarkCategory("Add"), Benchmark]
         public void Add()
         {
-            _repo.Add(new Customer { Name = "Random Name" });
+            _repo.Add(_customer);
         }
 
         [BenchmarkCategory("Add"), Benchmark]
         public void AddRange()
         {
-            _repo.Add(new[] { new Customer { Name = "Random Name" } });
+            _repo.Add(new[] { _customer });
         }
 
         [BenchmarkCategory("AddAsync"), Benchmark]
         public async Task Async_Add()
         {
-            await _repo.AddAsync(new Customer { Name = "Random Name" });
+            await _repo.AddAsync(_customer);
         }
 
         [BenchmarkCategory("AddAsync"), Benchmark]
         public async Task Async_AddRange()
         {
-            await _repo.AddAsync(new[] { new Customer { Name = "Random Name" } });
+            await _repo.AddAsync(new[] { _customer });
         }
     }
 }
