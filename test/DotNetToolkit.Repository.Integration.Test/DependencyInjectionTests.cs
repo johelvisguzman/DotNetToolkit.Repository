@@ -139,7 +139,7 @@
 
             var repo = new Repository<Customer>(provider.GetService<RepositoryOptions>());
 
-            Assert.Equal(3, GetLazyInterceptorsOptionsFromPrivateField<RepositoryBase<Customer>>(repo).Count());
+            Assert.Equal(3, GetLazyInterceptorsOptionsFromPrivateField<Internal.RepositoryBase<Customer>>(repo).Count());
             Assert.Single(provider.GetServices<IRepositoryInterceptor>());
             Assert.NotNull(provider.GetService<TestRepositoryInterceptorWithDepdencyInjectedServices>());
             Assert.Null(provider.GetService<TestRepositoryTimeStampInterceptor>());
@@ -166,7 +166,7 @@
 
             var repo = new Repository<Customer>(provider.GetService<RepositoryOptions>());
 
-            Assert.Equal(3, GetLazyInterceptorsOptionsFromPrivateField<RepositoryBase<Customer>>(repo).Count());
+            Assert.Equal(3, GetLazyInterceptorsOptionsFromPrivateField<Internal.RepositoryBase<Customer>>(repo).Count());
             Assert.Equal(3, provider.GetServices<IRepositoryInterceptor>().Count());
             Assert.NotNull(provider.GetService<TestRepositoryInterceptorWithDepdencyInjectedServices>());
             Assert.NotNull(provider.GetService<TestRepositoryTimeStampInterceptor>());
