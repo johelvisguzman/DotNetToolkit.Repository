@@ -1200,306 +1200,9 @@
 
         #endregion
 
-        #region Implementation of IRepositoryContextAsync
-
-        /// <summary>
-        /// Saves all changes made in this context to the database.
-        /// </summary>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of state entries written to the database.</returns>
-        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
-        {
-            using (var command = CreateCommand())
-            {
-                var rows = 0;
-                var connection = command.Connection;
-                var ownsConnection = _ownsConnection && command.Transaction == null;
-
-                if (connection.State == ConnectionState.Closed)
-                    await connection.OpenAsync(cancellationToken);
-
-                try
-                {
-                    while (_items.TryTake(out var entitySet))
-                    {
-                        var entityType = entitySet.Entity.GetType();
-
-                        await OnSchemaValidationAsync(entityType, cancellationToken);
-
-                        var primeryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-                        var isIdentity = primeryKeyPropertyInfo.IsColumnIdentity();
-
-                        // Checks if the entity exist in the database
-                        var existInDb = await command.ExecuteObjectExistAsync(entitySet.Entity, cancellationToken);
-
-                        // Prepare the sql statement
-                        _queryBuilder.PrepareEntitySetQuery(
-                            entitySet,
-                            existInDb,
-                            isIdentity,
-                            primeryKeyPropertyInfo,
-                            out string sql,
-                            out Dictionary<string, object> parameters);
-
-                        // Executes the sql statement
-                        command.CommandText = sql;
-                        command.CommandType = CommandType.Text;
-                        command.Parameters.Clear();
-                        command.AddParmeters(parameters);
-
-                        if (Logger.IsEnabled(LogLevel.Debug))
-                            Logger.Debug(FormatExecutingDebugQuery("ExecuteNonQueryAsync", parameters, sql));
-
-                        rows += await command.ExecuteNonQueryAsync(cancellationToken);
-
-                        // Checks to see if the model needs to be updated with the new key returned from the database
-                        if (entitySet.State == EntityState.Added && isIdentity)
-                        {
-                            command.CommandText = "SELECT @@IDENTITY";
-                            command.Parameters.Clear();
-
-                            if (Logger.IsEnabled(LogLevel.Debug))
-                                Logger.Debug(FormatExecutingDebugQuery("ExecuteScalarAsync", null, command.CommandText));
-
-                            var newKey = await command.ExecuteScalarAsync(cancellationToken);
-                            var convertedKeyValue = Convert.ChangeType(newKey, primeryKeyPropertyInfo.PropertyType);
-
-                            primeryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
-                        }
-                    }
-                }
-                finally
-                {
-                    if (ownsConnection)
-                        connection.Dispose();
-
-                    // Clears the collection
-                    while (_items.Count > 0)
-                    {
-                        _items.TryTake(out _);
-                    }
-                }
-
-                return rows;
-            }
-        }
-
-        /// <summary>
-        /// Asynchronously finds an entity with the given primary key values in the repository.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
-        /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
-        /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found in the repository.</returns>
-        public Task<QueryResult<TEntity>> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
-        {
-            if (keyValues == null)
-                throw new ArgumentNullException(nameof(keyValues));
-
-            ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
-
-            var options = new QueryOptions<TEntity>().Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
-
-            if (fetchStrategy != null)
-                options.Include(fetchStrategy);
-
-            return FindAsync<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken);
-        }
-
-        /// <summary>
-        /// Asynchronously finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <typeparam name="TResult">The type of the value returned by selector.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public async Task<QueryResult<TResult>> FindAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
-        {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
-
-            var selectorFunc = selector.Compile();
-
-            _queryBuilder.PrepareDefaultSelectQuery(options, out Mapper mapper);
-
-            await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
-
-            return await ExecuteObjectAsync<TResult>(mapper.Sql, mapper.Parameters, reader => mapper.Map<TEntity, TResult>(reader, selectorFunc), cancellationToken);
-        }
-
-        /// <summary>
-        /// Asynchronously finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <typeparam name="TResult">The type of the value returned by selector.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public async Task<QueryResult<IEnumerable<TResult>>> FindAllAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
-        {
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
-
-            var selectorFunc = selector.Compile();
-
-            _queryBuilder.PrepareDefaultSelectQuery(options, out Mapper mapper, true);
-
-            await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
-
-            return await ExecuteListAsync<TResult>(mapper.Sql, mapper.Parameters, reader => mapper.Map<TEntity, TResult>(reader, selectorFunc), cancellationToken);
-        }
-
-        /// <summary>
-        /// Asynchronously returns the number of entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public async Task<QueryResult<int>> CountAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
-        {
-            _queryBuilder.PrepareCountQuery(options, out Mapper mapper);
-
-            OnSchemaValidation(typeof(TEntity));
-
-            var result = await ExecuteScalarAsync<int>(mapper.Sql, mapper.Parameters, cancellationToken);
-
-            return new QueryResult<int>(result);
-        }
-
-        /// <summary>
-        /// Asynchronously determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="options" />.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
-        public async Task<QueryResult<bool>> ExistsAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
-        {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            _queryBuilder.PrepareDefaultSelectQuery(options, out Mapper mapper);
-
-            await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
-
-            using (var reader = await ExecuteReaderAsync(mapper.Sql, mapper.Parameters, cancellationToken))
-            {
-                var hasRows = false;
-
-                while (reader.Read())
-                {
-                    hasRows = true;
-
-                    break;
-                }
-
-                return new QueryResult<bool>(hasRows);
-            }
-        }
-
-        /// <summary>
-        /// Asynchronously returns a new <see cref="T:System.Collections.Generic.Dictionary`2" /> according to the specified <paramref name="keySelector" />, and an element selector function with entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
-        /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="T:System.Collections.Generic.Dictionary`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public async Task<QueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
-        {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
-            if (elementSelector == null)
-                throw new ArgumentNullException(nameof(elementSelector));
-
-            var keySelectFunc = keySelector.Compile();
-            var elementSelectorFunc = elementSelector.Compile();
-
-            _queryBuilder.PrepareDefaultSelectQuery(options, out Mapper mapper, true);
-
-            await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
-
-            using (var reader = await ExecuteReaderAsync(mapper.Sql, mapper.Parameters, cancellationToken))
-            {
-                var dict = new Dictionary<TDictionaryKey, TElement>();
-                var foundCrossJoinCountColumn = false;
-                var total = 0;
-
-                while (reader.Read())
-                {
-                    // TODO: NEEDS TO FIGURE OUT ANOTHER WAY TO DO THIS
-                    for (var i = 0; i < reader.FieldCount; i++)
-                    {
-                        var name = reader.GetName(i);
-
-                        if (name.Equals(QueryBuilder.CrossJoinCountColumnName))
-                        {
-                            total = (int)reader[name];
-                            foundCrossJoinCountColumn = true;
-                            break;
-                        }
-                    }
-
-                    dict.Add(mapper.Map<TEntity, TDictionaryKey>(reader, keySelectFunc), mapper.Map<TEntity, TElement>(reader, elementSelectorFunc));
-                }
-
-                if (!foundCrossJoinCountColumn)
-                    total = dict.Count;
-
-                return new QueryResult<Dictionary<TDictionaryKey, TElement>>(dict, total);
-            }
-        }
-
-        /// <summary>
-        /// Asynchronously returns a new <see cref="T:System.Collections.Generic.IEnumerable`1" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TResult">The type of the value returned by resultSelector.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="resultSelector">A function to project each entity into a new form</param>
-        /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="T:System.Linq.IGrouping`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public async Task<QueryResult<IEnumerable<TResult>>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
-        {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
-            if (resultSelector == null)
-                throw new ArgumentNullException(nameof(resultSelector));
-
-            var keySelectFunc = keySelector.Compile();
-            var resultSelectorFunc = resultSelector.Compile();
-
-            var queryResult = await FindAllAsync<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken);
-
-            var result = queryResult.Result
-                .GroupBy(keySelectFunc, resultSelectorFunc)
-                .ToList();
-
-            return new QueryResult<IEnumerable<TResult>>(result, queryResult.Total.GetValueOrDefault());
-        }
-
-        #endregion
-
         #region Implementation of IRepositoryContext
 
-        /// <summary>
-        /// Begins the transaction.
-        /// </summary>
-        /// <returns>The transaction.</returns>
+        /// <inheritdoc />
         public ITransactionManager BeginTransaction()
         {
             _transaction = CreateConnection().BeginTransaction();
@@ -1507,10 +1210,7 @@
             return new AdoNetTransactionManager(_transaction, Logger);
         }
 
-        /// <summary>
-        /// Sets the repository context logger provider to use.
-        /// </summary>
-        /// <param name="loggerProvider">The logger provider.</param>
+        /// <inheritdoc />
         public void UseLoggerProvider(ILoggerProvider loggerProvider)
         {
             if (loggerProvider == null)
@@ -1519,40 +1219,25 @@
             Logger = loggerProvider.Create(GetType().FullName);
         }
 
-        /// <summary>
-        /// Tracks the specified entity in memory and will be inserted into the database when <see cref="SaveChanges" /> is called..
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <param name="entity">The entity.</param>
+        /// <inheritdoc />
         public void Add<TEntity>(TEntity entity) where TEntity : class
         {
             _items.Add(new EntitySet(entity, EntityState.Added));
         }
 
-        /// <summary>
-        /// Tracks the specified entity in memory and will be updated in the database when <see cref="SaveChanges" /> is called..
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <param name="entity">The entity.</param>
+        /// <inheritdoc />
         public void Update<TEntity>(TEntity entity) where TEntity : class
         {
             _items.Add(new EntitySet(entity, EntityState.Modified));
         }
 
-        /// <summary>
-        /// Tracks the specified entity in memory and will be removed from the database when <see cref="SaveChanges" /> is called..
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <param name="entity">The entity.</param>
+        /// <inheritdoc />
         public void Remove<TEntity>(TEntity entity) where TEntity : class
         {
             _items.Add(new EntitySet(entity, EntityState.Removed));
         }
 
-        /// <summary>
-        /// Saves all changes made in this context to the database.
-        /// </summary>
-        /// <returns>The number of state entries written to the database.</returns>
+        /// <inheritdoc />
         public int SaveChanges()
         {
             using (var command = CreateCommand())
@@ -1631,13 +1316,7 @@
             }
         }
 
-        /// <summary>
-        /// Finds an entity with the given primary key values in the repository.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
-        /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
-        /// <returns>The entity found in the repository.</returns>
+        /// <inheritdoc />
         public QueryResult<TEntity> Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
             if (keyValues == null)
@@ -1653,14 +1332,7 @@
             return Find<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance);
         }
 
-        /// <summary>
-        /// Finds the first projected entity result in the repository that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <typeparam name="TResult">The type of the value returned by selector.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
+        /// <inheritdoc />
         public QueryResult<TResult> Find<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
         {
             if (options == null)
@@ -1678,14 +1350,7 @@
             return ExecuteObject<TResult>(mapper.Sql, mapper.Parameters, reader => mapper.Map<TEntity, TResult>(reader, selectorFunc));
         }
 
-        /// <summary>
-        /// Finds the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <typeparam name="TResult">The type of the value returned by selector.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="selector">A function to project each entity into a new form.</param>
-        /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
+        /// <inheritdoc />
         public QueryResult<IEnumerable<TResult>> FindAll<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
         {
             if (selector == null)
@@ -1700,12 +1365,7 @@
             return ExecuteList<TResult>(mapper.Sql, mapper.Parameters, reader => mapper.Map<TEntity, TResult>(reader, selectorFunc));
         }
 
-        /// <summary>
-        /// Returns the number of entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public QueryResult<int> Count<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
         {
             _queryBuilder.PrepareCountQuery(options, out Mapper mapper);
@@ -1717,12 +1377,7 @@
             return new QueryResult<int>(result);
         }
 
-        /// <summary>
-        /// Determines whether the repository contains an entity that match the conditions defined by the specified by the <paramref name="options" />.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
+        /// <inheritdoc />
         public QueryResult<bool> Exists<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
         {
             if (options == null)
@@ -1747,16 +1402,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns a new <see cref="T:System.Collections.Generic.Dictionary`2" /> according to the specified <paramref name="keySelector" />, and an element selector function with entities that satisfies the criteria specified by the <paramref name="options" /> in the repository.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
-        /// <returns>A new <see cref="T:System.Collections.Generic.Dictionary`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public QueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector) where TEntity : class
         {
             if (keySelector == null)
@@ -1803,16 +1449,7 @@
             }
         }
 
-        /// <summary>
-        /// Returns a new <see cref="T:System.Collections.Generic.IEnumerable`1" /> according to the specified <paramref name="keySelector" />, and an element selector function.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <typeparam name="TGroupKey">The type of the group key.</typeparam>
-        /// <typeparam name="TResult">The type of the value returned by resultSelector.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
-        /// <param name="keySelector">A function to extract a key from each entity.</param>
-        /// <param name="resultSelector">A function to project each entity into a new form</param>
-        /// <returns>A new <see cref="T:System.Linq.IGrouping`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
+        /// <inheritdoc />
         public QueryResult<IEnumerable<TResult>> GroupBy<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector) where TEntity : class
         {
             if (keySelector == null)
@@ -1835,11 +1472,245 @@
 
         #endregion
 
+        #region Implementation of IRepositoryContextAsync
+
+        /// <inheritdoc />
+        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var command = CreateCommand())
+            {
+                var rows = 0;
+                var connection = command.Connection;
+                var ownsConnection = _ownsConnection && command.Transaction == null;
+
+                if (connection.State == ConnectionState.Closed)
+                    await connection.OpenAsync(cancellationToken);
+
+                try
+                {
+                    while (_items.TryTake(out var entitySet))
+                    {
+                        var entityType = entitySet.Entity.GetType();
+
+                        await OnSchemaValidationAsync(entityType, cancellationToken);
+
+                        var primeryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+                        var isIdentity = primeryKeyPropertyInfo.IsColumnIdentity();
+
+                        // Checks if the entity exist in the database
+                        var existInDb = await command.ExecuteObjectExistAsync(entitySet.Entity, cancellationToken);
+
+                        // Prepare the sql statement
+                        _queryBuilder.PrepareEntitySetQuery(
+                            entitySet,
+                            existInDb,
+                            isIdentity,
+                            primeryKeyPropertyInfo,
+                            out string sql,
+                            out Dictionary<string, object> parameters);
+
+                        // Executes the sql statement
+                        command.CommandText = sql;
+                        command.CommandType = CommandType.Text;
+                        command.Parameters.Clear();
+                        command.AddParmeters(parameters);
+
+                        if (Logger.IsEnabled(LogLevel.Debug))
+                            Logger.Debug(FormatExecutingDebugQuery("ExecuteNonQueryAsync", parameters, sql));
+
+                        rows += await command.ExecuteNonQueryAsync(cancellationToken);
+
+                        // Checks to see if the model needs to be updated with the new key returned from the database
+                        if (entitySet.State == EntityState.Added && isIdentity)
+                        {
+                            command.CommandText = "SELECT @@IDENTITY";
+                            command.Parameters.Clear();
+
+                            if (Logger.IsEnabled(LogLevel.Debug))
+                                Logger.Debug(FormatExecutingDebugQuery("ExecuteScalarAsync", null, command.CommandText));
+
+                            var newKey = await command.ExecuteScalarAsync(cancellationToken);
+                            var convertedKeyValue = Convert.ChangeType(newKey, primeryKeyPropertyInfo.PropertyType);
+
+                            primeryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
+                        }
+                    }
+                }
+                finally
+                {
+                    if (ownsConnection)
+                        connection.Dispose();
+
+                    // Clears the collection
+                    while (_items.Count > 0)
+                    {
+                        _items.TryTake(out _);
+                    }
+                }
+
+                return rows;
+            }
+        }
+
+        /// <inheritdoc />
+        public Task<QueryResult<TEntity>> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
+        {
+            if (keyValues == null)
+                throw new ArgumentNullException(nameof(keyValues));
+
+            ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
+
+            var options = new QueryOptions<TEntity>().Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
+
+            if (fetchStrategy != null)
+                options.Include(fetchStrategy);
+
+            return FindAsync<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public async Task<QueryResult<TResult>> FindAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
+
+            if (selector == null)
+                throw new ArgumentNullException(nameof(selector));
+
+            var selectorFunc = selector.Compile();
+
+            _queryBuilder.PrepareDefaultSelectQuery(options, out Mapper mapper);
+
+            await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
+
+            return await ExecuteObjectAsync<TResult>(mapper.Sql, mapper.Parameters, reader => mapper.Map<TEntity, TResult>(reader, selectorFunc), cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public async Task<QueryResult<IEnumerable<TResult>>> FindAllAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            if (selector == null)
+                throw new ArgumentNullException(nameof(selector));
+
+            var selectorFunc = selector.Compile();
+
+            _queryBuilder.PrepareDefaultSelectQuery(options, out Mapper mapper, true);
+
+            await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
+
+            return await ExecuteListAsync<TResult>(mapper.Sql, mapper.Parameters, reader => mapper.Map<TEntity, TResult>(reader, selectorFunc), cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public async Task<QueryResult<int>> CountAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            _queryBuilder.PrepareCountQuery(options, out Mapper mapper);
+
+            OnSchemaValidation(typeof(TEntity));
+
+            var result = await ExecuteScalarAsync<int>(mapper.Sql, mapper.Parameters, cancellationToken);
+
+            return new QueryResult<int>(result);
+        }
+
+        /// <inheritdoc />
+        public async Task<QueryResult<bool>> ExistsAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
+
+            _queryBuilder.PrepareDefaultSelectQuery(options, out Mapper mapper);
+
+            await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
+
+            using (var reader = await ExecuteReaderAsync(mapper.Sql, mapper.Parameters, cancellationToken))
+            {
+                var hasRows = false;
+
+                while (reader.Read())
+                {
+                    hasRows = true;
+
+                    break;
+                }
+
+                return new QueryResult<bool>(hasRows);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<QueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            if (elementSelector == null)
+                throw new ArgumentNullException(nameof(elementSelector));
+
+            var keySelectFunc = keySelector.Compile();
+            var elementSelectorFunc = elementSelector.Compile();
+
+            _queryBuilder.PrepareDefaultSelectQuery(options, out Mapper mapper, true);
+
+            await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
+
+            using (var reader = await ExecuteReaderAsync(mapper.Sql, mapper.Parameters, cancellationToken))
+            {
+                var dict = new Dictionary<TDictionaryKey, TElement>();
+                var foundCrossJoinCountColumn = false;
+                var total = 0;
+
+                while (reader.Read())
+                {
+                    // TODO: NEEDS TO FIGURE OUT ANOTHER WAY TO DO THIS
+                    for (var i = 0; i < reader.FieldCount; i++)
+                    {
+                        var name = reader.GetName(i);
+
+                        if (name.Equals(QueryBuilder.CrossJoinCountColumnName))
+                        {
+                            total = (int)reader[name];
+                            foundCrossJoinCountColumn = true;
+                            break;
+                        }
+                    }
+
+                    dict.Add(mapper.Map<TEntity, TDictionaryKey>(reader, keySelectFunc), mapper.Map<TEntity, TElement>(reader, elementSelectorFunc));
+                }
+
+                if (!foundCrossJoinCountColumn)
+                    total = dict.Count;
+
+                return new QueryResult<Dictionary<TDictionaryKey, TElement>>(dict, total);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<QueryResult<IEnumerable<TResult>>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            if (keySelector == null)
+                throw new ArgumentNullException(nameof(keySelector));
+
+            if (resultSelector == null)
+                throw new ArgumentNullException(nameof(resultSelector));
+
+            var keySelectFunc = keySelector.Compile();
+            var resultSelectorFunc = resultSelector.Compile();
+
+            var queryResult = await FindAllAsync<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken);
+
+            var result = queryResult.Result
+                .GroupBy(keySelectFunc, resultSelectorFunc)
+                .ToList();
+
+            return new QueryResult<IEnumerable<TResult>>(result, queryResult.Total.GetValueOrDefault());
+        }
+
+        #endregion
+
         #region Implementation of IDisposable
 
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
+        /// <inheritdoc />
         public void Dispose()
         {
             if (_ownsConnection && _connection != null)

@@ -40,10 +40,7 @@
 
         #region Implementation of IRepositoryContextFactory
 
-        /// <summary>
-        /// Create a new repository context.
-        /// </summary>
-        /// <returns>The new repository context.</returns>
+        /// <inheritdoc />
         public IRepositoryContext Create()
         {
             return !string.IsNullOrEmpty(_databaseName)

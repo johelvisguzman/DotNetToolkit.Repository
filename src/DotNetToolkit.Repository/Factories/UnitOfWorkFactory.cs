@@ -50,20 +50,13 @@
 
         #region Implementation of IUnitOfWorkFactory
 
-        /// <summary>
-        /// Creates a new unit of work.
-        /// </summary>
-        /// <returns>The new unit of work.</returns>
+        /// <inheritdoc />
         public IUnitOfWork Create()
         {
             return CreateInstance<UnitOfWork>();
         }
 
-        /// <summary>
-        /// Creates a new repository for the specified type.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns>The new repository.</returns>
+        /// <inheritdoc />
         public T CreateInstance<T>() where T : class
         {
             return (T)Activator.CreateInstance(typeof(T), new object[] { _options });

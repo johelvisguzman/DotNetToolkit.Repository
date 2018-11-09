@@ -223,29 +223,19 @@
 
         #region Implementation of IQueryOptions<T>
 
-        /// <summary>
-        /// Gets the number of rows of the data page to retrieve.
-        /// </summary>
+        /// <inheritdoc />
         int IQueryOptions<T>.PageSize { get { return _pageSize; } }
 
-        /// <summary>
-        /// Gets the zero-based index of the data page to retrieve.
-        /// </summary>
+        /// <inheritdoc />
         int IQueryOptions<T>.PageIndex { get { return _pageIndex; } }
 
-        /// <summary>
-        /// Gets a collection of sorting property paths.
-        /// </summary>
+        /// <inheritdoc />
         IReadOnlyDictionary<string, SortOrder> IQueryOptions<T>.SortingPropertiesMapping { get { return _sortingPropertiesMapping; } }
 
-        /// <summary>
-        /// Gets the fetch strategy which defines the child objects that should be retrieved when loading the entity.
-        /// </summary>
+        /// <inheritdoc />
         IFetchQueryStrategy<T> IQueryOptions<T>.FetchStrategy { get { return _fetchStrategy; } }
 
-        /// <summary>
-        /// Gets the specification.
-        /// </summary>
+        /// <inheritdoc />
         ISpecificationQueryStrategy<T> IQueryOptions<T>.SpecificationStrategy { get { return _specificationStrategy; } }
 
         #endregion
