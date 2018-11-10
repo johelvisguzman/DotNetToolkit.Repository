@@ -68,3 +68,5 @@ In order for the repositories to read data from the appsettings.json file the us
   }
 } 
 ```
+
+Additionally, any interceptor type that is defined in the configuration file can be resolved by using the RepositoryInterceptorProvider.SetDefaultFactory.
