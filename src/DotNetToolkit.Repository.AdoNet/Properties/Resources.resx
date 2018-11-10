@@ -127,7 +127,7 @@
     <value>Cannot be null or an empty string.</value>
   </data>
   <data name="InvalidColumnName" xml:space="preserve">
-    <value>The column name {0} is not valid.</value>
+    <value>The column name '{0}' is not valid.</value>
   </data>
   <data name="ConnectionStringDoestNotExistInConfigFile" xml:space="preserve">
     <value>The connection string does not exist in your configuration file.</value>
@@ -146,5 +146,8 @@
   </data>
   <data name="UnableToDetermineCompositePrimaryKeyOrdering" xml:space="preserve">
     <value>Unable to determine composite {0} key ordering for type '{1}'. Use the ColumnAttribute to specify an order for composite primary keys.</value>
+  </data>
+  <data name="UnableToDeterminePrincipal" xml:space="preserve">
+    <value>Unable to determine the principal end of an association between the types '{0}' and '{1}'. The principal end of this association must be explicitly configured using data annotations.</value>
   </data>
 </root>

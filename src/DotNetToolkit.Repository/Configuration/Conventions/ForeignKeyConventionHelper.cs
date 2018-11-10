@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Conventions
 {
+    using Extensions;
     using Helpers;
     using Properties;
     using System;
@@ -58,7 +59,7 @@
 
                     // Try to find by checking on the foreign key property
                     propertyInfos = propertyInfosWithForeignKeys
-                        .Where(PropertyInfoHelper.IsPrimitive)
+                        .Where(Extensions.PropertyInfoExtensions.IsPrimitive)
                         .Where(x => x.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(foreignNavigationPropertyInfo.Name))
                         .ToList();
 
@@ -66,7 +67,7 @@
                     if (!propertyInfos.Any())
                     {
                         propertyInfos = properties
-                            .Where(PropertyInfoHelper.IsPrimitive)
+                            .Where(Extensions.PropertyInfoExtensions.IsPrimitive)
                             .Where(x => foreignNavigationPropertyInfo.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(x.GetColumnName()))
                             .ToList();
                     }

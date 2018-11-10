@@ -1,20 +1,17 @@
 ﻿namespace DotNetToolkit.Repository.Factories
 {
-    using Configuration.Interceptors;
+    using Configuration.Options;
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
 
     /// <summary>
-    /// 
+    /// An implementation of <see cref="IRepositoryFactory" />.
     /// </summary>
     /// <seealso cref="DotNetToolkit.Repository.Factories.IRepositoryFactory" />
     public class RepositoryFactory : IRepositoryFactory
     {
         #region Fields
 
-        private readonly IRepositoryContextFactory _factory;
-        private readonly IEnumerable<IRepositoryInterceptor> _interceptors;
+        private readonly RepositoryOptions _options;
 
         #endregion
 
@@ -23,28 +20,29 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="RepositoryFactory" /> class.
         /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        public RepositoryFactory(IRepositoryContextFactory factory) : this(factory, (IEnumerable<IRepositoryInterceptor>)null) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryFactory" /> class.
-        /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        /// <param name="interceptor">The interceptor.</param>
-        public RepositoryFactory(IRepositoryContextFactory factory, IRepositoryInterceptor interceptor) : this(factory, new List<IRepositoryInterceptor> { interceptor }) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryFactory" /> class.
-        /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        public RepositoryFactory(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors)
+        /// <param name="optionsAction">A builder action used to create or modify options for this repository factory.</param>
+        public RepositoryFactory(Action<RepositoryOptionsBuilder> optionsAction)
         {
-            if (factory == null)
-                throw new ArgumentNullException(nameof(factory));
+            if (optionsAction == null)
+                throw new ArgumentNullException(nameof(optionsAction));
 
-            _factory = factory;
-            _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
+            var optionsBuilder = new RepositoryOptionsBuilder();
+
+            optionsAction(optionsBuilder);
+
+            _options = optionsBuilder.Options;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryFactory" /> class.
+        /// </summary>
+        /// <param name="options">The repository options.</param>
+        public RepositoryFactory(RepositoryOptions options)
+        {
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
+
+            _options = options;
         }
 
         #endregion
@@ -104,19 +102,7 @@
         /// <returns>The new repository.</returns>
         public T CreateInstance<T>() where T : class
         {
-            var args = new List<object> { _factory };
-
-            if (_interceptors.Any())
-                args.Add(_interceptors);
-
-            try
-            {
-                return (T)Activator.CreateInstance(typeof(T), args.ToArray());
-            }
-            catch (Exception ex)
-            {
-                throw ex.InnerException ?? ex;
-            }
+            return (T)Activator.CreateInstance(typeof(T), new object[] { _options });
         }
 
         #endregion

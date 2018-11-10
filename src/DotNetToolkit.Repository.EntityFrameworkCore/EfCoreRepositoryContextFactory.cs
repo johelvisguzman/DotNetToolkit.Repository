@@ -29,6 +29,22 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="EfCoreRepositoryContextFactory{TDbContext}"/> class.
         /// </summary>
+        /// <param name="optionsAction">The context options builder action.</param>
+        public EfCoreRepositoryContextFactory(Action<DbContextOptionsBuilder> optionsAction)
+        {
+            if (optionsAction == null)
+                throw new ArgumentNullException(nameof(optionsAction));
+
+            var optionsBuilder = new DbContextOptionsBuilder<TDbContext>();
+
+            optionsAction(optionsBuilder);
+
+            _contextOptions = optionsBuilder.Options;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EfCoreRepositoryContextFactory{TDbContext}"/> class.
+        /// </summary>
         /// <param name="contextOptions">The context options.</param>
         public EfCoreRepositoryContextFactory(DbContextOptions contextOptions)
         {

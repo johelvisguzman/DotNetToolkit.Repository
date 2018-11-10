@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Conventions
 {
+    using Extensions;
     using Helpers;
     using System;
     using System.ComponentModel.DataAnnotations.Schema;
@@ -52,10 +53,12 @@
             if (pi == null)
                 throw new ArgumentNullException(nameof(pi));
 
-            return pi.GetCustomAttribute<NotMappedAttribute>() == null;
+            if (pi.GetCustomAttribute<NotMappedAttribute>() != null)
+                return false;
+
+            // Ensures the property has public setter
+            return pi.CanWrite && pi.GetSetMethod(nonPublic: true).IsPublic;
         }
-
-
 
         /// <summary>
         /// Gets the name of the column.

@@ -4,9 +4,12 @@
     using Factories;
     using System;
     using Xunit;
+    using Xunit.Abstractions;
 
     public class UnitOfWorkTraitsTests : TestBase
     {
+        public UnitOfWorkTraitsTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+
         [Fact]
         public void DisposeRollBackUnComittedChanges()
         {
@@ -31,6 +34,12 @@
             ForAllUnitOfWorkFactories(TestThrowsIfCommitWhenDisposed);
         }
 
+        [Fact]
+        public void Create()
+        {
+            ForAllUnitOfWorkFactories(TestCreate);
+        }
+        
         [Fact]
         public void ThrowsIfCreateRepositoryWhenDisposed()
         {
@@ -93,6 +102,17 @@
 
             var ex = Assert.Throws<ObjectDisposedException>(() => uow.Commit());
             Assert.Equal("Cannot access a disposed object.\r\nObject name: 'UnitOfWork'.", ex.Message);
+        }
+
+        private static void TestCreate(IUnitOfWorkFactory uowFactory)
+        {
+            var uow = uowFactory.Create();
+
+            Assert.NotNull(uow.Create<Customer>());
+            Assert.NotNull(uow.Create<Customer, int>());
+            Assert.NotNull(uow.Create<CustomerWithTwoCompositePrimaryKey, int, string>());
+            Assert.NotNull(uow.Create<CustomerWithThreeCompositePrimaryKey, int, string, int>());
+            Assert.NotNull(uow.CreateInstance<Repository<Customer>>());
         }
 
         private static void TestThrowsIfCreateRepositoryWhenDisposed(IUnitOfWorkFactory uowFactory)

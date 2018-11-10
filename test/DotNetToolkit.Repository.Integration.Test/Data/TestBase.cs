@@ -1,20 +1,27 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Data
 {
-    using Csv;
+    using Configuration.Logging;
+    using Configuration.Options;
     using EntityFrameworkCore;
     using Factories;
-    using Json;
+    using InMemory;
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-    using Xml;
     using Xunit;
+    using Xunit.Abstractions;
 
     public abstract class TestBase
     {
-        protected static void ForAllRepositoryFactories(Action<IRepositoryFactory> action, params Type[] contextConfigurationTypeExceptionList)
+        protected TestBase(ITestOutputHelper testOutputHelper)
+        {
+            TestXUnitLoggerProvider = new TestXUnitLoggerProvider(testOutputHelper);
+        }
+
+        protected ILoggerProvider TestXUnitLoggerProvider { get; }
+
+        protected void ForAllRepositoryFactories(Action<IRepositoryFactory> action, params Type[] contextConfigurationTypeExceptionList)
         {
             GetRepositoryContextFactories()
                 .ToList()
@@ -25,11 +32,16 @@
                     if (contextConfigurationTypeExceptionList != null && contextConfigurationTypeExceptionList.Contains(type))
                         return;
 
-                    action(new RepositoryFactory(x));
+                    var options = new RepositoryOptionsBuilder()
+                        .UseInternalContextFactory(x)
+                        .UseLoggerProvider(TestXUnitLoggerProvider)
+                        .Options;
+
+                    action(new RepositoryFactory(options));
                 });
         }
 
-        protected static void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactory, Task> action, params Type[] contextTypeExceptionList)
+        protected void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactory, Task> action, params Type[] contextTypeExceptionList)
         {
             GetRepositoryContextFactories()
                 .ToList()
@@ -40,8 +52,13 @@
                     if (contextTypeExceptionList != null && contextTypeExceptionList.Contains(type))
                         return;
 
+                    var options = new RepositoryOptionsBuilder()
+                        .UseInternalContextFactory(x)
+                        .UseLoggerProvider(TestXUnitLoggerProvider)
+                        .Options;
+
                     // Perform test
-                    var task = Record.ExceptionAsync(() => action(new RepositoryFactory(x)));
+                    var task = Record.ExceptionAsync(() => action(new RepositoryFactory(options)));
 
                     // Checks to see if we have any un-handled exception
                     if (task != null)
@@ -53,7 +70,7 @@
                 });
         }
 
-        protected static void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory> action)
+        protected void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory> action)
         {
             GetRepositoryContextFactories()
                 .ToList()
@@ -61,15 +78,48 @@
                 {
                     var type = x.GetType();
 
+                    var options = new RepositoryOptionsBuilder()
+                        .UseInternalContextFactory(x)
+                        .UseLoggerProvider(TestXUnitLoggerProvider)
+                        .Options;
+
                     // the in-memory context will not support transactions currently
                     if (typeof(InMemoryRepositoryContextFactory).IsAssignableFrom(type) ||
-                        typeof(CsvRepositoryContextFactory).IsAssignableFrom(type) ||
-                        typeof(JsonRepositoryContextFactory).IsAssignableFrom(type) ||
-                        typeof(XmlRepositoryContextFactory).IsAssignableFrom(type) ||
                         typeof(EfCoreRepositoryContextFactory<TestEfCoreDbContext>).IsAssignableFrom(type))
                         return;
 
-                    action(new UnitOfWorkFactory(x));
+                    action(new UnitOfWorkFactory(options));
+                });
+        }
+
+        protected void ForAllUnitOfWorkFactoriesAsync(Func<IUnitOfWorkFactory, Task> action)
+        {
+            GetRepositoryContextFactories()
+                .ToList()
+                .ForEach(async x =>
+                {
+                    var type = x.GetType();
+
+                    var options = new RepositoryOptionsBuilder()
+                        .UseInternalContextFactory(x)
+                        .UseLoggerProvider(TestXUnitLoggerProvider)
+                        .Options;
+
+                    // the in-memory context will not support transactions currently
+                    if (typeof(InMemoryRepositoryContextFactory).IsAssignableFrom(type) ||
+                        typeof(EfCoreRepositoryContextFactory<TestEfCoreDbContext>).IsAssignableFrom(type))
+                        return;
+
+                    // Perform test
+                    var task = Record.ExceptionAsync(() => action(new UnitOfWorkFactory(options)));
+
+                    // Checks to see if we have any un-handled exception
+                    if (task != null)
+                    {
+                        var ex = await task;
+
+                        Assert.Null(ex);
+                    }
                 });
         }
 
@@ -80,10 +130,7 @@
                 TestAdoNetContextFactory.Create(),
                 TestEfCoreDbContextFactory.Create(),
                 TestEfDbContextFactory.Create(),
-                new InMemoryRepositoryContextFactory(Guid.NewGuid().ToString()),
-                new CsvRepositoryContextFactory(Path.GetTempPath() + Guid.NewGuid().ToString("N")),
-                new JsonRepositoryContextFactory(Path.GetTempPath() + Guid.NewGuid().ToString("N")),
-                new XmlRepositoryContextFactory(Path.GetTempPath() + Guid.NewGuid().ToString("N"))
+                new InMemoryRepositoryContextFactory(Guid.NewGuid().ToString())
             };
         }
     }

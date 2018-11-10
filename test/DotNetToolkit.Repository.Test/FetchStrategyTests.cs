@@ -7,29 +7,29 @@
     public class FetchStrategyTests
     {
         [Fact]
-        public void Include()
+        public void Fetch()
         {
             var strategy = new FetchQueryStrategy<Customer>()
-                .Include(x => x.Address)
-                .Include(x => x.Phone)
-                .Include(x => x.Phone.Customer);
+                .Fetch(x => x.Address)
+                .Fetch(x => x.Phone)
+                .Fetch(x => x.Phone.Customer);
 
-            Assert.Contains("Address", strategy.IncludePaths);
-            Assert.Contains("Phone", strategy.IncludePaths);
-            Assert.Contains("Phone.Customer", strategy.IncludePaths);
+            Assert.Contains("Address", strategy.PropertyPaths);
+            Assert.Contains("Phone", strategy.PropertyPaths);
+            Assert.Contains("Phone.Customer", strategy.PropertyPaths);
         }
 
         [Fact]
-        public void Include_Property_Names()
+        public void Fetch_Property_Names()
         {
             var strategy = new FetchQueryStrategy<Customer>()
-                .Include("Address")
-                .Include("Phone")
-                .Include("Phone.Customer");
+                .Fetch("Address")
+                .Fetch("Phone")
+                .Fetch("Phone.Customer");
 
-            Assert.Contains("Address", strategy.IncludePaths);
-            Assert.Contains("Phone", strategy.IncludePaths);
-            Assert.Contains("Phone.Customer", strategy.IncludePaths);
+            Assert.Contains("Address", strategy.PropertyPaths);
+            Assert.Contains("Phone", strategy.PropertyPaths);
+            Assert.Contains("Phone.Customer", strategy.PropertyPaths);
         }
     }
 }

@@ -4,6 +4,7 @@
     using Factories;
     using Internal;
     using System;
+    using System.Collections.Generic;
     using System.Data.Common;
     using System.Data.Entity;
 
@@ -18,11 +19,15 @@
 
         private readonly DbConnection _existingConnection;
         private readonly string _nameOrConnectionString;
-        private readonly bool _contextOwnsConnection;
 
         #endregion
 
         #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EfRepositoryContextFactory{TDbContext}"/> class.
+        /// </summary>
+        public EfRepositoryContextFactory() { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EfRepositoryContextFactory{TDbContext}"/> class.
@@ -60,11 +65,21 @@
         {
             TDbContext underlyingContext;
 
+            var args = new List<object>();
+
+            if (_existingConnection != null)
+            {
+                args.Add(_existingConnection);
+                args.Add(false); // owns connection
+            }
+            else if (_nameOrConnectionString != null)
+            {
+                args.Add(_nameOrConnectionString);
+            }
+
             try
             {
-                underlyingContext = _existingConnection != null
-                    ? (TDbContext)Activator.CreateInstance(typeof(TDbContext), _existingConnection, false)
-                    : (TDbContext)Activator.CreateInstance(typeof(TDbContext), _nameOrConnectionString);
+                underlyingContext = (TDbContext)Activator.CreateInstance(typeof(TDbContext), args.ToArray());
             }
             catch (Exception ex)
             {

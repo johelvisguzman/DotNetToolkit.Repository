@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Queries.Strategies
 {
-    using Helpers;
+    using Extensions;
     using System;
     using System.Collections.Generic;
     using System.Linq.Expressions;
@@ -33,7 +33,7 @@
         /// <summary>
         /// Gets the collection of related objects to include in the query results.
         /// </summary>
-        public IEnumerable<string> IncludePaths
+        IEnumerable<string> IFetchQueryStrategy<T>.PropertyPaths
         {
             get { return _properties; }
         }
@@ -43,9 +43,9 @@
         /// </summary>
         /// <param name="path">A lambda expression representing the path to include.</param>
         /// <returns>A new <see cref="IFetchQueryStrategy{T}" /> with the defined query path.</returns>
-        public IFetchQueryStrategy<T> Include(Expression<Func<T, object>> path)
+        public IFetchQueryStrategy<T> Fetch(Expression<Func<T, object>> path)
         {
-            return Include(path.ToIncludeString());
+            return Fetch(path.ToIncludeString());
         }
 
         /// <summary>
@@ -53,7 +53,7 @@
         /// </summary>
         /// <param name="path">The dot-separated list of related objects to return in the query results.</param>
         /// <returns>A new <see cref="IFetchQueryStrategy{T}" /> with the defined query path.</returns>
-        public IFetchQueryStrategy<T> Include(string path)
+        public IFetchQueryStrategy<T> Fetch(string path)
         {
             _properties.Add(path);
             return this;

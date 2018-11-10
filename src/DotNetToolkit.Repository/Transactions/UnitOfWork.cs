@@ -1,12 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.Transactions
 {
     using Configuration;
-    using Configuration.Interceptors;
-    using Factories;
+    using Configuration.Options;
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
 
     /// <summary>
     /// An implementation of <see cref="IUnitOfWork" />.
@@ -15,9 +11,9 @@
     {
         #region Fields
 
+        private RepositoryOptions _options;
         private IRepositoryContext _context;
         private ITransactionManager _transactionManager;
-        private readonly IEnumerable<IRepositoryInterceptor> _interceptors;
 
         private bool _disposed;
 
@@ -28,29 +24,29 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="UnitOfWork" /> class.
         /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        public UnitOfWork(IRepositoryContextFactory factory) : this(factory, (IEnumerable<IRepositoryInterceptor>)null) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UnitOfWork" /> class.
-        /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        /// <param name="interceptor">The interceptor.</param>
-        public UnitOfWork(IRepositoryContextFactory factory, IRepositoryInterceptor interceptor) : this(factory, new List<IRepositoryInterceptor> { interceptor }) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UnitOfWork" /> class.
-        /// </summary>
-        /// <param name="factory">The repository context factory.</param>
-        /// <param name="interceptors">The interceptors.</param>
-        public UnitOfWork(IRepositoryContextFactory factory, IEnumerable<IRepositoryInterceptor> interceptors)
+        /// <param name="optionsAction">A builder action used to create or modify options for this unit of work.</param>
+        public UnitOfWork(Action<RepositoryOptionsBuilder> optionsAction)
         {
-            if (factory == null)
-                throw new ArgumentNullException(nameof(factory));
+            if (optionsAction == null)
+                throw new ArgumentNullException(nameof(optionsAction));
 
-            _context = factory.Create();
-            _transactionManager = _context.BeginTransaction();
-            _interceptors = interceptors ?? Enumerable.Empty<IRepositoryInterceptor>();
+            var optionsBuilder = new RepositoryOptionsBuilder();
+
+            optionsAction(optionsBuilder);
+
+            Initialize(optionsBuilder.Options);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UnitOfWork" /> class.
+        /// </summary>
+        /// <param name="options">The repository options.</param>
+        public UnitOfWork(RepositoryOptions options)
+        {
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
+
+            Initialize(options);
         }
 
         #endregion
@@ -93,6 +89,25 @@
                 throw new ObjectDisposedException(GetType().Name);
         }
 
+        #endregion
+
+        #region Private Methods
+        private void Initialize(RepositoryOptions options)
+        {
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
+
+            var contextFactory = options.ContextFactory;
+            if (contextFactory == null)
+                throw new InvalidOperationException("No context provider has been configured for this unit of work.");
+
+            _context = contextFactory.Create();
+            _transactionManager = _context.BeginTransaction();
+
+            // The shared context for the repositories to use
+            _options = options.Clone();
+            _options.AddInternalSharedContext(_context);
+        }
         #endregion
 
         #region Implementation of IUnitOfWork
@@ -182,19 +197,7 @@
         {
             ThrowIfDisposed();
 
-            var args = new List<object> { _context };
-
-            if (_interceptors.Any())
-                args.Add(_interceptors);
-
-            try
-            {
-                return (T)Activator.CreateInstance(typeof(T), BindingFlags.NonPublic | BindingFlags.Instance, null, args.ToArray(), null);
-            }
-            catch (Exception ex)
-            {
-                throw ex.InnerException ?? ex;
-            }
+            return (T)Activator.CreateInstance(typeof(T), new object[] { _options });
         }
 
         #endregion

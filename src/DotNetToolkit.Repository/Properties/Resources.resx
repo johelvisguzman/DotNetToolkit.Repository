@@ -144,4 +144,10 @@
   <data name="IRepositoryContextNotAsync" xml:space="preserve">
     <value>The source IRepositoryContext doesn't implement IRepositoryContextAsync. Only sources that implement IRepositoryContextAsync can be used for asynchronous operations.</value>
   </data>
+  <data name="EntityPrimaryKeyTypesMismatch" xml:space="preserve">
+    <value>The repository primary key type(s) constraint must match the number of primary key type(s) and ordering defined on the entity.</value>
+  </data>
+  <data name="UnableToDetermineCompositePrimaryKeyOrdering" xml:space="preserve">
+    <value>Unable to determine composite primary key ordering for type '{0}'. Use the ColumnAttribute to specify an order for composite primary keys.</value>
+  </data>
 </root>

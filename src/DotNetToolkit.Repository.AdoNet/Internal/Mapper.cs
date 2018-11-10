@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
     using Configuration.Conventions;
+    using Extensions;
     using Helpers;
     using Properties;
     using System;
@@ -38,6 +39,13 @@
                 .Where(x => x.IsPrimitive() && x.IsColumnMapped())
                 .OrderBy(x => x.GetColumnOrder())
                 .ToDictionary(x => x.GetColumnName(), x => x);
+
+            GenerateTableAlias(entityType);
+
+            foreach (var x in SqlPropertiesMapping)
+            {
+                GenerateColumnAlias(x.Value);
+            }
         }
 
         #endregion
@@ -127,9 +135,14 @@
 
         public Type GetTableTypeByColumnAlias(string columnAlias)
         {
-            var tableName = _columnAliasTableNameMapping[columnAlias];
+            if (_columnAliasTableNameMapping.ContainsKey(columnAlias))
+            {
+                var tableName = _columnAliasTableNameMapping[columnAlias];
 
-            return _tableNameAndTypeMapping[tableName];
+                return _tableNameAndTypeMapping[tableName];
+            }
+
+            return null;
         }
 
         public TElement Map<T, TElement>(DbDataReader r, Func<T, TElement> elementSelector)
@@ -153,9 +166,10 @@
                 if (value == DBNull.Value)
                     value = null;
 
-                if (SqlPropertiesMapping.ContainsKey(name) && !r.IsDBNull(r.GetOrdinal(name)))
+                if (SqlPropertiesMapping.ContainsKey(name))
                 {
-                    SqlPropertiesMapping[name].SetValue(entity, value);
+                    if (!r.IsDBNull(r.GetOrdinal(name)))
+                        SqlPropertiesMapping[name].SetValue(entity, value);
                 }
                 else if (joinTableInstances.Any())
                 {

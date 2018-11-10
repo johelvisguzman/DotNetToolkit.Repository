@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Queries
 {
+    using Extensions;
     using Helpers;
     using Strategies;
     using System;
@@ -16,6 +17,11 @@
     {
         #region Fields
 
+        private int _pageSize;
+        private int _pageIndex;
+        private FetchQueryStrategy<T> _fetchStrategy;
+        private SpecificationQueryStrategy<T> _specificationStrategy;
+
         private const int DefaultPageSize = 100;
 
         private readonly Dictionary<string, SortOrder> _sortingPropertiesMapping;
@@ -29,8 +35,8 @@
         /// </summary>
         public QueryOptions()
         {
-            PageSize = -1;
-            PageIndex = -1;
+            _pageSize = -1;
+            _pageIndex = -1;
 
             _sortingPropertiesMapping = new Dictionary<string, SortOrder>();
         }
@@ -111,8 +117,8 @@
             if (pageSize <= 0)
                 throw new ArgumentException("Cannot be lower than zero.", nameof(pageSize));
 
-            PageIndex = pageIndex;
-            PageSize = pageSize;
+            _pageIndex = pageIndex;
+            _pageSize = pageSize;
 
             return this;
         }
@@ -124,24 +130,24 @@
         /// <returns>The current instance.</returns>
         public QueryOptions<T> Page(int pageIndex)
         {
-            var pageSize = PageSize == -1 ? DefaultPageSize : PageSize;
+            var pageSize = _pageSize == -1 ? DefaultPageSize : _pageSize;
 
             return Page(pageIndex, pageSize);
         }
 
         /// <summary>
-        /// Applies a criteria that is used for matching entities against and combine it with the current specified predicate using the logical "and".
+        /// Includes a specification strategy/criteria that is used for matching entities against and combine it with the current specified predicate using the logical "and".
         /// </summary>
         /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> SatisfyBy(ISpecificationQueryStrategy<T> criteria)
+        public QueryOptions<T> Include(ISpecificationQueryStrategy<T> criteria)
         {
             if (criteria == null)
                 throw new ArgumentNullException(nameof(criteria));
 
-            var predicate = SpecificationStrategy != null ? SpecificationStrategy.Predicate.And(criteria.Predicate) : criteria.Predicate;
+            var predicate = _specificationStrategy != null ? _specificationStrategy.Predicate.And(criteria.Predicate) : criteria.Predicate;
 
-            SpecificationStrategy = new SpecificationQueryStrategy<T>(predicate);
+            _specificationStrategy = new SpecificationQueryStrategy<T>(predicate);
 
             return this;
         }
@@ -156,29 +162,29 @@
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
-            predicate = SpecificationStrategy != null ? SpecificationStrategy.Predicate.And(predicate) : predicate;
+            predicate = _specificationStrategy != null ? _specificationStrategy.Predicate.And(predicate) : predicate;
 
-            SpecificationStrategy = new SpecificationQueryStrategy<T>(predicate);
+            _specificationStrategy = new SpecificationQueryStrategy<T>(predicate);
 
             return this;
         }
 
         /// <summary>
-        /// Applies the fetch strategy which defines the child objects that should be retrieved when loading the entity.
+        /// Includes the fetch strategy which defines the child objects that should be retrieved when loading the entity and combines it with the current property pahts collection.
         /// </summary>
         /// <param name="fetchStrategy">The fetch strategy.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> Fetch(IFetchQueryStrategy<T> fetchStrategy)
+        public QueryOptions<T> Include(IFetchQueryStrategy<T> fetchStrategy)
         {
             if (fetchStrategy == null)
                 throw new ArgumentNullException(nameof(fetchStrategy));
 
-            var paths = FetchStrategy != null ? FetchStrategy.IncludePaths : new List<string>();
-            var mergedPaths = paths.Union(fetchStrategy.IncludePaths).ToList();
+            var paths = _fetchStrategy != null ? ((IFetchQueryStrategy<T>)_fetchStrategy).PropertyPaths : new List<string>();
+            var mergedPaths = paths.Union(fetchStrategy.PropertyPaths).ToList();
 
-            FetchStrategy = FetchStrategy ?? new FetchQueryStrategy<T>();
+            _fetchStrategy = _fetchStrategy ?? new FetchQueryStrategy<T>();
 
-            mergedPaths.ForEach(path => FetchStrategy.Include(path));
+            mergedPaths.ForEach(path => _fetchStrategy.Fetch(path));
 
             return this;
         }
@@ -193,9 +199,9 @@
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
 
-            FetchStrategy = FetchStrategy ?? new FetchQueryStrategy<T>();
+            _fetchStrategy = _fetchStrategy ?? new FetchQueryStrategy<T>();
 
-            FetchStrategy.Include(path);
+            _fetchStrategy.Fetch(path);
 
             return this;
         }
@@ -220,27 +226,27 @@
         /// <summary>
         /// Gets the number of rows of the data page to retrieve.
         /// </summary>
-        public int PageSize { get; private set; }
+        int IQueryOptions<T>.PageSize { get { return _pageSize; } }
 
         /// <summary>
         /// Gets the zero-based index of the data page to retrieve.
         /// </summary>
-        public int PageIndex { get; private set; }
+        int IQueryOptions<T>.PageIndex { get { return _pageIndex; } }
 
         /// <summary>
         /// Gets a collection of sorting property paths.
         /// </summary>
-        public IReadOnlyDictionary<string, SortOrder> SortingPropertiesMapping { get { return _sortingPropertiesMapping; } }
+        IReadOnlyDictionary<string, SortOrder> IQueryOptions<T>.SortingPropertiesMapping { get { return _sortingPropertiesMapping; } }
 
         /// <summary>
         /// Gets the fetch strategy which defines the child objects that should be retrieved when loading the entity.
         /// </summary>
-        public IFetchQueryStrategy<T> FetchStrategy { get; private set; }
+        IFetchQueryStrategy<T> IQueryOptions<T>.FetchStrategy { get { return _fetchStrategy; } }
 
         /// <summary>
         /// Gets the specification.
         /// </summary>
-        public ISpecificationQueryStrategy<T> SpecificationStrategy { get; private set; }
+        ISpecificationQueryStrategy<T> IQueryOptions<T>.SpecificationStrategy { get { return _specificationStrategy; } }
 
         #endregion
     }

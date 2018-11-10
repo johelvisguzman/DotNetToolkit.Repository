@@ -4,6 +4,8 @@
     using Factories;
     using Internal;
     using System;
+    using System.Data;
+    using System.Data.Common;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryContextFactory" />.
@@ -15,6 +17,7 @@
 
         private readonly string _nameOrConnectionString;
         private readonly string _providerName;
+        private readonly DbConnection _existingConnection;
 
         #endregion
 
@@ -49,6 +52,21 @@
             _nameOrConnectionString = connectionString;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryContextFactory" /> class.
+        /// </summary>
+        /// <param name="existingConnection">The existing connection.</param>
+        public AdoNetRepositoryContextFactory(DbConnection existingConnection)
+        {
+            if (existingConnection == null)
+                throw new ArgumentNullException(nameof(existingConnection));
+
+            if (existingConnection.State == ConnectionState.Closed)
+                existingConnection.Open();
+
+            _existingConnection = existingConnection;
+        }
+
         #endregion
 
         #region Implementation of IRepositoryContextFactory
@@ -59,9 +77,13 @@
         /// <returns>The new repository context.</returns>
         public IRepositoryContext Create()
         {
-            return !string.IsNullOrEmpty(_providerName)
-                ? new AdoNetRepositoryContext(_providerName, _nameOrConnectionString)
-                : new AdoNetRepositoryContext(_nameOrConnectionString);
+            if (_existingConnection != null)
+                return new AdoNetRepositoryContext(_existingConnection);
+
+            if (!string.IsNullOrEmpty(_providerName))
+                return new AdoNetRepositoryContext(_providerName, _nameOrConnectionString);
+
+            return new AdoNetRepositoryContext(_nameOrConnectionString);
         }
 
         #endregion

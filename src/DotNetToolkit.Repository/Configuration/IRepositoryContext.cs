@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Configuration
 {
+    using Logging;
     using Queries;
     using Queries.Strategies;
     using System;
@@ -18,6 +19,12 @@
         /// </summary>
         /// <returns>The transaction.</returns>
         ITransactionManager BeginTransaction();
+
+        /// <summary>
+        /// Sets the repository context logger provider to use.
+        /// </summary>
+        /// <param name="loggerProvider">The logger provider.</param>
+        void UseLoggerProvider(ILoggerProvider loggerProvider);
 
         /// <summary>
         /// Tracks the specified entity in memory and will be inserted into the database when <see cref="SaveChanges()" /> is called..

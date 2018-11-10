@@ -4,9 +4,12 @@
     using Factories;
     using Transactions;
     using Xunit;
+    using Xunit.Abstractions;
 
     public class UnitOfWorkFactoryTests : TestBase
     {
+        public UnitOfWorkFactoryTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+
         [Fact]
         public void Create()
         {

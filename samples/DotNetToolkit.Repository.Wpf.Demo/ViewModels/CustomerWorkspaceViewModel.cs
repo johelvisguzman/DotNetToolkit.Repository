@@ -5,6 +5,7 @@
     using DotNetToolkit.Wpf.Mvvm;
     using Factories;
     using Infrastructure;
+    using InMemory;
     using Models;
     using System;
     using System.Collections.ObjectModel;
@@ -46,7 +47,7 @@
             DisplayName = "Customers";
             _navigator = NavigationController.Instance;
 
-            _repositoryFactory = new RepositoryFactory(new InMemoryRepositoryContextFactory());
+            _repositoryFactory = new RepositoryFactory(options => options.UseInMemoryDatabase());
         }
 
         #endregion

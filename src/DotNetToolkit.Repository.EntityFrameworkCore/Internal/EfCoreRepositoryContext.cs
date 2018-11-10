@@ -2,6 +2,8 @@
 {
     using Configuration;
     using Configuration.Conventions;
+    using Configuration.Logging;
+    using Extensions;
     using Helpers;
     using Microsoft.EntityFrameworkCore;
     using Queries;
@@ -23,6 +25,15 @@
         #region Fields
 
         private readonly DbContext _context;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets the repository context logger.
+        /// </summary>
+        public ILogger Logger { get; private set; } = NullLogger.Instance;
 
         #endregion
 
@@ -50,26 +61,9 @@
                 throw new ArgumentException(DotNetToolkit.Repository.Properties.Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
         }
 
-        private IQueryable<TEntity> AsQueryable<TEntity>() where TEntity : class
-        {
-            return _context.Set<TEntity>().AsQueryable();
-        }
-
-        private IQueryable<TEntity> AsQueryable<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy) where TEntity : class
-        {
-            var query = AsQueryable<TEntity>();
-
-            return fetchStrategy == null ? query : fetchStrategy.IncludePaths.Aggregate(query, (current, path) => current.Include(path));
-        }
-
-        private IQueryable<TEntity> GetQuery<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
-        {
-            return options != null ? options.Apply(AsQueryable<TEntity>(options.FetchStrategy)) : AsQueryable<TEntity>();
-        }
-
         #endregion
 
-        #region Implementation of IContext
+        #region Implementation of IRepositoryContext
 
         /// <summary>
         /// Begins the transaction.
@@ -81,7 +75,21 @@
         }
 
         /// <summary>
-        /// Tracks the specified entity in memory and will be inserted into the database when <see cref="M:DotNetToolkit.Repository.IContext.SaveChanges" /> is called..
+        /// Sets the repository context logger provider to use.
+        /// </summary>
+        /// <param name="loggerProvider">The logger provider.</param>
+        public void UseLoggerProvider(ILoggerProvider loggerProvider)
+        {
+            if (loggerProvider == null)
+                throw new ArgumentNullException(nameof(loggerProvider));
+
+            Logger = loggerProvider.Create(typeof(DbContext).FullName);
+
+            _context.ConfigureLogging(s => Logger.Debug(s.TrimEnd(Environment.NewLine.ToCharArray())));
+        }
+
+        /// <summary>
+        /// Tracks the specified entity in memory and will be inserted into the database when <see cref="M:DotNetToolkit.Repository.IRepositoryContext.SaveChanges" /> is called..
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="entity">The entity.</param>
@@ -94,7 +102,7 @@
         }
 
         /// <summary>
-        /// Tracks the specified entity in memory and will be updated in the database when <see cref="M:DotNetToolkit.Repository.IContext.SaveChanges" /> is called..
+        /// Tracks the specified entity in memory and will be updated in the database when <see cref="M:DotNetToolkit.Repository.IRepositoryContext.SaveChanges" /> is called..
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="entity">The entity.</param>
@@ -103,11 +111,27 @@
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
-            _context.Entry(entity).State = EntityState.Modified;
+            var entry = _context.Entry(entity);
+
+            if (entry.State == EntityState.Detached)
+            {
+                var keyValues = PrimaryKeyConventionHelper.GetPrimaryKeyValues(entity);
+
+                var entityInDb = _context.Set<TEntity>().Find(keyValues);
+
+                if (entityInDb != null)
+                {
+                    _context.Entry(entityInDb).CurrentValues.SetValues(entity);
+                }
+            }
+            else
+            {
+                entry.State = EntityState.Modified;
+            }
         }
 
         /// <summary>
-        /// Tracks the specified entity in memory and will be removed from the database when <see cref="M:DotNetToolkit.Repository.IContext.SaveChanges" /> is called..
+        /// Tracks the specified entity in memory and will be removed from the database when <see cref="M:DotNetToolkit.Repository.IRepositoryContext.SaveChanges" /> is called..
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="entity">The entity.</param>
@@ -118,9 +142,7 @@
 
             if (_context.Entry(entity).State == EntityState.Detached)
             {
-                var keyValues = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>()
-                    .Select(x => x.GetValue(entity, null))
-                    .ToArray();
+                var keyValues = PrimaryKeyConventionHelper.GetPrimaryKeyValues(entity);
 
                 var entityInDb = _context.Set<TEntity>().Find(keyValues);
 
@@ -168,8 +190,8 @@
             }
 
             var options = new QueryOptions<TEntity>()
-                .SatisfyBy(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
-                .Fetch(fetchStrategy);
+                .Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
+                .Include(fetchStrategy);
 
             return Find<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance);
         }
@@ -190,7 +212,14 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            var result = GetQuery(options).Select(selector).FirstOrDefault();
+            var result = _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options)
+                .ApplyPagingOptions(options)
+                .Select(selector)
+                .FirstOrDefault();
 
             return new QueryResult<TResult>(result);
         }
@@ -208,9 +237,26 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            var result = GetQuery(options).Select(selector).ToList();
+            var query = _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options);
 
-            return new QueryResult<IEnumerable<TResult>>(result);
+            var data = query
+                .ApplyPagingOptions(options)
+                .Select(selector)
+                .Select(x => new
+                {
+                    Result = x,
+                    Total = query.Count()
+                })
+                .ToList();
+
+            var result = data.Select(x => x.Result);
+            var total = data.FirstOrDefault()?.Total ?? 0;
+
+            return new QueryResult<IEnumerable<TResult>>(result, total);
         }
 
         /// <summary>
@@ -221,7 +267,13 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public QueryResult<int> Count<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
         {
-            var result = GetQuery(options).Count();
+            var result = _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options)
+                .ApplyPagingOptions(options)
+                .Count();
 
             return new QueryResult<int>(result);
         }
@@ -237,7 +289,13 @@
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            var result = GetQuery(options).Any();
+            var result = _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options)
+                .ApplyPagingOptions(options)
+                .Any();
 
             return new QueryResult<bool>(result);
         }
@@ -263,9 +321,37 @@
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            var result = GetQuery(options).ToDictionary(keySelectFunc, elementSelectorFunc);
+            var query = _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options);
 
-            return new QueryResult<Dictionary<TDictionaryKey, TElement>>(result);
+            Dictionary<TDictionaryKey, TElement> result;
+            int total;
+
+            if (options != null && options.PageSize != -1)
+            {
+                // Tries to get the count in one query
+                var data = query
+                    .ApplyPagingOptions(options)
+                    .Select(x => new
+                    {
+                        Result = x,
+                        Total = query.Count()
+                    });
+
+                result = data.Select(x => x.Result).ToDictionary(keySelectFunc, elementSelectorFunc);
+                total = data.FirstOrDefault()?.Total ?? 0;
+            }
+            else
+            {
+                // Gets the total count from memory
+                result = query.ToDictionary(keySelectFunc, elementSelectorFunc);
+                total = result.Count;
+            }
+
+            return new QueryResult<Dictionary<TDictionaryKey, TElement>>(result, total);
         }
 
         /// <summary>
@@ -289,14 +375,29 @@
             var keySelectFunc = keySelector.Compile();
             var resultSelectorFunc = resultSelector.Compile();
 
-            var result = GetQuery(options).GroupBy(keySelectFunc, resultSelectorFunc).ToList();
+            var query = _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options);
 
-            return new QueryResult<IEnumerable<TResult>>(result);
+            var data = query
+                .ApplyPagingOptions(options)
+                .Select(x => new
+                {
+                    Result = x,
+                    Total = query.Count()
+                });
+
+            var result = data.Select(x => x.Result).GroupBy(keySelectFunc, resultSelectorFunc).ToList();
+            var total = data.FirstOrDefault()?.Total ?? 0;
+
+            return new QueryResult<IEnumerable<TResult>>(result, total);
         }
 
         #endregion
 
-        #region #region Implementation of IContextAsync
+        #region Implementation of IRepositoryContextAsync
 
         /// <summary>
         /// Asynchronously saves all changes made in this context to the database.
@@ -331,8 +432,8 @@
             }
 
             var options = new QueryOptions<TEntity>()
-                .SatisfyBy(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
-                .Fetch(fetchStrategy);
+                .Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
+                .Include(fetchStrategy);
 
             return await FindAsync<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken);
         }
@@ -354,7 +455,14 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            var result = await GetQuery(options).Select(selector).FirstOrDefaultAsync(cancellationToken);
+            var result = await _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options)
+                .ApplyPagingOptions(options)
+                .Select(selector)
+                .FirstOrDefaultAsync(cancellationToken);
 
             return new QueryResult<TResult>(result);
         }
@@ -373,9 +481,26 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            var result = await GetQuery(options).Select(selector).ToListAsync(cancellationToken);
+            var query = _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options);
 
-            return new QueryResult<IEnumerable<TResult>>(result);
+            var data = await query
+                .ApplyPagingOptions(options)
+                .Select(selector)
+                .Select(x => new
+                {
+                    Result = x,
+                    Total = query.Count()
+                })
+                .ToListAsync(cancellationToken);
+
+            var result = data.Select(x => x.Result);
+            var total = data.FirstOrDefault()?.Total ?? 0;
+
+            return new QueryResult<IEnumerable<TResult>>(result, total);
         }
 
         /// <summary>
@@ -387,7 +512,13 @@
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public async Task<QueryResult<int>> CountAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            var result = await GetQuery(options).CountAsync(cancellationToken);
+            var result = await _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options)
+                .ApplyPagingOptions(options)
+                .CountAsync(cancellationToken);
 
             return new QueryResult<int>(result);
         }
@@ -404,7 +535,13 @@
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            var result = await GetQuery(options).AnyAsync(cancellationToken);
+            var result = await _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options)
+                .ApplyPagingOptions(options)
+                .AnyAsync(cancellationToken);
 
             return new QueryResult<bool>(result);
         }
@@ -431,9 +568,37 @@
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            var result = await GetQuery(options).ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken);
+            var query = _context.Set<TEntity>()
+                .AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplyFetchingOptions(options)
+                .ApplySortingOptions(options);
 
-            return new QueryResult<Dictionary<TDictionaryKey, TElement>>(result);
+            Dictionary<TDictionaryKey, TElement> result;
+            int total;
+
+            if (options != null && options.PageSize != -1)
+            {
+                // Tries to get the count in one query
+                var data = query
+                    .ApplyPagingOptions(options)
+                    .Select(x => new
+                    {
+                        Result = x,
+                        Total = query.Count()
+                    });
+
+                result = await data.Select(x => x.Result).ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken);
+                total = (await data.FirstOrDefaultAsync(cancellationToken))?.Total ?? 0;
+            }
+            else
+            {
+                // Gets the total count from memory
+                result = await query.ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken);
+                total = result.Count;
+            }
+
+            return new QueryResult<Dictionary<TDictionaryKey, TElement>>(result, total);
         }
 
         /// <summary>
