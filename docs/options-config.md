@@ -22,6 +22,48 @@ var options = new RepositoryOptionsBuilder()
     .Options;
 ```
 
+```csharp
+namespace ExampleApplicationDemo
+{
+    using DotNetToolkit.Repository.Configuration.Interceptors;
+    using System;
+
+    public class AuditRepositoryInterceptor : RepositoryInterceptorBase
+    {
+        private readonly string _user;
+
+        public AuditRepositoryInterceptor(string loggedInUser)
+        {
+            _user = loggedInUser;
+        }
+
+        public override void AddExecuting<TEntity>(TEntity entity)
+        {
+            if (entity is IHaveTimeStamp haveStamp)
+            {
+                var currentTime = DateTime.UtcNow;
+
+                haveStamp.CreateTime = currentTime;
+                haveStamp.CreateUser = _user;
+                haveStamp.ModTime = currentTime;
+                haveStamp.ModUser = _user;
+            }
+        }
+
+        public override void UpdateExecuting<TEntity>(TEntity entity)
+        {
+            if (entity is IHaveTimeStamp haveStamp)
+            {
+                var currentTime = DateTime.UtcNow;
+
+                haveStamp.ModTime = currentTime;
+                haveStamp.ModUser = _user;
+            }
+        }
+    }
+}
+```
+
 We can even register a logger provider which will output any logging being done in the repositories (this will include logging any raw SQL query string being executed)
 
 ```csharp
