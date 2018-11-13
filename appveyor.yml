@@ -72,7 +72,8 @@ deploy:
   api_key:
     secure: uSU6YGrWfh7Ruar11vqDFOtauPZXzKYFHUp8WoK86wDjT5ahRJXpLqPfusF+oKFd
   on:
-
+    appveyor_repo_tag: true
+    
 #---------------------------------#
 #       tests configuration       #
 #---------------------------------#
