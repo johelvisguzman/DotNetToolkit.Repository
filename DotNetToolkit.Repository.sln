@@ -23,13 +23,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{257E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetToolkit.Repository.Wpf.Demo", "samples\DotNetToolkit.Repository.Wpf.Demo\DotNetToolkit.Repository.Wpf.Demo.csproj", "{14409451-ED11-4DEF-8A89-783834F8316C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Microsoft.DependencyInjection", "src\DotNetToolkit.Repository.Microsoft.DependencyInjection\DotNetToolkit.Repository.Microsoft.DependencyInjection.csproj", "{21EECEDF-7AD0-4456-87D0-ABA47AE3368C}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.InMemory", "src\DotNetToolkit.Repository.InMemory\DotNetToolkit.Repository.InMemory.csproj", "{05705FCB-B361-4139-8C83-D4D5DF085A62}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmarks", "benchmarks", "{91D14746-3446-48E3-B01C-BF77B848738A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Performance", "benchmarks\DotNetToolkit.Repository.Performance\DotNetToolkit.Repository.Performance.csproj", "{2700614E-A941-42C9-B86F-22D8A47690F3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection", "src\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.csproj", "{6658C0C2-366C-4906-A333-BAB42A512CC5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,10 +64,6 @@ Global
 		{14409451-ED11-4DEF-8A89-783834F8316C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{14409451-ED11-4DEF-8A89-783834F8316C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14409451-ED11-4DEF-8A89-783834F8316C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{21EECEDF-7AD0-4456-87D0-ABA47AE3368C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{21EECEDF-7AD0-4456-87D0-ABA47AE3368C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{21EECEDF-7AD0-4456-87D0-ABA47AE3368C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{21EECEDF-7AD0-4456-87D0-ABA47AE3368C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{05705FCB-B361-4139-8C83-D4D5DF085A62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{05705FCB-B361-4139-8C83-D4D5DF085A62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{05705FCB-B361-4139-8C83-D4D5DF085A62}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -76,6 +72,10 @@ Global
 		{2700614E-A941-42C9-B86F-22D8A47690F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2700614E-A941-42C9-B86F-22D8A47690F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2700614E-A941-42C9-B86F-22D8A47690F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6658C0C2-366C-4906-A333-BAB42A512CC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6658C0C2-366C-4906-A333-BAB42A512CC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6658C0C2-366C-4906-A333-BAB42A512CC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6658C0C2-366C-4906-A333-BAB42A512CC5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -88,9 +88,9 @@ Global
 		{0A9D9AA4-F01C-470F-AD5B-5A81EA7A398D} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{77973BF2-E352-43C9-8CF2-99E01142B2A8} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{14409451-ED11-4DEF-8A89-783834F8316C} = {257E837B-5B99-44D7-9647-1C2FE0A07520}
-		{21EECEDF-7AD0-4456-87D0-ABA47AE3368C} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{05705FCB-B361-4139-8C83-D4D5DF085A62} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{2700614E-A941-42C9-B86F-22D8A47690F3} = {91D14746-3446-48E3-B01C-BF77B848738A}
+		{6658C0C2-366C-4906-A333-BAB42A512CC5} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96973E0C-81D1-42DE-9F78-7103241B4E07}
