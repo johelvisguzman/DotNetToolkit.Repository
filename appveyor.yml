@@ -51,6 +51,22 @@ after_build:
   - dotnet pack .\src\DotNetToolkit.Repository.AdoNet\DotNetToolkit.Repository.AdoNet.csproj --configuration Release
   - dotnet pack .\src\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.csproj --configuration Release
 
+# deployment builds
+deploy:
+- provider: NuGet
+  server: https://www.myget.org/F/dotnettoolkitrepositorydev/api/v3/index.json
+  api_key:
+    secure: 8fcb65d9-0950-4d3c-8d47-49404efe76c0
+  skip_symbols: true
+  on:
+    branch: dev
+- provider: NuGet
+  name: production
+  api_key:
+    secure: oy2hjl5hx7jlxjfqaklqmcuet4lzcwauheqd2z3yiopeqq
+  on:
+    appveyor_repo_tag: true
+
 #---------------------------------#
 #       tests configuration       #
 #---------------------------------#
