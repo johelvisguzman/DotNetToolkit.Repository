@@ -54,16 +54,16 @@ after_build:
 # deployment builds
 deploy:
 - provider: NuGet
-  server: https://www.myget.org/F/dotnettoolkitrepositorydev/api/v3/index.json
+  server: https://www.myget.org/F/dotnettoolkitrepositorydev/api/v2/package
   api_key:
-    secure: 8fcb65d9-0950-4d3c-8d47-49404efe76c0
+    secure: cFsMUNC2a8k548E/iKlw/zglFoowEyPd2uPtCoY8pCc9mW2Hh8drjw6raWNDl/JX
   skip_symbols: true
   on:
     branch: master
 - provider: NuGet
   name: production
   api_key:
-    secure: oy2hjl5hx7jlxjfqaklqmcuet4lzcwauheqd2z3yiopeqq
+    secure: uSU6YGrWfh7Ruar11vqDFOtauPZXzKYFHUp8WoK86wDjT5ahRJXpLqPfusF+oKFd
   on:
     branch: master
     appveyor_repo_tag: true
