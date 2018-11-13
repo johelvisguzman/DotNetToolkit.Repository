@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Description>DotNetToolkit.Repository extensions for ASP.NET Core.</Description>
+    <Description>Extensions for the Microsoft DI container.</Description>
     <AssemblyName>DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection</AssemblyName>
     <RootNamespace>DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection</RootNamespace>
   </PropertyGroup>

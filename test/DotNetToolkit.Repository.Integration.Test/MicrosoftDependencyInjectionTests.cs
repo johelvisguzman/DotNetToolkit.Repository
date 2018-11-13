@@ -22,9 +22,9 @@
      * (ei: The mock stuff that is being done in RepositoryInterceptorTests.cs)
      */
     [Collection("Sequential")]
-    public class DependencyInjectionTests : TestBase
+    public class MicrosoftDependencyInjectionTests : TestBase
     {
-        public DependencyInjectionTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+        public MicrosoftDependencyInjectionTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
 
         [Fact]
         public void DependencyInjectionCanConfigureRepositoriesServices()
