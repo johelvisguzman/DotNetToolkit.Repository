@@ -50,6 +50,14 @@
         }
 
         [Fact]
+        public void CanBeginNullTransactionWhenWarningIgnored()
+        {
+            new InMemoryRepositoryContextFactory(ignoreTransactionWarning: true)
+                .Create()
+                .BeginTransaction();
+        }
+
+        [Fact]
         public void ThrowsIfDeleteWhenEntityNoInStore()
         {
             var options = new RepositoryOptionsBuilder()

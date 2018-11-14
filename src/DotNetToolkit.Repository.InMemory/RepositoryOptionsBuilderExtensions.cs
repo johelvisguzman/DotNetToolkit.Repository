@@ -12,13 +12,14 @@
         /// Configures the context to connect to a in-memory database.
         /// </summary>
         /// <param name="source">The repository options builder.</param>
+        /// <param name="ignoreTransactionWarning">If a transaction operation is requested, ignore any warnings since the in-memory provider does not support transactions.</param>
         /// <returns>The same builder instance.</returns>
-        public static RepositoryOptionsBuilder UseInMemoryDatabase(this RepositoryOptionsBuilder source)
+        public static RepositoryOptionsBuilder UseInMemoryDatabase(this RepositoryOptionsBuilder source, bool ignoreTransactionWarning = false)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            source.Options.With(new InMemoryRepositoryContextFactory());
+            source.Options.With(new InMemoryRepositoryContextFactory(ignoreTransactionWarning));
 
             return source;
         }
@@ -28,13 +29,14 @@
         /// </summary>
         /// <param name="source">The repository options builder.</param>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
+        /// <param name="ignoreTransactionWarning">If a transaction operation is requested, ignore any warnings since the in-memory provider does not support transactions.</param>
         /// <returns>The same builder instance.</returns>
-        public static RepositoryOptionsBuilder UseInMemoryDatabase(this RepositoryOptionsBuilder source, string databaseName)
+        public static RepositoryOptionsBuilder UseInMemoryDatabase(this RepositoryOptionsBuilder source, string databaseName, bool ignoreTransactionWarning = false)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            source.Options.With(new InMemoryRepositoryContextFactory(databaseName));
+            source.Options.With(new InMemoryRepositoryContextFactory(databaseName, ignoreTransactionWarning));
 
             return source;
         }

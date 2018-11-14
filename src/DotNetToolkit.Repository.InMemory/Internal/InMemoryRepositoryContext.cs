@@ -27,6 +27,7 @@
 
         private const string DefaultDatabaseName = "DotNetToolkit.Repository.InMemory";
 
+        private readonly bool _ignoreTransactionWarning;
         private readonly BlockingCollection<EntitySet> _items = new BlockingCollection<EntitySet>();
 
         #endregion
@@ -55,15 +56,22 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepositoryContext" /> class.
         /// </summary>
-        public InMemoryRepositoryContext() : this(null) { }
+        /// <param name="ignoreTransactionWarning">If a transaction operation is requested, ignore any warnings since the in-memory provider does not support transactions.</param>
+        public InMemoryRepositoryContext(bool ignoreTransactionWarning = false)
+        {
+            DatabaseName = DefaultDatabaseName;
+            _ignoreTransactionWarning = ignoreTransactionWarning;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepositoryContext" /> class.
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
-        public InMemoryRepositoryContext(string databaseName)
+        /// <param name="ignoreTransactionWarning">If a transaction operation is requested, ignore any warnings since the in-memory provider does not support transactions.</param>
+        public InMemoryRepositoryContext(string databaseName, bool ignoreTransactionWarning = false)
         {
             DatabaseName = string.IsNullOrEmpty(databaseName) ? DefaultDatabaseName : databaseName;
+            _ignoreTransactionWarning = ignoreTransactionWarning;
         }
 
         #endregion
@@ -160,7 +168,10 @@
         /// <returns>The transaction.</returns>
         public ITransactionManager BeginTransaction()
         {
-            throw new NotSupportedException(Resources.InMemoryContext_TransactionNotSupported);
+            if (!_ignoreTransactionWarning)
+                throw new NotSupportedException(Resources.InMemoryContext_TransactionNotSupported);
+
+            return InMemoryNullTransactionManager.Instance;
         }
 
         /// <summary>
