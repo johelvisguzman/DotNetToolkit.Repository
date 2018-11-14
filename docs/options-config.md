@@ -81,4 +81,4 @@ var options = new RepositoryOptionsBuilder()
     .Options;
 ```
 
-For more configuration details, please check out the [Config File Setup](https://github.com/johelvisguzman/DotNetToolkit.Repository/blob/master/docs/config-file-setup.md) guide.
+For more configuration details, please check out the [Config File Setup](/docs/config-file-setup.md) guide.
