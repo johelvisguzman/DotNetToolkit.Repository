@@ -15,7 +15,7 @@
             const string paramName = "random param";
 
             var interceptorElementCollection = new RepositoryInterceptorElementCollection();
-            var interceptorElement = interceptorElementCollection.AddInterceptor(type);
+            var interceptorElement = interceptorElementCollection.WithInterceptor(type);
 
             Assert.Equal(type, interceptorElement.Type);
 
@@ -49,7 +49,7 @@
             const string paramName = "not so random param";
 
             var interceptorElementCollection = new RepositoryInterceptorElementCollection();
-            var interceptorElement = interceptorElementCollection.AddInterceptor(type);
+            var interceptorElement = interceptorElementCollection.WithInterceptor(type);
 
             Assert.Equal(type, interceptorElement.Type);
 

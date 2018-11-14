@@ -31,7 +31,7 @@
         /// <summary>
         /// Gets the configured logger provider.
         /// </summary>
-        public ILoggerProvider LoggerProvider { get { return _loggerProvider; } }
+        public virtual ILoggerProvider LoggerProvider { get { return _loggerProvider; } }
 
         /// <summary>
         /// Gets the configured internal context factory.
@@ -67,7 +67,7 @@
         /// <param name="underlyingType">The type of interceptor.</param>
         /// <param name="interceptorFactory">The interceptor factory.</param>
         /// <returns>The same option instance.</returns>
-        internal virtual RepositoryOptions AddInterceptor(Type underlyingType, Func<IRepositoryInterceptor> interceptorFactory)
+        internal virtual RepositoryOptions WithInterceptor(Type underlyingType, Func<IRepositoryInterceptor> interceptorFactory)
         {
             if (underlyingType == null)
                 throw new ArgumentNullException(nameof(underlyingType));
@@ -115,7 +115,7 @@
         /// </summary>
         /// <param name="contextFactory">The context factory.</param>
         /// <returns>The same option instance.</returns>
-        internal virtual RepositoryOptions AddInternalContextFactory(IRepositoryContextFactory contextFactory)
+        internal virtual RepositoryOptions WithInternalContextFactory(IRepositoryContextFactory contextFactory)
         {
             if (contextFactory == null)
                 throw new ArgumentNullException(nameof(contextFactory));
@@ -130,7 +130,7 @@
         /// </summary>
         /// <param name="sharedContext">The context.</param>
         /// <returns>The same option instance.</returns>
-        internal virtual RepositoryOptions AddInternalSharedContext(IRepositoryContext sharedContext)
+        internal virtual RepositoryOptions WithInternalSharedContext(IRepositoryContext sharedContext)
         {
             if (sharedContext == null)
                 throw new ArgumentNullException(nameof(sharedContext));
@@ -145,7 +145,7 @@
         /// </summary>
         /// <param name="loggerProvider">The logger factory.</param>
         /// <returns>The same option instance.</returns>
-        internal virtual RepositoryOptions AddLoggerProvider(ILoggerProvider loggerProvider)
+        internal virtual RepositoryOptions WithLoggerProvider(ILoggerProvider loggerProvider)
         {
             if (loggerProvider == null)
                 throw new ArgumentNullException(nameof(loggerProvider));

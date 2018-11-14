@@ -127,7 +127,7 @@
             if (interceptorFactory == null)
                 throw new ArgumentNullException(nameof(interceptorFactory));
 
-            _options.AddInterceptor(underlyingType, interceptorFactory);
+            _options.WithInterceptor(underlyingType, interceptorFactory);
 
             return this;
         }
@@ -164,7 +164,7 @@
             if (loggerProvider == null)
                 throw new ArgumentNullException(nameof(loggerProvider));
 
-            _options.AddLoggerProvider(loggerProvider);
+            _options.WithLoggerProvider(loggerProvider);
 
             return this;
         }
@@ -183,7 +183,7 @@
             if (contextFactory == null)
                 throw new ArgumentNullException(nameof(contextFactory));
 
-            _options.AddInternalContextFactory(contextFactory);
+            _options.WithInternalContextFactory(contextFactory);
 
             return this;
         }

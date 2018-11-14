@@ -18,7 +18,7 @@
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            source.Options.AddInternalContextFactory(new InMemoryRepositoryContextFactory());
+            source.Options.WithInternalContextFactory(new InMemoryRepositoryContextFactory());
 
             return source;
         }
@@ -34,7 +34,7 @@
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            source.Options.AddInternalContextFactory(new InMemoryRepositoryContextFactory(databaseName));
+            source.Options.WithInternalContextFactory(new InMemoryRepositoryContextFactory(databaseName));
 
             return source;
         }
