@@ -96,18 +96,14 @@
             services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>(sp => new UnitOfWorkFactory(sp.GetRequiredService<RepositoryOptions>()));
             services.AddScoped<RepositoryOptions>(sp =>
             {
-                var serviceOptionsBuilder = new RepositoryOptionsBuilder(optionsBuilder.Options);
-
-                var contextFactory = serviceOptionsBuilder.Options.ContextFactory;
-                if (contextFactory == null)
-                    throw new InvalidOperationException("No context provider has been configured.");
+                var options = optionsBuilder.Options.Clone();
 
                 foreach (var interceptorType in registeredInterceptorTypes)
                 {
-                    serviceOptionsBuilder.UseInterceptor(interceptorType, () => (IRepositoryInterceptor)sp.GetService(interceptorType));
+                    options.WithInterceptor(interceptorType, () => (IRepositoryInterceptor)sp.GetService(interceptorType));
                 }
 
-                return serviceOptionsBuilder.Options;
+                return options;
             });
 
             return services;

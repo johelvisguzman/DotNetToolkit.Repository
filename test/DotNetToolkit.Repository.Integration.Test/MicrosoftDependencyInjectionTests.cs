@@ -173,19 +173,6 @@
             Assert.NotNull(provider.GetService<TestRepositoryInterceptor>());
         }
 
-        [Fact]
-        public void ThrowsIfDependencyInjectionNotConfiguredWithContextFactory()
-        {
-            var services = new ServiceCollection();
-
-            services.AddRepositories(options => { });
-
-            var provider = services.BuildServiceProvider();
-
-            var ex = Assert.Throws<InvalidOperationException>(() => provider.GetService<RepositoryOptions>());
-            Assert.Equal("No context provider has been configured.", ex.Message);
-        }
-
         private static IEnumerable<Lazy<IRepositoryInterceptor>> GetLazyInterceptorsOptionsFromPrivateField<T>(object obj)
         {
             var options = (RepositoryOptions)typeof(T)
