@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Options
 {
+    using Factories;
     using Interceptors;
     using Logging;
     using System;
@@ -19,5 +20,10 @@
         /// Gets the configured logger provider.
         /// </summary>
         ILoggerProvider LoggerProvider { get; }
+
+        /// <summary>
+        /// Gets the configured internal context factory.
+        /// </summary>
+        IRepositoryContextFactory ContextFactory { get; }
     }
 }

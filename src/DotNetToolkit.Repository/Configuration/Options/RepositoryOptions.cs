@@ -36,7 +36,7 @@
         /// <summary>
         /// Gets the configured internal context factory.
         /// </summary>
-        internal virtual IRepositoryContextFactory ContextFactory { get { return _contextFactory; } }
+        public virtual IRepositoryContextFactory ContextFactory { get { return _contextFactory; } }
 
         /// <summary>
         /// Gets the configured internal shared context.
@@ -111,11 +111,11 @@
         }
 
         /// <summary>
-        /// Returns the option instance with a configured internal context factory.
+        /// Returns the option instance with a configured context factory.
         /// </summary>
         /// <param name="contextFactory">The context factory.</param>
         /// <returns>The same option instance.</returns>
-        internal virtual RepositoryOptions WithInternalContextFactory(IRepositoryContextFactory contextFactory)
+        internal virtual RepositoryOptions WithContextFactory(IRepositoryContextFactory contextFactory)
         {
             if (contextFactory == null)
                 throw new ArgumentNullException(nameof(contextFactory));

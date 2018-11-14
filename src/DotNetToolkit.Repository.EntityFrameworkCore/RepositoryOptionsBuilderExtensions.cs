@@ -19,7 +19,7 @@
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            source.Options.WithInternalContextFactory(new EfCoreRepositoryContextFactory<TDbContext>());
+            source.Options.WithContextFactory(new EfCoreRepositoryContextFactory<TDbContext>());
 
             return source;
         }
@@ -59,7 +59,7 @@
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            source.Options.WithInternalContextFactory(new EfCoreRepositoryContextFactory<TDbContext>(options));
+            source.Options.WithContextFactory(new EfCoreRepositoryContextFactory<TDbContext>(options));
 
             return source;
         }
