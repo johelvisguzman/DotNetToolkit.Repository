@@ -76,7 +76,7 @@ deploy:
     secure: cFsMUNC2a8k548E/iKlw/zglFoowEyPd2uPtCoY8pCc9mW2Hh8drjw6raWNDl/JX
   skip_symbols: true
   on:
-    branch: master
+    branch: master                    # release from master branch only
 - provider: NuGet
   name: production
   api_key:
@@ -85,12 +85,12 @@ deploy:
     appveyor_repo_tag: true          # deploy on tag push only
     
 # Deploy to GitHub Releases
-  - provider: GitHub
-    draft: false
-    prerelease: false
-    on:
-      branch: master                # release from master branch only
-      appveyor_repo_tag: true       # deploy on tag push only
+- provider: GitHub
+  draft: false
+  prerelease: false
+  on:
+    branch: master                   # release from master branch only
+    appveyor_repo_tag: true          # deploy on tag push only
     
 #---------------------------------#
 #       tests configuration       #
