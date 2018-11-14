@@ -24,7 +24,7 @@ namespace MyApplicationDemo
 ```
 
 Create a RepositoryOptions object with a registered ORM provider to be used (in this example we will be using the in-memory database)
-For more configuration details, please check out the [Repository Options Configuration](https://github.com/johelvisguzman/DotNetToolkit.Repository/blob/dev/docs/options-config.md) guide.
+For more configuration details, please check out the [Repository Options Configuration](/docs/options-config.md) guide.
 
 
 ```csharp

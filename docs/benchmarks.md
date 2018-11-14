@@ -1,6 +1,6 @@
 **Performance**
 
-The benchmark can be found in [DotNetToolkit.Repository.Performance](https://github.com/johelvisguzman/DotNetToolkit.Repository/tree/dev/benchmarks/DotNetToolkit.Repository.Performance) and can be compiled via:
+The benchmark can be found in [DotNetToolkit.Repository.Performance](/benchmarks/DotNetToolkit.Repository.Performance) and can be compiled via:
 ```
 dotnet build DotNetToolkit.Repository.Performance.csproj --configuration Release
 dotnet run DotNetToolkit.Repository.Performance.csproj --configuration Release --filter *

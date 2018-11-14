@@ -11,7 +11,7 @@ An abstraction of the data layer and handling common data access functionality.
 
 **How do I get started?**
 
-If you want to use DotNetToolkit.Repository for the first time, the [Getting Started](https://github.com/johelvisguzman/DotNetToolkit.Repository/blob/dev/docs/getting-started.md) guide will help you.
+If you want to use DotNetToolkit.Repository for the first time, the [Getting Started](/docs/getting-started.md) guide will help you.
 
 **Packages**
 
@@ -31,4 +31,4 @@ The DotNetToolkit.Repository also supports Specifications, FetchStrategies, Serv
 
 **Performance**
 
-Checkout the most current [DotNetToolkit.Repository.Performance](https://github.com/johelvisguzman/DotNetToolkit.Repository/blob/dev/docs/benchmarks.md) benchmark results!
+Checkout the most current [DotNetToolkit.Repository.Performance](docs/benchmarks.md) benchmark results!
