@@ -3,6 +3,7 @@
 # DotNetToolkit.Repository
 
 [![Build status](https://ci.appveyor.com/api/projects/status/v02h9efjwev30sof?svg=true)](https://ci.appveyor.com/project/johelvisguzman/dotnettoolkit-repository)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **What is the Repository Pattern?**
 
