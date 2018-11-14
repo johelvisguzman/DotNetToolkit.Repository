@@ -23,7 +23,7 @@
             if (nameOrConnectionString == null)
                 throw new ArgumentNullException(nameof(nameOrConnectionString));
 
-            source.Options.WithContextFactory(new AdoNetRepositoryContextFactory(nameOrConnectionString));
+            source.Options.With(new AdoNetRepositoryContextFactory(nameOrConnectionString));
 
             return source;
         }
@@ -46,7 +46,7 @@
             if (connectionString == null)
                 throw new ArgumentNullException(nameof(connectionString));
 
-            source.Options.WithContextFactory(new AdoNetRepositoryContextFactory(providerName, connectionString));
+            source.Options.With(new AdoNetRepositoryContextFactory(providerName, connectionString));
 
             return source;
         }
@@ -65,7 +65,7 @@
             if (existingConnection == null)
                 throw new ArgumentNullException(nameof(existingConnection));
 
-            source.Options.WithContextFactory(new AdoNetRepositoryContextFactory(existingConnection));
+            source.Options.With(new AdoNetRepositoryContextFactory(existingConnection));
 
             return source;
         }

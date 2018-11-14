@@ -35,7 +35,7 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
             return ((RepositoryInterceptorElement)element).Type;
         }
 
-        public RepositoryInterceptorElement WithInterceptor(string type)
+        public RepositoryInterceptorElement AddInterceptor(string type)
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
