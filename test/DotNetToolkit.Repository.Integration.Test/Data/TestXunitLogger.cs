@@ -2,7 +2,6 @@
 {
     using Configuration.Logging;
     using System;
-    using System.Exception;
     using Xunit.Abstractions;
 
     public class TestXUnitLoggerProvider : ILoggerProvider
