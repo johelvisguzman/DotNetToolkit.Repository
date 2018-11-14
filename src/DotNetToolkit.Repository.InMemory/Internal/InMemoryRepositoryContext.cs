@@ -68,6 +68,24 @@
 
         #endregion
 
+        #region Public Methods
+
+        /// <summary>
+        /// Ensures the in-memory store is completely deleted.
+        /// </summary>
+        public void EnsureDeleted()
+        {
+            // Clears the collection
+            while (_items.Count > 0)
+            {
+                _items.TryTake(out _);
+            }
+
+            InMemoryCache.Instance.GetDatabaseStore(DatabaseName).Clear();
+        }
+
+        #endregion
+
         #region Private Methods
 
         private void ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(object[] keyValues) where TEntity : class
@@ -85,6 +103,51 @@
                 return Enumerable.Empty<TEntity>().AsQueryable();
 
             return store[entityType].Select(x => (TEntity)Convert.ChangeType(x.Value, entityType)).AsQueryable();
+        }
+
+        private static object DeepCopy(object entity)
+        {
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
+            var newItem = Activator.CreateInstance(entity.GetType());
+
+            foreach (var propInfo in entity.GetType().GetRuntimeProperties())
+            {
+                if (propInfo.CanWrite)
+                    propInfo.SetValue(newItem, propInfo.GetValue(entity, null), null);
+            }
+
+            return newItem;
+        }
+
+        private object GeneratePrimaryKey(Type entityType)
+        {
+            var propertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+            var propertyType = propertyInfo.PropertyType;
+
+            if (propertyType == typeof(Guid))
+                return Guid.NewGuid();
+
+            if (propertyType == typeof(string))
+                return Guid.NewGuid().ToString("N");
+
+            if (propertyType == typeof(int))
+            {
+                var store = InMemoryCache.Instance.GetDatabaseStore(DatabaseName);
+
+                if (!store.ContainsKey(entityType))
+                    return 1;
+
+                var key = store[entityType]
+                    .Select(x => propertyInfo.GetValue(x.Value, null))
+                    .OrderByDescending(x => x)
+                    .FirstOrDefault();
+
+                return Convert.ToInt32(key) + 1;
+            }
+
+            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.InMemoryContext_EntityKeyValueTypeInvalid, entityType.FullName, propertyType));
         }
 
         #endregion
@@ -436,69 +499,6 @@
             return new QueryResult<IEnumerable<TResult>>(result, total);
         }
 
-        /// <summary>
-        /// Ensures the in-memory store is completely deleted.
-        /// </summary>
-        public void EnsureDeleted()
-        {
-            // Clears the collection
-            while (_items.Count > 0)
-            {
-                _items.TryTake(out _);
-            }
-
-            InMemoryCache.Instance.GetDatabaseStore(DatabaseName).Clear();
-        }
-
-        #endregion
-
-        #region	Private Methods
-
-        private static object DeepCopy(object entity)
-        {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
-            var newItem = Activator.CreateInstance(entity.GetType());
-
-            foreach (var propInfo in entity.GetType().GetRuntimeProperties())
-            {
-                if (propInfo.CanWrite)
-                    propInfo.SetValue(newItem, propInfo.GetValue(entity, null), null);
-            }
-
-            return newItem;
-        }
-
-        private object GeneratePrimaryKey(Type entityType)
-        {
-            var propertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-            var propertyType = propertyInfo.PropertyType;
-
-            if (propertyType == typeof(Guid))
-                return Guid.NewGuid();
-
-            if (propertyType == typeof(string))
-                return Guid.NewGuid().ToString("N");
-
-            if (propertyType == typeof(int))
-            {
-                var store = InMemoryCache.Instance.GetDatabaseStore(DatabaseName);
-
-                if (!store.ContainsKey(entityType))
-                    return 1;
-
-                var key = store[entityType]
-                    .Select(x => propertyInfo.GetValue(x.Value, null))
-                    .OrderByDescending(x => x)
-                    .FirstOrDefault();
-
-                return Convert.ToInt32(key) + 1;
-            }
-
-            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.InMemoryContext_EntityKeyValueTypeInvalid, entityType.FullName, propertyType));
-        }
-
         #endregion
 
         #region IDisposable
@@ -513,133 +513,6 @@
             {
                 _items.TryTake(out _);
             }
-        }
-
-        #endregion
-
-        #region Nested type: EntitySet
-
-        /// <summary>
-        /// Represents an internal entity set in the in-memory store, which holds the entity and it's state representing the operation that was performed at the time.
-        /// </summary>
-        private class EntitySet
-        {
-            #region Constructors
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="EntitySet" /> class.
-            /// </summary>
-            /// <param name="entity">The entity.</param>
-            /// <param name="state">The state.</param>
-            public EntitySet(object entity, EntityState state)
-            {
-                Entity = entity;
-                State = state;
-            }
-
-            #endregion
-
-            #region Properties
-
-            /// <summary>
-            /// Gets the entity.
-            /// </summary>
-            public object Entity { get; }
-
-            /// <summary>
-            /// Gets the state.
-            /// </summary>
-            public EntityState State { get; }
-
-            #endregion
-        }
-
-        #endregion
-
-        #region Nested type: EntityState
-
-        /// <summary>
-        /// Represents an internal state for an entity in the in-memory store.
-        /// </summary>
-        private enum EntityState
-        {
-            Added,
-            Removed,
-            Modified
-        }
-
-        #endregion
-
-        #region Nested type: InMemoryCache
-
-        /// <summary>
-        /// Represents an internal thread safe database storage which will store any information for the in-memory
-        /// store that is needed through the life time of the application.
-        /// </summary>
-        private class InMemoryCache
-        {
-            #region Fields
-
-            private static volatile InMemoryCache _instance;
-            private static readonly object _syncRoot = new object();
-            private readonly ConcurrentDictionary<string, ConcurrentDictionary<Type, ConcurrentDictionary<object, object>>> _storage;
-
-            #endregion
-
-            #region Constructors
-
-            /// <summary>
-            /// Prevents a default instance of the <see cref="InMemoryCache" /> class from being created.
-            /// </summary>
-            private InMemoryCache()
-            {
-                _storage = new ConcurrentDictionary<string, ConcurrentDictionary<Type, ConcurrentDictionary<object, object>>>();
-            }
-
-            #endregion
-
-            #region Properties
-
-            /// <summary>
-            /// Gets the instance.
-            /// </summary>
-            public static InMemoryCache Instance
-            {
-                get
-                {
-                    if (_instance == null)
-                    {
-                        lock (_syncRoot)
-                        {
-                            if (_instance == null)
-                                _instance = new InMemoryCache();
-                        }
-                    }
-
-                    return _instance;
-                }
-            }
-
-            #endregion
-
-            #region Public Methods
-
-            /// <summary>
-            /// Gets the scoped database context by the specified name.
-            /// </summary>
-            /// <param name="name">The database name.</param>
-            /// <returns>The scoped database context by the specified database name.</returns>
-            public ConcurrentDictionary<Type, ConcurrentDictionary<object, object>> GetDatabaseStore(string name)
-            {
-                if (!_storage.ContainsKey(name))
-                {
-                    _storage[name] = new ConcurrentDictionary<Type, ConcurrentDictionary<object, object>>();
-                }
-
-                return _storage[name];
-            }
-
-            #endregion
         }
 
         #endregion
