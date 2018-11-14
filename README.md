@@ -31,4 +31,4 @@ The DotNetToolkit.Repository also supports Specifications, FetchStrategies, Serv
 
 **Performance**
 
-Checkout the most current [DotNetToolkit.Repository.Performance](https://github.com/johelvisguzman/DotNetToolkit.Repository/blob/master/docs/benchmarks.md) benchmark results!
+Checkout the most current [DotNetToolkit.Repository.Performance](docs/benchmarks.md) benchmark results!
