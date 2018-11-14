@@ -33,7 +33,7 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity}"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryOptionsBuilder"/> class.
         /// </summary>
         public RepositoryOptionsBuilder()
         {
@@ -43,7 +43,7 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryBase{TEntity}"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryOptionsBuilder"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
         public RepositoryOptionsBuilder(RepositoryOptions options)
@@ -127,7 +127,7 @@
             if (interceptorFactory == null)
                 throw new ArgumentNullException(nameof(interceptorFactory));
 
-            _options.AddInterceptor(underlyingType, interceptorFactory);
+            _options.With(underlyingType, interceptorFactory);
 
             return this;
         }
@@ -164,7 +164,7 @@
             if (loggerProvider == null)
                 throw new ArgumentNullException(nameof(loggerProvider));
 
-            _options.AddLoggerProvider(loggerProvider);
+            _options.With(loggerProvider);
 
             return this;
         }
@@ -183,7 +183,7 @@
             if (contextFactory == null)
                 throw new ArgumentNullException(nameof(contextFactory));
 
-            _options.AddInternalContextFactory(contextFactory);
+            _options.With(contextFactory);
 
             return this;
         }

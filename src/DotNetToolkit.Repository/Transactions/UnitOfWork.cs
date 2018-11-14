@@ -105,8 +105,7 @@
             _transactionManager = _context.BeginTransaction();
 
             // The shared context for the repositories to use
-            _options = options.Clone();
-            _options.AddInternalSharedContext(_context);
+            _options = options.Clone().With(_context);
         }
         #endregion
 
