@@ -2,6 +2,7 @@
 {
     using Configuration.Logging;
     using System;
+    using System.Exception;
     using Xunit.Abstractions;
 
     public class TestXUnitLoggerProvider : ILoggerProvider
@@ -40,11 +41,15 @@
             if (!IsEnabled(logLevel))
                 return;
 
-            _testOutputHelper.WriteLine("[{0} {1}] [{2}]   {3}",
-                DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss.fff tt"),
-                logLevel.ToString(),
-                _categoryName,
-                message);
+            try
+            {
+                _testOutputHelper.WriteLine("[{0} {1}] [{2}]   {3}",
+                    DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss.fff tt"),
+                    logLevel.ToString(),
+                    _categoryName,
+                    message);
+            }
+            catch (Exception) { } // ignore any errors
         }
     }
 }
