@@ -1,4 +1,4 @@
-**Getting Started**
+# Getting Started
 
 To get started with DotNetToolkit.Repository, please follow these steps.
 
@@ -25,7 +25,6 @@ namespace MyApplicationDemo
 
 Create a RepositoryOptions object with a registered ORM provider to be used (in this example we will be using the in-memory database)
 For more configuration details, please check out the [Repository Options Configuration](/docs/options-config.md) guide.
-
 
 ```csharp
 using DotNetToolkit.Repository;
@@ -92,18 +91,10 @@ namespace MyApplicationDemo
 }
 ```
 
+**QueryOptions / QueryResults**
+
+The DotNetToolkit.Repository supports [fetch query strategy](https://blog.willbeattie.com/2011/02/specification-pattern-entity-framework.html), [specification query strategy](https://en.wikipedia.org/wiki/Specification_pattern) and even pagination when it comes to fetching data. These strategies can be setup using a QueryOptions, and the data is returned as a QueryResults. For information regarding QueryOptions and QueryResults, please check out the [QueryOptions/QueryResults](/docs/queries.md) guide.
+
 **Dependency Injection**
 
-For ASP.NET Core applications, DotNetToolkit.Repository also provides a dependency injection package which will register all repositories, interceptors and services automatically. The AddRepositories service extension will scan for all IRepository<...>, IService<...> and IRepositoryInterceptor implementations in all the executing assemblies, and will register them so that you don't have to. Additionlly, a IRepositoryFactory, IUnitOfWork, IUnitOfWorkFactory and RepositoryOptions service will be registered as well.
-
-```csharp
-public void ConfigureServices(IServiceCollection services)
-{
-        services.AddMvc();
-	
-	services.AddRepositories(options => 
-	{
-		options.UseInMemoryDatabase();
-	});
-}
-```
+The DotNetToolkit.Repository also supports dependency injection. For information regarding dependency injection, please check out the [Dependency Injection](/docs/di.md) guide.

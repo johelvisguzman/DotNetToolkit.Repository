@@ -1,4 +1,4 @@
-**Repository Options Configuration**
+# Repository Options Configuration
 
 The repositories can be configure using the RepositoryOptions object, which can use ORM frameworks like Entity Framework.
 The RepositoryOptions object is built using the RepositoryOptionsBuilder. 

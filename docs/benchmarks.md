@@ -1,4 +1,4 @@
-**Performance**
+# Performance
 
 The benchmark can be found in [DotNetToolkit.Repository.Performance](/benchmarks/DotNetToolkit.Repository.Performance) and can be compiled via:
 ```
