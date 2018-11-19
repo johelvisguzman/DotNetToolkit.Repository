@@ -1,4 +1,4 @@
-**Config File Setup**
+# Config File Setup
 
 If you wish to use the configuration files to configure the repositories, please follow these steps:
 
