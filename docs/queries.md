@@ -4,7 +4,7 @@ The each repository and service class provide a wide range of functionality for 
 In cases where you need to fetch navigation properties (like entity framework .Include for example), you would want to use what's called a FetchQueryStrategy object.
 For cases where you need to filter the data that is being fetched, then you would use what's called a SpecificationQueryStrategy object.
 Each of these strategies can be used as part of the QueryOptions. Whenever the repository uses a QueryOptions, in most cases, a QueryResults in returned.
-The QueryResults object holds the result that was returned as well as the total number of rows from the database (this information is obtained in a single select query statement).
+The QueryResults object holds the result that was returned as well as the total number of rows from the database (this information is obtained in a single select query statement, and can be helpful when doing pagination and need to know the original total count before pagination is applied).
 
 **Fetching Strategy**
 
