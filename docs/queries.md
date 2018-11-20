@@ -56,7 +56,8 @@ var queryOptions = new QueryOptions<Customer>()
 // **** You can also set a specification expression predicate on the query options object itself ****
 
 queryOptions = new QueryOptions<Customer>()
-  .SatisfyBy(x => x.Name = "Random Name");
+  .SatisfyBy(x => x.Name = "Random Name")
+  .SatisfyBy(x => x.Id > 100); // Multiple specification expression predicates can be combine this way
 
 // **** Gets the query result ****
 
@@ -73,6 +74,9 @@ var queryOptions = new QueryOptions<Customer>()
   .Page(pageInde: 1, pageSize: 10);
 
 // **** Gets the query result ****
+
+// **** The total number is going to hold the actual number of rows before pagination was applied ****
+// **** This is being done in a single sql query statement ****
 
 var queryResult = repo.FindAll(queryOptions);
 ```
