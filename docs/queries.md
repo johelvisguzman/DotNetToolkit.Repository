@@ -2,7 +2,7 @@
 
 The repository and service class each provide a wide range of functionality for fetching data.
 
-In cases where you need to fetch navigation properties (like entity framework .Include for example), you would want to use what's called a FetchQueryStrategy object.
+In cases where you need to fetch navigation properties (like entity framework [QueryableExtensions.Include](https://msdn.microsoft.com/en-us/library/system.data.entity.queryableextensions.include(v=vs.113).aspx) for example), you would want to use what's called a FetchQueryStrategy object.
 For cases where you need to filter the data that is being fetched, then you would use what's called a SpecificationQueryStrategy object.
 Each of these strategies can be used as part of the QueryOptions.
 
