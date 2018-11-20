@@ -94,7 +94,7 @@ namespace MyApplicationDemo
 
 **QueryOptions / QueryResults**
 
-The DotNetToolkit.Repository supports [fetch query strategy](https://blog.willbeattie.com/2011/02/specification-pattern-entity-framework.html), [specification query strategy](https://en.wikipedia.org/wiki/Specification_pattern) and even pagination when it comes to fetching data. These strategies can be setup using a QueryOptions, and the data is returned as a QueryResults. For information, please check out the [QueryOptions and QueryResults](/docs/queries.md) guide.
+The DotNetToolkit.Repository supports [fetch query strategy](https://blog.willbeattie.com/2011/02/specification-pattern-entity-framework.html), [specification query strategy](https://en.wikipedia.org/wiki/Specification_pattern) and even pagination when it comes to fetching data. These strategies can be setup using a QueryOptions and the data is returned as a QueryResults. For information, please check out the [QueryOptions and QueryResults](/docs/queries.md) guide.
 
 **Dependency Injection**
 
