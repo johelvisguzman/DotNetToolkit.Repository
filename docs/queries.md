@@ -44,7 +44,7 @@ var spec = new SpecificationQueryStrategy<Customer>(x => x.Name = "Random Name")
 // **** You can also combine specifications and predicate expressions ****
 
 var combinedSpec = spec
-  .And(new SpecificationQueryStrategy<Customer>(x => x.Id > 100)) // combine using a spec
+  .And(new SpecificationQueryStrategy<Customer>(x => x.Id > 100)) // Combine using a spec
   .Or(x => x.Id == 1); // Combine using a predicate expression
 
 // **** Define the query options contaning the strategy to filter the data ****
