@@ -60,7 +60,8 @@ namespace MyApplicationDemo
     {
         static void Main(string[] args)
         {
-            // **** Configure Repository **** 
+            // **** Configure Repository ****
+	    
             var options = new RepositoryOptionsBuilder()
                 .UseInMemoryDatabase()
                 .Options;
