@@ -6,7 +6,7 @@ In cases where you need to fetch navigation properties (like entity framework [Q
 For cases where you need to filter the data that is being fetched, then you would use what's called a SpecificationQueryStrategy object.
 Each of these strategies can be used as part of the QueryOptions.
 
-Whenever the repository uses a QueryOptions, in most cases, a QueryResults in returned. The QueryResults object holds the result that was returned as well as the total number of rows from the database (this information is obtained in a single select query statement, and can be helpful when doing pagination and need to know the original total count before pagination is applied).
+Whenever the repository uses a QueryOptions, in most cases, a QueryResults is returned. The QueryResults object holds the result that was returned as well as the total number of rows from the database (this information is obtained in a single select query statement, and can be helpful when doing pagination and need to know the original total count before pagination is applied).
 
 **Fetching Strategy**
 
@@ -57,7 +57,7 @@ var queryOptions = new QueryOptions<Customer>()
 
 queryOptions = new QueryOptions<Customer>()
   .SatisfyBy(x => x.Name = "Random Name")
-  .SatisfyBy(x => x.Id > 100); // Multiple specification expression predicates can be combine this way
+  .SatisfyBy(x => x.Id > 100); // Multiple specification expression predicates can be combined this way
 
 // **** Gets the query result ****
 
@@ -70,12 +70,12 @@ var queryResult = repo.FindAll(queryOptions);
 // **** You can page the data using the query options ****
 
 var queryOptions = new QueryOptions<Customer>()
-  .Page(pageInde: 1) // Using a paging index (and a default page size of 100 items)
-  .Page(pageInde: 1, pageSize: 10);
+  .Page(pageIndex: 1) // Using a paging index (and a default page size of 100 items)
+  .Page(pageIndex: 1, pageSize: 10); // Page with explicit index and page size
 
 // **** Gets the query result ****
 
-// **** The total number is going to hold the actual number of rows before pagination was applied ****
+// **** The total number is going to hold the actual number of rows before pagination is applied ****
 // **** This is being done in a single sql query statement ****
 
 var queryResult = repo.FindAll(queryOptions);
@@ -87,8 +87,8 @@ var queryResult = repo.FindAll(queryOptions);
 // **** You can sort the data using the query options ****
 
 var queryOptions = new QueryOptions<Customer>()
-  .SortBy(x => x.Id)
-  .SortByDescending(x => x.Name); // Multiple sorting can be applied this way
+  .SortBy(x => x.Id) // Ascending sort
+  .SortByDescending(x => x.Name); // Descending sort - Multiple sorting properties can be applied this way
 
 // **** Gets the query result ****
 
