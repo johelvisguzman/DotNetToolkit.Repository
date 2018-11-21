@@ -23,7 +23,7 @@ In order for the repositories to read data from the App.config the user will nee
   </configSections>
   <!-- Configuration section settings area. -->
   <repository>
-    <defaultContextFactory type="DotNetToolkit.Repository.InMemory.InMemoryRepositoryContextFactory, DotNetToolkit.Repository.InMemory" />
+    <defaultContextFactory type="DotNetToolkit.Repository.InMemory.Internal.InMemoryRepositoryContextFactory, DotNetToolkit.Repository.InMemory" />
     <interceptors>
       <interceptor type="ExampleApplication.TestRepositoryInterceptor, ExampleApplication">
         <parameters>
@@ -42,7 +42,7 @@ In order for the repositories to read data from the appsettings.json file the us
 {
   "repository": {
     "defaultContextFactory": {
-      "type": "DotNetToolkit.Repository.InMemory.InMemoryRepositoryContextFactory, DotNetToolkit.Repository.InMemory"
+      "type": "DotNetToolkit.Repository.InMemory.Internal.InMemoryRepositoryContextFactory, DotNetToolkit.Repository.InMemory"
     },
     "interceptors": [
       {

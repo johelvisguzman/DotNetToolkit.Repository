@@ -2,7 +2,6 @@
 {
     using Configuration.Logging;
     using Configuration.Options;
-    using EntityFrameworkCore;
     using Factories;
     using InMemory;
     using System;
@@ -21,44 +20,30 @@
 
         protected ILoggerProvider TestXUnitLoggerProvider { get; }
 
-        protected void ForAllRepositoryFactories(Action<IRepositoryFactory> action, params Type[] contextConfigurationTypeExceptionList)
+        protected void ForAllRepositoryFactories(Action<IRepositoryFactory> action, params ContextProviderType[] contextTypeExceptionList)
         {
-            GetRepositoryContextFactories()
+            Providers()
                 .ToList()
                 .ForEach(x =>
                 {
-                    var type = x.GetType();
-
-                    if (contextConfigurationTypeExceptionList != null && contextConfigurationTypeExceptionList.Contains(type))
+                    if (contextTypeExceptionList != null && contextTypeExceptionList.Contains(x))
                         return;
 
-                    var options = new RepositoryOptionsBuilder()
-                        .UseInternalContextFactory(x)
-                        .UseLoggerProvider(TestXUnitLoggerProvider)
-                        .Options;
-
-                    action(new RepositoryFactory(options));
+                    action(new RepositoryFactory(BuildOptions(x)));
                 });
         }
 
-        protected void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactory, Task> action, params Type[] contextTypeExceptionList)
+        protected void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactory, Task> action, params ContextProviderType[] contextTypeExceptionList)
         {
-            GetRepositoryContextFactories()
+            Providers()
                 .ToList()
                 .ForEach(async x =>
                 {
-                    var type = x.GetType();
-
-                    if (contextTypeExceptionList != null && contextTypeExceptionList.Contains(type))
+                    if (contextTypeExceptionList != null && contextTypeExceptionList.Contains(x))
                         return;
 
-                    var options = new RepositoryOptionsBuilder()
-                        .UseInternalContextFactory(x)
-                        .UseLoggerProvider(TestXUnitLoggerProvider)
-                        .Options;
-
                     // Perform test
-                    var task = Record.ExceptionAsync(() => action(new RepositoryFactory(options)));
+                    var task = Record.ExceptionAsync(() => action(new RepositoryFactory(BuildOptions(x))));
 
                     // Checks to see if we have any un-handled exception
                     if (task != null)
@@ -72,46 +57,30 @@
 
         protected void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory> action)
         {
-            GetRepositoryContextFactories()
+            Providers()
                 .ToList()
                 .ForEach(x =>
                 {
-                    var type = x.GetType();
-
-                    var options = new RepositoryOptionsBuilder()
-                        .UseInternalContextFactory(x)
-                        .UseLoggerProvider(TestXUnitLoggerProvider)
-                        .Options;
-
                     // the in-memory context will not support transactions currently
-                    if (typeof(InMemoryRepositoryContextFactory).IsAssignableFrom(type) ||
-                        typeof(EfCoreRepositoryContextFactory<TestEfCoreDbContext>).IsAssignableFrom(type))
+                    if (x == ContextProviderType.EntityFrameworkCore || x == ContextProviderType.InMemory)
                         return;
 
-                    action(new UnitOfWorkFactory(options));
+                    action(new UnitOfWorkFactory(BuildOptions(x)));
                 });
         }
 
         protected void ForAllUnitOfWorkFactoriesAsync(Func<IUnitOfWorkFactory, Task> action)
         {
-            GetRepositoryContextFactories()
+            Providers()
                 .ToList()
                 .ForEach(async x =>
                 {
-                    var type = x.GetType();
-
-                    var options = new RepositoryOptionsBuilder()
-                        .UseInternalContextFactory(x)
-                        .UseLoggerProvider(TestXUnitLoggerProvider)
-                        .Options;
-
                     // the in-memory context will not support transactions currently
-                    if (typeof(InMemoryRepositoryContextFactory).IsAssignableFrom(type) ||
-                        typeof(EfCoreRepositoryContextFactory<TestEfCoreDbContext>).IsAssignableFrom(type))
+                    if (x == ContextProviderType.EntityFrameworkCore || x == ContextProviderType.InMemory)
                         return;
 
                     // Perform test
-                    var task = Record.ExceptionAsync(() => action(new UnitOfWorkFactory(options)));
+                    var task = Record.ExceptionAsync(() => action(new UnitOfWorkFactory(BuildOptions(x))));
 
                     // Checks to see if we have any un-handled exception
                     if (task != null)
@@ -123,15 +92,57 @@
                 });
         }
 
-        protected static IEnumerable<IRepositoryContextFactory> GetRepositoryContextFactories()
+        protected RepositoryOptions BuildOptions(ContextProviderType provider)
         {
-            return new List<IRepositoryContextFactory>
+            switch (provider)
             {
-                TestAdoNetContextFactory.Create(),
-                TestEfCoreDbContextFactory.Create(),
-                TestEfDbContextFactory.Create(),
-                new InMemoryRepositoryContextFactory(Guid.NewGuid().ToString())
+                case ContextProviderType.InMemory:
+                    {
+                        return new RepositoryOptionsBuilder()
+                            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                            .UseLoggerProvider(TestXUnitLoggerProvider)
+                            .Options;
+                    }
+                case ContextProviderType.AdoNet:
+                    {
+                        return TestAdoNetOptionsBuilderFactory.Create()
+                            .UseLoggerProvider(TestXUnitLoggerProvider)
+                            .Options;
+                    }
+                case ContextProviderType.EntityFramework:
+                    {
+                        return TestEfOptionsBuilderFactory.Create()
+                            .UseLoggerProvider(TestXUnitLoggerProvider)
+                            .Options;
+                    }
+                case ContextProviderType.EntityFrameworkCore:
+                    {
+                        return TestEfCoreOptionsBuilderFactory.Create()
+                            .UseLoggerProvider(TestXUnitLoggerProvider)
+                            .Options;
+                    }
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(provider));
+            }
+        }
+
+        private IEnumerable<ContextProviderType> Providers()
+        {
+            return new[]
+            {
+                ContextProviderType.InMemory,
+                ContextProviderType.AdoNet,
+                ContextProviderType.EntityFramework,
+                ContextProviderType.EntityFrameworkCore
             };
+        }
+
+        public enum ContextProviderType
+        {
+            InMemory,
+            AdoNet,
+            EntityFramework,
+            EntityFrameworkCore,
         }
     }
 }

@@ -4,6 +4,7 @@
     using Data;
     using InMemory;
     using System;
+    using Transactions;
     using Xunit;
     using Xunit.Abstractions;
 
@@ -52,9 +53,11 @@
         [Fact]
         public void CanBeginNullTransactionWhenWarningIgnored()
         {
-            new InMemoryRepositoryContextFactory(ignoreTransactionWarning: true)
-                .Create()
-                .BeginTransaction();
+            var options = new RepositoryOptionsBuilder()
+                .UseInMemoryDatabase(ignoreTransactionWarning: true)
+                .Options;
+
+            var uow = new UnitOfWork(options);
         }
 
         [Fact]
@@ -110,9 +113,11 @@
         [Fact]
         public void ThrowsIfBeginTransaction()
         {
-            var context = new InMemoryRepositoryContextFactory();
+            var options = new RepositoryOptionsBuilder()
+                .UseInMemoryDatabase(ignoreTransactionWarning: false)
+                .Options;
 
-            var ex = Assert.Throws<NotSupportedException>(() => context.Create().BeginTransaction());
+            var ex = Assert.Throws<NotSupportedException>(() => new UnitOfWork(options));
             Assert.Equal("The repository context does not support transactions.", ex.Message);
         }
     }

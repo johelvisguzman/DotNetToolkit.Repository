@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet
 {
     using Configuration.Options;
+    using Internal;
     using System;
     using System.Data.Common;
 

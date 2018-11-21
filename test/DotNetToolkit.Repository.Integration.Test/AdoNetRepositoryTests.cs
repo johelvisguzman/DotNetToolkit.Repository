@@ -25,12 +25,7 @@
         [Fact]
         public void CanUseExistingConnection()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
-
-            var repo = new Repository<Data.Customer>(options);
+            var repo = new Repository<Data.Customer>(BuildOptions(ContextProviderType.AdoNet));
 
             repo.Add(new Data.Customer());
 
@@ -40,15 +35,10 @@
         [Fact]
         public void FindWithNavigationPropertyByKey_OneToOneRelationship()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
-
             var customerKey = 1;
             var addressKey = 1;
 
-            var repoFactory = new RepositoryFactory(options);
+            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var addressRepo = repoFactory.Create<CustomerAddress>();
             var customerRepo = repoFactory.Create<Customer>();
@@ -84,16 +74,11 @@
         [Fact]
         public void FindWithCompositeNavigationPropertyByKey_OneToOneRelationship()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
-
             var customerKey = 1;
             var addressKey1 = 1;
             var addressKey2 = 2;
 
-            var repoFactory = new RepositoryFactory(options);
+            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var addressRepo = repoFactory.Create<CustomerAddressWithTwoCompositePrimaryKey, int, int>();
             var customerRepo = repoFactory.Create<CustomerWithTwoCompositePrimaryKey>();
@@ -130,15 +115,10 @@
         [Fact]
         public void FindWithForeignKeyAnnotationChangedByKey_OneToOneRelationship()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
-
             var customerKey = 1;
             var addressKey = 1;
 
-            var repoFactory = new RepositoryFactory(options);
+            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var addressWithForeignKeyAnnotationOnForeignKeyRepo = repoFactory.Create<CustomerAddressWithForeignKeyAnnotationOnForeignKey>();
             var customerWithForeignKeyAnnotationOnForeignKeyRepo = repoFactory.Create<CustomerWithForeignKeyAnnotationOnForeignKey>();
@@ -207,15 +187,10 @@
         [Fact]
         public void FindWithNavigationPropertyByCompositeKey_OneToOneRelationship()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
-
             var customerKey = 1;
             var addressKey = 1;
 
-            var repoFactory = new RepositoryFactory(options);
+            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var addressRepo = repoFactory.Create<CustomerCompositeAddress, int, int>();
             var customerRepo = repoFactory.Create<CustomerWithCompositeAddress>();
@@ -251,15 +226,10 @@
         [Fact]
         public async Task FindWithNavigationPropertyByKeyAsync_OneToOneRelationship()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
-
-            var customerKey = 1;
+           var customerKey = 1;
             var addressKey = 1;
 
-            var repoFactory = new RepositoryFactory(options);
+            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var addressRepo = repoFactory.Create<CustomerAddress>();
             var customerRepo = repoFactory.Create<Customer>();
@@ -295,15 +265,10 @@
         [Fact]
         public void FindWithNavigationProperty_OneToOneRelationship()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
-
             var customerKey = 1;
             var addressKey = 1;
 
-            var repoFactory = new RepositoryFactory(options);
+            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var addressRepo = repoFactory.Create<CustomerAddress>();
             var customerRepo = repoFactory.Create<Customer>();
@@ -343,15 +308,10 @@
         [Fact]
         public async Task FindWithNavigationPropertyAsync_OneToOneRelationship()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
-
             var customerKey = 1;
             var addressKey = 1;
 
-            var repoFactory = new RepositoryFactory(options);
+            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var addressRepo = repoFactory.Create<CustomerAddress>();
             var customerRepo = repoFactory.Create<Customer>();
@@ -391,15 +351,10 @@
         [Fact]
         public void FindAlldWithNavigationProperty_OneToOneRelationship()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
-
             var customerKey = 1;
             var addressKey = 1;
 
-            var repoFactory = new RepositoryFactory(options);
+            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var addressRepo = repoFactory.Create<CustomerAddress>();
             var customerRepo = repoFactory.Create<Customer>();
@@ -440,15 +395,10 @@
         [Fact]
         public async Task FindAlldWithNavigationPropertyAsync_OneToOneRelationship()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
-
             var customerKey = 1;
             var addressKey = 1;
 
-            var repoFactory = new RepositoryFactory(options);
+            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var addressRepo = repoFactory.Create<CustomerAddress>();
             var customerRepo = repoFactory.Create<Customer>();
@@ -489,15 +439,10 @@
         [Fact]
         public void ExistWithNavigationProperty_OneToOneRelationship()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
-
             var customerKey = 1;
             var addressKey = 1;
 
-            var repoFactory = new RepositoryFactory(options);
+            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var addressRepo = repoFactory.Create<CustomerAddress>();
             var customerRepo = repoFactory.Create<Customer>();
@@ -536,15 +481,10 @@
         [Fact]
         public async Task ExistWithNavigationPropertyAsync_OneToOneRelationship()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
-
             var customerKey = 1;
             var addressKey = 1;
 
-            var repoFactory = new RepositoryFactory(options);
+            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var addressRepo = repoFactory.Create<CustomerAddress>();
             var customerRepo = repoFactory.Create<Customer>();
@@ -583,14 +523,9 @@
         [Fact]
         public void FindWithNavigationProperty_OneToManyRelationship()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
-
             var customerKey = 1;
 
-            var repoFactory = new RepositoryFactory(options);
+            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var addressRepo = repoFactory.Create<CustomerAddressWithMultipleAddresses>();
             var customerRepo = repoFactory.Create<CustomerWithMultipleAddresses>();
@@ -635,14 +570,9 @@
         [Fact]
         public async void FindWithNavigationPropertyAsync_OneToManyRelationship()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
-
             var customerKey = 1;
 
-            var repoFactory = new RepositoryFactory(options);
+            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var addressRepo = repoFactory.Create<CustomerAddressWithMultipleAddresses>();
             var customerRepo = repoFactory.Create<CustomerWithMultipleAddresses>();
@@ -687,14 +617,9 @@
         [Fact]
         public void FindAlldWithNavigationProperty_OneToManyRelationship()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
-
             var customerKey = 1;
 
-            var repoFactory = new RepositoryFactory(options);
+            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var addressRepo = repoFactory.Create<CustomerAddressWithMultipleAddresses>();
             var customerRepo = repoFactory.Create<CustomerWithMultipleAddresses>();
@@ -739,14 +664,9 @@
         [Fact]
         public async void FindAlldWithNavigationPropertyAsync_OneToManyRelationship()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
+           var customerKey = 1;
 
-            var customerKey = 1;
-
-            var repoFactory = new RepositoryFactory(options);
+            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var addressRepo = repoFactory.Create<CustomerAddressWithMultipleAddresses>();
             var customerRepo = repoFactory.Create<CustomerWithMultipleAddresses>();
@@ -791,12 +711,7 @@
         [Fact]
         public void DeleteWithKeyDataAttribute()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
-
-            var repoFactory = new RepositoryFactory(options);
+           var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var repo = repoFactory.Create<CustomerWithKeyAnnotation>();
 
@@ -816,12 +731,7 @@
         [Fact]
         public async Task DeleteWithKeyDataAttributeAsync()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
-
-            var repoFactory = new RepositoryFactory(options);
+            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var repo = repoFactory.Create<CustomerWithKeyAnnotation>();
 
@@ -841,12 +751,7 @@
         [Fact]
         public void FindWithComplexExpressions()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
-
-            var repoFactory = new RepositoryFactory(options);
+            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var repo = repoFactory.Create<Customer>();
 
@@ -1025,12 +930,7 @@
         [Fact]
         public async void FindWithComplexExpressionsAsync()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
-
-            var repoFactory = new RepositoryFactory(options);
+            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var repo = repoFactory.Create<Customer>();
 
@@ -1229,12 +1129,7 @@
         [Fact]
         public void FindAllWithComplexExpressions()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
-
-            var repoFactory = new RepositoryFactory(options);
+           var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var repo = repoFactory.Create<Customer>();
 
@@ -1317,12 +1212,7 @@
         [Fact]
         public async void FindAllWithComplexExpressionsAsync()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(Data.TestAdoNetContextFactory.Create())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
-
-            var repoFactory = new RepositoryFactory(options);
+            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var repo = repoFactory.Create<Customer>();
 
@@ -1405,7 +1295,7 @@
         [Fact]
         public void ThrowsIfSchemaTableColumnsMismatchOnSaveChanges()
         {
-            var connection = TestAdoNetContextFactory.CreateConnection();
+            var connection = TestAdoNetOptionsBuilderFactory.CreateConnection();
             var options = new RepositoryOptionsBuilder()
                 .UseAdoNet(connection)
                 .UseLoggerProvider(TestXUnitLoggerProvider)
@@ -1473,9 +1363,7 @@
         [Fact]
         public void ThrowsIfThrowsIfSchemaTableForeignKeyAttributeOnPropertyNotFoundOnDependentType()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
-                .Options;
+            var options = BuildOptions(ContextProviderType.AdoNet);
 
             var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType>(options).Add(new CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType()));
             Assert.Equal($"The ForeignKeyAttribute on property 'Address' on type '{typeof(CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType).FullName}' is not valid. The foreign key name 'AddressId' was not found on the dependent type '{typeof(CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType).FullName}'. The Name value should be a comma separated list of foreign key property names.", ex.Message);
@@ -1565,34 +1453,22 @@
         [Fact]
         public void ThrowsIfUnableToDeterminePrincipalOnSaveChanges()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
+            var options = BuildOptions(ContextProviderType.AdoNet);
 
             var ex = Assert.Throws<InvalidOperationException>(() => new Repository<ClassD>(options).Add(new ClassD()));
             Assert.Equal($"Unable to determine the principal end of an association between the types '{typeof(ClassE).FullName}' and '{typeof(ClassD).FullName}'. The principal end of this association must be explicitly configured using data annotations.", ex.Message);
 
-            options = new RepositoryOptionsBuilder()
-                .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
+            options = BuildOptions(ContextProviderType.AdoNet);
 
             ex = Assert.Throws<InvalidOperationException>(() => new Repository<ClassE>(options).Add(new ClassE()));
             Assert.Equal($"Unable to determine the principal end of an association between the types '{typeof(ClassD).FullName}' and '{typeof(ClassE).FullName}'. The principal end of this association must be explicitly configured using data annotations.", ex.Message);
 
-            options = new RepositoryOptionsBuilder()
-                .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
+            options = BuildOptions(ContextProviderType.AdoNet);
 
             ex = Assert.Throws<InvalidOperationException>(() => new Repository<ClassF>(options).Add(new ClassF()));
             Assert.Equal($"Unable to determine the principal end of an association between the types '{typeof(ClassG).FullName}' and '{typeof(ClassF).FullName}'. The principal end of this association must be explicitly configured using data annotations.", ex.Message);
 
-            options = new RepositoryOptionsBuilder()
-                .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
+            options = BuildOptions(ContextProviderType.AdoNet);
 
             ex = Assert.Throws<InvalidOperationException>(() => new Repository<ClassG>(options).Add(new ClassG()));
             Assert.Equal($"Unable to determine the principal end of an association between the types '{typeof(ClassF).FullName}' and '{typeof(ClassG).FullName}'. The principal end of this association must be explicitly configured using data annotations.", ex.Message);
@@ -1601,10 +1477,7 @@
         [Fact]
         public void ThrowsIfUnableToDetermineCompositePrimaryKeyOrderingOnSaveChanges()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
+            var options = BuildOptions(ContextProviderType.AdoNet);
 
             var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering>(options).Add(new CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering()));
             Assert.Equal(string.Format(AdoNet.Properties.Resources.UnableToDetermineCompositePrimaryKeyOrdering, "primary", typeof(CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering).FullName), ex.Message);
@@ -1613,10 +1486,7 @@
         [Fact]
         public void ThrowsIfUnableToDetermineCompositeForeignKeyOrderingOnSaveChanges()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseAdoNet(TestAdoNetContextFactory.CreateConnection())
-                .UseLoggerProvider(TestXUnitLoggerProvider)
-                .Options;
+            var options = BuildOptions(ContextProviderType.AdoNet);
 
             var ex = Assert.Throws<InvalidOperationException>(() => new Repository<CustomerWithTwoCompositeForeignKeyAndNoOrdering>(options).Add(new CustomerWithTwoCompositeForeignKeyAndNoOrdering()));
             Assert.Equal(string.Format(AdoNet.Properties.Resources.UnableToDetermineCompositePrimaryKeyOrdering, "foreign", typeof(CustomerWithTwoCompositeForeignKeyAndNoOrdering).FullName), ex.Message);

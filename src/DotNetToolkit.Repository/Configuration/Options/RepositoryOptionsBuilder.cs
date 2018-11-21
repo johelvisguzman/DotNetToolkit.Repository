@@ -62,7 +62,7 @@
 
 #if !NETSTANDARD1_3
         /// <summary>
-        /// Configures the repository with the data from the App.config.
+        /// Configures the repository options with the data from the App.config.
         /// </summary>
         /// <returns>The same builder instance.</returns>
         public virtual RepositoryOptionsBuilder UseConfiguration()
@@ -87,7 +87,7 @@
 
 #if NETSTANDARD2_0
         /// <summary>
-        /// Configures the repository using the specified configuration.
+        /// Configures the repository options using the specified configuration.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
         /// <returns>The same builder instance.</returns>
@@ -114,7 +114,7 @@
 #endif
 
         /// <summary>
-        /// Configures the repository with an interceptor that intercepts any activity within the repository.
+        /// Configures the repository options with an interceptor that intercepts any activity within the repository.
         /// </summary>
         /// <param name="underlyingType">The type of interceptor.</param>
         /// <param name="interceptorFactory">The interceptor factory.</param>
@@ -133,7 +133,7 @@
         }
 
         /// <summary>
-        /// Configures the repository with an interceptor that intercepts any activity within the repository.
+        /// Configures the repository options with an interceptor that intercepts any activity within the repository.
         /// </summary>
         /// <typeparam name="TInterceptor">The type of interceptor.</typeparam>
         /// <param name="interceptorFactory">The interceptor factory.</param>
@@ -144,7 +144,7 @@
         }
 
         /// <summary>
-        /// Configures the repository with an interceptor that intercepts any activity within the repository.
+        /// Configures the repository options with an interceptor that intercepts any activity within the repository.
         /// </summary>
         /// <typeparam name="TInterceptor">The type of interceptor.</typeparam>
         /// <param name="interceptor">The interceptor.</param>
@@ -155,7 +155,7 @@
         }
 
         /// <summary>
-        /// Configures the repository with logger provider for logging messages within the repository.
+        /// Configures the repository options with logger provider for logging messages within the repository.
         /// </summary>
         /// <param name="loggerProvider">The logger provider.</param>
         /// <returns>The same builder instance.</returns>
@@ -169,16 +169,12 @@
             return this;
         }
 
-        #endregion
-
-        #region Internal Methods
-
         /// <summary>
-        /// Configures the repository with an internal context factory.
+        /// Configures the repository options with an internal context factory.
         /// </summary>
         /// <param name="contextFactory">The context factory.</param>
         /// <returns>The same builder instance.</returns>
-        internal virtual RepositoryOptionsBuilder UseInternalContextFactory(IRepositoryContextFactory contextFactory)
+        public virtual RepositoryOptionsBuilder UseInternalContextFactory(IRepositoryContextFactory contextFactory)
         {
             if (contextFactory == null)
                 throw new ArgumentNullException(nameof(contextFactory));

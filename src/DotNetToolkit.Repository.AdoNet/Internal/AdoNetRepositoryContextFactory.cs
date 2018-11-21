@@ -1,8 +1,7 @@
-﻿namespace DotNetToolkit.Repository.AdoNet
+﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
     using Configuration;
     using Factories;
-    using Internal;
     using System;
     using System.Data;
     using System.Data.Common;
@@ -11,7 +10,7 @@
     /// An implementation of <see cref="IRepositoryContextFactory" />.
     /// </summary>
     /// <seealso cref="IRepositoryContextFactory" />
-    public class AdoNetRepositoryContextFactory : IRepositoryContextFactory
+    internal class AdoNetRepositoryContextFactory : IRepositoryContextFactory
     {
         #region Fields
 

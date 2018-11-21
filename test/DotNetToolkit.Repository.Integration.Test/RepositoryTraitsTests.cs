@@ -10,6 +10,7 @@
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
+    using EntityFrameworkCore.Internal;
     using Xunit;
     using Xunit.Abstractions;
 
@@ -28,7 +29,7 @@
         {
             // run for all repositories context except for ef core.. it looks like this will not pass for some reason.
             // will need to comeback to this at somepoint
-            ForAllRepositoryFactories(TestAddWithSeededIdForIdentity, typeof(EfCoreRepositoryContextFactory<TestEfCoreDbContext>));
+            ForAllRepositoryFactories(TestAddWithSeededIdForIdentity, ContextProviderType.EntityFrameworkCore);
         }
 
         [Fact]
@@ -216,7 +217,7 @@
         {
             // run for all repositories context except for ef core.. it looks like this will not pass for some reason.
             // will need to comeback to this at somepoint
-            ForAllRepositoryFactoriesAsync(TestAddWithSeededIdForIdentityAsync, typeof(EfCoreRepositoryContextFactory<TestEfCoreDbContext>));
+            ForAllRepositoryFactoriesAsync(TestAddWithSeededIdForIdentityAsync, ContextProviderType.EntityFrameworkCore);
         }
 
         [Fact]
