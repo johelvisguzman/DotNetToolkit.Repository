@@ -51,7 +51,7 @@
             var optionsBuilder = new RepositoryOptionsBuilder()
                 .UseInMemoryDatabase();
 
-            Assert.True(optionsBuilder.Options.ContextFactory is InMemoryRepositoryContextFactory);
+            Assert.NotNull(optionsBuilder.Options.ContextFactory);
         }
     }
 }

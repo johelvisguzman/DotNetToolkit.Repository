@@ -4,7 +4,6 @@
     using Configuration.Options;
     using Data;
     using Factories;
-    using InMemory;
     using System;
     using System.Collections.Generic;
     using System.Reflection;
@@ -25,9 +24,6 @@
 
             var repoFactory = new RepositoryFactory(options);
             var repo = repoFactory.Create<Customer>();
-            var contextFactory = GetContextFactoryFromPrivateField<InternalRepositoryBase<Customer>>(repo);
-
-            Assert.True(contextFactory is InMemoryRepositoryContextFactory);
         }
 
         [Fact]
@@ -52,15 +48,6 @@
                 .GetValue(obj);
 
             return options.Interceptors;
-        }
-
-        private static IRepositoryContextFactory GetContextFactoryFromPrivateField<T>(object obj)
-        {
-            var contextFactory = (IRepositoryContextFactory)typeof(T)
-                .GetField("_contextFactory", BindingFlags.NonPublic | BindingFlags.Instance)
-                .GetValue(obj);
-
-            return contextFactory;
         }
     }
 }

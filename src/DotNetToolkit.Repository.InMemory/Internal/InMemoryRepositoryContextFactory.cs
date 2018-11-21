@@ -1,15 +1,14 @@
-﻿namespace DotNetToolkit.Repository.InMemory
+﻿namespace DotNetToolkit.Repository.InMemory.Internal
 {
     using Configuration;
     using Factories;
-    using Internal;
     using System;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryContextFactory" />.
     /// </summary>
     /// <seealso cref="IRepositoryContextFactory" />
-    public class InMemoryRepositoryContextFactory : IRepositoryContextFactory
+    internal class InMemoryRepositoryContextFactory : IRepositoryContextFactory
     {
         #region Fields
 

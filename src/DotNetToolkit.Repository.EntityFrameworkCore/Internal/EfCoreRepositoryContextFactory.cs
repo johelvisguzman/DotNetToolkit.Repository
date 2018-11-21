@@ -1,17 +1,16 @@
-﻿namespace DotNetToolkit.Repository.EntityFrameworkCore
+﻿namespace DotNetToolkit.Repository.EntityFrameworkCore.Internal
 {
+    using System;
     using Configuration;
     using Factories;
-    using Internal;
     using Microsoft.EntityFrameworkCore;
-    using System;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryContextFactory" />.
     /// </summary>
     /// <typeparam name="TDbContext">The type of the database context.</typeparam>
     /// <seealso cref="IRepositoryContextFactory" />
-    public class EfCoreRepositoryContextFactory<TDbContext> : IRepositoryContextFactory where TDbContext : DbContext
+    internal class EfCoreRepositoryContextFactory<TDbContext> : IRepositoryContextFactory where TDbContext : DbContext
     {
         #region Fields
 

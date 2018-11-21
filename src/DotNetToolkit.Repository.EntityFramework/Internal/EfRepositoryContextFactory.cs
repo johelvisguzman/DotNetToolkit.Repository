@@ -1,8 +1,7 @@
-﻿namespace DotNetToolkit.Repository.EntityFramework
+﻿namespace DotNetToolkit.Repository.EntityFramework.Internal
 {
     using Configuration;
     using Factories;
-    using Internal;
     using System;
     using System.Collections.Generic;
     using System.Data.Common;
@@ -13,7 +12,7 @@
     /// </summary>
     /// <typeparam name="TDbContext">The type of the database context.</typeparam>
     /// <seealso cref="IRepositoryContextFactory" />
-    public class EfRepositoryContextFactory<TDbContext> : IRepositoryContextFactory where TDbContext : DbContext
+    internal class EfRepositoryContextFactory<TDbContext> : IRepositoryContextFactory where TDbContext : DbContext
     {
         #region Fields
 

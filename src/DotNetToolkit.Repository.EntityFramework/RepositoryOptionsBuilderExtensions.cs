@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.EntityFramework
 {
     using Configuration.Options;
+    using Internal;
     using System;
     using System.Data.Common;
     using System.Data.Entity;

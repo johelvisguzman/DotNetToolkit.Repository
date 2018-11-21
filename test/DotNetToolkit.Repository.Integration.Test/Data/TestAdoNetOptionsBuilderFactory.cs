@@ -1,14 +1,15 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Data
 {
-    using AdoNet.Internal;
+    using AdoNet;
+    using Configuration.Options;
     using System.Data.Common;
     using DbProviderFactories = System.Data.Common.DbProviderFactories;
 
-    public class TestAdoNetContextFactory
+    public class TestAdoNetOptionsBuilderFactory
     {
-        internal static AdoNetRepositoryContextFactory Create()
+        public static RepositoryOptionsBuilder Create()
         {
-            return new AdoNetRepositoryContextFactory(CreateConnection());
+            return new RepositoryOptionsBuilder().UseAdoNet(CreateConnection());
         }
 
         public static DbConnection CreateConnection()
