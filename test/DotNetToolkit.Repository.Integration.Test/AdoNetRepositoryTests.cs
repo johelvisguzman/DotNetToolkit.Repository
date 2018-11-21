@@ -504,7 +504,7 @@
 
             const string street = "Street";
 
-            var queryOptions = new QueryOptions<Customer>();
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Address.Street.Equals(street));
 
             var entity = new Customer
             {
@@ -551,7 +551,7 @@
 
             const string street = "Street";
 
-            var queryOptions = new QueryOptions<Customer>();
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Address.Street.Equals(street));
 
             var entity = new Customer
             {
