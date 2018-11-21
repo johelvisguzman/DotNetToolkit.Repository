@@ -929,7 +929,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>();
+            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Name.Equals(name));
             var entity = new Customer { Name = name };
 
             Assert.False(service.GetExists(x => x.Name.Equals(name)));
@@ -2119,7 +2119,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>();
+            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Name.Equals(name));
             var entity = new Customer { Name = name };
 
             Assert.False(await service.GetExistsAsync(x => x.Name.Equals(name)));

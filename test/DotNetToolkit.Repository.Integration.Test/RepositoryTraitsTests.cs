@@ -405,6 +405,18 @@
             ForAllRepositoryFactories(TestThrowsIfEntityPrimaryKeyTypesMismatch);
         }
 
+        [Fact]
+        public void ThrowsIfSpecificationMissingFromQueryOptions()
+        {
+            ForAllRepositoryFactories(TestThrowsIfSpecificationMissingFromQueryOptions);
+        }
+
+        [Fact]
+        public void ThrowsIfSpecificationMissingFromQueryOptionsAsync()
+        {
+            ForAllRepositoryFactoriesAsync(TestThrowsIfSpecificationMissingFromQueryOptionsAsync);
+        }
+
         private static void TestAdd(IRepositoryFactory repoFactory)
         {
             var repo = repoFactory.Create<Customer>();
@@ -967,7 +979,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>();
+            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Name.Equals(name));
             var entity = new Customer { Name = name };
 
             Assert.False(repo.Exists(x => x.Name.Equals(name)));
@@ -2170,7 +2182,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>();
+            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Name.Equals(name));
             var entity = new Customer { Name = name };
 
             Assert.False(await repo.ExistsAsync(x => x.Name.Equals(name)));
@@ -2824,6 +2836,30 @@
         {
             var ex = Assert.Throws<TargetInvocationException>(() => repoFactory.Create<Customer, string>());
             Assert.Equal("The repository primary key type(s) constraint must match the number of primary key type(s) and ordering defined on the entity.", ex.InnerException?.Message);
+        }
+
+        private static void TestThrowsIfSpecificationMissingFromQueryOptions(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<Customer>();
+            var emptyQueryOptions = new QueryOptions<Customer>();
+
+            var ex = Assert.Throws<InvalidOperationException>(() => repo.Exists(emptyQueryOptions));
+            Assert.Equal("The specified query options is missing a specification predicate.", ex.Message);
+
+            ex = Assert.Throws<InvalidOperationException>(() => repo.Delete(emptyQueryOptions));
+            Assert.Equal("The specified query options is missing a specification predicate.", ex.Message);
+        }
+
+        private static async Task TestThrowsIfSpecificationMissingFromQueryOptionsAsync(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<Customer>();
+            var emptyQueryOptions = new QueryOptions<Customer>();
+
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => repo.ExistsAsync(emptyQueryOptions));
+            Assert.Equal("The specified query options is missing a specification predicate.", ex.Message);
+
+            ex = await Assert.ThrowsAsync<InvalidOperationException>(() => repo.DeleteAsync(emptyQueryOptions));
+            Assert.Equal("The specified query options is missing a specification predicate.", ex.Message);
         }
     }
 }

@@ -749,6 +749,12 @@
         /// <param name="options">The options to apply to the query.</param>
         public void Delete(IQueryOptions<TEntity> options)
         {
+            InterceptError(() =>
+            {
+                if (options.SpecificationStrategy == null)
+                    throw new InvalidOperationException("The specified query options is missing a specification predicate.");
+            });
+
             Delete(FindAll(options).Result);
         }
 
@@ -899,6 +905,12 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
         public bool Exists(IQueryOptions<TEntity> options)
         {
+            InterceptError(() =>
+            {
+                if (options.SpecificationStrategy == null)
+                    throw new InvalidOperationException("The specified query options is missing a specification predicate.");
+            });
+
             return Find(options) != null;
         }
 
@@ -1166,6 +1178,12 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
+            InterceptError(() =>
+            {
+                if (options.SpecificationStrategy == null)
+                    throw new InvalidOperationException("The specified query options is missing a specification predicate.");
+            });
+
             var entitiesInDb = (await FindAllAsync(options, cancellationToken)).Result;
 
             await DeleteAsync(entitiesInDb, cancellationToken);
@@ -1334,6 +1352,12 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
         public async Task<bool> ExistsAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
+            InterceptError(() =>
+            {
+                if (options.SpecificationStrategy == null)
+                    throw new InvalidOperationException("The specified query options is missing a specification predicate.");
+            });
+
             return await FindAsync(options, cancellationToken) != null;
         }
 
