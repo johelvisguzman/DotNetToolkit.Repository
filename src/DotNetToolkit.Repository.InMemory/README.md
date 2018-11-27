@@ -4,4 +4,6 @@
 var options = new RepositoryOptionsBuilder()
     .UseInMemoryDatabase(...) // for an in-memory database (for testing purposes only)
     .Options;
+    
+var repo = new Repository<Customer>(options);
 ```
