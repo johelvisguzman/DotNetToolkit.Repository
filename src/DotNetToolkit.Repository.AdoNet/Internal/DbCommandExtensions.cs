@@ -70,7 +70,7 @@
         /// <param name="command">The command.</param>
         /// <param name="parameters">The parameters.</param>
         /// <exception cref="System.ArgumentNullException">command</exception>
-        public static void AddParmeters(this DbCommand command, Dictionary<string, object> parameters)
+        public static void AddParameters(this DbCommand command, Dictionary<string, object> parameters)
         {
             if (command == null)
                 throw new ArgumentNullException(nameof(command));
@@ -99,13 +99,13 @@
 
             var entityType = obj.GetType();
             var tableName = entityType.GetTableName();
-            var primeryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-            var primeryKeyColumnName = primeryKeyPropertyInfo.GetColumnName();
+            var primaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+            var primaryKeyColumnName = primaryKeyPropertyInfo.GetColumnName();
 
-            command.CommandText = $"SELECT * FROM [{tableName}]\nWHERE {primeryKeyColumnName} = @{primeryKeyColumnName}";
+            command.CommandText = $"SELECT * FROM [{tableName}]\nWHERE {primaryKeyColumnName} = @{primaryKeyColumnName}";
             command.CommandType = CommandType.Text;
             command.Parameters.Clear();
-            command.AddParameter($"@{primeryKeyColumnName}", primeryKeyPropertyInfo.GetValue(obj, null));
+            command.AddParameter($"@{primaryKeyColumnName}", primaryKeyPropertyInfo.GetValue(obj, null));
 
             var existInDb = false;
 
@@ -132,13 +132,13 @@
 
             var entityType = obj.GetType();
             var tableName = entityType.GetTableName();
-            var primeryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-            var primeryKeyColumnName = primeryKeyPropertyInfo.GetColumnName();
+            var primaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+            var primaryKeyColumnName = primaryKeyPropertyInfo.GetColumnName();
 
-            command.CommandText = $"SELECT * FROM [{tableName}]\nWHERE {primeryKeyColumnName} = @{primeryKeyColumnName}";
+            command.CommandText = $"SELECT * FROM [{tableName}]\nWHERE {primaryKeyColumnName} = @{primaryKeyColumnName}";
             command.CommandType = CommandType.Text;
             command.Parameters.Clear();
-            command.AddParameter($"@{primeryKeyColumnName}", primeryKeyPropertyInfo.GetValue(obj, null));
+            command.AddParameter($"@{primaryKeyColumnName}", primaryKeyPropertyInfo.GetValue(obj, null));
 
             var existInDb = false;
 

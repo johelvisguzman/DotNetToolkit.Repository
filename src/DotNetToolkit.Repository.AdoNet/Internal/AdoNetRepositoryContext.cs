@@ -1130,7 +1130,7 @@
 
             command.CommandText = cmdText;
             command.CommandType = cmdType;
-            command.AddParmeters(parameters);
+            command.AddParameters(parameters);
 
             return command;
         }
@@ -1298,7 +1298,7 @@
                         command.CommandText = sql;
                         command.CommandType = CommandType.Text;
                         command.Parameters.Clear();
-                        command.AddParmeters(parameters);
+                        command.AddParameters(parameters);
 
                         rows += command.ExecuteNonQuery();
 
@@ -1585,7 +1585,7 @@
                         command.CommandText = sql;
                         command.CommandType = CommandType.Text;
                         command.Parameters.Clear();
-                        command.AddParmeters(parameters);
+                        command.AddParameters(parameters);
 
                         if (Logger.IsEnabled(LogLevel.Debug))
                             Logger.Debug(FormatExecutingDebugQuery("ExecuteNonQueryAsync", parameters, sql));

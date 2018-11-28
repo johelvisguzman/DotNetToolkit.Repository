@@ -160,7 +160,7 @@
 
         #endregion
 
-        #region Implementation of IContext
+        #region Implementation of IRepositoryContext
 
         /// <summary>
         /// Begins the transaction.
