@@ -118,7 +118,7 @@
                 .Options;
 
             var ex = Assert.Throws<NotSupportedException>(() => new UnitOfWork(options));
-            Assert.Equal("The repository context does not support transactions.", ex.Message);
+            Assert.Equal("The in-memory repository context does not support transactions.", ex.Message);
         }
     }
 }

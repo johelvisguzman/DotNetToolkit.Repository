@@ -155,7 +155,7 @@
                 return Convert.ToInt32(key) + 1;
             }
 
-            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.InMemoryContext_EntityKeyValueTypeInvalid, entityType.FullName, propertyType));
+            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeInvalid, entityType.FullName, propertyType));
         }
 
         #endregion
@@ -169,7 +169,7 @@
         public ITransactionManager BeginTransaction()
         {
             if (!_ignoreTransactionWarning)
-                throw new NotSupportedException(Resources.InMemoryContext_TransactionNotSupported);
+                throw new NotSupportedException(Resources.TransactionNotSupported);
 
             return InMemoryNullTransactionManager.Instance;
         }
@@ -242,7 +242,7 @@
                         if (context.ContainsKey(key))
                         {
                             throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
-                                Resources.InMemoryContext_EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
+                                Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
                         }
 
                         var primeryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
@@ -256,7 +256,7 @@
                     }
                     else if (!context.ContainsKey(key))
                     {
-                        throw new InvalidOperationException(Resources.InMemoryContext_EntityNotFoundInStore);
+                        throw new InvalidOperationException(Resources.EntityNotFoundInStore);
                     }
 
                     if (entitySet.State == EntityState.Removed)
