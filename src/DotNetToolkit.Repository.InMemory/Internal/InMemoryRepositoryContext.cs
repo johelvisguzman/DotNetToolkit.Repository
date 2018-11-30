@@ -11,6 +11,7 @@
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Data;
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
@@ -155,12 +156,36 @@
                 return Convert.ToInt32(key) + 1;
             }
 
-            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.InMemoryContext_EntityKeyValueTypeInvalid, entityType.FullName, propertyType));
+            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeInvalid, entityType.FullName, propertyType));
         }
 
         #endregion
 
-        #region Implementation of IContext
+        #region Implementation of IRepositoryContext
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        public IEnumerable<TEntity> ExecuteQuery<TEntity>(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector) where TEntity : class
+        {
+            throw new NotSupportedException(Resources.QueryExecutionNotSupported);
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        public int ExecuteQuery(string sql, CommandType cmdType, object[] parameters)
+        {
+            throw new NotSupportedException(Resources.QueryExecutionNotSupported);
+        }
 
         /// <summary>
         /// Begins the transaction.
@@ -169,7 +194,7 @@
         public ITransactionManager BeginTransaction()
         {
             if (!_ignoreTransactionWarning)
-                throw new NotSupportedException(Resources.InMemoryContext_TransactionNotSupported);
+                throw new NotSupportedException(Resources.TransactionNotSupported);
 
             return InMemoryNullTransactionManager.Instance;
         }
@@ -242,7 +267,7 @@
                         if (context.ContainsKey(key))
                         {
                             throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
-                                Resources.InMemoryContext_EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
+                                Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
                         }
 
                         var primeryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
@@ -256,7 +281,7 @@
                     }
                     else if (!context.ContainsKey(key))
                     {
-                        throw new InvalidOperationException(Resources.InMemoryContext_EntityNotFoundInStore);
+                        throw new InvalidOperationException(Resources.EntityNotFoundInStore);
                     }
 
                     if (entitySet.State == EntityState.Removed)

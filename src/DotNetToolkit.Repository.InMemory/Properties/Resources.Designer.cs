@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace DotNetToolkit.Repository.Properties {
+namespace DotNetToolkit.Repository.InMemory.Properties {
     using System.Reflection;
 
 
@@ -39,7 +39,7 @@ namespace DotNetToolkit.Repository.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DotNetToolkit.Repository.Properties.Resources", typeof(Resources).GetTypeInfo().Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DotNetToolkit.Repository.InMemory.Properties.Resources", typeof(Resources).GetTypeInfo().Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,56 +61,47 @@ namespace DotNetToolkit.Repository.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No entity found in the repository with the &apos;{0}&apos; key..
+        ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; cannot be added to the in-memory store because another instance of this type with the same key is already being tracked..
         /// </summary>
-        internal static string EntityKeyNotFound {
+        internal static string EntityAlreadyBeingTrackedInStore {
             get {
-                return ResourceManager.GetString("EntityKeyNotFound", resourceCulture);
+                return ResourceManager.GetString("EntityAlreadyBeingTrackedInStore", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The repository primary key type(s) constraint must match the number of primary key type(s) and ordering defined on the entity..
+        ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; cannot be added to the in-memory store because the key type &apos;{1}&apos; is an invalid primary key property type..
         /// </summary>
-        internal static string EntityPrimaryKeyTypesMismatch {
+        internal static string EntityKeyValueTypeInvalid {
             get {
-                return ResourceManager.GetString("EntityPrimaryKeyTypesMismatch", resourceCulture);
+                return ResourceManager.GetString("EntityKeyValueTypeInvalid", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The number of primary key values passed must match number of primary key values defined on the entity..
+        ///   Looks up a localized string similar to Attempted to update or delete an entity that does not exist in the in-memory store..
         /// </summary>
-        internal static string EntityPrimaryKeyValuesLengthMismatch {
+        internal static string EntityNotFoundInStore {
             get {
-                return ResourceManager.GetString("EntityPrimaryKeyValuesLengthMismatch", resourceCulture);
+                return ResourceManager.GetString("EntityNotFoundInStore", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; requires a primary key to be defined..
+        ///   Looks up a localized string similar to The in-memory store does not support SQL query execution..
         /// </summary>
-        internal static string EntityRequiresPrimaryKey {
+        internal static string QueryExecutionNotSupported {
             get {
-                return ResourceManager.GetString("EntityRequiresPrimaryKey", resourceCulture);
+                return ResourceManager.GetString("QueryExecutionNotSupported", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The ForeignKeyAttribute on property &apos;{0}&apos; on type &apos;{1}&apos; is not valid. The foreign key name &apos;{2}&apos; was not found on the dependent type &apos;{1}&apos;. The Name value should be a comma separated list of foreign key property names..
+        ///   Looks up a localized string similar to The in-memory store does not support transactions..
         /// </summary>
-        internal static string ForeignKeyAttributeOnPropertyNotFoundOnDependentType {
+        internal static string TransactionNotSupported {
             get {
-                return ResourceManager.GetString("ForeignKeyAttributeOnPropertyNotFoundOnDependentType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Unable to determine composite primary key ordering for type &apos;{0}&apos;. Use the ColumnAttribute to specify an order for composite primary keys..
-        /// </summary>
-        internal static string UnableToDetermineCompositePrimaryKeyOrdering {
-            get {
-                return ResourceManager.GetString("UnableToDetermineCompositePrimaryKeyOrdering", resourceCulture);
+                return ResourceManager.GetString("TransactionNotSupported", resourceCulture);
             }
         }
     }

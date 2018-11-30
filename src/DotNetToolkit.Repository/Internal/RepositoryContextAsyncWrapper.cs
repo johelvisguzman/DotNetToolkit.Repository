@@ -6,7 +6,7 @@
     using Queries.Strategies;
     using System;
     using System.Collections.Generic;
-    using System.Linq;
+    using System.Data;
     using System.Linq.Expressions;
     using System.Runtime.InteropServices;
     using System.Threading;
@@ -55,6 +55,31 @@
         #endregion
 
         #region Implementation of IRepositoryContext
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        public IEnumerable<TEntity> ExecuteQuery<TEntity>(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector) where TEntity : class
+        {
+            return _context.ExecuteQuery(sql, cmdType, parameters, projector);
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <returns>The number of rows affected.</returns>
+        public int ExecuteQuery(string sql, CommandType cmdType, object[] parameters)
+        {
+            return _context.ExecuteQuery(sql, cmdType, parameters);
+        }
 
         /// <summary>
         /// Begins the transaction.
@@ -206,6 +231,43 @@
         #endregion
 
         #region Implementation of IRepositoryContextAsync
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
+        public Task<IEnumerable<TEntity>> ExecuteQueryAsync<TEntity>(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            if (_context is IRepositoryContextAsync contextAsync)
+            {
+                return contextAsync.ExecuteQueryAsync(sql, cmdType, parameters, projector, cancellationToken);
+            }
+
+            return RunAsync<IEnumerable<TEntity>>(() => ExecuteQuery(sql, cmdType, parameters, projector), cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
+        public Task<int> ExecuteQueryAsync(string sql, CommandType cmdType, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
+        {
+            if (_context is IRepositoryContextAsync contextAsync)
+            {
+                return contextAsync.ExecuteQueryAsync(sql, cmdType, parameters, cancellationToken);
+            }
+
+            return RunAsync<int>(() => ExecuteQuery(sql, cmdType, parameters), cancellationToken);
+        }
 
         /// <summary>
         /// Asynchronously saves all changes made in this context to the database.

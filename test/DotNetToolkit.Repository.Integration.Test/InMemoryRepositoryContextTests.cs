@@ -118,7 +118,20 @@
                 .Options;
 
             var ex = Assert.Throws<NotSupportedException>(() => new UnitOfWork(options));
-            Assert.Equal("The repository context does not support transactions.", ex.Message);
+            Assert.Equal("The in-memory store does not support transactions.", ex.Message);
+        }
+
+        [Fact]
+        public void ThrowsIfExecutingQuery()
+        {
+            var options = new RepositoryOptionsBuilder()
+                .UseInMemoryDatabase()
+                .Options;
+
+            var repo = new Repository<Customer>(options);
+
+            var ex = Assert.Throws<NotSupportedException>(() => repo.ExecuteQuery("SELECT * FROM Customers"));
+            Assert.Equal("The in-memory store does not support SQL query execution.", ex.Message);
         }
     }
 }

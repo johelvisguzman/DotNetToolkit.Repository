@@ -117,22 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="EntityKeyNotFound" xml:space="preserve">
-    <value>No entity found in the repository with the '{0}' key.</value>
+  <data name="EntityAlreadyBeingTrackedInStore" xml:space="preserve">
+    <value>The instance of entity type '{0}' cannot be added to the in-memory store because another instance of this type with the same key is already being tracked.</value>
   </data>
-  <data name="EntityPrimaryKeyValuesLengthMismatch" xml:space="preserve">
-    <value>The number of primary key values passed must match number of primary key values defined on the entity.</value>
+  <data name="EntityKeyValueTypeInvalid" xml:space="preserve">
+    <value>The instance of entity type '{0}' cannot be added to the in-memory store because the key type '{1}' is an invalid primary key property type.</value>
   </data>
-  <data name="EntityRequiresPrimaryKey" xml:space="preserve">
-    <value>The instance of entity type '{0}' requires a primary key to be defined.</value>
+  <data name="EntityNotFoundInStore" xml:space="preserve">
+    <value>Attempted to update or delete an entity that does not exist in the in-memory store.</value>
   </data>
-  <data name="ForeignKeyAttributeOnPropertyNotFoundOnDependentType" xml:space="preserve">
-    <value>The ForeignKeyAttribute on property '{0}' on type '{1}' is not valid. The foreign key name '{2}' was not found on the dependent type '{1}'. The Name value should be a comma separated list of foreign key property names.</value>
+  <data name="QueryExecutionNotSupported" xml:space="preserve">
+    <value>The in-memory store does not support SQL query execution.</value>
   </data>
-  <data name="EntityPrimaryKeyTypesMismatch" xml:space="preserve">
-    <value>The repository primary key type(s) constraint must match the number of primary key type(s) and ordering defined on the entity.</value>
-  </data>
-  <data name="UnableToDetermineCompositePrimaryKeyOrdering" xml:space="preserve">
-    <value>Unable to determine composite primary key ordering for type '{0}'. Use the ColumnAttribute to specify an order for composite primary keys.</value>
+  <data name="TransactionNotSupported" xml:space="preserve">
+    <value>The in-memory store does not support transactions.</value>
   </data>
 </root>

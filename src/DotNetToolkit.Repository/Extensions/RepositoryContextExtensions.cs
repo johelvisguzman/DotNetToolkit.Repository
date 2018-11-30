@@ -1,8 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
-    using System;
     using Configuration;
-    using Properties;
+    using Internal;
+    using System;
 
     internal static class RepositoryContextExtensions
     {
@@ -10,12 +10,8 @@
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
-
-            var async = source as IRepositoryContextAsync;
-            if (async != null)
-                return async;
-
-            throw new NotSupportedException(Resources.IRepositoryContextNotAsync);
+            
+            return new RepositoryContextAsyncWrapper(source);
         }
     }
 }
