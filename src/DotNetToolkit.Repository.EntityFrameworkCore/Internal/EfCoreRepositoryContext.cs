@@ -10,6 +10,7 @@
     using Queries.Strategies;
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Threading;
@@ -64,6 +65,112 @@
         #endregion
 
         #region Implementation of IRepositoryContext
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        public IEnumerable<TEntity> ExecuteQuery<TEntity>(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector) where TEntity : class
+        {
+            if (sql == null)
+                throw new ArgumentNullException(nameof(sql));
+
+            if (projector == null)
+                throw new ArgumentNullException(nameof(projector));
+
+            var connection = _context.Database.GetDbConnection();
+            var command = connection.CreateCommand();
+            var shouldOpenConnection = connection.State != ConnectionState.Open;
+
+            if (shouldOpenConnection)
+                connection.Open();
+
+            command.CommandText = sql;
+            command.CommandType = cmdType;
+            command.Parameters.Clear();
+
+            if (parameters != null && parameters.Any())
+            {
+                for (var i = 0; i < parameters.Length; i++)
+                {
+                    var p = command.CreateParameter();
+
+                    p.ParameterName = $"@p{i}";
+                    p.Value = parameters[i] ?? DBNull.Value;
+
+                    command.Parameters.Add(p);
+                }
+            }
+
+            using (var reader = command.ExecuteReader(shouldOpenConnection ? CommandBehavior.CloseConnection : CommandBehavior.Default))
+            {
+                var list = new List<TEntity>();
+
+                while (reader.Read())
+                {
+                    list.Add(projector(reader));
+                }
+
+                return list;
+            }
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <returns>The number of rows affected.</returns>
+        public int ExecuteQuery(string sql, CommandType cmdType, object[] parameters)
+        {
+            if (sql == null)
+                throw new ArgumentNullException(nameof(sql));
+
+            var connection = _context.Database.GetDbConnection();
+            var shouldOpenConnection = connection.State != ConnectionState.Open;
+
+            if (shouldOpenConnection)
+                connection.Open();
+
+            try
+            {
+                using (var command = connection.CreateCommand())
+                {
+                    if (connection.State != ConnectionState.Open)
+                        connection.Open();
+
+                    command.CommandText = sql;
+                    command.CommandType = cmdType;
+                    command.Parameters.Clear();
+
+                    if (parameters != null && parameters.Any())
+                    {
+                        for (var i = 0; i < parameters.Length; i++)
+                        {
+                            var p = command.CreateParameter();
+
+                            p.ParameterName = $"@p{i}";
+                            p.Value = parameters[i] ?? DBNull.Value;
+
+                            command.Parameters.Add(p);
+                        }
+                    }
+
+                    return command.ExecuteNonQuery();
+                }
+            }
+            finally
+            {
+
+                if (shouldOpenConnection)
+                    connection.Close();
+            }
+        }
 
         /// <summary>
         /// Begins the transaction.
@@ -398,6 +505,111 @@
         #endregion
 
         #region Implementation of IRepositoryContextAsync
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
+        public async Task<IEnumerable<TEntity>> ExecuteQueryAsync<TEntity>(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            if (sql == null)
+                throw new ArgumentNullException(nameof(sql));
+
+            if (projector == null)
+                throw new ArgumentNullException(nameof(projector));
+
+            var connection = _context.Database.GetDbConnection();
+            var command = connection.CreateCommand();
+            var shouldOpenConnection = connection.State != ConnectionState.Open;
+
+            if (shouldOpenConnection)
+                await connection.OpenAsync(cancellationToken);
+
+            command.CommandText = sql;
+            command.CommandType = cmdType;
+            command.Parameters.Clear();
+
+            if (parameters != null && parameters.Any())
+            {
+                for (var i = 0; i < parameters.Length; i++)
+                {
+                    var p = command.CreateParameter();
+
+                    p.ParameterName = $"@p{i}";
+                    p.Value = parameters[i] ?? DBNull.Value;
+
+                    command.Parameters.Add(p);
+                }
+            }
+
+            using (var reader = await command.ExecuteReaderAsync(shouldOpenConnection ? CommandBehavior.CloseConnection : CommandBehavior.Default, cancellationToken))
+            {
+                var list = new List<TEntity>();
+
+                while (await reader.ReadAsync(cancellationToken))
+                {
+                    list.Add(projector(reader));
+                }
+
+                return list;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
+        public async Task<int> ExecuteQueryAsync(string sql, CommandType cmdType, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
+        {
+            if (sql == null)
+                throw new ArgumentNullException(nameof(sql));
+
+            var connection = _context.Database.GetDbConnection();
+            var shouldOpenConnection = connection.State != ConnectionState.Open;
+
+            try
+            {
+                using (var command = connection.CreateCommand())
+                {
+                    if (connection.State != ConnectionState.Open)
+                        await connection.OpenAsync(cancellationToken);
+
+                    command.CommandText = sql;
+                    command.CommandType = cmdType;
+                    command.Parameters.Clear();
+
+                    if (parameters != null && parameters.Any())
+                    {
+                        for (var i = 0; i < parameters.Length; i++)
+                        {
+                            var p = command.CreateParameter();
+
+                            p.ParameterName = $"@p{i}";
+                            p.Value = parameters[i] ?? DBNull.Value;
+
+                            command.Parameters.Add(p);
+                        }
+                    }
+
+                    return await command.ExecuteNonQueryAsync(cancellationToken);
+                }
+            }
+            finally
+            {
+
+                if (shouldOpenConnection)
+                    connection.Close();
+            }
+        }
 
         /// <summary>
         /// Asynchronously saves all changes made in this context to the database.

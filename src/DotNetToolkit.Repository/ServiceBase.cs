@@ -6,6 +6,7 @@
     using Queries.Strategies;
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
@@ -47,6 +48,234 @@
         #endregion
 
         #region Implementation of IService<TEntity, TKey1, TKey2, TKey3>
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        public virtual IEnumerable<TEntity> ExecuteQuery(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector)
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().ExecuteQuery(sql, cmdType, parameters, projector);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        public virtual IEnumerable<TEntity> ExecuteQuery(string sql, object[] parameters, Func<IDataReader, TEntity> projector)
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().ExecuteQuery(sql, parameters, projector);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        public virtual IEnumerable<TEntity> ExecuteQuery(string sql, Func<IDataReader, TEntity> projector)
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().ExecuteQuery(sql, projector);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <returns>The number of rows affected.</returns>
+        public virtual int ExecuteQuery(string sql, CommandType cmdType, object[] parameters)
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().ExecuteQuery(sql, cmdType, parameters);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <returns>The number of rows affected.</returns>
+        public virtual int ExecuteQuery(string sql, object[] parameters)
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().ExecuteQuery(sql, parameters);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <returns>The number of rows affected.</returns>
+        public virtual int ExecuteQuery(string sql)
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().ExecuteQuery(sql);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
+        public virtual async Task<IEnumerable<TEntity>> ExecuteQueryAsync(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().ExecuteQueryAsync(sql, cmdType, parameters, projector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
+        public virtual async Task<IEnumerable<TEntity>> ExecuteQueryAsync(string sql, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().ExecuteQueryAsync(sql, parameters, projector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
+        public virtual async Task<IEnumerable<TEntity>> ExecuteQueryAsync(string sql, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().ExecuteQueryAsync(sql, projector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
+        public virtual async Task<int> ExecuteQueryAsync(string sql, CommandType cmdType, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().ExecuteQueryAsync(sql, cmdType, parameters, cancellationToken);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
+        public virtual async Task<int> ExecuteQueryAsync(string sql, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().ExecuteQueryAsync(sql, parameters, cancellationToken);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
+        public virtual async Task<int> ExecuteQueryAsync(string sql, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().ExecuteQueryAsync(sql, cancellationToken);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
 
         /// <summary>
         /// Creates the specified <paramref name="entity" /> into the repository.
@@ -1084,6 +1313,234 @@
         #region Implementation of IService<TEntity, TKey1, TKey2>
 
         /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        public virtual IEnumerable<TEntity> ExecuteQuery(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector)
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = uow.Create<TEntity, TKey1, TKey2>().ExecuteQuery(sql, cmdType, parameters, projector);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        public virtual IEnumerable<TEntity> ExecuteQuery(string sql, object[] parameters, Func<IDataReader, TEntity> projector)
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = uow.Create<TEntity, TKey1, TKey2>().ExecuteQuery(sql, parameters, projector);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        public virtual IEnumerable<TEntity> ExecuteQuery(string sql, Func<IDataReader, TEntity> projector)
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = uow.Create<TEntity, TKey1, TKey2>().ExecuteQuery(sql, projector);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <returns>The number of rows affected.</returns>
+        public virtual int ExecuteQuery(string sql, CommandType cmdType, object[] parameters)
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = uow.Create<TEntity, TKey1, TKey2>().ExecuteQuery(sql, cmdType, parameters);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <returns>The number of rows affected.</returns>
+        public virtual int ExecuteQuery(string sql, object[] parameters)
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = uow.Create<TEntity, TKey1, TKey2>().ExecuteQuery(sql, parameters);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <returns>The number of rows affected.</returns>
+        public virtual int ExecuteQuery(string sql)
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = uow.Create<TEntity, TKey1, TKey2>().ExecuteQuery(sql);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
+        public virtual async Task<IEnumerable<TEntity>> ExecuteQueryAsync(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = await uow.Create<TEntity, TKey1, TKey2>().ExecuteQueryAsync(sql, cmdType, parameters, projector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
+        public virtual async Task<IEnumerable<TEntity>> ExecuteQueryAsync(string sql, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = await uow.Create<TEntity, TKey1, TKey2>().ExecuteQueryAsync(sql, parameters, projector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
+        public virtual async Task<IEnumerable<TEntity>> ExecuteQueryAsync(string sql, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = await uow.Create<TEntity, TKey1, TKey2>().ExecuteQueryAsync(sql, projector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
+        public virtual async Task<int> ExecuteQueryAsync(string sql, CommandType cmdType, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = await uow.Create<TEntity, TKey1, TKey2>().ExecuteQueryAsync(sql, cmdType, parameters, cancellationToken);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
+        public virtual async Task<int> ExecuteQueryAsync(string sql, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = await uow.Create<TEntity, TKey1, TKey2>().ExecuteQueryAsync(sql, parameters, cancellationToken);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
+        public virtual async Task<int> ExecuteQueryAsync(string sql, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = await uow.Create<TEntity, TKey1, TKey2>().ExecuteQueryAsync(sql, cancellationToken);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
         /// Creates the specified <paramref name="entity" /> into the repository.
         /// </summary>
         /// <param name="entity">The entity to add.</param>
@@ -2106,6 +2563,234 @@
         #endregion
 
         #region Implementation of IService<TEntity, TKey>
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        public virtual IEnumerable<TEntity> ExecuteQuery(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector)
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = uow.Create<TEntity, TKey>().ExecuteQuery(sql, cmdType, parameters, projector);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        public virtual IEnumerable<TEntity> ExecuteQuery(string sql, object[] parameters, Func<IDataReader, TEntity> projector)
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = uow.Create<TEntity, TKey>().ExecuteQuery(sql, parameters, projector);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        public virtual IEnumerable<TEntity> ExecuteQuery(string sql, Func<IDataReader, TEntity> projector)
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = uow.Create<TEntity, TKey>().ExecuteQuery(sql, projector);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <returns>The number of rows affected.</returns>
+        public virtual int ExecuteQuery(string sql, CommandType cmdType, object[] parameters)
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = uow.Create<TEntity, TKey>().ExecuteQuery(sql, cmdType, parameters);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <returns>The number of rows affected.</returns>
+        public virtual int ExecuteQuery(string sql, object[] parameters)
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = uow.Create<TEntity, TKey>().ExecuteQuery(sql, parameters);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <returns>The number of rows affected.</returns>
+        public virtual int ExecuteQuery(string sql)
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = uow.Create<TEntity, TKey>().ExecuteQuery(sql);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
+        public virtual async Task<IEnumerable<TEntity>> ExecuteQueryAsync(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = await uow.Create<TEntity, TKey>().ExecuteQueryAsync(sql, cmdType, parameters, projector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
+        public virtual async Task<IEnumerable<TEntity>> ExecuteQueryAsync(string sql, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = await uow.Create<TEntity, TKey>().ExecuteQueryAsync(sql, parameters, projector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
+        public virtual async Task<IEnumerable<TEntity>> ExecuteQueryAsync(string sql, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = await uow.Create<TEntity, TKey>().ExecuteQueryAsync(sql, projector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
+        public virtual async Task<int> ExecuteQueryAsync(string sql, CommandType cmdType, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = await uow.Create<TEntity, TKey>().ExecuteQueryAsync(sql, cmdType, parameters, cancellationToken);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
+        public virtual async Task<int> ExecuteQueryAsync(string sql, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = await uow.Create<TEntity, TKey>().ExecuteQueryAsync(sql, parameters, cancellationToken);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
+        public virtual async Task<int> ExecuteQueryAsync(string sql, CancellationToken cancellationToken = new CancellationToken())
+        {
+            using (var uow = UnitOfWorkFactory.Create())
+            {
+                var result = await uow.Create<TEntity, TKey>().ExecuteQueryAsync(sql, cancellationToken);
+
+                uow.Commit();
+
+                return result;
+            }
+        }
 
         /// <summary>
         /// Creates the specified <paramref name="entity" /> into the repository.

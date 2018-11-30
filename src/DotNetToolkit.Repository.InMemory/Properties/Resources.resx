@@ -126,7 +126,10 @@
   <data name="EntityNotFoundInStore" xml:space="preserve">
     <value>Attempted to update or delete an entity that does not exist in the in-memory store.</value>
   </data>
+  <data name="QueryExecutionNotSupported" xml:space="preserve">
+    <value>The in-memory store does not support SQL query execution.</value>
+  </data>
   <data name="TransactionNotSupported" xml:space="preserve">
-    <value>The in-memory repository context does not support transactions.</value>
+    <value>The in-memory store does not support transactions.</value>
   </data>
 </root>

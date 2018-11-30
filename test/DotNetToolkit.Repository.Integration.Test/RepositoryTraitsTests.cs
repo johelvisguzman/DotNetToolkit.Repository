@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
     using Data;
-    using EntityFrameworkCore;
     using Factories;
     using Queries;
     using Queries.Strategies;
@@ -10,7 +9,6 @@
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
-    using EntityFrameworkCore.Internal;
     using Xunit;
     using Xunit.Abstractions;
 
@@ -416,6 +414,18 @@
         public void ThrowsIfSpecificationMissingFromQueryOptionsAsync()
         {
             ForAllRepositoryFactoriesAsync(TestThrowsIfSpecificationMissingFromQueryOptionsAsync);
+        }
+
+        [Fact]
+        public void ExecuteQuery()
+        {
+            ForAllRepositoryFactories(TestExecuteQuery, ContextProviderType.InMemory, ContextProviderType.EntityFrameworkCore);
+        }
+
+        [Fact]
+        public void ExecuteQueryAsync()
+        {
+            ForAllRepositoryFactoriesAsync(TestExecuteQueryAsync, ContextProviderType.InMemory, ContextProviderType.EntityFrameworkCore);
         }
 
         private static void TestAdd(IRepositoryFactory repoFactory)
@@ -2861,6 +2871,224 @@
 
             ex = await Assert.ThrowsAsync<InvalidOperationException>(() => repo.DeleteAsync(emptyQueryOptions));
             Assert.Equal("The specified query options is missing a specification predicate.", ex.Message);
+        }
+
+        private static void TestExecuteQuery(IRepositoryFactory repoFactory)
+        {
+            const int id = 1;
+
+            var parameters = new object[] { id };
+
+            var repo = repoFactory.Create<Customer>();
+
+            // ** CREATE **
+            var rowsAffected = repo.ExecuteQuery(@"
+CREATE TABLE NewCustomers (
+    Id int,
+    Name nvarchar(255),
+    AddressId int
+)");
+
+            Assert.Equal(-1, rowsAffected);
+
+            // ** INSERT **
+            rowsAffected = repo.ExecuteQuery(@"
+INSERT INTO NewCustomers (Id, Name)
+VALUES (@p0, 'Random Name')",
+                parameters);
+
+            Assert.Equal(1, rowsAffected);
+
+            var customersInDb = repo.ExecuteQuery(@"
+SELECT
+    NewCustomers.Id,
+    NewCustomers.Name,
+    NewCustomers.AddressId
+FROM NewCustomers
+WHERE NewCustomers.Id = @p0",
+                parameters,
+                r => new Customer()
+                {
+                    Id = r.GetInt32(0),
+                    Name = r.GetString(1),
+                    AddressId = r.IsDBNull(2) ? 0 : r.GetInt32(2)
+                });
+
+            Assert.Single(customersInDb);
+
+            var customerInDb = customersInDb.ElementAt(0);
+
+            Assert.NotNull(customerInDb);
+            Assert.Equal(1, customerInDb.Id);
+            Assert.Equal("Random Name", customerInDb.Name);
+            Assert.Equal(0, customerInDb.AddressId);
+
+            // ** UPDATE **
+            rowsAffected = repo.ExecuteQuery(@"
+UPDATE NewCustomers 
+SET NewCustomers.Name = 'New Random Name' 
+WHERE Id = @p0",
+                parameters);
+
+            Assert.Equal(1, rowsAffected);
+
+            customersInDb = repo.ExecuteQuery(@"
+SELECT
+    NewCustomers.Id,
+    NewCustomers.Name,
+    NewCustomers.AddressId
+FROM NewCustomers
+WHERE NewCustomers.Id = @p0",
+                parameters,
+                r => new Customer()
+                {
+                    Id = r.GetInt32(0),
+                    Name = r.GetString(1),
+                    AddressId = r.IsDBNull(2) ? 0 : r.GetInt32(2)
+                });
+
+            Assert.Single(customersInDb);
+
+            customerInDb = customersInDb.ElementAt(0);
+
+            Assert.NotNull(customerInDb);
+            Assert.Equal(1, customerInDb.Id);
+            Assert.Equal("New Random Name", customerInDb.Name);
+            Assert.Equal(0, customerInDb.AddressId);
+
+            // ** DELETE **
+            rowsAffected = repo.ExecuteQuery(@"
+DELETE FROM NewCustomers
+WHERE Id = @p0", 
+                parameters);
+
+            Assert.Equal(1, rowsAffected);
+
+            customersInDb = repo.ExecuteQuery(@"
+SELECT
+    NewCustomers.Id,
+    NewCustomers.Name,
+    NewCustomers.AddressId
+FROM NewCustomers
+WHERE NewCustomers.Id = @p0",
+                parameters,
+                r => new Customer()
+                {
+                    Id = r.GetInt32(0),
+                    Name = r.GetString(1),
+                    AddressId = r.IsDBNull(2) ? 0 : r.GetInt32(2)
+                });
+
+            Assert.Empty(customersInDb);
+        }
+
+        private static async Task TestExecuteQueryAsync(IRepositoryFactory repoFactory)
+        {
+            const int id = 1;
+
+            var parameters = new object[] { id };
+
+            var repo = repoFactory.Create<Customer>();
+
+            // ** CREATE **
+            var rowsAffected = await repo.ExecuteQueryAsync(@"
+CREATE TABLE NewCustomers (
+    Id int,
+    Name nvarchar(255),
+    AddressId int
+)");
+
+            Assert.Equal(-1, rowsAffected);
+
+            // ** INSERT **
+            rowsAffected = await repo.ExecuteQueryAsync(@"
+INSERT INTO NewCustomers (Id, Name)
+VALUES (@p0, 'Random Name')",
+                parameters);
+
+            Assert.Equal(1, rowsAffected);
+
+            var customersInDb = await repo.ExecuteQueryAsync(@"
+SELECT
+    NewCustomers.Id,
+    NewCustomers.Name,
+    NewCustomers.AddressId
+FROM NewCustomers
+WHERE NewCustomers.Id = @p0",
+                parameters,
+                r => new Customer()
+                {
+                    Id = r.GetInt32(0),
+                    Name = r.GetString(1),
+                    AddressId = r.IsDBNull(2) ? 0 : r.GetInt32(2)
+                });
+
+            Assert.Single(customersInDb);
+
+            var customerInDb = customersInDb.ElementAt(0);
+
+            Assert.NotNull(customerInDb);
+            Assert.Equal(1, customerInDb.Id);
+            Assert.Equal("Random Name", customerInDb.Name);
+            Assert.Equal(0, customerInDb.AddressId);
+
+            // ** UPDATE **
+            rowsAffected = await repo.ExecuteQueryAsync(@"
+UPDATE NewCustomers 
+SET NewCustomers.Name = 'New Random Name' 
+WHERE Id = @p0",
+                parameters);
+
+            Assert.Equal(1, rowsAffected);
+
+            customersInDb = await repo.ExecuteQueryAsync(@"
+SELECT
+    NewCustomers.Id,
+    NewCustomers.Name,
+    NewCustomers.AddressId
+FROM NewCustomers
+WHERE NewCustomers.Id = @p0",
+                parameters,
+                r => new Customer()
+                {
+                    Id = r.GetInt32(0),
+                    Name = r.GetString(1),
+                    AddressId = r.IsDBNull(2) ? 0 : r.GetInt32(2)
+                });
+
+            Assert.Single(customersInDb);
+
+            customerInDb = customersInDb.ElementAt(0);
+
+            Assert.NotNull(customerInDb);
+            Assert.Equal(1, customerInDb.Id);
+            Assert.Equal("New Random Name", customerInDb.Name);
+            Assert.Equal(0, customerInDb.AddressId);
+
+            // ** DELETE **
+            rowsAffected = await repo.ExecuteQueryAsync(@"
+DELETE FROM NewCustomers
+WHERE Id = @p0",
+                parameters);
+
+            Assert.Equal(1, rowsAffected);
+
+            customersInDb = await repo.ExecuteQueryAsync(@"
+SELECT
+    NewCustomers.Id,
+    NewCustomers.Name,
+    NewCustomers.AddressId
+FROM NewCustomers
+WHERE NewCustomers.Id = @p0",
+                parameters,
+                r => new Customer()
+                {
+                    Id = r.GetInt32(0),
+                    Name = r.GetString(1),
+                    AddressId = r.IsDBNull(2) ? 0 : r.GetInt32(2)
+                });
+
+            Assert.Empty(customersInDb);
         }
     }
 }

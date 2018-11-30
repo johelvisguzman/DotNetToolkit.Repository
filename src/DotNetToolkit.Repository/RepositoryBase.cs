@@ -15,6 +15,7 @@
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Data;
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
@@ -628,6 +629,180 @@
         #endregion
 
         #region Public Methods
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        public IEnumerable<TEntity> ExecuteQuery(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector)
+        {
+            return InterceptError<IEnumerable<TEntity>>(() =>
+            {
+                if (sql == null)
+                    throw new ArgumentNullException(nameof(sql));
+
+                if (projector == null)
+                    throw new ArgumentNullException(nameof(projector));
+
+                return Context.ExecuteQuery(sql, cmdType, parameters, projector);
+            });
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        public IEnumerable<TEntity> ExecuteQuery(string sql, object[] parameters, Func<IDataReader, TEntity> projector)
+        {
+            return ExecuteQuery(sql, CommandType.Text, parameters, projector);
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        public IEnumerable<TEntity> ExecuteQuery(string sql, Func<IDataReader, TEntity> projector)
+        {
+            return ExecuteQuery(sql, (object[]) null, projector);
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <returns>The number of rows affected.</returns>
+        public int ExecuteQuery(string sql, CommandType cmdType, object[] parameters)
+        {
+            return InterceptError<int>(() =>
+            {
+                if (sql == null)
+                    throw new ArgumentNullException(nameof(sql));
+
+                return Context.ExecuteQuery(sql, cmdType, parameters);
+            });
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <returns>The number of rows affected.</returns>
+        public int ExecuteQuery(string sql, object[] parameters)
+        {
+            return ExecuteQuery(sql, CommandType.Text, parameters);
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <returns>The number of rows affected.</returns>
+        public int ExecuteQuery(string sql)
+        {
+            return ExecuteQuery(sql, (object[]) null);
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
+        public Task<IEnumerable<TEntity>> ExecuteQueryAsync(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return InterceptErrorAsync<IEnumerable<TEntity>>(() =>
+            {
+                if (sql == null)
+                    throw new ArgumentNullException(nameof(sql));
+
+                if (projector == null)
+                    throw new ArgumentNullException(nameof(projector));
+
+                return Context.AsAsync().ExecuteQueryAsync(sql, cmdType, parameters, projector, cancellationToken);
+            });
+        }
+
+        /// <summary>
+        /// Asynchronously creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
+        public Task<IEnumerable<TEntity>> ExecuteQueryAsync(string sql, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteQueryAsync(sql, CommandType.Text, parameters, projector, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
+        public Task<IEnumerable<TEntity>> ExecuteQueryAsync(string sql, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteQueryAsync(sql, (object[])null, projector, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
+        public Task<int> ExecuteQueryAsync(string sql, CommandType cmdType, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return InterceptErrorAsync<int>(() =>
+            {
+                if (sql == null)
+                    throw new ArgumentNullException(nameof(sql));
+
+                return Context.AsAsync().ExecuteQueryAsync(sql, cmdType, parameters, cancellationToken);
+            });
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
+        public Task<int> ExecuteQueryAsync(string sql, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteQueryAsync(sql, CommandType.Text, parameters, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
+        public Task<int> ExecuteQueryAsync(string sql, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteQueryAsync(sql, (object[])null, cancellationToken);
+        }
 
         /// <summary>
         /// Adds the specified <paramref name="entity" /> into the repository.
