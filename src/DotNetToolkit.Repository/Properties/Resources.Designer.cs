@@ -106,15 +106,6 @@ namespace DotNetToolkit.Repository.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The source IRepositoryContext doesn&apos;t implement IRepositoryContextAsync. Only sources that implement IRepositoryContextAsync can be used for asynchronous operations..
-        /// </summary>
-        internal static string IRepositoryContextNotAsync {
-            get {
-                return ResourceManager.GetString("IRepositoryContextNotAsync", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Unable to determine composite primary key ordering for type &apos;{0}&apos;. Use the ColumnAttribute to specify an order for composite primary keys..
         /// </summary>
         internal static string UnableToDetermineCompositePrimaryKeyOrdering {

@@ -129,9 +129,6 @@
   <data name="ForeignKeyAttributeOnPropertyNotFoundOnDependentType" xml:space="preserve">
     <value>The ForeignKeyAttribute on property '{0}' on type '{1}' is not valid. The foreign key name '{2}' was not found on the dependent type '{1}'. The Name value should be a comma separated list of foreign key property names.</value>
   </data>
-  <data name="IRepositoryContextNotAsync" xml:space="preserve">
-    <value>The source IRepositoryContext doesn't implement IRepositoryContextAsync. Only sources that implement IRepositoryContextAsync can be used for asynchronous operations.</value>
-  </data>
   <data name="EntityPrimaryKeyTypesMismatch" xml:space="preserve">
     <value>The repository primary key type(s) constraint must match the number of primary key type(s) and ordering defined on the entity.</value>
   </data>

@@ -570,7 +570,7 @@
             {
                 if (_context == null)
                 {
-                    _context = new RepositoryContextAsyncWrapper(_contextFactory.Create());
+                    _context = _contextFactory.Create();
                     _context.UseLoggerProvider(_options.LoggerProvider);
                 }
 
