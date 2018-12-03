@@ -92,6 +92,7 @@
         #endregion
 
         #region Private Methods
+
         private void Initialize(RepositoryOptions options)
         {
             if (options == null)
@@ -107,6 +108,7 @@
             // The shared context for the repositories to use
             _options = options.Clone().With(_context);
         }
+
         #endregion
 
         #region Implementation of IUnitOfWork

@@ -29,7 +29,7 @@
     {
         #region Fields
 
-        private DbTransaction _transaction;
+        private DbTransaction _underlyingTransaction;
         private readonly DbProviderFactory _factory;
         private readonly string _connectionString;
         private DbConnection _connection;
@@ -136,13 +136,13 @@
 
             DbConnection connection;
 
-            if (_transaction != null)
+            if (_underlyingTransaction != null)
             {
-                connection = _transaction.Connection;
+                connection = _underlyingTransaction.Connection;
 
                 try
                 {
-                    command.Transaction = _transaction;
+                    command.Transaction = _underlyingTransaction;
                 }
                 catch (Exception)
                 {
@@ -1105,7 +1105,7 @@
         /// <returns>The connection.</returns>
         protected virtual DbConnection CreateConnection()
         {
-            if (_transaction != null)
+            if (_underlyingTransaction != null)
                 throw new InvalidOperationException("Unable to create a new connection. A transaction has already been started.");
 
             if (_ownsConnection)
@@ -1275,9 +1275,9 @@
         /// <returns>The transaction.</returns>
         public ITransactionManager BeginTransaction()
         {
-            _transaction = CreateConnection().BeginTransaction();
+            _underlyingTransaction = CreateConnection().BeginTransaction();
 
-            CurrentTransaction = new AdoNetTransactionManager(_transaction, Logger);
+            CurrentTransaction = new AdoNetTransactionManager(_underlyingTransaction, Logger);
 
             return CurrentTransaction;
         }
@@ -1988,7 +1988,7 @@
                 _connection = null;
             }
 
-            _transaction = null;
+            _underlyingTransaction = null;
 
             GC.SuppressFinalize(this);
         }
