@@ -5,15 +5,11 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/v02h9efjwev30sof?svg=true)](https://ci.appveyor.com/project/johelvisguzman/dotnettoolkit-repository)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-**What is the Repository Pattern?**
+## What is the Repository Pattern?
 
 An abstraction of the data layer and handling common data access functionality.
 
-**How do I get started?**
-
-If you want to use DotNetToolkit.Repository for the first time, the [Getting Started](https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Getting-Started) guide will help you.
-
-**Packages**
+## Packages
 
 | Package | NuGet Stable  | Downloads | MyGet |
 | ------- | ------------- | --------- | ----- |
@@ -24,12 +20,11 @@ If you want to use DotNetToolkit.Repository for the first time, the [Getting Sta
 [DotNetToolkit.Repository.InMemory](https://www.nuget.org/packages/DotNetToolkit.Repository.InMemory/) | [![DotNetToolkit.Repository.InMemory](https://img.shields.io/nuget/v/DotNetToolkit.Repository.InMemory.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.InMemory/) | [![DotNetToolkit.Repository.InMemory](https://img.shields.io/nuget/dt/DotNetToolkit.Repository.InMemory.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.InMemory/) | [![MyGet (dev)](https://img.shields.io/myget/dotnettoolkitrepositorydev/v/DotNetToolkit.Repository.InMemory.svg)](https://www.myget.org/feed/dotnettoolkitrepositorydev/package/nuget/DotNetToolkit.Repository.InMemory) |
 [DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection](https://www.nuget.org/packages/DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection/) | [![DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection](https://img.shields.io/nuget/v/DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection/) | [![DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection](https://img.shields.io/nuget/dt/DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection/) | [![MyGet (dev)](https://img.shields.io/myget/dotnettoolkitrepositorydev/v/DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.svg)](https://www.myget.org/feed/dotnettoolkitrepositorydev/package/nuget/DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection) |
 
-
-**Features**
+## Features
 
 The DotNetToolkit.Repository includes basic repository objects for handling the data access layer.
 The DotNetToolkit.Repository also supports Specifications, FetchStrategies, Services and Transactions (Unit Of Work).
 
-**Performance**
+## Project Wiki
 
-Checkout the most current [DotNetToolkit.Repository.Performance](https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Performance) benchmark results!
+If you want more details about the project, please checkout the [project wiki](https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Home).
