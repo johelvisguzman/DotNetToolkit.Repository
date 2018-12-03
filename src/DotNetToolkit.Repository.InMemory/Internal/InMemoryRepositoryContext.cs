@@ -30,6 +30,7 @@
 
         private readonly bool _ignoreTransactionWarning;
         private readonly BlockingCollection<EntitySet> _items = new BlockingCollection<EntitySet>();
+        private ITransactionManager _transaction;
 
         #endregion
 
@@ -196,7 +197,30 @@
             if (!_ignoreTransactionWarning)
                 throw new NotSupportedException(Resources.TransactionNotSupported);
 
-            return InMemoryNullTransactionManager.Instance;
+            CurrentTransaction = InMemoryNullTransactionManager.Instance;
+
+            return CurrentTransaction;
+        }
+
+        /// <summary>
+        /// Gets the current transaction.
+        /// </summary>
+        public ITransactionManager CurrentTransaction
+        {
+            get
+            {
+                if (!_ignoreTransactionWarning)
+                    throw new NotSupportedException(Resources.TransactionNotSupported);
+
+                return _transaction;
+            }
+            private set
+            {
+                if (!_ignoreTransactionWarning)
+                    throw new NotSupportedException(Resources.TransactionNotSupported);
+
+                _transaction = value;
+            }
         }
 
         /// <summary>

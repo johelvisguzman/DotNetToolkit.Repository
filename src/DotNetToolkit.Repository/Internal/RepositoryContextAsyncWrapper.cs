@@ -91,6 +91,11 @@
         }
 
         /// <summary>
+        /// Gets the current transaction.
+        /// </summary>
+        public ITransactionManager CurrentTransaction { get { return _context.CurrentTransaction; } }
+
+        /// <summary>
         /// Sets the repository context logger provider to use.
         /// </summary>
         /// <param name="loggerProvider">The logger provider.</param>

@@ -41,6 +41,11 @@
         ITransactionManager BeginTransaction();
 
         /// <summary>
+        /// Gets the current transaction.
+        /// </summary>
+        ITransactionManager CurrentTransaction { get; }
+
+        /// <summary>
         /// Sets the repository context logger provider to use.
         /// </summary>
         /// <param name="loggerProvider">The logger provider.</param>

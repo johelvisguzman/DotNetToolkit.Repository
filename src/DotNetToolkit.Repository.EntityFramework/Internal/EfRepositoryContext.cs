@@ -175,8 +175,15 @@
         /// <returns>The transaction.</returns>
         public ITransactionManager BeginTransaction()
         {
-            return new EfTransactionManager(_context.Database.BeginTransaction());
+            CurrentTransaction = new EfTransactionManager(_context.Database.BeginTransaction());
+
+            return CurrentTransaction;
         }
+
+        /// <summary>
+        /// Gets the current transaction.
+        /// </summary>
+        public ITransactionManager CurrentTransaction { get; private set; }
 
         /// <summary>
         /// Sets the repository context logger provider to use.
