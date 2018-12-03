@@ -1277,8 +1277,15 @@
         {
             _transaction = CreateConnection().BeginTransaction();
 
-            return new AdoNetTransactionManager(_transaction, Logger);
+            CurrentTransaction = new AdoNetTransactionManager(_transaction, Logger);
+
+            return CurrentTransaction;
         }
+
+        /// <summary>
+        /// Gets the current transaction.
+        /// </summary>
+        public ITransactionManager CurrentTransaction { get; private set; }
 
         /// <summary>
         /// Sets the repository context logger provider to use.

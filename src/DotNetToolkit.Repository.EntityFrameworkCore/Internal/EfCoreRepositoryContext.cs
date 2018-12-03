@@ -178,8 +178,15 @@
         /// <returns>The transaction.</returns>
         public ITransactionManager BeginTransaction()
         {
-            return new EfCoreTransactionManager(_context.Database.BeginTransaction());
+            CurrentTransaction = new EfCoreTransactionManager(_context.Database.BeginTransaction());
+
+            return CurrentTransaction;
         }
+
+        /// <summary>
+        /// Gets the current transaction.
+        /// </summary>
+        public ITransactionManager CurrentTransaction { get; private set; }
 
         /// <summary>
         /// Sets the repository context logger provider to use.
