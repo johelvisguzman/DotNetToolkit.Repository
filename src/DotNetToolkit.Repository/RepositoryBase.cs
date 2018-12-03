@@ -8,7 +8,6 @@
     using Extensions;
     using Factories;
     using Helpers;
-    using Internal;
     using Properties;
     using Queries;
     using Queries.Strategies;
@@ -1764,7 +1763,7 @@
 
             var queryResult = InterceptError<QueryResult<T>>(action);
 
-            Logger.Debug("Executed QueryResult [ Method = {methodName} ]");
+            Logger.Debug($"Executed QueryResult [ Method = {methodName} ]");
 
             return queryResult.Result;
         }
@@ -1775,7 +1774,7 @@
 
             var queryResult = await InterceptErrorAsync<QueryResult<T>>(action);
 
-            Logger.Debug("Executed QueryResult [ Method = {methodName} ]");
+            Logger.Debug($"Executed QueryResult [ Method = {methodName} ]");
 
             return queryResult.Result;
         }
