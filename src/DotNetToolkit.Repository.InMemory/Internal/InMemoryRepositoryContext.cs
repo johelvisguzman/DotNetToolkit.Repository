@@ -30,7 +30,6 @@
 
         private readonly bool _ignoreTransactionWarning;
         private readonly BlockingCollection<EntitySet> _items = new BlockingCollection<EntitySet>();
-        private ITransactionManager _transaction;
 
         #endregion
 
@@ -205,23 +204,7 @@
         /// <summary>
         /// Gets the current transaction.
         /// </summary>
-        public ITransactionManager CurrentTransaction
-        {
-            get
-            {
-                if (!_ignoreTransactionWarning)
-                    throw new NotSupportedException(Resources.TransactionNotSupported);
-
-                return _transaction;
-            }
-            private set
-            {
-                if (!_ignoreTransactionWarning)
-                    throw new NotSupportedException(Resources.TransactionNotSupported);
-
-                _transaction = value;
-            }
-        }
+        public ITransactionManager CurrentTransaction { get; private set; }
 
         /// <summary>
         /// Sets the repository context logger provider to use.

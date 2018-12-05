@@ -606,21 +606,11 @@
 
             Logger = optionsBuilder.Options.LoggerProvider.Create($"DotNetToolkit.Repository<{typeof(TEntity).Name}>");
 
-            // The shared context that is set up by the unit of work
-            var context = optionsBuilder.Options.Context;
-            if (context != null)
-            {
-                _context = context;
-                _context.UseLoggerProvider(optionsBuilder.Options.LoggerProvider);
-            }
-            else
-            {
-                var contextFactory = optionsBuilder.Options.ContextFactory;
-                if (contextFactory == null)
-                    throw new InvalidOperationException("No context provider has been configured for this repository.");
+            var contextFactory = optionsBuilder.Options.ContextFactory;
+            if (contextFactory == null)
+                throw new InvalidOperationException("No context provider has been configured for this repository.");
 
-                _contextFactory = contextFactory;
-            }
+            _contextFactory = contextFactory;
 
             _options = optionsBuilder.Options;
         }
@@ -1865,7 +1855,7 @@
 
         private void DisposeContext()
         {
-            if (_contextFactory != null && _context != null)
+            if (_context != null && _context.CurrentTransaction == null)
             {
                 _context.Dispose();
                 _context = null;
