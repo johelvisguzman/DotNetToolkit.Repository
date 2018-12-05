@@ -129,10 +129,10 @@
             var services = new ServiceCollection();
 
             services.AddRepositories(options =>
-                {
-                    options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
-                    options.UseLoggerProvider(TestXUnitLoggerProvider);
-                },
+            {
+                options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
+                options.UseLoggerProvider(TestXUnitLoggerProvider);
+            },
                 typeof(MicrosoftDependencyInjectionTests).Assembly);
 
             var provider = services.BuildServiceProvider();
