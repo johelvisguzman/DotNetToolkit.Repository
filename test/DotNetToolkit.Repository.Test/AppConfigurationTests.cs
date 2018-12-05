@@ -36,7 +36,7 @@
             Assert.True((bool)parameters.ElementAt(1));
 
             var interceptors = interceptorElementCollection.GetTypedValues().ToList();
-            var interceptor = (TestRepositoryInterceptor)interceptors[0];
+            var interceptor = (TestRepositoryInterceptor)interceptors[0].Value();
 
             Assert.Single(interceptors);
             Assert.Equal(paramName, interceptor.P1);
@@ -58,7 +58,7 @@
             RepositoryInterceptorProvider.SetDefaultFactory(t => Activator.CreateInstance(t, paramName, true));
 
             var interceptors = interceptorElementCollection.GetTypedValues().ToList();
-            var interceptor = (TestRepositoryInterceptor)interceptors[0];
+            var interceptor = (TestRepositoryInterceptor)interceptors[0].Value();
 
             Assert.Single(interceptors);
             Assert.Equal(paramName, interceptor.P1);
