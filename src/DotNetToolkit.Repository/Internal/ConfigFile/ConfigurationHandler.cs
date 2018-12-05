@@ -77,9 +77,9 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
             return null;
         }
 
-        public IEnumerable<IRepositoryInterceptor> GetInterceptors()
+        public Dictionary<Type, Func<IRepositoryInterceptor>> GetInterceptors()
         {
-            var interceptors = new List<IRepositoryInterceptor>();
+            var interceptorsDict = new Dictionary<Type, Func<IRepositoryInterceptor>>();
             var interceptorCollectionSection = _root.GetSection(InterceptorCollectionSectionKey);
 
             if (interceptorCollectionSection != null)
@@ -94,12 +94,11 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
                     {
                         var interceptorType = Type.GetType(interceptorSection[TypeKey], throwOnError: true);
 
-                        if (defaultFactory != null)
+                        IRepositoryInterceptor Factory()
                         {
-                            interceptors.Add((IRepositoryInterceptor)defaultFactory(interceptorType));
-                        }
-                        else
-                        {
+                            if (defaultFactory != null)
+                                return (IRepositoryInterceptor)defaultFactory(interceptorType);
+
                             var parameterCollectionSection = interceptorSection.GetSection(ParameterCollectionSectionKey);
                             var args = new List<object>();
 
@@ -119,13 +118,15 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
                                 }
                             }
 
-                            interceptors.Add(CreateInstance<IRepositoryInterceptor>(interceptorType, args.ToArray()));
+                            return CreateInstance<IRepositoryInterceptor>(interceptorType, args.ToArray());
                         }
+
+                        interceptorsDict.Add(interceptorType, (Func<IRepositoryInterceptor>)Factory);
                     }
                 }
             }
 
-            return interceptors;
+            return interceptorsDict;
         }
 
         #endregion

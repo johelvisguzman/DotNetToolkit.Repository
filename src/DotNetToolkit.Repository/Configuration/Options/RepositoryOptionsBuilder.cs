@@ -76,9 +76,9 @@
                 UseInternalContextFactory(defaultContextFactory);
             }
 
-            foreach (var interceptor in config.Interceptors.GetTypedValues())
+            foreach (var item in config.Interceptors.GetTypedValues())
             {
-                UseInterceptor(interceptor.GetType(), () => interceptor);
+                UseInterceptor(item.Key, item.Value);
             }
 
             return this;
@@ -104,9 +104,9 @@
                 UseInternalContextFactory(defaultContextFactory);
             }
 
-            foreach (var interceptor in config.GetInterceptors())
+            foreach (var item in config.GetInterceptors())
             {
-                UseInterceptor(interceptor.GetType(), () => interceptor);
+                UseInterceptor(item.Key, item.Value);
             }
 
             return this;

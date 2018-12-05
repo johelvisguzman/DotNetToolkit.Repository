@@ -49,23 +49,29 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
             return element;
         }
 
-        public IEnumerable<IRepositoryInterceptor> GetTypedValues()
+        public Dictionary<Type, Func<IRepositoryInterceptor>> GetTypedValues()
         {
             var defaultFactory = RepositoryInterceptorProvider.GetDefaultFactory();
 
             return this.Cast<RepositoryInterceptorElement>()
-                .Select(x =>
-                {
-                    var type = Type.GetType(x.Type, throwOnError: true);
+                .ToDictionary(
+                    x => Type.GetType(x.Type, throwOnError: true),
+                    x =>
+                    {
+                        IRepositoryInterceptor Factory()
+                        {
+                            var type = Type.GetType(x.Type, throwOnError: true);
 
-                    if (defaultFactory != null)
-                        return (IRepositoryInterceptor)defaultFactory(type);
+                            if (defaultFactory != null)
+                                return (IRepositoryInterceptor)defaultFactory(type);
 
-                    var args = x.Parameters.GetTypedParameterValues();
+                            var args = x.Parameters.GetTypedParameterValues();
 
-                    return (IRepositoryInterceptor)Activator.CreateInstance(type, args);
-                })
-                .ToList();
+                            return (IRepositoryInterceptor)Activator.CreateInstance(type, args);
+                        }
+
+                        return (Func<IRepositoryInterceptor>)Factory;
+                    });
         }
     }
 }
