@@ -39,19 +39,13 @@
         public virtual IRepositoryContextFactory ContextFactory { get { return _contextFactory; } }
 
         /// <summary>
-        /// Gets the configured internal shared context.
-        /// </summary>
-        internal virtual IRepositoryContext Context { get { return _context; } }
-
-        /// <summary>
         /// Gets a value indicating whether any options have been configured.
         /// </summary>
         public virtual bool IsConfigured
         {
             get
             {
-                return Context != null ||
-                       ContextFactory != null ||
+                return ContextFactory != null ||
                        LoggerProvider != null ||
                        Interceptors.Any();
             }

@@ -3,6 +3,7 @@
     using Configuration;
     using Configuration.Options;
     using System;
+    using Internal;
 
     /// <summary>
     /// An implementation of <see cref="IUnitOfWork" />.
@@ -106,7 +107,7 @@
             _transactionManager = _context.BeginTransaction();
 
             // The shared context for the repositories to use
-            _options = options.Clone().With(_context);
+            _options = options.Clone().With(new SharedRepositoryContextFactory(_context));
         }
 
         #endregion
