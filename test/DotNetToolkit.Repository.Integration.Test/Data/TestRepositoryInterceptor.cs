@@ -1,12 +1,14 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Data
 {
     using Configuration.Interceptors;
+    using Unity.Attributes;
 
     public class TestRepositoryInterceptor : RepositoryInterceptorBase
     {
         public string P1 { get; }
         public bool P2 { get; }
 
+        [InjectionConstructor]
         public TestRepositoryInterceptor() { }
 
         public TestRepositoryInterceptor(string p1, bool p2)

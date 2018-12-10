@@ -1,9 +1,11 @@
-﻿namespace DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection
+﻿namespace DotNetToolkit.Repository.Extensions.Unity
 {
     using Configuration.Interceptors;
     using Configuration.Options;
     using Factories;
-    using global::Microsoft.Extensions.DependencyInjection;
+    using global::Unity;
+    using global::Unity.Injection;
+    using global::Unity.Lifetime;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -11,24 +13,23 @@
     using Transactions;
 
     /// <summary>
-    /// Contains various extension methods for <see cref="IServiceCollection" />
+    /// Contains various extension methods for <see cref="IUnityContainer" />
     /// </summary>
-    public static class ServiceCollectionExtensions
+    public static class UnityContainerExtensions
     {
         /// <summary>
-        /// Adds all the repository services using the specified options builder.
+        /// Register all the repositories services using the specified options builder.
         /// </summary>
-        /// <param name="services">The service collection.</param>
+        /// <param name="container">The unity container.</param>
         /// <param name="optionsAction">A builder action used to create or modify options for the repositories.</param>
         /// <param name="assembliesToScan">The assemblies to scan.</param>
-        /// <returns>The same instance of the service collection which has been configured with the repositories.</returns>
         /// <remarks>
         /// This method will scan for repositories and interceptors from the specified assemblies collection, and will register them to the service collection.
         /// </remarks>
-        public static IServiceCollection AddRepositories(this IServiceCollection services, Action<RepositoryOptionsBuilder> optionsAction, params Assembly[] assembliesToScan)
+        public static void RegisterRepositories(this IUnityContainer container, Action<RepositoryOptionsBuilder> optionsAction, params Assembly[] assembliesToScan)
         {
-            if (services == null)
-                throw new ArgumentNullException(nameof(services));
+            if (container == null)
+                throw new ArgumentNullException(nameof(container));
 
             if (optionsAction == null)
                 throw new ArgumentNullException(nameof(optionsAction));
@@ -83,52 +84,49 @@
                 {
                     if (serviceType == typeof(IRepositoryInterceptor))
                     {
-                        if (services.Any(x => x.ServiceType == implementationType) || optionsBuilder.Options.ContainsInterceptorOfType(implementationType))
+                        if (container.IsRegistered(implementationType) || optionsBuilder.Options.ContainsInterceptorOfType(implementationType))
                             continue;
 
-                        services.AddScoped(implementationType, implementationType);
-                        services.AddScoped(serviceType, implementationType);
+                        container.RegisterType(implementationType, implementationType);
+                        container.RegisterType(serviceType, implementationType, implementationType.FullName);
                         registeredInterceptorTypes.Add(implementationType);
                     }
                     else
                     {
-                        services.AddTransient(serviceType, implementationType);
+                        container.RegisterType(serviceType, implementationType, new ContainerControlledTransientManager());
                     }
                 }
             }
 
             // Register other services
-            services.AddScoped<IRepositoryFactory, RepositoryFactory>(sp => new RepositoryFactory(sp.GetRequiredService<RepositoryOptions>()));
-            services.AddScoped<IUnitOfWork, UnitOfWork>(sp => new UnitOfWork(sp.GetRequiredService<RepositoryOptions>()));
-            services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>(sp => new UnitOfWorkFactory(sp.GetRequiredService<RepositoryOptions>()));
-            services.AddScoped<RepositoryOptions>(sp =>
+            container.RegisterType<IRepositoryFactory>(new InjectionFactory((c, t, n) => new RepositoryFactory(c.Resolve<RepositoryOptions>())));
+            container.RegisterType<IUnitOfWork>(new InjectionFactory((c, t, n) => new UnitOfWork(c.Resolve<RepositoryOptions>())));
+            container.RegisterType<IUnitOfWorkFactory>(new InjectionFactory((c, t, n) => new UnitOfWorkFactory(c.Resolve<RepositoryOptions>())));
+            container.RegisterType<RepositoryOptions>(new InjectionFactory((c, t, n) =>
             {
                 var options = optionsBuilder.Options.Clone();
 
                 foreach (var interceptorType in registeredInterceptorTypes)
                 {
-                    options.With(interceptorType, () => (IRepositoryInterceptor)sp.GetService(interceptorType));
+                    options.With(interceptorType, () => (IRepositoryInterceptor)c.Resolve(interceptorType));
                 }
 
                 return options;
-            });
-
-            return services;
+            }));
         }
 
         /// <summary>
-        /// Adds all the repository services using the specified options builder.
+        /// Register all the repositories services using the specified options builder.
         /// </summary>
-        /// <param name="services">The service collection.</param>
+        /// <param name="container">The unity container.</param>
         /// <param name="optionsAction">A builder action used to create or modify options for the repositories.</param>
-        /// <returns>The same instance of the service collection which has been configured with the repositories.</returns>
         /// <remarks>
         /// This method will scan for repositories and interceptors from the assemblies that have been loaded into the
         /// execution context of this application domain, and will register them to the service collection.
         /// </remarks>
-        public static IServiceCollection AddRepositories(this IServiceCollection services, Action<RepositoryOptionsBuilder> optionsAction)
+        public static void RegisterRepositories(this IUnityContainer container, Action<RepositoryOptionsBuilder> optionsAction)
         {
-            return AddRepositories(services, optionsAction, AppDomain.CurrentDomain.GetAssemblies());
+            RegisterRepositories(container, optionsAction, AppDomain.CurrentDomain.GetAssemblies());
         }
     }
 }

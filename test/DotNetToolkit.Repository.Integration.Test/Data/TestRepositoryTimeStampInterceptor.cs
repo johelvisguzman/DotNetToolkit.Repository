@@ -2,11 +2,13 @@
 {
     using Configuration.Interceptors;
     using System;
+    using Unity.Attributes;
 
     public class TestRepositoryTimeStampInterceptor : RepositoryInterceptorBase
     {
         private readonly string _user;
 
+        [InjectionConstructor]
         public TestRepositoryTimeStampInterceptor()
         {
             _user = "UNKNOWN_USER";
