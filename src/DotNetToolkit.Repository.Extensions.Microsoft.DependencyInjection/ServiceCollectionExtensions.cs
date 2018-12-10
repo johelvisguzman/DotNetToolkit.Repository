@@ -7,6 +7,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using Transactions;
 
     /// <summary>
@@ -18,13 +19,13 @@
         /// Adds all the repository services using the specified options builder.
         /// </summary>
         /// <param name="services">The service collection.</param>
-        /// <param name="optionsAction">A builder action used to create or modify options for this unit of work factory.</param>
+        /// <param name="optionsAction">A builder action used to create or modify options for the repositories.</param>
+        /// <param name="assembliesToScan">The assemblies to scan.</param>
         /// <returns>The same instance of the service collection which has been configured with the repositories.</returns>
         /// <remarks>
-        /// This method will scan for repositories and interceptors from the assemblies that have been loaded into the
-        /// execution context of this application domain, and will register them to the service collection.
+        /// This method will scan for repositories and interceptors from the specified assemblies collection, and will register them to the service collection.
         /// </remarks>
-        public static IServiceCollection AddRepositories(this IServiceCollection services, Action<RepositoryOptionsBuilder> optionsAction)
+        public static IServiceCollection AddRepositories(this IServiceCollection services, Action<RepositoryOptionsBuilder> optionsAction, params Assembly[] assembliesToScan)
         {
             if (services == null)
                 throw new ArgumentNullException(nameof(services));
@@ -32,10 +33,16 @@
             if (optionsAction == null)
                 throw new ArgumentNullException(nameof(optionsAction));
 
-            // Gets all the accessible types for all the assemblies
-            var assembliesToScan = AppDomain.CurrentDomain.GetAssemblies();
+            if (assembliesToScan == null)
+                throw new ArgumentNullException(nameof(assembliesToScan));
 
-            var types = assembliesToScan.SelectMany(x => x.GetAccessibleTypes());
+            var baseAssembly = Assembly.Load("DotNetToolkit.Repository");
+
+            var assToScan = !assembliesToScan.Any(x => x.FullName.Equals(baseAssembly.FullName)) 
+                ? assembliesToScan.Concat(new[] { baseAssembly }) 
+                : assembliesToScan;
+
+            var types = assToScan.SelectMany(x => x.GetAccessibleTypes());
 
             var interfaceTypesToScan = new[]
             {
@@ -107,6 +114,21 @@
             });
 
             return services;
+        }
+
+        /// <summary>
+        /// Adds all the repository services using the specified options builder.
+        /// </summary>
+        /// <param name="services">The service collection.</param>
+        /// <param name="optionsAction">A builder action used to create or modify options for the repositories.</param>
+        /// <returns>The same instance of the service collection which has been configured with the repositories.</returns>
+        /// <remarks>
+        /// This method will scan for repositories and interceptors from the assemblies that have been loaded into the
+        /// execution context of this application domain, and will register them to the service collection.
+        /// </remarks>
+        public static IServiceCollection AddRepositories(this IServiceCollection services, Action<RepositoryOptionsBuilder> optionsAction)
+        {
+            return AddRepositories(services, optionsAction, AppDomain.CurrentDomain.GetAssemblies());
         }
     }
 }

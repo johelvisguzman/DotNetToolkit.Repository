@@ -3,11 +3,9 @@
     using Configuration.Interceptors;
     using Configuration.Options;
     using Data;
-    using EntityFrameworkCore;
     using Extensions.Microsoft.DependencyInjection;
     using Factories;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Infrastructure;
+    using InMemory;
     using Microsoft.Extensions.DependencyInjection;
     using System;
     using System.Collections.Generic;
@@ -17,11 +15,6 @@
     using Xunit;
     using Xunit.Abstractions;
 
-    /* Need to make this sequential because the .AddRepositories extension
-     * will scan for specific interfaces to register and we don't want to pick up anything from the other running tests
-     * (ei: The mock stuff that is being done in RepositoryInterceptorTests.cs)
-     */
-    [Collection("Sequential")]
     public class MicrosoftDependencyInjectionTests : TestBase
     {
         public MicrosoftDependencyInjectionTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
@@ -33,14 +26,10 @@
 
             services.AddRepositories(options =>
             {
-                options.UseEntityFrameworkCore<TestEfCoreDbContext>(opt =>
-                {
-                    opt.UseInMemoryDatabase(Guid.NewGuid().ToString())
-                        // don't raise the error warning us that the in memory db doesn't support transactions
-                        .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-                });
+                options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
-            });
+            },
+                typeof(MicrosoftDependencyInjectionTests).Assembly);
 
             var provider = services.BuildServiceProvider();
 
@@ -73,14 +62,10 @@
 
             services.AddRepositories(options =>
             {
-                options.UseEntityFrameworkCore<TestEfCoreDbContext>(opt =>
-                {
-                    opt.UseInMemoryDatabase(Guid.NewGuid().ToString())
-                        // don't raise the error warning us that the in memory db doesn't support transactions
-                        .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-                });
+                options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
-            });
+            },
+                typeof(MicrosoftDependencyInjectionTests).Assembly);
 
             var provider = services.BuildServiceProvider();
 
@@ -98,14 +83,10 @@
 
             services.AddRepositories(options =>
             {
-                options.UseEntityFrameworkCore<TestEfCoreDbContext>(opt =>
-                {
-                    opt.UseInMemoryDatabase(Guid.NewGuid().ToString())
-                        // don't raise the error warning us that the in memory db doesn't support transactions
-                        .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-                });
+                options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
-            });
+            },
+                typeof(MicrosoftDependencyInjectionTests).Assembly);
 
             var provider = services.BuildServiceProvider();
 
@@ -126,14 +107,10 @@
             {
                 options.UseInterceptor(new TestRepositoryInterceptor("RANDOM P1", false));
                 options.UseInterceptor(new TestRepositoryTimeStampInterceptor("RANDOM USER"));
-                options.UseEntityFrameworkCore<TestEfCoreDbContext>(opt =>
-                {
-                    opt.UseInMemoryDatabase(Guid.NewGuid().ToString())
-                        // don't raise the error warning us that the in memory db doesn't support transactions
-                        .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-                });
+                options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
-            });
+            },
+                    typeof(MicrosoftDependencyInjectionTests).Assembly);
 
             var provider = services.BuildServiceProvider();
 
@@ -152,15 +129,11 @@
             var services = new ServiceCollection();
 
             services.AddRepositories(options =>
-            {
-                options.UseEntityFrameworkCore<TestEfCoreDbContext>(opt =>
                 {
-                    opt.UseInMemoryDatabase(Guid.NewGuid().ToString())
-                        // don't raise the error warning us that the in memory db doesn't support transactions
-                        .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-                });
-                options.UseLoggerProvider(TestXUnitLoggerProvider);
-            });
+                    options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
+                    options.UseLoggerProvider(TestXUnitLoggerProvider);
+                },
+                typeof(MicrosoftDependencyInjectionTests).Assembly);
 
             var provider = services.BuildServiceProvider();
 
