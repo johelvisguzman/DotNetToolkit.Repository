@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\..\build\common.props" />
   
@@ -6,7 +6,7 @@
     <TargetFramework>net451</TargetFramework>
     <AssemblyName>DotNetToolkit.Repository.EntityFramework</AssemblyName>
     <RootNamespace>DotNetToolkit.Repository.EntityFramework</RootNamespace>
-    <Description>A toolkit that provides a lightweight starter kit for using the Repository pattern for the Entity Framework.</Description>
+    <Description>A repository context provider for the Entity Framework.</Description>
   </PropertyGroup>
 
   <ItemGroup>
