@@ -915,6 +915,9 @@
         {
             InterceptError(() =>
             {
+                if (options == null)
+                    throw new ArgumentNullException(nameof(options));
+
                 if (options.SpecificationStrategy == null)
                     throw new InvalidOperationException("The specified query options is missing a specification predicate.");
             });
@@ -1071,6 +1074,9 @@
         {
             InterceptError(() =>
             {
+                if (options == null)
+                    throw new ArgumentNullException(nameof(options));
+
                 if (options.SpecificationStrategy == null)
                     throw new InvalidOperationException("The specified query options is missing a specification predicate.");
             });
@@ -1344,6 +1350,9 @@
         {
             InterceptError(() =>
             {
+                if (options == null)
+                    throw new ArgumentNullException(nameof(options));
+
                 if (options.SpecificationStrategy == null)
                     throw new InvalidOperationException("The specified query options is missing a specification predicate.");
             });
@@ -1518,6 +1527,9 @@
         {
             InterceptError(() =>
             {
+                if (options == null)
+                    throw new ArgumentNullException(nameof(options));
+
                 if (options.SpecificationStrategy == null)
                     throw new InvalidOperationException("The specified query options is missing a specification predicate.");
             });
