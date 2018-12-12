@@ -810,7 +810,7 @@
 
                 Context.SaveChanges();
 
-                Logger.Info("Added an entity to the repository");
+                Logger.Debug("Added an entity to the repository");
             });
         }
 
@@ -831,7 +831,7 @@
 
                 Context.SaveChanges();
 
-                Logger.Info("Added a collection of entities to the repository");
+                Logger.Debug("Added a collection of entities to the repository");
             });
         }
 
@@ -852,7 +852,7 @@
 
                 Context.SaveChanges();
 
-                Logger.Info("Updated an entity in the repository");
+                Logger.Debug("Updated an entity in the repository");
             });
         }
 
@@ -873,7 +873,7 @@
 
                 Context.SaveChanges();
 
-                Logger.Info("Updated a collection of entities in the repository");
+                Logger.Debug("Updated a collection of entities in the repository");
             });
         }
 
@@ -894,7 +894,7 @@
 
                 Context.SaveChanges();
 
-                Logger.Info("Deleted an entity from the repository");
+                Logger.Debug("Deleted an entity from the repository");
             });
         }
 
@@ -915,6 +915,9 @@
         {
             InterceptError(() =>
             {
+                if (options == null)
+                    throw new ArgumentNullException(nameof(options));
+
                 if (options.SpecificationStrategy == null)
                     throw new InvalidOperationException("The specified query options is missing a specification predicate.");
             });
@@ -939,7 +942,7 @@
 
                 Context.SaveChanges();
 
-                Logger.Info("Deleted a collection of entities from the repository");
+                Logger.Debug("Deleted a collection of entities from the repository");
             });
         }
 
@@ -1071,6 +1074,9 @@
         {
             InterceptError(() =>
             {
+                if (options == null)
+                    throw new ArgumentNullException(nameof(options));
+
                 if (options.SpecificationStrategy == null)
                     throw new InvalidOperationException("The specified query options is missing a specification predicate.");
             });
@@ -1217,7 +1223,7 @@
 
                 await Context.AsAsync().SaveChangesAsync(cancellationToken);
 
-                Logger.Info("Added an entity to the repository");
+                Logger.Debug("Added an entity to the repository");
             });
         }
 
@@ -1242,7 +1248,7 @@
 
                 await Context.AsAsync().SaveChangesAsync(cancellationToken);
 
-                Logger.Info("Added a collection of entities to the repository");
+                Logger.Debug("Added a collection of entities to the repository");
             });
         }
 
@@ -1267,7 +1273,7 @@
 
                 await Context.AsAsync().SaveChangesAsync(cancellationToken);
 
-                Logger.Info("Updated an entity in the repository");
+                Logger.Debug("Updated an entity in the repository");
             });
         }
 
@@ -1292,7 +1298,7 @@
 
                 await Context.AsAsync().SaveChangesAsync(cancellationToken);
 
-                Logger.Info("Updated a collection of entities in the repository");
+                Logger.Debug("Updated a collection of entities in the repository");
             });
         }
 
@@ -1317,7 +1323,7 @@
 
                 await Context.AsAsync().SaveChangesAsync(cancellationToken);
 
-                Logger.Info("Deleted an entity from the repository");
+                Logger.Debug("Deleted an entity from the repository");
             });
         }
 
@@ -1344,6 +1350,9 @@
         {
             InterceptError(() =>
             {
+                if (options == null)
+                    throw new ArgumentNullException(nameof(options));
+
                 if (options.SpecificationStrategy == null)
                     throw new InvalidOperationException("The specified query options is missing a specification predicate.");
             });
@@ -1374,7 +1383,7 @@
 
                 await Context.AsAsync().SaveChangesAsync(cancellationToken);
 
-                Logger.Info("Deleted a collection of entities from the repository");
+                Logger.Debug("Deleted a collection of entities from the repository");
             });
         }
 
@@ -1518,6 +1527,9 @@
         {
             InterceptError(() =>
             {
+                if (options == null)
+                    throw new ArgumentNullException(nameof(options));
+
                 if (options.SpecificationStrategy == null)
                     throw new InvalidOperationException("The specified query options is missing a specification predicate.");
             });
