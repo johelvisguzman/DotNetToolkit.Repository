@@ -6,7 +6,7 @@
     <TargetFrameworks>net451;netstandard2.0</TargetFrameworks>
     <AssemblyName>DotNetToolkit.Repository.AdoNet</AssemblyName>
     <RootNamespace>DotNetToolkit.Repository.AdoNet</RootNamespace>
-    <Description>A toolkit that provides a lightweight starter kit for using the Repository pattern for ADO.NET.</Description>
+    <Description>A repository context provider for ADO.NET (for testing purposes only).</Description>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
