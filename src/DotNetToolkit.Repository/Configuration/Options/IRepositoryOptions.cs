@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Options
 {
+    using Caching;
     using Factories;
     using Interceptors;
     using Logging;
@@ -20,6 +21,11 @@
         /// Gets the configured logger provider.
         /// </summary>
         ILoggerProvider LoggerProvider { get; }
+
+        /// <summary>
+        /// Gets the configured caching provider.
+        /// </summary>
+        ICacheProvider CachingProvider { get; }
 
         /// <summary>
         /// Gets the configured internal context factory.

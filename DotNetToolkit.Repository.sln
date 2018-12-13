@@ -31,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Pe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection", "src\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.csproj", "{6658C0C2-366C-4906-A333-BAB42A512CC5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetToolkit.Repository.Extensions.Unity", "src\DotNetToolkit.Repository.Extensions.Unity\DotNetToolkit.Repository.Extensions.Unity.csproj", "{33BA3639-6B06-4D2B-8273-9CFDFF46A431}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Extensions.Unity", "src\DotNetToolkit.Repository.Extensions.Unity\DotNetToolkit.Repository.Extensions.Unity.csproj", "{33BA3639-6B06-4D2B-8273-9CFDFF46A431}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository
 {
     using Configuration;
+    using Configuration.Caching;
     using Configuration.Conventions;
     using Configuration.Interceptors;
     using Configuration.Logging;
@@ -18,7 +19,6 @@
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
-    using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
@@ -106,7 +106,16 @@
         /// <return>The entity found.</return>
         public TEntity Find(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
-            return InterceptQueryResult<TEntity>(() => Context.Find<TEntity>(fetchStrategy, key1, key2, key3));
+            Logger.Debug("Executing QueryResult [ Method = Find ]");
+
+            var queryResult = CacheProvider.GetOrSet<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy,
+                () => InterceptError<QueryResult<TEntity>>(
+                    () => Context.Find<TEntity>(fetchStrategy, key1, key2, key3)),
+                Logger);
+
+            Logger.Debug($"Executed QueryResult [ Method = Find, CacheUsed = {queryResult.CacheUsed} ]");
+
+            return queryResult.Result;
         }
 
         /// <summary>
@@ -156,9 +165,18 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptQueryResultAsync<TEntity>(() => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2, key3));
+            Logger.Debug("Executing QueryResult [ Method = FindAsync ]");
+
+            var queryResult = await CacheProvider.GetOrSetAsync<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy,
+                () => InterceptErrorAsync<QueryResult<TEntity>>(
+                    () => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2, key3)),
+                Logger);
+
+            Logger.Debug($"Executed QueryResult [ Method = FindAsync, CacheUsed = {queryResult.CacheUsed} ]");
+
+            return queryResult.Result;
         }
 
         /// <summary>
@@ -284,7 +302,16 @@
         /// <return>The entity found.</return>
         public TEntity Find(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
-            return InterceptQueryResult<TEntity>(() => Context.Find<TEntity>(fetchStrategy, key1, key2));
+            Logger.Debug("Executing QueryResult [ Method = Find ]");
+
+            var queryResult = CacheProvider.GetOrSet<TEntity>(new object[] { key1, key2 }, fetchStrategy,
+                () => InterceptError<QueryResult<TEntity>>(
+                    () => Context.Find<TEntity>(fetchStrategy, key1, key2)),
+                Logger);
+
+            Logger.Debug($"Executed QueryResult [ Method = Find, CacheUsed = {queryResult.CacheUsed} ]");
+
+            return queryResult.Result;
         }
 
         /// <summary>
@@ -330,9 +357,18 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptQueryResultAsync<TEntity>(() => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2));
+            Logger.Debug("Executing QueryResult [ Method = FindAsync ]");
+
+            var queryResult = await CacheProvider.GetOrSetAsync<TEntity>(new object[] { key1, key2 }, fetchStrategy,
+                () => InterceptErrorAsync<QueryResult<TEntity>>(
+                    () => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2)),
+                Logger);
+
+            Logger.Debug($"Executed QueryResult [ Method = FindAsync, CacheUsed = {queryResult.CacheUsed} ]");
+
+            return queryResult.Result;
         }
 
         /// <summary>
@@ -451,7 +487,16 @@
         /// <return>The entity found.</return>
         public TEntity Find(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
-            return InterceptQueryResult<TEntity>(() => Context.Find<TEntity>(fetchStrategy, key));
+            Logger.Debug("Executing QueryResult [ Method = Find ]");
+
+            var queryResult = CacheProvider.GetOrSet<TEntity>(new object[] { key }, fetchStrategy,
+                () => InterceptError<QueryResult<TEntity>>(
+                    () => Context.Find<TEntity>(fetchStrategy, key)),
+                Logger);
+
+            Logger.Debug($"Executed QueryResult [ Method = Find, CacheUsed = {queryResult.CacheUsed} ]");
+
+            return queryResult.Result;
         }
 
         /// <summary>
@@ -493,9 +538,18 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        public Task<TEntity> FindAsync(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<TEntity> FindAsync(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptQueryResultAsync<TEntity>(() => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key));
+            Logger.Debug("Executing QueryResult [ Method = FindAsync ]");
+
+            var queryResult = await CacheProvider.GetOrSetAsync<TEntity>(new object[] { key }, fetchStrategy,
+                () => InterceptErrorAsync<QueryResult<TEntity>>(
+                    () => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key)),
+                Logger);
+
+            Logger.Debug($"Executed QueryResult [ Method = FindAsync, CacheUsed = {queryResult.CacheUsed} ]");
+
+            return queryResult.Result;
         }
 
         /// <summary>
@@ -570,7 +624,7 @@
                 if (_context == null)
                 {
                     _context = _contextFactory.Create();
-                    _context.UseLoggerProvider(_options.LoggerProvider);
+                    _context.UseLoggerProvider(_options.LoggerProvider ?? new ConsoleLoggerProvider(LogLevel.Debug));
                 }
 
                 return _context;
@@ -581,6 +635,11 @@
         /// Gets the repository logger.
         /// </summary>
         internal ILogger Logger { get; }
+
+        /// <summary>
+        /// Gets the caching provider.
+        /// </summary>
+        internal ICacheProvider CacheProvider { get; private set; }
 
         #endregion
 
@@ -601,16 +660,20 @@
 
             OnConfiguring(optionsBuilder);
 
-            if (optionsBuilder.Options.LoggerProvider == null)
-                throw new InvalidOperationException("No logger provider has been configured for this repository.");
+            // Sets the default logger provider (prints all messages levels)
+            var loggerProvider = optionsBuilder.Options.LoggerProvider ?? new ConsoleLoggerProvider(LogLevel.Debug);
 
-            Logger = optionsBuilder.Options.LoggerProvider.Create($"DotNetToolkit.Repository<{typeof(TEntity).Name}>");
+            Logger = loggerProvider.Create($"DotNetToolkit.Repository<{typeof(TEntity).Name}>");
 
             var contextFactory = optionsBuilder.Options.ContextFactory;
             if (contextFactory == null)
                 throw new InvalidOperationException("No context provider has been configured for this repository.");
 
             _contextFactory = contextFactory;
+
+            var cachingProvider = options.CachingProvider ?? NullCacheProvider.Instance;
+
+            CacheProvider = cachingProvider;
 
             _options = optionsBuilder.Options;
         }
@@ -629,16 +692,27 @@
         /// <returns>A list which each entity has been projected into a new form.</returns>
         public IEnumerable<TEntity> ExecuteQuery(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector)
         {
-            return InterceptError<IEnumerable<TEntity>>(() =>
+            InterceptError(() =>
             {
                 if (sql == null)
                     throw new ArgumentNullException(nameof(sql));
 
                 if (projector == null)
                     throw new ArgumentNullException(nameof(projector));
-
-                return Context.ExecuteQuery(sql, cmdType, parameters, projector);
             });
+
+            Logger.Debug("Executing QueryResult [ Method = ExecuteQuery ]");
+
+            var queryResult = CacheProvider.GetOrSetExecuteQuery<TEntity>(sql, cmdType, parameters,
+                () => InterceptError<QueryResult<IEnumerable<TEntity>>>(
+                    () => Context.ExecuteQuery(sql, cmdType, parameters, projector)),
+                Logger);
+
+            CacheProviderManager.IncrementCounter();
+
+            Logger.Debug($"Executed QueryResult [ Method = ExecuteQuery, CacheUsed = {queryResult.CacheUsed} ]");
+
+            return queryResult.Result;
         }
 
         /// <summary>
@@ -661,7 +735,7 @@
         /// <returns>A list which each entity has been projected into a new form.</returns>
         public IEnumerable<TEntity> ExecuteQuery(string sql, Func<IDataReader, TEntity> projector)
         {
-            return ExecuteQuery(sql, (object[]) null, projector);
+            return ExecuteQuery(sql, (object[])null, projector);
         }
 
         /// <summary>
@@ -673,13 +747,24 @@
         /// <returns>The number of rows affected.</returns>
         public int ExecuteQuery(string sql, CommandType cmdType, object[] parameters)
         {
-            return InterceptError<int>(() =>
+            InterceptError(() =>
             {
                 if (sql == null)
                     throw new ArgumentNullException(nameof(sql));
-
-                return Context.ExecuteQuery(sql, cmdType, parameters);
             });
+
+            Logger.Debug("Executing QueryResult [ Method = ExecuteQuery ]");
+
+            var queryResult = CacheProvider.GetOrSetExecuteQuery<int>(sql, cmdType, parameters,
+                () => InterceptError<QueryResult<int>>(
+                    () => Context.ExecuteQuery(sql, cmdType, parameters)),
+                Logger);
+
+            CacheProviderManager.IncrementCounter();
+
+            Logger.Debug($"Executed QueryResult [ Method = ExecuteQuery, CacheUsed = {queryResult.CacheUsed} ]");
+
+            return queryResult.Result;
         }
 
         /// <summary>
@@ -700,7 +785,7 @@
         /// <returns>The number of rows affected.</returns>
         public int ExecuteQuery(string sql)
         {
-            return ExecuteQuery(sql, (object[]) null);
+            return ExecuteQuery(sql, (object[])null);
         }
 
         /// <summary>
@@ -712,18 +797,29 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
-        public Task<IEnumerable<TEntity>> ExecuteQueryAsync(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<IEnumerable<TEntity>> ExecuteQueryAsync(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync<IEnumerable<TEntity>>(() =>
+            InterceptError(() =>
             {
                 if (sql == null)
                     throw new ArgumentNullException(nameof(sql));
 
                 if (projector == null)
                     throw new ArgumentNullException(nameof(projector));
-
-                return Context.AsAsync().ExecuteQueryAsync(sql, cmdType, parameters, projector, cancellationToken);
             });
+
+            Logger.Debug("Executing QueryResult [ Method = ExecuteQueryAsync ]");
+
+            var queryResult = await CacheProvider.GetOrSetExecuteQueryAsync<TEntity>(sql, cmdType, parameters,
+                () => InterceptErrorAsync<QueryResult<IEnumerable<TEntity>>>(
+                    () => Context.AsAsync().ExecuteQueryAsync(sql, cmdType, parameters, projector, cancellationToken)),
+                Logger);
+
+            CacheProviderManager.IncrementCounter();
+
+            Logger.Debug($"Executed QueryResult [ Method = ExecuteQueryAsync, CacheUsed = {queryResult.CacheUsed} ]");
+
+            return queryResult.Result;
         }
 
         /// <summary>
@@ -759,15 +855,26 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
-        public Task<int> ExecuteQueryAsync(string sql, CommandType cmdType, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<int> ExecuteQueryAsync(string sql, CommandType cmdType, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync<int>(() =>
+            InterceptError(() =>
             {
                 if (sql == null)
                     throw new ArgumentNullException(nameof(sql));
-
-                return Context.AsAsync().ExecuteQueryAsync(sql, cmdType, parameters, cancellationToken);
             });
+
+            Logger.Debug("Executing QueryResult [ Method = ExecuteQueryAsync ]");
+
+            var queryResult = await CacheProvider.GetOrSetExecuteQueryAsync<int>(sql, cmdType, parameters,
+                () => InterceptErrorAsync<QueryResult<int>>(
+                    () => Context.AsAsync().ExecuteQueryAsync(sql, cmdType, parameters, cancellationToken)),
+                Logger);
+
+            CacheProviderManager.IncrementCounter();
+
+            Logger.Debug($"Executed QueryResult [ Method = ExecuteQueryAsync, CacheUsed = {queryResult.CacheUsed} ]");
+
+            return queryResult.Result;
         }
 
         /// <summary>
@@ -810,6 +917,8 @@
 
                 Context.SaveChanges();
 
+                CacheProviderManager.IncrementCounter();
+
                 Logger.Debug("Added an entity to the repository");
             });
         }
@@ -830,6 +939,8 @@
                 InterceptAddItem(entities);
 
                 Context.SaveChanges();
+
+                CacheProviderManager.IncrementCounter();
 
                 Logger.Debug("Added a collection of entities to the repository");
             });
@@ -852,6 +963,8 @@
 
                 Context.SaveChanges();
 
+                CacheProviderManager.IncrementCounter();
+
                 Logger.Debug("Updated an entity in the repository");
             });
         }
@@ -873,6 +986,8 @@
 
                 Context.SaveChanges();
 
+                CacheProviderManager.IncrementCounter();
+
                 Logger.Debug("Updated a collection of entities in the repository");
             });
         }
@@ -893,6 +1008,8 @@
                 InterceptDeleteItem(entity);
 
                 Context.SaveChanges();
+
+                CacheProviderManager.IncrementCounter();
 
                 Logger.Debug("Deleted an entity from the repository");
             });
@@ -942,6 +1059,8 @@
 
                 Context.SaveChanges();
 
+                CacheProviderManager.IncrementCounter();
+
                 Logger.Debug("Deleted a collection of entities from the repository");
             });
         }
@@ -985,7 +1104,16 @@
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public TResult Find<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
-            return InterceptQueryResult<TResult>(() => Context.Find<TEntity, TResult>(options, selector));
+            Logger.Debug("Executing QueryResult [ Method = Find ]");
+
+            var queryResult = CacheProvider.GetOrSet<TEntity, TResult>(options, selector,
+                () => InterceptError<QueryResult<TResult>>(
+                    () => Context.Find<TEntity, TResult>(options, selector)),
+                Logger);
+
+            Logger.Debug($"Executed QueryResult [ Method = Find, CacheUsed = {queryResult.CacheUsed} ]");
+
+            return queryResult.Result;
         }
 
         /// <summary>
@@ -1048,9 +1176,12 @@
         {
             Logger.Debug("Executing QueryResult [ Method = FindAll ]");
 
-            var queryResult = InterceptError<QueryResult<IEnumerable<TResult>>>(() => Context.FindAll<TEntity, TResult>(options, selector));
+            var queryResult = CacheProvider.GetOrSetAll<TEntity, TResult>(options, selector,
+                () => InterceptError<QueryResult<IEnumerable<TResult>>>(
+                    () => Context.FindAll<TEntity, TResult>(options, selector)),
+                Logger);
 
-            Logger.Debug("Executed QueryResult [ Method = FindAll ]");
+            Logger.Debug($"Executed QueryResult [ Method = FindAll, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult;
         }
@@ -1110,7 +1241,16 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public int Count(IQueryOptions<TEntity> options)
         {
-            return InterceptQueryResult<int>(() => Context.Count<TEntity>(options));
+            Logger.Debug("Executing QueryResult [ Method = Count ]");
+
+            var queryResult = CacheProvider.GetOrSetCount<TEntity>(options,
+                () => InterceptError<QueryResult<int>>(
+                    () => Context.Count<TEntity>(options)),
+                Logger);
+
+            Logger.Debug($"Executed QueryResult [ Method = Count, CacheUsed = {queryResult.CacheUsed} ]");
+
+            return queryResult.Result;
         }
 
         /// <summary>
@@ -1162,9 +1302,12 @@
         {
             Logger.Debug("Executing QueryResult [ Method = ToDictionary ]");
 
-            var queryResult = InterceptError<QueryResult<Dictionary<TDictionaryKey, TElement>>>(() => Context.ToDictionary(options, keySelector, elementSelector));
+            var queryResult = CacheProvider.GetOrSetDictionary<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector,
+                () => InterceptError<QueryResult<Dictionary<TDictionaryKey, TElement>>>(
+                    () => Context.ToDictionary(options, keySelector, elementSelector)),
+                Logger);
 
-            Logger.Debug("Executed QueryResult [ Method = ToDictionary ]");
+            Logger.Debug($"Executed QueryResult [ Method = ToDictionary, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult;
         }
@@ -1195,9 +1338,12 @@
         {
             Logger.Debug("Executing QueryResult [ Method = GroupBy ]");
 
-            var queryResult = InterceptError<QueryResult<IEnumerable<TResult>>>(() => Context.GroupBy(options, keySelector, resultSelector));
+            var queryResult = CacheProvider.GetOrSetGroup<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector,
+                () => InterceptError<QueryResult<IEnumerable<TResult>>>(
+                    () => Context.GroupBy(options, keySelector, resultSelector)),
+                Logger);
 
-            Logger.Debug("Executed QueryResult [ Method = GroupBy ]");
+            Logger.Debug($"Executed QueryResult [ Method = GroupBy, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult;
         }
@@ -1222,6 +1368,8 @@
                 InterceptAddItem(entity);
 
                 await Context.AsAsync().SaveChangesAsync(cancellationToken);
+
+                CacheProviderManager.IncrementCounter();
 
                 Logger.Debug("Added an entity to the repository");
             });
@@ -1248,6 +1396,8 @@
 
                 await Context.AsAsync().SaveChangesAsync(cancellationToken);
 
+                CacheProviderManager.IncrementCounter();
+
                 Logger.Debug("Added a collection of entities to the repository");
             });
         }
@@ -1272,6 +1422,8 @@
                 InterceptUpdateItem(entity);
 
                 await Context.AsAsync().SaveChangesAsync(cancellationToken);
+
+                CacheProviderManager.IncrementCounter();
 
                 Logger.Debug("Updated an entity in the repository");
             });
@@ -1298,6 +1450,8 @@
 
                 await Context.AsAsync().SaveChangesAsync(cancellationToken);
 
+                CacheProviderManager.IncrementCounter();
+
                 Logger.Debug("Updated a collection of entities in the repository");
             });
         }
@@ -1322,6 +1476,8 @@
                 InterceptDeleteItem(entity);
 
                 await Context.AsAsync().SaveChangesAsync(cancellationToken);
+
+                CacheProviderManager.IncrementCounter();
 
                 Logger.Debug("Deleted an entity from the repository");
             });
@@ -1383,6 +1539,8 @@
 
                 await Context.AsAsync().SaveChangesAsync(cancellationToken);
 
+                CacheProviderManager.IncrementCounter();
+
                 Logger.Debug("Deleted a collection of entities from the repository");
             });
         }
@@ -1428,9 +1586,18 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public Task<TResult> FindAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<TResult> FindAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptQueryResultAsync<TResult>(() => Context.AsAsync().FindAsync<TEntity, TResult>(options, selector, cancellationToken));
+            Logger.Debug("Executing QueryResult [ Method = FindAsync ]");
+
+            var queryResult = await CacheProvider.GetOrSetAsync<TEntity, TResult>(options, selector,
+                () => InterceptErrorAsync<QueryResult<TResult>>(
+                    () => Context.AsAsync().FindAsync<TEntity, TResult>(options, selector, cancellationToken)),
+                Logger);
+
+            Logger.Debug($"Executed QueryResult [ Method = FindAsync, CacheUsed = {queryResult.CacheUsed} ]");
+
+            return queryResult.Result;
         }
 
         /// <summary>
@@ -1499,9 +1666,12 @@
         {
             Logger.Debug("Executing QueryResult [ Method = FindAllAsync ]");
 
-            var queryResult = await InterceptErrorAsync<QueryResult<IEnumerable<TResult>>>(() => Context.AsAsync().FindAllAsync<TEntity, TResult>(options, selector, cancellationToken));
+            var queryResult = await CacheProvider.GetOrSetAllAsync<TEntity, TResult>(options, selector,
+                    () => InterceptErrorAsync<QueryResult<IEnumerable<TResult>>>(
+                        () => Context.AsAsync().FindAllAsync<TEntity, TResult>(options, selector, cancellationToken)),
+                Logger);
 
-            Logger.Debug("Executed QueryResult [ Method = FindAllAsync ]");
+            Logger.Debug($"Executed QueryResult [ Method = FindAllAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult;
         }
@@ -1564,9 +1734,18 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public Task<int> CountAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<int> CountAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptQueryResultAsync<int>(() => Context.AsAsync().CountAsync<TEntity>(options, cancellationToken));
+            Logger.Debug("Executing QueryResult [ Method = CountAsync ]");
+
+            var queryResult = await CacheProvider.GetOrSetCountAsync<TEntity>(options,
+                () => InterceptErrorAsync<QueryResult<int>>(
+                    () => Context.AsAsync().CountAsync<TEntity>(options, cancellationToken)),
+                Logger);
+
+            Logger.Debug($"Executed QueryResult [ Method = CountAsync, CacheUsed = {queryResult.CacheUsed} ]");
+
+            return queryResult.Result;
         }
 
         /// <summary>
@@ -1757,28 +1936,6 @@
             {
                 DisposeContext();
             }
-        }
-
-        internal T InterceptQueryResult<T>(Func<QueryResult<T>> action, [CallerMemberName] string methodName = null)
-        {
-            Logger.Debug($"Executing QueryResult [ Method = {methodName} ]");
-
-            var queryResult = InterceptError<QueryResult<T>>(action);
-
-            Logger.Debug($"Executed QueryResult [ Method = {methodName} ]");
-
-            return queryResult.Result;
-        }
-
-        internal async Task<T> InterceptQueryResultAsync<T>(Func<Task<QueryResult<T>>> action, [CallerMemberName] string methodName = null)
-        {
-            Logger.Debug($"Executing QueryResult [ Method = {methodName} ]");
-
-            var queryResult = await InterceptErrorAsync<QueryResult<T>>(action);
-
-            Logger.Debug($"Executed QueryResult [ Method = {methodName} ]");
-
-            return queryResult.Result;
         }
 
         #endregion

@@ -3,6 +3,7 @@
     using Extensions;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Linq.Expressions;
 
     /// <summary>
@@ -57,6 +58,19 @@
         {
             _properties.Add(path);
             return this;
+        }
+
+        #endregion
+
+        #region Overrides of Object
+
+        /// <summary>
+        /// Returns a string that represents the current object.
+        /// </summary>
+        /// <returns>A string that represents the current object.</returns>
+        public override string ToString()
+        {
+            return $"FetchQueryStrategy<{typeof(T).Name}>: [ Paths = {string.Join(", ", _properties.ToArray())} ]";
         }
 
         #endregion

@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Integration.Test.Data
+namespace DotNetToolkit.Repository.Integration.Test.Data
 {
     using Configuration.Logging;
     using Configuration.Options;

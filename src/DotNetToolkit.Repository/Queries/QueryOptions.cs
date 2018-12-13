@@ -7,6 +7,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Text;
 
     /// <summary>
     /// An implementation of <see cref="IQueryOptions{T}" />.
@@ -247,6 +248,40 @@
         /// Gets the specification.
         /// </summary>
         ISpecificationQueryStrategy<T> IQueryOptions<T>.SpecificationStrategy { get { return _specificationStrategy; } }
+
+        #endregion
+
+        #region Overrides of Object
+
+        /// <summary>
+        /// Returns a string that represents the current object.
+        /// </summary>
+        /// <returns>A string that represents the current object.</returns>
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+
+            sb.Append($"QueryOptions<{typeof(T).Name}>: [ ");
+
+            sb.Append(_specificationStrategy != null 
+                ? $"\n\t{_specificationStrategy.ToString()}," 
+                : $"\n\tSpecificationQueryStrategy<{typeof(T).Name}>: [ null ],");
+
+            sb.Append(_fetchStrategy != null
+                ? $"\n\t{_fetchStrategy.ToString()},"
+                : $"\n\tFetchQueryStrategy<{typeof(T).Name}>: [ null ],");
+
+            if (_sortingPropertiesMapping != null && _sortingPropertiesMapping.Any())
+                sb.Append($"\n\tSort: [ {string.Join(", ", _sortingPropertiesMapping.Select(x => x.Key + " = " + x.Value).ToArray())} ],");
+            else
+                sb.Append("\n\tSort: [ null ],");
+
+            sb.Append($"\n\tPage: [ Index = {_pageIndex}, Size = {_pageSize} ]");
+
+            sb.Append(" ]");
+
+            return sb.ToString();
+        }
 
         #endregion
     }

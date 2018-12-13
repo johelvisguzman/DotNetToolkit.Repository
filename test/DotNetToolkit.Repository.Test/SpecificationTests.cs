@@ -86,7 +86,7 @@
         }
 
         [Fact]
-        public void FindByConcretSpecification()
+        public void FindByConcreteSpecification()
         {
             var product = new Product { Price = 99 };
             var spec = new ProductOnSaleSpecification();
@@ -96,6 +96,14 @@
             product.Price = 100;
 
             Assert.False(spec.IsSatisfiedBy(product));
+        }
+
+        [Fact]
+        public void Spec_ToString()
+        {
+            var spec = new SpecificationQueryStrategy<Product>(p => p.Price < 100).Or(p => p.Name.Equals("Windows XP Professional"));
+
+            Assert.Equal("SpecificationQueryStrategy<Product>: [ Predicate = p => ((p.Price < 100) OrElse p.Name.Equals(\"Windows XP Professional\")) ]", spec.ToString());
         }
     }
 }
