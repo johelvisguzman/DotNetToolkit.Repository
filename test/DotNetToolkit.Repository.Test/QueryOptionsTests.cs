@@ -192,5 +192,29 @@
             Assert.Contains("Phone", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
             Assert.Contains("Phone.Customer", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
         }
+
+        [Fact]
+        public void Options_ToString()
+        {
+            var options = new QueryOptions<Customer>()
+                .Fetch("Address")
+                .Fetch("Phone")
+                .Fetch("Phone.Customer")
+                .SatisfyBy(x => x.Name.Equals("Random Name"))
+                .SatisfyBy(x => x.Id > 50)
+                .SortBy("Id")
+                .SortByDescending("Name")
+                .Page(1, 10);
+
+            var expected = 
+                "QueryOptions<Customer>: [ " +
+                "\n\tSpecificationQueryStrategy<Customer>: [ Predicate = x => (x.Name.Equals(\"Random Name\") AndAlso (x.Id > 50)) ]," +
+                "\n\tFetchQueryStrategy<Customer>: [ Paths = Address, Phone, Phone.Customer ]," +
+                "\n\tSort: [ Id = Ascending, Name = Descending ]," +
+                "\n\tPage: [ Index = 1, Size = 10 ]" +
+                " ]";
+
+            Assert.Equal(expected, options.ToString());
+        }
     }
 }

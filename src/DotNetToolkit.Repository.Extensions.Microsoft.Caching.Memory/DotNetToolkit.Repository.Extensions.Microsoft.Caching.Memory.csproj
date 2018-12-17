@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\build\common.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>net451;netstandard1.3;netstandard2.0</TargetFrameworks>
+    <Description>A caching provider for the Microsoft in-memory cache.</Description>
+    <AssemblyName>DotNetToolkit.Repository.Extensions.Microsoft.Caching.Memory</AssemblyName>
+    <RootNamespace>DotNetToolkit.Repository.Extensions.Microsoft.Caching.Memory</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3' Or '$(TargetFramework)' == 'net451'">
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="1.1.2" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="2.2.0" />
+  </ItemGroup>
+ 
+  <ItemGroup>
+    <ProjectReference Include="..\DotNetToolkit.Repository\DotNetToolkit.Repository.csproj" />
+  </ItemGroup>
+
+</Project>

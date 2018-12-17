@@ -30,6 +30,11 @@
         }
 
         /// <summary>
+        /// Gets a value indicating whether the executed query result was retrieved from the cache.
+        /// </summary>
+        public bool CacheUsed { get; internal set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="QueryResult{TResult}"/> class.
         /// </summary>
         /// <param name="result">The result.</param>

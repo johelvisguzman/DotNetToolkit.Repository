@@ -31,7 +31,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Pe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection", "src\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.csproj", "{6658C0C2-366C-4906-A333-BAB42A512CC5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetToolkit.Repository.Extensions.Unity", "src\DotNetToolkit.Repository.Extensions.Unity\DotNetToolkit.Repository.Extensions.Unity.csproj", "{33BA3639-6B06-4D2B-8273-9CFDFF46A431}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Extensions.Unity", "src\DotNetToolkit.Repository.Extensions.Unity\DotNetToolkit.Repository.Extensions.Unity.csproj", "{33BA3639-6B06-4D2B-8273-9CFDFF46A431}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Extensions.Microsoft.Caching.Memory", "src\DotNetToolkit.Repository.Extensions.Microsoft.Caching.Memory\DotNetToolkit.Repository.Extensions.Microsoft.Caching.Memory.csproj", "{D02247D4-1A6E-4BA8-9D87-2F70F2C234CE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -82,6 +84,10 @@ Global
 		{33BA3639-6B06-4D2B-8273-9CFDFF46A431}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33BA3639-6B06-4D2B-8273-9CFDFF46A431}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33BA3639-6B06-4D2B-8273-9CFDFF46A431}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D02247D4-1A6E-4BA8-9D87-2F70F2C234CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D02247D4-1A6E-4BA8-9D87-2F70F2C234CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D02247D4-1A6E-4BA8-9D87-2F70F2C234CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D02247D4-1A6E-4BA8-9D87-2F70F2C234CE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -98,6 +104,7 @@ Global
 		{2700614E-A941-42C9-B86F-22D8A47690F3} = {91D14746-3446-48E3-B01C-BF77B848738A}
 		{6658C0C2-366C-4906-A333-BAB42A512CC5} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{33BA3639-6B06-4D2B-8273-9CFDFF46A431} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
+		{D02247D4-1A6E-4BA8-9D87-2F70F2C234CE} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96973E0C-81D1-42DE-9F78-7103241B4E07}

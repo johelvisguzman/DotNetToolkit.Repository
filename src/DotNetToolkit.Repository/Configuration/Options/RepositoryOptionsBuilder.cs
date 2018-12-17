@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Options
 {
+    using Caching;
     using Factories;
     using Interceptors;
     using Logging;
@@ -38,8 +39,6 @@
         public RepositoryOptionsBuilder()
         {
             _options = new RepositoryOptions();
-
-            Initialize();
         }
 
         /// <summary>
@@ -52,8 +51,6 @@
                 throw new ArgumentNullException(nameof(options));
 
             _options = options.Clone();
-
-            Initialize();
         }
 
         #endregion
@@ -155,7 +152,7 @@
         }
 
         /// <summary>
-        /// Configures the repository options with logger provider for logging messages within the repository.
+        /// Configures the repository options with a logger provider for logging messages within the repository.
         /// </summary>
         /// <param name="loggerProvider">The logger provider.</param>
         /// <returns>The same builder instance.</returns>
@@ -165,6 +162,21 @@
                 throw new ArgumentNullException(nameof(loggerProvider));
 
             _options.With(loggerProvider);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Configures the repository options with a caching provider for caching queries within the repository.
+        /// </summary>
+        /// <param name="cacheProvider">The caching provider.</param>
+        /// <returns>The same builder instance.</returns>
+        public RepositoryOptionsBuilder UseCachingProvider(ICacheProvider cacheProvider)
+        {
+            if (cacheProvider == null)
+                throw new ArgumentNullException(nameof(cacheProvider));
+
+            _options.With(cacheProvider);
 
             return this;
         }
@@ -182,19 +194,6 @@
             _options.With(contextFactory);
 
             return this;
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        private void Initialize()
-        {
-            if (_options.LoggerProvider == null)
-            {
-                // Sets the default logger provider (prints all messages levels)
-                UseLoggerProvider(new ConsoleLoggerProvider(LogLevel.Debug));
-            }
         }
 
         #endregion

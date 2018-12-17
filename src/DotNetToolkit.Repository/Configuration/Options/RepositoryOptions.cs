@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Options
 {
+    using Caching;
     using Factories;
     using Interceptors;
     using Logging;
@@ -18,6 +19,7 @@
         private IRepositoryContextFactory _contextFactory;
         private IRepositoryContext _context;
         private ILoggerProvider _loggerProvider;
+        private ICacheProvider _cachingProvider;
 
         #endregion
 
@@ -34,6 +36,11 @@
         public virtual ILoggerProvider LoggerProvider { get { return _loggerProvider; } }
 
         /// <summary>
+        /// Gets the configured caching provider.
+        /// </summary>
+        public virtual ICacheProvider CachingProvider { get { return _cachingProvider; } }
+
+        /// <summary>
         /// Gets the configured internal context factory.
         /// </summary>
         public virtual IRepositoryContextFactory ContextFactory { get { return _contextFactory; } }
@@ -47,6 +54,7 @@
             {
                 return ContextFactory != null ||
                        LoggerProvider != null ||
+                       CachingProvider != null ||
                        Interceptors.Any();
             }
         }
@@ -78,7 +86,7 @@
 
             return this;
         }
-        
+
         /// <summary>
         /// Returns the option instance with a configured context factory.
         /// </summary>
@@ -120,6 +128,21 @@
                 throw new ArgumentNullException(nameof(loggerProvider));
 
             _loggerProvider = loggerProvider;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Returns the option instance with a configured caching provider for caching queries within the repository.
+        /// </summary>
+        /// <param name="cacheProvider">The caching provider.</param>
+        /// <returns>The same option instance.</returns>
+        internal virtual RepositoryOptions With(ICacheProvider cacheProvider)
+        {
+            if (cacheProvider == null)
+                throw new ArgumentNullException(nameof(cacheProvider));
+
+            _cachingProvider = cacheProvider;
 
             return this;
         }

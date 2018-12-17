@@ -31,5 +31,16 @@
             Assert.Contains("Phone", strategy.PropertyPaths);
             Assert.Contains("Phone.Customer", strategy.PropertyPaths);
         }
+
+        [Fact]
+        public void Fetch_ToString()
+        {
+            var strategy = new FetchQueryStrategy<Customer>()
+                .Fetch("Address")
+                .Fetch("Phone")
+                .Fetch("Phone.Customer");
+
+            Assert.Equal("FetchQueryStrategy<Customer>: [ Paths = Address, Phone, Phone.Customer ]", strategy.ToString());
+        }
     }
 }

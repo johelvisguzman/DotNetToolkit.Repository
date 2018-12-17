@@ -176,6 +176,26 @@
         }
 
         /// <summary>
+        /// Gets the hashing information for the specified expression.
+        /// </summary>
+        /// <param name="exp">The expression.</param>
+        /// <returns>The generated hash.</returns>
+        // https://blogs.msdn.microsoft.com/mattwar/2007/08/01/linq-building-an-iqueryable-provider-part-iii/
+        public static string TranslateToString(Expression exp)
+        {
+            if (exp == null)
+                throw new ArgumentNullException(nameof(exp));
+
+            // locally evaluate as much of the query as possible
+            exp = Evaluator.PartialEval(exp);
+
+            // support local collections
+            exp = LocalCollectionExpander.Rewrite(exp);
+
+            return exp.ToString();
+        }
+
+        /// <summary>
         /// Gets the member expression.
         /// </summary>
         /// <param name="exp">The expression.</param>
