@@ -53,6 +53,7 @@ after_build:
   - dotnet pack .\src\DotNetToolkit.Repository.AdoNet\DotNetToolkit.Repository.AdoNet.csproj --configuration Release
   - dotnet pack .\src\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.csproj --configuration Release
   - dotnet pack .\src\DotNetToolkit.Repository.Extensions.Unity\DotNetToolkit.Repository.Extensions.Unity.csproj --configuration Release
+  - dotnet pack .\src\DotNetToolkit.Repository.Extensions.Microsoft.Caching.Memory\DotNetToolkit.Repository.Extensions.Microsoft.Caching.Memory.csproj --configuration Release
 
 #---------------------------------#
 #      artifacts configuration    #

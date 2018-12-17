@@ -8,6 +8,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Extensions.Microsoft.Caching.Memory;
     using Xunit;
     using Xunit.Abstractions;
 
@@ -100,24 +101,28 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                     {
                         return new RepositoryOptionsBuilder()
                             .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                            .UseCachingProvider(new InMemoryCacheProvider())
                             .UseLoggerProvider(TestXUnitLoggerProvider)
                             .Options;
                     }
                 case ContextProviderType.AdoNet:
                     {
                         return TestAdoNetOptionsBuilderFactory.Create()
+                            .UseCachingProvider(new InMemoryCacheProvider())
                             .UseLoggerProvider(TestXUnitLoggerProvider)
                             .Options;
                     }
                 case ContextProviderType.EntityFramework:
                     {
                         return TestEfOptionsBuilderFactory.Create()
+                            .UseCachingProvider(new InMemoryCacheProvider())
                             .UseLoggerProvider(TestXUnitLoggerProvider)
                             .Options;
                     }
                 case ContextProviderType.EntityFrameworkCore:
                     {
                         return TestEfCoreOptionsBuilderFactory.Create()
+                            .UseCachingProvider(new InMemoryCacheProvider())
                             .UseLoggerProvider(TestXUnitLoggerProvider)
                             .Options;
                     }
