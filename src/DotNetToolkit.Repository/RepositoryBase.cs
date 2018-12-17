@@ -1801,9 +1801,12 @@
         {
             Logger.Debug("Executing QueryResult [ Method = ToDictionaryAsync ]");
 
-            var queryResult = await InterceptErrorAsync<QueryResult<Dictionary<TDictionaryKey, TElement>>>(() => Context.AsAsync().ToDictionaryAsync(options, keySelector, elementSelector, cancellationToken));
+            var queryResult = await CacheProvider.GetOrSetDictionaryAsync<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector,
+                () => InterceptErrorAsync<QueryResult<Dictionary<TDictionaryKey, TElement>>>(
+                    () => Context.AsAsync().ToDictionaryAsync(options, keySelector, elementSelector, cancellationToken)),
+                Logger);
 
-            Logger.Debug("Executed QueryResult [ Method = ToDictionaryAsync ]");
+            Logger.Debug($"Executed QueryResult [ Method = ToDictionaryAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult;
 
@@ -1837,9 +1840,12 @@
         {
             Logger.Debug("Executing QueryResult [ Method = GroupByAsync ]");
 
-            var queryResult = await InterceptErrorAsync<QueryResult<IEnumerable<TResult>>>(() => Context.AsAsync().GroupByAsync(options, keySelector, resultSelector, cancellationToken));
+            var queryResult = await CacheProvider.GetOrSetGroupAsync<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector,
+                () => InterceptErrorAsync<QueryResult<IEnumerable<TResult>>>(
+                    () => Context.AsAsync().GroupByAsync(options, keySelector, resultSelector, cancellationToken)),
+                Logger);
 
-            Logger.Debug("Executed QueryResult [ Method = GroupByAsync ]");
+            Logger.Debug($"Executed QueryResult [ Method = GroupByAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult;
         }
