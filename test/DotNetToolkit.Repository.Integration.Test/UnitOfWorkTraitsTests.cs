@@ -11,21 +11,21 @@
         public UnitOfWorkTraitsTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
 
         [Fact]
-        public void DisposeRollBackUnComittedChanges()
+        public void DisposeRollBackUnCommittedChanges()
         {
-            ForAllUnitOfWorkFactories(TestDisposeRollBackUnComittedChanges);
+            ForAllUnitOfWorkFactories(TestDisposeRollBackUnCommittedChanges);
         }
 
         [Fact]
         public void Commit()
         {
-            ForAllUnitOfWorkFactories(TestComit);
+            ForAllUnitOfWorkFactories(TestCommit);
         }
 
         [Fact]
-        public void ThrowsIfAlreadyComitted()
+        public void ThrowsIfAlreadyCommitted()
         {
-            ForAllUnitOfWorkFactories(TestThrowsIfAlreadyComitted);
+            ForAllUnitOfWorkFactories(TestThrowsIfAlreadyCommitted);
         }
 
         [Fact]
@@ -39,14 +39,14 @@
         {
             ForAllUnitOfWorkFactories(TestCreate);
         }
-        
+
         [Fact]
         public void ThrowsIfCreateRepositoryWhenDisposed()
         {
             ForAllUnitOfWorkFactories(TestThrowsIfCreateRepositoryWhenDisposed);
         }
 
-        private static void TestDisposeRollBackUnComittedChanges(IUnitOfWorkFactory uowFactory)
+        private static void TestDisposeRollBackUnCommittedChanges(IUnitOfWorkFactory uowFactory)
         {
             using (var uow = uowFactory.Create())
             {
@@ -64,7 +64,7 @@
             }
         }
 
-        private static void TestComit(IUnitOfWorkFactory uowFactory)
+        private static void TestCommit(IUnitOfWorkFactory uowFactory)
         {
             using (var uow = uowFactory.Create())
             {
@@ -84,7 +84,7 @@
             }
         }
 
-        private static void TestThrowsIfAlreadyComitted(IUnitOfWorkFactory uowFactory)
+        private static void TestThrowsIfAlreadyCommitted(IUnitOfWorkFactory uowFactory)
         {
             var uow = uowFactory.Create();
 
