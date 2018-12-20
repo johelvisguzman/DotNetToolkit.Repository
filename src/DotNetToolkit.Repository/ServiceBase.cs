@@ -197,7 +197,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().Find(key1, key2, key3);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().Find(key1, key2, key3);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -213,7 +217,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().Find(key1, key2, key3, fetchStrategy);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().Find(key1, key2, key3, fetchStrategy);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -226,7 +234,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().Find(predicate);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().Find(predicate);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -239,7 +251,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().Find(options);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().Find(options);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -253,7 +269,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().Find<TResult>(predicate, selector);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().Find<TResult>(predicate, selector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -267,7 +287,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().Find<TResult>(options, selector);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().Find<TResult>(options, selector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -279,7 +303,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAll();
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAll();
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -292,7 +320,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAll(predicate);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAll(predicate);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -305,7 +337,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAll(options);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAll(options);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -318,7 +354,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAll<TResult>(selector);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAll<TResult>(selector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -332,7 +372,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAll<TResult>(predicate, selector);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAll<TResult>(predicate, selector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -346,7 +390,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAll<TResult>(options, selector);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAll<TResult>(options, selector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -361,7 +409,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().Exists(key1, key2, key3);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().Exists(key1, key2, key3);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -374,7 +426,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().Exists(predicate);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().Exists(predicate);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -387,7 +443,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().Exists(options);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().Exists(options);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -399,7 +459,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().Count();
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().Count();
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -412,7 +476,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().Count(predicate);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().Count(predicate);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -425,7 +493,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().Count(options);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().Count(options);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -439,7 +511,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().ToDictionary<TDictionaryKey>(keySelector);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().ToDictionary<TDictionaryKey>(keySelector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -454,7 +530,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().ToDictionary<TDictionaryKey>(options, keySelector);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().ToDictionary<TDictionaryKey>(options, keySelector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -470,7 +550,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().ToDictionary<TDictionaryKey, TElement>(keySelector, elementSelector);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().ToDictionary<TDictionaryKey, TElement>(keySelector, elementSelector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -487,7 +571,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().ToDictionary<TDictionaryKey, TElement>(options, keySelector, elementSelector);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().ToDictionary<TDictionaryKey, TElement>(options, keySelector, elementSelector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -503,7 +591,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().GroupBy<TGroupKey, TResult>(keySelector, resultSelector);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().GroupBy<TGroupKey, TResult>(keySelector, resultSelector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -520,7 +612,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2, TKey3>().GroupBy<TGroupKey, TResult>(options, keySelector, resultSelector);
+                var result = uow.Create<TEntity, TKey1, TKey2, TKey3>().GroupBy<TGroupKey, TResult>(options, keySelector, resultSelector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -693,7 +789,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync(key1, key2, key3, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync(key1, key2, key3, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -710,7 +810,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync(key1, key2, key3, fetchStrategy, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync(key1, key2, key3, fetchStrategy, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -724,7 +828,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync(predicate, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync(predicate, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -738,7 +846,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync(options, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -753,7 +865,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync<TResult>(predicate, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync<TResult>(predicate, selector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -768,7 +884,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync<TResult>(options, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync<TResult>(options, selector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -781,7 +901,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAllAsync(cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAllAsync(cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -795,7 +919,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAllAsync(cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAllAsync(cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -809,7 +937,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAllAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAllAsync(options, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -823,7 +955,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAllAsync<TResult>(selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAllAsync<TResult>(selector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -838,7 +974,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAllAsync<TResult>(predicate, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAllAsync<TResult>(predicate, selector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -853,7 +993,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAllAsync<TResult>(options, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAllAsync<TResult>(options, selector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -869,7 +1013,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().ExistsAsync(key1, key2, key3, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().ExistsAsync(key1, key2, key3, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -883,7 +1031,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().ExistsAsync(predicate, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().ExistsAsync(predicate, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -897,7 +1049,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().ExistsAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().ExistsAsync(options, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -910,7 +1066,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().CountAsync(cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().CountAsync(cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -924,7 +1084,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().CountAsync(predicate, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().CountAsync(predicate, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -938,7 +1102,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().CountAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().CountAsync(options, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -953,7 +1121,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().ToDictionaryAsync<TDictionaryKey>(keySelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().ToDictionaryAsync<TDictionaryKey>(keySelector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -969,7 +1141,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().ToDictionaryAsync<TDictionaryKey>(options, keySelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().ToDictionaryAsync<TDictionaryKey>(options, keySelector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -986,7 +1162,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().ToDictionaryAsync<TDictionaryKey, TElement>(keySelector, elementSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().ToDictionaryAsync<TDictionaryKey, TElement>(keySelector, elementSelector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1004,7 +1184,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().ToDictionaryAsync<TDictionaryKey, TElement>(options, keySelector, elementSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().ToDictionaryAsync<TDictionaryKey, TElement>(options, keySelector, elementSelector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1021,7 +1205,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().GroupByAsync<TGroupKey, TResult>(keySelector, resultSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().GroupByAsync<TGroupKey, TResult>(keySelector, resultSelector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1039,7 +1227,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2, TKey3>().GroupByAsync<TGroupKey, TResult>(options, keySelector, resultSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().GroupByAsync<TGroupKey, TResult>(options, keySelector, resultSelector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1229,7 +1421,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().Find(key1, key2);
+                var result = uow.Create<TEntity, TKey1, TKey2>().Find(key1, key2);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1244,7 +1440,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().Find(key1, key2, fetchStrategy);
+                var result = uow.Create<TEntity, TKey1, TKey2>().Find(key1, key2, fetchStrategy);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1257,7 +1457,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().Find(predicate);
+                var result = uow.Create<TEntity, TKey1, TKey2>().Find(predicate);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1270,7 +1474,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().Find(options);
+                var result = uow.Create<TEntity, TKey1, TKey2>().Find(options);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1284,7 +1492,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().Find<TResult>(predicate, selector);
+                var result = uow.Create<TEntity, TKey1, TKey2>().Find<TResult>(predicate, selector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1298,7 +1510,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().Find<TResult>(options, selector);
+                var result = uow.Create<TEntity, TKey1, TKey2>().Find<TResult>(options, selector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1310,7 +1526,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().FindAll();
+                var result = uow.Create<TEntity, TKey1, TKey2>().FindAll();
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1323,7 +1543,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().FindAll(predicate);
+                var result = uow.Create<TEntity, TKey1, TKey2>().FindAll(predicate);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1336,7 +1560,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().FindAll(options);
+                var result = uow.Create<TEntity, TKey1, TKey2>().FindAll(options);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1349,7 +1577,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().FindAll<TResult>(selector);
+                var result = uow.Create<TEntity, TKey1, TKey2>().FindAll<TResult>(selector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1363,7 +1595,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().FindAll<TResult>(predicate, selector);
+                var result = uow.Create<TEntity, TKey1, TKey2>().FindAll<TResult>(predicate, selector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1377,7 +1613,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().FindAll<TResult>(options, selector);
+                var result = uow.Create<TEntity, TKey1, TKey2>().FindAll<TResult>(options, selector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1391,7 +1631,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().Exists(key1, key2);
+                var result = uow.Create<TEntity, TKey1, TKey2>().Exists(key1, key2);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1404,7 +1648,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().Exists(predicate);
+                var result = uow.Create<TEntity, TKey1, TKey2>().Exists(predicate);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1417,7 +1665,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().Exists(options);
+                var result = uow.Create<TEntity, TKey1, TKey2>().Exists(options);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1429,7 +1681,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().Count();
+                var result = uow.Create<TEntity, TKey1, TKey2>().Count();
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1442,7 +1698,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().Count(predicate);
+                var result = uow.Create<TEntity, TKey1, TKey2>().Count(predicate);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1455,7 +1715,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().Count(options);
+                var result = uow.Create<TEntity, TKey1, TKey2>().Count(options);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1469,7 +1733,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().ToDictionary<TDictionaryKey>(keySelector);
+                var result = uow.Create<TEntity, TKey1, TKey2>().ToDictionary<TDictionaryKey>(keySelector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1484,7 +1752,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().ToDictionary<TDictionaryKey>(options, keySelector);
+                var result = uow.Create<TEntity, TKey1, TKey2>().ToDictionary<TDictionaryKey>(options, keySelector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1500,7 +1772,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().ToDictionary<TDictionaryKey, TElement>(keySelector, elementSelector);
+                var result = uow.Create<TEntity, TKey1, TKey2>().ToDictionary<TDictionaryKey, TElement>(keySelector, elementSelector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1517,7 +1793,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().ToDictionary<TDictionaryKey, TElement>(options, keySelector, elementSelector);
+                var result = uow.Create<TEntity, TKey1, TKey2>().ToDictionary<TDictionaryKey, TElement>(options, keySelector, elementSelector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1533,7 +1813,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().GroupBy<TGroupKey, TResult>(keySelector, resultSelector);
+                var result = uow.Create<TEntity, TKey1, TKey2>().GroupBy<TGroupKey, TResult>(keySelector, resultSelector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1550,7 +1834,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey1, TKey2>().GroupBy<TGroupKey, TResult>(options, keySelector, resultSelector);
+                var result = uow.Create<TEntity, TKey1, TKey2>().GroupBy<TGroupKey, TResult>(options, keySelector, resultSelector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1720,7 +2008,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().FindAsync(key1, key2, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAsync(key1, key2, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1736,7 +2028,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().FindAsync(key1, key2, fetchStrategy, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAsync(key1, key2, fetchStrategy, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1750,7 +2046,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().FindAsync(predicate, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAsync(predicate, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1764,7 +2064,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().FindAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAsync(options, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1779,7 +2083,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().FindAsync<TResult>(predicate, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAsync<TResult>(predicate, selector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1794,7 +2102,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().FindAsync<TResult>(options, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAsync<TResult>(options, selector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1807,7 +2119,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().FindAllAsync(cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAllAsync(cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1821,7 +2137,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().FindAllAsync(cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAllAsync(cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1835,7 +2155,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().FindAllAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAllAsync(options, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1849,7 +2173,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().FindAllAsync<TResult>(selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAllAsync<TResult>(selector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1864,7 +2192,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().FindAllAsync<TResult>(predicate, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAllAsync<TResult>(predicate, selector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1879,7 +2211,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().FindAllAsync<TResult>(options, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAllAsync<TResult>(options, selector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1894,7 +2230,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().ExistsAsync(key1, key2, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().ExistsAsync(key1, key2, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1908,7 +2248,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().ExistsAsync(predicate, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().ExistsAsync(predicate, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1922,7 +2266,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().ExistsAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().ExistsAsync(options, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1935,7 +2283,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().CountAsync(cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().CountAsync(cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1949,7 +2301,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().CountAsync(predicate, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().CountAsync(predicate, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1963,7 +2319,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().CountAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().CountAsync(options, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1978,7 +2338,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().ToDictionaryAsync<TDictionaryKey>(keySelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().ToDictionaryAsync<TDictionaryKey>(keySelector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -1994,7 +2358,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().ToDictionaryAsync<TDictionaryKey>(options, keySelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().ToDictionaryAsync<TDictionaryKey>(options, keySelector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2011,7 +2379,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().ToDictionaryAsync<TDictionaryKey, TElement>(keySelector, elementSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().ToDictionaryAsync<TDictionaryKey, TElement>(keySelector, elementSelector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2029,7 +2401,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().ToDictionaryAsync<TDictionaryKey, TElement>(options, keySelector, elementSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().ToDictionaryAsync<TDictionaryKey, TElement>(options, keySelector, elementSelector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2046,7 +2422,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().GroupByAsync<TGroupKey, TResult>(keySelector, resultSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().GroupByAsync<TGroupKey, TResult>(keySelector, resultSelector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2064,7 +2444,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey1, TKey2>().GroupByAsync<TGroupKey, TResult>(options, keySelector, resultSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>().GroupByAsync<TGroupKey, TResult>(options, keySelector, resultSelector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2250,7 +2634,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().Find(key);
+                var result = uow.Create<TEntity, TKey>().Find(key);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2264,7 +2652,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().Find(key, fetchStrategy);
+                var result = uow.Create<TEntity, TKey>().Find(key, fetchStrategy);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2277,7 +2669,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().Find(predicate);
+                var result = uow.Create<TEntity, TKey>().Find(predicate);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2290,7 +2686,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().Find(options);
+                var result = uow.Create<TEntity, TKey>().Find(options);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2304,7 +2704,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().Find<TResult>(predicate, selector);
+                var result = uow.Create<TEntity, TKey>().Find<TResult>(predicate, selector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2318,7 +2722,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().Find<TResult>(options, selector);
+                var result = uow.Create<TEntity, TKey>().Find<TResult>(options, selector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2330,7 +2738,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().FindAll();
+                var result = uow.Create<TEntity, TKey>().FindAll();
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2343,7 +2755,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().FindAll(predicate);
+                var result = uow.Create<TEntity, TKey>().FindAll(predicate);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2356,7 +2772,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().FindAll(options);
+                var result = uow.Create<TEntity, TKey>().FindAll(options);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2369,7 +2789,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().FindAll<TResult>(selector);
+                var result = uow.Create<TEntity, TKey>().FindAll<TResult>(selector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2383,7 +2807,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().FindAll<TResult>(predicate, selector);
+                var result = uow.Create<TEntity, TKey>().FindAll<TResult>(predicate, selector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2397,7 +2825,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().FindAll<TResult>(options, selector);
+                var result = uow.Create<TEntity, TKey>().FindAll<TResult>(options, selector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2410,7 +2842,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().Exists(key);
+                var result = uow.Create<TEntity, TKey>().Exists(key);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2423,7 +2859,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().Exists(predicate);
+                var result = uow.Create<TEntity, TKey>().Exists(predicate);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2436,7 +2876,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().Exists(options);
+                var result = uow.Create<TEntity, TKey>().Exists(options);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2448,7 +2892,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().Count();
+                var result = uow.Create<TEntity, TKey>().Count();
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2461,7 +2909,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().Count(predicate);
+                var result = uow.Create<TEntity, TKey>().Count(predicate);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2474,7 +2926,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().Count(options);
+                var result = uow.Create<TEntity, TKey>().Count(options);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2488,7 +2944,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().ToDictionary<TDictionaryKey>(keySelector);
+                var result = uow.Create<TEntity, TKey>().ToDictionary<TDictionaryKey>(keySelector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2503,7 +2963,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().ToDictionary<TDictionaryKey>(options, keySelector);
+                var result = uow.Create<TEntity, TKey>().ToDictionary<TDictionaryKey>(options, keySelector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2519,7 +2983,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().ToDictionary<TDictionaryKey, TElement>(keySelector, elementSelector);
+                var result = uow.Create<TEntity, TKey>().ToDictionary<TDictionaryKey, TElement>(keySelector, elementSelector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2536,7 +3004,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().ToDictionary<TDictionaryKey, TElement>(options, keySelector, elementSelector);
+                var result = uow.Create<TEntity, TKey>().ToDictionary<TDictionaryKey, TElement>(options, keySelector, elementSelector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2552,7 +3024,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().GroupBy<TGroupKey, TResult>(keySelector, resultSelector);
+                var result = uow.Create<TEntity, TKey>().GroupBy<TGroupKey, TResult>(keySelector, resultSelector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2569,7 +3045,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return uow.Create<TEntity, TKey>().GroupBy<TGroupKey, TResult>(options, keySelector, resultSelector);
+                var result = uow.Create<TEntity, TKey>().GroupBy<TGroupKey, TResult>(options, keySelector, resultSelector);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2736,7 +3216,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().FindAsync(key, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().FindAsync(key, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2751,7 +3235,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().FindAsync(key, fetchStrategy, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().FindAsync(key, fetchStrategy, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2765,7 +3253,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().FindAsync(predicate, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().FindAsync(predicate, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2779,7 +3271,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().FindAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().FindAsync(options, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2794,7 +3290,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().FindAsync<TResult>(predicate, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().FindAsync<TResult>(predicate, selector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2809,7 +3309,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().FindAsync<TResult>(options, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().FindAsync<TResult>(options, selector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2822,7 +3326,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().FindAllAsync(cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().FindAllAsync(cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2836,7 +3344,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().FindAllAsync(cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().FindAllAsync(cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2850,7 +3362,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().FindAllAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().FindAllAsync(options, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2864,7 +3380,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().FindAllAsync<TResult>(selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().FindAllAsync<TResult>(selector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2879,7 +3399,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().FindAllAsync<TResult>(predicate, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().FindAllAsync<TResult>(predicate, selector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2894,7 +3418,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().FindAllAsync<TResult>(options, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().FindAllAsync<TResult>(options, selector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2908,7 +3436,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().ExistsAsync(key, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().ExistsAsync(key, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2922,7 +3454,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().ExistsAsync(predicate, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().ExistsAsync(predicate, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2936,7 +3472,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().ExistsAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().ExistsAsync(options, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2949,7 +3489,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().CountAsync(cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().CountAsync(cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2963,7 +3507,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().CountAsync(predicate, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().CountAsync(predicate, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2977,7 +3525,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().CountAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().CountAsync(options, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -2992,7 +3544,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().ToDictionaryAsync<TDictionaryKey>(keySelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().ToDictionaryAsync<TDictionaryKey>(keySelector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -3008,7 +3564,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().ToDictionaryAsync<TDictionaryKey>(options, keySelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().ToDictionaryAsync<TDictionaryKey>(options, keySelector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -3025,7 +3585,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().ToDictionaryAsync<TDictionaryKey, TElement>(keySelector, elementSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().ToDictionaryAsync<TDictionaryKey, TElement>(keySelector, elementSelector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -3043,7 +3607,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().ToDictionaryAsync<TDictionaryKey, TElement>(options, keySelector, elementSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().ToDictionaryAsync<TDictionaryKey, TElement>(options, keySelector, elementSelector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -3060,7 +3628,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().GroupByAsync<TGroupKey, TResult>(keySelector, resultSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().GroupByAsync<TGroupKey, TResult>(keySelector, resultSelector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
@@ -3078,7 +3650,11 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                return await uow.Create<TEntity, TKey>().GroupByAsync<TGroupKey, TResult>(options, keySelector, resultSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>().GroupByAsync<TGroupKey, TResult>(options, keySelector, resultSelector, cancellationToken);
+
+                uow.Commit();
+
+                return result;
             }
         }
 
