@@ -18,6 +18,9 @@
         /// <param name="cache">The underlying caching storage.</param>
         public InMemoryCacheProvider(IMemoryCache cache)
         {
+            if (cache == null)
+                throw new ArgumentNullException(nameof(cache));
+
             Cache = new InMemoryCache(cache);
         }
 
