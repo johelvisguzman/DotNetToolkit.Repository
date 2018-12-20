@@ -37,6 +37,9 @@
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
+            if (databaseName == null)
+                throw new ArgumentNullException(nameof(databaseName));
+
             source.Options.With(new InMemoryRepositoryContextFactory(databaseName, ignoreTransactionWarning));
 
             return source;
