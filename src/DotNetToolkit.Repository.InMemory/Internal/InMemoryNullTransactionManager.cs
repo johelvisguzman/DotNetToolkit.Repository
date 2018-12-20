@@ -14,8 +14,16 @@
 
         public void Dispose() { }
 
-        public void Commit() { }
+        public TransactionStatus Status { get; private set; }
 
-        public void Rollback() { }
+        public void Commit()
+        {
+            Status = TransactionStatus.Committed;
+        }
+
+        public void Rollback()
+        {
+            Status = TransactionStatus.Aborted;
+        }
     }
 }

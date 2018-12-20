@@ -66,11 +66,18 @@
         #region Implementation of ITransaction
 
         /// <summary>
+        /// The transaction status.
+        /// </summary>
+        public TransactionStatus Status { get; private set; }
+
+        /// <summary>
         /// Commits all changes made to the database in the current transaction.
         /// </summary>
         public void Commit()
         {
             Transaction.Commit();
+
+            Status = TransactionStatus.Committed;
 
             _logger.Debug("Committed transaction");
         }
@@ -81,6 +88,8 @@
         public void Rollback()
         {
             Transaction.Rollback();
+
+            Status = TransactionStatus.Aborted;
 
             _logger.Debug("Rolled-back transaction");
         }

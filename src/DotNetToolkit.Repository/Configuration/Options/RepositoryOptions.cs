@@ -185,6 +185,7 @@
                 throw new ArgumentNullException(nameof(target));
 
             target._interceptors = source._interceptors.ToDictionary(x => x.Key, x => x.Value);
+            target._cachingProvider = source._cachingProvider;
             target._loggerProvider = source._loggerProvider;
             target._contextFactory = source._contextFactory;
             target._context = source._context;

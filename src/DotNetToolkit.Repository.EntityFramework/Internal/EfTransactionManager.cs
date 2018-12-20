@@ -50,11 +50,18 @@
         #region Implementation of ITransactionManager
 
         /// <summary>
+        /// The transaction status.
+        /// </summary>
+        public TransactionStatus Status { get; private set; }
+
+        /// <summary>
         /// Commits all changes made to the database in the current transaction.
         /// </summary>
         public void Commit()
         {
             Transaction.Commit();
+
+            Status = TransactionStatus.Committed;
         }
 
         /// <summary>
@@ -63,6 +70,8 @@
         public void Rollback()
         {
             Transaction.Rollback();
+
+            Status = TransactionStatus.Aborted;
         }
 
         #endregion
