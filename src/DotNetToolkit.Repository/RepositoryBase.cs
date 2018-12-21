@@ -913,9 +913,13 @@
 
                 Logger.Debug("Adding an entity to the repository");
 
-                InterceptAddItem(entity);
+                Intercept(x => x.AddExecuting(entity));
+
+                Context.Add(entity);
 
                 Context.SaveChanges();
+
+                Intercept(x => x.AddExecuted(entity));
 
                 CacheProviderManager.IncrementCounter();
 
@@ -936,9 +940,19 @@
 
                 Logger.Debug("Adding a collection of entities to the repository");
 
-                InterceptAddItem(entities);
+                foreach (var entity in entities)
+                {
+                    Intercept(x => x.AddExecuting(entity));
+
+                    Context.Add(entity);
+                }
 
                 Context.SaveChanges();
+
+                foreach (var entity in entities)
+                {
+                    Intercept(x => x.AddExecuted(entity));
+                }
 
                 CacheProviderManager.IncrementCounter();
 
@@ -959,9 +973,13 @@
 
                 Logger.Debug("Updating an entity in the repository");
 
-                InterceptUpdateItem(entity);
+                Intercept(x => x.UpdateExecuting(entity));
+
+                Context.Update(entity);
 
                 Context.SaveChanges();
+
+                Intercept(x => x.UpdateExecuted(entity));
 
                 CacheProviderManager.IncrementCounter();
 
@@ -982,9 +1000,19 @@
 
                 Logger.Debug("Updating a collection of entities in the repository");
 
-                InterceptUpdateItem(entities);
+                foreach (var entity in entities)
+                {
+                    Intercept(x => x.UpdateExecuting(entity));
+
+                    Context.Update(entity);
+                }
 
                 Context.SaveChanges();
+
+                foreach (var entity in entities)
+                {
+                    Intercept(x => x.UpdateExecuted(entity));
+                }
 
                 CacheProviderManager.IncrementCounter();
 
@@ -1005,9 +1033,13 @@
 
                 Logger.Debug("Deleting an entity from the repository");
 
-                InterceptDeleteItem(entity);
+                Intercept(x => x.DeleteExecuting(entity));
+
+                Context.Remove(entity);
 
                 Context.SaveChanges();
+
+                Intercept(x => x.DeleteExecuted(entity));
 
                 CacheProviderManager.IncrementCounter();
 
@@ -1055,9 +1087,19 @@
 
                 Logger.Debug("Deleting a collection of entities from the repository");
 
-                InterceptDeleteItem(entities);
+                foreach (var entity in entities)
+                {
+                    Intercept(x => x.DeleteExecuting(entity));
+
+                    Context.Remove(entity);
+                }
 
                 Context.SaveChanges();
+
+                foreach (var entity in entities)
+                {
+                    Intercept(x => x.DeleteExecuted(entity));
+                }
 
                 CacheProviderManager.IncrementCounter();
 
@@ -1365,9 +1407,13 @@
 
                 cancellationToken.ThrowIfCancellationRequested();
 
-                InterceptAddItem(entity);
+                Intercept(x => x.AddExecuting(entity));
+
+                Context.Add(entity);
 
                 await Context.AsAsync().SaveChangesAsync(cancellationToken);
+
+                Intercept(x => x.AddExecuted(entity));
 
                 CacheProviderManager.IncrementCounter();
 
@@ -1392,9 +1438,19 @@
 
                 cancellationToken.ThrowIfCancellationRequested();
 
-                InterceptAddItem(entities);
+                foreach (var entity in entities)
+                {
+                    Intercept(x => x.AddExecuting(entity));
+
+                    Context.Add(entity);
+                }
 
                 await Context.AsAsync().SaveChangesAsync(cancellationToken);
+
+                foreach (var entity in entities)
+                {
+                    Intercept(x => x.AddExecuted(entity));
+                }
 
                 CacheProviderManager.IncrementCounter();
 
@@ -1419,9 +1475,13 @@
 
                 cancellationToken.ThrowIfCancellationRequested();
 
-                InterceptUpdateItem(entity);
+                Intercept(x => x.UpdateExecuting(entity));
+
+                Context.Update(entity);
 
                 await Context.AsAsync().SaveChangesAsync(cancellationToken);
+
+                Intercept(x => x.UpdateExecuted(entity));
 
                 CacheProviderManager.IncrementCounter();
 
@@ -1446,9 +1506,19 @@
 
                 cancellationToken.ThrowIfCancellationRequested();
 
-                InterceptUpdateItem(entities);
+                foreach (var entity in entities)
+                {
+                    Intercept(x => x.UpdateExecuting(entity));
+
+                    Context.Update(entity);
+                }
 
                 await Context.AsAsync().SaveChangesAsync(cancellationToken);
+
+                foreach (var entity in entities)
+                {
+                    Intercept(x => x.UpdateExecuted(entity));
+                }
 
                 CacheProviderManager.IncrementCounter();
 
@@ -1473,9 +1543,13 @@
 
                 cancellationToken.ThrowIfCancellationRequested();
 
-                InterceptDeleteItem(entity);
+                Intercept(x => x.DeleteExecuting(entity));
+
+                Context.Remove(entity);
 
                 await Context.AsAsync().SaveChangesAsync(cancellationToken);
+
+                Intercept(x => x.DeleteExecuted(entity));
 
                 CacheProviderManager.IncrementCounter();
 
@@ -1535,9 +1609,19 @@
 
                 cancellationToken.ThrowIfCancellationRequested();
 
-                InterceptDeleteItem(entities);
+                foreach (var entity in entities)
+                {
+                    Intercept(x => x.DeleteExecuting(entity));
+
+                    Context.Remove(entity);
+                }
 
                 await Context.AsAsync().SaveChangesAsync(cancellationToken);
+
+                foreach (var entity in entities)
+                {
+                    Intercept(x => x.DeleteExecuted(entity));
+                }
 
                 CacheProviderManager.IncrementCounter();
 
@@ -1872,6 +1956,24 @@
             }
         }
 
+        internal void InterceptError(Action action)
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex);
+
+                throw;
+            }
+            finally
+            {
+                DisposeContext();
+            }
+        }
+
         internal T InterceptError<T>(Func<T> action)
         {
             try
@@ -1926,24 +2028,6 @@
             }
         }
 
-        internal void InterceptError(Action action)
-        {
-            try
-            {
-                action();
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex);
-
-                throw;
-            }
-            finally
-            {
-                DisposeContext();
-            }
-        }
-
         #endregion
 
         #region Private Methods
@@ -1952,66 +2036,6 @@
         {
             if (!PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Any())
                 throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityRequiresPrimaryKey, typeof(TEntity).FullName));
-        }
-
-        private void InterceptAddItem(TEntity entity)
-        {
-            Intercept(x => x.AddExecuting(entity));
-
-            Context.Add(entity);
-
-            Intercept(x => x.AddExecuted(entity));
-        }
-
-        private void InterceptAddItem(IEnumerable<TEntity> entities)
-        {
-            if (!entities.Any())
-                Logger.Debug("There are no items in the collection.");
-
-            foreach (var entity in entities)
-            {
-                InterceptAddItem(entity);
-            }
-        }
-
-        private void InterceptUpdateItem(TEntity entity)
-        {
-            Intercept(x => x.UpdateExecuting(entity));
-
-            Context.Update(entity);
-
-            Intercept(x => x.UpdateExecuted(entity));
-        }
-
-        private void InterceptUpdateItem(IEnumerable<TEntity> entities)
-        {
-            if (!entities.Any())
-                Logger.Debug("There are no items in the collection.");
-
-            foreach (var entity in entities)
-            {
-                InterceptUpdateItem(entity);
-            }
-        }
-
-        private void InterceptDeleteItem(TEntity entity)
-        {
-            Intercept(x => x.DeleteExecuting(entity));
-
-            Context.Remove(entity);
-
-            Intercept(x => x.DeleteExecuted(entity));
-        }
-
-        private void InterceptDeleteItem(IEnumerable<TEntity> entities)
-        {
-            if (!entities.Any())
-                Logger.Debug("There are no items in the collection.");
-
-            foreach (var entity in entities)
-            {
-                InterceptDeleteItem(entity);
-            }
         }
 
         private IEnumerable<IRepositoryInterceptor> GetInterceptors()
