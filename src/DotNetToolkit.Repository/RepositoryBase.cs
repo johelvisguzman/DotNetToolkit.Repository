@@ -708,7 +708,7 @@
                     () => Context.ExecuteQuery(sql, cmdType, parameters, projector)),
                 Logger);
 
-            CacheProviderManager.IncrementCounter();
+            IncrementCacheCounter(sql);
 
             Logger.Debug($"Executed QueryResult [ Method = ExecuteQuery, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -760,7 +760,7 @@
                     () => Context.ExecuteQuery(sql, cmdType, parameters)),
                 Logger);
 
-            CacheProviderManager.IncrementCounter();
+            IncrementCacheCounter(sql);
 
             Logger.Debug($"Executed QueryResult [ Method = ExecuteQuery, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -815,7 +815,7 @@
                     () => Context.AsAsync().ExecuteQueryAsync(sql, cmdType, parameters, projector, cancellationToken)),
                 Logger);
 
-            CacheProviderManager.IncrementCounter();
+            IncrementCacheCounter(sql);
 
             Logger.Debug($"Executed QueryResult [ Method = ExecuteQueryAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -870,7 +870,7 @@
                     () => Context.AsAsync().ExecuteQueryAsync(sql, cmdType, parameters, cancellationToken)),
                 Logger);
 
-            CacheProviderManager.IncrementCounter();
+            IncrementCacheCounter(sql);
 
             Logger.Debug($"Executed QueryResult [ Method = ExecuteQueryAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -2059,6 +2059,19 @@
                 _context.Dispose();
                 _context = null;
             }
+        }
+
+        private void IncrementCacheCounter(string sql)
+        {
+            if (sql == null)
+                throw new ArgumentNullException(nameof(sql));
+
+            var s = sql.ToUpperInvariant();
+
+            var canClearCache = s.Contains("UPDATE") || s.Contains("DELETE FROM") || s.Contains("INSERT INTO");
+
+            if (canClearCache)
+                CacheProviderManager.IncrementCounter();
         }
 
         #endregion
