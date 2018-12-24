@@ -20,6 +20,11 @@
     public interface IRepository<TEntity, in TKey1, in TKey2, in TKey3> where TEntity : class
     {
         /// <summary>
+        /// Gets or sets the value indicating whether caching is enabled or not.
+        /// </summary>
+        bool CacheEnabled { get; set; }
+
+        /// <summary>
         /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
         /// </summary>
         /// <param name="sql">The SQL query string.</param>
@@ -699,6 +704,11 @@
     public interface IRepository<TEntity, in TKey1, in TKey2> where TEntity : class
     {
         /// <summary>
+        /// Gets or sets the value indicating whether caching is enabled or not.
+        /// </summary>
+        bool CacheEnabled { get; set; }
+
+        /// <summary>
         /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
         /// </summary>
         /// <param name="sql">The SQL query string.</param>
@@ -1366,6 +1376,11 @@
     /// <seealso cref="System.IDisposable" />
     public interface IRepository<TEntity, in TKey> where TEntity : class
     {
+        /// <summary>
+        /// Gets or sets the value indicating whether caching is enabled or not.
+        /// </summary>
+        bool CacheEnabled { get; set; }
+
         /// <summary>
         /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
         /// </summary>
