@@ -108,10 +108,15 @@
         {
             Logger.Debug("Executing QueryResult [ Method = Find ]");
 
-            var queryResult = CacheProvider.GetOrSet<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy,
-                () => InterceptError<QueryResult<TEntity>>(
-                    () => Context.Find<TEntity>(fetchStrategy, key1, key2, key3)),
-                Logger);
+            QueryResult<TEntity> Getter() =>
+                InterceptError<QueryResult<TEntity>>(
+                    () => Context.Find<TEntity>(fetchStrategy, key1, key2, key3));
+
+            var queryResult = CacheEnabled
+                ? CacheProvider.GetOrSet<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy, Getter, Logger)
+                : Getter();
+
+            CacheUsed = queryResult.CacheUsed;
 
             Logger.Debug($"Executed QueryResult [ Method = Find, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -169,10 +174,15 @@
         {
             Logger.Debug("Executing QueryResult [ Method = FindAsync ]");
 
-            var queryResult = await CacheProvider.GetOrSetAsync<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy,
-                () => InterceptErrorAsync<QueryResult<TEntity>>(
-                    () => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2, key3)),
-                Logger);
+            Task<QueryResult<TEntity>> Getter() =>
+                InterceptErrorAsync<QueryResult<TEntity>>(
+                    () => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2, key3));
+
+            var queryResult = CacheEnabled
+                ? await CacheProvider.GetOrSetAsync<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy, Getter, Logger)
+                : await Getter();
+
+            CacheUsed = queryResult.CacheUsed;
 
             Logger.Debug($"Executed QueryResult [ Method = FindAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -304,10 +314,15 @@
         {
             Logger.Debug("Executing QueryResult [ Method = Find ]");
 
-            var queryResult = CacheProvider.GetOrSet<TEntity>(new object[] { key1, key2 }, fetchStrategy,
-                () => InterceptError<QueryResult<TEntity>>(
-                    () => Context.Find<TEntity>(fetchStrategy, key1, key2)),
-                Logger);
+            QueryResult<TEntity> Getter() =>
+                InterceptError<QueryResult<TEntity>>(
+                    () => Context.Find<TEntity>(fetchStrategy, key1, key2));
+
+            var queryResult = CacheEnabled
+                ? CacheProvider.GetOrSet<TEntity>(new object[] { key1, key2 }, fetchStrategy, Getter, Logger)
+                : Getter();
+
+            CacheUsed = queryResult.CacheUsed;
 
             Logger.Debug($"Executed QueryResult [ Method = Find, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -361,10 +376,15 @@
         {
             Logger.Debug("Executing QueryResult [ Method = FindAsync ]");
 
-            var queryResult = await CacheProvider.GetOrSetAsync<TEntity>(new object[] { key1, key2 }, fetchStrategy,
-                () => InterceptErrorAsync<QueryResult<TEntity>>(
-                    () => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2)),
-                Logger);
+            Task<QueryResult<TEntity>> Getter() =>
+                InterceptErrorAsync<QueryResult<TEntity>>(
+                    () => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2));
+
+            var queryResult = CacheEnabled
+                ? await CacheProvider.GetOrSetAsync<TEntity>(new object[] { key1, key2 }, fetchStrategy, Getter, Logger)
+                : await Getter();
+
+            CacheUsed = queryResult.CacheUsed;
 
             Logger.Debug($"Executed QueryResult [ Method = FindAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -489,10 +509,15 @@
         {
             Logger.Debug("Executing QueryResult [ Method = Find ]");
 
-            var queryResult = CacheProvider.GetOrSet<TEntity>(new object[] { key }, fetchStrategy,
-                () => InterceptError<QueryResult<TEntity>>(
-                    () => Context.Find<TEntity>(fetchStrategy, key)),
-                Logger);
+            QueryResult<TEntity> Getter() =>
+                InterceptError<QueryResult<TEntity>>(
+                    () => Context.Find<TEntity>(fetchStrategy, key));
+
+            var queryResult = CacheEnabled
+                ? CacheProvider.GetOrSet<TEntity>(new object[] { key }, fetchStrategy, Getter, Logger)
+                : Getter();
+
+            CacheUsed = queryResult.CacheUsed;
 
             Logger.Debug($"Executed QueryResult [ Method = Find, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -542,10 +567,15 @@
         {
             Logger.Debug("Executing QueryResult [ Method = FindAsync ]");
 
-            var queryResult = await CacheProvider.GetOrSetAsync<TEntity>(new object[] { key }, fetchStrategy,
-                () => InterceptErrorAsync<QueryResult<TEntity>>(
-                    () => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key)),
-                Logger);
+            Task<QueryResult<TEntity>> Getter() =>
+                InterceptErrorAsync<QueryResult<TEntity>>(
+                    () => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key));
+
+            var queryResult = CacheEnabled
+                ? await CacheProvider.GetOrSetAsync<TEntity>(new object[] { key }, fetchStrategy, Getter, Logger)
+                : await Getter();
+
+            CacheUsed = queryResult.CacheUsed;
 
             Logger.Debug($"Executed QueryResult [ Method = FindAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -614,6 +644,17 @@
 
         #region Properties
 
+
+        /// <summary>
+        /// Gets or sets the value indicating whether caching is enabled or not.
+        /// </summary>
+        public bool CacheEnabled { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the cached was used or not on the previous executed query.
+        /// </summary>
+        public bool CacheUsed { get; internal set; }
+
         /// <summary>
         /// Gets the repository context.
         /// </summary>
@@ -673,6 +714,9 @@
 
             var cachingProvider = options.CachingProvider ?? NullCacheProvider.Instance;
 
+            if (cachingProvider.GetType() != typeof(NullCacheProvider))
+                CacheEnabled = true;
+
             CacheProvider = cachingProvider;
 
             _options = optionsBuilder.Options;
@@ -703,12 +747,17 @@
 
             Logger.Debug("Executing QueryResult [ Method = ExecuteQuery ]");
 
-            var queryResult = CacheProvider.GetOrSetExecuteQuery<TEntity>(sql, cmdType, parameters,
-                () => InterceptError<QueryResult<IEnumerable<TEntity>>>(
-                    () => Context.ExecuteQuery(sql, cmdType, parameters, projector)),
-                Logger);
+            QueryResult<IEnumerable<TEntity>> Getter() =>
+                InterceptError<QueryResult<IEnumerable<TEntity>>>(
+                    () => Context.ExecuteQuery(sql, cmdType, parameters, projector));
+
+            var queryResult = CacheEnabled
+                ? CacheProvider.GetOrSetExecuteQuery<TEntity>(sql, cmdType, parameters, projector, Getter, Logger)
+                : Getter();
 
             IncrementCacheCounter(sql);
+
+            CacheUsed = queryResult.CacheUsed;
 
             Logger.Debug($"Executed QueryResult [ Method = ExecuteQuery, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -755,12 +804,17 @@
 
             Logger.Debug("Executing QueryResult [ Method = ExecuteQuery ]");
 
-            var queryResult = CacheProvider.GetOrSetExecuteQuery<int>(sql, cmdType, parameters,
-                () => InterceptError<QueryResult<int>>(
-                    () => Context.ExecuteQuery(sql, cmdType, parameters)),
-                Logger);
+            QueryResult<int> Getter() =>
+                InterceptError<QueryResult<int>>(
+                    () => Context.ExecuteQuery(sql, cmdType, parameters));
+
+            var queryResult = CacheEnabled
+                ? CacheProvider.GetOrSetExecuteQuery<TEntity>(sql, cmdType, parameters, Getter, Logger)
+                : Getter();
 
             IncrementCacheCounter(sql);
+
+            CacheUsed = queryResult.CacheUsed;
 
             Logger.Debug($"Executed QueryResult [ Method = ExecuteQuery, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -810,12 +864,17 @@
 
             Logger.Debug("Executing QueryResult [ Method = ExecuteQueryAsync ]");
 
-            var queryResult = await CacheProvider.GetOrSetExecuteQueryAsync<TEntity>(sql, cmdType, parameters,
-                () => InterceptErrorAsync<QueryResult<IEnumerable<TEntity>>>(
-                    () => Context.AsAsync().ExecuteQueryAsync(sql, cmdType, parameters, projector, cancellationToken)),
-                Logger);
+            Task<QueryResult<IEnumerable<TEntity>>> Getter() =>
+                InterceptErrorAsync<QueryResult<IEnumerable<TEntity>>>(
+                    () => Context.AsAsync().ExecuteQueryAsync(sql, cmdType, parameters, projector, cancellationToken));
+
+            var queryResult = CacheEnabled
+                ? await CacheProvider.GetOrSetExecuteQueryAsync<TEntity>(sql, cmdType, parameters, projector, Getter, Logger)
+                : await Getter();
 
             IncrementCacheCounter(sql);
+
+            CacheUsed = queryResult.CacheUsed;
 
             Logger.Debug($"Executed QueryResult [ Method = ExecuteQueryAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -865,12 +924,17 @@
 
             Logger.Debug("Executing QueryResult [ Method = ExecuteQueryAsync ]");
 
-            var queryResult = await CacheProvider.GetOrSetExecuteQueryAsync<int>(sql, cmdType, parameters,
-                () => InterceptErrorAsync<QueryResult<int>>(
-                    () => Context.AsAsync().ExecuteQueryAsync(sql, cmdType, parameters, cancellationToken)),
-                Logger);
+            Task<QueryResult<int>> Getter() =>
+                InterceptErrorAsync<QueryResult<int>>(
+                    () => Context.AsAsync().ExecuteQueryAsync(sql, cmdType, parameters, cancellationToken));
+
+            var queryResult = CacheEnabled
+                ? await CacheProvider.GetOrSetExecuteQueryAsync<TEntity>(sql, cmdType, parameters, Getter, Logger)
+                : await Getter();
 
             IncrementCacheCounter(sql);
+
+            CacheUsed = queryResult.CacheUsed;
 
             Logger.Debug($"Executed QueryResult [ Method = ExecuteQueryAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -1148,10 +1212,15 @@
         {
             Logger.Debug("Executing QueryResult [ Method = Find ]");
 
-            var queryResult = CacheProvider.GetOrSet<TEntity, TResult>(options, selector,
-                () => InterceptError<QueryResult<TResult>>(
-                    () => Context.Find<TEntity, TResult>(options, selector)),
-                Logger);
+            QueryResult<TResult> Getter() =>
+                InterceptError<QueryResult<TResult>>(
+                    () => Context.Find<TEntity, TResult>(options, selector));
+
+            var queryResult = CacheEnabled
+                ? CacheProvider.GetOrSet<TEntity, TResult>(options, selector, Getter, Logger)
+                : Getter();
+
+            CacheUsed = queryResult.CacheUsed;
 
             Logger.Debug($"Executed QueryResult [ Method = Find, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -1218,10 +1287,15 @@
         {
             Logger.Debug("Executing QueryResult [ Method = FindAll ]");
 
-            var queryResult = CacheProvider.GetOrSetAll<TEntity, TResult>(options, selector,
-                () => InterceptError<QueryResult<IEnumerable<TResult>>>(
-                    () => Context.FindAll<TEntity, TResult>(options, selector)),
-                Logger);
+            QueryResult<IEnumerable<TResult>> Getter() =>
+                InterceptError<QueryResult<IEnumerable<TResult>>>(
+                    () => Context.FindAll<TEntity, TResult>(options, selector));
+
+            var queryResult = CacheEnabled
+                ? CacheProvider.GetOrSetAll<TEntity, TResult>(options, selector, Getter, Logger)
+                : Getter();
+
+            CacheUsed = queryResult.CacheUsed;
 
             Logger.Debug($"Executed QueryResult [ Method = FindAll, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -1285,10 +1359,15 @@
         {
             Logger.Debug("Executing QueryResult [ Method = Count ]");
 
-            var queryResult = CacheProvider.GetOrSetCount<TEntity>(options,
-                () => InterceptError<QueryResult<int>>(
-                    () => Context.Count<TEntity>(options)),
-                Logger);
+            QueryResult<int> Getter() =>
+                InterceptError<QueryResult<int>>(
+                    () => Context.Count<TEntity>(options));
+
+            var queryResult = CacheEnabled
+                ? CacheProvider.GetOrSetCount<TEntity>(options, Getter, Logger)
+                : Getter();
+
+            CacheUsed = queryResult.CacheUsed;
 
             Logger.Debug($"Executed QueryResult [ Method = Count, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -1344,10 +1423,15 @@
         {
             Logger.Debug("Executing QueryResult [ Method = ToDictionary ]");
 
-            var queryResult = CacheProvider.GetOrSetDictionary<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector,
-                () => InterceptError<QueryResult<Dictionary<TDictionaryKey, TElement>>>(
-                    () => Context.ToDictionary(options, keySelector, elementSelector)),
-                Logger);
+            QueryResult<Dictionary<TDictionaryKey, TElement>> Getter() =>
+                InterceptError<QueryResult<Dictionary<TDictionaryKey, TElement>>>(
+                    () => Context.ToDictionary(options, keySelector, elementSelector));
+
+            var queryResult = CacheEnabled
+                ? CacheProvider.GetOrSetDictionary<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector, Getter, Logger)
+                : Getter();
+
+            CacheUsed = queryResult.CacheUsed;
 
             Logger.Debug($"Executed QueryResult [ Method = ToDictionary, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -1380,10 +1464,15 @@
         {
             Logger.Debug("Executing QueryResult [ Method = GroupBy ]");
 
-            var queryResult = CacheProvider.GetOrSetGroup<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector,
-                () => InterceptError<QueryResult<IEnumerable<TResult>>>(
-                    () => Context.GroupBy(options, keySelector, resultSelector)),
-                Logger);
+            QueryResult<IEnumerable<TResult>> Getter() =>
+                InterceptError<QueryResult<IEnumerable<TResult>>>(
+                    () => Context.GroupBy(options, keySelector, resultSelector));
+
+            var queryResult = CacheEnabled
+                ? CacheProvider.GetOrSetGroup<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector, Getter, Logger)
+                : Getter();
+
+            CacheUsed = queryResult.CacheUsed;
 
             Logger.Debug($"Executed QueryResult [ Method = GroupBy, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -1674,10 +1763,15 @@
         {
             Logger.Debug("Executing QueryResult [ Method = FindAsync ]");
 
-            var queryResult = await CacheProvider.GetOrSetAsync<TEntity, TResult>(options, selector,
-                () => InterceptErrorAsync<QueryResult<TResult>>(
-                    () => Context.AsAsync().FindAsync<TEntity, TResult>(options, selector, cancellationToken)),
-                Logger);
+            Task<QueryResult<TResult>> Getter() =>
+                InterceptErrorAsync<QueryResult<TResult>>(
+                    () => Context.AsAsync().FindAsync<TEntity, TResult>(options, selector, cancellationToken));
+
+            var queryResult = CacheEnabled
+                ? await CacheProvider.GetOrSetAsync<TEntity, TResult>(options, selector, Getter, Logger)
+                : await Getter();
+
+            CacheUsed = queryResult.CacheUsed;
 
             Logger.Debug($"Executed QueryResult [ Method = FindAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -1750,10 +1844,15 @@
         {
             Logger.Debug("Executing QueryResult [ Method = FindAllAsync ]");
 
-            var queryResult = await CacheProvider.GetOrSetAllAsync<TEntity, TResult>(options, selector,
-                    () => InterceptErrorAsync<QueryResult<IEnumerable<TResult>>>(
-                        () => Context.AsAsync().FindAllAsync<TEntity, TResult>(options, selector, cancellationToken)),
-                Logger);
+            Task<QueryResult<IEnumerable<TResult>>> Getter() =>
+                InterceptErrorAsync<QueryResult<IEnumerable<TResult>>>(
+                    () => Context.AsAsync().FindAllAsync<TEntity, TResult>(options, selector, cancellationToken));
+
+            var queryResult = CacheEnabled
+                ? await CacheProvider.GetOrSetAllAsync<TEntity, TResult>(options, selector, Getter, Logger)
+                : await Getter();
+
+            CacheUsed = queryResult.CacheUsed;
 
             Logger.Debug($"Executed QueryResult [ Method = FindAllAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -1822,10 +1921,15 @@
         {
             Logger.Debug("Executing QueryResult [ Method = CountAsync ]");
 
-            var queryResult = await CacheProvider.GetOrSetCountAsync<TEntity>(options,
-                () => InterceptErrorAsync<QueryResult<int>>(
-                    () => Context.AsAsync().CountAsync<TEntity>(options, cancellationToken)),
-                Logger);
+            Task<QueryResult<int>> Getter() =>
+                InterceptErrorAsync<QueryResult<int>>(
+                    () => Context.AsAsync().CountAsync<TEntity>(options, cancellationToken));
+
+            var queryResult = CacheEnabled
+                ? await CacheProvider.GetOrSetCountAsync<TEntity>(options, Getter, Logger)
+                : await Getter();
+
+            CacheUsed = queryResult.CacheUsed;
 
             Logger.Debug($"Executed QueryResult [ Method = CountAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -1885,10 +1989,15 @@
         {
             Logger.Debug("Executing QueryResult [ Method = ToDictionaryAsync ]");
 
-            var queryResult = await CacheProvider.GetOrSetDictionaryAsync<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector,
-                () => InterceptErrorAsync<QueryResult<Dictionary<TDictionaryKey, TElement>>>(
-                    () => Context.AsAsync().ToDictionaryAsync(options, keySelector, elementSelector, cancellationToken)),
-                Logger);
+            Task<QueryResult<Dictionary<TDictionaryKey, TElement>>> Getter() =>
+                InterceptErrorAsync<QueryResult<Dictionary<TDictionaryKey, TElement>>>(
+                    () => Context.AsAsync().ToDictionaryAsync(options, keySelector, elementSelector, cancellationToken));
+
+            var queryResult = CacheEnabled
+                ? await CacheProvider.GetOrSetDictionaryAsync<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector, Getter, Logger)
+                : await Getter();
+
+            CacheUsed = queryResult.CacheUsed;
 
             Logger.Debug($"Executed QueryResult [ Method = ToDictionaryAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
@@ -1924,10 +2033,15 @@
         {
             Logger.Debug("Executing QueryResult [ Method = GroupByAsync ]");
 
-            var queryResult = await CacheProvider.GetOrSetGroupAsync<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector,
-                () => InterceptErrorAsync<QueryResult<IEnumerable<TResult>>>(
-                    () => Context.AsAsync().GroupByAsync(options, keySelector, resultSelector, cancellationToken)),
-                Logger);
+            Task<QueryResult<IEnumerable<TResult>>> Getter() =>
+                InterceptErrorAsync<QueryResult<IEnumerable<TResult>>>(
+                    () => Context.AsAsync().GroupByAsync(options, keySelector, resultSelector, cancellationToken));
+
+            var queryResult = CacheEnabled
+                ? await CacheProvider.GetOrSetGroupAsync<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector, Getter, Logger)
+                : await Getter();
+
+            CacheUsed = queryResult.CacheUsed;
 
             Logger.Debug($"Executed QueryResult [ Method = GroupByAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
