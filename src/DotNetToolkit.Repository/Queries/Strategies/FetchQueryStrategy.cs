@@ -56,7 +56,9 @@
         /// <returns>A new <see cref="IFetchQueryStrategy{T}" /> with the defined query path.</returns>
         public IFetchQueryStrategy<T> Fetch(string path)
         {
-            _properties.Add(path);
+            if (!_properties.Contains(path))
+                _properties.Add(path);
+
             return this;
         }
 
