@@ -58,6 +58,8 @@
 
             if (!_sortingPropertiesMapping.ContainsKey(propertyName))
                 _sortingPropertiesMapping.Add(propertyName, SortOrder.Ascending);
+            else
+                _sortingPropertiesMapping[propertyName] = SortOrder.Ascending;
 
             return this;
         }
@@ -74,6 +76,8 @@
 
             if (!_sortingPropertiesMapping.ContainsKey(propertyName))
                 _sortingPropertiesMapping.Add(propertyName, SortOrder.Descending);
+            else
+                _sortingPropertiesMapping[propertyName] = SortOrder.Descending;
 
             return this;
         }

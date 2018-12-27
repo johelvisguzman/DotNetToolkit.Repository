@@ -104,6 +104,12 @@
             Assert.Equal(2, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.Count);
             Assert.Equal("Name", ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(1).Key);
             Assert.Equal(SortOrder.Ascending, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(1).Value);
+
+            options = new QueryOptions<Customer>().OrderBy("Name").OrderByDescending("Name");
+
+            Assert.Equal(1, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.Count);
+            Assert.Equal("Name", ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(0).Key);
+            Assert.Equal(SortOrder.Descending, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(0).Value);
         }
 
         [Fact]
@@ -122,6 +128,12 @@
             Assert.Equal(2, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.Count);
             Assert.Equal("Name", ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(1).Key);
             Assert.Equal(SortOrder.Descending, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(1).Value);
+
+            options = new QueryOptions<Customer>().OrderByDescending("Name").OrderBy("Name");
+
+            Assert.Equal(1, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.Count);
+            Assert.Equal("Name", ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(0).Key);
+            Assert.Equal(SortOrder.Ascending, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(0).Value);
         }
 
         [Fact]
