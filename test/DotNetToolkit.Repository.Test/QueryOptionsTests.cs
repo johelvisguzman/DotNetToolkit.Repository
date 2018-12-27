@@ -208,17 +208,65 @@
         [Fact]
         public void Options_ToString()
         {
-            var options = new QueryOptions<Customer>()
+            var options = new QueryOptions<Customer>();
+
+            string expected =
+                "QueryOptions<Customer>: [ " +
+                "\n\tSpecificationQueryStrategy<Customer>: [ null ]," +
+                "\n\tFetchQueryStrategy<Customer>: [ null ]," +
+                "\n\tSort: [ null ]," +
+                "\n\tPage: [ Index = -1, Size = -1 ]" +
+                " ]";
+
+            Assert.Equal(expected, options.ToString());
+
+            options = options
                 .Fetch("Address")
                 .Fetch("Phone")
-                .Fetch("Phone.Customer")
+                .Fetch("Phone.Customer");
+
+            expected =
+                "QueryOptions<Customer>: [ " +
+                "\n\tSpecificationQueryStrategy<Customer>: [ null ]," +
+                "\n\tFetchQueryStrategy<Customer>: [ Paths = Address, Phone, Phone.Customer ]," +
+                "\n\tSort: [ null ]," +
+                "\n\tPage: [ Index = -1, Size = -1 ]" +
+                " ]";
+
+            Assert.Equal(expected, options.ToString());
+
+            options = options
                 .SatisfyBy(x => x.Name.Equals("Random Name"))
-                .SatisfyBy(x => x.Id > 50)
+                .SatisfyBy(x => x.Id > 50);
+
+            expected =
+                "QueryOptions<Customer>: [ " +
+                "\n\tSpecificationQueryStrategy<Customer>: [ Predicate = x => (x.Name.Equals(\"Random Name\") AndAlso (x.Id > 50)) ]," +
+                "\n\tFetchQueryStrategy<Customer>: [ Paths = Address, Phone, Phone.Customer ]," +
+                "\n\tSort: [ null ]," +
+                "\n\tPage: [ Index = -1, Size = -1 ]" +
+                " ]";
+
+            Assert.Equal(expected, options.ToString());
+
+            options = options
                 .OrderBy("Id")
-                .OrderByDescending("Name")
+                .OrderByDescending("Name");
+
+            expected =
+                "QueryOptions<Customer>: [ " +
+                "\n\tSpecificationQueryStrategy<Customer>: [ Predicate = x => (x.Name.Equals(\"Random Name\") AndAlso (x.Id > 50)) ]," +
+                "\n\tFetchQueryStrategy<Customer>: [ Paths = Address, Phone, Phone.Customer ]," +
+                "\n\tSort: [ Id = Ascending, Name = Descending ]," +
+                "\n\tPage: [ Index = -1, Size = -1 ]" +
+                " ]";
+
+            Assert.Equal(expected, options.ToString());
+
+            options = options
                 .Page(1, 10);
 
-            var expected = 
+            expected =
                 "QueryOptions<Customer>: [ " +
                 "\n\tSpecificationQueryStrategy<Customer>: [ Predicate = x => (x.Name.Equals(\"Random Name\") AndAlso (x.Id > 50)) ]," +
                 "\n\tFetchQueryStrategy<Customer>: [ Paths = Address, Phone, Phone.Customer ]," +
