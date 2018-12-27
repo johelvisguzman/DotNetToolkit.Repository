@@ -55,13 +55,13 @@
 
             Assert.Empty(((IQueryOptions<Customer>)options).SortingPropertiesMapping);
 
-            options = options.SortBy(x => x.Id);
+            options = options.OrderBy(x => x.Id);
 
             Assert.Equal(1, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.Count);
             Assert.Equal("Id", ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(0).Key);
             Assert.Equal(SortOrder.Ascending, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(0).Value);
 
-            options = options.SortBy("Id");
+            options = options.OrderBy("Id");
 
             Assert.Equal(1, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.Count);
             Assert.Equal("Id", ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(0).Key);
@@ -75,13 +75,13 @@
 
             Assert.Empty(((IQueryOptions<Customer>)options).SortingPropertiesMapping);
 
-            options = options.SortByDescending(x => x.Id);
+            options = options.OrderByDescending(x => x.Id);
 
             Assert.Equal(1, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.Count);
             Assert.Equal("Id", ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(0).Key);
             Assert.Equal(SortOrder.Descending, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(0).Value);
 
-            options = options.SortByDescending("Id");
+            options = options.OrderByDescending("Id");
 
             Assert.Equal(1, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.Count);
             Assert.Equal("Id", ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(0).Key);
@@ -93,13 +93,13 @@
         {
             var options = new QueryOptions<Customer>();
 
-            options = options.SortBy(x => x.Id).SortBy(x => x.Name);
+            options = options.OrderBy(x => x.Id).OrderBy(x => x.Name);
 
             Assert.Equal(2, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.Count);
             Assert.Equal("Name", ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(1).Key);
             Assert.Equal(SortOrder.Ascending, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(1).Value);
 
-            options = options.SortBy("Id").SortBy("Name");
+            options = options.OrderBy("Id").OrderBy("Name");
 
             Assert.Equal(2, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.Count);
             Assert.Equal("Name", ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(1).Key);
@@ -111,13 +111,13 @@
         {
             var options = new QueryOptions<Customer>();
 
-            options = options.SortByDescending(x => x.Id).SortByDescending(x => x.Name);
+            options = options.OrderByDescending(x => x.Id).OrderByDescending(x => x.Name);
 
             Assert.Equal(2, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.Count);
             Assert.Equal("Name", ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(1).Key);
             Assert.Equal(SortOrder.Descending, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(1).Value);
 
-            options = options.SortByDescending("Id").SortByDescending("Name");
+            options = options.OrderByDescending("Id").OrderByDescending("Name");
 
             Assert.Equal(2, ((IQueryOptions<Customer>)options).SortingPropertiesMapping.Count);
             Assert.Equal("Name", ((IQueryOptions<Customer>)options).SortingPropertiesMapping.ElementAt(1).Key);
@@ -202,8 +202,8 @@
                 .Fetch("Phone.Customer")
                 .SatisfyBy(x => x.Name.Equals("Random Name"))
                 .SatisfyBy(x => x.Id > 50)
-                .SortBy("Id")
-                .SortByDescending("Name")
+                .OrderBy("Id")
+                .OrderByDescending("Name")
                 .Page(1, 10);
 
             var expected = 

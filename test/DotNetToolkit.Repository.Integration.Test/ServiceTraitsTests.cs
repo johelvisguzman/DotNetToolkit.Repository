@@ -605,7 +605,7 @@
                 new Customer { Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
 
             Assert.Null(service.Get(x => x.Name.Contains("Random Name"))?.Name);
             Assert.Null(service.Get(options)?.Name);
@@ -630,7 +630,7 @@
                 new Customer { Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
 
             Assert.Null(service.Get(x => x.Name.Contains("Random Name"))?.Name);
             Assert.Null(service.Get(options)?.Name);
@@ -651,7 +651,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
             var entity = new Customer { Name = name };
 
             Assert.Empty(service.GetAll());
@@ -682,7 +682,7 @@
                 new Customer { Id = 3, Name = "Random Name 2" }
             };
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
 
             Assert.Null(service.GetAll().FirstOrDefault()?.Name);
             Assert.Null(service.GetAll(options).Result.FirstOrDefault()?.Name);
@@ -701,7 +701,7 @@
             Assert.Equal(1, service.GetAll<int>(x => x.Id).First());
             Assert.Equal(1, service.GetAll<int>(options, x => x.Id).Result.First());
 
-            options = new QueryOptions<Customer>().SortByDescending(x => x.Name).SortByDescending(x => x.Id);
+            options = new QueryOptions<Customer>().OrderByDescending(x => x.Name).OrderByDescending(x => x.Id);
 
             Assert.Equal("Random Name 2", service.GetAll().First().Name);
             Assert.Equal("Random Name 2", service.GetAll(options).Result.First().Name);
@@ -724,7 +724,7 @@
                 new Customer { Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
 
             Assert.Null(service.GetAll().FirstOrDefault()?.Name);
             Assert.Null(service.GetAll(options).Result.FirstOrDefault()?.Name);
@@ -738,7 +738,7 @@
             Assert.Equal("Random Name 2", service.GetAll<string>(x => x.Name).First());
             Assert.Equal("Random Name 1", service.GetAll<string>(options, x => x.Name).Result.First());
 
-            options = new QueryOptions<Customer>().SortBy(x => x.Name).SortBy(x => x.Id);
+            options = new QueryOptions<Customer>().OrderBy(x => x.Name).OrderBy(x => x.Id);
 
             Assert.Equal("Random Name 2", service.GetAll().First().Name);
             Assert.Equal("Random Name 1", service.GetAll(options).Result.First().Name);
@@ -759,7 +759,7 @@
 
             service.Create(entities);
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Id).Page(1, 5);
             var queryResult = service.GetAll(options);
 
             Assert.Equal(21, queryResult.Total);
@@ -827,7 +827,7 @@
 
             service.Create(entities);
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Id).Page(1, 5);
             var queryResult = service.GetAll(options);
 
             Assert.Equal(21, queryResult.Total);
@@ -994,7 +994,7 @@
                 entities.Add(new Customer { Id = i + 1, Name = "Random Name " + i });
             }
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Id).Page(1, 5);
             var expectedDictionary = entities.ToDictionary(x => x.Id);
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
 
@@ -1173,7 +1173,7 @@
                 entities.Add(new Customer { Id = i + 1, Name = "Random Name " + i });
             }
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Id).Page(1, 5);
 
             var expectedDictionary = entities.ToDictionary(x => x.Id);
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
@@ -1375,7 +1375,7 @@
                 new Customer { Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
 
             service.Create(entities);
 
@@ -1393,7 +1393,7 @@
                 new Customer { Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
 
             service.Create(entities);
 
@@ -1414,7 +1414,7 @@
 
             service.Create(entities);
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Id).Page(1, 5);
 
             var queryResult = service.GetGroupBy(options, y => y.Name, (key, g) => key);
 
@@ -1499,7 +1499,7 @@
 
             service.Create(entities);
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Id).Page(1, 5);
 
             var queryResult = service.GetGroupBy(options, y => y.Name, (key, g) => key);
 
@@ -1795,7 +1795,7 @@
                 new Customer { Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
 
             Assert.Null((await service.GetAsync(x => x.Name.Contains("Random Name")))?.Name);
             Assert.Null((await service.GetAsync(options))?.Name);
@@ -1820,7 +1820,7 @@
                 new Customer { Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
 
             Assert.Null((await service.GetAsync(x => x.Name.Contains("Random Name")))?.Name);
             Assert.Null((await service.GetAsync(options))?.Name);
@@ -1841,7 +1841,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
             var entity = new Customer { Name = name };
 
             Assert.Empty(await service.GetAllAsync());
@@ -1872,7 +1872,7 @@
                 new Customer { Id = 3, Name = "Random Name 2" }
             };
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
 
             Assert.Null((await service.GetAllAsync()).FirstOrDefault()?.Name);
             Assert.Null((await service.GetAllAsync(options)).Result.FirstOrDefault()?.Name);
@@ -1891,7 +1891,7 @@
             Assert.Equal(1, (await service.GetAllAsync<int>(x => x.Id)).First());
             Assert.Equal(1, (await service.GetAllAsync<int>(options, x => x.Id)).Result.First());
 
-            options = new QueryOptions<Customer>().SortByDescending(x => x.Name).SortByDescending(x => x.Id);
+            options = new QueryOptions<Customer>().OrderByDescending(x => x.Name).OrderByDescending(x => x.Id);
 
             Assert.Equal("Random Name 2", (await service.GetAllAsync()).First().Name);
             Assert.Equal("Random Name 2", (await service.GetAllAsync(options)).Result.First().Name);
@@ -1914,7 +1914,7 @@
                 new Customer { Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
 
             Assert.Null((await service.GetAllAsync()).FirstOrDefault()?.Name);
             Assert.Null((await service.GetAllAsync(options)).Result.FirstOrDefault()?.Name);
@@ -1928,7 +1928,7 @@
             Assert.Equal("Random Name 2", (await service.GetAllAsync<string>(x => x.Name)).First());
             Assert.Equal("Random Name 1", (await service.GetAllAsync<string>(options, x => x.Name)).Result.First());
 
-            options = new QueryOptions<Customer>().SortBy(x => x.Name).SortBy(x => x.Id);
+            options = new QueryOptions<Customer>().OrderBy(x => x.Name).OrderBy(x => x.Id);
 
             Assert.Equal("Random Name 2", (await service.GetAllAsync()).First().Name);
             Assert.Equal("Random Name 1", (await service.GetAllAsync(options)).Result.First().Name);
@@ -1949,7 +1949,7 @@
 
             await service.CreateAsync(entities);
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Id).Page(1, 5);
             var queryResult = await service.GetAllAsync(options);
 
             Assert.Equal(21, queryResult.Total);
@@ -2017,7 +2017,7 @@
 
             await service.CreateAsync(entities);
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Id).Page(1, 5);
             var queryResult = await service.GetAllAsync(options);
 
             Assert.Equal(21, queryResult.Total);
@@ -2184,7 +2184,7 @@
                 entities.Add(new Customer { Id = i + 1, Name = "Random Name " + i });
             }
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Id).Page(1, 5);
             var expectedDictionary = entities.ToDictionary(x => x.Id);
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
 
@@ -2363,7 +2363,7 @@
                 entities.Add(new Customer { Id = i + 1, Name = "Random Name " + i });
             }
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Id).Page(1, 5);
 
             var expectedDictionary = entities.ToDictionary(x => x.Id);
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
@@ -2565,7 +2565,7 @@
                 new Customer { Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
 
             await service.CreateAsync(entities);
 
@@ -2583,7 +2583,7 @@
                 new Customer { Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
 
             await service.CreateAsync(entities);
 
@@ -2604,7 +2604,7 @@
 
             await service.CreateAsync(entities);
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Id).Page(1, 5);
 
             var queryResult = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
 
@@ -2689,7 +2689,7 @@
 
             await service.CreateAsync(entities);
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Id).Page(1, 5);
 
             var queryResult = await service.GetGroupByAsync(options, y => y.Name, (key, g) => key);
 

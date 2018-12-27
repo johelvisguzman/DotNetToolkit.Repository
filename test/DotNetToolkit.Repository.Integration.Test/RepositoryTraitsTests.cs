@@ -666,7 +666,7 @@
                 new Customer { Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
 
             Assert.Null(repo.Find(x => x.Name.Contains("Random Name"))?.Name);
             Assert.Null(repo.Find(options)?.Name);
@@ -691,7 +691,7 @@
                 new Customer { Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
 
             Assert.Null(repo.Find(x => x.Name.Contains("Random Name"))?.Name);
             Assert.Null(repo.Find(options)?.Name);
@@ -712,7 +712,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
             var entity = new Customer { Name = name };
 
             Assert.Empty(repo.FindAll());
@@ -743,7 +743,7 @@
                 new Customer { Id = 3, Name = "Random Name 2" }
             };
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
 
             Assert.Null(repo.FindAll().FirstOrDefault()?.Name);
             Assert.Null(repo.FindAll(options).Result.FirstOrDefault()?.Name);
@@ -762,7 +762,7 @@
             Assert.Equal(1, repo.FindAll<int>(x => x.Id).First());
             Assert.Equal(1, repo.FindAll<int>(options, x => x.Id).Result.First());
 
-            options = new QueryOptions<Customer>().SortByDescending(x => x.Name).SortByDescending(x => x.Id);
+            options = new QueryOptions<Customer>().OrderByDescending(x => x.Name).OrderByDescending(x => x.Id);
 
             Assert.Equal("Random Name 2", repo.FindAll().First().Name);
             Assert.Equal("Random Name 2", repo.FindAll(options).Result.First().Name);
@@ -785,7 +785,7 @@
                 new Customer { Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
 
             Assert.Null(repo.FindAll().FirstOrDefault()?.Name);
             Assert.Null(repo.FindAll(options).Result.FirstOrDefault()?.Name);
@@ -799,7 +799,7 @@
             Assert.Equal("Random Name 2", repo.FindAll<string>(x => x.Name).First());
             Assert.Equal("Random Name 1", repo.FindAll<string>(options, x => x.Name).Result.First());
 
-            options = new QueryOptions<Customer>().SortBy(x => x.Name).SortBy(x => x.Id);
+            options = new QueryOptions<Customer>().OrderBy(x => x.Name).OrderBy(x => x.Id);
 
             Assert.Equal("Random Name 2", repo.FindAll().First().Name);
             Assert.Equal("Random Name 1", repo.FindAll(options).Result.First().Name);
@@ -820,7 +820,7 @@
 
             repo.Add(entities);
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Id).Page(1, 5);
             var queryResult = repo.FindAll(options);
 
             Assert.Equal(21, queryResult.Total);
@@ -888,7 +888,7 @@
 
             repo.Add(entities);
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Id).Page(1, 5);
             var queryResult = repo.FindAll(options);
 
             Assert.Equal(21, queryResult.Total);
@@ -1055,7 +1055,7 @@
                 entities.Add(new Customer { Id = i + 1, Name = "Random Name " + i });
             }
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Id).Page(1, 5);
             var expectedDictionary = entities.ToDictionary(x => x.Id);
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
 
@@ -1234,7 +1234,7 @@
                 entities.Add(new Customer { Id = i + 1, Name = "Random Name " + i });
             }
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Id).Page(1, 5);
 
             var expectedDictionary = entities.ToDictionary(x => x.Id);
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
@@ -1436,7 +1436,7 @@
                 new Customer { Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
 
             repo.Add(entities);
 
@@ -1454,7 +1454,7 @@
                 new Customer { Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
 
             repo.Add(entities);
 
@@ -1475,7 +1475,7 @@
 
             repo.Add(entities);
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Id).Page(1, 5);
             var queryResult = repo.GroupBy(options, y => y.Name, (key, g) => key);
 
             Assert.Equal(21, queryResult.Total);
@@ -1559,7 +1559,7 @@
 
             repo.Add(entities);
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Id).Page(1, 5);
             var queryResult = repo.GroupBy(options, y => y.Name, (key, g) => key);
 
             Assert.Equal(21, queryResult.Total);
@@ -1869,7 +1869,7 @@
                 new Customer { Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
 
             Assert.Null((await repo.FindAsync(x => x.Name.Contains("Random Name")))?.Name);
             Assert.Null((await repo.FindAsync(options))?.Name);
@@ -1894,7 +1894,7 @@
                 new Customer { Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
 
             Assert.Null((await repo.FindAsync(x => x.Name.Contains("Random Name")))?.Name);
             Assert.Null((await repo.FindAsync(options))?.Name);
@@ -1915,7 +1915,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
             var entity = new Customer { Name = name };
 
             Assert.Empty(await repo.FindAllAsync());
@@ -1946,7 +1946,7 @@
                 new Customer { Id = 3, Name = "Random Name 2" }
             };
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
 
             Assert.Null((await repo.FindAllAsync()).FirstOrDefault()?.Name);
             Assert.Null((await repo.FindAllAsync(options)).Result.FirstOrDefault()?.Name);
@@ -1965,7 +1965,7 @@
             Assert.Equal(1, (await repo.FindAllAsync<int>(x => x.Id)).First());
             Assert.Equal(1, (await repo.FindAllAsync<int>(options, x => x.Id)).Result.First());
 
-            options = new QueryOptions<Customer>().SortByDescending(x => x.Name).SortByDescending(x => x.Id);
+            options = new QueryOptions<Customer>().OrderByDescending(x => x.Name).OrderByDescending(x => x.Id);
 
             Assert.Equal("Random Name 2", (await repo.FindAllAsync()).First().Name);
             Assert.Equal("Random Name 2", (await repo.FindAllAsync(options)).Result.First().Name);
@@ -1988,7 +1988,7 @@
                 new Customer { Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
 
             Assert.Null((await repo.FindAllAsync()).FirstOrDefault()?.Name);
             Assert.Null((await repo.FindAllAsync(options)).Result.FirstOrDefault()?.Name);
@@ -2002,7 +2002,7 @@
             Assert.Equal("Random Name 2", (await repo.FindAllAsync<string>(x => x.Name)).First());
             Assert.Equal("Random Name 1", (await repo.FindAllAsync<string>(options, x => x.Name)).Result.First());
 
-            options = new QueryOptions<Customer>().SortBy(x => x.Name).SortBy(x => x.Id);
+            options = new QueryOptions<Customer>().OrderBy(x => x.Name).OrderBy(x => x.Id);
 
             Assert.Equal("Random Name 2", (await repo.FindAllAsync()).First().Name);
             Assert.Equal("Random Name 1", (await repo.FindAllAsync(options)).Result.First().Name);
@@ -2023,7 +2023,7 @@
 
             await repo.AddAsync(entities);
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Id).Page(1, 5);
             var queryResult = await repo.FindAllAsync(options);
 
             Assert.Equal(21, queryResult.Total);
@@ -2091,7 +2091,7 @@
 
             await repo.AddAsync(entities);
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Id).Page(1, 5);
             var queryResult = await repo.FindAllAsync(options);
 
             Assert.Equal(21, queryResult.Total);
@@ -2258,7 +2258,7 @@
                 entities.Add(new Customer { Id = i + 1, Name = "Random Name " + i });
             }
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Id).Page(1, 5);
             var expectedDictionary = entities.ToDictionary(x => x.Id);
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
 
@@ -2437,7 +2437,7 @@
                 entities.Add(new Customer { Id = i + 1, Name = "Random Name " + i });
             }
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Id).Page(1, 5);
 
             var expectedDictionary = entities.ToDictionary(x => x.Id);
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
@@ -2640,7 +2640,7 @@
                 new Customer { Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
 
             await repo.AddAsync(entities);
 
@@ -2658,7 +2658,7 @@
                 new Customer { Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
 
             await repo.AddAsync(entities);
 
@@ -2679,7 +2679,7 @@
 
             await repo.AddAsync(entities);
 
-            var options = new QueryOptions<Customer>().SortBy(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Id).Page(1, 5);
 
             var queryResult = await repo.GroupByAsync(options, y => y.Name, (key, g) => key);
 
@@ -2764,7 +2764,7 @@
 
             await repo.AddAsync(entities);
 
-            var options = new QueryOptions<Customer>().SortByDescending(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Id).Page(1, 5);
 
             var queryResult = await repo.GroupByAsync(options, y => y.Name, (key, g) => key);
 

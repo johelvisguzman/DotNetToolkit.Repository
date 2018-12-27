@@ -51,7 +51,7 @@
         /// </summary>
         /// <param name="propertyName">The name of the property.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> SortBy(string propertyName)
+        public QueryOptions<T> OrderBy(string propertyName)
         {
             if (propertyName == null)
                 throw new ArgumentNullException(nameof(propertyName));
@@ -67,7 +67,7 @@
         /// </summary>
         /// <param name="propertyName">The name of the property.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> SortByDescending(string propertyName)
+        public QueryOptions<T> OrderByDescending(string propertyName)
         {
             if (propertyName == null)
                 throw new ArgumentNullException(nameof(propertyName));
@@ -83,12 +83,12 @@
         /// </summary>
         /// <param name="property">The sorting property expression.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> SortBy(Expression<Func<T, object>> property)
+        public QueryOptions<T> OrderBy(Expression<Func<T, object>> property)
         {
             if (property == null)
                 throw new ArgumentNullException(nameof(property));
 
-            return SortBy(ExpressionHelper.GetPropertyPath(property));
+            return OrderBy(ExpressionHelper.GetPropertyPath(property));
         }
 
         /// <summary>
@@ -96,12 +96,12 @@
         /// </summary>
         /// <param name="property">The sorting property expression.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> SortByDescending(Expression<Func<T, object>> property)
+        public QueryOptions<T> OrderByDescending(Expression<Func<T, object>> property)
         {
             if (property == null)
                 throw new ArgumentNullException(nameof(property));
 
-            return SortByDescending(ExpressionHelper.GetPropertyPath(property));
+            return OrderByDescending(ExpressionHelper.GetPropertyPath(property));
         }
 
         /// <summary>
