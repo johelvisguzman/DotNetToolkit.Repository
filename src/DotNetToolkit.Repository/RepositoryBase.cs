@@ -38,7 +38,7 @@
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2, TKey3}"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        protected RepositoryBase(RepositoryOptions options) : base(options)
+        protected RepositoryBase(IRepositoryOptions options) : base(options)
         {
             PrimaryKeyConventionHelper.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>(typeof(TKey1), typeof(TKey2), typeof(TKey3));
         }
@@ -248,7 +248,7 @@
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2}"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        protected RepositoryBase(RepositoryOptions options) : base(options)
+        protected RepositoryBase(IRepositoryOptions options) : base(options)
         {
             PrimaryKeyConventionHelper.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>(typeof(TKey1), typeof(TKey2));
         }
@@ -447,7 +447,7 @@
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        protected RepositoryBase(RepositoryOptions options) : base(options)
+        protected RepositoryBase(IRepositoryOptions options) : base(options)
         {
             PrimaryKeyConventionHelper.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>(typeof(TKey));
         }
@@ -635,7 +635,7 @@
     {
         #region Fields
 
-        private readonly RepositoryOptions _options;
+        private readonly IRepositoryOptions _options;
         private readonly IRepositoryContextFactory _contextFactory;
         private IRepositoryContext _context;
         private IEnumerable<IRepositoryInterceptor> _interceptors;
@@ -690,7 +690,7 @@
         /// Initializes a new instance of the <see cref="InternalRepositoryBase{TEntity}"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        internal InternalRepositoryBase(RepositoryOptions options)
+        internal InternalRepositoryBase(IRepositoryOptions options)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -2156,8 +2156,8 @@
         {
             if (_interceptors == null)
             {
-                _interceptors = _options.Interceptors.Any()
-                    ? _options.Interceptors
+                _interceptors = _options.Interceptors.Values.Any()
+                    ? _options.Interceptors.Values
                         .Select(lazyInterceptor => lazyInterceptor.Value)
                         .Where(value => value != null)
                     : Enumerable.Empty<IRepositoryInterceptor>();

@@ -6,10 +6,10 @@
     using System;
     using Transactions;
 
-    public class TestRepositoryInterceptorWithDepdencyInjectedServices : RepositoryInterceptorBase
+    public class TestRepositoryInterceptorWithDependencyInjectedServices : RepositoryInterceptorBase
     {
-        public TestRepositoryInterceptorWithDepdencyInjectedServices(
-                RepositoryOptions options,
+        public TestRepositoryInterceptorWithDependencyInjectedServices(
+                IRepositoryOptions options,
                 IRepositoryFactory repoFactory,
                 IRepository<Customer> repo,
                 IUnitOfWorkFactory uowFactory,

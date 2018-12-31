@@ -13,7 +13,7 @@
     {
         #region Fields
 
-        private RepositoryOptions _options;
+        private IRepositoryOptions _options;
         private IRepositoryContext _context;
         private ITransactionManager _transactionManager;
 
@@ -43,7 +43,7 @@
         /// Initializes a new instance of the <see cref="UnitOfWork" /> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        public UnitOfWork(RepositoryOptions options)
+        public UnitOfWork(IRepositoryOptions options)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -101,7 +101,7 @@
 
         #region Private Methods
 
-        private void Initialize(RepositoryOptions options)
+        private void Initialize(IRepositoryOptions options)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
@@ -114,7 +114,8 @@
             _transactionManager = _context.BeginTransaction();
 
             // The shared context for the repositories to use
-            _options = options.Clone().With(new SharedRepositoryContextFactory(_context));
+            _options = new RepositoryOptions(options)
+                .With(new SharedRepositoryContextFactory(_context));
         }
 
         #endregion

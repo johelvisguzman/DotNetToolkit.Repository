@@ -45,12 +45,12 @@
         /// Initializes a new instance of the <see cref="RepositoryOptionsBuilder"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        public RepositoryOptionsBuilder(RepositoryOptions options)
+        public RepositoryOptionsBuilder(IRepositoryOptions options)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            _options = options.Clone();
+            _options = new RepositoryOptions(options);
         }
 
         #endregion

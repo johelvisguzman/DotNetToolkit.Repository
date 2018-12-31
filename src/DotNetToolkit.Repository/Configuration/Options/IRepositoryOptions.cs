@@ -15,7 +15,7 @@
         /// <summary>
         /// Gets the configured interceptors.
         /// </summary>
-        IEnumerable<Lazy<IRepositoryInterceptor>> Interceptors { get; }
+        IReadOnlyDictionary<Type, Lazy<IRepositoryInterceptor>> Interceptors { get; }
 
         /// <summary>
         /// Gets the configured logger provider.

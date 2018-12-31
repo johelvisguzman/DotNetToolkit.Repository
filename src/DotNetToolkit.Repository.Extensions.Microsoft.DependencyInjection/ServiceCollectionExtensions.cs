@@ -98,12 +98,12 @@
             }
 
             // Register other services
-            services.AddScoped<IRepositoryFactory, RepositoryFactory>(sp => new RepositoryFactory(sp.GetRequiredService<RepositoryOptions>()));
-            services.AddScoped<IUnitOfWork, UnitOfWork>(sp => new UnitOfWork(sp.GetRequiredService<RepositoryOptions>()));
-            services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>(sp => new UnitOfWorkFactory(sp.GetRequiredService<RepositoryOptions>()));
-            services.AddScoped<RepositoryOptions>(sp =>
+            services.AddScoped<IRepositoryFactory, RepositoryFactory>(sp => new RepositoryFactory(sp.GetRequiredService<IRepositoryOptions>()));
+            services.AddScoped<IUnitOfWork, UnitOfWork>(sp => new UnitOfWork(sp.GetRequiredService<IRepositoryOptions>()));
+            services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>(sp => new UnitOfWorkFactory(sp.GetRequiredService<IRepositoryOptions>()));
+            services.AddScoped<IRepositoryOptions>(sp =>
             {
-                var options = optionsBuilder.Options.Clone();
+                var options = new RepositoryOptions(optionsBuilder.Options);
 
                 foreach (var interceptorType in registeredInterceptorTypes)
                 {

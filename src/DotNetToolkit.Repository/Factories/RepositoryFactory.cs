@@ -11,7 +11,7 @@
     {
         #region Fields
 
-        private readonly RepositoryOptions _options;
+        private readonly IRepositoryOptions _options;
 
         #endregion
 
@@ -37,7 +37,7 @@
         /// Initializes a new instance of the <see cref="RepositoryFactory" /> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        public RepositoryFactory(RepositoryOptions options)
+        public RepositoryFactory(IRepositoryOptions options)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));

@@ -17,7 +17,6 @@
 
         private Dictionary<Type, Lazy<IRepositoryInterceptor>> _interceptors = new Dictionary<Type, Lazy<IRepositoryInterceptor>>();
         private IRepositoryContextFactory _contextFactory;
-        private IRepositoryContext _context;
         private ILoggerProvider _loggerProvider;
         private ICacheProvider _cachingProvider;
 
@@ -28,7 +27,7 @@
         /// <summary>
         /// Gets the configured interceptors.
         /// </summary>
-        public virtual IEnumerable<Lazy<IRepositoryInterceptor>> Interceptors { get { return _interceptors.Values; } }
+        public virtual IReadOnlyDictionary<Type, Lazy<IRepositoryInterceptor>> Interceptors { get { return _interceptors; } }
 
         /// <summary>
         /// Gets the configured logger provider.
@@ -57,6 +56,44 @@
                        CachingProvider != null ||
                        Interceptors.Any();
             }
+        }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryOptions" /> class.
+        /// </summary>
+        public RepositoryOptions() { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryOptions" /> class.
+        /// </summary>
+        /// <param name="options">The repository options to clone.</param>
+        public RepositoryOptions(IRepositoryOptions options)
+        {
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
+
+            Map(options, this);
+        }
+
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Clones the current configured options to a new instance.
+        /// </summary>
+        /// <returns>The new clone instance.</returns>
+        public virtual RepositoryOptions Clone()
+        {
+            var clone = new RepositoryOptions();
+
+            Map(this, clone);
+
+            return clone;
         }
 
         #endregion
@@ -103,21 +140,6 @@
         }
 
         /// <summary>
-        /// Returns the option instance with a configured internal shared context (usually setup by the unit of work).
-        /// </summary>
-        /// <param name="sharedContext">The context.</param>
-        /// <returns>The same option instance.</returns>
-        internal virtual RepositoryOptions With(IRepositoryContext sharedContext)
-        {
-            if (sharedContext == null)
-                throw new ArgumentNullException(nameof(sharedContext));
-
-            _context = sharedContext;
-
-            return this;
-        }
-
-        /// <summary>
         /// Returns the option instance with a configured logger provider for logging messages within the repository.
         /// </summary>
         /// <param name="loggerProvider">The logger factory.</param>
@@ -158,25 +180,12 @@
 
             return _interceptors.ContainsKey(type);
         }
-
-        /// <summary>
-        /// Clones the current configured options to a new instance.
-        /// </summary>
-        /// <returns>The new clone instance.</returns>
-        internal virtual RepositoryOptions Clone()
-        {
-            var clone = new RepositoryOptions();
-
-            Map(this, clone);
-
-            return clone;
-        }
-
+        
         #endregion
 
         #region Private Methods
 
-        private void Map(RepositoryOptions source, RepositoryOptions target)
+        private void Map(IRepositoryOptions source, RepositoryOptions target)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
@@ -184,11 +193,10 @@
             if (target == null)
                 throw new ArgumentNullException(nameof(target));
 
-            target._interceptors = source._interceptors.ToDictionary(x => x.Key, x => x.Value);
-            target._cachingProvider = source._cachingProvider;
-            target._loggerProvider = source._loggerProvider;
-            target._contextFactory = source._contextFactory;
-            target._context = source._context;
+            target._interceptors = source.Interceptors.ToDictionary(x => x.Key, x => x.Value);
+            target._cachingProvider = source.CachingProvider;
+            target._loggerProvider = source.LoggerProvider;
+            target._contextFactory = source.ContextFactory;
         }
 
         #endregion
