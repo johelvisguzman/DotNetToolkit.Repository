@@ -18,7 +18,7 @@
         /// Initializes a new instance of the <see cref="Repository{TEntity, TKey1, TKey2, TKey3}"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        public Repository(RepositoryOptions options) : base(options) { }
+        public Repository(IRepositoryOptions options) : base(options) { }
 
         #endregion
     }
@@ -38,7 +38,7 @@
         /// Initializes a new instance of the <see cref="Repository{TEntity, TKey1, TKey2}"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        public Repository(RepositoryOptions options) : base(options) { }
+        public Repository(IRepositoryOptions options) : base(options) { }
 
         #endregion
     }
@@ -57,7 +57,7 @@
         /// Initializes a new instance of the <see cref="Repository{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        public Repository(RepositoryOptions options) : base(options) { }
+        public Repository(IRepositoryOptions options) : base(options) { }
 
         #endregion
     }
@@ -75,7 +75,7 @@
         /// Initializes a new instance of the <see cref="Repository{TEntity}"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        public Repository(RepositoryOptions options) : base(options) { }
+        public Repository(IRepositoryOptions options) : base(options) { }
 
         #endregion
     }

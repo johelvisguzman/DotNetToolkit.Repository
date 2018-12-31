@@ -10,6 +10,6 @@
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        public TestCustomerRepository(RepositoryOptions options) : base(options) { }
+        public TestCustomerRepository(IRepositoryOptions options) : base(options) { }
     }
 }

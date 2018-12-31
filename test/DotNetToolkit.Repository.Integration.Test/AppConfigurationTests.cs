@@ -43,11 +43,11 @@
 
         private static IEnumerable<Lazy<IRepositoryInterceptor>> GetLazyInterceptorsOptionsFromPrivateField<T>(object obj)
         {
-            var options = (RepositoryOptions)typeof(T)
+            var options = (IRepositoryOptions)typeof(T)
                 .GetField("_options", BindingFlags.NonPublic | BindingFlags.Instance)
                 .GetValue(obj);
 
-            return options.Interceptors;
+            return options.Interceptors.Values;
         }
     }
 }

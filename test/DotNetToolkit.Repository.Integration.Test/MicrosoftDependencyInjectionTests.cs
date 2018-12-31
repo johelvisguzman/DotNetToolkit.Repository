@@ -33,7 +33,7 @@
 
             var provider = services.BuildServiceProvider();
 
-            Assert.NotNull(provider.GetService<TestRepositoryInterceptorWithDepdencyInjectedServices>());
+            Assert.NotNull(provider.GetService<TestRepositoryInterceptorWithDependencyInjectedServices>());
             Assert.NotNull(provider.GetService<TestRepositoryTimeStampInterceptor>());
             Assert.NotNull(provider.GetService<TestRepositoryInterceptor>());
             Assert.Equal(3, provider.GetServices<IRepositoryInterceptor>().Count());
@@ -48,11 +48,9 @@
             Assert.NotNull(provider.GetService<IService<CustomerWithThreeCompositePrimaryKey, int, string, int>>());
             Assert.NotNull(provider.GetService<ITestCustomerService>());
             Assert.NotNull(provider.GetService<IRepositoryFactory>());
-            Assert.NotNull(provider.GetService<RepositoryOptions>());
+            Assert.NotNull(provider.GetService<IRepositoryOptions>());
             Assert.NotNull(provider.GetService<IUnitOfWork>());
             Assert.NotNull(provider.GetService<IUnitOfWorkFactory>());
-            Assert.Null(provider.GetService<RepositoryOptionsBuilder>());
-            Assert.Null(provider.GetService<IRepositoryOptions>());
         }
 
         [Fact]
@@ -90,7 +88,7 @@
 
             var provider = services.BuildServiceProvider();
 
-            var repoOptions = provider.GetService<RepositoryOptions>();
+            var repoOptions = provider.GetService<IRepositoryOptions>();
             var repo = new Repository<Customer>(repoOptions);
 
             repo.Add(new Customer());
@@ -114,11 +112,11 @@
 
             var provider = services.BuildServiceProvider();
 
-            var repo = new Repository<Customer>(provider.GetService<RepositoryOptions>());
+            var repo = new Repository<Customer>(provider.GetService<IRepositoryOptions>());
 
             Assert.Equal(3, GetLazyInterceptorsOptionsFromPrivateField<InternalRepositoryBase<Customer>>(repo).Count());
             Assert.Single(provider.GetServices<IRepositoryInterceptor>());
-            Assert.NotNull(provider.GetService<TestRepositoryInterceptorWithDepdencyInjectedServices>());
+            Assert.NotNull(provider.GetService<TestRepositoryInterceptorWithDependencyInjectedServices>());
             Assert.Null(provider.GetService<TestRepositoryTimeStampInterceptor>());
             Assert.Null(provider.GetService<TestRepositoryInterceptor>());
         }
@@ -137,22 +135,22 @@
 
             var provider = services.BuildServiceProvider();
 
-            var repo = new Repository<Customer>(provider.GetService<RepositoryOptions>());
+            var repo = new Repository<Customer>(provider.GetService<IRepositoryOptions>());
 
             Assert.Equal(3, GetLazyInterceptorsOptionsFromPrivateField<InternalRepositoryBase<Customer>>(repo).Count());
             Assert.Equal(3, provider.GetServices<IRepositoryInterceptor>().Count());
-            Assert.NotNull(provider.GetService<TestRepositoryInterceptorWithDepdencyInjectedServices>());
+            Assert.NotNull(provider.GetService<TestRepositoryInterceptorWithDependencyInjectedServices>());
             Assert.NotNull(provider.GetService<TestRepositoryTimeStampInterceptor>());
             Assert.NotNull(provider.GetService<TestRepositoryInterceptor>());
         }
 
         private static IEnumerable<Lazy<IRepositoryInterceptor>> GetLazyInterceptorsOptionsFromPrivateField<T>(object obj)
         {
-            var options = (RepositoryOptions)typeof(T)
+            var options = (IRepositoryOptions)typeof(T)
                 .GetField("_options", BindingFlags.NonPublic | BindingFlags.Instance)
                 .GetValue(obj);
 
-            return options.Interceptors;
+            return options.Interceptors.Values;
         }
     }
 }

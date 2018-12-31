@@ -31,7 +31,7 @@
             },
                 typeof(UnityContainerDependencyInjectionTests).Assembly);
 
-            Assert.NotNull(container.Resolve<TestRepositoryInterceptorWithDepdencyInjectedServices>());
+            Assert.NotNull(container.Resolve<TestRepositoryInterceptorWithDependencyInjectedServices>());
             Assert.NotNull(container.Resolve<TestRepositoryTimeStampInterceptor>());
             Assert.NotNull(container.Resolve<TestRepositoryInterceptor>());
             Assert.Equal(3, container.ResolveAll<IRepositoryInterceptor>().Count());
@@ -46,11 +46,10 @@
             Assert.NotNull(container.Resolve<IService<CustomerWithThreeCompositePrimaryKey, int, string, int>>());
             Assert.NotNull(container.Resolve<ITestCustomerService>());
             Assert.NotNull(container.Resolve<IRepositoryFactory>());
-            Assert.NotNull(container.Resolve<RepositoryOptions>());
+            Assert.NotNull(container.Resolve<IRepositoryOptions>());
             Assert.NotNull(container.Resolve<IUnitOfWork>());
             Assert.NotNull(container.Resolve<IUnitOfWorkFactory>());
             Assert.NotNull(container.Resolve<RepositoryOptionsBuilder>());
-            Assert.Throws<Unity.Exceptions.ResolutionFailedException>(() => container.Resolve<IRepositoryOptions>());
         }
 
         [Fact]
@@ -110,7 +109,7 @@
 
             Assert.Equal(3, GetLazyInterceptorsOptionsFromPrivateField<InternalRepositoryBase<Customer>>(repo).Count());
             Assert.Single(container.ResolveAll<IRepositoryInterceptor>());
-            Assert.NotNull(container.Resolve<TestRepositoryInterceptorWithDepdencyInjectedServices>());
+            Assert.NotNull(container.Resolve<TestRepositoryInterceptorWithDependencyInjectedServices>());
             Assert.NotNull(container.Resolve<TestRepositoryTimeStampInterceptor>());
             Assert.NotNull(container.Resolve<TestRepositoryInterceptor>());
         }
@@ -131,18 +130,18 @@
 
             Assert.Equal(3, GetLazyInterceptorsOptionsFromPrivateField<InternalRepositoryBase<Customer>>(repo).Count());
             Assert.Equal(3, container.ResolveAll<IRepositoryInterceptor>().Count());
-            Assert.NotNull(container.Resolve<TestRepositoryInterceptorWithDepdencyInjectedServices>());
+            Assert.NotNull(container.Resolve<TestRepositoryInterceptorWithDependencyInjectedServices>());
             Assert.NotNull(container.Resolve<TestRepositoryTimeStampInterceptor>());
             Assert.NotNull(container.Resolve<TestRepositoryInterceptor>());
         }
 
         private static IEnumerable<Lazy<IRepositoryInterceptor>> GetLazyInterceptorsOptionsFromPrivateField<T>(object obj)
         {
-            var options = (RepositoryOptions)typeof(T)
+            var options = (IRepositoryOptions)typeof(T)
                 .GetField("_options", BindingFlags.NonPublic | BindingFlags.Instance)
                 .GetValue(obj);
 
-            return options.Interceptors;
+            return options.Interceptors.Values;
         }
     }
 }
