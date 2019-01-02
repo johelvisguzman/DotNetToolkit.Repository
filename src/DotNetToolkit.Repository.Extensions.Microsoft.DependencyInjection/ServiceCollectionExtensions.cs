@@ -83,7 +83,7 @@
                 {
                     if (serviceType == typeof(IRepositoryInterceptor))
                     {
-                        if (services.Any(x => x.ServiceType == implementationType) || optionsBuilder.Options.ContainsInterceptorOfType(implementationType))
+                        if (services.Any(x => x.ServiceType == implementationType) || optionsBuilder.Options.Interceptors.ContainsKey(implementationType))
                             continue;
 
                         services.AddScoped(implementationType, implementationType);

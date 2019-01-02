@@ -76,7 +76,10 @@
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            Map(options, this);
+            _interceptors = options.Interceptors.ToDictionary(x => x.Key, x => x.Value);
+            _cachingProvider = options.CachingProvider;
+            _loggerProvider = options.LoggerProvider;
+            _contextFactory = options.ContextFactory;
         }
 
         #endregion
@@ -89,16 +92,8 @@
         /// <returns>The new clone instance.</returns>
         public virtual RepositoryOptions Clone()
         {
-            var clone = new RepositoryOptions();
-
-            Map(this, clone);
-
-            return clone;
+            return new RepositoryOptions(this);
         }
-
-        #endregion
-
-        #region Internal Methods
 
         /// <summary>
         /// Returns the option instance with a configured interceptor.
@@ -106,7 +101,7 @@
         /// <param name="underlyingType">The type of interceptor.</param>
         /// <param name="interceptorFactory">The interceptor factory.</param>
         /// <returns>The same option instance.</returns>
-        internal virtual RepositoryOptions With(Type underlyingType, Func<IRepositoryInterceptor> interceptorFactory)
+        public virtual RepositoryOptions With(Type underlyingType, Func<IRepositoryInterceptor> interceptorFactory)
         {
             if (underlyingType == null)
                 throw new ArgumentNullException(nameof(underlyingType));
@@ -129,7 +124,7 @@
         /// </summary>
         /// <param name="contextFactory">The context factory.</param>
         /// <returns>The same option instance.</returns>
-        internal virtual RepositoryOptions With(IRepositoryContextFactory contextFactory)
+        public virtual RepositoryOptions With(IRepositoryContextFactory contextFactory)
         {
             if (contextFactory == null)
                 throw new ArgumentNullException(nameof(contextFactory));
@@ -144,7 +139,7 @@
         /// </summary>
         /// <param name="loggerProvider">The logger factory.</param>
         /// <returns>The same option instance.</returns>
-        internal virtual RepositoryOptions With(ILoggerProvider loggerProvider)
+        public virtual RepositoryOptions With(ILoggerProvider loggerProvider)
         {
             if (loggerProvider == null)
                 throw new ArgumentNullException(nameof(loggerProvider));
@@ -159,7 +154,7 @@
         /// </summary>
         /// <param name="cacheProvider">The caching provider.</param>
         /// <returns>The same option instance.</returns>
-        internal virtual RepositoryOptions With(ICacheProvider cacheProvider)
+        public virtual RepositoryOptions With(ICacheProvider cacheProvider)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -168,37 +163,7 @@
 
             return this;
         }
-
-        /// <summary>
-        /// Determines whether the specified interceptor exists within the collection.
-        /// </summary>
-        /// <returns><c>true</c> if able to find an interceptor of the specified type; otherwise, <c>false</c>.</returns>
-        internal virtual bool ContainsInterceptorOfType(Type type)
-        {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
-
-            return _interceptors.ContainsKey(type);
-        }
         
-        #endregion
-
-        #region Private Methods
-
-        private void Map(IRepositoryOptions source, RepositoryOptions target)
-        {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            if (target == null)
-                throw new ArgumentNullException(nameof(target));
-
-            target._interceptors = source.Interceptors.ToDictionary(x => x.Key, x => x.Value);
-            target._cachingProvider = source.CachingProvider;
-            target._loggerProvider = source.LoggerProvider;
-            target._contextFactory = source.ContextFactory;
-        }
-
         #endregion
     }
 }

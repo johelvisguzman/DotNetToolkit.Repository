@@ -84,7 +84,7 @@
                 {
                     if (serviceType == typeof(IRepositoryInterceptor))
                     {
-                        if (container.IsRegistered(implementationType) || optionsBuilder.Options.ContainsInterceptorOfType(implementationType))
+                        if (container.IsRegistered(implementationType) || optionsBuilder.Options.Interceptors.ContainsKey(implementationType))
                             continue;
 
                         container.RegisterType(implementationType, implementationType);
