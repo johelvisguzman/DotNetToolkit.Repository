@@ -20,7 +20,7 @@
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            source.Options.With(new InMemoryRepositoryContextFactory(ignoreTransactionWarning));
+            source.UseInternalContextFactory(new InMemoryRepositoryContextFactory(ignoreTransactionWarning));
 
             return source;
         }
@@ -40,7 +40,7 @@
             if (databaseName == null)
                 throw new ArgumentNullException(nameof(databaseName));
 
-            source.Options.With(new InMemoryRepositoryContextFactory(databaseName, ignoreTransactionWarning));
+            source.UseInternalContextFactory(new InMemoryRepositoryContextFactory(databaseName, ignoreTransactionWarning));
 
             return source;
         }
