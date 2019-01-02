@@ -16,7 +16,7 @@
 
             Assert.Single(optionsBuilder.Options.Interceptors);
 
-            Assert.True(optionsBuilder.Options.ContainsInterceptorOfType(typeof(TestRepositoryInterceptor)));
+            Assert.True(optionsBuilder.Options.Interceptors.ContainsKey(typeof(TestRepositoryInterceptor)));
         }
 
         [Fact]
@@ -28,7 +28,7 @@
 
             Assert.Single(optionsBuilder.Options.Interceptors);
 
-            Assert.True(optionsBuilder.Options.ContainsInterceptorOfType(typeof(TestRepositoryInterceptor)));
+            Assert.True(optionsBuilder.Options.Interceptors.ContainsKey(typeof(TestRepositoryInterceptor)));
         }
 
 
@@ -41,8 +41,8 @@
 
             Assert.Equal(2, optionsBuilder.Options.Interceptors.Count());
 
-            Assert.True(optionsBuilder.Options.ContainsInterceptorOfType(typeof(TestRepositoryInterceptor)));
-            Assert.True(optionsBuilder.Options.ContainsInterceptorOfType(typeof(TestRepositoryInterceptor2)));
+            Assert.True(optionsBuilder.Options.Interceptors.ContainsKey(typeof(TestRepositoryInterceptor)));
+            Assert.True(optionsBuilder.Options.Interceptors.ContainsKey(typeof(TestRepositoryInterceptor2)));
         }
 
         [Fact]

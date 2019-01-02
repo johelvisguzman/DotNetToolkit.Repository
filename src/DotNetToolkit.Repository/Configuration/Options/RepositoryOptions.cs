@@ -168,18 +168,6 @@
 
             return this;
         }
-
-        /// <summary>
-        /// Determines whether the specified interceptor exists within the collection.
-        /// </summary>
-        /// <returns><c>true</c> if able to find an interceptor of the specified type; otherwise, <c>false</c>.</returns>
-        internal virtual bool ContainsInterceptorOfType(Type type)
-        {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
-
-            return _interceptors.ContainsKey(type);
-        }
         
         #endregion
 
