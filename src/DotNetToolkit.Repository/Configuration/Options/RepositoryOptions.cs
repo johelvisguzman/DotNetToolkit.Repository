@@ -96,17 +96,13 @@
             return clone;
         }
 
-        #endregion
-
-        #region Internal Methods
-
         /// <summary>
         /// Returns the option instance with a configured interceptor.
         /// </summary>
         /// <param name="underlyingType">The type of interceptor.</param>
         /// <param name="interceptorFactory">The interceptor factory.</param>
         /// <returns>The same option instance.</returns>
-        internal virtual RepositoryOptions With(Type underlyingType, Func<IRepositoryInterceptor> interceptorFactory)
+        public virtual RepositoryOptions With(Type underlyingType, Func<IRepositoryInterceptor> interceptorFactory)
         {
             if (underlyingType == null)
                 throw new ArgumentNullException(nameof(underlyingType));
@@ -129,7 +125,7 @@
         /// </summary>
         /// <param name="contextFactory">The context factory.</param>
         /// <returns>The same option instance.</returns>
-        internal virtual RepositoryOptions With(IRepositoryContextFactory contextFactory)
+        public virtual RepositoryOptions With(IRepositoryContextFactory contextFactory)
         {
             if (contextFactory == null)
                 throw new ArgumentNullException(nameof(contextFactory));
@@ -144,7 +140,7 @@
         /// </summary>
         /// <param name="loggerProvider">The logger factory.</param>
         /// <returns>The same option instance.</returns>
-        internal virtual RepositoryOptions With(ILoggerProvider loggerProvider)
+        public virtual RepositoryOptions With(ILoggerProvider loggerProvider)
         {
             if (loggerProvider == null)
                 throw new ArgumentNullException(nameof(loggerProvider));
@@ -159,7 +155,7 @@
         /// </summary>
         /// <param name="cacheProvider">The caching provider.</param>
         /// <returns>The same option instance.</returns>
-        internal virtual RepositoryOptions With(ICacheProvider cacheProvider)
+        public virtual RepositoryOptions With(ICacheProvider cacheProvider)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
