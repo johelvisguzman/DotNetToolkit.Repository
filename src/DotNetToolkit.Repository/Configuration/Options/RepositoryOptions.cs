@@ -76,7 +76,10 @@
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            Map(options, this);
+            _interceptors = options.Interceptors.ToDictionary(x => x.Key, x => x.Value);
+            _cachingProvider = options.CachingProvider;
+            _loggerProvider = options.LoggerProvider;
+            _contextFactory = options.ContextFactory;
         }
 
         #endregion
@@ -89,11 +92,7 @@
         /// <returns>The new clone instance.</returns>
         public virtual RepositoryOptions Clone()
         {
-            var clone = new RepositoryOptions();
-
-            Map(this, clone);
-
-            return clone;
+            return new RepositoryOptions(this);
         }
 
         /// <summary>
@@ -165,24 +164,6 @@
             return this;
         }
         
-        #endregion
-
-        #region Private Methods
-
-        private void Map(IRepositoryOptions source, RepositoryOptions target)
-        {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            if (target == null)
-                throw new ArgumentNullException(nameof(target));
-
-            target._interceptors = source.Interceptors.ToDictionary(x => x.Key, x => x.Value);
-            target._cachingProvider = source.CachingProvider;
-            target._loggerProvider = source.LoggerProvider;
-            target._contextFactory = source.ContextFactory;
-        }
-
         #endregion
     }
 }
