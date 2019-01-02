@@ -90,10 +90,14 @@
         /// Clones the current configured options to a new instance.
         /// </summary>
         /// <returns>The new clone instance.</returns>
-        public virtual RepositoryOptions Clone()
+        public RepositoryOptions Clone()
         {
             return new RepositoryOptions(this);
         }
+
+        #endregion
+
+        #region Internal Methods
 
         /// <summary>
         /// Returns the option instance with a configured interceptor.
@@ -101,7 +105,7 @@
         /// <param name="underlyingType">The type of interceptor.</param>
         /// <param name="interceptorFactory">The interceptor factory.</param>
         /// <returns>The same option instance.</returns>
-        public virtual RepositoryOptions With(Type underlyingType, Func<IRepositoryInterceptor> interceptorFactory)
+        internal RepositoryOptions With(Type underlyingType, Func<IRepositoryInterceptor> interceptorFactory)
         {
             if (underlyingType == null)
                 throw new ArgumentNullException(nameof(underlyingType));
@@ -124,7 +128,7 @@
         /// </summary>
         /// <param name="contextFactory">The context factory.</param>
         /// <returns>The same option instance.</returns>
-        public virtual RepositoryOptions With(IRepositoryContextFactory contextFactory)
+        internal RepositoryOptions With(IRepositoryContextFactory contextFactory)
         {
             if (contextFactory == null)
                 throw new ArgumentNullException(nameof(contextFactory));
@@ -139,7 +143,7 @@
         /// </summary>
         /// <param name="loggerProvider">The logger factory.</param>
         /// <returns>The same option instance.</returns>
-        public virtual RepositoryOptions With(ILoggerProvider loggerProvider)
+        internal RepositoryOptions With(ILoggerProvider loggerProvider)
         {
             if (loggerProvider == null)
                 throw new ArgumentNullException(nameof(loggerProvider));
@@ -154,7 +158,7 @@
         /// </summary>
         /// <param name="cacheProvider">The caching provider.</param>
         /// <returns>The same option instance.</returns>
-        public virtual RepositoryOptions With(ICacheProvider cacheProvider)
+        internal RepositoryOptions With(ICacheProvider cacheProvider)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));

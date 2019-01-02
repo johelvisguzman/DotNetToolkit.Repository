@@ -21,7 +21,7 @@
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            source.Options.With(new EfRepositoryContextFactory<TDbContext>());
+            source.UseInternalContextFactory(new EfRepositoryContextFactory<TDbContext>());
 
             return source;
         }
@@ -40,7 +40,7 @@
             if (nameOrConnectionString == null)
                 throw new ArgumentNullException(nameof(nameOrConnectionString));
 
-            source.Options.With(new EfRepositoryContextFactory<TDbContext>(nameOrConnectionString));
+            source.UseInternalContextFactory(new EfRepositoryContextFactory<TDbContext>(nameOrConnectionString));
 
             return source;
         }
@@ -59,7 +59,7 @@
             if (existingConnection == null)
                 throw new ArgumentNullException(nameof(existingConnection));
 
-            source.Options.With(new EfRepositoryContextFactory<TDbContext>(existingConnection));
+            source.UseInternalContextFactory(new EfRepositoryContextFactory<TDbContext>(existingConnection));
 
             return source;
         }
