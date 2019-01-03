@@ -225,6 +225,16 @@
         }
 
         /// <summary>
+        /// Throws an exception if the specified number of key values does not match the ones defined for the entity.
+        /// </summary>
+        /// <param name="keyValues"></param>
+        public static void ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(object[] keyValues) where TEntity : class
+        {
+            if (keyValues.Length != PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Count())
+                throw new ArgumentException(DotNetToolkit.Repository.Properties.Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
+        }
+
+        /// <summary>
         /// Gets the primary key name checks.
         /// </summary>
         /// <param name="entityType">The entity type to get the primary key from.</param>

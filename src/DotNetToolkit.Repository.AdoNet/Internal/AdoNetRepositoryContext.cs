@@ -1158,12 +1158,6 @@
             return ConvertValue<TElement>;
         }
 
-        private void ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(object[] keyValues) where TEntity : class
-        {
-            if (keyValues.Length != PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Count())
-                throw new ArgumentException(DotNetToolkit.Repository.Properties.Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
-        }
-
         private async Task OnSchemaValidationAsync(Type entityType, CancellationToken cancellationToken)
         {
             // Performs some schema validation for this type (either creates the table if does not exist, or validates)
@@ -1423,7 +1417,7 @@
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));
 
-            ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
+            PrimaryKeyConventionHelper.ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
 
             var options = new QueryOptions<TEntity>().Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
 
@@ -1777,7 +1771,7 @@
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));
 
-            ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
+            PrimaryKeyConventionHelper.ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
 
             var options = new QueryOptions<TEntity>().Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
 

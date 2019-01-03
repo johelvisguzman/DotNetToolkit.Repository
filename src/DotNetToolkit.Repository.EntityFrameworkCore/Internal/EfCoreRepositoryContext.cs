@@ -54,16 +54,6 @@
 
         #endregion
 
-        #region Private Methods
-
-        private void ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(object[] keyValues) where TEntity : class
-        {
-            if (keyValues.Length != PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Count())
-                throw new ArgumentException(DotNetToolkit.Repository.Properties.Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
-        }
-
-        #endregion
-
         #region Implementation of IRepositoryContext
 
         /// <summary>
@@ -294,7 +284,7 @@
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));
 
-            ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
+            PrimaryKeyConventionHelper.ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
 
             if (fetchStrategy == null)
             {
@@ -641,7 +631,7 @@
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));
 
-            ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
+            PrimaryKeyConventionHelper.ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
 
             if (fetchStrategy == null)
             {

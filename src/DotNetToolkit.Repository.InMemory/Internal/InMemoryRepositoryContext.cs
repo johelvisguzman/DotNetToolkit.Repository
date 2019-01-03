@@ -41,11 +41,6 @@
         public string DatabaseName { get; internal set; }
 
         /// <summary>
-        /// Gets the item types in-memory that have not yet been saved. This collection is cleared after the context is saved.
-        /// </summary>
-        internal IEnumerable<Type> ItemTypes { get { return _items.Select(x => x.Entity.GetType()); } }
-
-        /// <summary>
         /// Gets the repository context logger.
         /// </summary>
         public ILogger Logger { get; private set; } = NullLogger.Instance;
@@ -96,12 +91,6 @@
         #endregion
 
         #region Private Methods
-
-        private void ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(object[] keyValues) where TEntity : class
-        {
-            if (keyValues.Length != PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Count())
-                throw new ArgumentException(DotNetToolkit.Repository.Properties.Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
-        }
 
         private IQueryable<TEntity> AsQueryable<TEntity>() where TEntity : class
         {
@@ -327,7 +316,7 @@
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));
 
-            ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
+            PrimaryKeyConventionHelper.ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
 
             var entityType = typeof(TEntity);
             var store = InMemoryCache.Instance.GetDatabaseStore(DatabaseName);
