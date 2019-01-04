@@ -17,14 +17,22 @@
         /// <summary>
         /// Gets the global caching prefix counter.
         /// </summary>
-        internal static int GlobalCachingPrefixCounter { get { return _counter; } }
+        public static int GlobalCachingPrefixCounter { get { return _counter; } }
 
         /// <summary>
-        /// Clears the cache.
+        /// Increments the caching prefix counter.
         /// </summary>
         public static void IncrementCounter()
         {
             Interlocked.Increment(ref _counter);
+        }
+
+        /// <summary>
+        /// Decrements the caching prefix counter.
+        /// </summary>
+        public static void DecrementCounter()
+        {
+            Interlocked.Decrement(ref _counter);
         }
     }
 }
