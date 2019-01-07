@@ -163,8 +163,7 @@
 
             var propInfos = GetPrimaryKeyPropertyInfos<TEntity>().ToList();
 
-            if (keyValues.Length != propInfos.Count)
-                throw new ArgumentException(Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
+            ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
 
             var parameter = Expression.Parameter(typeof(TEntity), "x");
 
@@ -230,7 +229,7 @@
         /// <param name="keyValues"></param>
         public static void ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(object[] keyValues) where TEntity : class
         {
-            if (keyValues.Length != PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Count())
+            if (keyValues.Length != GetPrimaryKeyPropertyInfos<TEntity>().Count())
                 throw new ArgumentException(DotNetToolkit.Repository.Properties.Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
         }
 
