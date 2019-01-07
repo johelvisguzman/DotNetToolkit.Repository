@@ -128,6 +128,43 @@
             throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeInvalid, entityType.FullName, propertyType));
         }
 
+        private static object GetPrimaryKeyValue(object obj)
+        {
+            if (obj == null)
+                throw new ArgumentNullException(nameof(obj));
+
+            return Combine(PrimaryKeyConventionHelper.GetPrimaryKeyValues(obj));
+        }
+
+        private static object Combine(object[] keyValues)
+        {
+            if (keyValues == null)
+                throw new ArgumentNullException(nameof(keyValues));
+
+            object key;
+
+            switch (keyValues.Length)
+            {
+                case 3:
+                {
+                    key = Tuple.Create(keyValues[0], keyValues[1], keyValues[2]);
+                    break;
+                }
+                case 2:
+                {
+                    key = Tuple.Create(keyValues[0], keyValues[1]);
+                    break;
+                }
+                default:
+                {
+                    key = keyValues[0];
+                    break;
+                }
+            }
+
+            return key;
+        }
+
         #endregion
 
         #region Implementation of IRepositoryContext
@@ -231,7 +268,7 @@
                 while (_items.TryTake(out var entitySet))
                 {
                     var entityType = entitySet.Entity.GetType();
-                    var key = PrimaryKeyConventionHelper.GetPrimaryKeyValue(entitySet.Entity);
+                    var key = GetPrimaryKeyValue(entitySet.Entity);
 
                     if (!store.ContainsKey(entityType))
                         store[entityType] = new ConcurrentDictionary<object, object>();
@@ -304,7 +341,7 @@
             if (!store.ContainsKey(entityType))
                 return new QueryResult<TEntity>(default(TEntity));
 
-            var key = PrimaryKeyConventionHelper.Combine(keyValues);
+            var key = Combine(keyValues);
 
             store[entityType].TryGetValue(key, out object entity);
 
