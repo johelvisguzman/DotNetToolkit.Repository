@@ -8,8 +8,15 @@
     using System.Linq;
     using System.Reflection;
 
-    internal static class QueryableExtensions
+    /// <summary>
+    /// Contains various utility methods for applying options to the specified <see cref="IQueryable{T}" />.
+    /// </summary>
+    public static class QueryableExtensions
     {
+        /// <summary>
+        /// Apply a specification strategy options to the specified entity's query.
+        /// </summary>
+        /// <returns>The entity's query with the applied options.</returns>
         public static IQueryable<T> ApplySpecificationOptions<T>(this IQueryable<T> query, IQueryOptions<T> options) where T : class
         {
             if (query == null)
@@ -21,6 +28,10 @@
             return query;
         }
 
+        /// <summary>
+        /// Apply a sorting options to the specified entity's query.
+        /// </summary>
+        /// <returns>The entity's query with the applied options.</returns>
         public static IOrderedQueryable<T> ApplySortingOptions<T>(this IQueryable<T> query, IQueryOptions<T> options) where T : class
         {
             if (query == null)
@@ -62,6 +73,10 @@
             return sortedQuery;
         }
 
+        /// <summary>
+        /// Apply a paging options to the specified entity's query.
+        /// </summary>
+        /// <returns>The entity's query with the applied options.</returns>
         public static IQueryable<T> ApplyPagingOptions<T>(this IQueryable<T> query, IQueryOptions<T> options)
         {
             if (query == null)
@@ -95,22 +110,22 @@
             return (IOrderedQueryable<T>)result;
         }
 
-        public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> source, string propertyName)
+        private static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> source, string propertyName)
         {
             return ApplyOrder<T>(source, propertyName, "OrderBy");
         }
 
-        public static IOrderedQueryable<T> OrderByDescending<T>(this IQueryable<T> source, string propertyName)
+        private static IOrderedQueryable<T> OrderByDescending<T>(this IQueryable<T> source, string propertyName)
         {
             return ApplyOrder<T>(source, propertyName, "OrderByDescending");
         }
 
-        public static IOrderedQueryable<T> ThenBy<T>(this IOrderedQueryable<T> source, string propertyName)
+        private static IOrderedQueryable<T> ThenBy<T>(this IOrderedQueryable<T> source, string propertyName)
         {
             return ApplyOrder<T>(source, propertyName, "ThenBy");
         }
 
-        public static IOrderedQueryable<T> ThenByDescending<T>(this IOrderedQueryable<T> source, string propertyName)
+        private static IOrderedQueryable<T> ThenByDescending<T>(this IOrderedQueryable<T> source, string propertyName)
         {
             return ApplyOrder<T>(source, propertyName, "ThenByDescending");
         }

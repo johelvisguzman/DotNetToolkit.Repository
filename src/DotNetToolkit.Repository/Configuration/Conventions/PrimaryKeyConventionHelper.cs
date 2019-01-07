@@ -108,51 +108,6 @@
         }
 
         /// <summary>
-        /// Gets the primary key value for the specified object. If the primary key is defined as a composite key, then the result will be returned as a tuple.
-        /// </summary>
-        /// <returns>The primary key value.</returns>
-        public static object GetPrimaryKeyValue(object obj)
-        {
-            if (obj == null)
-                throw new ArgumentNullException(nameof(obj));
-
-            return Combine(GetPrimaryKeyValues(obj));
-        }
-
-        /// <summary>
-        /// Merges the specified collection of key values into a tuple if there are more than one key; otherwise, it will return the single key object.
-        /// </summary>
-        /// <returns>The merged primary key value.</returns>
-        public static object Combine(object[] keyValues)
-        {
-            if (keyValues == null)
-                throw new ArgumentNullException(nameof(keyValues));
-
-            object key;
-
-            switch (keyValues.Length)
-            {
-                case 3:
-                    {
-                        key = Tuple.Create(keyValues[0], keyValues[1], keyValues[2]);
-                        break;
-                    }
-                case 2:
-                    {
-                        key = Tuple.Create(keyValues[0], keyValues[1]);
-                        break;
-                    }
-                default:
-                    {
-                        key = keyValues[0];
-                        break;
-                    }
-            }
-
-            return key;
-        }
-
-        /// <summary>
         /// Returns a specification for getting an entity by it's primary key.
         /// </summary>
         /// <returns>The new specification.</returns>
@@ -163,8 +118,7 @@
 
             var propInfos = GetPrimaryKeyPropertyInfos<TEntity>().ToList();
 
-            if (keyValues.Length != propInfos.Count)
-                throw new ArgumentException(Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
+            ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
 
             var parameter = Expression.Parameter(typeof(TEntity), "x");
 
@@ -230,7 +184,7 @@
         /// <param name="keyValues"></param>
         public static void ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(object[] keyValues) where TEntity : class
         {
-            if (keyValues.Length != PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Count())
+            if (keyValues.Length != GetPrimaryKeyPropertyInfos<TEntity>().Count())
                 throw new ArgumentException(DotNetToolkit.Repository.Properties.Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
         }
 
