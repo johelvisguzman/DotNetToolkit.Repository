@@ -92,7 +92,7 @@
                     }
                     else
                     {
-                        services.AddTransient(serviceType, implementationType);
+                        services.AddScoped(serviceType, implementationType);
                     }
                 }
             }

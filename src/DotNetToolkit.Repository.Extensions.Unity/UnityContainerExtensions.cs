@@ -93,7 +93,7 @@
                     }
                     else
                     {
-                        container.RegisterType(serviceType, implementationType, new ContainerControlledTransientManager());
+                        container.RegisterType(serviceType, implementationType);
                     }
                 }
             }
