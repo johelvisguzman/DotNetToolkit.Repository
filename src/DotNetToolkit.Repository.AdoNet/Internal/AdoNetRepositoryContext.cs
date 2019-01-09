@@ -39,7 +39,9 @@
         private readonly ConcurrentDictionary<Type, bool> _schemaValidationTypeMapping = new ConcurrentDictionary<Type, bool>();
         private readonly SchemaTableConfigurationHelper _schemaConfigHelper;
 
-        private readonly QueryBuilder _queryBuilder = new QueryBuilder();
+        private readonly QueryBuilder _queryBuilder;
+
+        private readonly DataAccessProviderType _providerType;
 
         #endregion
 
@@ -63,25 +65,14 @@
             if (nameOrConnectionString == null)
                 throw new ArgumentNullException(nameof(nameOrConnectionString));
 
-            var css = ConfigurationManager.ConnectionStrings[nameOrConnectionString];
-            if (css == null)
-            {
-                for (var i = 0; i < ConfigurationManager.ConnectionStrings.Count; i++)
-                {
-                    css = ConfigurationManager.ConnectionStrings[i];
-
-                    if (css.ConnectionString.Equals(nameOrConnectionString))
-                        break;
-                }
-            }
-
-            if (css == null)
-                throw new ArgumentException("The connection string does not exist in your configuration file.");
+            var css = GetConnectionStringSettings(nameOrConnectionString);
 
             _factory = DbProviderFactories.GetFactory(css.ProviderName);
             _connectionString = css.ConnectionString;
             _ownsConnection = true;
             _schemaConfigHelper = new SchemaTableConfigurationHelper(this);
+            _providerType = DataAccessProvider.GetProviderType(css.ProviderName);
+            _queryBuilder = new QueryBuilder(_providerType);
         }
 
         /// <summary>
@@ -101,6 +92,8 @@
             _connectionString = connectionString;
             _ownsConnection = true;
             _schemaConfigHelper = new SchemaTableConfigurationHelper(this);
+            _providerType = DataAccessProvider.GetProviderType(providerName);
+            _queryBuilder = new QueryBuilder(_providerType);
         }
 
         /// <summary>
@@ -118,6 +111,11 @@
             _connection = existingConnection;
             _ownsConnection = false;
             _schemaConfigHelper = new SchemaTableConfigurationHelper(this);
+
+            var css = GetConnectionStringSettings(existingConnection.ConnectionString);
+
+            _providerType = DataAccessProvider.GetProviderType(css.ProviderName);
+            _queryBuilder = new QueryBuilder(_providerType);
         }
 
         #endregion
@@ -1142,6 +1140,27 @@
 
         #region Private Methods
 
+        private static ConnectionStringSettings GetConnectionStringSettings(string nameOrConnectionString)
+        {
+            var css = ConfigurationManager.ConnectionStrings[nameOrConnectionString];
+
+            if (css == null)
+            {
+                for (var i = 0; i < ConfigurationManager.ConnectionStrings.Count; i++)
+                {
+                    css = ConfigurationManager.ConnectionStrings[i];
+
+                    if (css.ConnectionString.Equals(nameOrConnectionString))
+                        break;
+                }
+            }
+
+            if (css == null)
+                throw new ArgumentException("The connection string does not exist in your configuration file.");
+
+            return css;
+        }
+
         private static T ConvertValue<T>(object value)
         {
             if (value == null || value is DBNull)
@@ -1346,9 +1365,8 @@
 
                         OnSchemaValidation(entityType);
 
-                        var primeryKeyPropertyInfo =
-                            PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-                        var isIdentity = primeryKeyPropertyInfo.IsColumnIdentity();
+                        var primaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+                        var isIdentity = primaryKeyPropertyInfo.IsColumnIdentity();
 
                         // Checks if the entity exist in the database
                         var existInDb = command.ExecuteObjectExist(entitySet.Entity);
@@ -1358,7 +1376,7 @@
                             entitySet,
                             existInDb,
                             isIdentity,
-                            primeryKeyPropertyInfo,
+                            primaryKeyPropertyInfo,
                             out string sql,
                             out Dictionary<string, object> parameters);
 
@@ -1368,24 +1386,39 @@
                         command.Parameters.Clear();
                         command.AddParameters(parameters);
 
-                        rows += command.ExecuteNonQuery();
-
-                        if (Logger.IsEnabled(LogLevel.Debug))
-                            Logger.Debug(FormatExecutingDebugQuery("ExecuteNonQuery", parameters, sql));
-
-                        // Checks to see if the model needs to be updated with the new key returned from the database
                         if (entitySet.State == EntityState.Added && isIdentity)
                         {
-                            command.CommandText = "SELECT @@IDENTITY";
-                            command.Parameters.Clear();
+#if NETFULL
+                            if (_providerType == DataAccessProviderType.SqlServerCompact)
+                            {
+                                if (Logger.IsEnabled(LogLevel.Debug))
+                                    Logger.Debug(FormatExecutingDebugQuery("ExecuteNonQuery", parameters, sql));
 
+                                command.ExecuteNonQuery();
+
+                                sql = "SELECT @@IDENTITY";
+                                parameters.Clear();
+
+                                command.CommandText = sql;
+                                command.Parameters.Clear();
+                            }
+#endif
                             if (Logger.IsEnabled(LogLevel.Debug))
-                                Logger.Debug(FormatExecutingDebugQuery("ExecuteScalar", null, command.CommandText));
+                                Logger.Debug(FormatExecutingDebugQuery("ExecuteScalar", parameters, sql));
 
                             var newKey = command.ExecuteScalar();
-                            var convertedKeyValue = Convert.ChangeType(newKey, primeryKeyPropertyInfo.PropertyType);
+                            var convertedKeyValue = Convert.ChangeType(newKey, primaryKeyPropertyInfo.PropertyType);
 
-                            primeryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
+                            primaryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
+
+                            rows++;
+                        }
+                        else
+                        {
+                            if (Logger.IsEnabled(LogLevel.Debug))
+                                Logger.Debug(FormatExecutingDebugQuery("ExecuteNonQuery", parameters, sql));
+
+                            rows += command.ExecuteNonQuery();
                         }
                     }
                 }
@@ -1700,8 +1733,8 @@
 
                         await OnSchemaValidationAsync(entityType, cancellationToken);
 
-                        var primeryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-                        var isIdentity = primeryKeyPropertyInfo.IsColumnIdentity();
+                        var primaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+                        var isIdentity = primaryKeyPropertyInfo.IsColumnIdentity();
 
                         // Checks if the entity exist in the database
                         var existInDb = await command.ExecuteObjectExistAsync(entitySet.Entity, cancellationToken);
@@ -1711,7 +1744,7 @@
                             entitySet,
                             existInDb,
                             isIdentity,
-                            primeryKeyPropertyInfo,
+                            primaryKeyPropertyInfo,
                             out string sql,
                             out Dictionary<string, object> parameters);
 
@@ -1721,24 +1754,39 @@
                         command.Parameters.Clear();
                         command.AddParameters(parameters);
 
-                        if (Logger.IsEnabled(LogLevel.Debug))
-                            Logger.Debug(FormatExecutingDebugQuery("ExecuteNonQueryAsync", parameters, sql));
-
-                        rows += await command.ExecuteNonQueryAsync(cancellationToken);
-
-                        // Checks to see if the model needs to be updated with the new key returned from the database
                         if (entitySet.State == EntityState.Added && isIdentity)
                         {
-                            command.CommandText = "SELECT @@IDENTITY";
-                            command.Parameters.Clear();
+#if NETFULL
+                            if (_providerType == DataAccessProviderType.SqlServerCompact)
+                            {
+                                if (Logger.IsEnabled(LogLevel.Debug))
+                                    Logger.Debug(FormatExecutingDebugQuery("ExecuteNonQueryAsync", parameters, sql));
 
+                                await command.ExecuteNonQueryAsync(cancellationToken);
+
+                                sql = "SELECT @@IDENTITY";
+                                parameters.Clear();
+
+                                command.CommandText = sql;
+                                command.Parameters.Clear();
+                            }
+#endif
                             if (Logger.IsEnabled(LogLevel.Debug))
-                                Logger.Debug(FormatExecutingDebugQuery("ExecuteScalarAsync", null, command.CommandText));
+                                Logger.Debug(FormatExecutingDebugQuery("ExecuteScalarAsync", parameters, sql));
 
                             var newKey = await command.ExecuteScalarAsync(cancellationToken);
-                            var convertedKeyValue = Convert.ChangeType(newKey, primeryKeyPropertyInfo.PropertyType);
+                            var convertedKeyValue = Convert.ChangeType(newKey, primaryKeyPropertyInfo.PropertyType);
 
-                            primeryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
+                            primaryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
+
+                            rows++;
+                        }
+                        else
+                        {
+                            if (Logger.IsEnabled(LogLevel.Debug))
+                                Logger.Debug(FormatExecutingDebugQuery("ExecuteNonQueryAsync", parameters, sql));
+
+                            rows += await command.ExecuteNonQueryAsync(cancellationToken);
                         }
                     }
                 }
