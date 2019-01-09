@@ -22,12 +22,22 @@
 
         // TODO: NEEDS TO FIGURE OUT A BETTER WAY TO DO THIS
         private static readonly Lazy<string> _crossJoinCountColumnName = new Lazy<string>(() => "Counter_" + Guid.NewGuid().ToString("N"));
-
+        private readonly DataAccessProviderType _providerType;
+        
         #endregion
 
         #region Preperties
 
         public static string CrossJoinCountColumnName { get { return _crossJoinCountColumnName.Value; } }
+
+        #endregion
+
+        #region Constructors
+
+        public QueryBuilder(DataAccessProviderType providerType)
+        {
+            _providerType = providerType;
+        }
 
         #endregion
 
@@ -417,6 +427,16 @@
                         var values = string.Join(", ", properties.Select(x => $"@{x.Value.GetColumnName()}")).TrimEnd();
 
                         sql = $"INSERT INTO [{tableName}] ({columnNames}){Environment.NewLine}VALUES ({values})";
+
+                        var canGetScopeIdentity = true;
+
+#if NETFULL
+                        if (_providerType == DataAccessProviderType.SqlServerCompact)
+                            canGetScopeIdentity = false;
+#endif
+
+                        if (canGetScopeIdentity)
+                            sql += $"{Environment.NewLine}SELECT SCOPE_IDENTITY()";
 
                         foreach (var pi in properties)
                         {

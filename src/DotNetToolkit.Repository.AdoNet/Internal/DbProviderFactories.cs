@@ -27,18 +27,21 @@
 #if NETFULL
             return System.Data.Common.DbProviderFactories.GetFactory(providerName);
 #else
-            var providername = providerName.ToLower();
-
-            if (providerName == "system.data.sqlclient")
-                return GetFactory(DataAccessProviderTypes.SqlServer);
-            if (providerName == "system.data.sqlite" || providerName == "microsoft.data.sqlite")
-                return GetFactory(DataAccessProviderTypes.SqLite);
-            if (providerName == "mysql.data.mysqlclient" || providername == "mysql.data")
-                return GetFactory(DataAccessProviderTypes.MySql);
-            if (providerName == "npgsql")
-                return GetFactory(DataAccessProviderTypes.PostgreSql);
-
-            throw new NotSupportedException($"Unsupported Provider Factory specified: {providerName}");
+            switch (providerName.ToLower())
+            {
+                case "system.data.sqlclient":
+                    return GetFactory(DataAccessProviderType.SqlServer);
+                case "system.data.sqlite":
+                case "microsoft.data.sqlite":
+                    return GetFactory(DataAccessProviderType.SqLite);
+                case "mysql.data.mysqlclient":
+                case "mysql.data":
+                    return GetFactory(DataAccessProviderType.MySql);
+                case "npgsql":
+                    return GetFactory(DataAccessProviderType.PostgreSql);
+                default:
+                    throw new NotSupportedException($"Unsupported Provider Factory specified: {providerName}");
+            } 
 #endif
         }
 
@@ -155,12 +158,12 @@
             return instance as DbProviderFactory;
         }
 
-        private static DbProviderFactory GetFactory(DataAccessProviderTypes type)
+        private static DbProviderFactory GetFactory(DataAccessProviderType type)
         {
-            if (type == DataAccessProviderTypes.SqlServer)
+            if (type == DataAccessProviderType.SqlServer)
                 return SqlClientFactory.Instance; // this library has a ref to SqlClient so this works
 
-            if (type == DataAccessProviderTypes.SqLite)
+            if (type == DataAccessProviderType.SqLite)
             {
 #if NETFULL
                 return GetFactory("System.Data.SQLite.SQLiteFactory", "System.Data.SQLite");
@@ -168,14 +171,14 @@
                 return GetFactory("Microsoft.Data.Sqlite.SqliteFactory", "Microsoft.Data.Sqlite");
 #endif
             }
-            if (type == DataAccessProviderTypes.MySql)
+            if (type == DataAccessProviderType.MySql)
                 return GetFactory("MySql.Data.MySqlClient.MySqlClientFactory", "MySql.Data");
-            if (type == DataAccessProviderTypes.PostgreSql)
+            if (type == DataAccessProviderType.PostgreSql)
                 return GetFactory("Npgsql.NpgsqlFactory", "Npgsql");
 #if NETFULL
-            if (type == DataAccessProviderTypes.OleDb)
+            if (type == DataAccessProviderType.OleDb)
                 return System.Data.OleDb.OleDbFactory.Instance;
-            if (type == DataAccessProviderTypes.SqlServerCompact)
+            if (type == DataAccessProviderType.SqlServerCompact)
                 return System.Data.Common.DbProviderFactories.GetFactory("System.Data.SqlServerCe.4.0");
 #endif
 
@@ -185,7 +188,7 @@
         #endregion
     }
 
-    internal enum DataAccessProviderTypes
+    internal enum DataAccessProviderType
     {
         SqlServer,
         SqLite,
@@ -196,5 +199,33 @@
         OleDb,
         SqlServerCompact
 #endif
+    }
+
+    internal static class DataAccessProvider
+    {
+        public static DataAccessProviderType GetProviderType(string providerName)
+        {
+            switch (providerName.ToLower())
+            {
+#if NETFULL
+                case "system.data.sqlserverce.4.0":
+                    return DataAccessProviderType.SqlServerCompact;
+                case "microsoft.jet.oledb.4.0":
+                    return DataAccessProviderType.OleDb;
+#endif
+                case "system.data.sqlclient":
+                    return DataAccessProviderType.SqlServer;
+                case "system.data.sqlite":
+                case "microsoft.data.sqlite":
+                    return DataAccessProviderType.SqLite;
+                case "mysql.data.mysqlclient":
+                case "mysql.data":
+                    return DataAccessProviderType.MySql;
+                case "npgsql":
+                    return DataAccessProviderType.PostgreSql;
+                default:
+                    throw new NotSupportedException($"Unsupported Provider Factory specified: {providerName}");
+            }
+        }
     }
 }
