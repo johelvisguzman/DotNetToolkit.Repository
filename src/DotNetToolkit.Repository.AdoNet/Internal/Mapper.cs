@@ -3,7 +3,6 @@
     using Configuration.Conventions;
     using Extensions;
     using Helpers;
-    using Properties;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -12,140 +11,48 @@
     using System.Reflection;
     using System.Text.RegularExpressions;
 
-    internal class Mapper
+    internal class Mapper<T>
     {
         #region Fields
 
-        private int _tableAliasCount = 1;
-
-        private readonly ConcurrentDictionary<string, string> _tableAliasMapping = new ConcurrentDictionary<string, string>();
-        private readonly ConcurrentDictionary<string, Type> _tableNameAndTypeMapping = new ConcurrentDictionary<string, Type>();
-        private readonly ConcurrentDictionary<Type, string> _tableTypeAndNameMapping = new ConcurrentDictionary<Type, string>();
-        private readonly ConcurrentDictionary<string, Dictionary<string, string>> _tableColumnAliasMapping = new ConcurrentDictionary<string, Dictionary<string, string>>();
-        private readonly ConcurrentDictionary<string, string> _columnAliasTableNameMapping = new ConcurrentDictionary<string, string>();
-        private readonly ConcurrentDictionary<string, int> _columnAliasMappingCount = new ConcurrentDictionary<string, int>();
+        private readonly Dictionary<string, PropertyInfo> _properties;
+        private readonly Dictionary<Type, Dictionary<string, PropertyInfo>> _navigationProperties;
+        private readonly Func<string, Type> _getTableTypeByColumnAliasCallback;
         private readonly ConcurrentDictionary<object, object> _entityDataReaderMapping = new ConcurrentDictionary<object, object>();
 
         #endregion
 
         #region Constructors
 
-        public Mapper(Type entityType)
+        public Mapper()
         {
-            SqlNavigationPropertiesMapping = new Dictionary<Type, Dictionary<string, PropertyInfo>>();
-
-            SqlPropertiesMapping = entityType
-                .GetRuntimeProperties()
+            _properties = typeof(T).GetRuntimeProperties()
                 .Where(x => x.IsPrimitive() && x.IsColumnMapped())
                 .OrderBy(x => x.GetColumnOrder())
                 .ToDictionary(x => x.GetColumnName(), x => x);
 
-            GenerateTableAlias(entityType);
-
-            foreach (var x in SqlPropertiesMapping)
-            {
-                GenerateColumnAlias(x.Value);
-            }
+            _navigationProperties = new Dictionary<Type, Dictionary<string, PropertyInfo>>();
         }
 
-        #endregion
+        public Mapper(Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, Func<string, Type> getTableTypeByColumnAliasCallback)
+        {
+            if (getTableTypeByColumnAliasCallback == null)
+                throw new ArgumentNullException(nameof(getTableTypeByColumnAliasCallback));
 
-        #region Properties
+            _properties = typeof(T).GetRuntimeProperties()
+                .Where(x => x.IsPrimitive() && x.IsColumnMapped())
+                .OrderBy(x => x.GetColumnOrder())
+                .ToDictionary(x => x.GetColumnName(), x => x);
 
-        public string Sql { get; set; }
-        public Dictionary<string, object> Parameters { get; set; }
-        public Dictionary<Type, Dictionary<string, PropertyInfo>> SqlNavigationPropertiesMapping { get; }
-        public Dictionary<string, PropertyInfo> SqlPropertiesMapping { get; }
+            _navigationProperties = navigationProperties ?? new Dictionary<Type, Dictionary<string, PropertyInfo>>();
+            _getTableTypeByColumnAliasCallback = getTableTypeByColumnAliasCallback;
+        }
 
         #endregion
 
         #region Public Methods
 
-        public string GenerateTableAlias(Type tableType)
-        {
-            var tableAlias = $"Extent{_tableAliasCount++}";
-            var tableName = tableType.GetTableName();
-
-            _tableAliasMapping.TryAdd(tableName, tableAlias);
-            _tableNameAndTypeMapping.TryAdd(tableName, tableType);
-            _tableTypeAndNameMapping.TryAdd(tableType, tableName);
-            _tableColumnAliasMapping[tableName] = new Dictionary<string, string>();
-
-            return tableAlias;
-        }
-
-        public string GenerateColumnAlias(PropertyInfo pi)
-        {
-            var columnName = pi.GetColumnName();
-            var columnAlias = columnName;
-            var tableName = pi.DeclaringType.GetTableName();
-
-            if (_columnAliasMappingCount.TryGetValue(columnName, out int columnAliasCount))
-            {
-                ++columnAliasCount;
-                columnAlias = $"{columnAlias}{columnAliasCount}";
-
-                _columnAliasMappingCount[columnName] = columnAliasCount;
-            }
-            else
-            {
-                _columnAliasMappingCount.TryAdd(columnName, 0);
-            }
-
-            _tableColumnAliasMapping[tableName][columnName] = columnAlias;
-
-            _columnAliasTableNameMapping[columnAlias] = tableName;
-
-            return columnAlias;
-        }
-
-        public string GetTableAlias(string tableName)
-        {
-            return _tableAliasMapping[tableName];
-        }
-
-        public string GetTableName(string tableAlias)
-        {
-            return !_tableAliasMapping.Values.Contains(tableAlias)
-                ? null
-                : _tableAliasMapping.SingleOrDefault(x => x.Value == tableAlias).Key;
-        }
-
-        public string GetTableName(Type tableType)
-        {
-            return _tableTypeAndNameMapping[tableType];
-        }
-
-        public string GetColumnAlias(PropertyInfo pi)
-        {
-            var columnName = pi.GetColumnName();
-            var tableName = pi.DeclaringType.GetTableName();
-            var columnMapping = _tableColumnAliasMapping[tableName];
-
-            if (!columnMapping.ContainsKey(columnName))
-                throw new InvalidOperationException(string.Format(Resources.InvalidColumnName, columnName));
-
-            return columnMapping[columnName];
-        }
-
-        public string NormalizeColumnAlias(string columnAlias)
-        {
-            return Regex.Replace(columnAlias, @"[\d-]", string.Empty);
-        }
-
-        public Type GetTableTypeByColumnAlias(string columnAlias)
-        {
-            if (_columnAliasTableNameMapping.ContainsKey(columnAlias))
-            {
-                var tableName = _columnAliasTableNameMapping[columnAlias];
-
-                return _tableNameAndTypeMapping[tableName];
-            }
-
-            return null;
-        }
-
-        public TElement Map<T, TElement>(DbDataReader r, Func<T, TElement> elementSelector)
+        public TElement Map<TElement>(DbDataReader r, Func<T, TElement> elementSelector)
         {
             if (r == null)
                 throw new ArgumentNullException(nameof(r));
@@ -153,10 +60,14 @@
             if (elementSelector == null)
                 throw new ArgumentNullException(nameof(elementSelector));
 
-            var key = GetKey<T>(r);
-            var entity = _entityDataReaderMapping.ContainsKey(key) ? (T)_entityDataReaderMapping[key] : Activator.CreateInstance<T>();
+            var key = GetDataReaderPrimaryKey<T>(r);
+
+            var entity = _entityDataReaderMapping.ContainsKey(key) 
+                ? (T)_entityDataReaderMapping[key] 
+                : Activator.CreateInstance<T>();
+
             var entityType = typeof(T);
-            var joinTableInstances = SqlNavigationPropertiesMapping.Keys.ToDictionary(x => x, Activator.CreateInstance);
+            var joinTableInstances = _navigationProperties.Keys.ToDictionary(x => x, Activator.CreateInstance);
 
             for (var i = 0; i < r.FieldCount; i++)
             {
@@ -166,25 +77,31 @@
                 if (value == DBNull.Value)
                     value = null;
 
-                if (SqlPropertiesMapping.ContainsKey(name))
+                if (_properties.ContainsKey(name))
                 {
                     if (!r.IsDBNull(r.GetOrdinal(name)))
-                        SqlPropertiesMapping[name].SetValue(entity, value);
+                        _properties[name].SetValue(entity, value);
                 }
                 else if (joinTableInstances.Any())
                 {
-                    var joinTableType = GetTableTypeByColumnAlias(name);
+                    var joinTableProperty = _getTableTypeByColumnAliasCallback(name);
 
-                    if (joinTableType != null)
+                    if (joinTableProperty != null)
                     {
-                        var columnPropertyInfosMapping = SqlNavigationPropertiesMapping.Single(x => x.Key == joinTableType).Value;
-                        if (columnPropertyInfosMapping.ContainsKey(name))
+                        var joinTableType = _getTableTypeByColumnAliasCallback(name);
+
+                        if (joinTableType != null)
                         {
-                            columnPropertyInfosMapping[name].SetValue(joinTableInstances[joinTableType], value);
-                        }
-                        else
-                        {
-                            columnPropertyInfosMapping[NormalizeColumnAlias(name)].SetValue(joinTableInstances[joinTableType], value);
+                            var columnPropertyInfosMapping = _navigationProperties.Single(x => x.Key == joinTableType).Value;
+
+                            if (columnPropertyInfosMapping.ContainsKey(name))
+                            {
+                                columnPropertyInfosMapping[name].SetValue(joinTableInstances[joinTableType], value);
+                            }
+                            else
+                            {
+                                columnPropertyInfosMapping[NormalizeColumnAlias(name)].SetValue(joinTableInstances[joinTableType], value);
+                            }
                         }
                     }
                 }
@@ -244,7 +161,13 @@
             return elementSelector(entity);
         }
 
-        private static object GetKey<T>(DbDataReader r)
+        public T Map(DbDataReader r) => Map<T>(r, IdentityFunction<T>.Instance);
+
+        #endregion
+
+        #region Private Methods
+
+        private static object GetDataReaderPrimaryKey<T>(DbDataReader r)
         {
             if (r == null)
                 throw new ArgumentNullException(nameof(r));
@@ -254,46 +177,24 @@
                 .Select(x => r[x.GetColumnName()])
                 .ToList();
 
-            object key = null;
-
             switch (primaryKeyValues.Count)
             {
                 case 3:
-                    {
-                        key = Tuple.Create(primaryKeyValues[0], primaryKeyValues[1], primaryKeyValues[2]);
-                        break;
-                    }
+                    return Tuple.Create(primaryKeyValues[0], primaryKeyValues[1], primaryKeyValues[2]);
                 case 2:
-                    {
-                        key = Tuple.Create(primaryKeyValues[0], primaryKeyValues[1]);
-                        break;
-                    }
+                    return Tuple.Create(primaryKeyValues[0], primaryKeyValues[1]);
                 case 1:
-                    {
-                        key = primaryKeyValues[0];
-                        break;
-                    }
+                    return primaryKeyValues[0];
                 default:
-                    {
-                        key = Guid.NewGuid();
-                        break;
-                    }
+                    return Guid.NewGuid();
             }
+        }
 
-            return key;
+        private string NormalizeColumnAlias(string columnAlias)
+        {
+            return Regex.Replace(columnAlias, @"[\d-]", string.Empty);
         }
 
         #endregion
-    }
-
-    internal class Mapper<T> where T : class
-    {
-        public static T Map(DbDataReader r)
-        {
-            if (r == null)
-                throw new ArgumentNullException(nameof(r));
-
-            return new Mapper(typeof(T)).Map<T, T>(r, IdentityFunction<T>.Instance);
-        }
     }
 }

@@ -7,62 +7,244 @@
     using Queries;
     using Queries.Strategies;
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
     using System.Reflection;
     using System.Text;
 
+    /// <summary>
+    /// Represents an internal query builder for building various queries.
+    /// </summary>
     internal class QueryBuilder
     {
-        #region Fields
-
-        private readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, PropertyInfo>> _sqlPropertiesMapping = new ConcurrentDictionary<Type, ConcurrentDictionary<string, PropertyInfo>>();
-
-        // TODO: NEEDS TO FIGURE OUT A BETTER WAY TO DO THIS
-        private static readonly Lazy<string> _crossJoinCountColumnName = new Lazy<string>(() => "Counter_" + Guid.NewGuid().ToString("N"));
-        private readonly DataAccessProviderType _providerType;
-        
-        #endregion
-
-        #region Preperties
-
-        public static string CrossJoinCountColumnName { get { return _crossJoinCountColumnName.Value; } }
-
-        #endregion
-
-        #region Constructors
-
-        public QueryBuilder(DataAccessProviderType providerType)
+        public static void CreateInsertStatement(object entity, out string sql, out Dictionary<string, object> parameters)
         {
-            _providerType = providerType;
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
+            parameters = new Dictionary<string, object>();
+
+            var entityType = entity.GetType();
+            var tableName = entityType.GetTableName();
+
+            var primaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+            var primaryKeyColumnName = primaryKeyPropertyInfo.GetColumnName();
+
+            var properties = GetProperties(entityType);
+
+            var isIdentity = primaryKeyPropertyInfo.IsColumnIdentity();
+
+            if (isIdentity)
+            {
+                properties.Remove(primaryKeyColumnName);
+                parameters.Add($"@{primaryKeyColumnName}", primaryKeyPropertyInfo.GetValue(entity, null));
+            }
+
+            foreach (var x in properties)
+            {
+                parameters.Add($"@{x.Key}", x.Value.GetValue(entity, null));
+            }
+
+            var columnNames = string.Join(", ", properties.Select(x => x.Key)).TrimEnd();
+            var values = string.Join(", ", properties.Select(x => $"@{x.Key}")).TrimEnd();
+
+            sql = $"INSERT INTO [{tableName}] ({columnNames}){Environment.NewLine}VALUES ({values})";
         }
 
-        #endregion
-
-        #region Public Methods
-
-        public void PrepareCountQuery<T>(IQueryOptions<T> options, out Mapper mapper) where T : class
+        public static void CreateUpdateStatement(object entity, out string sql, out Dictionary<string, object> parameters)
         {
-            var parameters = new Dictionary<string, object>();
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
+            parameters = new Dictionary<string, object>();
+
+            var entityType = entity.GetType();
+            var tableName = entityType.GetTableName();
+
+            var primaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+            var primaryKeyColumnName = primaryKeyPropertyInfo.GetColumnName();
+
+            var isIdentity = primaryKeyPropertyInfo.IsColumnIdentity();
+
+            var properties = GetProperties(entityType);
+
+            if (isIdentity)
+            {
+                properties.Remove(primaryKeyColumnName);
+                parameters.Add($"@{primaryKeyColumnName}", primaryKeyPropertyInfo.GetValue(entity, null));
+            }
+
+            var values = string.Join($",{Environment.NewLine}\t", properties.Select(x => x.Key + " = " + $"@{x.Key}"));
+
+            sql = $"UPDATE [{tableName}]{Environment.NewLine}SET {values}{Environment.NewLine}WHERE {primaryKeyColumnName} = @{primaryKeyColumnName}";
+
+            foreach (var x in properties)
+            {
+                parameters.Add($"@{x.Key}", x.Value.GetValue(entity, null));
+            }
+        }
+
+        public static void CreateDeleteStatement(object entity, out string sql, out Dictionary<string, object> parameters)
+        {
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
+            parameters = new Dictionary<string, object>();
+
+            var entityType = entity.GetType();
+            var tableName = entityType.GetTableName();
+
+            var primaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+            var primaryKeyColumnName = primaryKeyPropertyInfo.GetColumnName();
+
+            sql = $"DELETE FROM [{tableName}]{Environment.NewLine}WHERE {primaryKeyColumnName} = @{primaryKeyColumnName}";
+
+            parameters.Add($"@{primaryKeyColumnName}", primaryKeyPropertyInfo.GetValue(entity, null));
+        }
+
+        public static void CreateSelectStatement<T>(IQueryOptions<T> options, string defaultSelect, out string sql, out Dictionary<string, object> parameters, out Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, out Func<string, Type> getTableTypeByColumnAliasCallback)
+        {
+            parameters = new Dictionary<string, object>();
+            navigationProperties = new Dictionary<Type, Dictionary<string, PropertyInfo>>();
+
+            var tableAliasCount = 1;
+            var tableAliasMapping = new Dictionary<string, string>();
+            var tableNameAndTypeMapping = new Dictionary<string, Type>();
+            var tableTypeAndNameMapping = new Dictionary<Type, string>();
+            var tableColumnAliasMapping = new Dictionary<string, Dictionary<string, string>>();
+            var columnAliasMappingCount = new Dictionary<string, int>();
+            var columnAliasTableNameMapping = new Dictionary<string, string>();
+            var crossJoinCountColumnAlias = string.Empty;
+            var crossJoinTableAlias = string.Empty;
+            var select = string.Empty;
+
+            string GenerateTableAlias(Type tableType)
+            {
+                if (tableType == null)
+                    throw new ArgumentNullException(nameof(tableType));
+
+                var tableAlias = $"Extent{tableAliasCount++}";
+                var tableName = tableType.GetTableName();
+
+                tableAliasMapping.Add(tableName, tableAlias);
+                tableNameAndTypeMapping.Add(tableName, tableType);
+                tableTypeAndNameMapping.Add(tableType, tableName);
+                tableColumnAliasMapping[tableName] = new Dictionary<string, string>();
+
+                return tableAlias;
+            }
+
+            string GenerateColumnAlias(PropertyInfo pi)
+            {
+                if (pi == null)
+                    throw new ArgumentNullException(nameof(pi));
+
+                var columnName = pi.GetColumnName();
+                var columnAlias = columnName;
+                var tableName = pi.DeclaringType.GetTableName();
+
+                if (columnAliasMappingCount.TryGetValue(columnName, out int columnAliasCount))
+                {
+                    ++columnAliasCount;
+                    columnAlias = $"{columnAlias}{columnAliasCount}";
+
+                    columnAliasMappingCount[columnName] = columnAliasCount;
+                }
+                else
+                {
+                    columnAliasMappingCount.Add(columnName, 0);
+                }
+
+                tableColumnAliasMapping[tableName][columnName] = columnAlias;
+                columnAliasTableNameMapping[columnAlias] = tableName;
+
+                return columnAlias;
+            }
+
+            string EnsureColumnAlias(string prefix)
+            {
+                var columnAlias = prefix;
+
+                while (columnAliasTableNameMapping.ContainsKey(columnAlias))
+                {
+                    var count = new string(columnAlias.Where(char.IsDigit).ToArray());
+
+                    columnAlias = columnAlias + count + 1;
+                }
+
+                return columnAlias;
+            }
+
+            string EnsureTableAlias(string prefix)
+            {
+                var tableAlias = prefix;
+
+                while (tableAliasMapping.ContainsValue(tableAlias))
+                {
+                    var count = new string(tableAlias.Where(char.IsDigit).ToArray());
+
+                    tableAlias = tableAlias + count + 1;
+                }
+
+                return tableAlias;
+            }
+
+            string GetTableNameFromType(Type tableType)
+                => tableTypeAndNameMapping[tableType];
+
+            string GetTableAliasFromName(string tableName)
+                => tableAliasMapping[tableName];
+
+            string GetTableAliasFromType(Type tableType)
+                => GetTableAliasFromName(GetTableNameFromType(tableType));
+
+            string GetColumnAliasFromProperty(PropertyInfo pi)
+            {
+                if (pi == null)
+                    throw new ArgumentNullException(nameof(pi));
+
+                var columnName = pi.GetColumnName();
+                var tableName = pi.DeclaringType.GetTableName();
+                var columnMapping = tableColumnAliasMapping[tableName];
+
+                if (!columnMapping.ContainsKey(columnName))
+                    throw new InvalidOperationException(string.Format(Resources.InvalidColumnName, columnName));
+
+                return columnMapping[columnName];
+            }
+
+            getTableTypeByColumnAliasCallback = columnAlias =>
+            {
+                if (columnAliasTableNameMapping.ContainsKey(columnAlias))
+                {
+                    var tableName = columnAliasTableNameMapping[columnAlias];
+
+                    return tableNameAndTypeMapping[tableName];
+                }
+
+                return null;
+            };
+
             var sb = new StringBuilder();
             var joinStatementSb = new StringBuilder();
+
             var mainTableType = typeof(T);
             var mainTableName = mainTableType.GetTableName();
-            var m = new Mapper(mainTableType);
-            var mainTableAlias = m.GetTableAlias(mainTableName);
+            var mainTableAlias = GenerateTableAlias(mainTableType);
             var mainTableProperties = mainTableType.GetRuntimeProperties().ToList();
             var mainTablePrimaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<T>().First();
             var mainTablePrimaryKeyName = mainTablePrimaryKeyPropertyInfo.GetColumnName();
             var fetchStrategy = options?.FetchStrategy;
 
-            // -----------------------------------------------------------------------------------------------------------
-            // Select clause
-            // -----------------------------------------------------------------------------------------------------------
-            sb.Append("SELECT COUNT(*)");
-            sb.Append(Environment.NewLine);
-            sb.Append($"FROM [{mainTableName}] AS [{mainTableAlias}]");
+            const string DEFAULT_CROSS_JOIN_COLUMN_ALIAS = "C1";
+            const string DEFAULT_CROSS_JOIN_TABLE_ALIAS = "GroupBy1";
+
+            var properties = GetProperties(mainTableType);
+
+            foreach (var pi in properties.Values)
+            {
+                GenerateColumnAlias(pi);
+            }
 
             // Check to see if we can automatically include some navigation properties (this seems to be the behavior of entity framework as well).
             // Only supports a one to one table join for now...
@@ -88,136 +270,31 @@
                 }
             }
 
-            // Append join tables from fetchStrategy
-            // Only supports a one to one table join for now...
-            if (fetchStrategy != null && fetchStrategy.PropertyPaths.Any())
-            {
-                foreach (var path in fetchStrategy.PropertyPaths)
-                {
-                    var joinTablePropertyInfo = mainTableProperties.Single(x => x.Name.Equals(path));
-                    var joinTableType = joinTablePropertyInfo.PropertyType.IsGenericCollection()
-                        ? joinTablePropertyInfo.PropertyType.GetGenericArguments().First()
-                        : joinTablePropertyInfo.PropertyType;
-                    var joinTableForeignKeyPropertyInfo = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(joinTableType, mainTableType).FirstOrDefault();
-
-                    // Only do a join when the primary table has a foreign key property for the join table
-                    if (joinTableForeignKeyPropertyInfo != null)
-                    {
-                        var joinTableForeignKeyName = joinTableForeignKeyPropertyInfo.GetColumnName();
-                        var joinTableProperties = joinTableType.GetRuntimeProperties().ToList();
-                        var joinTableName = joinTableType.GetTableName();
-                        var joinTableAlias = m.GenerateTableAlias(joinTableType);
-
-                        foreach (var x in joinTableProperties.Where(Extensions.PropertyInfoExtensions.IsPrimitive))
-                        {
-                            m.GenerateColumnAlias(x);
-                        }
-
-                        joinStatementSb.Append(Environment.NewLine);
-                        joinStatementSb.Append($"LEFT OUTER JOIN [{joinTableName}] AS [{joinTableAlias}] ON [{mainTableAlias}].[{mainTablePrimaryKeyName}] = [{joinTableAlias}].[{joinTableForeignKeyName}]");
-
-                        m.SqlNavigationPropertiesMapping.Add(joinTableType, joinTableProperties.ToDictionary(ModelConventionHelper.GetColumnName, x => x));
-                    }
-                }
-
-                if (joinStatementSb.Length > 0)
-                {
-                    joinStatementSb.Remove(0, Environment.NewLine.Length);
-
-                    sb.Append(Environment.NewLine);
-                    sb.Append(joinStatementSb);
-                }
-            }
-
-            if (options != null)
-            {
-                // -----------------------------------------------------------------------------------------------------------
-                // Where clause
-                // -----------------------------------------------------------------------------------------------------------
-
-                if (options.SpecificationStrategy != null)
-                {
-                    new ExpressionTranslator().Translate(
-                        options.SpecificationStrategy.Predicate,
-                        m,
-                        out string expSql,
-                        out Dictionary<string, object> expParameters);
-
-                    sb.Append($"{Environment.NewLine}WHERE ");
-                    sb.Append(expSql);
-
-                    foreach (var item in expParameters)
-                    {
-                        parameters.Add(item.Key, item.Value);
-                    }
-                }
-            }
-
-            // Setup mapper object
-            m.Sql = sb.ToString();
-            m.Parameters = parameters;
-
-            mapper = m;
-        }
-
-        public void PrepareDefaultSelectQuery<T>(IQueryOptions<T> options, out Mapper mapper, bool allowCrossJoinTotalCount = false) where T : class
-        {
-            var parameters = new Dictionary<string, object>();
-            var sb = new StringBuilder();
-            var joinStatementSb = new StringBuilder();
-            var mainTableType = typeof(T);
-            var mainTableName = mainTableType.GetTableName();
-            var m = new Mapper(mainTableType);
-            var mainTableAlias = m.GetTableAlias(mainTableName);
-            var mainTableProperties = mainTableType.GetRuntimeProperties().ToList();
-            var mainTablePrimaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<T>().First();
-            var mainTablePrimaryKeyName = mainTablePrimaryKeyPropertyInfo.GetColumnName();
-            var fetchStrategy = options?.FetchStrategy;
-
-            const string CrossJoinTableName = "temp1";
-
-            // Default select
-            var columns = string.Join($",{Environment.NewLine}\t", m.SqlPropertiesMapping.Select(x =>
-            {
-                var colAlias = m.GetColumnAlias(x.Value);
-                var colName = x.Value.GetColumnName();
-
-                return $"[{mainTableAlias}].[{colName}] AS [{colAlias}]";
-            }));
-
-            // Check to see if we can automatically include some navigation properties (this seems to be the behavior of entity framework as well).
-            // Only supports a one to one table join for now...
-            if (fetchStrategy == null || !fetchStrategy.PropertyPaths.Any())
-            {
-                // Assumes we want to perform a join when the navigation property from the primary table has also a navigation property of
-                // the same type as the primary table
-                // Only do a join when the primary table has a foreign key property for the join table
-                var paths = mainTableProperties
-                    .Where(x => x.IsComplex() && PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(x.PropertyType).Any())
-                    .Select(x => x.Name)
-                    .ToList();
-
-                if (paths.Count > 0)
-                {
-                    if (fetchStrategy == null)
-                        fetchStrategy = new FetchQueryStrategy<T>();
-
-                    foreach (var path in paths)
-                    {
-                        fetchStrategy.Fetch(path);
-                    }
-                }
-            }
-
             // -----------------------------------------------------------------------------------------------------------
             // Select clause
             // -----------------------------------------------------------------------------------------------------------
 
+            if (string.IsNullOrEmpty(defaultSelect))
+            {
+                // Default select
+                select = string.Join($",{Environment.NewLine}\t", properties.Select(x =>
+                {
+                    var colAlias = GetColumnAliasFromProperty(x.Value);
+                    var colName = x.Key;
+
+                    return $"[{mainTableAlias}].[{colName}] AS [{colAlias}]";
+                }));
+            }
+            else
+            {
+                select = defaultSelect;
+            }
+
             // Append join tables from fetchStrategy
             // Only supports a one to one table join for now...
             if (fetchStrategy != null && fetchStrategy.PropertyPaths.Any())
             {
-                sb.Append($"SELECT{Environment.NewLine}\t{columns}");
+                sb.Append($"SELECT{Environment.NewLine}\t{select}");
 
                 foreach (var path in fetchStrategy.PropertyPaths)
                 {
@@ -233,35 +310,40 @@
                         var joinTableForeignKeyName = joinTableForeignKeyPropertyInfo.GetColumnName();
                         var joinTableProperties = joinTableType.GetRuntimeProperties().ToList();
                         var joinTableName = joinTableType.GetTableName();
-                        var joinTableAlias = m.GenerateTableAlias(joinTableType);
+                        var joinTableAlias = GenerateTableAlias(joinTableType);
                         var joinTableColumnNames = string.Join($",{Environment.NewLine}\t",
                             joinTableProperties
                                 .Where(Extensions.PropertyInfoExtensions.IsPrimitive)
                                 .Select(x =>
                                 {
-                                    var colAlias = m.GenerateColumnAlias(x);
+                                    var colAlias = GenerateColumnAlias(x);
                                     var colName = x.GetColumnName();
 
                                     return $"[{joinTableAlias}].[{colName}] AS [{colAlias}]";
                                 }));
 
-
-                        sb.Append($",{Environment.NewLine}\t");
-                        sb.Append(joinTableColumnNames);
+                        if (string.IsNullOrEmpty(defaultSelect))
+                        {
+                            sb.Append($",{Environment.NewLine}\t");
+                            sb.Append(joinTableColumnNames);
+                        }
 
                         joinStatementSb.Append(Environment.NewLine);
                         joinStatementSb.Append($"LEFT OUTER JOIN [{joinTableName}] AS [{joinTableAlias}] ON [{mainTableAlias}].[{mainTablePrimaryKeyName}] = [{joinTableAlias}].[{joinTableForeignKeyName}]");
 
-                        m.SqlNavigationPropertiesMapping.Add(joinTableType, joinTableProperties.ToDictionary(ModelConventionHelper.GetColumnName, x => x));
+                        navigationProperties.Add(joinTableType, joinTableProperties.ToDictionary(ModelConventionHelper.GetColumnName, x => x));
                     }
                 }
 
-                if (options != null && options.PageSize != -1 && allowCrossJoinTotalCount)
+                if (options != null && options.PageSize != -1 && string.IsNullOrEmpty(defaultSelect))
                 {
+                    crossJoinCountColumnAlias = EnsureColumnAlias(DEFAULT_CROSS_JOIN_COLUMN_ALIAS);
+                    crossJoinTableAlias = EnsureTableAlias(DEFAULT_CROSS_JOIN_TABLE_ALIAS);
+
                     // Cross join counter column
                     sb.Append(",");
                     sb.Append(Environment.NewLine);
-                    sb.Append($"\t[{CrossJoinTableName}].[{CrossJoinCountColumnName}] AS [{CrossJoinCountColumnName}]");
+                    sb.Append($"\t[{crossJoinTableAlias}].[{crossJoinCountColumnAlias}] AS [{crossJoinCountColumnAlias}]");
                 }
 
                 sb.Append(Environment.NewLine);
@@ -277,7 +359,7 @@
             }
             else
             {
-                sb.Append($"SELECT{Environment.NewLine}\t{columns}{Environment.NewLine}FROM [{mainTableName}] AS [{mainTableAlias}]");
+                sb.Append($"SELECT{Environment.NewLine}\t{select}{Environment.NewLine}FROM [{mainTableName}] AS [{mainTableAlias}]");
             }
 
             if (options != null)
@@ -286,12 +368,12 @@
                 // Cross Join clause
                 // -----------------------------------------------------------------------------------------------------------
 
-                if (options.PageSize != -1 && allowCrossJoinTotalCount)
+                if (options.PageSize != -1 && string.IsNullOrEmpty(defaultSelect))
                 {
                     sb.Append(Environment.NewLine);
                     sb.Append("CROSS JOIN (");
                     sb.Append(Environment.NewLine);
-                    sb.Append($"\tSELECT COUNT(*) AS [{CrossJoinCountColumnName}]");
+                    sb.Append($"\tSELECT COUNT(*) AS [{crossJoinCountColumnAlias}]");
                     sb.Append(Environment.NewLine);
                     sb.Append($"\tFROM [{mainTableName}] AS [{mainTableAlias}]");
 
@@ -306,8 +388,9 @@
                     {
                         new ExpressionTranslator().Translate(
                             options.SpecificationStrategy.Predicate,
-                            m,
-                            out string expSql,
+                            GetTableAliasFromType,
+                            GetColumnAliasFromProperty,
+                            out var expSql,
                             out _);
 
                         sb.Append(Environment.NewLine);
@@ -315,7 +398,7 @@
                     }
 
                     sb.Append(Environment.NewLine);
-                    sb.Append($") AS [{CrossJoinTableName}]");
+                    sb.Append($") AS [{crossJoinTableAlias}]");
                 }
 
                 // -----------------------------------------------------------------------------------------------------------
@@ -326,9 +409,10 @@
                 {
                     new ExpressionTranslator().Translate(
                         options.SpecificationStrategy.Predicate,
-                        m,
-                        out string expSql,
-                        out Dictionary<string, object> expParameters);
+                        GetTableAliasFromType,
+                        GetColumnAliasFromProperty,
+                        out var expSql,
+                        out var expParameters);
 
                     sb.Append($"{Environment.NewLine}WHERE ");
                     sb.Append(expSql);
@@ -343,35 +427,38 @@
                 // Sorting clause
                 // -----------------------------------------------------------------------------------------------------------
 
-                var sorting = options.SortingPropertiesMapping.ToDictionary(x => x.Key, x => x.Value);
-
-                if (!sorting.Any())
+                if (string.IsNullOrEmpty(defaultSelect))
                 {
-                    // Sorts on the Id key by default if no sorting is provided
-                    foreach (var primaryKeyPropertyInfo in PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<T>())
+                    var sorting = options.SortingPropertiesMapping.ToDictionary(x => x.Key, x => x.Value);
+
+                    if (!sorting.Any())
                     {
-                        sorting.Add(primaryKeyPropertyInfo.Name, SortOrder.Ascending);
+                        // Sorts on the Id key by default if no sorting is provided
+                        foreach (var primaryKeyPropertyInfo in PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<T>())
+                        {
+                            sorting.Add(primaryKeyPropertyInfo.Name, SortOrder.Ascending);
+                        }
                     }
+
+                    sb.Append(Environment.NewLine);
+                    sb.Append("ORDER BY ");
+
+                    foreach (var sort in sorting)
+                    {
+                        var sortOrder = sort.Value;
+                        var sortProperty = sort.Key;
+                        var lambda = ExpressionHelper.GetExpression<T>(sortProperty);
+                        var tableType = ExpressionHelper.GetMemberExpression(lambda).Expression.Type;
+                        var tableName = GetTableNameFromType(tableType);
+                        var tableAlias = GetTableAliasFromName(tableName);
+                        var sortingPropertyInfo = ExpressionHelper.GetPropertyInfo(lambda);
+                        var columnAlias = GetColumnAliasFromProperty(sortingPropertyInfo);
+
+                        sb.Append($"[{tableAlias}].[{columnAlias}] {(sortOrder == SortOrder.Descending ? "DESC" : "ASC")}, ");
+                    }
+
+                    sb.Remove(sb.Length - 2, 2);
                 }
-
-                sb.Append(Environment.NewLine);
-                sb.Append("ORDER BY ");
-
-                foreach (var sort in sorting)
-                {
-                    var sortOrder = sort.Value;
-                    var sortProperty = sort.Key;
-                    var lambda = ExpressionHelper.GetExpression<T>(sortProperty);
-                    var tableType = ExpressionHelper.GetMemberExpression(lambda).Expression.Type;
-                    var tableName = m.GetTableName(tableType);
-                    var tableAlias = m.GetTableAlias(tableName);
-                    var sortingPropertyInfo = ExpressionHelper.GetPropertyInfo(lambda);
-                    var columnAlias = m.GetColumnAlias(sortingPropertyInfo);
-
-                    sb.Append($"[{tableAlias}].[{columnAlias}] {(sortOrder == SortOrder.Descending ? "DESC" : "ASC")}, ");
-                }
-
-                sb.Remove(sb.Length - 2, 2);
 
                 // -----------------------------------------------------------------------------------------------------------
                 // Paging clause
@@ -386,105 +473,81 @@
                 }
             }
 
-            // Setup mapper object
-            m.Sql = sb.ToString();
-            m.Parameters = parameters;
-
-            mapper = m;
+            sql = sb.ToString();
         }
 
-        public void PrepareEntitySetQuery(EntitySet entitySet, bool existInDb, bool isIdentity, PropertyInfo primeryKeyPropertyInfo, out string sql, out Dictionary<string, object> parameters)
+        public static void CreateSelectStatement<T>(IQueryOptions<T> options, out string sql, out Dictionary<string, object> parameters, out Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, out Func<string, Type> getTableTypeByColumnAliasCallback)
         {
-            var entityType = entitySet.Entity.GetType();
-            var tableName = entityType.GetTableName();
-            var primaryKeyColumnName = primeryKeyPropertyInfo.GetColumnName();
+            CreateSelectStatement<T>(
+                options,
+                null,
+                out sql,
+                out parameters,
+                out navigationProperties,
+                out getTableTypeByColumnAliasCallback);
+        }
 
-            if (!_sqlPropertiesMapping.ContainsKey(entityType))
+        public static void CreateSelectStatement<T>(IQueryOptions<T> options, out string sql, out Dictionary<string, object> parameters)
+        {
+            CreateSelectStatement<T>(
+                options,
+                out sql,
+                out parameters,
+                out var navigationProperties,
+                out var getPropertyFromColumnAliasCallback);
+        }
+
+        public static void CreateSelectStatement<T>(out string sql)
+        {
+            CreateSelectStatement<T>(null, out sql, out var parameters);
+        }
+
+        public static void CreateSelectStatement<T>(IQueryOptions<T> options, string select, out string sql, out Dictionary<string, object> parameters)
+        {
+            CreateSelectStatement<T>(
+                options,
+                select,
+                out sql,
+                out parameters,
+                out var navigationProperties,
+                out var getPropertyFromColumnAliasCallback);
+        }
+
+        public static void CreateSelectStatement<T>(string select, out string sql)
+        {
+            CreateSelectStatement<T>(null, select, out sql, out var parameters);
+        }
+
+        public static void ExtractCrossJoinColumnName(string sql, out string columnName)
+        {
+            if (sql == null)
+                throw new ArgumentNullException(nameof(sql));
+
+            columnName = string.Empty;
+
+            var i = sql.IndexOf("CROSS JOIN", StringComparison.InvariantCultureIgnoreCase);
+
+            if (i > 0)
             {
-                var dict = entityType
-                    .GetRuntimeProperties()
-                    .Where(x => x.IsPrimitive() && x.IsColumnMapped())
-                    .OrderBy(x => x.GetColumnOrder())
-                    .ToDictionary(x => x.GetColumnName(), x => x);
+                i = sql.IndexOf("SELECT COUNT(*) AS ", i, StringComparison.InvariantCultureIgnoreCase);
+                i = sql.IndexOf("[", i, StringComparison.Ordinal);
 
-                _sqlPropertiesMapping[entityType] = new ConcurrentDictionary<string, PropertyInfo>(dict);
-            }
+                var j = sql.IndexOf("]", i, StringComparison.Ordinal);
 
-            var sqlPropertiesMapping = _sqlPropertiesMapping[entityType];
-            var properties = (isIdentity ? sqlPropertiesMapping.Where(x => !x.Key.Equals(primaryKeyColumnName)) : sqlPropertiesMapping).ToList();
-
-            sql = string.Empty;
-            parameters = new Dictionary<string, object>();
-
-            switch (entitySet.State)
-            {
-                case EntityState.Added:
-                    {
-                        if (existInDb)
-                            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
-
-                        var columnNames = string.Join(", ", properties.Select(x => x.Value.GetColumnName())).TrimEnd();
-                        var values = string.Join(", ", properties.Select(x => $"@{x.Value.GetColumnName()}")).TrimEnd();
-
-                        sql = $"INSERT INTO [{tableName}] ({columnNames}){Environment.NewLine}VALUES ({values})";
-
-                        var canGetScopeIdentity = true;
-
-#if NETFULL
-                        if (_providerType == DataAccessProviderType.SqlServerCompact)
-                            canGetScopeIdentity = false;
-#endif
-
-                        if (canGetScopeIdentity)
-                            sql += $"{Environment.NewLine}SELECT SCOPE_IDENTITY()";
-
-                        foreach (var pi in properties)
-                        {
-                            parameters.Add($"@{pi.Value.GetColumnName()}", pi.Value.GetValue(entitySet.Entity, null));
-                        }
-
-                        if (isIdentity)
-                            parameters.Add($"@{primaryKeyColumnName}", primeryKeyPropertyInfo.GetValue(entitySet.Entity, null));
-
-                        break;
-                    }
-                case EntityState.Removed:
-                    {
-                        if (!existInDb)
-                            throw new InvalidOperationException(Resources.EntityNotFoundInStore);
-
-                        sql = $"DELETE FROM [{tableName}]{Environment.NewLine}WHERE {primaryKeyColumnName} = @{primaryKeyColumnName}";
-
-                        parameters.Add($"@{primaryKeyColumnName}", primeryKeyPropertyInfo.GetValue(entitySet.Entity, null));
-
-                        break;
-                    }
-                case EntityState.Modified:
-                    {
-                        if (!existInDb)
-                            throw new InvalidOperationException(Resources.EntityNotFoundInStore);
-
-                        var values = string.Join($",{Environment.NewLine}\t", properties.Select(x =>
-                        {
-                            var columnName = x.Value.GetColumnName();
-                            return columnName + " = " + $"@{columnName}";
-                        }));
-
-                        sql = $"UPDATE [{tableName}]{Environment.NewLine}SET {values}{Environment.NewLine}WHERE {primaryKeyColumnName} = @{primaryKeyColumnName}";
-
-                        foreach (var pi in properties)
-                        {
-                            parameters.Add($"@{pi.Value.GetColumnName()}", pi.Value.GetValue(entitySet.Entity, null));
-                        }
-
-                        if (isIdentity)
-                            parameters.Add($"@{primaryKeyColumnName}", primeryKeyPropertyInfo.GetValue(entitySet.Entity, null));
-
-                        break;
-                    }
+                columnName = sql.Substring(i + 1, j - i - 1);
             }
         }
 
-        #endregion
+        private static Dictionary<string, PropertyInfo> GetProperties(Type entityType)
+        {
+            if (entityType == null)
+                throw new ArgumentNullException(nameof(entityType));
+
+            return entityType
+                .GetRuntimeProperties()
+                .Where(x => x.IsPrimitive() && x.IsColumnMapped())
+                .OrderBy(x => x.GetColumnOrder())
+                .ToDictionary(x => x.GetColumnName(), x => x);
+        }
     }
 }

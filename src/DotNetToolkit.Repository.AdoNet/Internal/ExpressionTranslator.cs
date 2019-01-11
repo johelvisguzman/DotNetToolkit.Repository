@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Reflection;
     using System.Text;
 
     /// <summary>
@@ -17,7 +18,8 @@
         private readonly IComparer<ExpressionType> _comparer = new OperatorPrecedenceComparer();
         private readonly StringBuilder _sb = new StringBuilder();
         private readonly Dictionary<string, object> _parameters = new Dictionary<string, object>();
-        private Mapper _mapper;
+        private Func<Type, string> _getTableAlias;
+        private Func<PropertyInfo, string> _getColumnAlias;
 
         #endregion
 
@@ -26,14 +28,19 @@
         /// <summary>
         /// Translates the specified predicate.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="predicate">The predicate.</param>
-        /// <param name="mapper">The mapper.</param>
-        /// <param name="sql">The sql query string.</param>
-        /// <param name="parameters">The parameters.</param>
-        public void Translate<T>(Expression<Func<T, bool>> predicate, Mapper mapper, out string sql, out Dictionary<string, object> parameters)
+        public void Translate<T>(Expression<Func<T, bool>> predicate, Func<Type, string> getTableAlias, Func<PropertyInfo, string> getColumnAlias, out string sql, out Dictionary<string, object> parameters)
         {
-            _mapper = mapper;
+            if (predicate == null)
+                throw new ArgumentNullException(nameof(predicate));
+
+            if (getTableAlias == null)
+                throw new ArgumentNullException(nameof(getTableAlias));
+
+            if (getColumnAlias == null)
+                throw new ArgumentNullException(nameof(getColumnAlias));
+
+            _getTableAlias = getTableAlias;
+            _getColumnAlias = getColumnAlias;
 
             _sb.Append("(");
 
@@ -250,10 +257,9 @@
         {
             var propertyInfo = ExpressionHelper.GetPropertyInfo(variableExpression);
             var tableType = ExpressionHelper.GetMemberExpression(variableExpression).Expression.Type;
-            var tableName = _mapper.GetTableName(tableType);
-            var tableAlias = _mapper.GetTableAlias(tableName);
+            var tableAlias = _getTableAlias(tableType);
 
-            columnAlias = _mapper.GetColumnAlias(propertyInfo);
+            columnAlias = _getColumnAlias(propertyInfo);
             column = $"[{tableAlias}].[{columnAlias}]";
         }
 
