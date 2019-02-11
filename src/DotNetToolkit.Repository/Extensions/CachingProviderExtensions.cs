@@ -19,7 +19,7 @@
     /// </summary>
     internal static class CachingProviderExtensions
     {
-        private static bool TryGetValue<T>(this ICacheProvider cacheProvider, string key, out T value)
+        private static bool TryGetValue<T>(this ICacheProvider cacheProvider, string key, out QueryResult<T> value)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -29,12 +29,14 @@
 
             if (!cacheProvider.Cache.TryGetValue(key, out var obj))
             {
-                value = default(T);
+                value = default(QueryResult<T>);
 
                 return false;
             }
 
-            value = (T)obj;
+            value = (QueryResult<T>)obj;
+
+            value.CacheUsed = true;
 
             return true;
         }
@@ -87,15 +89,11 @@
 
             var hashedKey = FormatHashKey(key);
 
-            if (!cacheProvider.TryGetValue<QueryResult<T>>(hashedKey, out var value))
+            if (!cacheProvider.TryGetValue<T>(hashedKey, out var value))
             {
                 value = getter();
 
                 cacheProvider.SetValue(hashedKey, key, value, priority, cacheExpiration, logger);
-            }
-            else
-            {
-                value.CacheUsed = true;
             }
 
             return value;
@@ -243,15 +241,11 @@
 
             var hashedKey = FormatHashKey(key);
 
-            if (!cacheProvider.TryGetValue<QueryResult<T>>(hashedKey, out var value))
+            if (!cacheProvider.TryGetValue<T>(hashedKey, out var value))
             {
                 value = await getter();
 
                 cacheProvider.SetValue(hashedKey, key, value, priority, cacheExpiration, logger);
-            }
-            else
-            {
-                value.CacheUsed = true;
             }
 
             return value;
