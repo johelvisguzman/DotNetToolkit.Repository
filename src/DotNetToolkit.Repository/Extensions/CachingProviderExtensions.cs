@@ -114,7 +114,7 @@
             return cacheProvider.GetOrSet<T>(key, getter, cacheProvider.CacheExpiration ?? TimeSpan.Zero, logger);
         }
 
-        public static QueryResult<IEnumerable<T>> GetOrSetExecuteQuery<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, object[] parameters, Func<IDataReader, T> projector, Func<QueryResult<IEnumerable<T>>> getter, ILogger logger)
+        public static QueryResult<IEnumerable<T>> GetOrSetExecuteSqlQuery<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, object[] parameters, Func<IDataReader, T> projector, Func<QueryResult<IEnumerable<T>>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -125,12 +125,12 @@
             if (projector == null)
                 throw new ArgumentNullException(nameof(projector));
 
-            var key = FormatGetOrSetExecuteQueryKey<T>(sql, cmdType, parameters);
+            var key = FormatGetOrSetExecuteSqlQueryKey<T>(sql, cmdType, parameters);
 
             return cacheProvider.GetOrSet<IEnumerable<T>>(key, getter, logger);
         }
 
-        public static QueryResult<int> GetOrSetExecuteQuery<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, object[] parameters, Func<QueryResult<int>> getter, ILogger logger)
+        public static QueryResult<int> GetOrSetExecuteSqlCommand<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, object[] parameters, Func<QueryResult<int>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -138,7 +138,7 @@
             if (sql == null)
                 throw new ArgumentNullException(nameof(sql));
 
-            var key = FormatGetOrSetExecuteQueryKey<T>(sql, cmdType, parameters);
+            var key = FormatGetOrSetExecuteSqlCommandKey<T>(sql, cmdType, parameters);
 
             return cacheProvider.GetOrSet<int>(key, getter, logger);
         }
@@ -273,7 +273,7 @@
             return cacheProvider.GetOrSetAsync<T>(key, getter, cacheProvider.CacheExpiration ?? TimeSpan.Zero, logger);
         }
 
-        public static Task<QueryResult<IEnumerable<T>>> GetOrSetExecuteQueryAsync<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, object[] parameters, Func<IDataReader, T> projector, Func<Task<QueryResult<IEnumerable<T>>>> getter, ILogger logger)
+        public static Task<QueryResult<IEnumerable<T>>> GetOrSetExecuteSqlQueryAsync<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, object[] parameters, Func<IDataReader, T> projector, Func<Task<QueryResult<IEnumerable<T>>>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -284,12 +284,12 @@
             if (projector == null)
                 throw new ArgumentNullException(nameof(projector));
 
-            var key = FormatGetOrSetExecuteQueryKey<T>(sql, cmdType, parameters);
+            var key = FormatGetOrSetExecuteSqlQueryKey<T>(sql, cmdType, parameters);
 
             return cacheProvider.GetOrSetAsync<IEnumerable<T>>(key, getter, logger);
         }
 
-        public static Task<QueryResult<int>> GetOrSetExecuteQueryAsync<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, object[] parameters, Func<Task<QueryResult<int>>> getter, ILogger logger)
+        public static Task<QueryResult<int>> GetOrSetExecuteSqlCommandAsync<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, object[] parameters, Func<Task<QueryResult<int>>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -297,7 +297,7 @@
             if (sql == null)
                 throw new ArgumentNullException(nameof(sql));
 
-            var key = FormatGetOrSetExecuteQueryKey<T>(sql, cmdType, parameters);
+            var key = FormatGetOrSetExecuteSqlCommandKey<T>(sql, cmdType, parameters);
 
             return cacheProvider.GetOrSetAsync<int>(key, getter, logger);
         }
@@ -391,11 +391,27 @@
             return $"{CacheProviderManager.CachePrefix}_{CacheProviderManager.GlobalCachingPrefixCounter}_{key.ToSHA256()}";
         }
 
-        private static string FormatGetOrSetExecuteQueryKey<T>(string sql, CommandType cmdType, object[] parameters)
+        private static string FormatGetOrSetExecuteSqlQueryKey<T>(string sql, CommandType cmdType, object[] parameters)
         {
             var sb = new StringBuilder();
 
-            sb.Append($"GetOrSetExecuteQuery<{typeof(T).Name}>: [ \n\tSql = {sql},");
+            sb.Append($"GetOrSetExecuteSqlQuery<{typeof(T).Name}>: [ \n\tSql = {sql},");
+
+            if (parameters != null && parameters.Any())
+            {
+                sb.Append($"\n\tParameters = {string.Join(", ", parameters.Select(x => x.ToString()).ToArray())},");
+            }
+
+            sb.Append($"\n\tCommandType = {cmdType} ]");
+
+            return sb.ToString();
+        }
+
+        private static string FormatGetOrSetExecuteSqlCommandKey<T>(string sql, CommandType cmdType, object[] parameters)
+        {
+            var sb = new StringBuilder();
+
+            sb.Append($"GetOrSetExecuteSqlCommand<{typeof(T).Name}>: [ \n\tSql = {sql},");
 
             if (parameters != null && parameters.Any())
             {

@@ -2882,7 +2882,7 @@
             var repo = repoFactory.Create<Customer>();
 
             // ** CREATE **
-            var rowsAffected = repo.ExecuteQuery(@"
+            var rowsAffected = repo.ExecuteSqlCommand(@"
 CREATE TABLE NewCustomers (
     Id int,
     Name nvarchar(255),
@@ -2892,14 +2892,14 @@ CREATE TABLE NewCustomers (
             Assert.Equal(-1, rowsAffected);
 
             // ** INSERT **
-            rowsAffected = repo.ExecuteQuery(@"
+            rowsAffected = repo.ExecuteSqlCommand(@"
 INSERT INTO NewCustomers (Id, Name)
 VALUES (@p0, 'Random Name')",
                 parameters);
 
             Assert.Equal(1, rowsAffected);
 
-            var customersInDb = repo.ExecuteQuery(@"
+            var customersInDb = repo.ExecuteSqlQuery(@"
 SELECT
     NewCustomers.Id,
     NewCustomers.Name,
@@ -2924,7 +2924,7 @@ WHERE NewCustomers.Id = @p0",
             Assert.Equal(0, customerInDb.AddressId);
 
             // ** UPDATE **
-            rowsAffected = repo.ExecuteQuery(@"
+            rowsAffected = repo.ExecuteSqlCommand(@"
 UPDATE NewCustomers 
 SET NewCustomers.Name = 'New Random Name' 
 WHERE Id = @p0",
@@ -2932,7 +2932,7 @@ WHERE Id = @p0",
 
             Assert.Equal(1, rowsAffected);
 
-            customersInDb = repo.ExecuteQuery(@"
+            customersInDb = repo.ExecuteSqlQuery(@"
 SELECT
     NewCustomers.Id,
     NewCustomers.Name,
@@ -2957,14 +2957,14 @@ WHERE NewCustomers.Id = @p0",
             Assert.Equal(0, customerInDb.AddressId);
 
             // ** DELETE **
-            rowsAffected = repo.ExecuteQuery(@"
+            rowsAffected = repo.ExecuteSqlCommand(@"
 DELETE FROM NewCustomers
 WHERE Id = @p0", 
                 parameters);
 
             Assert.Equal(1, rowsAffected);
 
-            customersInDb = repo.ExecuteQuery(@"
+            customersInDb = repo.ExecuteSqlQuery(@"
 SELECT
     NewCustomers.Id,
     NewCustomers.Name,
@@ -2991,7 +2991,7 @@ WHERE NewCustomers.Id = @p0",
             var repo = repoFactory.Create<Customer>();
 
             // ** CREATE **
-            var rowsAffected = await repo.ExecuteQueryAsync(@"
+            var rowsAffected = await repo.ExecuteSqlCommandAsync(@"
 CREATE TABLE NewCustomers (
     Id int,
     Name nvarchar(255),
@@ -3001,14 +3001,14 @@ CREATE TABLE NewCustomers (
             Assert.Equal(-1, rowsAffected);
 
             // ** INSERT **
-            rowsAffected = await repo.ExecuteQueryAsync(@"
+            rowsAffected = await repo.ExecuteSqlCommandAsync(@"
 INSERT INTO NewCustomers (Id, Name)
 VALUES (@p0, 'Random Name')",
                 parameters);
 
             Assert.Equal(1, rowsAffected);
 
-            var customersInDb = await repo.ExecuteQueryAsync(@"
+            var customersInDb = await repo.ExecuteSqlQueryAsync(@"
 SELECT
     NewCustomers.Id,
     NewCustomers.Name,
@@ -3033,7 +3033,7 @@ WHERE NewCustomers.Id = @p0",
             Assert.Equal(0, customerInDb.AddressId);
 
             // ** UPDATE **
-            rowsAffected = await repo.ExecuteQueryAsync(@"
+            rowsAffected = await repo.ExecuteSqlCommandAsync(@"
 UPDATE NewCustomers 
 SET NewCustomers.Name = 'New Random Name' 
 WHERE Id = @p0",
@@ -3041,7 +3041,7 @@ WHERE Id = @p0",
 
             Assert.Equal(1, rowsAffected);
 
-            customersInDb = await repo.ExecuteQueryAsync(@"
+            customersInDb = await repo.ExecuteSqlQueryAsync(@"
 SELECT
     NewCustomers.Id,
     NewCustomers.Name,
@@ -3066,14 +3066,14 @@ WHERE NewCustomers.Id = @p0",
             Assert.Equal(0, customerInDb.AddressId);
 
             // ** DELETE **
-            rowsAffected = await repo.ExecuteQueryAsync(@"
+            rowsAffected = await repo.ExecuteSqlCommandAsync(@"
 DELETE FROM NewCustomers
 WHERE Id = @p0",
                 parameters);
 
             Assert.Equal(1, rowsAffected);
 
-            customersInDb = await repo.ExecuteQueryAsync(@"
+            customersInDb = await repo.ExecuteSqlQueryAsync(@"
 SELECT
     NewCustomers.Id,
     NewCustomers.Name,

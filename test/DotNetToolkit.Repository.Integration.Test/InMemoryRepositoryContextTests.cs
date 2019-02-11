@@ -130,7 +130,7 @@
 
             var repo = new Repository<Customer>(options);
 
-            var ex = Assert.Throws<NotSupportedException>(() => repo.ExecuteQuery("SELECT * FROM Customers"));
+            var ex = Assert.Throws<NotSupportedException>(() => repo.ExecuteSqlCommand("SELECT * FROM Customers"));
             Assert.Equal("The in-memory store does not support SQL query execution.", ex.Message);
         }
     }
