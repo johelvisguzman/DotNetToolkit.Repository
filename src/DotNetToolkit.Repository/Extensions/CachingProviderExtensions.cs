@@ -91,9 +91,6 @@
             {
                 value = getter();
 
-                if (value == null)
-                    return default(QueryResult<T>);
-
                 cacheProvider.SetValue(hashedKey, key, value, priority, cacheExpiration, logger);
             }
             else
@@ -249,9 +246,6 @@
             if (!cacheProvider.TryGetValue<QueryResult<T>>(hashedKey, out var value))
             {
                 value = await getter();
-
-                if (value == null)
-                    return default(QueryResult<T>);
 
                 cacheProvider.SetValue(hashedKey, key, value, priority, cacheExpiration, logger);
             }
