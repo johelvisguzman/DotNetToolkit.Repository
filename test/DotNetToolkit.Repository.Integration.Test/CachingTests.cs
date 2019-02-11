@@ -38,14 +38,14 @@
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            repo.ExecuteQuery(@"
+            repo.ExecuteSqlCommand(@"
 CREATE TABLE NewCustomers (
     Id int,
     Name nvarchar(255),
     AddressId int
 )");
 
-            repo.ExecuteQuery(@"
+            repo.ExecuteSqlQuery(@"
 SELECT
     NewCustomers.Id,
     NewCustomers.Name,
@@ -61,7 +61,7 @@ WHERE NewCustomers.Id = @p0",
 
             Assert.False(repo.CacheUsed);
 
-            repo.ExecuteQuery(@"
+            repo.ExecuteSqlQuery(@"
 SELECT
     NewCustomers.Id,
     NewCustomers.Name,
@@ -79,7 +79,7 @@ WHERE NewCustomers.Id = @p0",
 
             repo.CacheEnabled = false;
 
-            repo.ExecuteQuery(@"
+            repo.ExecuteSqlQuery(@"
 SELECT
     NewCustomers.Id,
     NewCustomers.Name,
@@ -415,14 +415,14 @@ WHERE NewCustomers.Id = @p0",
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            await repo.ExecuteQueryAsync(@"
+            await repo.ExecuteSqlCommandAsync(@"
 CREATE TABLE NewCustomers (
     Id int,
     Name nvarchar(255),
     AddressId int
 )");
 
-            await repo.ExecuteQueryAsync(@"
+            await repo.ExecuteSqlQueryAsync(@"
 SELECT
     NewCustomers.Id,
     NewCustomers.Name,
@@ -438,7 +438,7 @@ WHERE NewCustomers.Id = @p0",
 
             Assert.False(repo.CacheUsed);
 
-            await repo.ExecuteQueryAsync(@"
+            await repo.ExecuteSqlQueryAsync(@"
 SELECT
     NewCustomers.Id,
     NewCustomers.Name,
@@ -456,7 +456,7 @@ WHERE NewCustomers.Id = @p0",
 
             repo.CacheEnabled = false;
 
-            await repo.ExecuteQueryAsync(@"
+            await repo.ExecuteSqlQueryAsync(@"
 SELECT
     NewCustomers.Id,
     NewCustomers.Name,

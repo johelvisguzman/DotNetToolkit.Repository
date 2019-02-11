@@ -734,7 +734,7 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public IEnumerable<TEntity> ExecuteQuery(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector)
+        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector)
         {
             InterceptError(() =>
             {
@@ -745,21 +745,21 @@
                     throw new ArgumentNullException(nameof(projector));
             });
 
-            Logger.Debug("Executing QueryResult [ Method = ExecuteQuery ]");
+            Logger.Debug("Executing QueryResult [ Method = ExecuteSqlQuery ]");
 
             QueryResult<IEnumerable<TEntity>> Getter() =>
                 InterceptError<QueryResult<IEnumerable<TEntity>>>(
-                    () => Context.ExecuteQuery(sql, cmdType, parameters, projector));
+                    () => Context.ExecuteSqlQuery(sql, cmdType, parameters, projector));
 
             var queryResult = CacheEnabled
-                ? CacheProvider.GetOrSetExecuteQuery<TEntity>(sql, cmdType, parameters, projector, Getter, Logger)
+                ? CacheProvider.GetOrSetExecuteSqlQuery<TEntity>(sql, cmdType, parameters, projector, Getter, Logger)
                 : Getter();
 
             IncrementCacheCounter(sql);
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = ExecuteQuery, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed QueryResult [ Method = ExecuteSqlQuery, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult.Result;
         }
@@ -771,9 +771,9 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public IEnumerable<TEntity> ExecuteQuery(string sql, object[] parameters, Func<IDataReader, TEntity> projector)
+        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, object[] parameters, Func<IDataReader, TEntity> projector)
         {
-            return ExecuteQuery(sql, CommandType.Text, parameters, projector);
+            return ExecuteSqlQuery(sql, CommandType.Text, parameters, projector);
         }
 
         /// <summary>
@@ -782,9 +782,9 @@
         /// <param name="sql">The SQL query string.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public IEnumerable<TEntity> ExecuteQuery(string sql, Func<IDataReader, TEntity> projector)
+        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, Func<IDataReader, TEntity> projector)
         {
-            return ExecuteQuery(sql, (object[])null, projector);
+            return ExecuteSqlQuery(sql, (object[])null, projector);
         }
 
         /// <summary>
@@ -794,7 +794,7 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <returns>The number of rows affected.</returns>
-        public int ExecuteQuery(string sql, CommandType cmdType, object[] parameters)
+        public int ExecuteSqlCommand(string sql, CommandType cmdType, object[] parameters)
         {
             InterceptError(() =>
             {
@@ -802,21 +802,21 @@
                     throw new ArgumentNullException(nameof(sql));
             });
 
-            Logger.Debug("Executing QueryResult [ Method = ExecuteQuery ]");
+            Logger.Debug("Executing QueryResult [ Method = ExecutesSqlCommand ]");
 
             QueryResult<int> Getter() =>
                 InterceptError<QueryResult<int>>(
-                    () => Context.ExecuteQuery(sql, cmdType, parameters));
+                    () => Context.ExecuteSqlCommand(sql, cmdType, parameters));
 
             var queryResult = CacheEnabled
-                ? CacheProvider.GetOrSetExecuteQuery<TEntity>(sql, cmdType, parameters, Getter, Logger)
+                ? CacheProvider.GetOrSetExecuteSqlCommand<TEntity>(sql, cmdType, parameters, Getter, Logger)
                 : Getter();
 
             IncrementCacheCounter(sql);
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = ExecuteQuery, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed QueryResult [ Method = ExecutesSqlCommand, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult.Result;
         }
@@ -827,9 +827,9 @@
         /// <param name="sql">The SQL query string.</param>
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <returns>The number of rows affected.</returns>
-        public int ExecuteQuery(string sql, object[] parameters)
+        public int ExecuteSqlCommand(string sql, object[] parameters)
         {
-            return ExecuteQuery(sql, CommandType.Text, parameters);
+            return ExecuteSqlCommand(sql, CommandType.Text, parameters);
         }
 
         /// <summary>
@@ -837,9 +837,9 @@
         /// </summary>
         /// <param name="sql">The SQL query string.</param>
         /// <returns>The number of rows affected.</returns>
-        public int ExecuteQuery(string sql)
+        public int ExecuteSqlCommand(string sql)
         {
-            return ExecuteQuery(sql, (object[])null);
+            return ExecuteSqlCommand(sql, (object[])null);
         }
 
         /// <summary>
@@ -851,7 +851,7 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
-        public async Task<IEnumerable<TEntity>> ExecuteQueryAsync(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             InterceptError(() =>
             {
@@ -862,21 +862,21 @@
                     throw new ArgumentNullException(nameof(projector));
             });
 
-            Logger.Debug("Executing QueryResult [ Method = ExecuteQueryAsync ]");
+            Logger.Debug("Executing QueryResult [ Method = ExecuteSqlQueryAsync ]");
 
             Task<QueryResult<IEnumerable<TEntity>>> Getter() =>
                 InterceptErrorAsync<QueryResult<IEnumerable<TEntity>>>(
-                    () => Context.AsAsync().ExecuteQueryAsync(sql, cmdType, parameters, projector, cancellationToken));
+                    () => Context.AsAsync().ExecuteSqlQueryAsync(sql, cmdType, parameters, projector, cancellationToken));
 
             var queryResult = CacheEnabled
-                ? await CacheProvider.GetOrSetExecuteQueryAsync<TEntity>(sql, cmdType, parameters, projector, Getter, Logger)
+                ? await CacheProvider.GetOrSetExecuteSqlQueryAsync<TEntity>(sql, cmdType, parameters, projector, Getter, Logger)
                 : await Getter();
 
             IncrementCacheCounter(sql);
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = ExecuteQueryAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed QueryResult [ Method = ExecuteSqlQueryAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult.Result;
         }
@@ -889,9 +889,9 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
-        public Task<IEnumerable<TEntity>> ExecuteQueryAsync(string sql, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return ExecuteQueryAsync(sql, CommandType.Text, parameters, projector, cancellationToken);
+            return ExecuteSqlQueryAsync(sql, CommandType.Text, parameters, projector, cancellationToken);
         }
 
         /// <summary>
@@ -901,9 +901,9 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
-        public Task<IEnumerable<TEntity>> ExecuteQueryAsync(string sql, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return ExecuteQueryAsync(sql, (object[])null, projector, cancellationToken);
+            return ExecuteSqlQueryAsync(sql, (object[])null, projector, cancellationToken);
         }
 
         /// <summary>
@@ -914,7 +914,7 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
-        public async Task<int> ExecuteQueryAsync(string sql, CommandType cmdType, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<int> ExecuteSqlCommandAsync(string sql, CommandType cmdType, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
         {
             InterceptError(() =>
             {
@@ -922,21 +922,21 @@
                     throw new ArgumentNullException(nameof(sql));
             });
 
-            Logger.Debug("Executing QueryResult [ Method = ExecuteQueryAsync ]");
+            Logger.Debug("Executing QueryResult [ Method = ExecuteSqlCommandAsync ]");
 
             Task<QueryResult<int>> Getter() =>
                 InterceptErrorAsync<QueryResult<int>>(
-                    () => Context.AsAsync().ExecuteQueryAsync(sql, cmdType, parameters, cancellationToken));
+                    () => Context.AsAsync().ExecuteSqlCommandAsync(sql, cmdType, parameters, cancellationToken));
 
             var queryResult = CacheEnabled
-                ? await CacheProvider.GetOrSetExecuteQueryAsync<TEntity>(sql, cmdType, parameters, Getter, Logger)
+                ? await CacheProvider.GetOrSetExecuteSqlCommandAsync<TEntity>(sql, cmdType, parameters, Getter, Logger)
                 : await Getter();
 
             IncrementCacheCounter(sql);
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = ExecuteQueryAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed QueryResult [ Method = ExecuteSqlCommandAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult.Result;
         }
@@ -948,9 +948,9 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
-        public Task<int> ExecuteQueryAsync(string sql, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
+        public Task<int> ExecuteSqlCommandAsync(string sql, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
         {
-            return ExecuteQueryAsync(sql, CommandType.Text, parameters, cancellationToken);
+            return ExecuteSqlCommandAsync(sql, CommandType.Text, parameters, cancellationToken);
         }
 
         /// <summary>
@@ -959,9 +959,9 @@
         /// <param name="sql">The SQL query string.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
-        public Task<int> ExecuteQueryAsync(string sql, CancellationToken cancellationToken = new CancellationToken())
+        public Task<int> ExecuteSqlCommandAsync(string sql, CancellationToken cancellationToken = new CancellationToken())
         {
-            return ExecuteQueryAsync(sql, (object[])null, cancellationToken);
+            return ExecuteSqlCommandAsync(sql, (object[])null, cancellationToken);
         }
 
         /// <summary>

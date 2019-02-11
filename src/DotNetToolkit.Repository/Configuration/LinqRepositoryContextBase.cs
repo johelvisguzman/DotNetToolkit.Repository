@@ -49,7 +49,7 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public abstract QueryResult<IEnumerable<TEntity>> ExecuteQuery<TEntity>(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector) where TEntity : class;
+        public abstract QueryResult<IEnumerable<TEntity>> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector) where TEntity : class;
 
         /// <summary>
         /// Creates a raw SQL query that is executed directly in the database.
@@ -58,7 +58,7 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <returns>The number of rows affected.</returns>
-        public abstract QueryResult<int> ExecuteQuery(string sql, CommandType cmdType, object[] parameters);
+        public abstract QueryResult<int> ExecuteSqlCommand(string sql, CommandType cmdType, object[] parameters);
 
         /// <summary>
         /// Begins the transaction.

@@ -194,7 +194,7 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public override QueryResult<IEnumerable<TEntity>> ExecuteQuery<TEntity>(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector)
+        public override QueryResult<IEnumerable<TEntity>> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector)
         {
             throw new NotSupportedException(Resources.QueryExecutionNotSupported);
         }
@@ -205,7 +205,7 @@
         /// <param name="sql">The SQL query string.</param>
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
-        public override QueryResult<int> ExecuteQuery(string sql, CommandType cmdType, object[] parameters)
+        public override QueryResult<int> ExecuteSqlCommand(string sql, CommandType cmdType, object[] parameters)
         {
             throw new NotSupportedException(Resources.QueryExecutionNotSupported);
         }
