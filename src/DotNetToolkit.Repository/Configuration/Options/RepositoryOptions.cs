@@ -4,6 +4,7 @@
     using Factories;
     using Interceptors;
     using Logging;
+    using Mapper;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -19,6 +20,7 @@
         private IRepositoryContextFactory _contextFactory;
         private ILoggerProvider _loggerProvider;
         private ICacheProvider _cachingProvider;
+        private IMapperProvider _mapperProvider;
 
         #endregion
 
@@ -40,6 +42,11 @@
         public virtual ICacheProvider CachingProvider { get { return _cachingProvider; } }
 
         /// <summary>
+        /// Gets the configured mapper provider.
+        /// </summary>
+        public IMapperProvider MapperProvider { get { return _mapperProvider; } }
+
+        /// <summary>
         /// Gets the configured internal context factory.
         /// </summary>
         public virtual IRepositoryContextFactory ContextFactory { get { return _contextFactory; } }
@@ -54,6 +61,7 @@
                 return ContextFactory != null ||
                        LoggerProvider != null ||
                        CachingProvider != null ||
+                       MapperProvider != null ||
                        Interceptors.Any();
             }
         }
@@ -167,7 +175,22 @@
 
             return this;
         }
-        
+
+        /// <summary>
+        /// Returns the option instance with a configured mapper provider for mapping an query result to a valid entity object within the repository.
+        /// </summary>
+        /// <param name="mapperProvider">The entity mapper provider.</param>
+        /// <returns>The same option instance.</returns>
+        internal RepositoryOptions With(IMapperProvider mapperProvider)
+        {
+            if (mapperProvider == null)
+                throw new ArgumentNullException(nameof(mapperProvider));
+
+            _mapperProvider = mapperProvider;
+
+            return this;
+        }
+
         #endregion
     }
 }

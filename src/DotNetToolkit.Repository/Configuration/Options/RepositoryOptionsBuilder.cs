@@ -4,6 +4,7 @@
     using Factories;
     using Interceptors;
     using Logging;
+    using Mapper;
     using System;
 
     /// <summary>
@@ -177,6 +178,21 @@
                 throw new ArgumentNullException(nameof(cacheProvider));
 
             _options.With(cacheProvider);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Configures the repository options with a mapper provider for mapping an query result to a valid entity object within the repository.
+        /// </summary>
+        /// <param name="mapperProvider">The entity mapper provider.</param>
+        /// <returns>The same builder instance.</returns>
+        public virtual RepositoryOptionsBuilder UseMapperProvider(IMapperProvider mapperProvider)
+        {
+            if (mapperProvider == null)
+                throw new ArgumentNullException(nameof(mapperProvider));
+
+            _options.With(mapperProvider);
 
             return this;
         }
