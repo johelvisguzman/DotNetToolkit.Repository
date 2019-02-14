@@ -5,6 +5,7 @@
     using Configuration.Conventions;
     using Configuration.Interceptors;
     using Configuration.Logging;
+    using Configuration.Mapper;
     using Configuration.Options;
     using Extensions;
     using Factories;
@@ -644,7 +645,6 @@
 
         #region Properties
 
-
         /// <summary>
         /// Gets or sets the value indicating whether caching is enabled or not.
         /// </summary>
@@ -681,6 +681,11 @@
         /// Gets the caching provider.
         /// </summary>
         internal ICacheProvider CacheProvider { get; private set; }
+
+        /// <summary>
+        /// Gets the mapping provider.
+        /// </summary>
+        internal IMapperProvider MapperProvider { get; }
 
         #endregion
 
@@ -719,13 +724,15 @@
 
             CacheProvider = cachingProvider;
 
+            MapperProvider = optionsBuilder.Options.MapperProvider ?? Configuration.Mapper.MapperProvider.Instance;
+
             _options = optionsBuilder.Options;
         }
 
         #endregion
 
         #region Public Methods
-
+        
         /// <summary>
         /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
         /// </summary>
@@ -788,6 +795,41 @@
         }
 
         /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <returns>A list which each entity has been projected into a new form using a default mapping provider.</returns>
+        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, CommandType cmdType, object[] parameters)
+        {
+            var mapper = MapperProvider.Create<TEntity>();
+
+            return ExecuteSqlQuery(sql, CommandType.Text, parameters, r => mapper.Map(r));
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <returns>A list which each entity has been projected into a new form using a default mapping provider.</returns>
+        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, object[] parameters)
+        {
+            return ExecuteSqlQuery(sql, CommandType.Text, parameters);
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <returns>A list which each entity has been projected into a new form using a default mapping provider.</returns>
+        public IEnumerable<TEntity> ExecuteSqlQuery(string sql)
+        {
+            return ExecuteSqlQuery(sql, (object[])null);
+        }
+
+        /// <summary>
         /// Creates a raw SQL query that is executed directly in the database.
         /// </summary>
         /// <param name="sql">The SQL query string.</param>
@@ -841,7 +883,7 @@
         {
             return ExecuteSqlCommand(sql, (object[])null);
         }
-
+        
         /// <summary>
         /// Asynchronously creates raw SQL query that is executed directly in the database and returns a collection of entities.
         /// </summary>
@@ -904,6 +946,44 @@
         public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteSqlQueryAsync(sql, (object[])null, projector, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing A list which each entity has been projected into a new form using a default mapping provider.</returns> 
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CommandType cmdType, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
+        {
+            var mapper = MapperProvider.Create<TEntity>();
+
+            return ExecuteSqlQueryAsync(sql, CommandType.Text, parameters, r => mapper.Map(r), cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing A list which each entity has been projected into a new form using a default mapping provider.</returns> 
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteSqlQueryAsync(sql, CommandType.Text, parameters, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing A list which each entity has been projected into a new form using a default mapping provider.</returns> 
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteSqlQueryAsync(sql, (object[])null, cancellationToken);
         }
 
         /// <summary>
