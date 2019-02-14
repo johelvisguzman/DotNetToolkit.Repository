@@ -87,6 +87,7 @@
             _interceptors = options.Interceptors.ToDictionary(x => x.Key, x => x.Value);
             _cachingProvider = options.CachingProvider;
             _loggerProvider = options.LoggerProvider;
+            _mapperProvider = options.MapperProvider;
             _contextFactory = options.ContextFactory;
         }
 
