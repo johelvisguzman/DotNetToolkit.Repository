@@ -37,10 +37,10 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// </summary>
         public DataAccessProviderType ProviderType { get { return _providerType; } }
 
-		/// <summary>
+        /// <summary>
         /// Gets the provider factory.
         /// </summary>
-		public DbProviderFactory DbProviderFactory { get { return _factory; } }
+        public DbProviderFactory DbProviderFactory { get { return _factory; } }
 
         /// <summary>
         /// Gets the connection string.
@@ -225,7 +225,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
                 canCloseConnection = true;
             }
 
-           	LogExecutingCommandQuery(command);
+            LogExecutingCommandQuery(command);
 
             var result = command.ExecuteNonQuery();
 
@@ -958,33 +958,33 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
             return ConvertValue<TElement>;
         }
 
-		private void LogExecutingCommandQuery(DbCommand command, [CallerMemberName] string commandName = null)
-		{
-			if (Logger.IsEnabled(LogLevel.Debug))
+        private void LogExecutingCommandQuery(DbCommand command, [CallerMemberName] string commandName = null)
+        {
+            if (Logger.IsEnabled(LogLevel.Debug))
                 Logger.Debug(FormatCommandDebugQuery("Executing", command, commandName));
-		}
+        }
 
         private static string FormatCommandDebugQuery(string action, DbCommand command, string commandName)
         {
-			if (action == null)
-				throw new ArgumentNullException(nameof(action));
-			
-			if (command == null)
-				throw new ArgumentNullException(nameof(command));
-				
-			if (commandName == null)
-				throw new ArgumentNullException(nameof(commandName));
-		
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+
+            if (command == null)
+                throw new ArgumentNullException(nameof(command));
+
+            if (commandName == null)
+                throw new ArgumentNullException(nameof(commandName));
+
             var sb = new StringBuilder();
 
             sb.Append($"{action} [ Command = {commandName}, CommandType = {command.CommandType}");
-			
-			if (command.Parameters.Count > 0)
+
+            if (command.Parameters.Count > 0)
             {
                 sb.Append(", ");
                 sb.Append($"Parameters = {command.Parameters.ToDebugString()}");
             }
-			
+
             sb.Append(" ]");
             sb.Append(Environment.NewLine);
             sb.Append(command.CommandText.Indent(3));

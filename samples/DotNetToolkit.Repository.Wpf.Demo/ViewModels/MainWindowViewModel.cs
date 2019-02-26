@@ -2,6 +2,7 @@
 {
     using DotNetToolkit.Wpf.Mvvm;
     using Infrastructure;
+    using Services;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -29,20 +30,11 @@
 
         #region Constructors
 
-        public MainWindowViewModel()
+        public MainWindowViewModel(IServiceLocator serviceLocator)
         {
-            Workspaces = GetWorkspaces();
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        private static IEnumerable<ViewModelBase> GetWorkspaces()
-        {
-            return new ViewModelBase[]
+            Workspaces = new ViewModelBase[]
             {
-                new CustomerWorkspaceViewModel()
+                serviceLocator.GetService<CustomerWorkspaceViewModel>()
             };
         }
 

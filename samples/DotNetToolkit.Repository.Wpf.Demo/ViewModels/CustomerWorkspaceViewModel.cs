@@ -5,8 +5,8 @@
     using DotNetToolkit.Wpf.Mvvm;
     using Factories;
     using Infrastructure;
-    using InMemory;
     using Models;
+    using Services;
     using System;
     using System.Collections.ObjectModel;
 
@@ -14,6 +14,7 @@
     {
         #region Fields
 
+        private readonly IServiceLocator _serviceLocator;
         private ObservableCollection<CustomerFormViewModel> _customers;
         private readonly NavigationController _navigator;
 
@@ -39,15 +40,16 @@
 
         #region Constructors
 
-        public CustomerWorkspaceViewModel()
+        public CustomerWorkspaceViewModel(IServiceLocator serviceLocator)
         {
             AddCommand = new RelayCommand(OnAdd);
             EditCommand = new RelayCommand<CustomerFormViewModel>(OnEdit);
             DeleteCommand = new RelayCommand<CustomerFormViewModel>(OnDelete);
             DisplayName = "Customers";
-            _navigator = NavigationController.Instance;
 
-            _repositoryFactory = new RepositoryFactory(options => options.UseInMemoryDatabase());
+            _serviceLocator = serviceLocator;
+            _navigator = NavigationController.Instance;
+            _repositoryFactory = serviceLocator.GetService<IRepositoryFactory>();
         }
 
         #endregion
@@ -56,7 +58,7 @@
 
         private async void OnAdd()
         {
-            var viewModel = new CustomerFormViewModel();
+            var viewModel = _serviceLocator.GetService<CustomerFormViewModel>();
 
             viewModel.DisplayName = "New Customer";
             viewModel.Date = DateTime.Now;
