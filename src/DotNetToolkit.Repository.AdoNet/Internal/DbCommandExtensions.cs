@@ -89,7 +89,7 @@
             }
         }
 
-        internal static bool ExecuteObjectExist(this DbCommand command, object obj)
+        internal static bool ExecuteObjectExist(this DbHelper dbHelper, DbCommand command, object obj)
         {
             if (command == null)
                 throw new ArgumentNullException(nameof(command));
@@ -109,7 +109,7 @@
 
             var existInDb = false;
 
-            using (var reader = command.ExecuteReader())
+            using (var reader = dbHelper.ExecuteReader(command))
             {
                 while (reader.Read())
                 {
@@ -122,7 +122,7 @@
             return existInDb;
         }
 
-        internal static async Task<bool> ExecuteObjectExistAsync(this DbCommand command, object obj, CancellationToken cancellationToken = new CancellationToken())
+        internal static async Task<bool> ExecuteObjectExistAsync(this DbHelper dbHelper, DbCommand command, object obj, CancellationToken cancellationToken = new CancellationToken())
         {
             if (command == null)
                 throw new ArgumentNullException(nameof(command));
@@ -142,7 +142,7 @@
 
             var existInDb = false;
 
-            using (var reader = await command.ExecuteReaderAsync(cancellationToken))
+            using (var reader = await dbHelper.ExecuteReaderAsync(command, cancellationToken))
             {
                 while (reader.Read())
                 {

@@ -1373,8 +1373,9 @@
         public void CreateTableOnSaveChanges()
         {
             //
-            var contextFactory = TestAdoNetContextFactory.Create();
-            var schemaHelper = new SchemaTableConfigurationHelper((AdoNetRepositoryContext)contextFactory.Create());
+            var connection = TestAdoNetContextFactory.CreateConnection();
+            var contextFactory = TestAdoNetContextFactory.Create(connection);
+            var schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(connection));
             var options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(contextFactory)
                 .UseLoggerProvider(TestXUnitLoggerProvider)
@@ -1392,8 +1393,9 @@
             Assert.Equal(1, classARepo.Count());
 
             //
-            contextFactory = TestAdoNetContextFactory.Create();
-            schemaHelper = new SchemaTableConfigurationHelper((AdoNetRepositoryContext)contextFactory.Create());
+            connection = TestAdoNetContextFactory.CreateConnection();
+            contextFactory = TestAdoNetContextFactory.Create(connection);
+            schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(connection));
             options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(contextFactory)
                 .UseLoggerProvider(TestXUnitLoggerProvider)
@@ -1419,8 +1421,9 @@
             Assert.Equal(1, classBRepo.Count());
 
             //
-            contextFactory = TestAdoNetContextFactory.Create();
-            schemaHelper = new SchemaTableConfigurationHelper((AdoNetRepositoryContext)contextFactory.Create());
+            connection = TestAdoNetContextFactory.CreateConnection();
+            contextFactory = TestAdoNetContextFactory.Create(connection);
+            schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(connection));
             options = new RepositoryOptionsBuilder()
                 .UseInternalContextFactory(contextFactory)
                 .UseLoggerProvider(TestXUnitLoggerProvider)

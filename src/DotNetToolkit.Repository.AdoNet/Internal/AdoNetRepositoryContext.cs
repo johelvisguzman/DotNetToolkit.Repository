@@ -3,7 +3,6 @@
     using Configuration;
     using Configuration.Conventions;
     using Configuration.Logging;
-    using Extensions;
     using Helpers;
     using Properties;
     using Queries;
@@ -12,13 +11,11 @@
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Configuration;
     using System.Data;
     using System.Data.Common;
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Transactions;
@@ -31,17 +28,10 @@
     {
         #region Fields
 
-        private DbTransaction _underlyingTransaction;
-        private readonly DbProviderFactory _factory;
-        private readonly string _connectionString;
-        private DbConnection _connection;
-        private readonly bool _ownsConnection;
-
         private readonly BlockingCollection<EntitySet> _items = new BlockingCollection<EntitySet>();
-        private readonly ConcurrentDictionary<Type, bool> _schemaValidationTypeMapping = new ConcurrentDictionary<Type, bool>();
         private readonly SchemaTableConfigurationHelper _schemaConfigHelper;
 
-        private readonly DataAccessProviderType _providerType;
+        private readonly DbHelper _dbHelper;
 
         #endregion
 
@@ -65,13 +55,8 @@
             if (nameOrConnectionString == null)
                 throw new ArgumentNullException(nameof(nameOrConnectionString));
 
-            var css = GetConnectionStringSettings(nameOrConnectionString);
-
-            _factory = DbProviderFactories.GetFactory(css.ProviderName);
-            _connectionString = css.ConnectionString;
-            _ownsConnection = true;
-            _schemaConfigHelper = new SchemaTableConfigurationHelper(this);
-            _providerType = DataAccessProvider.GetProviderType(css.ProviderName);
+            _dbHelper = new DbHelper(nameOrConnectionString);
+            _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
         }
 
         /// <summary>
@@ -87,11 +72,8 @@
             if (connectionString == null)
                 throw new ArgumentNullException(nameof(connectionString));
 
-            _factory = DbProviderFactories.GetFactory(providerName);
-            _connectionString = connectionString;
-            _ownsConnection = true;
-            _schemaConfigHelper = new SchemaTableConfigurationHelper(this);
-            _providerType = DataAccessProvider.GetProviderType(providerName);
+            _dbHelper = new DbHelper(providerName, connectionString);
+            _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
         }
 
         /// <summary>
@@ -103,654 +85,8 @@
             if (existingConnection == null)
                 throw new ArgumentNullException(nameof(existingConnection));
 
-            if (existingConnection.State == ConnectionState.Closed)
-                existingConnection.Open();
-
-            _connection = existingConnection;
-            _ownsConnection = false;
-            _schemaConfigHelper = new SchemaTableConfigurationHelper(this);
-
-            var css = GetConnectionStringSettings(existingConnection.ConnectionString);
-
-            _providerType = DataAccessProvider.GetProviderType(css.ProviderName);
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Creates the command.
-        /// </summary>
-        /// <returns>The new command.</returns>
-        public virtual DbCommand CreateCommand()
-        {
-            var command = _ownsConnection
-                ? _factory.CreateCommand()
-                : _connection.CreateCommand();
-
-            DbConnection connection;
-
-            if (_underlyingTransaction != null)
-            {
-                connection = _underlyingTransaction.Connection;
-
-                try
-                {
-                    command.Transaction = _underlyingTransaction;
-                }
-                catch (Exception)
-                {
-                    // ignored
-                }
-            }
-            else
-            {
-                connection = CreateConnection();
-            }
-
-            command.Connection = connection;
-
-            return command;
-        }
-
-        /// <summary>
-        /// Executes a SQL statement against a connection.
-        /// </summary>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <returns>The number of rows affected.</returns>
-        public virtual int ExecuteNonQuery(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
-        {
-            using (var command = CreateCommand(cmdText, cmdType, parameters))
-            {
-                var connection = command.Connection;
-                var ownsConnection = _ownsConnection && command.Transaction == null;
-
-                if (connection.State == ConnectionState.Closed)
-                    connection.Open();
-
-                if (Logger.IsEnabled(LogLevel.Debug))
-                    Logger.Debug(FormatExecutingDebugQuery("ExecuteNonQuery", parameters, cmdText));
-
-                var result = command.ExecuteNonQuery();
-
-                if (ownsConnection)
-                    connection.Dispose();
-
-                return result;
-            }
-        }
-
-        /// <summary>
-        /// Executes a SQL statement against a connection.
-        /// </summary>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <returns>The number of rows affected.</returns>
-        public int ExecuteNonQuery(string cmdText, Dictionary<string, object> parameters = null)
-        {
-            return ExecuteNonQuery(cmdText, CommandType.Text, parameters);
-        }
-
-        /// <summary>
-        /// Sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DbDataReader" />.
-        /// </summary>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <returns>A <see cref="System.Data.SqlClient.SqlDataReader" /> object.</returns>
-        public virtual DbDataReader ExecuteReader(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
-        {
-            var command = CreateCommand(cmdText, cmdType, parameters);
-            var connection = command.Connection;
-            var ownsConnection = _ownsConnection && command.Transaction == null;
-
-            if (connection.State == ConnectionState.Closed)
-                connection.Open();
-
-            if (Logger.IsEnabled(LogLevel.Debug))
-                Logger.Debug(FormatExecutingDebugQuery("ExecuteReader", parameters, cmdText));
-
-            var reader = command.ExecuteReader(ownsConnection ? CommandBehavior.CloseConnection : CommandBehavior.Default);
-
-            return reader;
-        }
-
-        /// <summary>
-        /// Sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DbDataReader" />.
-        /// </summary>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <returns>A <see cref="System.Data.SqlClient.SqlDataReader" /> object.</returns>
-        public DbDataReader ExecuteReader(string cmdText, Dictionary<string, object> parameters = null)
-        {
-            return ExecuteReader(cmdText, CommandType.Text, parameters);
-        }
-
-        /// <summary>
-        /// Executes the query, and returns the first column of the first row in the result set returned by the query. Additional columns or rows are ignored.
-        /// </summary>
-        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <returns>The first column of the first row in the result set returned by the query.</returns>
-        public virtual T ExecuteScalar<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
-        {
-            using (var command = CreateCommand(cmdText, cmdType, parameters))
-            {
-                var connection = command.Connection;
-                var ownsConnection = _ownsConnection && command.Transaction == null;
-
-                if (connection.State == ConnectionState.Closed)
-                    connection.Open();
-
-                if (Logger.IsEnabled(LogLevel.Debug))
-                    Logger.Debug(FormatExecutingDebugQuery("ExecuteScalar", parameters, cmdText));
-
-                var result = ConvertValue<T>(command.ExecuteScalar());
-
-                if (ownsConnection)
-                    connection.Dispose();
-
-                return result;
-            }
-        }
-
-        /// <summary>
-        /// Executes the query, and returns the first column of the first row in the result set returned by the query. Additional columns or rows are ignored.
-        /// </summary>
-        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <returns>The first column of the first row in the result set returned by the query.</returns>
-        public T ExecuteScalar<T>(string cmdText, Dictionary<string, object> parameters = null)
-        {
-            return ExecuteScalar<T>(cmdText, CommandType.Text, parameters);
-        }
-
-        /// <summary>
-        /// Executes the query, and returns an object which has been projected into a new form.
-        /// </summary>
-        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <param name="projector">A function to project each entity into a new form.</param>
-        /// <returns>An entity which has been projected into a new form.</returns>
-        public virtual QueryResult<T> ExecuteObject<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
-        {
-            using (var reader = ExecuteReader(cmdText, cmdType, parameters))
-            {
-                var list = new List<T>();
-
-                while (reader.Read())
-                {
-                    list.Add(projector(reader));
-                }
-
-                var result = list.FirstOrDefault();
-
-                return new QueryResult<T>(result);
-            }
-        }
-
-       /// <summary>
-        /// Executes the query, and returns an object which has been projected into a new form.
-        /// </summary>
-        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <param name="projector">A function to project each entity into a new form.</param>
-        /// <returns>An entity which has been projected into a new form.</returns>
-        public QueryResult<T> ExecuteObject<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
-        {
-            return ExecuteObject<T>(cmdText, CommandType.Text, parameters, projector);
-        }
-        
-        /// <summary>
-        /// Executes the query, and returns a list which each entity has been projected into a new form.
-        /// </summary>
-        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <param name="projector">A function to project each entity into a new form.</param>
-        /// <returns>A list which each entity has been projected into a new form.</returns>
-        public virtual QueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
-        {
-            using (var reader = ExecuteReader(cmdText, cmdType, parameters))
-            {
-                var list = new List<T>();
-                var foundCrossJoinCountColumn = false;
-                var total = 0;
-
-                QueryBuilder.ExtractCrossJoinColumnName(cmdText, out var crossJoinColumnName);
-
-                while (reader.Read())
-                {
-                    for (var i = 0; i < reader.FieldCount; i++)
-                    {
-                        var name = reader.GetName(i);
-
-                        if (!string.IsNullOrEmpty(crossJoinColumnName) && name.Equals(crossJoinColumnName))
-                        {
-                            total = (int)reader[name];
-                            foundCrossJoinCountColumn = true;
-                            break;
-                        }
-                    }
-
-                    list.Add(projector(reader));
-                }
-
-                if (!foundCrossJoinCountColumn)
-                    total = list.Count;
-
-                return new QueryResult<IEnumerable<T>>(list, total);
-            }
-        }
-
-        /// <summary>
-        /// Executes the query, and returns a list which each entity has been projected into a new form.
-        /// </summary>
-        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <param name="projector">A function to project each entity into a new form.</param>
-        /// <returns>A list which each entity has been projected into a new form.</returns>
-        public QueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
-        {
-            return ExecuteList<T>(cmdText, CommandType.Text, parameters, projector);
-        }
-
-        /// <summary>
-        /// Executes the query, and returns a list which each entity has been projected into a new form.
-        /// </summary>
-        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <returns>A list which each entity has been projected into a new form.</returns>
-        public QueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, Dictionary<string, object> parameters) where T : class
-        {
-            var mapper = new Mapper<T>();
-
-            return ExecuteList<T>(cmdText, parameters, mapper.Map);
-        }
-
-        /// <summary>
-        /// Executes the query, and returns a list which each entity has been projected into a new form.
-        /// </summary>
-        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="projector">A function to project each entity into a new form.</param>
-        /// <returns>A list which each entity has been projected into a new form.</returns>
-        public QueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, CommandType cmdType, Func<DbDataReader, T> projector)
-        {
-            return ExecuteList<T>(cmdText, cmdType, null, projector);
-        }
-
-        /// <summary>
-        /// Executes the query, and returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keyProjector" />, and <paramref name="elementProjector" />.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <param name="keyProjector">A function to extract a key from each entity.</param>
-        /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
-        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public virtual QueryResult<Dictionary<TDictionaryKey, TElement>> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector)
-        {
-            using (var reader = ExecuteReader(cmdText, cmdType, parameters))
-            {
-                var dict = new Dictionary<TDictionaryKey, TElement>();
-
-                while (reader.Read())
-                {
-                    dict.Add(keyProjector(reader.GetValue(0)), elementProjector(reader.GetValue(1)));
-                }
-
-                return new QueryResult<Dictionary<TDictionaryKey, TElement>>(dict);
-            }
-        }
-
-        /// <summary>
-        /// Executes the query, and returns a new <see cref="Dictionary{TDictionaryKey, TElement}" />.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public QueryResult<Dictionary<TDictionaryKey, TElement>> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
-        {
-            return ExecuteDictionary<TDictionaryKey, TElement>(cmdText, cmdType, parameters, ConvertType<TDictionaryKey>(), ConvertType<TElement>());
-        }
-
-        /// <summary>
-        /// Executes the query, and returns a new <see cref="Dictionary{TDictionaryKey, TElement}" />.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public QueryResult<Dictionary<TDictionaryKey, TElement>> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, Dictionary<string, object> parameters = null)
-        {
-            return ExecuteDictionary<TDictionaryKey, TElement>(cmdText, CommandType.Text, parameters);
-        }
-
-        /// <summary>
-        /// Asynchronously executes a SQL statement against a connection.
-        /// </summary>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
-        public virtual async Task<int> ExecuteNonQueryAsync(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
-        {
-            using (var command = CreateCommand(cmdText, cmdType, parameters))
-            {
-                var connection = command.Connection;
-                var ownsConnection = _ownsConnection && command.Transaction == null;
-
-                if (connection.State == ConnectionState.Closed)
-                    await connection.OpenAsync(cancellationToken);
-
-                if (Logger.IsEnabled(LogLevel.Debug))
-                    Logger.Debug(FormatExecutingDebugQuery("ExecuteNonQueryAsync", parameters, cmdText));
-
-                var result = await command.ExecuteNonQueryAsync(cancellationToken);
-
-                if (ownsConnection)
-                    connection.Dispose();
-
-                return result;
-            }
-        }
-
-        /// <summary>
-        /// Asynchronously executes a SQL statement against a connection.
-        /// </summary>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
-        public Task<int> ExecuteNonQueryAsync(string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return ExecuteNonQueryAsync(cmdText, CommandType.Text, parameters, cancellationToken);
-        }
-
-        /// <summary>
-        /// Asynchronously sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DbDataReader" />.
-        /// </summary>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a <see cref="System.Data.SqlClient.SqlDataReader" /> object.</returns>
-        public virtual async Task<DbDataReader> ExecuteReaderAsync(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
-        {
-            var command = CreateCommand(cmdText, cmdType, parameters);
-            var connection = command.Connection;
-            var ownsConnection = _ownsConnection && command.Transaction == null;
-
-            if (connection.State == ConnectionState.Closed)
-                await connection.OpenAsync(cancellationToken);
-
-            if (Logger.IsEnabled(LogLevel.Debug))
-                Logger.Debug(FormatExecutingDebugQuery("ExecuteReaderAsync", parameters, cmdText));
-
-            var reader = await command.ExecuteReaderAsync(ownsConnection ? CommandBehavior.CloseConnection : CommandBehavior.Default, cancellationToken);
-
-            return reader;
-        }
-
-        /// <summary>
-        /// Asynchronously sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DbDataReader" />.
-        /// </summary>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a <see cref="System.Data.SqlClient.SqlDataReader" /> object.</returns>
-        public Task<DbDataReader> ExecuteReaderAsync(string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return ExecuteReaderAsync(cmdText, CommandType.Text, parameters, cancellationToken);
-        }
-
-        /// <summary>
-        /// Asynchronously executes the query, and returns the first column of the first row in the result set returned by the query. Additional columns or rows are ignored.
-        /// </summary>
-        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the first column of the first row in the result set returned by the query.</returns>
-        public virtual async Task<T> ExecuteScalarAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
-        {
-            using (var command = CreateCommand(cmdText, cmdType, parameters))
-            {
-                var connection = command.Connection;
-                var ownsConnection = _ownsConnection && command.Transaction == null;
-
-                if (connection.State == ConnectionState.Closed)
-                    await connection.OpenAsync(cancellationToken);
-
-                if (Logger.IsEnabled(LogLevel.Debug))
-                    Logger.Debug(FormatExecutingDebugQuery("ExecuteScalarAsync", parameters, cmdText));
-
-                var result = ConvertValue<T>(await command.ExecuteScalarAsync(cancellationToken));
-
-                if (ownsConnection)
-                    connection.Dispose();
-
-                return result;
-            }
-        }
-
-        /// <summary>
-        /// Asynchronously executes the query, and returns the first column of the first row in the result set returned by the query. Additional columns or rows are ignored.
-        /// </summary>
-        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the first column of the first row in the result set returned by the query.</returns>
-        public Task<T> ExecuteScalarAsync<T>(string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return ExecuteScalarAsync<T>(cmdText, CommandType.Text, parameters, cancellationToken);
-        }
-
-        /// <summary>
-        /// Asynchronously executes the query, and returns an object which has been projected into a new form.
-        /// </summary>
-        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <param name="projector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing an entity which has been projected into a new form.</returns>
-        public virtual async Task<QueryResult<T>> ExecuteObjectAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            using (var reader = await ExecuteReaderAsync(cmdText, cmdType, parameters, cancellationToken))
-            {
-                var list = new List<T>();
-
-                while (reader.Read())
-                {
-                    list.Add(projector(reader));
-                }
-
-                var result = list.FirstOrDefault();
-
-                return new QueryResult<T>(result);
-            }
-        }
-
-        /// <summary>
-        /// Asynchronously executes the query, and returns an object which has been projected into a new form.
-        /// </summary>
-        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <param name="projector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing an entity which has been projected into a new form.</returns>
-        public Task<QueryResult<T>> ExecuteObjectAsync<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return ExecuteObjectAsync<T>(cmdText, CommandType.Text, parameters, projector, cancellationToken);
-        }
-
-        /// <summary>
-        /// Asynchronously executes the query, and returns a list which each entity has been projected into a new form.
-        /// </summary>
-        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <param name="projector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
-        public virtual async Task<QueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            using (var reader = await ExecuteReaderAsync(cmdText, cmdType, parameters, cancellationToken))
-            {
-                var list = new List<T>();
-                var foundCrossJoinCountColumn = false;
-                var total = 0;
-
-                QueryBuilder.ExtractCrossJoinColumnName(cmdText, out var crossJoinColumnName);
-
-                while (reader.Read())
-                {
-                    for (var i = 0; i < reader.FieldCount; i++)
-                    {
-                        var name = reader.GetName(i);
-
-                        if (!string.IsNullOrEmpty(crossJoinColumnName) && name.Equals(crossJoinColumnName))
-                        {
-                            total = (int)reader[name];
-                            foundCrossJoinCountColumn = true;
-                            break;
-                        }
-                    }
-
-                    list.Add(projector(reader));
-                }
-
-                if (!foundCrossJoinCountColumn)
-                    total = list.Count;
-
-                return new QueryResult<IEnumerable<T>>(list, total);
-            }
-        }
-
-        /// <summary>
-        /// Asynchronously executes the query, and returns a list which each entity has been projected into a new form.
-        /// </summary>
-        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <param name="projector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
-        public Task<QueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return ExecuteListAsync<T>(cmdText, CommandType.Text, parameters, projector, cancellationToken);
-        }
-
-        /// <summary>
-        /// Asynchronously executes the query, and returns a list which each entity has been projected into a new form.
-        /// </summary>
-        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
-        public Task<QueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken()) where T : class
-        {
-            var mapper = new Mapper<T>();
-
-            return ExecuteListAsync<T>(cmdText, parameters, mapper.Map, cancellationToken);
-        }
-
-       /// <summary>
-        /// Asynchronously executes the query, and returns a new <see cref="Dictionary{TDictionaryKey, TElement}" /> according to the specified <paramref name="keyProjector" />, and <paramref name="elementProjector" />.
-        /// </summary>
-        /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
-        /// <typeparam name="TElement">The type of the value returned by elementSelector.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <param name="keyProjector">A function to extract a key from each entity.</param>
-        /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public virtual async Task<QueryResult<Dictionary<TDictionaryKey, TElement>>> ExecuteDictionaryAsync<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            using (var reader = await ExecuteReaderAsync(cmdText, cmdType, parameters, cancellationToken))
-            {
-                var dict = new Dictionary<TDictionaryKey, TElement>();
-
-                while (reader.Read())
-                {
-                    dict.Add(keyProjector(reader.GetValue(0)), elementProjector(reader.GetValue(1)));
-                }
-
-                return new QueryResult<Dictionary<TDictionaryKey, TElement>>(dict);
-            }
-        }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// Creates the connection.
-        /// </summary>
-        /// <returns>The connection.</returns>
-        protected virtual DbConnection CreateConnection()
-        {
-            if (_underlyingTransaction != null)
-                throw new InvalidOperationException("Unable to create a new connection. A transaction has already been started.");
-
-            if (_ownsConnection)
-            {
-                _connection = _factory.CreateConnection();
-                _connection.ConnectionString = _connectionString;
-            }
-
-            return _connection;
-        }
-
-        /// <summary>
-        /// Creates a command.
-        /// </summary>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <returns>The new command.</returns>
-        protected DbCommand CreateCommand(string cmdText, CommandType cmdType, Dictionary<string, object> parameters)
-        {
-            if (cmdText == null)
-                throw new ArgumentNullException(nameof(cmdText));
-
-            var command = CreateCommand();
-
-            command.CommandText = cmdText;
-            command.CommandType = cmdType;
-            command.AddParameters(parameters);
-
-            return command;
+            _dbHelper = new DbHelper(existingConnection);
+            _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
         }
 
         #endregion
@@ -774,7 +110,7 @@
                         var canGetScopeIdentity = true;
 
 #if NETFULL
-                        if (_providerType == DataAccessProviderType.SqlServerCompact)
+                        if (_dbHelper.ProviderType == DataAccessProviderType.SqlServerCompact)
                             canGetScopeIdentity = false;
 #endif
 
@@ -802,80 +138,6 @@
                         break;
                     }
             }
-        }
-
-        private static ConnectionStringSettings GetConnectionStringSettings(string nameOrConnectionString)
-        {
-            var css = ConfigurationManager.ConnectionStrings[nameOrConnectionString];
-
-            if (css == null)
-            {
-                for (var i = 0; i < ConfigurationManager.ConnectionStrings.Count; i++)
-                {
-                    css = ConfigurationManager.ConnectionStrings[i];
-
-                    if (css.ConnectionString.Equals(nameOrConnectionString))
-                        break;
-                }
-            }
-
-            if (css == null)
-                throw new ArgumentException("The connection string does not exist in your configuration file.");
-
-            return css;
-        }
-
-        private static T ConvertValue<T>(object value)
-        {
-            if (value == null || value is DBNull)
-                return default(T);
-
-            if (value is T)
-                return (T)value;
-
-            return (T)Convert.ChangeType(value, typeof(T));
-        }
-
-        private static Func<object, TElement> ConvertType<TElement>()
-        {
-            return ConvertValue<TElement>;
-        }
-
-        private async Task OnSchemaValidationAsync(Type entityType, CancellationToken cancellationToken)
-        {
-            // Performs some schema validation for this type (either creates the table if does not exist, or validates)
-            if (!_schemaValidationTypeMapping.ContainsKey(entityType))
-            {
-                try { await _schemaConfigHelper.ExecuteSchemaValidateAsync(entityType, cancellationToken); }
-                finally { _schemaValidationTypeMapping[entityType] = true; }
-            }
-        }
-
-        private void OnSchemaValidation(Type entityType)
-        {
-            // Performs some schema validation for this type (either creates the table if does not exist, or validates)
-            if (!_schemaValidationTypeMapping.ContainsKey(entityType))
-            {
-                try { _schemaConfigHelper.ExecuteSchemaValidate(entityType); }
-                finally { _schemaValidationTypeMapping[entityType] = true; }
-            }
-        }
-
-        private static string FormatExecutingDebugQuery(string commandName, Dictionary<string, object> parameters, string sql)
-        {
-            var sb = new StringBuilder();
-
-            sb.Append($"Executing [ Command = {commandName}");
-            if (parameters != null && parameters.Count > 0)
-            {
-                sb.Append(", ");
-                sb.Append($"Parameters = {parameters.ToDebugString()}");
-            }
-            sb.Append(" ]");
-            sb.Append(Environment.NewLine);
-            sb.Append(sql.Indent(3));
-
-            return sb.ToString();
         }
 
         #endregion
@@ -908,7 +170,7 @@
                 }
             }
 
-            using (var reader = ExecuteReader(sql, cmdType, parametersDict))
+            using (var reader = _dbHelper.ExecuteReader(sql, cmdType, parametersDict))
             {
                 var list = new List<TEntity>();
 
@@ -943,7 +205,7 @@
                 }
             }
 
-            return new QueryResult<int>(ExecuteNonQuery(sql, cmdType, parametersDict));
+            return new QueryResult<int>(_dbHelper.ExecuteNonQuery(sql, cmdType, parametersDict));
         }
 
         /// <summary>
@@ -952,9 +214,9 @@
         /// <returns>The transaction.</returns>
         public ITransactionManager BeginTransaction()
         {
-            _underlyingTransaction = CreateConnection().BeginTransaction();
+            var transaction = _dbHelper.BeginTransaction();
 
-            CurrentTransaction = new AdoNetTransactionManager(_underlyingTransaction, Logger);
+            CurrentTransaction = new AdoNetTransactionManager(transaction, Logger);
 
             return CurrentTransaction;
         }
@@ -972,6 +234,8 @@
         {
             if (loggerProvider == null)
                 throw new ArgumentNullException(nameof(loggerProvider));
+
+            _dbHelper.UseLoggerProvider(loggerProvider);
 
             Logger = loggerProvider.Create(GetType().FullName);
         }
@@ -1012,14 +276,18 @@
         /// <returns>The number of state entries written to the database.</returns>
         public int SaveChanges()
         {
-            using (var command = CreateCommand())
+            using (var command = _dbHelper.CreateCommand())
             {
                 var rows = 0;
                 var connection = command.Connection;
-                var ownsConnection = _ownsConnection && command.Transaction == null;
+                var canCloseConnection = false;
+                var ownsConnection = _dbHelper.OwnsConnection;
 
                 if (connection.State == ConnectionState.Closed)
+                {
                     connection.Open();
+                    canCloseConnection = true;
+                }
 
                 try
                 {
@@ -1027,13 +295,13 @@
                     {
                         var entityType = entitySet.Entity.GetType();
 
-                        OnSchemaValidation(entityType);
+                        _schemaConfigHelper.ExecuteSchemaValidate(entityType);
 
                         var primaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
                         var isIdentity = primaryKeyPropertyInfo.IsColumnIdentity();
 
                         // Checks if the entity exist in the database
-                        var existInDb = command.ExecuteObjectExist(entitySet.Entity);
+                        var existInDb = _dbHelper.ExecuteObjectExist(command, entitySet.Entity);
 
                         // Prepare the sql statement
                         PrepareEntitySetQuery(
@@ -1051,12 +319,9 @@
                         if (entitySet.State == EntityState.Added && isIdentity)
                         {
 #if NETFULL
-                            if (_providerType == DataAccessProviderType.SqlServerCompact)
+                            if (_dbHelper.ProviderType == DataAccessProviderType.SqlServerCompact)
                             {
-                                if (Logger.IsEnabled(LogLevel.Debug))
-                                    Logger.Debug(FormatExecutingDebugQuery("ExecuteNonQuery", parameters, sql));
-
-                                command.ExecuteNonQuery();
+                                _dbHelper.ExecuteNonQuery(command);
 
                                 sql = "SELECT @@IDENTITY";
                                 parameters.Clear();
@@ -1065,10 +330,7 @@
                                 command.Parameters.Clear();
                             }
 #endif
-                            if (Logger.IsEnabled(LogLevel.Debug))
-                                Logger.Debug(FormatExecutingDebugQuery("ExecuteScalar", parameters, sql));
-
-                            var newKey = command.ExecuteScalar();
+                            var newKey = _dbHelper.ExecuteScalar<object>(command);
                             var convertedKeyValue = Convert.ChangeType(newKey, primaryKeyPropertyInfo.PropertyType);
 
                             primaryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
@@ -1077,16 +339,13 @@
                         }
                         else
                         {
-                            if (Logger.IsEnabled(LogLevel.Debug))
-                                Logger.Debug(FormatExecutingDebugQuery("ExecuteNonQuery", parameters, sql));
-
-                            rows += command.ExecuteNonQuery();
+                            rows += _dbHelper.ExecuteNonQuery(command);
                         }
                     }
                 }
                 finally
                 {
-                    if (ownsConnection)
+                    if (canCloseConnection && ownsConnection)
                         connection.Dispose();
 
                     // Clears the collection
@@ -1141,17 +400,17 @@
             var selectorFunc = selector.Compile();
 
             QueryBuilder.CreateSelectStatement<TEntity>(
-                options, 
-                out var sql, 
-                out var parameters, 
-                out var navigationProperties, 
+                options,
+                out var sql,
+                out var parameters,
+                out var navigationProperties,
                 out var getPropertyFromColumnAliasCallback);
 
             var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
 
-            OnSchemaValidation(typeof(TEntity));
+            _schemaConfigHelper.ExecuteSchemaValidate(typeof(TEntity));
 
-            return ExecuteObject<TResult>(sql, parameters, reader => mapper.Map<TResult>(reader, selectorFunc));
+            return _dbHelper.ExecuteObject<TResult>(sql, parameters, reader => mapper.Map<TResult>(reader, selectorFunc));
         }
 
         /// <summary>
@@ -1178,9 +437,9 @@
 
             var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
 
-            OnSchemaValidation(typeof(TEntity));
+            _schemaConfigHelper.ExecuteSchemaValidate(typeof(TEntity));
 
-            return ExecuteList<TResult>(sql, parameters, reader => mapper.Map<TResult>(reader, selectorFunc));
+            return _dbHelper.ExecuteList<TResult>(sql, parameters, reader => mapper.Map<TResult>(reader, selectorFunc));
         }
 
         /// <summary>
@@ -1193,9 +452,9 @@
         {
             QueryBuilder.CreateSelectStatement<TEntity>(options, "COUNT(*)", out var sql, out var parameters);
 
-            OnSchemaValidation(typeof(TEntity));
+            _schemaConfigHelper.ExecuteSchemaValidate(typeof(TEntity));
 
-            var result = ExecuteScalar<int>(sql, parameters);
+            var result = _dbHelper.ExecuteScalar<int>(sql, parameters);
 
             return new QueryResult<int>(result);
         }
@@ -1213,9 +472,9 @@
 
             QueryBuilder.CreateSelectStatement<TEntity>(options, out var sql, out var parameters);
 
-            OnSchemaValidation(typeof(TEntity));
+            _schemaConfigHelper.ExecuteSchemaValidate(typeof(TEntity));
 
-            using (var reader = ExecuteReader(sql, parameters))
+            using (var reader = _dbHelper.ExecuteReader(sql, parameters))
             {
                 var hasRows = false;
 
@@ -1260,9 +519,9 @@
 
             var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
 
-            OnSchemaValidation(typeof(TEntity));
+            _schemaConfigHelper.ExecuteSchemaValidate(typeof(TEntity));
 
-            using (var reader = ExecuteReader(sql, parameters))
+            using (var reader = _dbHelper.ExecuteReader(sql, parameters))
             {
                 var dict = new Dictionary<TDictionaryKey, TElement>();
                 var foundCrossJoinCountColumn = false;
@@ -1355,7 +614,7 @@
                 }
             }
 
-            using (var reader = await ExecuteReaderAsync(sql, cmdType, parametersDict, cancellationToken))
+            using (var reader = await _dbHelper.ExecuteReaderAsync(sql, cmdType, parametersDict, cancellationToken))
             {
                 var list = new List<TEntity>();
 
@@ -1391,7 +650,7 @@
                 }
             }
 
-            return new QueryResult<int>(await ExecuteNonQueryAsync(sql, cmdType, parametersDict, cancellationToken));
+            return new QueryResult<int>(await _dbHelper.ExecuteNonQueryAsync(sql, cmdType, parametersDict, cancellationToken));
         }
 
         /// <summary>
@@ -1400,14 +659,18 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of state entries written to the database.</returns>
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
-            using (var command = CreateCommand())
+            using (var command = _dbHelper.CreateCommand())
             {
                 var rows = 0;
                 var connection = command.Connection;
-                var ownsConnection = _ownsConnection && command.Transaction == null;
+                var canCloseConnection = false;
+                var ownsConnection = _dbHelper.OwnsConnection;
 
                 if (connection.State == ConnectionState.Closed)
+                {
                     await connection.OpenAsync(cancellationToken);
+                    canCloseConnection = true;
+                }
 
                 try
                 {
@@ -1415,13 +678,13 @@
                     {
                         var entityType = entitySet.Entity.GetType();
 
-                        await OnSchemaValidationAsync(entityType, cancellationToken);
+                        await _schemaConfigHelper.ExecuteSchemaValidateAsync(entityType, cancellationToken);
 
                         var primaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
                         var isIdentity = primaryKeyPropertyInfo.IsColumnIdentity();
 
                         // Checks if the entity exist in the database
-                        var existInDb = await command.ExecuteObjectExistAsync(entitySet.Entity, cancellationToken);
+                        var existInDb = await _dbHelper.ExecuteObjectExistAsync(command, entitySet.Entity, cancellationToken);
 
                         // Prepare the sql statement
                         PrepareEntitySetQuery(
@@ -1439,12 +702,9 @@
                         if (entitySet.State == EntityState.Added && isIdentity)
                         {
 #if NETFULL
-                            if (_providerType == DataAccessProviderType.SqlServerCompact)
+                            if (_dbHelper.ProviderType == DataAccessProviderType.SqlServerCompact)
                             {
-                                if (Logger.IsEnabled(LogLevel.Debug))
-                                    Logger.Debug(FormatExecutingDebugQuery("ExecuteNonQueryAsync", parameters, sql));
-
-                                await command.ExecuteNonQueryAsync(cancellationToken);
+                                await _dbHelper.ExecuteNonQueryAsync(command, cancellationToken);
 
                                 sql = "SELECT @@IDENTITY";
                                 parameters.Clear();
@@ -1453,10 +713,7 @@
                                 command.Parameters.Clear();
                             }
 #endif
-                            if (Logger.IsEnabled(LogLevel.Debug))
-                                Logger.Debug(FormatExecutingDebugQuery("ExecuteScalarAsync", parameters, sql));
-
-                            var newKey = await command.ExecuteScalarAsync(cancellationToken);
+                            var newKey = await _dbHelper.ExecuteScalarAsync<object>(command, cancellationToken);
                             var convertedKeyValue = Convert.ChangeType(newKey, primaryKeyPropertyInfo.PropertyType);
 
                             primaryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
@@ -1465,16 +722,13 @@
                         }
                         else
                         {
-                            if (Logger.IsEnabled(LogLevel.Debug))
-                                Logger.Debug(FormatExecutingDebugQuery("ExecuteNonQueryAsync", parameters, sql));
-
-                            rows += await command.ExecuteNonQueryAsync(cancellationToken);
+                            rows += await _dbHelper.ExecuteNonQueryAsync(command, cancellationToken);
                         }
                     }
                 }
                 finally
                 {
-                    if (ownsConnection)
+                    if (canCloseConnection && ownsConnection)
                         connection.Dispose();
 
                     // Clears the collection
@@ -1539,9 +793,9 @@
 
             var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
 
-            await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
+            await _schemaConfigHelper.ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 
-            return await ExecuteObjectAsync<TResult>(sql, parameters, reader => mapper.Map<TResult>(reader, selectorFunc), cancellationToken);
+            return await _dbHelper.ExecuteObjectAsync<TResult>(sql, parameters, reader => mapper.Map<TResult>(reader, selectorFunc), cancellationToken);
         }
 
         /// <summary>
@@ -1569,9 +823,9 @@
 
             var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
 
-            await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
+            await _schemaConfigHelper.ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 
-            return await ExecuteListAsync<TResult>(sql, parameters, reader => mapper.Map<TResult>(reader, selectorFunc), cancellationToken);
+            return await _dbHelper.ExecuteListAsync<TResult>(sql, parameters, reader => mapper.Map<TResult>(reader, selectorFunc), cancellationToken);
         }
 
         /// <summary>
@@ -1585,9 +839,9 @@
         {
             QueryBuilder.CreateSelectStatement<TEntity>(options, "COUNT(*)", out var sql, out var parameters);
 
-            OnSchemaValidation(typeof(TEntity));
+            _schemaConfigHelper.ExecuteSchemaValidate(typeof(TEntity));
 
-            var result = await ExecuteScalarAsync<int>(sql, parameters, cancellationToken);
+            var result = await _dbHelper.ExecuteScalarAsync<int>(sql, parameters, cancellationToken);
 
             return new QueryResult<int>(result);
         }
@@ -1606,9 +860,9 @@
 
             QueryBuilder.CreateSelectStatement<TEntity>(options, out var sql, out var parameters);
 
-            await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
+            await _schemaConfigHelper.ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 
-            using (var reader = await ExecuteReaderAsync(sql, parameters, cancellationToken))
+            using (var reader = await _dbHelper.ExecuteReaderAsync(sql, parameters, cancellationToken))
             {
                 var hasRows = false;
 
@@ -1654,9 +908,9 @@
 
             var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
 
-            await OnSchemaValidationAsync(typeof(TEntity), cancellationToken);
+            await _schemaConfigHelper.ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 
-            using (var reader = await ExecuteReaderAsync(sql, parameters, cancellationToken))
+            using (var reader = await _dbHelper.ExecuteReaderAsync(sql, parameters, cancellationToken))
             {
                 var dict = new Dictionary<TDictionaryKey, TElement>();
                 var foundCrossJoinCountColumn = false;
@@ -1728,13 +982,7 @@
         /// </summary>
         public void Dispose()
         {
-            if (_ownsConnection && _connection != null)
-            {
-                _connection.Dispose();
-                _connection = null;
-            }
-
-            _underlyingTransaction = null;
+            _dbHelper.Dispose();
 
             GC.SuppressFinalize(this);
         }

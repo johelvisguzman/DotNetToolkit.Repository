@@ -5,10 +5,10 @@
     using Extensions;
     using Properties;
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-    using System.Data;
     using System.Linq;
     using System.Reflection;
     using System.Text;
@@ -22,9 +22,10 @@
     {
         #region Fields
 
-        private readonly AdoNetRepositoryContext _context;
+        private readonly DbHelper _dbHelper;
         private readonly Dictionary<Type, bool> _tableCreationMapping = new Dictionary<Type, bool>();
         private readonly Dictionary<Type, Tuple<string, Type>> _foreignTableCreationMapping = new Dictionary<Type, Tuple<string, Type>>();
+        private readonly ConcurrentDictionary<Type, bool> _schemaValidationTypeMapping = new ConcurrentDictionary<Type, bool>();
 
         #endregion
 
@@ -33,13 +34,13 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="SchemaTableConfigurationHelper"/> class.
         /// </summary>
-        /// <param name="context">The context.</param>
-        public SchemaTableConfigurationHelper(AdoNetRepositoryContext context)
+        /// <param name="dbHelper">The database helper.</param>
+        public SchemaTableConfigurationHelper(DbHelper dbHelper)
         {
-            if (context == null)
-                throw new ArgumentNullException(nameof(context));
+            if (dbHelper == null)
+                throw new ArgumentNullException(nameof(dbHelper));
 
-            _context = context;
+            _dbHelper = dbHelper;
         }
 
         #endregion
@@ -55,13 +56,24 @@
             if (entityType == null)
                 throw new ArgumentNullException(nameof(entityType));
 
-            if (!ExecuteTableExists(entityType))
+            // Performs some schema validation for this type (either creates the table if does not exist, or validates)
+            if (!_schemaValidationTypeMapping.ContainsKey(entityType))
             {
-                ExecuteTableCreate(entityType);
-            }
-            else
-            {
-                ExecuteTableValidate(entityType);
+                try
+                {
+                    if (!ExecuteTableExists(entityType))
+                    {
+                        ExecuteTableCreate(entityType);
+                    }
+                    else
+                    {
+                        ExecuteTableValidate(entityType);
+                    }
+                }
+                finally
+                {
+                    _schemaValidationTypeMapping[entityType] = true;
+                }
             }
         }
 
@@ -104,13 +116,24 @@
             if (entityType == null)
                 throw new ArgumentNullException(nameof(entityType));
 
-            if (!await ExecuteTableExistsAsync(entityType, cancellationToken))
+            // Performs some schema validation for this type (either creates the table if does not exist, or validates)
+            if (!_schemaValidationTypeMapping.ContainsKey(entityType))
             {
-                await ExecuteTableCreateAsync(entityType, cancellationToken);
-            }
-            else
-            {
-                await ExecuteTableValidateAsync(entityType, cancellationToken);
+                try
+                {
+                    if (!await ExecuteTableExistsAsync(entityType, cancellationToken))
+                    {
+                        await ExecuteTableCreateAsync(entityType, cancellationToken);
+                    }
+                    else
+                    {
+                        await ExecuteTableValidateAsync(entityType, cancellationToken);
+                    }
+                }
+                finally
+                {
+                    _schemaValidationTypeMapping[entityType] = true;
+                }
             }
         }
 
@@ -161,7 +184,7 @@
             var sql = @"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @tableName";
             var parameters = new Dictionary<string, object> { { "@tableName", tableName } };
 
-            using (var reader = _context.ExecuteReader(sql, parameters))
+            using (var reader = _dbHelper.ExecuteReader(sql, parameters))
             {
                 var hasRows = false;
 
@@ -240,7 +263,7 @@
                 var propertyInfo = propertiesMapping[columnName];
 
                 // Property type
-                var columnDataType = MapToType(schemaTableColumn.DataType);
+                var columnDataType = DbHelper.MapToType(schemaTableColumn.DataType);
                 if (columnDataType != propertyInfo.PropertyType)
                     error["PropertyType_Mismatch"] = true;
 
@@ -327,7 +350,7 @@
             var sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName";
             var parameters = new Dictionary<string, object> { { "@tableName", tableName } };
 
-            return _context.ExecuteList<SchemaTableColumn>(sql, parameters)?.Result;
+            return _dbHelper.ExecuteList<SchemaTableColumn>(sql, parameters)?.Result;
         }
 
         private async Task<IEnumerable<SchemaTableColumn>> GetSchemaTableColumnsAsync(string tableName, CancellationToken cancellationToken)
@@ -335,7 +358,7 @@
             var sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName";
             var parameters = new Dictionary<string, object> { { "@tableName", tableName } };
 
-            return (await _context.ExecuteListAsync<SchemaTableColumn>(sql, parameters, cancellationToken))?.Result;
+            return (await _dbHelper.ExecuteListAsync<SchemaTableColumn>(sql, parameters, cancellationToken))?.Result;
         }
 
         private Dictionary<string, string> GetSchemaTableColumnConstraintsMapping(string tableName, string[] columns)
@@ -362,11 +385,11 @@
 
             try
             {
-                return _context.ExecuteDictionary<string, string>(sql, parameters)?.Result;
+                return _dbHelper.ExecuteDictionary<string, string>(sql, parameters)?.Result;
             }
             catch (Exception ex)
             {
-                _context.Logger.Error(ex);
+                _dbHelper.Logger.Error(ex);
 
                 return null;
             }
@@ -381,7 +404,7 @@
             {
                 if (!ExecuteTableExists(item.Key))
                 {
-                    _context.ExecuteNonQuery(item.Value);
+                    _dbHelper.ExecuteNonQuery(item.Value);
                 }
             }
         }
@@ -395,7 +418,7 @@
             {
                 if (!await ExecuteTableExistsAsync(item.Key, cancellationToken: cancellationToken))
                 {
-                    await _context.ExecuteNonQueryAsync(item.Value, cancellationToken: cancellationToken);
+                    await _dbHelper.ExecuteNonQueryAsync(item.Value, cancellationToken: cancellationToken);
                 }
             }
         }
@@ -541,7 +564,7 @@
                 sb.Append($"{item.Key} ");
 
                 // Type
-                var sqlType = MapToSqlDbType(item.Value.PropertyType).ToString().ToLowerInvariant();
+                var sqlType = DbHelper.MapToSqlDbType(item.Value.PropertyType).ToString().ToLowerInvariant();
 
                 if (item.Value.PropertyType == typeof(string))
                 {
@@ -661,7 +684,7 @@
             var sql = @"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @tableName";
             var parameters = new Dictionary<string, object> { { "@tableName", tableName } };
 
-            using (var reader = await _context.ExecuteReaderAsync(sql, parameters, cancellationToken))
+            using (var reader = await _dbHelper.ExecuteReaderAsync(sql, parameters, cancellationToken))
             {
                 var hasRows = false;
 
@@ -674,101 +697,6 @@
 
                 return hasRows;
             }
-        }
-
-        private static SqlDbType MapToSqlDbType(string sqlDataType)
-        {
-            return (SqlDbType)Enum.Parse(typeof(SqlDbType), sqlDataType, true);
-        }
-
-        private static Type MapToType(string sqlDataType)
-        {
-            return MapToType(MapToSqlDbType(sqlDataType));
-        }
-
-        private static Type MapToType(SqlDbType sqlType)
-        {
-            switch (sqlType)
-            {
-                case SqlDbType.BigInt:
-                    return typeof(long);
-                case SqlDbType.Binary:
-                case SqlDbType.Image:
-                case SqlDbType.Timestamp:
-                case SqlDbType.VarBinary:
-                    return typeof(byte[]);
-                case SqlDbType.Bit:
-                    return typeof(bool);
-                case SqlDbType.Char:
-                case SqlDbType.NChar:
-                case SqlDbType.NText:
-                case SqlDbType.NVarChar:
-                case SqlDbType.Text:
-                case SqlDbType.VarChar:
-                case SqlDbType.Xml:
-                    return typeof(string);
-                case SqlDbType.DateTime:
-                case SqlDbType.SmallDateTime:
-                case SqlDbType.Date:
-                case SqlDbType.Time:
-                case SqlDbType.DateTime2:
-                    return typeof(DateTime);
-                case SqlDbType.Decimal:
-                case SqlDbType.Money:
-                case SqlDbType.SmallMoney:
-                    return typeof(decimal);
-                case SqlDbType.Float:
-                    return typeof(double);
-                case SqlDbType.Int:
-                    return typeof(int);
-                case SqlDbType.Real:
-                    return typeof(float?);
-                case SqlDbType.UniqueIdentifier:
-                    return typeof(Guid);
-                case SqlDbType.SmallInt:
-                    return typeof(short);
-                case SqlDbType.TinyInt:
-                    return typeof(byte);
-                case SqlDbType.Variant:
-                case SqlDbType.Udt:
-                    return typeof(object);
-                case SqlDbType.Structured:
-                    return typeof(DataTable);
-                case SqlDbType.DateTimeOffset:
-                    return typeof(DateTimeOffset?);
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(sqlType));
-            }
-        }
-
-        private static SqlDbType MapToSqlDbType(Type type)
-        {
-            var typeMap = new Dictionary<Type, SqlDbType>
-            {
-                [typeof(string)] = SqlDbType.NVarChar,
-                [typeof(char[])] = SqlDbType.NVarChar,
-                [typeof(byte)] = SqlDbType.TinyInt,
-                [typeof(short)] = SqlDbType.SmallInt,
-                [typeof(int)] = SqlDbType.Int,
-                [typeof(long)] = SqlDbType.BigInt,
-                [typeof(byte[])] = SqlDbType.Image,
-                [typeof(bool)] = SqlDbType.Bit,
-                [typeof(DateTime)] = SqlDbType.DateTime2,
-                [typeof(DateTimeOffset)] = SqlDbType.DateTimeOffset,
-                [typeof(decimal)] = SqlDbType.Money,
-                [typeof(float)] = SqlDbType.Real,
-                [typeof(double)] = SqlDbType.Float,
-                [typeof(TimeSpan)] = SqlDbType.Time
-            };
-
-            type = Nullable.GetUnderlyingType(type) ?? type;
-
-            if (typeMap.ContainsKey(type))
-            {
-                return typeMap[type];
-            }
-
-            throw new ArgumentException($"{type.FullName} is not a supported .NET class");
         }
 
         #endregion
