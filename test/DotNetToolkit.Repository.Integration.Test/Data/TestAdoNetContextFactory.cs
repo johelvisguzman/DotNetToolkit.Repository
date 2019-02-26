@@ -6,9 +6,14 @@
 
     public class TestAdoNetContextFactory
     {
+        internal static AdoNetRepositoryContextFactory Create(DbConnection existingConnection)
+        {
+            return new AdoNetRepositoryContextFactory(existingConnection);
+        }
+
         internal static AdoNetRepositoryContextFactory Create()
         {
-            return new AdoNetRepositoryContextFactory(CreateConnection());
+            return Create(CreateConnection());
         }
 
         public static DbConnection CreateConnection()
