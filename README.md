@@ -9,6 +9,9 @@
 
 An abstraction of the data layer and handling common data access functionality.
 
+## How do I get started?
+If you want to use DotNetToolkit.Repository for the first time, the [Getting Started](https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Getting-Started) guide will help you.
+
 ## Packages
 
 | Package | NuGet Stable  | Downloads | MyGet |
