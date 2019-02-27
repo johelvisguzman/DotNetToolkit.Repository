@@ -6,6 +6,7 @@
     using Logging;
     using Mapper;
     using System;
+    using System.Linq;
 
     /// <summary>
     /// Represents a builder used to create or modify options for a repository.
@@ -23,12 +24,22 @@
         /// <summary>
         /// Gets a value indicating whether any options have been configured.
         /// </summary>
-        public virtual bool IsConfigured { get { return Options.IsConfigured; } }
+        public virtual bool IsConfigured
+        {
+            get
+            {
+                return Options.ContextFactory != null ||
+                       Options.LoggerProvider != null ||
+                       Options.CachingProvider != null ||
+                       Options.MapperProvider != null ||
+                       Options.Interceptors.Any();
+            }
+        }
 
         /// <summary>
         /// Gets the options being configured.
         /// </summary>
-        public virtual RepositoryOptions Options { get { return _options; } }
+        public virtual IRepositoryOptions Options { get { return _options; } }
 
         #endregion
 

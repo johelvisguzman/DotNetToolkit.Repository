@@ -22,8 +22,9 @@
         [Fact]
         public void CacheDisabled()
         {
-            var options = BuildOptions(ContextProviderType.AdoNet)
-                .With(NullCacheProvider.Instance);
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.AdoNet)
+                .UseCachingProvider(NullCacheProvider.Instance)
+                .Options;
 
             var repo = new Repository<Customer>(options);
 

@@ -12,7 +12,7 @@
     /// <summary>
     /// An implementation of <see cref="IRepositoryOptions" />.
     /// </summary>
-    public class RepositoryOptions : IRepositoryOptions
+    internal class RepositoryOptions : IRepositoryOptions
     {
         #region Fields
 
@@ -29,17 +29,17 @@
         /// <summary>
         /// Gets the configured interceptors.
         /// </summary>
-        public virtual IReadOnlyDictionary<Type, Lazy<IRepositoryInterceptor>> Interceptors { get { return _interceptors; } }
+        public IReadOnlyDictionary<Type, Lazy<IRepositoryInterceptor>> Interceptors { get { return _interceptors; } }
 
         /// <summary>
         /// Gets the configured logger provider.
         /// </summary>
-        public virtual ILoggerProvider LoggerProvider { get { return _loggerProvider; } }
+        public ILoggerProvider LoggerProvider { get { return _loggerProvider; } }
 
         /// <summary>
         /// Gets the configured caching provider.
         /// </summary>
-        public virtual ICacheProvider CachingProvider { get { return _cachingProvider; } }
+        public ICacheProvider CachingProvider { get { return _cachingProvider; } }
 
         /// <summary>
         /// Gets the configured mapper provider.
@@ -49,22 +49,7 @@
         /// <summary>
         /// Gets the configured internal context factory.
         /// </summary>
-        public virtual IRepositoryContextFactory ContextFactory { get { return _contextFactory; } }
-
-        /// <summary>
-        /// Gets a value indicating whether any options have been configured.
-        /// </summary>
-        public virtual bool IsConfigured
-        {
-            get
-            {
-                return ContextFactory != null ||
-                       LoggerProvider != null ||
-                       CachingProvider != null ||
-                       MapperProvider != null ||
-                       Interceptors.Any();
-            }
-        }
+        public IRepositoryContextFactory ContextFactory { get { return _contextFactory; } }
 
         #endregion
 
@@ -104,17 +89,13 @@
             return new RepositoryOptions(this);
         }
 
-        #endregion
-
-        #region Internal Methods
-
         /// <summary>
         /// Returns the option instance with a configured interceptor.
         /// </summary>
         /// <param name="underlyingType">The type of interceptor.</param>
         /// <param name="interceptorFactory">The interceptor factory.</param>
         /// <returns>The same option instance.</returns>
-        internal RepositoryOptions With(Type underlyingType, Func<IRepositoryInterceptor> interceptorFactory)
+        public RepositoryOptions With(Type underlyingType, Func<IRepositoryInterceptor> interceptorFactory)
         {
             if (underlyingType == null)
                 throw new ArgumentNullException(nameof(underlyingType));
@@ -137,7 +118,7 @@
         /// </summary>
         /// <param name="contextFactory">The context factory.</param>
         /// <returns>The same option instance.</returns>
-        internal RepositoryOptions With(IRepositoryContextFactory contextFactory)
+        public RepositoryOptions With(IRepositoryContextFactory contextFactory)
         {
             if (contextFactory == null)
                 throw new ArgumentNullException(nameof(contextFactory));
@@ -152,7 +133,7 @@
         /// </summary>
         /// <param name="loggerProvider">The logger factory.</param>
         /// <returns>The same option instance.</returns>
-        internal RepositoryOptions With(ILoggerProvider loggerProvider)
+        public RepositoryOptions With(ILoggerProvider loggerProvider)
         {
             if (loggerProvider == null)
                 throw new ArgumentNullException(nameof(loggerProvider));
@@ -167,7 +148,7 @@
         /// </summary>
         /// <param name="cacheProvider">The caching provider.</param>
         /// <returns>The same option instance.</returns>
-        internal RepositoryOptions With(ICacheProvider cacheProvider)
+        public RepositoryOptions With(ICacheProvider cacheProvider)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -182,7 +163,7 @@
         /// </summary>
         /// <param name="mapperProvider">The entity mapper provider.</param>
         /// <returns>The same option instance.</returns>
-        internal RepositoryOptions With(IMapperProvider mapperProvider)
+        public RepositoryOptions With(IMapperProvider mapperProvider)
         {
             if (mapperProvider == null)
                 throw new ArgumentNullException(nameof(mapperProvider));
