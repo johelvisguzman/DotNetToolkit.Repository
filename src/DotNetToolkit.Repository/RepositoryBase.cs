@@ -109,8 +109,8 @@
         {
             Logger.Debug("Executing QueryResult [ Method = Find ]");
 
-            QueryResult<TEntity> Getter() =>
-                InterceptError<QueryResult<TEntity>>(
+            IQueryResult<TEntity> Getter() =>
+                InterceptError<IQueryResult<TEntity>>(
                     () => Context.Find<TEntity>(fetchStrategy, key1, key2, key3));
 
             var queryResult = CacheEnabled
@@ -175,8 +175,8 @@
         {
             Logger.Debug("Executing QueryResult [ Method = FindAsync ]");
 
-            Task<QueryResult<TEntity>> Getter() =>
-                InterceptErrorAsync<QueryResult<TEntity>>(
+            Task<IQueryResult<TEntity>> Getter() =>
+                InterceptErrorAsync<IQueryResult<TEntity>>(
                     () => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2, key3));
 
             var queryResult = CacheEnabled
@@ -315,8 +315,8 @@
         {
             Logger.Debug("Executing QueryResult [ Method = Find ]");
 
-            QueryResult<TEntity> Getter() =>
-                InterceptError<QueryResult<TEntity>>(
+            IQueryResult<TEntity> Getter() =>
+                InterceptError<IQueryResult<TEntity>>(
                     () => Context.Find<TEntity>(fetchStrategy, key1, key2));
 
             var queryResult = CacheEnabled
@@ -377,8 +377,8 @@
         {
             Logger.Debug("Executing QueryResult [ Method = FindAsync ]");
 
-            Task<QueryResult<TEntity>> Getter() =>
-                InterceptErrorAsync<QueryResult<TEntity>>(
+            Task<IQueryResult<TEntity>> Getter() =>
+                InterceptErrorAsync<IQueryResult<TEntity>>(
                     () => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2));
 
             var queryResult = CacheEnabled
@@ -510,8 +510,8 @@
         {
             Logger.Debug("Executing QueryResult [ Method = Find ]");
 
-            QueryResult<TEntity> Getter() =>
-                InterceptError<QueryResult<TEntity>>(
+            IQueryResult<TEntity> Getter() =>
+                InterceptError<IQueryResult<TEntity>>(
                     () => Context.Find<TEntity>(fetchStrategy, key));
 
             var queryResult = CacheEnabled
@@ -568,8 +568,8 @@
         {
             Logger.Debug("Executing QueryResult [ Method = FindAsync ]");
 
-            Task<QueryResult<TEntity>> Getter() =>
-                InterceptErrorAsync<QueryResult<TEntity>>(
+            Task<IQueryResult<TEntity>> Getter() =>
+                InterceptErrorAsync<IQueryResult<TEntity>>(
                     () => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key));
 
             var queryResult = CacheEnabled
@@ -754,8 +754,8 @@
 
             Logger.Debug("Executing QueryResult [ Method = ExecuteSqlQuery ]");
 
-            QueryResult<IEnumerable<TEntity>> Getter() =>
-                InterceptError<QueryResult<IEnumerable<TEntity>>>(
+            IQueryResult<IEnumerable<TEntity>> Getter() =>
+                InterceptError<IQueryResult<IEnumerable<TEntity>>>(
                     () => Context.ExecuteSqlQuery(sql, cmdType, parameters, projector));
 
             var queryResult = CacheEnabled
@@ -846,8 +846,8 @@
 
             Logger.Debug("Executing QueryResult [ Method = ExecutesSqlCommand ]");
 
-            QueryResult<int> Getter() =>
-                InterceptError<QueryResult<int>>(
+            IQueryResult<int> Getter() =>
+                InterceptError<IQueryResult<int>>(
                     () => Context.ExecuteSqlCommand(sql, cmdType, parameters));
 
             var queryResult = CacheEnabled
@@ -906,8 +906,8 @@
 
             Logger.Debug("Executing QueryResult [ Method = ExecuteSqlQueryAsync ]");
 
-            Task<QueryResult<IEnumerable<TEntity>>> Getter() =>
-                InterceptErrorAsync<QueryResult<IEnumerable<TEntity>>>(
+            Task<IQueryResult<IEnumerable<TEntity>>> Getter() =>
+                InterceptErrorAsync<IQueryResult<IEnumerable<TEntity>>>(
                     () => Context.AsAsync().ExecuteSqlQueryAsync(sql, cmdType, parameters, projector, cancellationToken));
 
             var queryResult = CacheEnabled
@@ -1004,8 +1004,8 @@
 
             Logger.Debug("Executing QueryResult [ Method = ExecuteSqlCommandAsync ]");
 
-            Task<QueryResult<int>> Getter() =>
-                InterceptErrorAsync<QueryResult<int>>(
+            Task<IQueryResult<int>> Getter() =>
+                InterceptErrorAsync<IQueryResult<int>>(
                     () => Context.AsAsync().ExecuteSqlCommandAsync(sql, cmdType, parameters, cancellationToken));
 
             var queryResult = CacheEnabled
@@ -1292,8 +1292,8 @@
         {
             Logger.Debug("Executing QueryResult [ Method = Find ]");
 
-            QueryResult<TResult> Getter() =>
-                InterceptError<QueryResult<TResult>>(
+            IQueryResult<TResult> Getter() =>
+                InterceptError<IQueryResult<TResult>>(
                     () => Context.Find<TEntity, TResult>(options, selector));
 
             var queryResult = CacheEnabled
@@ -1367,8 +1367,8 @@
         {
             Logger.Debug("Executing QueryResult [ Method = FindAll ]");
 
-            QueryResult<IEnumerable<TResult>> Getter() =>
-                InterceptError<QueryResult<IEnumerable<TResult>>>(
+            IQueryResult<IEnumerable<TResult>> Getter() =>
+                InterceptError<IQueryResult<IEnumerable<TResult>>>(
                     () => Context.FindAll<TEntity, TResult>(options, selector));
 
             var queryResult = CacheEnabled
@@ -1439,8 +1439,8 @@
         {
             Logger.Debug("Executing QueryResult [ Method = Count ]");
 
-            QueryResult<int> Getter() =>
-                InterceptError<QueryResult<int>>(
+            IQueryResult<int> Getter() =>
+                InterceptError<IQueryResult<int>>(
                     () => Context.Count<TEntity>(options));
 
             var queryResult = CacheEnabled
@@ -1503,8 +1503,8 @@
         {
             Logger.Debug("Executing QueryResult [ Method = ToDictionary ]");
 
-            QueryResult<Dictionary<TDictionaryKey, TElement>> Getter() =>
-                InterceptError<QueryResult<Dictionary<TDictionaryKey, TElement>>>(
+            IQueryResult<Dictionary<TDictionaryKey, TElement>> Getter() =>
+                InterceptError<IQueryResult<Dictionary<TDictionaryKey, TElement>>>(
                     () => Context.ToDictionary(options, keySelector, elementSelector));
 
             var queryResult = CacheEnabled
@@ -1544,8 +1544,8 @@
         {
             Logger.Debug("Executing QueryResult [ Method = GroupBy ]");
 
-            QueryResult<IEnumerable<TResult>> Getter() =>
-                InterceptError<QueryResult<IEnumerable<TResult>>>(
+            IQueryResult<IEnumerable<TResult>> Getter() =>
+                InterceptError<IQueryResult<IEnumerable<TResult>>>(
                     () => Context.GroupBy(options, keySelector, resultSelector));
 
             var queryResult = CacheEnabled
@@ -1843,8 +1843,8 @@
         {
             Logger.Debug("Executing QueryResult [ Method = FindAsync ]");
 
-            Task<QueryResult<TResult>> Getter() =>
-                InterceptErrorAsync<QueryResult<TResult>>(
+            Task<IQueryResult<TResult>> Getter() =>
+                InterceptErrorAsync<IQueryResult<TResult>>(
                     () => Context.AsAsync().FindAsync<TEntity, TResult>(options, selector, cancellationToken));
 
             var queryResult = CacheEnabled
@@ -1924,8 +1924,8 @@
         {
             Logger.Debug("Executing QueryResult [ Method = FindAllAsync ]");
 
-            Task<QueryResult<IEnumerable<TResult>>> Getter() =>
-                InterceptErrorAsync<QueryResult<IEnumerable<TResult>>>(
+            Task<IQueryResult<IEnumerable<TResult>>> Getter() =>
+                InterceptErrorAsync<IQueryResult<IEnumerable<TResult>>>(
                     () => Context.AsAsync().FindAllAsync<TEntity, TResult>(options, selector, cancellationToken));
 
             var queryResult = CacheEnabled
@@ -2001,8 +2001,8 @@
         {
             Logger.Debug("Executing QueryResult [ Method = CountAsync ]");
 
-            Task<QueryResult<int>> Getter() =>
-                InterceptErrorAsync<QueryResult<int>>(
+            Task<IQueryResult<int>> Getter() =>
+                InterceptErrorAsync<IQueryResult<int>>(
                     () => Context.AsAsync().CountAsync<TEntity>(options, cancellationToken));
 
             var queryResult = CacheEnabled
@@ -2069,8 +2069,8 @@
         {
             Logger.Debug("Executing QueryResult [ Method = ToDictionaryAsync ]");
 
-            Task<QueryResult<Dictionary<TDictionaryKey, TElement>>> Getter() =>
-                InterceptErrorAsync<QueryResult<Dictionary<TDictionaryKey, TElement>>>(
+            Task<IQueryResult<Dictionary<TDictionaryKey, TElement>>> Getter() =>
+                InterceptErrorAsync<IQueryResult<Dictionary<TDictionaryKey, TElement>>>(
                     () => Context.AsAsync().ToDictionaryAsync(options, keySelector, elementSelector, cancellationToken));
 
             var queryResult = CacheEnabled
@@ -2113,8 +2113,8 @@
         {
             Logger.Debug("Executing QueryResult [ Method = GroupByAsync ]");
 
-            Task<QueryResult<IEnumerable<TResult>>> Getter() =>
-                InterceptErrorAsync<QueryResult<IEnumerable<TResult>>>(
+            Task<IQueryResult<IEnumerable<TResult>>> Getter() =>
+                InterceptErrorAsync<IQueryResult<IEnumerable<TResult>>>(
                     () => Context.AsAsync().GroupByAsync(options, keySelector, resultSelector, cancellationToken));
 
             var queryResult = CacheEnabled

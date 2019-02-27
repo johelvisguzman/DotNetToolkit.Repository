@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Queries
 {
-
     /// <summary>
     /// Represents a query result.
     /// </summary>
@@ -13,8 +12,13 @@
         TResult Result { get; }
 
         /// <summary>
+        /// Gets a value indicating whether the executed query result was retrieved from the cache.
+        /// </summary>
+        bool CacheUsed { get; }
+
+        /// <summary>
         /// Gets the total number of records.
         /// </summary>
-        int? Total { get; }
+        int Total { get; }
     }
 }

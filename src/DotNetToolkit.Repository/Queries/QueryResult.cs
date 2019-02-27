@@ -4,7 +4,7 @@
     /// An implementation of <see cref="IQueryResult{TResult}" />.
     /// </summary>
     /// <typeparam name="TResult">The type of the result.</typeparam>
-    public class QueryResult<TResult> : IQueryResult<TResult>
+    internal class QueryResult<TResult> : IQueryResult<TResult>
     {
         private readonly TResult _result;
 
@@ -19,7 +19,7 @@
         /// <summary>
         /// Gets the total number of records.
         /// </summary>
-        public int? Total { get; }
+        public int Total { get; }
 
         /// <summary>
         /// Gets a value indicating whether the executed query has a result.
