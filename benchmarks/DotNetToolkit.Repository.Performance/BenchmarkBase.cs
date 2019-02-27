@@ -24,7 +24,7 @@
             _connection.Open();
         }
 
-        protected RepositoryOptions BuildOptions(ContextProviderType provider)
+        protected IRepositoryOptions BuildOptions(ContextProviderType provider)
         {
             switch (provider)
             {

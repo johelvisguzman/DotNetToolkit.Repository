@@ -107,7 +107,7 @@
         /// <return>The entity found.</return>
         public TEntity Find(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
-            Logger.Debug("Executing QueryResult [ Method = Find ]");
+            Logger.Debug($"Executing [ Method = Find, CacheEnabled = {CacheEnabled} ]");
 
             IQueryResult<TEntity> Getter() =>
                 InterceptError<IQueryResult<TEntity>>(
@@ -119,7 +119,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = Find, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed [ Method = Find, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult.Result;
         }
@@ -173,7 +173,7 @@
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         public async Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            Logger.Debug("Executing QueryResult [ Method = FindAsync ]");
+            Logger.Debug($"Executing [ Method = FindAsync, CacheEnabled = {CacheEnabled} ]");
 
             Task<IQueryResult<TEntity>> Getter() =>
                 InterceptErrorAsync<IQueryResult<TEntity>>(
@@ -185,7 +185,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = FindAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed [ Method = FindAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult.Result;
         }
@@ -313,7 +313,7 @@
         /// <return>The entity found.</return>
         public TEntity Find(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
-            Logger.Debug("Executing QueryResult [ Method = Find ]");
+            Logger.Debug($"Executing [ Method = Find, CacheEnabled = {CacheEnabled} ]");
 
             IQueryResult<TEntity> Getter() =>
                 InterceptError<IQueryResult<TEntity>>(
@@ -325,7 +325,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = Find, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed [ Method = Find, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult.Result;
         }
@@ -375,7 +375,7 @@
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         public async Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            Logger.Debug("Executing QueryResult [ Method = FindAsync ]");
+            Logger.Debug($"Executing [ Method = FindAsync, CacheEnabled = {CacheEnabled} ]");
 
             Task<IQueryResult<TEntity>> Getter() =>
                 InterceptErrorAsync<IQueryResult<TEntity>>(
@@ -387,7 +387,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = FindAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed [ Method = FindAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult.Result;
         }
@@ -508,7 +508,7 @@
         /// <return>The entity found.</return>
         public TEntity Find(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
-            Logger.Debug("Executing QueryResult [ Method = Find ]");
+            Logger.Debug($"Executing [ Method = Find, CacheEnabled = {CacheEnabled} ]");
 
             IQueryResult<TEntity> Getter() =>
                 InterceptError<IQueryResult<TEntity>>(
@@ -520,7 +520,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = Find, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed [ Method = Find, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult.Result;
         }
@@ -566,7 +566,7 @@
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         public async Task<TEntity> FindAsync(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            Logger.Debug("Executing QueryResult [ Method = FindAsync ]");
+            Logger.Debug($"Executing [ Method = FindAsync, CacheEnabled = {CacheEnabled} ]");
 
             Task<IQueryResult<TEntity>> Getter() =>
                 InterceptErrorAsync<IQueryResult<TEntity>>(
@@ -578,7 +578,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = FindAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed [ Method = FindAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult.Result;
         }
@@ -752,7 +752,7 @@
                     throw new ArgumentNullException(nameof(projector));
             });
 
-            Logger.Debug("Executing QueryResult [ Method = ExecuteSqlQuery ]");
+            Logger.Debug($"Executing [ Method = ExecuteSqlQuery, CacheEnabled = {CacheEnabled} ]");
 
             IQueryResult<IEnumerable<TEntity>> Getter() =>
                 InterceptError<IQueryResult<IEnumerable<TEntity>>>(
@@ -766,7 +766,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = ExecuteSqlQuery, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed [ Method = ExecuteSqlQuery, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult.Result;
         }
@@ -844,7 +844,7 @@
                     throw new ArgumentNullException(nameof(sql));
             });
 
-            Logger.Debug("Executing QueryResult [ Method = ExecutesSqlCommand ]");
+            Logger.Debug($"Executing [ Method = ExecutesSqlCommand, CacheEnabled = {CacheEnabled} ]");
 
             IQueryResult<int> Getter() =>
                 InterceptError<IQueryResult<int>>(
@@ -858,7 +858,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = ExecutesSqlCommand, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed [ Method = ExecutesSqlCommand, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult.Result;
         }
@@ -904,7 +904,7 @@
                     throw new ArgumentNullException(nameof(projector));
             });
 
-            Logger.Debug("Executing QueryResult [ Method = ExecuteSqlQueryAsync ]");
+            Logger.Debug($"Executing [ Method = ExecuteSqlQueryAsync, CacheEnabled = {CacheEnabled} ]");
 
             Task<IQueryResult<IEnumerable<TEntity>>> Getter() =>
                 InterceptErrorAsync<IQueryResult<IEnumerable<TEntity>>>(
@@ -918,7 +918,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = ExecuteSqlQueryAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed [ Method = ExecuteSqlQueryAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult.Result;
         }
@@ -1002,7 +1002,7 @@
                     throw new ArgumentNullException(nameof(sql));
             });
 
-            Logger.Debug("Executing QueryResult [ Method = ExecuteSqlCommandAsync ]");
+            Logger.Debug($"Executing [ Method = ExecuteSqlCommandAsync, CacheEnabled = {CacheEnabled} ]");
 
             Task<IQueryResult<int>> Getter() =>
                 InterceptErrorAsync<IQueryResult<int>>(
@@ -1016,7 +1016,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = ExecuteSqlCommandAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed [ Method = ExecuteSqlCommandAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult.Result;
         }
@@ -1290,7 +1290,7 @@
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public TResult Find<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
-            Logger.Debug("Executing QueryResult [ Method = Find ]");
+            Logger.Debug($"Executing [ Method = Find, CacheEnabled = {CacheEnabled} ]");
 
             IQueryResult<TResult> Getter() =>
                 InterceptError<IQueryResult<TResult>>(
@@ -1302,7 +1302,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = Find, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed [ Method = Find, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult.Result;
         }
@@ -1365,7 +1365,7 @@
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public IQueryResult<IEnumerable<TResult>> FindAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
-            Logger.Debug("Executing QueryResult [ Method = FindAll ]");
+            Logger.Debug($"Executing [ Method = FindAll, CacheEnabled = {CacheEnabled} ]");
 
             IQueryResult<IEnumerable<TResult>> Getter() =>
                 InterceptError<IQueryResult<IEnumerable<TResult>>>(
@@ -1377,7 +1377,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = FindAll, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed [ Method = FindAll, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult;
         }
@@ -1437,7 +1437,7 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public int Count(IQueryOptions<TEntity> options)
         {
-            Logger.Debug("Executing QueryResult [ Method = Count ]");
+            Logger.Debug($"Executing [ Method = Count, CacheEnabled = {CacheEnabled} ]");
 
             IQueryResult<int> Getter() =>
                 InterceptError<IQueryResult<int>>(
@@ -1449,7 +1449,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = Count, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed [ Method = Count, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult.Result;
         }
@@ -1501,7 +1501,7 @@
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public IQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
-            Logger.Debug("Executing QueryResult [ Method = ToDictionary ]");
+            Logger.Debug($"Executing [ Method = ToDictionary, CacheEnabled = {CacheEnabled} ]");
 
             IQueryResult<Dictionary<TDictionaryKey, TElement>> Getter() =>
                 InterceptError<IQueryResult<Dictionary<TDictionaryKey, TElement>>>(
@@ -1513,7 +1513,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = ToDictionary, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed [ Method = ToDictionary, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult;
         }
@@ -1542,7 +1542,7 @@
         /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public IQueryResult<IEnumerable<TResult>> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
-            Logger.Debug("Executing QueryResult [ Method = GroupBy ]");
+            Logger.Debug($"Executing [ Method = GroupBy, CacheEnabled = {CacheEnabled} ]");
 
             IQueryResult<IEnumerable<TResult>> Getter() =>
                 InterceptError<IQueryResult<IEnumerable<TResult>>>(
@@ -1554,7 +1554,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = GroupBy, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed [ Method = GroupBy, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult;
         }
@@ -1841,7 +1841,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public async Task<TResult> FindAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            Logger.Debug("Executing QueryResult [ Method = FindAsync ]");
+            Logger.Debug($"Executing [ Method = FindAsync, CacheEnabled = {CacheEnabled} ]");
 
             Task<IQueryResult<TResult>> Getter() =>
                 InterceptErrorAsync<IQueryResult<TResult>>(
@@ -1853,7 +1853,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = FindAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed [ Method = FindAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult.Result;
         }
@@ -1922,7 +1922,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public async Task<IQueryResult<IEnumerable<TResult>>> FindAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            Logger.Debug("Executing QueryResult [ Method = FindAllAsync ]");
+            Logger.Debug($"Executing [ Method = FindAllAsync, CacheEnabled = {CacheEnabled} ]");
 
             Task<IQueryResult<IEnumerable<TResult>>> Getter() =>
                 InterceptErrorAsync<IQueryResult<IEnumerable<TResult>>>(
@@ -1934,7 +1934,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = FindAllAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed [ Method = FindAllAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult;
         }
@@ -1999,7 +1999,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public async Task<int> CountAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            Logger.Debug("Executing QueryResult [ Method = CountAsync ]");
+            Logger.Debug($"Executing [ Method = CountAsync, CacheEnabled = {CacheEnabled} ]");
 
             Task<IQueryResult<int>> Getter() =>
                 InterceptErrorAsync<IQueryResult<int>>(
@@ -2011,7 +2011,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = CountAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed [ Method = CountAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult.Result;
         }
@@ -2067,7 +2067,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public async Task<IQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            Logger.Debug("Executing QueryResult [ Method = ToDictionaryAsync ]");
+            Logger.Debug($"Executing [ Method = ToDictionaryAsync, CacheEnabled = {CacheEnabled} ]");
 
             Task<IQueryResult<Dictionary<TDictionaryKey, TElement>>> Getter() =>
                 InterceptErrorAsync<IQueryResult<Dictionary<TDictionaryKey, TElement>>>(
@@ -2079,7 +2079,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = ToDictionaryAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed [ Method = ToDictionaryAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult;
 
@@ -2111,7 +2111,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public async Task<IQueryResult<IEnumerable<TResult>>> GroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            Logger.Debug("Executing QueryResult [ Method = GroupByAsync ]");
+            Logger.Debug($"Executing [ Method = GroupByAsync, CacheEnabled = {CacheEnabled} ]");
 
             Task<IQueryResult<IEnumerable<TResult>>> Getter() =>
                 InterceptErrorAsync<IQueryResult<IEnumerable<TResult>>>(
@@ -2123,7 +2123,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed QueryResult [ Method = GroupByAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            Logger.Debug($"Executed [ Method = GroupByAsync, CacheUsed = {queryResult.CacheUsed} ]");
 
             return queryResult;
         }
