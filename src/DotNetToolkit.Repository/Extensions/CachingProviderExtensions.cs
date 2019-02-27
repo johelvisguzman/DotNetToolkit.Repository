@@ -19,7 +19,7 @@
     /// </summary>
     internal static class CachingProviderExtensions
     {
-        private static bool TryGetValue<T>(this ICacheProvider cacheProvider, string key, out QueryResult<T> value)
+        private static bool TryGetValue<T>(this ICacheProvider cacheProvider, string key, out IQueryResult<T> value)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -29,19 +29,22 @@
 
             if (!cacheProvider.Cache.TryGetValue(key, out var obj))
             {
-                value = default(QueryResult<T>);
+                value = default(IQueryResult<T>);
 
                 return false;
             }
 
-            value = (QueryResult<T>)obj;
+            var oldValue = (IQueryResult<T>)obj;
 
-            value.CacheUsed = true;
+            value = new QueryResult<T>(oldValue.Result, oldValue.Total)
+            {
+                CacheUsed = true
+            };
 
             return true;
         }
 
-        private static void SetValue<T>(this ICacheProvider cacheProvider, string hashedKey, string key, QueryResult<T> value, CacheItemPriority priority, TimeSpan cacheExpiration, ILogger logger)
+        private static void SetValue<T>(this ICacheProvider cacheProvider, string hashedKey, string key, IQueryResult<T> value, CacheItemPriority priority, TimeSpan cacheExpiration, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -70,7 +73,7 @@
                 reason => logger.Debug($"Cache for '{hashedKey}' has expired. Evicting from cache for '{reason}'"));
         }
 
-        private static QueryResult<T> GetOrSet<T>(this ICacheProvider cacheProvider, string key, Func<QueryResult<T>> getter, CacheItemPriority priority, TimeSpan cacheExpiration, ILogger logger)
+        private static IQueryResult<T> GetOrSet<T>(this ICacheProvider cacheProvider, string key, Func<IQueryResult<T>> getter, CacheItemPriority priority, TimeSpan cacheExpiration, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -99,17 +102,17 @@
             return value;
         }
 
-        private static QueryResult<T> GetOrSet<T>(this ICacheProvider cacheProvider, string key, Func<QueryResult<T>> getter, TimeSpan cacheExpiration, ILogger logger)
+        private static IQueryResult<T> GetOrSet<T>(this ICacheProvider cacheProvider, string key, Func<IQueryResult<T>> getter, TimeSpan cacheExpiration, ILogger logger)
         {
             return cacheProvider.GetOrSet<T>(key, getter, CacheItemPriority.Normal, cacheExpiration, logger);
         }
 
-        private static QueryResult<T> GetOrSet<T>(this ICacheProvider cacheProvider, string key, Func<QueryResult<T>> getter, ILogger logger)
+        private static IQueryResult<T> GetOrSet<T>(this ICacheProvider cacheProvider, string key, Func<IQueryResult<T>> getter, ILogger logger)
         {
             return cacheProvider.GetOrSet<T>(key, getter, cacheProvider.CacheExpiration ?? TimeSpan.Zero, logger);
         }
 
-        public static QueryResult<IEnumerable<T>> GetOrSetExecuteSqlQuery<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, object[] parameters, Func<IDataReader, T> projector, Func<QueryResult<IEnumerable<T>>> getter, ILogger logger)
+        public static IQueryResult<IEnumerable<T>> GetOrSetExecuteSqlQuery<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, object[] parameters, Func<IDataReader, T> projector, Func<IQueryResult<IEnumerable<T>>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -125,7 +128,7 @@
             return cacheProvider.GetOrSet<IEnumerable<T>>(key, getter, logger);
         }
 
-        public static QueryResult<int> GetOrSetExecuteSqlCommand<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, object[] parameters, Func<QueryResult<int>> getter, ILogger logger)
+        public static IQueryResult<int> GetOrSetExecuteSqlCommand<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, object[] parameters, Func<IQueryResult<int>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -137,8 +140,8 @@
 
             return cacheProvider.GetOrSet<int>(key, getter, logger);
         }
-        
-        public static QueryResult<T> GetOrSet<T>(this ICacheProvider cacheProvider, object[] keys, IFetchQueryStrategy<T> fetchStrategy, Func<QueryResult<T>> getter, ILogger logger)
+
+        public static IQueryResult<T> GetOrSet<T>(this ICacheProvider cacheProvider, object[] keys, IFetchQueryStrategy<T> fetchStrategy, Func<IQueryResult<T>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -151,7 +154,7 @@
             return cacheProvider.GetOrSet<T>(key, getter, logger);
         }
 
-        public static QueryResult<TResult> GetOrSet<T, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TResult>> selector, Func<QueryResult<TResult>> getter, ILogger logger)
+        public static IQueryResult<TResult> GetOrSet<T, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TResult>> selector, Func<IQueryResult<TResult>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -167,7 +170,7 @@
             return cacheProvider.GetOrSet<TResult>(key, getter, logger);
         }
 
-        public static QueryResult<IEnumerable<TResult>> GetOrSetAll<T, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TResult>> selector, Func<QueryResult<IEnumerable<TResult>>> getter, ILogger logger)
+        public static IQueryResult<IEnumerable<TResult>> GetOrSetAll<T, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TResult>> selector, Func<IQueryResult<IEnumerable<TResult>>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -180,7 +183,7 @@
             return cacheProvider.GetOrSet<IEnumerable<TResult>>(key, getter, logger);
         }
 
-        public static QueryResult<int> GetOrSetCount<T>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Func<QueryResult<int>> getter, ILogger logger)
+        public static IQueryResult<int> GetOrSetCount<T>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Func<IQueryResult<int>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -190,7 +193,7 @@
             return cacheProvider.GetOrSet<int>(key, getter, logger);
         }
 
-        public static QueryResult<Dictionary<TDictionaryKey, TElement>> GetOrSetDictionary<T, TDictionaryKey, TElement>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TDictionaryKey>> keySelector, Expression<Func<T, TElement>> elementSelector, Func<QueryResult<Dictionary<TDictionaryKey, TElement>>> getter, ILogger logger)
+        public static IQueryResult<Dictionary<TDictionaryKey, TElement>> GetOrSetDictionary<T, TDictionaryKey, TElement>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TDictionaryKey>> keySelector, Expression<Func<T, TElement>> elementSelector, Func<IQueryResult<Dictionary<TDictionaryKey, TElement>>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -205,8 +208,8 @@
 
             return cacheProvider.GetOrSet<Dictionary<TDictionaryKey, TElement>>(key, getter, logger);
         }
-        
-        public static QueryResult<IEnumerable<TResult>> GetOrSetGroup<T, TGroupKey, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<T>, TResult>> resultSelector, Func<QueryResult<IEnumerable<TResult>>> getter, ILogger logger)
+
+        public static IQueryResult<IEnumerable<TResult>> GetOrSetGroup<T, TGroupKey, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<T>, TResult>> resultSelector, Func<IQueryResult<IEnumerable<TResult>>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -222,7 +225,7 @@
             return cacheProvider.GetOrSet<IEnumerable<TResult>>(key, getter, logger);
         }
 
-        private static async Task<QueryResult<T>> GetOrSetAsync<T>(this ICacheProvider cacheProvider, string key, Func<Task<QueryResult<T>>> getter, CacheItemPriority priority, TimeSpan cacheExpiration, ILogger logger)
+        private static async Task<IQueryResult<T>> GetOrSetAsync<T>(this ICacheProvider cacheProvider, string key, Func<Task<IQueryResult<T>>> getter, CacheItemPriority priority, TimeSpan cacheExpiration, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -251,17 +254,17 @@
             return value;
         }
 
-        private static Task<QueryResult<T>> GetOrSetAsync<T>(this ICacheProvider cacheProvider, string key, Func<Task<QueryResult<T>>> getter, TimeSpan cacheExpiration, ILogger logger)
+        private static Task<IQueryResult<T>> GetOrSetAsync<T>(this ICacheProvider cacheProvider, string key, Func<Task<IQueryResult<T>>> getter, TimeSpan cacheExpiration, ILogger logger)
         {
             return cacheProvider.GetOrSetAsync<T>(key, getter, CacheItemPriority.Normal, cacheExpiration, logger);
         }
 
-        private static Task<QueryResult<T>> GetOrSetAsync<T>(this ICacheProvider cacheProvider, string key, Func<Task<QueryResult<T>>> getter, ILogger logger)
+        private static Task<IQueryResult<T>> GetOrSetAsync<T>(this ICacheProvider cacheProvider, string key, Func<Task<IQueryResult<T>>> getter, ILogger logger)
         {
             return cacheProvider.GetOrSetAsync<T>(key, getter, cacheProvider.CacheExpiration ?? TimeSpan.Zero, logger);
         }
 
-        public static Task<QueryResult<IEnumerable<T>>> GetOrSetExecuteSqlQueryAsync<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, object[] parameters, Func<IDataReader, T> projector, Func<Task<QueryResult<IEnumerable<T>>>> getter, ILogger logger)
+        public static Task<IQueryResult<IEnumerable<T>>> GetOrSetExecuteSqlQueryAsync<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, object[] parameters, Func<IDataReader, T> projector, Func<Task<IQueryResult<IEnumerable<T>>>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -277,7 +280,7 @@
             return cacheProvider.GetOrSetAsync<IEnumerable<T>>(key, getter, logger);
         }
 
-        public static Task<QueryResult<int>> GetOrSetExecuteSqlCommandAsync<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, object[] parameters, Func<Task<QueryResult<int>>> getter, ILogger logger)
+        public static Task<IQueryResult<int>> GetOrSetExecuteSqlCommandAsync<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, object[] parameters, Func<Task<IQueryResult<int>>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -290,7 +293,7 @@
             return cacheProvider.GetOrSetAsync<int>(key, getter, logger);
         }
 
-        public static Task<QueryResult<T>> GetOrSetAsync<T>(this ICacheProvider cacheProvider, object[] keys, IFetchQueryStrategy<T> fetchStrategy, Func<Task<QueryResult<T>>> getter, ILogger logger)
+        public static Task<IQueryResult<T>> GetOrSetAsync<T>(this ICacheProvider cacheProvider, object[] keys, IFetchQueryStrategy<T> fetchStrategy, Func<Task<IQueryResult<T>>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -303,7 +306,7 @@
             return cacheProvider.GetOrSetAsync<T>(key, getter, logger);
         }
 
-        public static Task<QueryResult<TResult>> GetOrSetAsync<T, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TResult>> selector, Func<Task<QueryResult<TResult>>> getter, ILogger logger)
+        public static Task<IQueryResult<TResult>> GetOrSetAsync<T, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TResult>> selector, Func<Task<IQueryResult<TResult>>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -319,7 +322,7 @@
             return cacheProvider.GetOrSetAsync<TResult>(key, getter, logger);
         }
 
-        public static Task<QueryResult<IEnumerable<TResult>>> GetOrSetAllAsync<T, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TResult>> selector, Func<Task<QueryResult<IEnumerable<TResult>>>> getter, ILogger logger)
+        public static Task<IQueryResult<IEnumerable<TResult>>> GetOrSetAllAsync<T, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TResult>> selector, Func<Task<IQueryResult<IEnumerable<TResult>>>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -332,7 +335,7 @@
             return cacheProvider.GetOrSetAsync<IEnumerable<TResult>>(key, getter, logger);
         }
 
-        public static Task<QueryResult<int>> GetOrSetCountAsync<T>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Func<Task<QueryResult<int>>> getter, ILogger logger)
+        public static Task<IQueryResult<int>> GetOrSetCountAsync<T>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Func<Task<IQueryResult<int>>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -342,7 +345,7 @@
             return cacheProvider.GetOrSetAsync<int>(key, getter, logger);
         }
 
-        public static Task<QueryResult<Dictionary<TDictionaryKey, TElement>>> GetOrSetDictionaryAsync<T, TDictionaryKey, TElement>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TDictionaryKey>> keySelector, Expression<Func<T, TElement>> elementSelector, Func<Task<QueryResult<Dictionary<TDictionaryKey, TElement>>>> getter, ILogger logger)
+        public static Task<IQueryResult<Dictionary<TDictionaryKey, TElement>>> GetOrSetDictionaryAsync<T, TDictionaryKey, TElement>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TDictionaryKey>> keySelector, Expression<Func<T, TElement>> elementSelector, Func<Task<IQueryResult<Dictionary<TDictionaryKey, TElement>>>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -358,7 +361,7 @@
             return cacheProvider.GetOrSetAsync<Dictionary<TDictionaryKey, TElement>>(key, getter, logger);
         }
 
-        public static Task<QueryResult<IEnumerable<TResult>>> GetOrSetGroupAsync<T, TGroupKey, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<T>, TResult>> resultSelector, Func<Task<QueryResult<IEnumerable<TResult>>>> getter, ILogger logger)
+        public static Task<IQueryResult<IEnumerable<TResult>>> GetOrSetGroupAsync<T, TGroupKey, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<T>, TResult>> resultSelector, Func<Task<IQueryResult<IEnumerable<TResult>>>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));

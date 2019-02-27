@@ -8,7 +8,7 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AdoNetRepositoryContext.EntitySet" /> class.
+        /// Initializes a new instance of the <see cref="EntitySet" /> class.
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="state">The state.</param>

@@ -194,7 +194,7 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public override QueryResult<IEnumerable<TEntity>> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector)
+        public override IQueryResult<IEnumerable<TEntity>> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector)
         {
             throw new NotSupportedException(Resources.QueryExecutionNotSupported);
         }
@@ -205,7 +205,7 @@
         /// <param name="sql">The SQL query string.</param>
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
-        public override QueryResult<int> ExecuteSqlCommand(string sql, CommandType cmdType, object[] parameters)
+        public override IQueryResult<int> ExecuteSqlCommand(string sql, CommandType cmdType, object[] parameters)
         {
             throw new NotSupportedException(Resources.QueryExecutionNotSupported);
         }
@@ -328,7 +328,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <returns>The entity found in the repository.</returns>
-        public override QueryResult<TEntity> Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues)
+        public override IQueryResult<TEntity> Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues)
         {
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));
