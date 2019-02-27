@@ -6,7 +6,7 @@
 
     /// <summary>
     /// Encapsulate predicates and business rules that can be chainged together using boolean logic.
-    /// <see cref="https://en.wikipedia.org/wiki/Specification_pattern" />
+    /// <see href="https://en.wikipedia.org/wiki/Specification_pattern" />
     /// </summary>
     /// <typeparam name="T">The type pf the entity.</typeparam>
     public interface ISpecificationQueryStrategy<T>

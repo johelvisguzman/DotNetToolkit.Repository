@@ -732,7 +732,7 @@
         #endregion
 
         #region Public Methods
-        
+
         /// <summary>
         /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
         /// </summary>
@@ -883,7 +883,7 @@
         {
             return ExecuteSqlCommand(sql, (object[])null);
         }
-        
+
         /// <summary>
         /// Asynchronously creates raw SQL query that is executed directly in the database and returns a collection of entities.
         /// </summary>
