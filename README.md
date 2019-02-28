@@ -27,8 +27,7 @@ If you want to use DotNetToolkit.Repository for the first time, the [Getting Sta
 
 ## Features
 
-The DotNetToolkit.Repository includes basic repository objects for handling the data access layer.
-The DotNetToolkit.Repository also supports Specifications, FetchStrategies, Services and Transactions (Unit Of Work).
+The DotNetToolkit.Repository includes basic repository objects for handling the data access layer. The DotNetToolkit.Repository also supports Specifications, FetchStrategies, Services and Transactions (Unit Of Work), caching, and even allows for logging activities within the repositories. The ability for executing raw SQL queries is even allowed.
 
 ## Project Wiki
 
