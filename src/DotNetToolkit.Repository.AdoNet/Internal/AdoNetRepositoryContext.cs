@@ -140,6 +140,21 @@
             }
         }
 
+        private static Dictionary<string, object> ConvertToParametersDictionary(object[] parameters)
+        {
+            var parametersDict = new Dictionary<string, object>();
+
+            if (parameters != null && parameters.Any())
+            {
+                for (var i = 0; i < parameters.Length; i++)
+                {
+                    parametersDict.Add($"@p{i}", parameters[i]);
+                }
+            }
+
+            return parametersDict;
+        }
+
         #endregion
 
         #region Implementation of IRepositoryContext
@@ -160,15 +175,7 @@
             if (projector == null)
                 throw new ArgumentNullException(nameof(projector));
 
-            var parametersDict = new Dictionary<string, object>();
-
-            if (parameters != null && parameters.Any())
-            {
-                for (var i = 0; i < parameters.Length; i++)
-                {
-                    parametersDict.Add($"@p{i}", parameters[i]);
-                }
-            }
+            var parametersDict = ConvertToParametersDictionary(parameters);
 
             using (var reader = _dbHelper.ExecuteReader(sql, cmdType, parametersDict))
             {
@@ -195,19 +202,11 @@
             if (sql == null)
                 throw new ArgumentNullException(nameof(sql));
 
-            var parametersDict = new Dictionary<string, object>();
-
-            if (parameters != null && parameters.Any())
-            {
-                for (var i = 0; i < parameters.Length; i++)
-                {
-                    parametersDict.Add($"@p{i}", parameters[i]);
-                }
-            }
+            var parametersDict = ConvertToParametersDictionary(parameters);
 
             return new QueryResult<int>(_dbHelper.ExecuteNonQuery(sql, cmdType, parametersDict));
         }
-
+        
         /// <summary>
         /// Begins the transaction.
         /// </summary>

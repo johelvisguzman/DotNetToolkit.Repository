@@ -55,7 +55,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <summary>
         /// Gets a value indicating whether this instance owns the connection.
         /// </summary>
-        public bool OwnsConnection { get { return _ownsConnection && _underlyingTransaction != null; } }
+        public bool OwnsConnection { get { return _ownsConnection && _underlyingTransaction == null; } }
 
         /// <summary>
         /// Gets the repository context logger.
