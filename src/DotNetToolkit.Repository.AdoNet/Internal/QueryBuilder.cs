@@ -27,17 +27,19 @@
             var entityType = entity.GetType();
             var tableName = entityType.GetTableName();
 
-            var primaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-            var primaryKeyColumnName = primaryKeyPropertyInfo.GetColumnName();
-
+            var primaryKeyPropertyInfos = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).ToList();
             var properties = GetProperties(entityType);
 
-            var isIdentity = primaryKeyPropertyInfo.IsColumnIdentity();
-
-            if (isIdentity)
+            if (primaryKeyPropertyInfos.Count == 1)
             {
-                properties.Remove(primaryKeyColumnName);
-                parameters.Add($"@{primaryKeyColumnName}", primaryKeyPropertyInfo.GetValue(entity, null));
+                var primaryKeyPropertyInfo = primaryKeyPropertyInfos.First();
+                var primaryKeyColumnName = primaryKeyPropertyInfo.GetColumnName();
+
+                if (primaryKeyPropertyInfo.IsColumnIdentity())
+                {
+                    properties.Remove(primaryKeyColumnName);
+                    parameters.Add($"@{primaryKeyColumnName}", primaryKeyPropertyInfo.GetValue(entity, null));
+                }
             }
 
             foreach (var x in properties)
@@ -61,22 +63,26 @@
             var entityType = entity.GetType();
             var tableName = entityType.GetTableName();
 
-            var primaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-            var primaryKeyColumnName = primaryKeyPropertyInfo.GetColumnName();
-
-            var isIdentity = primaryKeyPropertyInfo.IsColumnIdentity();
-
+            var primaryKeyPropertyInfos = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).ToList();
+            var primaryKeyColumnNamesDict = primaryKeyPropertyInfos.ToDictionary(x => x.GetColumnName(), x => x);
             var properties = GetProperties(entityType);
 
-            if (isIdentity)
+            if (primaryKeyPropertyInfos.Count == 1)
             {
-                properties.Remove(primaryKeyColumnName);
-                parameters.Add($"@{primaryKeyColumnName}", primaryKeyPropertyInfo.GetValue(entity, null));
+                var primaryKeyPropertyInfo = primaryKeyPropertyInfos.First();
+                var primaryKeyColumnName = primaryKeyPropertyInfo.GetColumnName();
+
+                if (primaryKeyPropertyInfo.IsColumnIdentity())
+                {
+                    properties.Remove(primaryKeyColumnName);
+                    parameters.Add($"@{primaryKeyColumnName}", primaryKeyPropertyInfo.GetValue(entity, null));
+                }
             }
 
             var values = string.Join($",{Environment.NewLine}\t", properties.Select(x => x.Key + " = " + $"@{x.Key}"));
+            var condition = string.Join(" AND ", primaryKeyColumnNamesDict.Select(kv => "(" + kv.Key + " = @" + kv.Key + ")"));
 
-            sql = $"UPDATE [{tableName}]{Environment.NewLine}SET {values}{Environment.NewLine}WHERE {primaryKeyColumnName} = @{primaryKeyColumnName}";
+            sql = $"UPDATE [{tableName}]{Environment.NewLine}SET {values}{Environment.NewLine}WHERE ({condition})";
 
             foreach (var x in properties)
             {
@@ -94,12 +100,18 @@
             var entityType = entity.GetType();
             var tableName = entityType.GetTableName();
 
-            var primaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-            var primaryKeyColumnName = primaryKeyPropertyInfo.GetColumnName();
+            var primaryKeyColumnNamesDict = PrimaryKeyConventionHelper
+                .GetPrimaryKeyPropertyInfos(entityType)
+                .ToDictionary(x => x.GetColumnName(), x => x);
 
-            sql = $"DELETE FROM [{tableName}]{Environment.NewLine}WHERE {primaryKeyColumnName} = @{primaryKeyColumnName}";
+            var condition = string.Join(" AND ", primaryKeyColumnNamesDict.Select(kv => "(" + kv.Key + " = @" + kv.Key + ")"));
 
-            parameters.Add($"@{primaryKeyColumnName}", primaryKeyPropertyInfo.GetValue(entity, null));
+            sql = $"DELETE FROM [{tableName}]{Environment.NewLine}WHERE ({condition})";
+
+            foreach (var x in primaryKeyColumnNamesDict)
+            {
+                parameters.Add($"@{x.Key}", x.Value.GetValue(entity, null));
+            }
         }
 
         public static void CreateSelectStatement<T>(IQueryOptions<T> options, string defaultSelect, out string sql, out Dictionary<string, object> parameters, out Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, out Func<string, Type> getTableTypeByColumnAliasCallback)
