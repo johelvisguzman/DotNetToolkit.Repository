@@ -62,8 +62,8 @@
 
             var key = GetDataReaderPrimaryKey<T>(r);
 
-            var entity = _entityDataReaderMapping.ContainsKey(key) 
-                ? (T)_entityDataReaderMapping[key] 
+            var entity = _entityDataReaderMapping.ContainsKey(key)
+                ? (T)_entityDataReaderMapping[key]
                 : Activator.CreateInstance<T>();
 
             var entityType = typeof(T);
@@ -179,14 +179,12 @@
 
             switch (primaryKeyValues.Count)
             {
-                case 3:
-                    return Tuple.Create(primaryKeyValues[0], primaryKeyValues[1], primaryKeyValues[2]);
-                case 2:
-                    return Tuple.Create(primaryKeyValues[0], primaryKeyValues[1]);
+                case 0:
+                    return Guid.NewGuid();
                 case 1:
                     return primaryKeyValues[0];
                 default:
-                    return Guid.NewGuid();
+                    return string.Join(":", primaryKeyValues);
             }
         }
 
