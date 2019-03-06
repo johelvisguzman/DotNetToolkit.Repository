@@ -117,10 +117,7 @@
                 if (!store.ContainsKey(entityType))
                     return 1;
 
-                var key = store[entityType]
-                    .Select(x => propertyInfo.GetValue(x.Value, null))
-                    .OrderByDescending(x => x)
-                    .FirstOrDefault();
+                var key = store[entityType].Keys.LastOrDefault();
 
                 return Convert.ToInt32(key) + 1;
             }
@@ -141,28 +138,7 @@
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));
 
-            object key;
-
-            switch (keyValues.Length)
-            {
-                case 3:
-                {
-                    key = Tuple.Create(keyValues[0], keyValues[1], keyValues[2]);
-                    break;
-                }
-                case 2:
-                {
-                    key = Tuple.Create(keyValues[0], keyValues[1]);
-                    break;
-                }
-                default:
-                {
-                    key = keyValues[0];
-                    break;
-                }
-            }
-
-            return key;
+            return keyValues.Length == 1 ? keyValues[0] : string.Join(":", keyValues);
         }
 
         #endregion
