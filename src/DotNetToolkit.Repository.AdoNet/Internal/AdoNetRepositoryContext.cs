@@ -603,15 +603,7 @@
             if (projector == null)
                 throw new ArgumentNullException(nameof(projector));
 
-            var parametersDict = new Dictionary<string, object>();
-
-            if (parameters != null && parameters.Any())
-            {
-                for (var i = 0; i < parameters.Length; i++)
-                {
-                    parametersDict.Add($"@p{i}", parameters[i]);
-                }
-            }
+            var parametersDict = ConvertToParametersDictionary(parameters);
 
             using (var reader = await _dbHelper.ExecuteReaderAsync(sql, cmdType, parametersDict, cancellationToken))
             {
@@ -639,15 +631,7 @@
             if (sql == null)
                 throw new ArgumentNullException(nameof(sql));
 
-            var parametersDict = new Dictionary<string, object>();
-
-            if (parameters != null && parameters.Any())
-            {
-                for (var i = 0; i < parameters.Length; i++)
-                {
-                    parametersDict.Add($"@p{i}", parameters[i]);
-                }
-            }
+            var parametersDict = ConvertToParametersDictionary(parameters);
 
             return new QueryResult<int>(await _dbHelper.ExecuteNonQueryAsync(sql, cmdType, parametersDict, cancellationToken));
         }
