@@ -150,9 +150,9 @@
             if (keyTypes == null)
                 throw new ArgumentNullException(nameof(keyTypes));
 
-            var definedKeyInfos = GetPrimaryKeyPropertyInfos<TEntity>();
+            var definedKeyInfos = GetPrimaryKeyPropertyInfos<TEntity>().ToList();
 
-            if (definedKeyInfos.Count() > 1)
+            if (definedKeyInfos.Count > 1)
             {
                 var hasNoKeyOrdering = definedKeyInfos.Any(x =>
                 {
