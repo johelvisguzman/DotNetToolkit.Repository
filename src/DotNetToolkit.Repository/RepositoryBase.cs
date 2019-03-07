@@ -754,12 +754,14 @@
 
             Logger.Debug($"Executing [ Method = ExecuteSqlQuery, CacheEnabled = {CacheEnabled} ]");
 
+            var parametersDict = ConvertToParametersDictionary(parameters);
+
             IQueryResult<IEnumerable<TEntity>> Getter() =>
                 InterceptError<IQueryResult<IEnumerable<TEntity>>>(
-                    () => Context.ExecuteSqlQuery(sql, cmdType, parameters, projector));
+                    () => Context.ExecuteSqlQuery(sql, cmdType, parametersDict, projector));
 
             var queryResult = CacheEnabled
-                ? CacheProvider.GetOrSetExecuteSqlQuery<TEntity>(sql, cmdType, parameters, projector, Getter, Logger)
+                ? CacheProvider.GetOrSetExecuteSqlQuery<TEntity>(sql, cmdType, parametersDict, projector, Getter, Logger)
                 : Getter();
 
             IncrementCacheCounter(sql);
@@ -846,12 +848,14 @@
 
             Logger.Debug($"Executing [ Method = ExecutesSqlCommand, CacheEnabled = {CacheEnabled} ]");
 
+            var parametersDict = ConvertToParametersDictionary(parameters);
+
             IQueryResult<int> Getter() =>
                 InterceptError<IQueryResult<int>>(
-                    () => Context.ExecuteSqlCommand(sql, cmdType, parameters));
+                    () => Context.ExecuteSqlCommand(sql, cmdType, parametersDict));
 
             var queryResult = CacheEnabled
-                ? CacheProvider.GetOrSetExecuteSqlCommand<TEntity>(sql, cmdType, parameters, Getter, Logger)
+                ? CacheProvider.GetOrSetExecuteSqlCommand<TEntity>(sql, cmdType, parametersDict, Getter, Logger)
                 : Getter();
 
             IncrementCacheCounter(sql);
@@ -906,12 +910,14 @@
 
             Logger.Debug($"Executing [ Method = ExecuteSqlQueryAsync, CacheEnabled = {CacheEnabled} ]");
 
+            var parametersDict = ConvertToParametersDictionary(parameters);
+
             Task<IQueryResult<IEnumerable<TEntity>>> Getter() =>
                 InterceptErrorAsync<IQueryResult<IEnumerable<TEntity>>>(
-                    () => Context.AsAsync().ExecuteSqlQueryAsync(sql, cmdType, parameters, projector, cancellationToken));
+                    () => Context.AsAsync().ExecuteSqlQueryAsync(sql, cmdType, parametersDict, projector, cancellationToken));
 
             var queryResult = CacheEnabled
-                ? await CacheProvider.GetOrSetExecuteSqlQueryAsync<TEntity>(sql, cmdType, parameters, projector, Getter, Logger)
+                ? await CacheProvider.GetOrSetExecuteSqlQueryAsync<TEntity>(sql, cmdType, parametersDict, projector, Getter, Logger)
                 : await Getter();
 
             IncrementCacheCounter(sql);
@@ -1004,12 +1010,14 @@
 
             Logger.Debug($"Executing [ Method = ExecuteSqlCommandAsync, CacheEnabled = {CacheEnabled} ]");
 
+            var parametersDict = ConvertToParametersDictionary(parameters);
+
             Task<IQueryResult<int>> Getter() =>
                 InterceptErrorAsync<IQueryResult<int>>(
-                    () => Context.AsAsync().ExecuteSqlCommandAsync(sql, cmdType, parameters, cancellationToken));
+                    () => Context.AsAsync().ExecuteSqlCommandAsync(sql, cmdType, parametersDict, cancellationToken));
 
             var queryResult = CacheEnabled
-                ? await CacheProvider.GetOrSetExecuteSqlCommandAsync<TEntity>(sql, cmdType, parameters, Getter, Logger)
+                ? await CacheProvider.GetOrSetExecuteSqlCommandAsync<TEntity>(sql, cmdType, parametersDict, Getter, Logger)
                 : await Getter();
 
             IncrementCacheCounter(sql);
@@ -2266,6 +2274,21 @@
 
             if (canClearCache)
                 CacheProviderManager.IncrementCounter();
+        }
+
+        private static Dictionary<string, object> ConvertToParametersDictionary(object[] parameters)
+        {
+            var parametersDict = new Dictionary<string, object>();
+
+            if (parameters != null && parameters.Any())
+            {
+                for (var i = 0; i < parameters.Length; i++)
+                {
+                    parametersDict.Add($"@p{i}", parameters[i]);
+                }
+            }
+
+            return parametersDict;
         }
 
         #endregion

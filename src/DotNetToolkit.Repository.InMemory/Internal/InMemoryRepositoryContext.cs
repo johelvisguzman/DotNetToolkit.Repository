@@ -170,7 +170,7 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public override IQueryResult<IEnumerable<TEntity>> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector)
+        public override IQueryResult<IEnumerable<TEntity>> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector)
         {
             throw new NotSupportedException(Resources.QueryExecutionNotSupported);
         }
@@ -181,7 +181,7 @@
         /// <param name="sql">The SQL query string.</param>
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
-        public override IQueryResult<int> ExecuteSqlCommand(string sql, CommandType cmdType, object[] parameters)
+        public override IQueryResult<int> ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters)
         {
             throw new NotSupportedException(Resources.QueryExecutionNotSupported);
         }
@@ -201,7 +201,7 @@
         }
 
         /// <summary>
-        /// Tracks the specified entity in memory and will be inserted into the database when <see cref="SaveChanges" /> is called..
+        /// Tracks the specified entity in memory and will be inserted into the database when <see cref="SaveChanges" /> is called.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="entity">The entity.</param>
@@ -211,7 +211,7 @@
         }
 
         /// <summary>
-        /// Tracks the specified entity in memory and will be updated in the database when <see cref="SaveChanges" /> is called..
+        /// Tracks the specified entity in memory and will be updated in the database when <see cref="SaveChanges" /> is called.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="entity">The entity.</param>
@@ -221,7 +221,7 @@
         }
 
         /// <summary>
-        /// Tracks the specified entity in memory and will be removed from the database when <see cref="SaveChanges" /> is called..
+        /// Tracks the specified entity in memory and will be removed from the database when <see cref="SaveChanges" /> is called.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="entity">The entity.</param>
