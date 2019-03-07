@@ -1063,7 +1063,7 @@
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
 
-                Logger.Debug("Adding an entity to the repository");
+                Logger.Debug("Executing [ Method = Add ]");
 
                 Intercept(x => x.AddExecuting(entity));
 
@@ -1075,7 +1075,7 @@
 
                 CacheProviderManager.IncrementCounter();
 
-                Logger.Debug("Added an entity to the repository");
+                Logger.Debug("Executed [ Method = Add ]");
             });
         }
 
@@ -1090,7 +1090,7 @@
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
 
-                Logger.Debug("Adding a collection of entities to the repository");
+                Logger.Debug("Executing [ Method = Add ]");
 
                 foreach (var entity in entities)
                 {
@@ -1108,7 +1108,7 @@
 
                 CacheProviderManager.IncrementCounter();
 
-                Logger.Debug("Added a collection of entities to the repository");
+                Logger.Debug("Executed [ Method = Add ]");
             });
         }
 
@@ -1123,7 +1123,7 @@
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
 
-                Logger.Debug("Updating an entity in the repository");
+                Logger.Debug("Executing [ Method = Update ]");
 
                 Intercept(x => x.UpdateExecuting(entity));
 
@@ -1135,7 +1135,7 @@
 
                 CacheProviderManager.IncrementCounter();
 
-                Logger.Debug("Updated an entity in the repository");
+                Logger.Debug("Executed [ Method = Update ]");
             });
         }
 
@@ -1150,7 +1150,7 @@
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
 
-                Logger.Debug("Updating a collection of entities in the repository");
+                Logger.Debug("Executing [ Method = Update ]");
 
                 foreach (var entity in entities)
                 {
@@ -1168,7 +1168,7 @@
 
                 CacheProviderManager.IncrementCounter();
 
-                Logger.Debug("Updated a collection of entities in the repository");
+                Logger.Debug("Executed [ Method = Update ]");
             });
         }
 
@@ -1183,7 +1183,7 @@
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
 
-                Logger.Debug("Deleting an entity from the repository");
+                Logger.Debug("Executing [ Method = Delete ]");
 
                 Intercept(x => x.DeleteExecuting(entity));
 
@@ -1195,7 +1195,7 @@
 
                 CacheProviderManager.IncrementCounter();
 
-                Logger.Debug("Deleted an entity from the repository");
+                Logger.Debug("Executed [ Method = Delete ]");
             });
         }
 
@@ -1237,7 +1237,7 @@
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
 
-                Logger.Debug("Deleting a collection of entities from the repository");
+                Logger.Debug("Executing [ Method = Delete ]");
 
                 foreach (var entity in entities)
                 {
@@ -1255,7 +1255,7 @@
 
                 CacheProviderManager.IncrementCounter();
 
-                Logger.Debug("Deleted a collection of entities from the repository");
+                Logger.Debug("Executed [ Method = Delete ]");
             });
         }
 
@@ -1580,7 +1580,7 @@
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
 
-                Logger.Debug("Adding an entity to the repository");
+                Logger.Debug("Executing [ Method = AddAsync ]");
 
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -1594,7 +1594,7 @@
 
                 CacheProviderManager.IncrementCounter();
 
-                Logger.Debug("Added an entity to the repository");
+                Logger.Debug("Executed [ Method = AddAsync ]");
             });
         }
 
@@ -1611,7 +1611,7 @@
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
 
-                Logger.Debug("Adding a collection of entities to the repository");
+                Logger.Debug("Executing [ Method = AddAsync ]");
 
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -1631,7 +1631,7 @@
 
                 CacheProviderManager.IncrementCounter();
 
-                Logger.Debug("Added a collection of entities to the repository");
+                Logger.Debug("Executed [ Method = AddAsync ]");
             });
         }
 
@@ -1648,7 +1648,7 @@
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
 
-                Logger.Debug("Updating an entity in the repository");
+                Logger.Debug("Executing [ Method = UpdateAsync ]");
 
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -1662,7 +1662,7 @@
 
                 CacheProviderManager.IncrementCounter();
 
-                Logger.Debug("Updated an entity in the repository");
+                Logger.Debug("Executed [ Method = UpdateAsync ]");
             });
         }
 
@@ -1679,7 +1679,7 @@
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
 
-                Logger.Debug("Updating a collection of entities in the repository");
+                Logger.Debug("Executing [ Method = UpdateAsync ]");
 
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -1699,7 +1699,7 @@
 
                 CacheProviderManager.IncrementCounter();
 
-                Logger.Debug("Updated a collection of entities in the repository");
+                Logger.Debug("Executed [ Method = UpdateAsync ]");
             });
         }
 
@@ -1716,7 +1716,7 @@
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
 
-                Logger.Debug("Deleting an entity from the repository");
+                Logger.Debug("Executing [ Method = DeleteAsync ]");
 
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -1730,7 +1730,7 @@
 
                 CacheProviderManager.IncrementCounter();
 
-                Logger.Debug("Deleted an entity from the repository");
+                Logger.Debug("Executed [ Method = DeleteAsync ]");
             });
         }
 
@@ -1782,7 +1782,7 @@
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
 
-                Logger.Debug("Deleting a collection of entities from the repository");
+                Logger.Debug("Executing [ Method = DeleteAsync ]");
 
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -1802,7 +1802,7 @@
 
                 CacheProviderManager.IncrementCounter();
 
-                Logger.Debug("Deleted a collection of entities from the repository");
+                Logger.Debug("Executed [ Method = DeleteAsync ]");
             });
         }
 
