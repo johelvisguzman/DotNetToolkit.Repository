@@ -165,6 +165,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
 
             command.CommandText = cmdText;
             command.CommandType = cmdType;
+            command.Parameters.Clear();
             command.AddParameters(parameters);
 
             return command;

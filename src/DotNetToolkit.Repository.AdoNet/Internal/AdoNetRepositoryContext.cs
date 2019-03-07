@@ -3,6 +3,7 @@
     using Configuration;
     using Configuration.Conventions;
     using Configuration.Logging;
+    using Extensions;
     using Helpers;
     using Properties;
     using Queries;
@@ -140,21 +141,6 @@
             }
         }
 
-        private static Dictionary<string, object> ConvertToParametersDictionary(object[] parameters)
-        {
-            var parametersDict = new Dictionary<string, object>();
-
-            if (parameters != null && parameters.Any())
-            {
-                for (var i = 0; i < parameters.Length; i++)
-                {
-                    parametersDict.Add($"@p{i}", parameters[i]);
-                }
-            }
-
-            return parametersDict;
-        }
-
         #endregion
 
         #region Implementation of IRepositoryContext
@@ -167,7 +153,7 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public IQueryResult<IEnumerable<TEntity>> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector) where TEntity : class
+        public IQueryResult<IEnumerable<TEntity>> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector) where TEntity : class
         {
             if (sql == null)
                 throw new ArgumentNullException(nameof(sql));
@@ -175,9 +161,7 @@
             if (projector == null)
                 throw new ArgumentNullException(nameof(projector));
 
-            var parametersDict = ConvertToParametersDictionary(parameters);
-
-            using (var reader = _dbHelper.ExecuteReader(sql, cmdType, parametersDict))
+            using (var reader = _dbHelper.ExecuteReader(sql, cmdType, parameters))
             {
                 var list = new List<TEntity>();
 
@@ -197,16 +181,14 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <returns>The number of rows affected.</returns>
-        public IQueryResult<int> ExecuteSqlCommand(string sql, CommandType cmdType, object[] parameters)
+        public IQueryResult<int> ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters)
         {
             if (sql == null)
                 throw new ArgumentNullException(nameof(sql));
 
-            var parametersDict = ConvertToParametersDictionary(parameters);
-
-            return new QueryResult<int>(_dbHelper.ExecuteNonQuery(sql, cmdType, parametersDict));
+            return new QueryResult<int>(_dbHelper.ExecuteNonQuery(sql, cmdType, parameters));
         }
-        
+
         /// <summary>
         /// Begins the transaction.
         /// </summary>
@@ -595,7 +577,7 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
-        public async Task<IQueryResult<IEnumerable<TEntity>>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public async Task<IQueryResult<IEnumerable<TEntity>>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             if (sql == null)
                 throw new ArgumentNullException(nameof(sql));
@@ -603,9 +585,7 @@
             if (projector == null)
                 throw new ArgumentNullException(nameof(projector));
 
-            var parametersDict = ConvertToParametersDictionary(parameters);
-
-            using (var reader = await _dbHelper.ExecuteReaderAsync(sql, cmdType, parametersDict, cancellationToken))
+            using (var reader = await _dbHelper.ExecuteReaderAsync(sql, cmdType, parameters, cancellationToken))
             {
                 var list = new List<TEntity>();
 
@@ -626,14 +606,12 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
-        public async Task<IQueryResult<int>> ExecuteSqlCommandAsync(string sql, CommandType cmdType, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<IQueryResult<int>> ExecuteSqlCommandAsync(string sql, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken())
         {
             if (sql == null)
                 throw new ArgumentNullException(nameof(sql));
 
-            var parametersDict = ConvertToParametersDictionary(parameters);
-
-            return new QueryResult<int>(await _dbHelper.ExecuteNonQueryAsync(sql, cmdType, parametersDict, cancellationToken));
+            return new QueryResult<int>(await _dbHelper.ExecuteNonQueryAsync(sql, cmdType, parameters, cancellationToken));
         }
 
         /// <summary>

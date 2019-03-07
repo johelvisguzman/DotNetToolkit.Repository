@@ -112,7 +112,7 @@
             return cacheProvider.GetOrSet<T>(key, getter, cacheProvider.CacheExpiration ?? TimeSpan.Zero, logger);
         }
 
-        public static IQueryResult<IEnumerable<T>> GetOrSetExecuteSqlQuery<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, object[] parameters, Func<IDataReader, T> projector, Func<IQueryResult<IEnumerable<T>>> getter, ILogger logger)
+        public static IQueryResult<IEnumerable<T>> GetOrSetExecuteSqlQuery<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, T> projector, Func<IQueryResult<IEnumerable<T>>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -128,7 +128,7 @@
             return cacheProvider.GetOrSet<IEnumerable<T>>(key, getter, logger);
         }
 
-        public static IQueryResult<int> GetOrSetExecuteSqlCommand<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, object[] parameters, Func<IQueryResult<int>> getter, ILogger logger)
+        public static IQueryResult<int> GetOrSetExecuteSqlCommand<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IQueryResult<int>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -264,7 +264,7 @@
             return cacheProvider.GetOrSetAsync<T>(key, getter, cacheProvider.CacheExpiration ?? TimeSpan.Zero, logger);
         }
 
-        public static Task<IQueryResult<IEnumerable<T>>> GetOrSetExecuteSqlQueryAsync<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, object[] parameters, Func<IDataReader, T> projector, Func<Task<IQueryResult<IEnumerable<T>>>> getter, ILogger logger)
+        public static Task<IQueryResult<IEnumerable<T>>> GetOrSetExecuteSqlQueryAsync<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, T> projector, Func<Task<IQueryResult<IEnumerable<T>>>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -280,7 +280,7 @@
             return cacheProvider.GetOrSetAsync<IEnumerable<T>>(key, getter, logger);
         }
 
-        public static Task<IQueryResult<int>> GetOrSetExecuteSqlCommandAsync<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, object[] parameters, Func<Task<IQueryResult<int>>> getter, ILogger logger)
+        public static Task<IQueryResult<int>> GetOrSetExecuteSqlCommandAsync<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<Task<IQueryResult<int>>> getter, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -382,7 +382,7 @@
             return $"{CacheProviderManager.CachePrefix}_{CacheProviderManager.GlobalCachingPrefixCounter}_{key.ToSHA256()}";
         }
 
-        private static string FormatGetOrSetExecuteSqlQueryKey<T>(string sql, CommandType cmdType, object[] parameters)
+        private static string FormatGetOrSetExecuteSqlQueryKey<T>(string sql, CommandType cmdType, Dictionary<string, object> parameters)
         {
             var sb = new StringBuilder();
 
@@ -390,7 +390,7 @@
 
             if (parameters != null && parameters.Any())
             {
-                sb.Append($"\n\tParameters = {string.Join(", ", parameters.Select(x => x.ToString()).ToArray())},");
+                sb.Append($"\n\tParameters = {parameters.ToDebugString()},");
             }
 
             sb.Append($"\n\tCommandType = {cmdType} ]");
@@ -398,7 +398,7 @@
             return sb.ToString();
         }
 
-        private static string FormatGetOrSetExecuteSqlCommandKey<T>(string sql, CommandType cmdType, object[] parameters)
+        private static string FormatGetOrSetExecuteSqlCommandKey<T>(string sql, CommandType cmdType, Dictionary<string, object> parameters)
         {
             var sb = new StringBuilder();
 
@@ -406,7 +406,7 @@
 
             if (parameters != null && parameters.Any())
             {
-                sb.Append($"\n\tParameters = {string.Join(", ", parameters.Select(x => x.ToString()).ToArray())},");
+                sb.Append($"\n\tParameters = {parameters.ToDebugString()},");
             }
 
             sb.Append($"\n\tCommandType = {cmdType} ]");
