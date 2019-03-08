@@ -4,6 +4,7 @@
     using Extensions;
     using Helpers;
     using Logging;
+    using Properties;
     using Queries;
     using Queries.Strategies;
     using System;
@@ -49,7 +50,10 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public abstract IQueryResult<IEnumerable<TEntity>> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector) where TEntity : class;
+        public virtual IQueryResult<IEnumerable<TEntity>> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector) where TEntity : class
+        {
+            throw new NotSupportedException(Resources.QueryExecutionNotSupported);
+        }
 
         /// <summary>
         /// Creates a raw SQL query that is executed directly in the database.
@@ -58,13 +62,19 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <returns>The number of rows affected.</returns>
-        public abstract IQueryResult<int> ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters);
+        public virtual IQueryResult<int> ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters)
+        {
+            throw new NotSupportedException(Resources.QueryExecutionNotSupported);
+        }
 
         /// <summary>
         /// Begins the transaction.
         /// </summary>
         /// <returns>The transaction.</returns>
-        public abstract ITransactionManager BeginTransaction();
+        public virtual ITransactionManager BeginTransaction()
+        {
+            throw new NotSupportedException(Resources.TransactionNotSupported);
+        }
 
         /// <summary>
         /// Gets the current transaction.
@@ -123,8 +133,10 @@
                 throw new ArgumentNullException(nameof(keyValues));
 
             var options = new QueryOptions<TEntity>()
-                .Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
-                .Include(fetchStrategy);
+                .Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
+
+            if (fetchStrategy != null)
+                options = options.Include(fetchStrategy);
 
             return Find<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance);
         }

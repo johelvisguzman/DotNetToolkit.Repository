@@ -113,25 +113,17 @@
         [Fact]
         public void ThrowsIfBeginTransaction()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInMemoryDatabase(ignoreTransactionWarning: false)
-                .Options;
-
-            var ex = Assert.Throws<NotSupportedException>(() => new UnitOfWork(options));
-            Assert.Equal("The in-memory store does not support transactions.", ex.Message);
+            var ex = Assert.Throws<NotSupportedException>(() => new UnitOfWork(BuildOptions(ContextProviderType.InMemory)));
+            Assert.Equal("This context provider does not support transactions.", ex.Message);
         }
 
         [Fact]
         public void ThrowsIfExecutingQuery()
         {
-            var options = new RepositoryOptionsBuilder()
-                .UseInMemoryDatabase()
-                .Options;
-
-            var repo = new Repository<Customer>(options);
+            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
 
             var ex = Assert.Throws<NotSupportedException>(() => repo.ExecuteSqlCommand("SELECT * FROM Customers"));
-            Assert.Equal("The in-memory store does not support SQL query execution.", ex.Message);
+            Assert.Equal("This context provider does not support SQL query execution.", ex.Message);
         }
     }
 }

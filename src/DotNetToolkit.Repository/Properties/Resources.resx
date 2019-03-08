@@ -135,4 +135,19 @@
   <data name="UnableToDetermineCompositePrimaryKeyOrdering" xml:space="preserve">
     <value>Unable to determine composite primary key ordering for type '{0}'. Use the ColumnAttribute to specify an order for composite primary keys.</value>
   </data>
+  <data name="QueryExecutionNotSupported" xml:space="preserve">
+    <value>This context provider does not support SQL query execution.</value>
+  </data>
+  <data name="TransactionNotSupported" xml:space="preserve">
+    <value>This context provider does not support transactions.</value>
+  </data>
+  <data name="EntityAlreadyBeingTrackedInStore" xml:space="preserve">
+    <value>The instance of entity type '{0}' cannot be added to the store because another instance of this type with the same key is already being tracked.</value>
+  </data>
+  <data name="EntityKeyValueTypeInvalid" xml:space="preserve">
+    <value>The instance of entity type '{0}' cannot be added to the store because the key type '{1}' is an invalid primary key property type.</value>
+  </data>
+  <data name="EntityNotFoundInStore" xml:space="preserve">
+    <value>Attempted to update or delete an entity that does not exist in the store.</value>
+  </data>
 </root>

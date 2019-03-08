@@ -5,10 +5,13 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
     using Extensions.Microsoft.Caching.Memory;
     using Factories;
     using InMemory;
+    using Json;
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using Unity.Interception.Utilities;
     using Xunit;
     using Xunit.Abstractions;
 
@@ -60,12 +63,9 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
         {
             Providers()
                 .ToList()
+                .Where(x => !InMemoryProviders().Contains(x))
                 .ForEach(x =>
                 {
-                    // the in-memory context will not support transactions currently
-                    if (x == ContextProviderType.EntityFrameworkCore || x == ContextProviderType.InMemory)
-                        return;
-
                     action(new UnitOfWorkFactory(BuildOptions(x)));
                 });
         }
@@ -74,12 +74,9 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
         {
             Providers()
                 .ToList()
+                .Where(x => !InMemoryProviders().Contains(x))
                 .ForEach(async x =>
                 {
-                    // the in-memory context will not support transactions currently
-                    if (x == ContextProviderType.EntityFrameworkCore || x == ContextProviderType.InMemory)
-                        return;
-
                     // Perform test
                     var task = Record.ExceptionAsync(() => action(new UnitOfWorkFactory(BuildOptions(x))));
 
@@ -103,6 +100,12 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                     {
                         builder = new RepositoryOptionsBuilder();
                         builder.UseInMemoryDatabase(Guid.NewGuid().ToString());
+                        break;
+                    }
+                case ContextProviderType.Json:
+                    {
+                        builder = new RepositoryOptionsBuilder();
+                        builder.UseJsonDatabase(Path.GetTempPath() + Guid.NewGuid().ToString("N"));
                         break;
                     }
                 case ContextProviderType.AdoNet:
@@ -131,24 +134,34 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             return builder;
         }
 
-        protected IRepositoryOptions BuildOptions(ContextProviderType provider) 
+        protected IRepositoryOptions BuildOptions(ContextProviderType provider)
             => GetRepositoryOptionsBuilder(provider)
                 .Options;
+
+        protected static IEnumerable<ContextProviderType> InMemoryProviders()
+        {
+            return new[]
+            {
+                ContextProviderType.InMemory,
+                ContextProviderType.Json,
+                ContextProviderType.EntityFrameworkCore
+            };
+        }
 
         private IEnumerable<ContextProviderType> Providers()
         {
             return new[]
             {
-                ContextProviderType.InMemory,
                 ContextProviderType.AdoNet,
                 ContextProviderType.EntityFramework,
-                ContextProviderType.EntityFrameworkCore
-            };
+            }
+                .Union(InMemoryProviders());
         }
 
         public enum ContextProviderType
         {
             InMemory,
+            Json,
             AdoNet,
             EntityFramework,
             EntityFrameworkCore,

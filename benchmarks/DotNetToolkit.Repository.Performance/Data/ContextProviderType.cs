@@ -3,6 +3,7 @@
     public enum ContextProviderType
     {
         InMemory,
+        Json,
         AdoNet,
         EntityFramework,
         EntityFrameworkCore,

@@ -10,8 +10,8 @@
 
 namespace DotNetToolkit.Repository.Properties {
     using System.Reflection;
-
-
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -61,11 +61,38 @@ namespace DotNetToolkit.Repository.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; cannot be added to the store because another instance of this type with the same key is already being tracked..
+        /// </summary>
+        internal static string EntityAlreadyBeingTrackedInStore {
+            get {
+                return ResourceManager.GetString("EntityAlreadyBeingTrackedInStore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No entity found in the repository with the &apos;{0}&apos; key..
         /// </summary>
         internal static string EntityKeyNotFound {
             get {
                 return ResourceManager.GetString("EntityKeyNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; cannot be added to the store because the key type &apos;{1}&apos; is an invalid primary key property type..
+        /// </summary>
+        internal static string EntityKeyValueTypeInvalid {
+            get {
+                return ResourceManager.GetString("EntityKeyValueTypeInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Attempted to update or delete an entity that does not exist in the store..
+        /// </summary>
+        internal static string EntityNotFoundInStore {
+            get {
+                return ResourceManager.GetString("EntityNotFoundInStore", resourceCulture);
             }
         }
         
@@ -102,6 +129,24 @@ namespace DotNetToolkit.Repository.Properties {
         internal static string ForeignKeyAttributeOnPropertyNotFoundOnDependentType {
             get {
                 return ResourceManager.GetString("ForeignKeyAttributeOnPropertyNotFoundOnDependentType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This context provider does not support SQL query execution..
+        /// </summary>
+        internal static string QueryExecutionNotSupported {
+            get {
+                return ResourceManager.GetString("QueryExecutionNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This context provider does not support transactions..
+        /// </summary>
+        internal static string TransactionNotSupported {
+            get {
+                return ResourceManager.GetString("TransactionNotSupported", resourceCulture);
             }
         }
         

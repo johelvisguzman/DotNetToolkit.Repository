@@ -86,23 +86,5 @@ namespace DotNetToolkit.Repository.InMemory.Properties {
                 return ResourceManager.GetString("EntityNotFoundInStore", resourceCulture);
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The in-memory store does not support SQL query execution..
-        /// </summary>
-        internal static string QueryExecutionNotSupported {
-            get {
-                return ResourceManager.GetString("QueryExecutionNotSupported", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The in-memory store does not support transactions..
-        /// </summary>
-        internal static string TransactionNotSupported {
-            get {
-                return ResourceManager.GetString("TransactionNotSupported", resourceCulture);
-            }
-        }
     }
 }
