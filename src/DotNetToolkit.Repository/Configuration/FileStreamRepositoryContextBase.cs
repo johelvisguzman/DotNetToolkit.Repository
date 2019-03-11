@@ -131,7 +131,7 @@
         }
 
         internal void SaveFile<TEntity>(StreamWriter writer, IEnumerable entities)
-            => OnSaved<TEntity>(writer, entities.Cast<TEntity>());
+            => OnSaved<TEntity>(writer, entities.Cast<TEntity>().ToList());
 
         private static object GetPrimaryKeyValue(object obj)
         {

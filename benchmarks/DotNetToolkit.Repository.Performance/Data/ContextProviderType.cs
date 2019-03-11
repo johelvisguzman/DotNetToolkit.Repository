@@ -4,6 +4,7 @@
     {
         InMemory,
         Json,
+        Xml,
         AdoNet,
         EntityFramework,
         EntityFrameworkCore,

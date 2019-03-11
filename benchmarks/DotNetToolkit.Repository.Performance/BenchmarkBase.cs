@@ -71,6 +71,7 @@
             {
                 ContextProviderType.InMemory,
                 ContextProviderType.Json,
+                ContextProviderType.Xml,
                 ContextProviderType.AdoNet,
                 ContextProviderType.EntityFramework,
                 ContextProviderType.EntityFrameworkCore

@@ -12,6 +12,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
     using System.Linq;
     using System.Threading.Tasks;
     using Unity.Interception.Utilities;
+    using Xml;
     using Xunit;
     using Xunit.Abstractions;
 
@@ -108,6 +109,12 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                         builder.UseJsonDatabase(Path.GetTempPath() + Guid.NewGuid().ToString("N"));
                         break;
                     }
+                case ContextProviderType.Xml:
+                    {
+                        builder = new RepositoryOptionsBuilder();
+                        builder.UseXmlDatabase(Path.GetTempPath() + Guid.NewGuid().ToString("N"));
+                        break;
+                    }
                 case ContextProviderType.AdoNet:
                     {
                         builder = TestAdoNetOptionsBuilderFactory.Create();
@@ -144,6 +151,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             {
                 ContextProviderType.InMemory,
                 ContextProviderType.Json,
+                ContextProviderType.Xml,
                 ContextProviderType.EntityFrameworkCore
             };
         }
@@ -162,6 +170,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
         {
             InMemory,
             Json,
+            Xml,
             AdoNet,
             EntityFramework,
             EntityFrameworkCore,

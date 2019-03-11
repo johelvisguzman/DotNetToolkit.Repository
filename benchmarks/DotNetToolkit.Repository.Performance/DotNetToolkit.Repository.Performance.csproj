@@ -34,6 +34,7 @@
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.EntityFramework\DotNetToolkit.Repository.EntityFramework.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.InMemory\DotNetToolkit.Repository.InMemory.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Json\DotNetToolkit.Repository.Json.csproj" />
+    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Xml\DotNetToolkit.Repository.Xml.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository\DotNetToolkit.Repository.csproj" />
   </ItemGroup>
 
