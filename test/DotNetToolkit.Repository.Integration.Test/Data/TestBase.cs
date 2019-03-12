@@ -5,10 +5,14 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
     using Extensions.Microsoft.Caching.Memory;
     using Factories;
     using InMemory;
+    using Json;
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using Unity.Interception.Utilities;
+    using Xml;
     using Xunit;
     using Xunit.Abstractions;
 
@@ -24,7 +28,6 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
         protected void ForAllRepositoryFactories(Action<IRepositoryFactory> action, params ContextProviderType[] contextTypeExceptionList)
         {
             Providers()
-                .ToList()
                 .ForEach(x =>
                 {
                     if (contextTypeExceptionList != null && contextTypeExceptionList.Contains(x))
@@ -37,7 +40,6 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
         protected void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactory, Task> action, params ContextProviderType[] contextTypeExceptionList)
         {
             Providers()
-                .ToList()
                 .ForEach(async x =>
                 {
                     if (contextTypeExceptionList != null && contextTypeExceptionList.Contains(x))
@@ -59,13 +61,9 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
         protected void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory> action)
         {
             Providers()
-                .ToList()
+                .Where(SupportsTransactions)
                 .ForEach(x =>
                 {
-                    // the in-memory context will not support transactions currently
-                    if (x == ContextProviderType.EntityFrameworkCore || x == ContextProviderType.InMemory)
-                        return;
-
                     action(new UnitOfWorkFactory(BuildOptions(x)));
                 });
         }
@@ -73,13 +71,9 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
         protected void ForAllUnitOfWorkFactoriesAsync(Func<IUnitOfWorkFactory, Task> action)
         {
             Providers()
-                .ToList()
+                .Where(SupportsTransactions)
                 .ForEach(async x =>
                 {
-                    // the in-memory context will not support transactions currently
-                    if (x == ContextProviderType.EntityFrameworkCore || x == ContextProviderType.InMemory)
-                        return;
-
                     // Perform test
                     var task = Record.ExceptionAsync(() => action(new UnitOfWorkFactory(BuildOptions(x))));
 
@@ -93,6 +87,16 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                 });
         }
 
+        protected void ForAllFileStreamContextProviders(Action<IRepositoryOptions> action)
+        {
+            FileStreamProviders().Select(BuildOptions).ForEach(action);
+        }
+
+        private static bool SupportsTransactions(ContextProviderType x)
+        {
+            return SqlServerProviders().Contains(x);
+        }
+
         protected RepositoryOptionsBuilder GetRepositoryOptionsBuilder(ContextProviderType provider)
         {
             RepositoryOptionsBuilder builder;
@@ -103,6 +107,18 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                     {
                         builder = new RepositoryOptionsBuilder();
                         builder.UseInMemoryDatabase(Guid.NewGuid().ToString());
+                        break;
+                    }
+                case ContextProviderType.Json:
+                    {
+                        builder = new RepositoryOptionsBuilder();
+                        builder.UseJsonDatabase(Path.GetTempPath() + Guid.NewGuid().ToString("N"));
+                        break;
+                    }
+                case ContextProviderType.Xml:
+                    {
+                        builder = new RepositoryOptionsBuilder();
+                        builder.UseXmlDatabase(Path.GetTempPath() + Guid.NewGuid().ToString("N"));
                         break;
                     }
                 case ContextProviderType.AdoNet:
@@ -131,24 +147,51 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             return builder;
         }
 
-        protected IRepositoryOptions BuildOptions(ContextProviderType provider) 
-            => GetRepositoryOptionsBuilder(provider)
-                .Options;
+        protected IRepositoryOptions BuildOptions(ContextProviderType provider) => GetRepositoryOptionsBuilder(provider).Options;
 
-        private IEnumerable<ContextProviderType> Providers()
+        protected static IEnumerable<ContextProviderType> InMemoryProviders()
         {
             return new[]
             {
                 ContextProviderType.InMemory,
-                ContextProviderType.AdoNet,
-                ContextProviderType.EntityFramework,
                 ContextProviderType.EntityFrameworkCore
             };
+        }
+
+        protected static IEnumerable<ContextProviderType> FileStreamProviders()
+        {
+            return new[]
+            {
+                ContextProviderType.Json,
+                ContextProviderType.Xml
+            };
+        }
+
+        protected static IEnumerable<ContextProviderType> SqlServerProviders()
+        {
+            return new[]
+            {
+                ContextProviderType.AdoNet,
+                ContextProviderType.EntityFramework
+            };
+        }
+
+        private static IEnumerable<ContextProviderType> Providers()
+        {
+            var list = new List<ContextProviderType>();
+
+            list.AddRange(SqlServerProviders());
+            list.AddRange(InMemoryProviders());
+            list.AddRange(FileStreamProviders());
+
+            return list;
         }
 
         public enum ContextProviderType
         {
             InMemory,
+            Json,
+            Xml,
             AdoNet,
             EntityFramework,
             EntityFrameworkCore,

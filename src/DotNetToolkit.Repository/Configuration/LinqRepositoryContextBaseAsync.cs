@@ -1,5 +1,11 @@
 ﻿namespace DotNetToolkit.Repository.Configuration
 {
+    using Conventions;
+    using Extensions;
+    using Helpers;
+    using Properties;
+    using Queries;
+    using Queries.Strategies;
     using System;
     using System.Collections.Generic;
     using System.Data;
@@ -7,11 +13,6 @@
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
-    using Conventions;
-    using Extensions;
-    using Helpers;
-    using Queries;
-    using Queries.Strategies;
 
     /// <summary>
     /// Represents a repository context class which handles asynchronous linq operations.
@@ -58,7 +59,10 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
-        public abstract Task<IQueryResult<IEnumerable<TEntity>>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class;
+        public virtual Task<IQueryResult<IEnumerable<TEntity>>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            throw new NotSupportedException(Resources.QueryExecutionNotSupported);
+        }
 
         /// <summary>
         /// Asynchronously creates raw SQL query that is executed directly in the database.
@@ -68,7 +72,10 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
-        public abstract Task<IQueryResult<int>> ExecuteSqlCommandAsync(string sql, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken());
+        public virtual Task<IQueryResult<int>> ExecuteSqlCommandAsync(string sql, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken())
+        {
+            throw new NotSupportedException(Resources.QueryExecutionNotSupported);
+        }
 
         /// <summary>
         /// Asynchronously saves all changes made in this context to the database.
@@ -91,8 +98,10 @@
                 throw new ArgumentNullException(nameof(keyValues));
 
             var options = new QueryOptions<TEntity>()
-                .Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues))
-                .Include(fetchStrategy);
+                .Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
+
+            if (fetchStrategy != null)
+                options = options.Include(fetchStrategy);
 
             return FindAsync<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken);
         }

@@ -421,37 +421,49 @@ namespace DotNetToolkit.Repository.Integration.Test
         [Fact]
         public void ExecuteQuery()
         {
-            ForAllRepositoryFactories(TestExecuteQuery, ContextProviderType.InMemory, ContextProviderType.EntityFrameworkCore);
+            var exclude = InMemoryProviders().Union(FileStreamProviders()).ToArray();
+
+            ForAllRepositoryFactories(TestExecuteQuery, exclude);
         }
 
         [Fact]
         public void ExecuteQueryWithDefaultMapper()
         {
-            ForAllRepositoryFactories(TestExecuteQueryWithDefaultMapper, ContextProviderType.InMemory, ContextProviderType.EntityFrameworkCore);
+            var exclude = InMemoryProviders().Union(FileStreamProviders()).ToArray();
+
+            ForAllRepositoryFactories(TestExecuteQueryWithDefaultMapper, exclude);
         }
 
         [Fact]
         public void ExecuteQueryWithRegisteredMapper()
         {
-            ForAllRepositoryFactories(TestExecuteQueryWithRegisteredMapper, ContextProviderType.InMemory, ContextProviderType.EntityFrameworkCore);
+            var exclude = InMemoryProviders().Union(FileStreamProviders()).ToArray();
+
+            ForAllRepositoryFactories(TestExecuteQueryWithRegisteredMapper, exclude);
         }
 
         [Fact]
         public void ExecuteQueryAsync()
         {
-            ForAllRepositoryFactoriesAsync(TestExecuteQueryAsync, ContextProviderType.InMemory, ContextProviderType.EntityFrameworkCore);
+            var exclude = InMemoryProviders().Union(FileStreamProviders()).ToArray();
+
+            ForAllRepositoryFactoriesAsync(TestExecuteQueryAsync, exclude);
         }
 
         [Fact]
         public void ExecuteQueryWithDefaultMapperAsync()
         {
-            ForAllRepositoryFactoriesAsync(TestExecuteQueryWithDefaultMapperAsync, ContextProviderType.InMemory, ContextProviderType.EntityFrameworkCore);
+            var exclude = InMemoryProviders().Union(FileStreamProviders()).ToArray();
+
+            ForAllRepositoryFactoriesAsync(TestExecuteQueryWithDefaultMapperAsync, exclude);
         }
 
         [Fact]
         public void ExecuteQueryWithRegisteredMapperAsync()
         {
-            ForAllRepositoryFactoriesAsync(TestExecuteQueryWithRegisteredMapperAsync, ContextProviderType.InMemory, ContextProviderType.EntityFrameworkCore);
+            var exclude = InMemoryProviders().Union(FileStreamProviders()).ToArray();
+
+            ForAllRepositoryFactoriesAsync(TestExecuteQueryWithRegisteredMapperAsync, exclude);
         }
 
         private static void TestAdd(IRepositoryFactory repoFactory)
@@ -2985,7 +2997,7 @@ WHERE NewCustomers.Id = @p0",
             // ** DELETE **
             rowsAffected = repo.ExecuteSqlCommand(@"
 DELETE FROM NewCustomers
-WHERE Id = @p0", 
+WHERE Id = @p0",
                 parameters);
 
             Assert.Equal(1, rowsAffected);

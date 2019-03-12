@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\build\common.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>net451;netstandard1.3;netstandard2.0</TargetFrameworks>
+    <AssemblyName>DotNetToolkit.Repository.Xml</AssemblyName>
+    <RootNamespace>DotNetToolkit.Repository.Xml</RootNamespace>
+    <Description>A repository context provider for storing entities in a XML formatted file.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DotNetToolkit.Repository\DotNetToolkit.Repository.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -7,11 +7,13 @@
     using EntityFramework;
     using EntityFrameworkCore;
     using InMemory;
+    using Json;
     using Microsoft.EntityFrameworkCore;
     using System;
     using System.Collections.Generic;
     using System.Configuration;
     using System.Data.SqlClient;
+    using System.IO;
 
     public abstract class BenchmarkBase
     {
@@ -32,6 +34,12 @@
                     {
                         return new RepositoryOptionsBuilder()
                             .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                            .Options;
+                    }
+                case ContextProviderType.Json:
+                    {
+                        return new RepositoryOptionsBuilder()
+                            .UseJsonDatabase(Path.GetTempPath() + Guid.NewGuid().ToString("N"))
                             .Options;
                     }
                 case ContextProviderType.AdoNet:
@@ -62,6 +70,8 @@
             return new[]
             {
                 ContextProviderType.InMemory,
+                ContextProviderType.Json,
+                ContextProviderType.Xml,
                 ContextProviderType.AdoNet,
                 ContextProviderType.EntityFramework,
                 ContextProviderType.EntityFrameworkCore
