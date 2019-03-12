@@ -28,7 +28,6 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
         protected void ForAllRepositoryFactories(Action<IRepositoryFactory> action, params ContextProviderType[] contextTypeExceptionList)
         {
             Providers()
-                .ToList()
                 .ForEach(x =>
                 {
                     if (contextTypeExceptionList != null && contextTypeExceptionList.Contains(x))
@@ -41,7 +40,6 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
         protected void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactory, Task> action, params ContextProviderType[] contextTypeExceptionList)
         {
             Providers()
-                .ToList()
                 .ForEach(async x =>
                 {
                     if (contextTypeExceptionList != null && contextTypeExceptionList.Contains(x))
@@ -63,8 +61,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
         protected void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory> action)
         {
             Providers()
-                .ToList()
-                .Where(x => !InMemoryProviders().Contains(x))
+                .Where(SupportsTransactions)
                 .ForEach(x =>
                 {
                     action(new UnitOfWorkFactory(BuildOptions(x)));
@@ -74,8 +71,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
         protected void ForAllUnitOfWorkFactoriesAsync(Func<IUnitOfWorkFactory, Task> action)
         {
             Providers()
-                .ToList()
-                .Where(x => !InMemoryProviders().Contains(x))
+                .Where(SupportsTransactions)
                 .ForEach(async x =>
                 {
                     // Perform test
@@ -89,6 +85,16 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                         Assert.Null(ex);
                     }
                 });
+        }
+
+        protected void ForAllFileStreamContextProviders(Action<IRepositoryOptions> action)
+        {
+            FileStreamProviders().Select(BuildOptions).ForEach(action);
+        }
+
+        private static bool SupportsTransactions(ContextProviderType x)
+        {
+            return SqlServerProviders().Contains(x);
         }
 
         protected RepositoryOptionsBuilder GetRepositoryOptionsBuilder(ContextProviderType provider)
@@ -141,29 +147,44 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             return builder;
         }
 
-        protected IRepositoryOptions BuildOptions(ContextProviderType provider)
-            => GetRepositoryOptionsBuilder(provider)
-                .Options;
+        protected IRepositoryOptions BuildOptions(ContextProviderType provider) => GetRepositoryOptionsBuilder(provider).Options;
 
         protected static IEnumerable<ContextProviderType> InMemoryProviders()
         {
             return new[]
             {
                 ContextProviderType.InMemory,
-                ContextProviderType.Json,
-                ContextProviderType.Xml,
                 ContextProviderType.EntityFrameworkCore
             };
         }
 
-        private IEnumerable<ContextProviderType> Providers()
+        protected static IEnumerable<ContextProviderType> FileStreamProviders()
+        {
+            return new[]
+            {
+                ContextProviderType.Json,
+                ContextProviderType.Xml
+            };
+        }
+
+        protected static IEnumerable<ContextProviderType> SqlServerProviders()
         {
             return new[]
             {
                 ContextProviderType.AdoNet,
-                ContextProviderType.EntityFramework,
-            }
-                .Union(InMemoryProviders());
+                ContextProviderType.EntityFramework
+            };
+        }
+
+        private static IEnumerable<ContextProviderType> Providers()
+        {
+            var list = new List<ContextProviderType>();
+
+            list.AddRange(SqlServerProviders());
+            list.AddRange(InMemoryProviders());
+            list.AddRange(FileStreamProviders());
+
+            return list;
         }
 
         public enum ContextProviderType

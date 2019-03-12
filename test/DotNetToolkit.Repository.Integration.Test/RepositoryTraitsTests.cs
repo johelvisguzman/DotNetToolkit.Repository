@@ -421,37 +421,49 @@ namespace DotNetToolkit.Repository.Integration.Test
         [Fact]
         public void ExecuteQuery()
         {
-            ForAllRepositoryFactories(TestExecuteQuery, InMemoryProviders().ToArray());
+            var exclude = InMemoryProviders().Union(FileStreamProviders()).ToArray();
+
+            ForAllRepositoryFactories(TestExecuteQuery, exclude);
         }
 
         [Fact]
         public void ExecuteQueryWithDefaultMapper()
         {
-            ForAllRepositoryFactories(TestExecuteQueryWithDefaultMapper, InMemoryProviders().ToArray());
+            var exclude = InMemoryProviders().Union(FileStreamProviders()).ToArray();
+
+            ForAllRepositoryFactories(TestExecuteQueryWithDefaultMapper, exclude);
         }
 
         [Fact]
         public void ExecuteQueryWithRegisteredMapper()
         {
-            ForAllRepositoryFactories(TestExecuteQueryWithRegisteredMapper, InMemoryProviders().ToArray());
+            var exclude = InMemoryProviders().Union(FileStreamProviders()).ToArray();
+
+            ForAllRepositoryFactories(TestExecuteQueryWithRegisteredMapper, exclude);
         }
 
         [Fact]
         public void ExecuteQueryAsync()
         {
-            ForAllRepositoryFactoriesAsync(TestExecuteQueryAsync, InMemoryProviders().ToArray());
+            var exclude = InMemoryProviders().Union(FileStreamProviders()).ToArray();
+
+            ForAllRepositoryFactoriesAsync(TestExecuteQueryAsync, exclude);
         }
 
         [Fact]
         public void ExecuteQueryWithDefaultMapperAsync()
         {
-            ForAllRepositoryFactoriesAsync(TestExecuteQueryWithDefaultMapperAsync, InMemoryProviders().ToArray());
+            var exclude = InMemoryProviders().Union(FileStreamProviders()).ToArray();
+
+            ForAllRepositoryFactoriesAsync(TestExecuteQueryWithDefaultMapperAsync, exclude);
         }
 
         [Fact]
         public void ExecuteQueryWithRegisteredMapperAsync()
         {
-            ForAllRepositoryFactoriesAsync(TestExecuteQueryWithRegisteredMapperAsync, InMemoryProviders().ToArray());
+            var exclude = InMemoryProviders().Union(FileStreamProviders()).ToArray();
+
+            ForAllRepositoryFactoriesAsync(TestExecuteQueryWithRegisteredMapperAsync, exclude);
         }
 
         private static void TestAdd(IRepositoryFactory repoFactory)
