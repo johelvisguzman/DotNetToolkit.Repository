@@ -21,6 +21,12 @@
         }
 
         [Fact]
+        public void ExistWithNavigationProperty_OneToOneRelationship()
+        {
+            ForAllRepositoryFactories(TestExistWithNavigationProperty_OneToOneRelationship);
+        }
+
+        [Fact]
         public void ExistsAsync()
         {
             ForAllRepositoryFactoriesAsync(TestExistsAsync);
@@ -30,6 +36,12 @@
         public void ExistsWithIdAsync()
         {
             ForAllRepositoryFactoriesAsync(TestExistsWithIdAsync);
+        }
+
+        [Fact]
+        public void ExistWithNavigationPropertyAsync_OneToOneRelationship()
+        {
+            ForAllRepositoryFactoriesAsync(TestExistWithNavigationPropertyAsync_OneToOneRelationship);
         }
 
         private static void TestExists(IRepositoryFactory repoFactory)
@@ -65,6 +77,44 @@
             Assert.True(repo.Exists(id));
         }
 
+        private static void TestExistWithNavigationProperty_OneToOneRelationship(IRepositoryFactory repoFactory, ContextProviderType providerType)
+        {
+            var addressRepo = repoFactory.Create<CustomerAddress>();
+            var customerRepo = repoFactory.Create<Customer>();
+
+            var queryOptions = new QueryOptions<Customer>();
+
+            var entity = new Customer
+            {
+                Name = "Random Name"
+            };
+
+            customerRepo.Add(entity);
+
+            var address = new CustomerAddress
+            {
+                Street = "Street",
+                City = "New City",
+                State = "ST",
+                CustomerId = entity.Id
+            };
+
+            // The customer is required here, otherwise it will throw an exception for entity framework
+            if (providerType == ContextProviderType.EntityFramework)
+            {
+                address.Customer = entity;
+            }
+
+            Assert.False(customerRepo.Exists(queryOptions.SatisfyBy(x => x.Id == entity.Id && (x.Address != null && x.Address.Street.Equals(address.Street)))));
+            Assert.False(customerRepo.Exists(x => x.Id == entity.Id && (x.Address != null && x.Address.Street.Equals(address.Street))));
+
+            addressRepo.Add(address);
+
+            // for one to one, the navigation properties will be included automatically (no need to fetch)
+            Assert.True(customerRepo.Exists(queryOptions.SatisfyBy(x => x.Id == entity.Id && (x.Address != null && x.Address.Street.Equals(address.Street)))));
+            Assert.True(customerRepo.Exists(x => x.Id == entity.Id && (x.Address != null && x.Address.Street.Equals(address.Street))));
+        }
+
         private static async Task TestExistsAsync(IRepositoryFactory repoFactory)
         {
             var repo = repoFactory.Create<Customer>();
@@ -96,6 +146,44 @@
             await repo.AddAsync(entity);
 
             Assert.True(await repo.ExistsAsync(id));
+        }
+
+        private static async Task TestExistWithNavigationPropertyAsync_OneToOneRelationship(IRepositoryFactory repoFactory, ContextProviderType providerType)
+        {
+            var addressRepo = repoFactory.Create<CustomerAddress>();
+            var customerRepo = repoFactory.Create<Customer>();
+
+            var queryOptions = new QueryOptions<Customer>();
+
+            var entity = new Customer
+            {
+                Name = "Random Name"
+            };
+
+            await customerRepo.AddAsync(entity);
+
+            var address = new CustomerAddress
+            {
+                Street = "Street",
+                City = "New City",
+                State = "ST",
+                CustomerId = entity.Id,
+            };
+
+            // The customer is required here, otherwise it will throw an exception for entity framework
+            if (providerType == ContextProviderType.EntityFramework)
+            {
+                address.Customer = entity;
+            }
+
+            Assert.False(await customerRepo.ExistsAsync(queryOptions.SatisfyBy(x => x.Id == entity.Id && (x.Address != null && x.Address.Street.Equals(address.Street)))));
+            Assert.False(await customerRepo.ExistsAsync(x => x.Id == entity.Id && (x.Address != null && x.Address.Street.Equals(address.Street))));
+
+            await addressRepo.AddAsync(address);
+
+            // for one to one, the navigation properties will be included automatically (no need to fetch)
+            Assert.True(await customerRepo.ExistsAsync(queryOptions.SatisfyBy(x => x.Id == entity.Id && (x.Address != null && x.Address.Street.Equals(address.Street)))));
+            Assert.True(await customerRepo.ExistsAsync(x => x.Id == entity.Id && (x.Address != null && x.Address.Street.Equals(address.Street))));
         }
     }
 }

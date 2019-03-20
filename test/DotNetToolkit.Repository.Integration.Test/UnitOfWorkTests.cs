@@ -16,7 +16,7 @@
         {
             ForAllUnitOfWorkFactories(TestFactoryCreate);
         }
-        
+
         [Fact]
         public void DisposeRollBackUnCommittedChanges()
         {
@@ -63,17 +63,14 @@
         {
             using (var uow = uowFactory.Create())
             {
-                uow.Create<Customer>().Add(new Customer { Id = 1 });
-                uow.Create<CustomerAddress>().Add(new CustomerAddress() { CustomerId = 1 });
+                uow.Create<Customer>().Add(new Customer());
 
                 Assert.Equal(1, uow.Create<Customer>().Count());
-                Assert.Equal(1, uow.Create<CustomerAddress>().Count());
             }
 
             using (var uow = uowFactory.Create())
             {
                 Assert.Equal(0, uow.Create<Customer>().Count());
-                Assert.Equal(0, uow.Create<CustomerAddress>().Count());
             }
         }
 
@@ -81,11 +78,9 @@
         {
             using (var uow = uowFactory.Create())
             {
-                uow.Create<Customer>().Add(new Customer { Id = 1 });
-                uow.Create<CustomerAddress>().Add(new CustomerAddress() { CustomerId = 1 });
+                uow.Create<Customer>().Add(new Customer());
 
                 Assert.Equal(1, uow.Create<Customer>().Count());
-                Assert.Equal(1, uow.Create<CustomerAddress>().Count());
 
                 uow.Commit();
             }
@@ -93,7 +88,6 @@
             using (var uow = uowFactory.Create())
             {
                 Assert.Equal(1, uow.Create<Customer>().Count());
-                Assert.Equal(1, uow.Create<CustomerAddress>().Count());
             }
         }
 

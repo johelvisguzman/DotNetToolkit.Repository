@@ -170,9 +170,8 @@
         /// Returns the entity's query.
         /// </summary>
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The entity's query.</returns>
-        protected override IQueryable<TEntity> AsQueryable<TEntity>(IQueryOptions<TEntity> options)
+        protected override IQueryable<TEntity> AsQueryable<TEntity>()
         {
             return LoadFile(typeof(TEntity)).Cast<TEntity>().AsQueryable();
         }

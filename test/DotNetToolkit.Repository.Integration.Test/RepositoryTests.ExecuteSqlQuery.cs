@@ -86,16 +86,14 @@ VALUES (@p0, 'Random Name')",
             var customersInDb = repo.ExecuteSqlQuery(@"
 SELECT
     NewCustomers.Id,
-    NewCustomers.Name,
-    NewCustomers.AddressId
+    NewCustomers.Name
 FROM NewCustomers
 WHERE NewCustomers.Id = @p0",
                 parameters,
                 r => new Customer()
                 {
                     Id = r.GetInt32(0),
-                    Name = r.GetString(1),
-                    AddressId = r.IsDBNull(2) ? 0 : r.GetInt32(2)
+                    Name = r.GetString(1)
                 });
 
             Assert.Single(customersInDb);
@@ -105,7 +103,6 @@ WHERE NewCustomers.Id = @p0",
             Assert.NotNull(customerInDb);
             Assert.Equal(1, customerInDb.Id);
             Assert.Equal("Random Name", customerInDb.Name);
-            Assert.Equal(0, customerInDb.AddressId);
 
             // ** UPDATE **
             rowsAffected = repo.ExecuteSqlCommand(@"
@@ -119,16 +116,14 @@ WHERE Id = @p0",
             customersInDb = repo.ExecuteSqlQuery(@"
 SELECT
     NewCustomers.Id,
-    NewCustomers.Name,
-    NewCustomers.AddressId
+    NewCustomers.Name
 FROM NewCustomers
 WHERE NewCustomers.Id = @p0",
                 parameters,
                 r => new Customer()
                 {
                     Id = r.GetInt32(0),
-                    Name = r.GetString(1),
-                    AddressId = r.IsDBNull(2) ? 0 : r.GetInt32(2)
+                    Name = r.GetString(1)
                 });
 
             Assert.Single(customersInDb);
@@ -138,7 +133,6 @@ WHERE NewCustomers.Id = @p0",
             Assert.NotNull(customerInDb);
             Assert.Equal(1, customerInDb.Id);
             Assert.Equal("New Random Name", customerInDb.Name);
-            Assert.Equal(0, customerInDb.AddressId);
 
             // ** DELETE **
             rowsAffected = repo.ExecuteSqlCommand(@"
@@ -151,16 +145,14 @@ WHERE Id = @p0",
             customersInDb = repo.ExecuteSqlQuery(@"
 SELECT
     NewCustomers.Id,
-    NewCustomers.Name,
-    NewCustomers.AddressId
+    NewCustomers.Name
 FROM NewCustomers
 WHERE NewCustomers.Id = @p0",
                 parameters,
                 r => new Customer()
                 {
                     Id = r.GetInt32(0),
-                    Name = r.GetString(1),
-                    AddressId = r.IsDBNull(2) ? 0 : r.GetInt32(2)
+                    Name = r.GetString(1)
                 });
 
             Assert.Empty(customersInDb);
@@ -178,8 +170,7 @@ WHERE NewCustomers.Id = @p0",
             var rowsAffected = repo.ExecuteSqlCommand(@"
 CREATE TABLE NewCustomers (
     Id int,
-    Name nvarchar(255),
-    AddressId int
+    Name nvarchar(255)
 )");
 
             Assert.Equal(-1, rowsAffected);
@@ -195,8 +186,7 @@ VALUES (@p0, 'Random Name')",
             var customersInDb = repo.ExecuteSqlQuery(@"
 SELECT
     NewCustomers.Id,
-    NewCustomers.Name,
-    NewCustomers.AddressId
+    NewCustomers.Name
 FROM NewCustomers
 WHERE NewCustomers.Id = @p0",
                 parameters);
@@ -208,7 +198,6 @@ WHERE NewCustomers.Id = @p0",
             Assert.NotNull(customerInDb);
             Assert.Equal(1, customerInDb.Id);
             Assert.Equal("Random Name", customerInDb.Name);
-            Assert.Equal(0, customerInDb.AddressId);
         }
 
         private static void TestExecuteQueryWithRegisteredMapper(IRepositoryFactory repoFactory)
@@ -242,8 +231,7 @@ VALUES (@p0, 'Random Name')",
             var customersInDb = repo.ExecuteSqlQuery(@"
 SELECT
     NewCustomers.Id,
-    NewCustomers.Name,
-    NewCustomers.AddressId
+    NewCustomers.Name
 FROM NewCustomers
 WHERE NewCustomers.Id = @p0",
                 parameters);
@@ -255,7 +243,6 @@ WHERE NewCustomers.Id = @p0",
             Assert.NotNull(customerInDb);
             Assert.Equal(1, customerInDb.Id);
             Assert.Equal("Random Name", customerInDb.Name);
-            Assert.Equal(0, customerInDb.AddressId);
         }
 
         private static async Task TestExecuteQueryAsync(IRepositoryFactory repoFactory)
@@ -270,8 +257,7 @@ WHERE NewCustomers.Id = @p0",
             var rowsAffected = await repo.ExecuteSqlCommandAsync(@"
 CREATE TABLE NewCustomers (
     Id int,
-    Name nvarchar(255),
-    AddressId int
+    Name nvarchar(255)
 )");
 
             Assert.Equal(-1, rowsAffected);
@@ -287,8 +273,7 @@ VALUES (@p0, 'Random Name')",
             var customersInDb = await repo.ExecuteSqlQueryAsync(@"
 SELECT
     NewCustomers.Id,
-    NewCustomers.Name,
-    NewCustomers.AddressId
+    NewCustomers.Name
 FROM NewCustomers
 WHERE NewCustomers.Id = @p0",
                 parameters,
@@ -296,7 +281,6 @@ WHERE NewCustomers.Id = @p0",
                 {
                     Id = r.GetInt32(0),
                     Name = r.GetString(1),
-                    AddressId = r.IsDBNull(2) ? 0 : r.GetInt32(2)
                 });
 
             Assert.Single(customersInDb);
@@ -306,7 +290,6 @@ WHERE NewCustomers.Id = @p0",
             Assert.NotNull(customerInDb);
             Assert.Equal(1, customerInDb.Id);
             Assert.Equal("Random Name", customerInDb.Name);
-            Assert.Equal(0, customerInDb.AddressId);
 
             // ** UPDATE **
             rowsAffected = await repo.ExecuteSqlCommandAsync(@"
@@ -320,8 +303,7 @@ WHERE Id = @p0",
             customersInDb = await repo.ExecuteSqlQueryAsync(@"
 SELECT
     NewCustomers.Id,
-    NewCustomers.Name,
-    NewCustomers.AddressId
+    NewCustomers.Name
 FROM NewCustomers
 WHERE NewCustomers.Id = @p0",
                 parameters,
@@ -329,7 +311,6 @@ WHERE NewCustomers.Id = @p0",
                 {
                     Id = r.GetInt32(0),
                     Name = r.GetString(1),
-                    AddressId = r.IsDBNull(2) ? 0 : r.GetInt32(2)
                 });
 
             Assert.Single(customersInDb);
@@ -339,7 +320,6 @@ WHERE NewCustomers.Id = @p0",
             Assert.NotNull(customerInDb);
             Assert.Equal(1, customerInDb.Id);
             Assert.Equal("New Random Name", customerInDb.Name);
-            Assert.Equal(0, customerInDb.AddressId);
 
             // ** DELETE **
             rowsAffected = await repo.ExecuteSqlCommandAsync(@"
@@ -352,8 +332,7 @@ WHERE Id = @p0",
             customersInDb = await repo.ExecuteSqlQueryAsync(@"
 SELECT
     NewCustomers.Id,
-    NewCustomers.Name,
-    NewCustomers.AddressId
+    NewCustomers.Name
 FROM NewCustomers
 WHERE NewCustomers.Id = @p0",
                 parameters,
@@ -361,7 +340,6 @@ WHERE NewCustomers.Id = @p0",
                 {
                     Id = r.GetInt32(0),
                     Name = r.GetString(1),
-                    AddressId = r.IsDBNull(2) ? 0 : r.GetInt32(2)
                 });
 
             Assert.Empty(customersInDb);
@@ -379,8 +357,7 @@ WHERE NewCustomers.Id = @p0",
             var rowsAffected = await repo.ExecuteSqlCommandAsync(@"
 CREATE TABLE NewCustomers (
     Id int,
-    Name nvarchar(255),
-    AddressId int
+    Name nvarchar(255)
 )");
 
             Assert.Equal(-1, rowsAffected);
@@ -396,8 +373,7 @@ VALUES (@p0, 'Random Name')",
             var customersInDb = await repo.ExecuteSqlQueryAsync(@"
 SELECT
     NewCustomers.Id,
-    NewCustomers.Name,
-    NewCustomers.AddressId
+    NewCustomers.Name
 FROM NewCustomers
 WHERE NewCustomers.Id = @p0",
                 parameters);
@@ -409,7 +385,6 @@ WHERE NewCustomers.Id = @p0",
             Assert.NotNull(customerInDb);
             Assert.Equal(1, customerInDb.Id);
             Assert.Equal("Random Name", customerInDb.Name);
-            Assert.Equal(0, customerInDb.AddressId);
         }
 
         private static async Task TestExecuteQueryWithRegisteredMapperAsync(IRepositoryFactory repoFactory)
@@ -424,8 +399,7 @@ WHERE NewCustomers.Id = @p0",
             var rowsAffected = await repo.ExecuteSqlCommandAsync(@"
 CREATE TABLE NewCustomers (
     Id int,
-    Name nvarchar(255),
-    AddressId int
+    Name nvarchar(255)
 )");
 
             Assert.Equal(-1, rowsAffected);
@@ -443,8 +417,7 @@ VALUES (@p0, 'Random Name')",
             var customersInDb = await repo.ExecuteSqlQueryAsync(@"
 SELECT
     NewCustomers.Id,
-    NewCustomers.Name,
-    NewCustomers.AddressId
+    NewCustomers.Name
 FROM NewCustomers
 WHERE NewCustomers.Id = @p0",
                 parameters);
@@ -456,7 +429,6 @@ WHERE NewCustomers.Id = @p0",
             Assert.NotNull(customerInDb);
             Assert.Equal(1, customerInDb.Id);
             Assert.Equal("Random Name", customerInDb.Name);
-            Assert.Equal(0, customerInDb.AddressId);
         }
     }
 }

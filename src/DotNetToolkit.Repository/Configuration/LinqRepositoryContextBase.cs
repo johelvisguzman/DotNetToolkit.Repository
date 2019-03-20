@@ -2,7 +2,6 @@
 {
     using Conventions;
     using Extensions;
-    using Helpers;
     using Logging;
     using Properties;
     using Queries;
@@ -12,6 +11,7 @@
     using System.Data;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Reflection;
     using Transactions;
 
     /// <summary>
@@ -34,9 +34,33 @@
         /// Returns the entity's query.
         /// </summary>
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The entity's query.</returns>
-        protected abstract IQueryable<TEntity> AsQueryable<TEntity>(IQueryOptions<TEntity> options) where TEntity : class;
+        protected abstract IQueryable<TEntity> AsQueryable<TEntity>() where TEntity : class;
+
+        /// <summary>
+        /// Apply a fetching options to the specified entity's query.
+        /// </summary>
+        /// <returns>The entity's query with the applied options.</returns>
+        protected virtual IQueryable<TEntity> ApplyFetchingOptions<TEntity>(IQueryable<TEntity> query, IQueryOptions<TEntity> options) where TEntity : class
+        {
+            return query.ApplyFetchingOptions(options, InvokeAsQueryable);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private IQueryable<object> InvokeAsQueryable(Type type)
+        {
+            return (IQueryable<object>)GetType()
+                .GetRuntimeMethods()
+                .Single(x => x.Name == nameof(AsQueryable) &&
+                             x.IsGenericMethodDefinition &&
+                             x.GetGenericArguments().Length == 1 &&
+                             x.GetParameters().Length == 0)
+                .MakeGenericMethod(type)
+                .Invoke(this, null);
+        }
 
         #endregion
 
@@ -132,13 +156,21 @@
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));
 
+            PrimaryKeyConventionHelper.ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
+
             var options = new QueryOptions<TEntity>()
                 .Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
 
-            if (fetchStrategy != null)
-                options = options.Include(fetchStrategy);
+            var query = AsQueryable<TEntity>();
 
-            return Find<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance);
+            if (fetchStrategy != null)
+                query = ApplyFetchingOptions(query, options.Include(fetchStrategy));
+
+            var result = query
+                .ApplySpecificationOptions(options)
+                .FirstOrDefault();
+
+            return new QueryResult<TEntity>(result);
         }
 
         /// <summary>
@@ -157,7 +189,7 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            var result = AsQueryable(options)
+            var result = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(options)
                 .ApplyPagingOptions(options)
@@ -180,7 +212,7 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            var query = AsQueryable(options)
+            var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(options);
 
@@ -202,7 +234,7 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public virtual IQueryResult<int> Count<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
         {
-            var result = AsQueryable(options)
+            var result = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(options)
                 .ApplyPagingOptions(options)
@@ -222,7 +254,7 @@
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            var result = AsQueryable(options)
+            var result = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(options)
                 .ApplyPagingOptions(options)
@@ -252,7 +284,7 @@
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            var query = AsQueryable(options)
+            var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(options);
 
@@ -298,7 +330,7 @@
             var keySelectFunc = keySelector.Compile();
             var resultSelectorFunc = resultSelector.Compile();
 
-            var query = AsQueryable(options)
+            var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(options);
 

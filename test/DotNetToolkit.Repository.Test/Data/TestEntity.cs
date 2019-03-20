@@ -6,8 +6,6 @@
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public int AddressId { get; set; }
-        public int PhoneId { get; set; }
         public CustomerAddress Address { get; set; }
         public CustomerPhone Phone { get; set; }
     }

@@ -2,6 +2,7 @@
 {
     using Configuration.Caching;
     using Data;
+    using Extensions.Microsoft.Caching.Memory;
     using Queries;
     using System.Threading.Tasks;
     using Xunit;
@@ -14,7 +15,11 @@
         [Fact]
         public void CacheEnabled()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.AdoNet));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             Assert.True(repo.CacheEnabled);
         }
@@ -22,11 +27,19 @@
         [Fact]
         public void CacheDisabled()
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.AdoNet)
-                .UseCachingProvider(NullCacheProvider.Instance)
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
                 .Options;
 
             var repo = new Repository<Customer>(options);
+
+            Assert.False(repo.CacheEnabled);
+            Assert.True(repo.CacheProvider is NullCacheProvider);
+
+            options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(NullCacheProvider.Instance)
+                .Options;
+
+            repo = new Repository<Customer>(options);
 
             Assert.False(repo.CacheEnabled);
         }
@@ -34,7 +47,11 @@
         [Fact]
         public void ExecuteQuery()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.AdoNet));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.AdoNet)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -56,8 +73,7 @@ WHERE NewCustomers.Id = @p0",
                 r => new Customer
                 {
                     Id = r.GetInt32(0),
-                    Name = r.GetString(1),
-                    AddressId = r.IsDBNull(2) ? 0 : r.GetInt32(2)
+                    Name = r.GetString(1)
                 });
 
             Assert.False(repo.CacheUsed);
@@ -72,8 +88,7 @@ WHERE NewCustomers.Id = @p0",
                 r => new Customer
                 {
                     Id = r.GetInt32(0),
-                    Name = r.GetString(1),
-                    AddressId = r.IsDBNull(2) ? 0 : r.GetInt32(2)
+                    Name = r.GetString(1)
                 });
 
             Assert.True(repo.CacheUsed);
@@ -90,8 +105,7 @@ WHERE NewCustomers.Id = @p0",
                 r => new Customer
                 {
                     Id = r.GetInt32(0),
-                    Name = r.GetString(1),
-                    AddressId = r.IsDBNull(2) ? 0 : r.GetInt32(2)
+                    Name = r.GetString(1)
                 });
 
             Assert.False(repo.CacheUsed);
@@ -100,7 +114,11 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public void Find()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -123,7 +141,11 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public void FindWithId()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -146,24 +168,28 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public void FindWithOptions()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
 
-            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var repo = new Repository<Customer>(options);
+
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            repo.Find(options);
+            repo.Find(queryOptions);
 
             Assert.False(repo.CacheUsed);
 
-            repo.Find(options);
+            repo.Find(queryOptions);
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            repo.Find(options);
+            repo.Find(queryOptions);
 
             Assert.False(repo.CacheUsed);
         }
@@ -171,7 +197,11 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public void FindAll()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -194,24 +224,28 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public void FindAllWithOptions()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
 
-            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var repo = new Repository<Customer>(options);
+
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            repo.FindAll(options);
+            repo.FindAll(queryOptions);
 
             Assert.False(repo.CacheUsed);
 
-            repo.FindAll(options);
+            repo.FindAll(queryOptions);
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            repo.FindAll(options);
+            repo.FindAll(queryOptions);
 
             Assert.False(repo.CacheUsed);
         }
@@ -219,7 +253,11 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public void Count()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -242,24 +280,28 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public void CountWithOptions()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
 
-            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var repo = new Repository<Customer>(options);
+
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            repo.Count(options);
+            repo.Count(queryOptions);
 
             Assert.False(repo.CacheUsed);
 
-            repo.Count(options);
+            repo.Count(queryOptions);
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            repo.Count(options);
+            repo.Count(queryOptions);
 
             Assert.False(repo.CacheUsed);
         }
@@ -267,7 +309,11 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public void Exists()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -290,24 +336,28 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public void ExistsWithOptions()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
 
-            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var repo = new Repository<Customer>(options);
+
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            repo.Exists(options);
+            repo.Exists(queryOptions);
 
             Assert.False(repo.CacheUsed);
 
-            repo.Exists(options);
+            repo.Exists(queryOptions);
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            repo.Exists(options);
+            repo.Exists(queryOptions);
 
             Assert.False(repo.CacheUsed);
         }
@@ -315,7 +365,11 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public void ToDictionary()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -338,24 +392,28 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public void ToDictionaryWithOptions()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
 
-            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var repo = new Repository<Customer>(options);
+
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            repo.ToDictionary(options, x => x.Id);
+            repo.ToDictionary(queryOptions, x => x.Id);
 
             Assert.False(repo.CacheUsed);
 
-            repo.ToDictionary(options, x => x.Id);
+            repo.ToDictionary(queryOptions, x => x.Id);
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            repo.ToDictionary(options, x => x.Id);
+            repo.ToDictionary(queryOptions, x => x.Id);
 
             Assert.False(repo.CacheUsed);
         }
@@ -363,7 +421,11 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public void GroupBy()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -386,24 +448,28 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public void GroupByWithOptions()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
 
-            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var repo = new Repository<Customer>(options);
+
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            repo.GroupBy(options, x => x.Id, (key, g) => key);
+            repo.GroupBy(queryOptions, x => x.Id, (key, g) => key);
 
             Assert.False(repo.CacheUsed);
 
-            repo.GroupBy(options, x => x.Id, (key, g) => key);
+            repo.GroupBy(queryOptions, x => x.Id, (key, g) => key);
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            repo.GroupBy(options, x => x.Id, (key, g) => key);
+            repo.GroupBy(queryOptions, x => x.Id, (key, g) => key);
 
             Assert.False(repo.CacheUsed);
         }
@@ -411,7 +477,11 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public async Task ExecuteQueryAsync()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.AdoNet));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.AdoNet)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -419,22 +489,19 @@ WHERE NewCustomers.Id = @p0",
             await repo.ExecuteSqlCommandAsync(@"
 CREATE TABLE NewCustomers (
     Id int,
-    Name nvarchar(255),
-    AddressId int
+    Name nvarchar(255)
 )");
 
             await repo.ExecuteSqlQueryAsync(@"
 SELECT
     NewCustomers.Id,
-    NewCustomers.Name,
-    NewCustomers.AddressId
+    NewCustomers.Name
 FROM NewCustomers
 WHERE NewCustomers.Id = @p0",
                 r => new Customer
                 {
                     Id = r.GetInt32(0),
-                    Name = r.GetString(1),
-                    AddressId = r.IsDBNull(2) ? 0 : r.GetInt32(2)
+                    Name = r.GetString(1)
                 });
 
             Assert.False(repo.CacheUsed);
@@ -442,15 +509,13 @@ WHERE NewCustomers.Id = @p0",
             await repo.ExecuteSqlQueryAsync(@"
 SELECT
     NewCustomers.Id,
-    NewCustomers.Name,
-    NewCustomers.AddressId
+    NewCustomers.Name
 FROM NewCustomers
 WHERE NewCustomers.Id = @p0",
                 r => new Customer
                 {
                     Id = r.GetInt32(0),
-                    Name = r.GetString(1),
-                    AddressId = r.IsDBNull(2) ? 0 : r.GetInt32(2)
+                    Name = r.GetString(1)
                 });
 
             Assert.True(repo.CacheUsed);
@@ -460,15 +525,13 @@ WHERE NewCustomers.Id = @p0",
             await repo.ExecuteSqlQueryAsync(@"
 SELECT
     NewCustomers.Id,
-    NewCustomers.Name,
-    NewCustomers.AddressId
+    NewCustomers.Name
 FROM NewCustomers
 WHERE NewCustomers.Id = @p0",
                 r => new Customer
                 {
                     Id = r.GetInt32(0),
-                    Name = r.GetString(1),
-                    AddressId = r.IsDBNull(2) ? 0 : r.GetInt32(2)
+                    Name = r.GetString(1)
                 });
 
             Assert.False(repo.CacheUsed);
@@ -477,7 +540,11 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public async Task FindAsync()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -500,7 +567,11 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public async Task FindWithIdAsync()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -523,24 +594,28 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public async Task FindWithOptionsAsync()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
 
-            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var repo = new Repository<Customer>(options);
+
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            await repo.FindAsync(options);
+            await repo.FindAsync(queryOptions);
 
             Assert.False(repo.CacheUsed);
 
-            await repo.FindAsync(options);
+            await repo.FindAsync(queryOptions);
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            await repo.FindAsync(options);
+            await repo.FindAsync(queryOptions);
 
             Assert.False(repo.CacheUsed);
         }
@@ -548,7 +623,11 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public async Task FindAllAsync()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -571,24 +650,28 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public async Task FindAllWithOptionsAsync()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
 
-            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var repo = new Repository<Customer>(options);
+
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            await repo.FindAllAsync(options);
+            await repo.FindAllAsync(queryOptions);
 
             Assert.False(repo.CacheUsed);
 
-            await repo.FindAllAsync(options);
+            await repo.FindAllAsync(queryOptions);
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            await repo.FindAllAsync(options);
+            await repo.FindAllAsync(queryOptions);
 
             Assert.False(repo.CacheUsed);
         }
@@ -596,7 +679,11 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public async Task CountAsync()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -619,24 +706,28 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public async Task CountWithOptionsAsync()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
 
-            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var repo = new Repository<Customer>(options);
+
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            await repo.CountAsync(options);
+            await repo.CountAsync(queryOptions);
 
             Assert.False(repo.CacheUsed);
 
-            await repo.CountAsync(options);
+            await repo.CountAsync(queryOptions);
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            await repo.CountAsync(options);
+            await repo.CountAsync(queryOptions);
 
             Assert.False(repo.CacheUsed);
         }
@@ -644,7 +735,11 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public async Task ExistsAsync()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -667,24 +762,28 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public async Task ExistsWithOptionsAsync()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
 
-            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var repo = new Repository<Customer>(options);
+
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            await repo.ExistsAsync(options);
+            await repo.ExistsAsync(queryOptions);
 
             Assert.False(repo.CacheUsed);
 
-            await repo.ExistsAsync(options);
+            await repo.ExistsAsync(queryOptions);
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            await repo.ExistsAsync(options);
+            await repo.ExistsAsync(queryOptions);
 
             Assert.False(repo.CacheUsed);
         }
@@ -692,7 +791,11 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public async Task ToDictionaryAsync()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -715,24 +818,28 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public async Task ToDictionaryWithOptionsAsync()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
 
-            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var repo = new Repository<Customer>(options);
+
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            await repo.ToDictionaryAsync(options, x => x.Id);
+            await repo.ToDictionaryAsync(queryOptions, x => x.Id);
 
             Assert.False(repo.CacheUsed);
 
-            await repo.ToDictionaryAsync(options, x => x.Id);
+            await repo.ToDictionaryAsync(queryOptions, x => x.Id);
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            await repo.ToDictionaryAsync(options, x => x.Id);
+            await repo.ToDictionaryAsync(queryOptions, x => x.Id);
 
             Assert.False(repo.CacheUsed);
         }
@@ -740,7 +847,11 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public async Task GroupByAsync()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
+
+            var repo = new Repository<Customer>(options);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -763,24 +874,28 @@ WHERE NewCustomers.Id = @p0",
         [Fact]
         public async Task GroupByWithOptionsAsync()
         {
-            var repo = new Repository<Customer>(BuildOptions(ContextProviderType.InMemory));
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
 
-            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var repo = new Repository<Customer>(options);
+
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            await repo.GroupByAsync(options, x => x.Id, (key, g) => key);
+            await repo.GroupByAsync(queryOptions, x => x.Id, (key, g) => key);
 
             Assert.False(repo.CacheUsed);
 
-            await repo.GroupByAsync(options, x => x.Id, (key, g) => key);
+            await repo.GroupByAsync(queryOptions, x => x.Id, (key, g) => key);
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            await repo.GroupByAsync(options, x => x.Id, (key, g) => key);
+            await repo.GroupByAsync(queryOptions, x => x.Id, (key, g) => key);
 
             Assert.False(repo.CacheUsed);
         }
