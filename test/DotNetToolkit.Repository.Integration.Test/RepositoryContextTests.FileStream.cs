@@ -7,9 +7,9 @@
     using Xunit;
     using Xunit.Abstractions;
 
-    public class FileStreamRepositoryContextTests : TestBase
+    public class FileStreamRepositoryTests : TestBase
     {
-        public FileStreamRepositoryContextTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+        public FileStreamRepositoryTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
 
         [Fact]
         public void ThrowsIfDeleteWhenEntityNoInStore()
