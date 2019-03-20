@@ -9,7 +9,6 @@
     using System.Collections.Concurrent;
     using System.Globalization;
     using System.Linq;
-    using System.Reflection;
     using Transactions;
 
     /// <summary>
@@ -81,22 +80,6 @@
 
         #region Private Methods
 
-        private static object DeepCopy(object entity)
-        {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
-            var newItem = Activator.CreateInstance(entity.GetType());
-
-            foreach (var propInfo in entity.GetType().GetRuntimeProperties())
-            {
-                if (propInfo.CanWrite)
-                    propInfo.SetValue(newItem, propInfo.GetValue(entity, null), null);
-            }
-
-            return newItem;
-        }
-
         private object GeneratePrimaryKey(Type entityType)
         {
             var propertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
@@ -156,7 +139,12 @@
             if (!store.ContainsKey(entityType))
                 return Enumerable.Empty<TEntity>().AsQueryable();
 
-            return store[entityType].Select(x => (TEntity)Convert.ChangeType(x.Value, entityType)).AsQueryable();
+            var context = store[entityType];
+            var query = context
+                .Select(x => (TEntity)Convert.ChangeType(CloneableHelper.DeepCopy(x.Value), entityType))
+                .AsQueryable();
+
+            return query;
         }
 
         /// <summary>
@@ -252,7 +240,7 @@
                     }
                     else
                     {
-                        context[key] = DeepCopy(entitySet.Entity);
+                        context[key] = CloneableHelper.DeepCopy(entitySet.Entity);
                     }
 
                     count++;
@@ -284,19 +272,24 @@
 
             PrimaryKeyConventionHelper.ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
 
-            var entityType = typeof(TEntity);
-            var store = InMemoryCache.Instance.GetDatabaseStore(DatabaseName);
+            if (fetchStrategy == null)
+            {
+                var entityType = typeof(TEntity);
+                var store = InMemoryCache.Instance.GetDatabaseStore(DatabaseName);
 
-            if (!store.ContainsKey(entityType))
-                return new QueryResult<TEntity>(default(TEntity));
+                if (!store.ContainsKey(entityType))
+                    return new QueryResult<TEntity>(default(TEntity));
 
-            var key = Combine(keyValues);
+                var key = Combine(keyValues);
 
-            store[entityType].TryGetValue(key, out object entity);
+                store[entityType].TryGetValue(key, out object entity);
 
-            var result = (TEntity)Convert.ChangeType(entity, entityType);
+                var result = (TEntity)Convert.ChangeType(entity, entityType);
 
-            return new QueryResult<TEntity>(result);
+                return new QueryResult<TEntity>(result);
+            }
+
+            return base.Find(fetchStrategy, keyValues);
         }
 
         #endregion
