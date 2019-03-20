@@ -8,9 +8,9 @@
     using Xunit;
     using Xunit.Abstractions;
 
-    public class InMemoryRepositoryContextTests : TestBase
+    public class InMemoryRepositoryTests : TestBase
     {
-        public InMemoryRepositoryContextTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+        public InMemoryRepositoryTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
 
         [Fact]
         public void CanScoped()

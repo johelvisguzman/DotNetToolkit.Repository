@@ -7,9 +7,9 @@
     using Xunit;
     using Xunit.Abstractions;
 
-    public class CachingTests : TestBase
+    public class RepositoryCachingTests : TestBase
     {
-        public CachingTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+        public RepositoryCachingTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
 
         [Fact]
         public void CacheEnabled()

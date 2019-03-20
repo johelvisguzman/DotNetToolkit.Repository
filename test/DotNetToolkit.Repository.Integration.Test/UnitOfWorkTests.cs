@@ -3,13 +3,20 @@
     using Data;
     using Factories;
     using System;
+    using Transactions;
     using Xunit;
     using Xunit.Abstractions;
 
-    public class UnitOfWorkTraitsTests : TestBase
+    public class UnitOfWorkTests : TestBase
     {
-        public UnitOfWorkTraitsTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+        public UnitOfWorkTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
 
+        [Fact]
+        public void FactoryCreate()
+        {
+            ForAllUnitOfWorkFactories(TestFactoryCreate);
+        }
+        
         [Fact]
         public void DisposeRollBackUnCommittedChanges()
         {
@@ -44,6 +51,12 @@
         public void ThrowsIfCreateRepositoryWhenDisposed()
         {
             ForAllUnitOfWorkFactories(TestThrowsIfCreateRepositoryWhenDisposed);
+        }
+
+        private static void TestFactoryCreate(IUnitOfWorkFactory uowFactory)
+        {
+            Assert.NotNull(uowFactory.Create());
+            Assert.NotNull(uowFactory.CreateInstance<UnitOfWork>());
         }
 
         private static void TestDisposeRollBackUnCommittedChanges(IUnitOfWorkFactory uowFactory)

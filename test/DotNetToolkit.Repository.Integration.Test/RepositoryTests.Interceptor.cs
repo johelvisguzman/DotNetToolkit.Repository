@@ -6,10 +6,13 @@
     using InMemory;
     using Moq;
     using Xunit;
+    using Xunit.Abstractions;
 
     [Collection("Sequential")]
-    public class RepositoryInterceptorTests
+    public class RepositoryInterceptorTests : TestBase
     {
+        public RepositoryInterceptorTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+
         [Fact]
         public void Add()
         {
