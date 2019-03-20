@@ -2,7 +2,6 @@
 {
     using Configuration;
     using Newtonsoft.Json;
-    using Newtonsoft.Json.Serialization;
     using System.Collections.Generic;
     using System.IO;
 
@@ -44,7 +43,8 @@
             var serializer = new JsonSerializer
             {
                 Formatting = Formatting.Indented,
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
+                ContractResolver = new JsonDefaultSerializeContractResolver(),
+                PreserveReferencesHandling = PreserveReferencesHandling.None
             };
 
             serializer.Serialize(writer, entities);
