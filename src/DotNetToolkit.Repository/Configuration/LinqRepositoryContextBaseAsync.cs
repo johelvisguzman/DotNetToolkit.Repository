@@ -152,20 +152,14 @@
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(options);
 
+            var total = await CountAsync(query, cancellationToken);
+
             var pagedQuery = query
                 .ApplyPagingOptions(options)
-                .Select(selector)
-                .Select(x => new
-                {
-                    Result = x,
-                    Total = query.Count()
-                });
+                .Select(selector);
 
-            var data = await ToListAsync(pagedQuery, cancellationToken);
-
-            var result = data.Select(x => x.Result);
-            var total = data.FirstOrDefault()?.Total ?? 0;
-
+            var result = await ToListAsync(pagedQuery, cancellationToken);
+            
             return new QueryResult<IEnumerable<TResult>>(result, total);
         }
 
@@ -241,17 +235,11 @@
 
             if (options != null && options.PageSize != -1)
             {
-                // Tries to get the count in one query
-                var data = query
-                    .ApplyPagingOptions(options)
-                    .Select(x => new
-                    {
-                        Result = x,
-                        Total = query.Count()
-                    });
+                total = query.Count();
 
-                result = await ToDictionaryAsync(data.Select(x => x.Result), keySelectFunc, elementSelectorFunc, cancellationToken);
-                total = data.FirstOrDefault()?.Total ?? 0;
+                var pagedQuery = query.ApplyPagingOptions(options);
+
+                result = await ToDictionaryAsync(pagedQuery, keySelectFunc, elementSelectorFunc, cancellationToken);
             }
             else
             {
