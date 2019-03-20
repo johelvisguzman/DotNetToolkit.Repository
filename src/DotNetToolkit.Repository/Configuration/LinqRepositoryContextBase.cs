@@ -184,18 +184,12 @@
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(options);
 
-            var data = query
+            var total = query.Count();
+
+            var result = query
                 .ApplyPagingOptions(options)
                 .Select(selector)
-                .Select(x => new
-                {
-                    Result = x,
-                    Total = query.Count()
-                })
                 .ToList();
-
-            var result = data.Select(x => x.Result);
-            var total = data.FirstOrDefault()?.Total ?? 0;
 
             return new QueryResult<IEnumerable<TResult>>(result, total);
         }
@@ -267,17 +261,11 @@
 
             if (options != null && options.PageSize != -1)
             {
-                // Tries to get the count in one query
-                var data = query
-                    .ApplyPagingOptions(options)
-                    .Select(x => new
-                    {
-                        Result = x,
-                        Total = query.Count()
-                    });
+                total = query.Count();
 
-                result = data.Select(x => x.Result).ToDictionary(keySelectFunc, elementSelectorFunc);
-                total = data.FirstOrDefault()?.Total ?? 0;
+                result = query
+                    .ApplyPagingOptions(options)
+                    .ToDictionary(keySelectFunc, elementSelectorFunc);
             }
             else
             {
@@ -314,16 +302,12 @@
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(options);
 
-            var data = query
-                .ApplyPagingOptions(options)
-                .Select(x => new
-                {
-                    Result = x,
-                    Total = query.Count()
-                });
+            var total = query.Count();
 
-            var result = data.Select(x => x.Result).GroupBy(keySelectFunc, resultSelectorFunc).ToList();
-            var total = data.FirstOrDefault()?.Total ?? 0;
+            var result = query
+                .ApplyPagingOptions(options)
+                .GroupBy(keySelectFunc, resultSelectorFunc)
+                .ToList();
 
             return new QueryResult<IEnumerable<TResult>>(result, total);
         }
