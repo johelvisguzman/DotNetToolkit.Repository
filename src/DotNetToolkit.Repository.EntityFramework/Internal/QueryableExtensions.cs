@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.EntityFramework.Internal
 {
+    using Extensions;
     using Queries;
     using System;
     using System.Data.Entity;
@@ -12,8 +13,10 @@
             if (query == null)
                 throw new ArgumentNullException(nameof(query));
 
-            if (options?.FetchStrategy != null)
-                query = options.FetchStrategy.PropertyPaths.Aggregate(query, (current, path) => current.Include(path));
+            var fetchingPaths = options.DefaultIfFetchStrategyEmpty().PropertyPaths.ToList();
+
+            if (fetchingPaths.Any())
+                query = fetchingPaths.Aggregate(query, (current, path) => current.Include(path));
 
             return query;
         }
