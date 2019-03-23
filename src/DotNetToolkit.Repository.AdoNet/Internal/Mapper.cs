@@ -106,54 +106,74 @@
                     }
                 }
             }
-
+            
             if (joinTableInstances.Any())
             {
-                var mainTableProperties = entityType.GetRuntimeProperties().ToList();
+                var mainTablePrimaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<T>().First();
+                var mainTablePrimaryKeyValue = mainTablePrimaryKeyPropertyInfo.GetValue(entity);
 
-                foreach (var item in joinTableInstances)
+                // Needs to make sure we are not dealing with navigation properties that are not actually linked to this entity
+                var validJoinTableInstances = joinTableInstances
+                    .Where(x =>
+                    {
+                        var joinTableForeignKeyPropertyInfo = ForeignKeyConventionHelper
+                            .GetForeignKeyPropertyInfos(x.Key, entityType)
+                            .First();
+
+                        var joinTableForeignKeyValue = joinTableForeignKeyPropertyInfo.GetValue(x.Value);
+
+                        return mainTablePrimaryKeyValue.Equals(joinTableForeignKeyValue);
+                    })
+                    .ToDictionary(x => x.Key, x => x.Value);
+
+                if (validJoinTableInstances.Any())
                 {
-                    var joinTableInstance = item.Value;
-                    var joinTableType = item.Key;
-                    var isJoinPropertyCollection = false;
+                    var mainTableProperties = entityType.GetRuntimeProperties().ToList();
 
-                    // Sets the main table property in the join table
-                    var mainTablePropertyInfo = joinTableType.GetRuntimeProperties().Single(x => x.PropertyType == entityType);
-
-                    mainTablePropertyInfo.SetValue(joinTableInstance, entity);
-
-                    // Sets the join table property in the main table
-                    var joinTablePropertyInfo = mainTableProperties.Single(x =>
+                    foreach (var item in validJoinTableInstances)
                     {
-                        isJoinPropertyCollection = x.PropertyType.IsGenericCollection();
+                        var joinTableInstance = item.Value;
+                        var joinTableType = item.Key;
+                        var isJoinPropertyCollection = false;
 
-                        var type = isJoinPropertyCollection
-                            ? x.PropertyType.GetGenericArguments().First()
-                            : x.PropertyType;
+                        // Sets the main table property in the join table
+                        var mainTablePropertyInfo = joinTableType.GetRuntimeProperties().Single(x => x.PropertyType == entityType);
 
-                        return type == joinTableType;
-                    });
+                        mainTablePropertyInfo.SetValue(joinTableInstance, entity);
 
-                    if (isJoinPropertyCollection)
-                    {
-                        var collection = joinTablePropertyInfo.GetValue(entity, null);
-
-                        if (collection == null)
+                        // Sets the join table property in the main table
+                        var joinTablePropertyInfo = mainTableProperties.Single(x =>
                         {
-                            var collectionTypeParam = joinTablePropertyInfo.PropertyType.GetGenericArguments().First();
+                            isJoinPropertyCollection = x.PropertyType.IsGenericCollection();
 
-                            collection = Activator.CreateInstance(typeof(List<>).MakeGenericType(collectionTypeParam));
+                            var type = isJoinPropertyCollection
+                                ? x.PropertyType.GetGenericArguments().First()
+                                : x.PropertyType;
 
-                            joinTablePropertyInfo.SetValue(entity, collection);
+                            return type == joinTableType;
+                        });
+
+                        if (isJoinPropertyCollection)
+                        {
+                            var collection = joinTablePropertyInfo.GetValue(entity, null);
+
+                            if (collection == null)
+                            {
+                                var collectionTypeParam = joinTablePropertyInfo.PropertyType.GetGenericArguments().First();
+
+                                collection = Activator.CreateInstance(typeof(List<>).MakeGenericType(collectionTypeParam));
+
+                                joinTablePropertyInfo.SetValue(entity, collection);
+                            }
+
+                            collection.GetType().GetMethod("Add").Invoke(collection, new[] { joinTableInstance });
                         }
-
-                        collection.GetType().GetMethod("Add").Invoke(collection, new[] { joinTableInstance });
+                        else
+                        {
+                            joinTablePropertyInfo.SetValue(entity, joinTableInstance);
+                        }
                     }
-                    else
-                    {
-                        joinTablePropertyInfo.SetValue(entity, joinTableInstance);
-                    }
-                }
+                } 
             }
 
             _entityDataReaderMapping[key] = entity;
