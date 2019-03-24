@@ -122,6 +122,24 @@
                         break;
                 }
             }
+            else if (memberExpression.Expression.NodeType != ExpressionType.Parameter)
+            {
+                var innerMemberExpression = GetMemberExpression(memberExpression.Expression);
+
+                while (innerMemberExpression.Expression.NodeType == ExpressionType.MemberAccess)
+                {
+                    innerMemberExpression = (MemberExpression)innerMemberExpression.Expression;
+                }
+
+                if (innerMemberExpression.Expression.NodeType != ExpressionType.Parameter)
+                {
+                    var objectMember = Expression.Convert(memberExpression, typeof(object));
+                    var getterLambda = Expression.Lambda<Func<object>>(objectMember);
+                    var getter = getterLambda.Compile();
+
+                    value = getter();
+                }
+            }
 
             return convertToString && value != null ? value.ToString() : value;
         }
