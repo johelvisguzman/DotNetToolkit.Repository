@@ -359,7 +359,21 @@
             if (fetchStrategy != null)
                 options.Include(fetchStrategy);
 
-            return Find<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance);
+            var selectorFunc = IdentityFunction<TEntity>.Instance;
+
+            QueryBuilder.CreateSelectStatement<TEntity>(
+                options,
+                fetchStrategy != null,
+                out var sql,
+                out var parameters,
+                out var navigationProperties,
+                out var getPropertyFromColumnAliasCallback);
+
+            var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
+
+            _schemaConfigHelper.ExecuteSchemaValidate(typeof(TEntity));
+
+            return _dbHelper.ExecuteObject<TEntity>(sql, parameters, reader => mapper.Map<TEntity>(reader, selectorFunc));
         }
 
         /// <summary>
@@ -711,7 +725,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found in the repository.</returns>
-        public Task<IQueryResult<TEntity>> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
+        public async Task<IQueryResult<TEntity>> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));
@@ -723,7 +737,21 @@
             if (fetchStrategy != null)
                 options.Include(fetchStrategy);
 
-            return FindAsync<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken);
+            var selectorFunc = IdentityFunction<TEntity>.Instance;
+
+            QueryBuilder.CreateSelectStatement<TEntity>(
+                options,
+                fetchStrategy != null,
+                out var sql,
+                out var parameters,
+                out var navigationProperties,
+                out var getPropertyFromColumnAliasCallback);
+
+            var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
+
+            await _schemaConfigHelper.ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
+
+            return await _dbHelper.ExecuteObjectAsync<TEntity>(sql, parameters, reader => mapper.Map<TEntity>(reader, selectorFunc), cancellationToken);
         }
 
         /// <summary>

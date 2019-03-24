@@ -113,7 +113,7 @@
             }
         }
 
-        public static void CreateSelectStatement<T>(IQueryOptions<T> options, string defaultSelect, out string sql, out Dictionary<string, object> parameters, out Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, out Func<string, Type> getTableTypeByColumnAliasCallback)
+        public static void CreateSelectStatement<T>(IQueryOptions<T> options, string defaultSelect, bool applyFetchOptions, out string sql, out Dictionary<string, object> parameters, out Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, out Func<string, Type> getTableTypeByColumnAliasCallback)
         {
             parameters = new Dictionary<string, object>();
             navigationProperties = new Dictionary<Type, Dictionary<string, PropertyInfo>>();
@@ -245,7 +245,9 @@
             var mainTableProperties = mainTableType.GetRuntimeProperties().ToList();
             var mainTablePrimaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<T>().First();
             var mainTablePrimaryKeyName = mainTablePrimaryKeyPropertyInfo.GetColumnName();
-            var fetchingPaths = options.DefaultIfFetchStrategyEmpty().PropertyPaths.ToList();
+            var fetchingPaths = applyFetchOptions
+                ? options.DefaultIfFetchStrategyEmpty().PropertyPaths.ToList()
+                : Enumerable.Empty<string>().ToList();
 
             const string DEFAULT_CROSS_JOIN_COLUMN_ALIAS = "C1";
             const string DEFAULT_CROSS_JOIN_TABLE_ALIAS = "GroupBy1";
@@ -463,11 +465,23 @@
             sql = sb.ToString();
         }
 
-        public static void CreateSelectStatement<T>(IQueryOptions<T> options, out string sql, out Dictionary<string, object> parameters, out Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, out Func<string, Type> getTableTypeByColumnAliasCallback)
+        public static void CreateSelectStatement<T>(IQueryOptions<T> options, bool applyFetchOptions, out string sql, out Dictionary<string, object> parameters, out Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, out Func<string, Type> getTableTypeByColumnAliasCallback)
         {
             CreateSelectStatement<T>(
                 options,
                 null,
+                applyFetchOptions,
+                out sql,
+                out parameters,
+                out navigationProperties,
+                out getTableTypeByColumnAliasCallback);
+        }
+
+        public static void CreateSelectStatement<T>(IQueryOptions<T> options, out string sql, out Dictionary<string, object> parameters, out Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, out Func<string, Type> getTableTypeByColumnAliasCallback)
+        {
+            CreateSelectStatement<T>(
+                options,
+                true,
                 out sql,
                 out parameters,
                 out navigationProperties,
@@ -478,22 +492,19 @@
         {
             CreateSelectStatement<T>(
                 options,
+                false,
                 out sql,
                 out parameters,
                 out var navigationProperties,
                 out var getPropertyFromColumnAliasCallback);
         }
-
-        public static void CreateSelectStatement<T>(out string sql)
-        {
-            CreateSelectStatement<T>(null, out sql, out var parameters);
-        }
-
+        
         public static void CreateSelectStatement<T>(IQueryOptions<T> options, string select, out string sql, out Dictionary<string, object> parameters)
         {
             CreateSelectStatement<T>(
                 options,
                 select,
+                false,
                 out sql,
                 out parameters,
                 out var navigationProperties,
@@ -503,6 +514,11 @@
         public static void CreateSelectStatement<T>(string select, out string sql)
         {
             CreateSelectStatement<T>(null, select, out sql, out var parameters);
+        }
+
+        public static void CreateSelectStatement<T>(out string sql)
+        {
+            CreateSelectStatement<T>(null, out sql, out var parameters);
         }
 
         public static void ExtractCrossJoinColumnName(string sql, out string columnName)
