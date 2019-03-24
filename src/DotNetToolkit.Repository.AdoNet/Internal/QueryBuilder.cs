@@ -219,7 +219,7 @@
                 var columnMapping = tableColumnAliasMapping[tableName];
 
                 if (!columnMapping.ContainsKey(columnName))
-                    throw new InvalidOperationException(string.Format(Resources.InvalidColumnName, columnName));
+                    return null;
 
                 return columnMapping[columnName];
             }

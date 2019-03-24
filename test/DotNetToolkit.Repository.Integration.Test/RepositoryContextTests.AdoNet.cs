@@ -95,6 +95,8 @@
 
             repo.Add(entities);
 
+            var customer = entities[0];
+
             // The ado.net repository should be able translate the expression into a valid sql query string to execute
             // things like parentheses and operators should be tested
 
@@ -110,6 +112,9 @@
             Assert.Equal(1, repo.Find(x => numOneConst == x.Id).Id);
             Assert.Equal(1, repo.Find(x => x.Id == numOneConst).Id);
             Assert.Equal(1, repo.Find(x => numOneConst == numOneConst).Id);
+            Assert.Equal(1, repo.Find(x => customer.Id == x.Id).Id);
+            Assert.Equal(1, repo.Find(x => x.Id == customer.Id).Id);
+            Assert.Equal(1, repo.Find(x => customer.Id == customer.Id).Id);
             Assert.Equal(1, repo.Find<int>(x => numOneConst == x.Id, x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => 1 == x.Id, x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => x.Id == 1, x => x.Id));
@@ -119,6 +124,9 @@
             Assert.Equal(1, repo.Find<int>(x => numOneVar == x.Id, x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => x.Id == numOneVar, x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => x.Id == numOneConst, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => customer.Id == x.Id, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id == customer.Id, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => customer.Id == customer.Id, x => x.Id));
 
             // boolean
             Assert.Equal(1, repo.Find(x => true).Id);
@@ -274,6 +282,8 @@
 
             await repo.AddAsync(entities);
 
+            var customer = entities[0];
+
             // The ado.net repository should be able translate the expression into a valid sql query string to execute
             // things like parentheses and operators should be tested
 
@@ -289,6 +299,9 @@
             Assert.Equal(1, (await repo.FindAsync(x => numOneConst == x.Id)).Id);
             Assert.Equal(1, (await repo.FindAsync(x => x.Id == numOneConst)).Id);
             Assert.Equal(1, (await repo.FindAsync(x => numOneConst == numOneConst)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => customer.Id == x.Id)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id == customer.Id)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => customer.Id == customer.Id)).Id);
             Assert.Equal(1, await repo.FindAsync<int>(x => numOneConst == x.Id, x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => 1 == x.Id, x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == 1, x => x.Id));
@@ -300,6 +313,9 @@
             Assert.Equal(1, await repo.FindAsync<int>(x => numOneVar == x.Id, x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == numOneVar, x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == numOneConst, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => customer.Id == x.Id, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == customer.Id, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => customer.Id == customer.Id, x => x.Id));
 
             // boolean
             Assert.Equal(1, (await repo.FindAsync(x => true)).Id);
