@@ -1339,7 +1339,7 @@
         /// </summary>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public IQueryResult<IEnumerable<TEntity>> FindAll(IQueryOptions<TEntity> options)
+        public IPagedQueryResult<IEnumerable<TEntity>> FindAll(IQueryOptions<TEntity> options)
         {
             return FindAll<TEntity>(options, IdentityExpression<TEntity>.Instance);
         }
@@ -1371,12 +1371,12 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public IQueryResult<IEnumerable<TResult>> FindAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
+        public IPagedQueryResult<IEnumerable<TResult>> FindAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
             Logger.Debug($"Executing [ Method = FindAll, CacheEnabled = {CacheEnabled} ]");
 
-            IQueryResult<IEnumerable<TResult>> Getter() =>
-                InterceptError<IQueryResult<IEnumerable<TResult>>>(
+            IPagedQueryResult<IEnumerable<TResult>> Getter() =>
+                InterceptError<IPagedQueryResult<IEnumerable<TResult>>>(
                     () => Context.FindAll<TEntity, TResult>(options, selector));
 
             var queryResult = CacheEnabled
@@ -1480,7 +1480,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public IQueryResult<Dictionary<TDictionaryKey, TEntity>> ToDictionary<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector)
+        public IPagedQueryResult<Dictionary<TDictionaryKey, TEntity>> ToDictionary<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector)
         {
             return ToDictionary<TDictionaryKey, TEntity>(options, keySelector, IdentityExpression<TEntity>.Instance);
         }
@@ -1507,12 +1507,12 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public IQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
+        public IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
             Logger.Debug($"Executing [ Method = ToDictionary, CacheEnabled = {CacheEnabled} ]");
 
-            IQueryResult<Dictionary<TDictionaryKey, TElement>> Getter() =>
-                InterceptError<IQueryResult<Dictionary<TDictionaryKey, TElement>>>(
+            IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> Getter() =>
+                InterceptError<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
                     () => Context.ToDictionary(options, keySelector, elementSelector));
 
             var queryResult = CacheEnabled
@@ -1548,12 +1548,12 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="resultSelector">A transform function to produce a result value from each element.</param>
         /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public IQueryResult<IEnumerable<TResult>> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
+        public IPagedQueryResult<IEnumerable<TResult>> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
             Logger.Debug($"Executing [ Method = GroupBy, CacheEnabled = {CacheEnabled} ]");
 
-            IQueryResult<IEnumerable<TResult>> Getter() =>
-                InterceptError<IQueryResult<IEnumerable<TResult>>>(
+            IPagedQueryResult<IEnumerable<TResult>> Getter() =>
+                InterceptError<IPagedQueryResult<IEnumerable<TResult>>>(
                     () => Context.GroupBy(options, keySelector, resultSelector));
 
             var queryResult = CacheEnabled
@@ -1893,7 +1893,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public Task<IQueryResult<IEnumerable<TEntity>>> FindAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        public Task<IPagedQueryResult<IEnumerable<TEntity>>> FindAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             return FindAllAsync<TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken);
         }
@@ -1928,12 +1928,12 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public async Task<IQueryResult<IEnumerable<TResult>>> FindAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<IPagedQueryResult<IEnumerable<TResult>>> FindAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             Logger.Debug($"Executing [ Method = FindAllAsync, CacheEnabled = {CacheEnabled} ]");
 
-            Task<IQueryResult<IEnumerable<TResult>>> Getter() =>
-                InterceptErrorAsync<IQueryResult<IEnumerable<TResult>>>(
+            Task<IPagedQueryResult<IEnumerable<TResult>>> Getter() =>
+                InterceptErrorAsync<IPagedQueryResult<IEnumerable<TResult>>>(
                     () => Context.AsAsync().FindAllAsync<TEntity, TResult>(options, selector, cancellationToken));
 
             var queryResult = CacheEnabled
@@ -2044,7 +2044,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public Task<IQueryResult<Dictionary<TDictionaryKey, TEntity>>> ToDictionaryAsync<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<IPagedQueryResult<Dictionary<TDictionaryKey, TEntity>>> ToDictionaryAsync<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ToDictionaryAsync<TDictionaryKey, TEntity>(options, keySelector, IdentityExpression<TEntity>.Instance, cancellationToken);
         }
@@ -2073,12 +2073,12 @@
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public async Task<IQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             Logger.Debug($"Executing [ Method = ToDictionaryAsync, CacheEnabled = {CacheEnabled} ]");
 
-            Task<IQueryResult<Dictionary<TDictionaryKey, TElement>>> Getter() =>
-                InterceptErrorAsync<IQueryResult<Dictionary<TDictionaryKey, TElement>>>(
+            Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> Getter() =>
+                InterceptErrorAsync<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
                     () => Context.AsAsync().ToDictionaryAsync(options, keySelector, elementSelector, cancellationToken));
 
             var queryResult = CacheEnabled
@@ -2117,12 +2117,12 @@
         /// <param name="resultSelector">A transform function to produce a result value from each element.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public async Task<IQueryResult<IEnumerable<TResult>>> GroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<IPagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             Logger.Debug($"Executing [ Method = GroupByAsync, CacheEnabled = {CacheEnabled} ]");
 
-            Task<IQueryResult<IEnumerable<TResult>>> Getter() =>
-                InterceptErrorAsync<IQueryResult<IEnumerable<TResult>>>(
+            Task<IPagedQueryResult<IEnumerable<TResult>>> Getter() =>
+                InterceptErrorAsync<IPagedQueryResult<IEnumerable<TResult>>>(
                     () => Context.AsAsync().GroupByAsync(options, keySelector, resultSelector, cancellationToken));
 
             var queryResult = CacheEnabled

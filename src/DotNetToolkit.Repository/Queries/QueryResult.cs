@@ -17,11 +17,6 @@
         }
 
         /// <summary>
-        /// Gets the total number of records.
-        /// </summary>
-        public int Total { get; }
-
-        /// <summary>
         /// Gets a value indicating whether the executed query has a result.
         /// </summary>
         public bool HasResult
@@ -41,17 +36,6 @@
         public QueryResult(TResult result)
         {
             _result = result;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="QueryResult{TResult}"/> class.
-        /// </summary>
-        /// <param name="result">The result.</param>
-        /// <param name="total">The total number of records.</param>
-        public QueryResult(TResult result, int total)
-        {
-            _result = result;
-            Total = total;
         }
     }
 }
