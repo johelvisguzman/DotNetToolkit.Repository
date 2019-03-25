@@ -2,7 +2,6 @@
 {
     using Conventions;
     using Extensions;
-    using Helpers;
     using Properties;
     using Queries;
     using Queries.Strategies;
@@ -92,18 +91,24 @@
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found in the repository.</returns>
-        public virtual Task<IQueryResult<TEntity>> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
+        public virtual async Task<IQueryResult<TEntity>> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));
 
+            PrimaryKeyConventionHelper.ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
+
             var options = new QueryOptions<TEntity>()
                 .Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
 
-            if (fetchStrategy != null)
-                options = options.Include(fetchStrategy);
+            var query = AsQueryable<TEntity>();
 
-            return FindAsync<TEntity, TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken);
+            if (fetchStrategy != null)
+                query = ApplyFetchingOptions(query, options.Include(fetchStrategy));
+
+            var result = await FirstOrDefaultAsync(query.ApplySpecificationOptions(options), cancellationToken);
+
+            return new QueryResult<TEntity>(result);
         }
 
         /// <summary>
@@ -123,7 +128,7 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            var query = AsQueryable(options)
+            var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(options)
                 .ApplyPagingOptions(options)
@@ -148,7 +153,7 @@
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
 
-            var query = AsQueryable(options)
+            var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(options);
 
@@ -159,7 +164,7 @@
                 .Select(selector);
 
             var result = await ToListAsync(pagedQuery, cancellationToken);
-            
+
             return new QueryResult<IEnumerable<TResult>>(result, total);
         }
 
@@ -172,7 +177,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public virtual async Task<IQueryResult<int>> CountAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            var query = AsQueryable(options)
+            var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(options)
                 .ApplyPagingOptions(options);
@@ -194,7 +199,7 @@
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            var query = AsQueryable(options)
+            var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(options)
                 .ApplyPagingOptions(options);
@@ -226,7 +231,7 @@
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            var query = AsQueryable(options)
+            var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(options);
 

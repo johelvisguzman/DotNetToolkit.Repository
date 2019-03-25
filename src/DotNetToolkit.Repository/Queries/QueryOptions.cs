@@ -20,12 +20,11 @@
 
         private int _pageSize;
         private int _pageIndex;
-        private FetchQueryStrategy<T> _fetchStrategy;
-        private SpecificationQueryStrategy<T> _specificationStrategy;
+        private IFetchQueryStrategy<T> _fetchStrategy;
+        private ISpecificationQueryStrategy<T> _specificationStrategy;
+        private Dictionary<string, SortOrder> _sortingPropertiesMapping;
 
         private const int DefaultPageSize = 100;
-
-        private readonly Dictionary<string, SortOrder> _sortingPropertiesMapping;
 
         #endregion
 
@@ -45,6 +44,27 @@
         #endregion
 
         #region Public Methods
+
+        /// <summary>
+        /// Clones the current configured options to a new instance.
+        /// </summary>
+        /// <returns>The new clone instance.</returns>
+        public QueryOptions<T> Clone()
+        {
+            var copy = new QueryOptions<T>();
+
+            if (this._fetchStrategy != null)
+                copy.Include(this._fetchStrategy);
+
+            if (this._specificationStrategy != null)
+                copy.Include(this._specificationStrategy);
+
+            copy._sortingPropertiesMapping = this._sortingPropertiesMapping.ToDictionary(x => x.Key, x => x.Value);
+            copy._pageIndex = this._pageIndex;
+            copy._pageSize = this._pageSize;
+
+            return copy;
+        }
 
         /// <summary>
         /// Applies an ascending sort order according to the specified property name.
@@ -267,8 +287,8 @@
 
             sb.Append($"QueryOptions<{typeof(T).Name}>: [ ");
 
-            sb.Append(_specificationStrategy != null 
-                ? $"\n\t{_specificationStrategy.ToString()}," 
+            sb.Append(_specificationStrategy != null
+                ? $"\n\t{_specificationStrategy.ToString()},"
                 : $"\n\tSpecificationQueryStrategy<{typeof(T).Name}>: [ null ],");
 
             sb.Append(_fetchStrategy != null

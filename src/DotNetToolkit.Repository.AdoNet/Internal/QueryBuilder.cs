@@ -5,7 +5,6 @@
     using Helpers;
     using Properties;
     using Queries;
-    using Queries.Strategies;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -114,7 +113,7 @@
             }
         }
 
-        public static void CreateSelectStatement<T>(IQueryOptions<T> options, string defaultSelect, out string sql, out Dictionary<string, object> parameters, out Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, out Func<string, Type> getTableTypeByColumnAliasCallback)
+        public static void CreateSelectStatement<T>(IQueryOptions<T> options, string defaultSelect, bool applyFetchOptions, out string sql, out Dictionary<string, object> parameters, out Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, out Func<string, Type> getTableTypeByColumnAliasCallback)
         {
             parameters = new Dictionary<string, object>();
             navigationProperties = new Dictionary<Type, Dictionary<string, PropertyInfo>>();
@@ -220,7 +219,7 @@
                 var columnMapping = tableColumnAliasMapping[tableName];
 
                 if (!columnMapping.ContainsKey(columnName))
-                    throw new InvalidOperationException(string.Format(Resources.InvalidColumnName, columnName));
+                    return null;
 
                 return columnMapping[columnName];
             }
@@ -246,7 +245,9 @@
             var mainTableProperties = mainTableType.GetRuntimeProperties().ToList();
             var mainTablePrimaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<T>().First();
             var mainTablePrimaryKeyName = mainTablePrimaryKeyPropertyInfo.GetColumnName();
-            var fetchStrategy = options?.FetchStrategy;
+            var fetchingPaths = applyFetchOptions
+                ? options.DefaultIfFetchStrategyEmpty().PropertyPaths.ToList()
+                : Enumerable.Empty<string>().ToList();
 
             const string DEFAULT_CROSS_JOIN_COLUMN_ALIAS = "C1";
             const string DEFAULT_CROSS_JOIN_TABLE_ALIAS = "GroupBy1";
@@ -256,30 +257,6 @@
             foreach (var pi in properties.Values)
             {
                 GenerateColumnAlias(pi);
-            }
-
-            // Check to see if we can automatically include some navigation properties (this seems to be the behavior of entity framework as well).
-            // Only supports a one to one table join for now...
-            if (fetchStrategy == null || !fetchStrategy.PropertyPaths.Any())
-            {
-                // Assumes we want to perform a join when the navigation property from the primary table has also a navigation property of
-                // the same type as the primary table
-                // Only do a join when the primary table has a foreign key property for the join table
-                var paths = mainTableProperties
-                    .Where(x => x.IsComplex() && PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(x.PropertyType).Any())
-                    .Select(x => x.Name)
-                    .ToList();
-
-                if (paths.Count > 0)
-                {
-                    if (fetchStrategy == null)
-                        fetchStrategy = new FetchQueryStrategy<T>();
-
-                    foreach (var path in paths)
-                    {
-                        fetchStrategy.Fetch(path);
-                    }
-                }
             }
 
             // -----------------------------------------------------------------------------------------------------------
@@ -304,11 +281,11 @@
 
             // Append join tables from fetchStrategy
             // Only supports a one to one table join for now...
-            if (fetchStrategy != null && fetchStrategy.PropertyPaths.Any())
+            if (fetchingPaths.Any())
             {
                 sb.Append($"SELECT{Environment.NewLine}\t{select}");
 
-                foreach (var path in fetchStrategy.PropertyPaths)
+                foreach (var path in fetchingPaths)
                 {
                     var joinTablePropertyInfo = mainTableProperties.Single(x => x.Name.Equals(path));
                     var joinTableType = joinTablePropertyInfo.PropertyType.IsGenericCollection()
@@ -488,11 +465,23 @@
             sql = sb.ToString();
         }
 
-        public static void CreateSelectStatement<T>(IQueryOptions<T> options, out string sql, out Dictionary<string, object> parameters, out Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, out Func<string, Type> getTableTypeByColumnAliasCallback)
+        public static void CreateSelectStatement<T>(IQueryOptions<T> options, bool applyFetchOptions, out string sql, out Dictionary<string, object> parameters, out Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, out Func<string, Type> getTableTypeByColumnAliasCallback)
         {
             CreateSelectStatement<T>(
                 options,
                 null,
+                applyFetchOptions,
+                out sql,
+                out parameters,
+                out navigationProperties,
+                out getTableTypeByColumnAliasCallback);
+        }
+
+        public static void CreateSelectStatement<T>(IQueryOptions<T> options, out string sql, out Dictionary<string, object> parameters, out Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, out Func<string, Type> getTableTypeByColumnAliasCallback)
+        {
+            CreateSelectStatement<T>(
+                options,
+                true,
                 out sql,
                 out parameters,
                 out navigationProperties,
@@ -503,22 +492,19 @@
         {
             CreateSelectStatement<T>(
                 options,
+                false,
                 out sql,
                 out parameters,
                 out var navigationProperties,
                 out var getPropertyFromColumnAliasCallback);
         }
-
-        public static void CreateSelectStatement<T>(out string sql)
-        {
-            CreateSelectStatement<T>(null, out sql, out var parameters);
-        }
-
+        
         public static void CreateSelectStatement<T>(IQueryOptions<T> options, string select, out string sql, out Dictionary<string, object> parameters)
         {
             CreateSelectStatement<T>(
                 options,
                 select,
+                false,
                 out sql,
                 out parameters,
                 out var navigationProperties,
@@ -528,6 +514,11 @@
         public static void CreateSelectStatement<T>(string select, out string sql)
         {
             CreateSelectStatement<T>(null, select, out sql, out var parameters);
+        }
+
+        public static void CreateSelectStatement<T>(out string sql)
+        {
+            CreateSelectStatement<T>(null, out sql, out var parameters);
         }
 
         public static void ExtractCrossJoinColumnName(string sql, out string columnName)

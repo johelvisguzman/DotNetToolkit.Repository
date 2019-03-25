@@ -49,13 +49,19 @@
         /// Returns the entity's query.
         /// </summary>
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <param name="options">The options to apply to the query.</param>
         /// <returns>The entity's query.</returns>
-        protected override IQueryable<TEntity> AsQueryable<TEntity>(IQueryOptions<TEntity> options)
+        protected override IQueryable<TEntity> AsQueryable<TEntity>()
         {
-            return _context.Set<TEntity>()
-                .AsQueryable()
-                .ApplyFetchingOptions(options);
+            return _context.Set<TEntity>().AsQueryable();
+        }
+
+        /// <summary>
+        /// Apply a fetching options to the specified entity's query.
+        /// </summary>
+        /// <returns>The entity's query with the applied options.</returns>
+        protected override IQueryable<TEntity> ApplyFetchingOptions<TEntity>(IQueryable<TEntity> query, IQueryOptions<TEntity> options)
+        {
+            return query.ApplyFetchingOptions(options);
         }
 
         /// <summary>

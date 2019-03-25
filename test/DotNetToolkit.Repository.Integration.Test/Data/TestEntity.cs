@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Data
 {
     using System;
+    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
@@ -10,7 +11,6 @@
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string Name { get; set; }
-        public int AddressId { get; set; }
         public CustomerAddress Address { get; set; }
     }
 
@@ -21,13 +21,11 @@
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
         public string Name { get; set; }
-        public int AddressId { get; set; }
     }
 
     public class CustomerAddress
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public string Street { get; set; }
         public string City { get; set; }
@@ -35,15 +33,6 @@
         public int CustomerId { get; set; }
         [Required]
         public Customer Customer { get; set; }
-    }
-
-    public class CustomerWithTwoCompositePrimaryKeyAndNoOrder
-    {
-        [Key]
-        public int Id1 { get; set; }
-        [Key]
-        public string Id2 { get; set; }
-        public string Name { get; set; }
     }
 
     public class CustomerWithThreeCompositePrimaryKeyAndNoOrder
@@ -97,6 +86,47 @@
     public class CustomerWithNoId
     {
         public string Name { get; set; }
+    }
+
+    [Table("Customers")]
+    public class CustomerWithCompositeAddress
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public CustomerCompositeAddress Address { get; set; }
+    }
+
+    [Table("CustomerCompositeAddresses")]
+    public class CustomerCompositeAddress
+    {
+        [Key]
+        [Column(Order = 1)]
+        public int Id { get; set; }
+        [Key]
+        [Column(Order = 2)]
+        public int CustomerId { get; set; }
+        public string Street { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        [Required]
+        public CustomerWithCompositeAddress Customer { get; set; }
+    }
+
+    public class CustomerWithMultipleAddresses
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public ICollection<CustomerAddressWithMultipleAddresses> Addresses { get; set; }
+    }
+
+    public class CustomerAddressWithMultipleAddresses
+    {
+        public int Id { get; set; }
+        public string Street { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public int CustomerId { get; set; }
+        public CustomerWithMultipleAddresses Customer { get; set; }
     }
 
     public interface IHaveTimeStamp

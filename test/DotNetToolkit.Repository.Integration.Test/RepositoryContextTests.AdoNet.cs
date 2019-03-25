@@ -6,8 +6,6 @@
     using Configuration.Options;
     using Data;
     using Factories;
-    using Queries;
-    using Queries.Strategies;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
@@ -33,685 +31,9 @@
         }
 
         [Fact]
-        public void FindWithNavigationPropertyByKey_OneToOneRelationship()
-        {
-            var customerKey = 1;
-            var addressKey = 1;
-
-            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
-
-            var addressRepo = repoFactory.Create<CustomerAddress>();
-            var customerRepo = repoFactory.Create<Customer>();
-            var customerFetchStrategy = new FetchQueryStrategy<Customer>();
-
-            var entity = new Customer
-            {
-                Id = customerKey,
-                Name = "Random Name",
-                AddressId = addressKey
-            };
-
-            customerRepo.Add(entity);
-
-            var address = new CustomerAddress
-            {
-                Id = addressKey,
-                Street = "Street",
-                City = "New City",
-                State = "ST",
-                CustomerId = customerKey,
-                Customer = entity
-            };
-
-            addressRepo.Add(address);
-
-            TestCustomerAddress(address, customerRepo.Find(customerKey, customerFetchStrategy).Address);
-
-            // for one to one, the navigation properties will be included automatically (no need to fetch)
-            TestCustomerAddress(address, customerRepo.Find(customerKey).Address);
-        }
-
-        [Fact]
-        public void FindWithCompositeNavigationPropertyByKey_OneToOneRelationship()
-        {
-            var customerKey = 1;
-            var addressKey1 = 1;
-            var addressKey2 = 2;
-
-            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
-
-            var addressRepo = repoFactory.Create<CustomerAddressWithTwoCompositePrimaryKey, int, int>();
-            var customerRepo = repoFactory.Create<CustomerWithTwoCompositePrimaryKey>();
-            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithTwoCompositePrimaryKey>();
-
-            var entity = new CustomerWithTwoCompositePrimaryKey
-            {
-                Id = customerKey,
-                Name = "Random Name",
-                AddressId1 = addressKey1,
-                AddressId2 = addressKey2
-            };
-
-            var address = new CustomerAddressWithTwoCompositePrimaryKey
-            {
-                Id1 = addressKey1,
-                Id2 = addressKey2,
-                Street = "Street",
-                City = "New City",
-                State = "ST",
-                CustomerId = customerKey,
-                Customer = entity
-            };
-
-            customerRepo.Add(entity);
-            addressRepo.Add(address);
-
-            TestCustomerAddress(address, customerRepo.Find(customerKey, customerFetchStrategy).Address);
-
-            // for one to one, the navigation properties will be included automatically (no need to fetch)
-            TestCustomerAddress(address, customerRepo.Find(customerKey).Address);
-        }
-
-        [Fact]
-        public void FindWithForeignKeyAnnotationChangedByKey_OneToOneRelationship()
-        {
-            var customerKey = 1;
-            var addressKey = 1;
-
-            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
-
-            var addressWithForeignKeyAnnotationOnForeignKeyRepo = repoFactory.Create<CustomerAddressWithForeignKeyAnnotationOnForeignKey>();
-            var customerWithForeignKeyAnnotationOnForeignKeyRepo = repoFactory.Create<CustomerWithForeignKeyAnnotationOnForeignKey>();
-            var customerWithForeignKeyAnnotationOnForeignKeyFetchStrategy = new FetchQueryStrategy<CustomerWithForeignKeyAnnotationOnForeignKey>();
-
-            var customerWithForeignKeyAnnotationOnForeignKey = new CustomerWithForeignKeyAnnotationOnForeignKey
-            {
-                Id = customerKey,
-                Name = "Random Name",
-                AddressKey = addressKey
-            };
-
-            customerWithForeignKeyAnnotationOnForeignKeyRepo.Add(customerWithForeignKeyAnnotationOnForeignKey);
-
-            var addressWithForeignKeyAnnotationOnForeignKey = new CustomerAddressWithForeignKeyAnnotationOnForeignKey
-            {
-                Id = addressKey,
-                Street = "Street",
-                City = "New City",
-                State = "ST",
-                CustomerKey = customerKey,
-                Customer = customerWithForeignKeyAnnotationOnForeignKey
-            };
-
-            addressWithForeignKeyAnnotationOnForeignKeyRepo.Add(addressWithForeignKeyAnnotationOnForeignKey);
-
-            TestCustomerAddress(addressWithForeignKeyAnnotationOnForeignKey, customerWithForeignKeyAnnotationOnForeignKeyRepo.Find(customerKey, customerWithForeignKeyAnnotationOnForeignKeyFetchStrategy).Address);
-
-            // for one to one, the navigation properties will be included automatically (no need to fetch)
-            TestCustomerAddress(addressWithForeignKeyAnnotationOnForeignKey, customerWithForeignKeyAnnotationOnForeignKeyRepo.Find(customerKey).Address);
-
-            var addressWithForeignKeyAnnotationOnNavigationPropertyRepo = repoFactory.Create<CustomerAddressWithForeignKeyAnnotationOnNavigationProperty>();
-            var customerWithForeignKeyAnnotationOnNavigationPropertyRepo = repoFactory.Create<CustomerWithForeignKeyAnnotationOnNavigationProperty>();
-            var customerWithForeignKeyAnnotationOnNavigationPropertyFetchStrategy = new FetchQueryStrategy<CustomerWithForeignKeyAnnotationOnNavigationProperty>();
-
-            customerKey = 2;
-            addressKey = 2;
-
-            var customerWithForeignKeyAnnotationOnNavigationProperty = new CustomerWithForeignKeyAnnotationOnNavigationProperty
-            {
-                Id = customerKey,
-                Name = "Random Name",
-                AddressKey = addressKey
-            };
-
-            customerWithForeignKeyAnnotationOnNavigationPropertyRepo.Add(customerWithForeignKeyAnnotationOnNavigationProperty);
-
-            var addressWithForeignKeyAnnotationOnNavigationProperty = new CustomerAddressWithForeignKeyAnnotationOnNavigationProperty
-            {
-                Id = addressKey,
-                Street = "Street",
-                City = "New City",
-                State = "ST",
-                CustomerKey = customerKey,
-                Customer = customerWithForeignKeyAnnotationOnNavigationProperty
-            };
-
-            addressWithForeignKeyAnnotationOnNavigationPropertyRepo.Add(addressWithForeignKeyAnnotationOnNavigationProperty);
-
-            TestCustomerAddress(addressWithForeignKeyAnnotationOnNavigationProperty, customerWithForeignKeyAnnotationOnNavigationPropertyRepo.Find(customerKey, customerWithForeignKeyAnnotationOnNavigationPropertyFetchStrategy).Address);
-
-            // for one to one, the navigation properties will be included automatically (no need to fetch)
-            TestCustomerAddress(addressWithForeignKeyAnnotationOnNavigationProperty, customerWithForeignKeyAnnotationOnNavigationPropertyRepo.Find(customerKey).Address);
-        }
-
-        [Fact]
-        public void FindWithNavigationPropertyByCompositeKey_OneToOneRelationship()
-        {
-            var customerKey = 1;
-            var addressKey = 1;
-
-            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
-
-            var addressRepo = repoFactory.Create<CustomerCompositeAddress, int, int>();
-            var customerRepo = repoFactory.Create<CustomerWithCompositeAddress>();
-            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithCompositeAddress>();
-
-            var entity = new CustomerWithCompositeAddress
-            {
-                Id = customerKey,
-                Name = "Random Name",
-                AddressId = addressKey
-            };
-
-            customerRepo.Add(entity);
-
-            var address = new CustomerCompositeAddress
-            {
-                Id = addressKey,
-                Street = "Street",
-                City = "New City",
-                State = "ST",
-                CustomerId = customerKey,
-                Customer = entity
-            };
-
-            addressRepo.Add(address);
-
-            TestCustomerAddress(address, customerRepo.Find(customerKey, customerFetchStrategy).Address);
-
-            // for one to one, the navigation properties will be included automatically (no need to fetch)
-            TestCustomerAddress(address, customerRepo.Find(customerKey).Address);
-        }
-
-        [Fact]
-        public async Task FindWithNavigationPropertyByKeyAsync_OneToOneRelationship()
-        {
-           var customerKey = 1;
-            var addressKey = 1;
-
-            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
-
-            var addressRepo = repoFactory.Create<CustomerAddress>();
-            var customerRepo = repoFactory.Create<Customer>();
-            var fetchStrategy = new FetchQueryStrategy<Customer>();
-
-            var entity = new Customer
-            {
-                Id = customerKey,
-                Name = "Random Name",
-                AddressId = addressKey
-            };
-
-            await customerRepo.AddAsync(entity);
-
-            var address = new CustomerAddress
-            {
-                Id = addressKey,
-                Street = "Street",
-                City = "New City",
-                State = "ST",
-                CustomerId = customerKey,
-                Customer = entity
-            };
-
-            addressRepo.Add(address);
-
-            TestCustomerAddress(address, (await customerRepo.FindAsync(customerKey, fetchStrategy)).Address);
-
-            // for one to one, the navigation properties will be included automatically (no need to fetch)
-            TestCustomerAddress(address, (await customerRepo.FindAsync(customerKey)).Address);
-        }
-
-        [Fact]
-        public void FindWithNavigationProperty_OneToOneRelationship()
-        {
-            var customerKey = 1;
-            var addressKey = 1;
-
-            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
-
-            var addressRepo = repoFactory.Create<CustomerAddress>();
-            var customerRepo = repoFactory.Create<Customer>();
-
-            const string name = "Random Name";
-
-            var queryOptions = new QueryOptions<Customer>();
-
-            var entity = new Customer
-            {
-                Id = customerKey,
-                Name = name,
-                AddressId = addressKey
-            };
-
-            customerRepo.Add(entity);
-
-            var address = new CustomerAddress
-            {
-                Id = addressKey,
-                Street = "Street",
-                City = "New City",
-                State = "ST",
-                CustomerId = customerKey,
-                Customer = entity
-            };
-
-            addressRepo.Add(address);
-
-            // for one to one, the navigation properties will be included automatically (no need to fetch)
-            TestCustomerAddress(address, customerRepo.Find(x => x.Name.Equals(name)).Address);
-            TestCustomerAddress(address, customerRepo.Find(queryOptions).Address);
-            TestCustomerAddress(address, customerRepo.Find<CustomerAddress>(x => x.Name.Equals(name), x => x.Address));
-            TestCustomerAddress(address, customerRepo.Find<CustomerAddress>(queryOptions, x => x.Address));
-        }
-
-        [Fact]
-        public async Task FindWithNavigationPropertyAsync_OneToOneRelationship()
-        {
-            var customerKey = 1;
-            var addressKey = 1;
-
-            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
-
-            var addressRepo = repoFactory.Create<CustomerAddress>();
-            var customerRepo = repoFactory.Create<Customer>();
-
-            const string name = "Random Name";
-
-            var queryOptions = new QueryOptions<Customer>();
-
-            var entity = new Customer
-            {
-                Id = customerKey,
-                Name = name,
-                AddressId = addressKey
-            };
-
-            await customerRepo.AddAsync(entity);
-
-            var address = new CustomerAddress
-            {
-                Id = addressKey,
-                Street = "Street",
-                City = "New City",
-                State = "ST",
-                CustomerId = customerKey,
-                Customer = entity
-            };
-
-            await addressRepo.AddAsync(address);
-
-            // for one to one, the navigation properties will be included automatically (no need to fetch)
-            TestCustomerAddress(address, (await customerRepo.FindAsync(x => x.Name.Equals(name))).Address);
-            TestCustomerAddress(address, (await customerRepo.FindAsync(queryOptions)).Address);
-            TestCustomerAddress(address, await customerRepo.FindAsync<CustomerAddress>(x => x.Name.Equals(name), x => x.Address));
-            TestCustomerAddress(address, await customerRepo.FindAsync<CustomerAddress>(queryOptions, x => x.Address));
-        }
-
-        [Fact]
-        public void FindAlldWithNavigationProperty_OneToOneRelationship()
-        {
-            var customerKey = 1;
-            var addressKey = 1;
-
-            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
-
-            var addressRepo = repoFactory.Create<CustomerAddress>();
-            var customerRepo = repoFactory.Create<Customer>();
-
-            const string name = "Random Name";
-
-            var queryOptions = new QueryOptions<Customer>();
-
-            var entity = new Customer
-            {
-                Id = customerKey,
-                Name = name,
-                AddressId = addressKey
-            };
-
-            customerRepo.Add(entity);
-
-            var address = new CustomerAddress
-            {
-                Id = addressKey,
-                Street = "Street",
-                City = "New City",
-                State = "ST",
-                CustomerId = customerKey,
-                Customer = entity
-            };
-
-            addressRepo.Add(address);
-
-            // for one to one, the navigation properties will be included automatically (no need to fetch)
-            TestCustomerAddress(address, customerRepo.FindAll()?.FirstOrDefault()?.Address);
-            TestCustomerAddress(address, customerRepo.FindAll(x => x.Name.Equals(name))?.FirstOrDefault()?.Address);
-            TestCustomerAddress(address, customerRepo.FindAll(queryOptions).Result?.FirstOrDefault()?.Address);
-            TestCustomerAddress(address, customerRepo.FindAll<CustomerAddress>(x => x.Name.Equals(name), x => x.Address)?.FirstOrDefault());
-            TestCustomerAddress(address, customerRepo.FindAll<CustomerAddress>(queryOptions, x => x.Address).Result?.FirstOrDefault());
-        }
-
-        [Fact]
-        public async Task FindAlldWithNavigationPropertyAsync_OneToOneRelationship()
-        {
-            var customerKey = 1;
-            var addressKey = 1;
-
-            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
-
-            var addressRepo = repoFactory.Create<CustomerAddress>();
-            var customerRepo = repoFactory.Create<Customer>();
-
-            const string name = "Random Name";
-
-            var queryOptions = new QueryOptions<Customer>();
-
-            var entity = new Customer
-            {
-                Id = customerKey,
-                Name = name,
-                AddressId = addressKey
-            };
-
-            await customerRepo.AddAsync(entity);
-
-            var address = new CustomerAddress
-            {
-                Id = addressKey,
-                Street = "Street",
-                City = "New City",
-                State = "ST",
-                CustomerId = customerKey,
-                Customer = entity
-            };
-
-            await addressRepo.AddAsync(address);
-
-            // for one to one, the navigation properties will be included automatically (no need to fetch)
-            TestCustomerAddress(address, (await customerRepo.FindAllAsync())?.FirstOrDefault()?.Address);
-            TestCustomerAddress(address, (await customerRepo.FindAllAsync(x => x.Name.Equals(name)))?.FirstOrDefault()?.Address);
-            TestCustomerAddress(address, (await customerRepo.FindAllAsync(queryOptions)).Result?.FirstOrDefault()?.Address);
-            TestCustomerAddress(address, (await customerRepo.FindAllAsync<CustomerAddress>(x => x.Name.Equals(name), x => x.Address))?.FirstOrDefault());
-            TestCustomerAddress(address, (await customerRepo.FindAllAsync<CustomerAddress>(queryOptions, x => x.Address)).Result?.FirstOrDefault());
-        }
-
-        [Fact]
-        public void ExistWithNavigationProperty_OneToOneRelationship()
-        {
-            var customerKey = 1;
-            var addressKey = 1;
-
-            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
-
-            var addressRepo = repoFactory.Create<CustomerAddress>();
-            var customerRepo = repoFactory.Create<Customer>();
-
-            const string street = "Street";
-
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Address.Street.Equals(street));
-
-            var entity = new Customer
-            {
-                Id = customerKey,
-                Name = "Random Name",
-                AddressId = addressKey
-            };
-
-            customerRepo.Add(entity);
-
-            var address = new CustomerAddress
-            {
-                Id = addressKey,
-                Street = street,
-                City = "New City",
-                State = "ST",
-                CustomerId = customerKey,
-                Customer = entity
-            };
-
-            addressRepo.Add(address);
-
-            Assert.True(customerRepo.Exists(queryOptions));
-
-            // for one to one, the navigation properties will be included automatically (no need to fetch)
-            Assert.True(customerRepo.Exists(x => x.Address.Street.Equals(street)));
-        }
-
-        [Fact]
-        public async Task ExistWithNavigationPropertyAsync_OneToOneRelationship()
-        {
-            var customerKey = 1;
-            var addressKey = 1;
-
-            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
-
-            var addressRepo = repoFactory.Create<CustomerAddress>();
-            var customerRepo = repoFactory.Create<Customer>();
-
-            const string street = "Street";
-
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Address.Street.Equals(street));
-
-            var entity = new Customer
-            {
-                Id = customerKey,
-                Name = "Random Name",
-                AddressId = addressKey
-            };
-
-            await customerRepo.AddAsync(entity);
-
-            var address = new CustomerAddress
-            {
-                Id = addressKey,
-                Street = street,
-                City = "New City",
-                State = "ST",
-                CustomerId = customerKey,
-                Customer = entity
-            };
-
-            await addressRepo.AddAsync(address);
-
-            Assert.True(await customerRepo.ExistsAsync(queryOptions));
-
-            // for one to one, the navigation properties will be included automatically (no need to fetch)
-            Assert.True(await customerRepo.ExistsAsync(x => x.Address.Street.Equals(street)));
-        }
-
-        [Fact]
-        public void FindWithNavigationProperty_OneToManyRelationship()
-        {
-            var customerKey = 1;
-
-            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
-
-            var addressRepo = repoFactory.Create<CustomerAddressWithMultipleAddresses>();
-            var customerRepo = repoFactory.Create<CustomerWithMultipleAddresses>();
-            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
-            var queryOptions = new QueryOptions<CustomerWithMultipleAddresses>();
-            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
-
-            var entity = new CustomerWithMultipleAddresses
-            {
-                Id = customerKey,
-                Name = "Random Name",
-            };
-
-            customerRepo.Add(entity);
-
-            var addresses = new List<CustomerAddressWithMultipleAddresses>();
-
-            for (int i = 0; i < 5; i++)
-            {
-                addresses.Add(new CustomerAddressWithMultipleAddresses()
-                {
-                    Id = i + 1,
-                    Street = $"Street {i}",
-                    City = $"New City {i}",
-                    State = $"ST {i}",
-                    CustomerId = entity.Id,
-                    Customer = entity
-                });
-            }
-
-            addressRepo.Add(addresses);
-
-            Assert.Null(customerRepo.Find(customerKey).Addresses);
-            Assert.Null(customerRepo.Find(queryOptions).Addresses);
-            Assert.Null(customerRepo.Find<ICollection<CustomerAddressWithMultipleAddresses>>(queryOptions, x => x.Addresses));
-
-            TestCustomerAddress(addresses, customerRepo.Find(customerKey, customerFetchStrategy).Addresses);
-            TestCustomerAddress(addresses, customerRepo.Find(optionsWithFetchStrategy).Addresses);
-            TestCustomerAddress(addresses, customerRepo.Find<ICollection<CustomerAddressWithMultipleAddresses>>(optionsWithFetchStrategy, x => x.Addresses));
-        }
-
-        [Fact]
-        public async void FindWithNavigationPropertyAsync_OneToManyRelationship()
-        {
-            var customerKey = 1;
-
-            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
-
-            var addressRepo = repoFactory.Create<CustomerAddressWithMultipleAddresses>();
-            var customerRepo = repoFactory.Create<CustomerWithMultipleAddresses>();
-            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
-            var queryOptions = new QueryOptions<CustomerWithMultipleAddresses>();
-            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
-
-            var entity = new CustomerWithMultipleAddresses
-            {
-                Id = customerKey,
-                Name = "Random Name",
-            };
-
-            await customerRepo.AddAsync(entity);
-
-            var addresses = new List<CustomerAddressWithMultipleAddresses>();
-
-            for (int i = 0; i < 5; i++)
-            {
-                addresses.Add(new CustomerAddressWithMultipleAddresses()
-                {
-                    Id = i + 1,
-                    Street = $"Street {i}",
-                    City = $"New City {i}",
-                    State = $"ST {i}",
-                    CustomerId = entity.Id,
-                    Customer = entity
-                });
-            }
-
-            await addressRepo.AddAsync(addresses);
-
-            Assert.Null((await customerRepo.FindAsync(customerKey)).Addresses);
-            Assert.Null((await customerRepo.FindAsync(queryOptions)).Addresses);
-            Assert.Null(await customerRepo.FindAsync<ICollection<CustomerAddressWithMultipleAddresses>>(queryOptions, x => x.Addresses));
-
-            TestCustomerAddress(addresses, (await customerRepo.FindAsync(customerKey, customerFetchStrategy)).Addresses);
-            TestCustomerAddress(addresses, (await customerRepo.FindAsync(optionsWithFetchStrategy)).Addresses);
-            TestCustomerAddress(addresses, await customerRepo.FindAsync<ICollection<CustomerAddressWithMultipleAddresses>>(optionsWithFetchStrategy, x => x.Addresses));
-        }
-
-        [Fact]
-        public void FindAlldWithNavigationProperty_OneToManyRelationship()
-        {
-            var customerKey = 1;
-
-            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
-
-            var addressRepo = repoFactory.Create<CustomerAddressWithMultipleAddresses>();
-            var customerRepo = repoFactory.Create<CustomerWithMultipleAddresses>();
-            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
-            var queryOptions = new QueryOptions<CustomerWithMultipleAddresses>();
-            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
-
-            const string name = "Random Name";
-
-            var entity = new CustomerWithMultipleAddresses
-            {
-                Id = customerKey,
-                Name = name
-            };
-
-            customerRepo.Add(entity);
-
-            var addresses = new List<CustomerAddressWithMultipleAddresses>();
-
-            for (int i = 0; i < 5; i++)
-            {
-                addresses.Add(new CustomerAddressWithMultipleAddresses()
-                {
-                    Id = i + 1,
-                    Street = $"Street {i}",
-                    City = $"New City {i}",
-                    State = $"ST {i}",
-                    CustomerId = entity.Id,
-                    Customer = entity
-                });
-            }
-
-            addressRepo.Add(addresses);
-
-            Assert.Null(customerRepo.FindAll()?.FirstOrDefault()?.Addresses);
-            Assert.Null(customerRepo.FindAll(queryOptions).Result?.FirstOrDefault()?.Addresses);
-
-            TestCustomerAddress(addresses, customerRepo.FindAll(optionsWithFetchStrategy).Result?.FirstOrDefault()?.Addresses);
-            TestCustomerAddress(addresses, customerRepo.FindAll<ICollection<CustomerAddressWithMultipleAddresses>>(optionsWithFetchStrategy, x => x.Addresses).Result?.FirstOrDefault());
-        }
-
-        [Fact]
-        public async void FindAlldWithNavigationPropertyAsync_OneToManyRelationship()
-        {
-           var customerKey = 1;
-
-            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
-
-            var addressRepo = repoFactory.Create<CustomerAddressWithMultipleAddresses>();
-            var customerRepo = repoFactory.Create<CustomerWithMultipleAddresses>();
-            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
-            var queryOptions = new QueryOptions<CustomerWithMultipleAddresses>();
-            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
-
-            const string name = "Random Name";
-
-            var entity = new CustomerWithMultipleAddresses
-            {
-                Id = customerKey,
-                Name = name
-            };
-
-            await customerRepo.AddAsync(entity);
-
-            var addresses = new List<CustomerAddressWithMultipleAddresses>();
-
-            for (int i = 0; i < 5; i++)
-            {
-                addresses.Add(new CustomerAddressWithMultipleAddresses()
-                {
-                    Id = i + 1,
-                    Street = $"Street {i}",
-                    City = $"New City {i}",
-                    State = $"ST {i}",
-                    CustomerId = entity.Id,
-                    Customer = entity
-                });
-            }
-
-            await addressRepo.AddAsync(addresses);
-
-            Assert.Null((await customerRepo.FindAllAsync())?.FirstOrDefault()?.Addresses);
-            Assert.Null((await customerRepo.FindAllAsync(queryOptions)).Result?.FirstOrDefault()?.Addresses);
-
-            TestCustomerAddress(addresses, (await customerRepo.FindAllAsync(optionsWithFetchStrategy)).Result?.FirstOrDefault()?.Addresses);
-            TestCustomerAddress(addresses, (await customerRepo.FindAllAsync<ICollection<CustomerAddressWithMultipleAddresses>>(optionsWithFetchStrategy, x => x.Addresses)).Result?.FirstOrDefault());
-        }
-
-        [Fact]
         public void DeleteWithKeyDataAttribute()
         {
-           var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
+            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var repo = repoFactory.Create<CustomerWithKeyAnnotation>();
 
@@ -773,6 +95,8 @@
 
             repo.Add(entities);
 
+            var customer = entities[0];
+
             // The ado.net repository should be able translate the expression into a valid sql query string to execute
             // things like parentheses and operators should be tested
 
@@ -788,6 +112,9 @@
             Assert.Equal(1, repo.Find(x => numOneConst == x.Id).Id);
             Assert.Equal(1, repo.Find(x => x.Id == numOneConst).Id);
             Assert.Equal(1, repo.Find(x => numOneConst == numOneConst).Id);
+            Assert.Equal(1, repo.Find(x => customer.Id == x.Id).Id);
+            Assert.Equal(1, repo.Find(x => x.Id == customer.Id).Id);
+            Assert.Equal(1, repo.Find(x => customer.Id == customer.Id).Id);
             Assert.Equal(1, repo.Find<int>(x => numOneConst == x.Id, x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => 1 == x.Id, x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => x.Id == 1, x => x.Id));
@@ -797,6 +124,9 @@
             Assert.Equal(1, repo.Find<int>(x => numOneVar == x.Id, x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => x.Id == numOneVar, x => x.Id));
             Assert.Equal(1, repo.Find<int>(x => x.Id == numOneConst, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => customer.Id == x.Id, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => x.Id == customer.Id, x => x.Id));
+            Assert.Equal(1, repo.Find<int>(x => customer.Id == customer.Id, x => x.Id));
 
             // boolean
             Assert.Equal(1, repo.Find(x => true).Id);
@@ -952,6 +282,8 @@
 
             await repo.AddAsync(entities);
 
+            var customer = entities[0];
+
             // The ado.net repository should be able translate the expression into a valid sql query string to execute
             // things like parentheses and operators should be tested
 
@@ -967,6 +299,9 @@
             Assert.Equal(1, (await repo.FindAsync(x => numOneConst == x.Id)).Id);
             Assert.Equal(1, (await repo.FindAsync(x => x.Id == numOneConst)).Id);
             Assert.Equal(1, (await repo.FindAsync(x => numOneConst == numOneConst)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => customer.Id == x.Id)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => x.Id == customer.Id)).Id);
+            Assert.Equal(1, (await repo.FindAsync(x => customer.Id == customer.Id)).Id);
             Assert.Equal(1, await repo.FindAsync<int>(x => numOneConst == x.Id, x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => 1 == x.Id, x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == 1, x => x.Id));
@@ -978,6 +313,9 @@
             Assert.Equal(1, await repo.FindAsync<int>(x => numOneVar == x.Id, x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == numOneVar, x => x.Id));
             Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == numOneConst, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => customer.Id == x.Id, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => x.Id == customer.Id, x => x.Id));
+            Assert.Equal(1, await repo.FindAsync<int>(x => customer.Id == customer.Id, x => x.Id));
 
             // boolean
             Assert.Equal(1, (await repo.FindAsync(x => true)).Id);
@@ -1129,7 +467,7 @@
         [Fact]
         public void FindAllWithComplexExpressions()
         {
-           var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
+            var repoFactory = new RepositoryFactory(BuildOptions(ContextProviderType.AdoNet));
 
             var repo = repoFactory.Create<Customer>();
 
@@ -1295,7 +633,7 @@
         [Fact]
         public void ThrowsIfSchemaTableColumnsMismatchOnSaveChanges()
         {
-            var connection = TestAdoNetOptionsBuilderFactory.CreateConnection();
+            var connection = TestDbConnectionHelper.CreateConnection();
             var options = new RepositoryOptionsBuilder()
                 .UseAdoNet(connection)
                 .UseLoggerProvider(TestXUnitLoggerProvider)
@@ -1495,175 +833,6 @@
             Assert.Equal(string.Format(AdoNet.Properties.Resources.UnableToDetermineCompositePrimaryKeyOrdering, "foreign", typeof(CustomerWithTwoCompositeForeignKeyAndNoOrdering).FullName), ex.Message);
         }
 
-        private static void TestCustomerAddress(CustomerAddress expected, CustomerAddress actual)
-        {
-            Assert.NotNull(expected);
-            Assert.NotNull(actual);
-            Assert.NotEqual(expected, actual);
-
-            // The navigation property should have all the values mapped correctly
-            Assert.Equal(expected.Street, actual.Street);
-            Assert.Equal(expected.City, actual.City);
-            Assert.Equal(expected.State, actual.State);
-
-            // The navigation property should have a key linking back to the main class (customer)
-            Assert.NotEqual(0, actual.CustomerId);
-            Assert.NotEqual(0, expected.CustomerId);
-            Assert.Equal(expected.CustomerId, actual.CustomerId);
-
-            // If the navigation property has also a navigation property linking back to the main class (customer),
-            // then that navigation property should also be mapped correctly
-            Assert.NotNull(expected.Customer);
-            Assert.NotNull(actual.Customer);
-            Assert.Equal(expected.Customer.Id, expected.Customer.Id);
-            Assert.Equal(expected.Customer.Name, expected.Customer.Name);
-            Assert.Equal(expected.Customer.AddressId, expected.Customer.AddressId);
-        }
-
-        private static void TestCustomerAddress(CustomerAddressWithTwoCompositePrimaryKey expected, CustomerAddressWithTwoCompositePrimaryKey actual)
-        {
-            Assert.NotNull(expected);
-            Assert.NotNull(actual);
-            Assert.NotEqual(expected, actual);
-
-            // The navigation property should have all the values mapped correctly
-            Assert.Equal(expected.Street, actual.Street);
-            Assert.Equal(expected.City, actual.City);
-            Assert.Equal(expected.State, actual.State);
-
-            // The navigation property should have a key linking back to the main class (customer)
-            Assert.NotEqual(0, actual.CustomerId);
-            Assert.NotEqual(0, expected.CustomerId);
-            Assert.Equal(expected.CustomerId, actual.CustomerId);
-
-            // If the navigation property has also a navigation property linking back to the main class (customer),
-            // then that navigation property should also be mapped correctly
-            Assert.NotNull(expected.Customer);
-            Assert.NotNull(actual.Customer);
-            Assert.Equal(expected.Customer.Id, expected.Customer.Id);
-            Assert.Equal(expected.Customer.Name, expected.Customer.Name);
-            Assert.Equal(expected.Customer.AddressId1, expected.Customer.AddressId1);
-            Assert.Equal(expected.Customer.AddressId2, expected.Customer.AddressId2);
-        }
-
-        private static void TestCustomerAddress(CustomerCompositeAddress expected, CustomerCompositeAddress actual)
-        {
-            Assert.NotNull(expected);
-            Assert.NotNull(actual);
-            Assert.NotEqual(expected, actual);
-
-            // The navigation property should have all the values mapped correctly
-            Assert.Equal(expected.Street, actual.Street);
-            Assert.Equal(expected.City, actual.City);
-            Assert.Equal(expected.State, actual.State);
-
-            // The navigation property should have a key linking back to the main class (customer)
-            Assert.NotEqual(0, actual.CustomerId);
-            Assert.NotEqual(0, expected.CustomerId);
-            Assert.Equal(expected.CustomerId, actual.CustomerId);
-
-            // If the navigation property has also a navigation property linking back to the main class (customer),
-            // then that navigation property should also be mapped correctly
-            Assert.NotNull(expected.Customer);
-            Assert.NotNull(actual.Customer);
-            Assert.Equal(expected.Customer.Id, expected.Customer.Id);
-            Assert.Equal(expected.Customer.Name, expected.Customer.Name);
-            Assert.Equal(expected.Customer.AddressId, expected.Customer.AddressId);
-        }
-
-        private static void TestCustomerAddress(CustomerAddressWithForeignKeyAnnotationOnForeignKey expected, CustomerAddressWithForeignKeyAnnotationOnForeignKey actual)
-        {
-            Assert.NotNull(expected);
-            Assert.NotNull(actual);
-            Assert.NotEqual(expected, actual);
-
-            // The navigation property should have all the values mapped correctly
-            Assert.Equal(expected.Street, actual.Street);
-            Assert.Equal(expected.City, actual.City);
-            Assert.Equal(expected.State, actual.State);
-
-            // The navigation property should have a key linking back to the main class (customer)
-            Assert.NotEqual(0, actual.CustomerKey);
-            Assert.NotEqual(0, expected.CustomerKey);
-            Assert.Equal(expected.CustomerKey, actual.CustomerKey);
-
-            // If the navigation property has also a navigation property linking back to the main class (customer),
-            // then that navigation property should also be mapped correctly
-            Assert.NotNull(expected.Customer);
-            Assert.NotNull(actual.Customer);
-            Assert.Equal(expected.Customer.Id, expected.Customer.Id);
-            Assert.Equal(expected.Customer.Name, expected.Customer.Name);
-            Assert.Equal(expected.Customer.AddressKey, expected.Customer.AddressKey);
-        }
-
-        private static void TestCustomerAddress(CustomerAddressWithForeignKeyAnnotationOnNavigationProperty expected, CustomerAddressWithForeignKeyAnnotationOnNavigationProperty actual)
-        {
-            Assert.NotNull(expected);
-            Assert.NotNull(actual);
-            Assert.NotEqual(expected, actual);
-
-            // The navigation property should have all the values mapped correctly
-            Assert.Equal(expected.Street, actual.Street);
-            Assert.Equal(expected.City, actual.City);
-            Assert.Equal(expected.State, actual.State);
-
-            // The navigation property should have a key linking back to the main class (customer)
-            Assert.NotEqual(0, actual.CustomerKey);
-            Assert.NotEqual(0, expected.CustomerKey);
-            Assert.Equal(expected.CustomerKey, actual.CustomerKey);
-
-            // If the navigation property has also a navigation property linking back to the main class (customer),
-            // then that navigation property should also be mapped correctly
-            Assert.NotNull(expected.Customer);
-            Assert.NotNull(actual.Customer);
-            Assert.Equal(expected.Customer.Id, expected.Customer.Id);
-            Assert.Equal(expected.Customer.Name, expected.Customer.Name);
-            Assert.Equal(expected.Customer.AddressKey, expected.Customer.AddressKey);
-        }
-
-        private static void TestCustomerAddress(IEnumerable<CustomerAddressWithMultipleAddresses> expectedList, IEnumerable<CustomerAddressWithMultipleAddresses> actualList)
-        {
-            Assert.NotEmpty(expectedList);
-            Assert.NotEmpty(actualList);
-            Assert.NotEqual(expectedList, actualList);
-            Assert.Equal(expectedList.Count(), actualList.Count());
-
-            for (var i = 0; i < expectedList.Count(); i++)
-            {
-                var expected = expectedList.ElementAt(i);
-                var actual = actualList.ElementAt(i);
-
-                Assert.NotNull(expected);
-                Assert.NotNull(actual);
-                Assert.NotEqual(expected, actual);
-
-                // The navigation property should have all the values mapped correctly
-                Assert.Equal(expected.Street, actual.Street);
-                Assert.Equal(expected.City, actual.City);
-                Assert.Equal(expected.State, actual.State);
-
-                // The navigation property should have a key linking back to the main class (customer)
-                Assert.NotEqual(0, actual.CustomerId);
-                Assert.NotEqual(0, expected.CustomerId);
-                Assert.Equal(expected.CustomerId, actual.CustomerId);
-
-                // If the navigation property has also a navigation property linking back to the main class (customer),
-                // then that navigation property should also be mapped correctly
-                Assert.NotNull(expected.Customer);
-                Assert.NotNull(actual.Customer);
-                Assert.Equal(expected.Customer.Id, expected.Customer.Id);
-                Assert.Equal(expected.Customer.Name, expected.Customer.Name);
-            }
-        }
-
-        class Customer
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-            public int AddressId { get; set; }
-            public CustomerAddress Address { get; set; }
-        }
-
         [Table("Customers")]
         class CustomerWithKeyAnnotation
         {
@@ -1671,91 +840,30 @@
             [Column("Id")]
             public int Key { get; set; }
             public string Name { get; set; }
-            public int AddressId { get; set; }
             public CustomerAddress Address { get; set; }
         }
 
-        [Table("Customers")]
-        class CustomerWithForeignKeyAnnotationOnForeignKey
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-            [Column("AddressId")]
-            public int AddressKey { get; set; }
-            public CustomerAddressWithForeignKeyAnnotationOnForeignKey Address { get; set; }
-        }
-
-        [Table("Customers")]
-        class CustomerWithForeignKeyAnnotationOnNavigationProperty
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-            [Column("AddressId")]
-            public int AddressKey { get; set; }
-            [ForeignKey("AddressId")]
-            public CustomerAddressWithForeignKeyAnnotationOnNavigationProperty Address { get; set; }
-        }
-
-        [Table("Customers")]
-        class CustomerWithCompositeAddress
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-            public int AddressId { get; set; }
-            public CustomerCompositeAddress Address { get; set; }
-        }
-
-        class CustomerAddress
-        {
-            public int Id { get; set; }
-            public string Street { get; set; }
-            public string City { get; set; }
-            public string State { get; set; }
-            public int CustomerId { get; set; }
-            [Required]
-            public Customer Customer { get; set; }
-        }
-
-        [Table("CustomerCompositeAddresses")]
-        class CustomerCompositeAddress
+        class CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering
         {
             [Key]
-            [Column(Order = 1)]
-            public int Id { get; set; }
+            public int Id1 { get; set; }
             [Key]
-            [Column(Order = 2)]
-            public int CustomerId { get; set; }
-            public string Street { get; set; }
+            public int Id2 { get; set; }
+            public string Street1 { get; set; }
             public string City { get; set; }
             public string State { get; set; }
-            public CustomerWithCompositeAddress Customer { get; set; }
         }
 
-        [Table("CustomerAddresses")]
-        class CustomerAddressWithForeignKeyAnnotationOnForeignKey
+        class CustomerWithTwoCompositeForeignKeyAndNoOrdering
         {
             public int Id { get; set; }
-            public string Street { get; set; }
-            public string City { get; set; }
-            public string State { get; set; }
-            [ForeignKey("Customer")]
-            [Column("CustomerId")]
-            public int CustomerKey { get; set; }
             [Required]
-            public CustomerWithForeignKeyAnnotationOnForeignKey Customer { get; set; }
-        }
-
-        [Table("CustomerAddresses")]
-        class CustomerAddressWithForeignKeyAnnotationOnNavigationProperty
-        {
-            public int Id { get; set; }
-            public string Street { get; set; }
-            public string City { get; set; }
-            public string State { get; set; }
-            [Column("CustomerId")]
-            public int CustomerKey { get; set; }
-            [ForeignKey("CustomerId")]
-            public CustomerWithForeignKeyAnnotationOnNavigationProperty Customer { get; set; }
+            public string Name { get; set; }
+            [ForeignKey("Address")]
+            public int AddressId1 { get; set; }
+            [ForeignKey("Address")]
+            public int AddressId2 { get; set; }
+            public CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering Address { get; set; }
         }
 
         [Table("CustomersColumnNameMismatch")]
@@ -1786,95 +894,6 @@
             public string Name { get; set; }
         }
 
-        [Table("CustomersWithTwoCompositePrimaryKey")]
-        class CustomerWithTwoCompositePrimaryKey
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-            [ForeignKey("Address")]
-            [Column(Order = 1)]
-            public int AddressId1 { get; set; }
-            [ForeignKey("Address")]
-            [Column(Order = 2)]
-            public int AddressId2 { get; set; }
-            public CustomerAddressWithTwoCompositePrimaryKey Address { get; set; }
-        }
-
-        [Table("CustomersAddressWithTwoCompositePrimaryKey")]
-        class CustomerAddressWithTwoCompositePrimaryKey
-        {
-            [Key]
-            [Column(Order = 1)]
-            public int Id1 { get; set; }
-            [Key]
-            [Column(Order = 2)]
-            public int Id2 { get; set; }
-            public string Street { get; set; }
-            public string City { get; set; }
-            public string State { get; set; }
-            public int CustomerId { get; set; }
-            [Required]
-            public CustomerWithTwoCompositePrimaryKey Customer { get; set; }
-        }
-
-        [Table("CustomersNotCreated")]
-        class CustomerNotCreated
-        {
-            public int Id { get; set; }
-            [Required]
-            public string Name { get; set; }
-            [ForeignKey("Address")]
-            [Column(Order = 1)]
-            public int AddressId1 { get; set; }
-            [ForeignKey("Address")]
-            [Column(Order = 2)]
-            public int AddressId2 { get; set; }
-            public CustomerAddressNotCreated Address { get; set; }
-        }
-
-        [Table("CustomersAddressNotCreated")]
-        class CustomerAddressNotCreated
-        {
-            [Key]
-            [Column(Order = 1)]
-            public int Id1 { get; set; }
-            [Key]
-            [Column(Order = 2)]
-            public int Id2 { get; set; }
-            [Required]
-            public string Street1 { get; set; }
-            [Required]
-            public string City { get; set; }
-            [Required]
-            [Column("ST")]
-            [StringLength(2)]
-            public string State { get; set; }
-            public CustomerNotCreated Customer { get; set; }
-        }
-
-        class CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering
-        {
-            [Key]
-            public int Id1 { get; set; }
-            [Key]
-            public int Id2 { get; set; }
-            public string Street1 { get; set; }
-            public string City { get; set; }
-            public string State { get; set; }
-        }
-
-        class CustomerWithTwoCompositeForeignKeyAndNoOrdering
-        {
-            public int Id { get; set; }
-            [Required]
-            public string Name { get; set; }
-            [ForeignKey("Address")]
-            public int AddressId1 { get; set; }
-            [ForeignKey("Address")]
-            public int AddressId2 { get; set; }
-            public CustomerAddressWithTwoCompositePrimaryKeyAndNoOrdering Address { get; set; }
-        }
-
         [Table("CustomersNotCreatedWithForeignKeyAttributeNotFoundOnDependentType")]
         class CustomerNotCreatedWithForeignKeyAttributeNotFoundOnDependentType
         {
@@ -1882,23 +901,6 @@
             public string Name { get; set; }
             [ForeignKey("AddressId")]
             public CustomerAddress Address { get; set; }
-        }
-
-        class CustomerWithMultipleAddresses
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-            public ICollection<CustomerAddressWithMultipleAddresses> Addresses { get; set; }
-        }
-
-        class CustomerAddressWithMultipleAddresses
-        {
-            public int Id { get; set; }
-            public string Street { get; set; }
-            public string City { get; set; }
-            public string State { get; set; }
-            public int CustomerId { get; set; }
-            public CustomerWithMultipleAddresses Customer { get; set; }
         }
 
         class ClassA

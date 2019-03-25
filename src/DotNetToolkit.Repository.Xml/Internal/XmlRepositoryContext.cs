@@ -1,8 +1,13 @@
 ﻿namespace DotNetToolkit.Repository.Xml.Internal
 {
     using Configuration;
+    using Configuration.Logging;
+    using Extensions;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
+    using System.Reflection;
+    using System.Xml;
     using System.Xml.Serialization;
 
     /// <summary>
@@ -22,6 +27,35 @@
 
         #endregion
 
+        #region Private Methods
+
+        private static XmlAttributeOverrides GetXmlAttributeOverrides<TEntity>()
+        {
+            var overrides = new XmlAttributeOverrides();
+            var ignore = new XmlAttributes { XmlIgnore = true };
+
+            var type = typeof(TEntity);
+
+            var properties = type.GetRuntimeProperties().Where(x => x.IsComplex());
+
+            foreach (var propInfo in properties)
+            {
+                overrides.Add(type, propInfo.Name, ignore);
+            }
+
+            return overrides;
+        }
+
+        private static XmlSerializer GetSerializer<TEntity>()
+        {
+            var overrides = GetXmlAttributeOverrides<TEntity>();
+            var serializer = new XmlSerializer(typeof(List<TEntity>), overrides);
+
+            return serializer;
+        }
+
+        #endregion
+
         #region Overrides of FileStreamRepositoryContextBase
 
         /// <summary>
@@ -29,10 +63,17 @@
         /// </summary>
         protected override IEnumerable<TEntity> OnLoaded<TEntity>(StreamReader reader)
         {
-            var serializer = new XmlSerializer(typeof(List<TEntity>));
-            var entities = (List<TEntity>)serializer.Deserialize(reader);
+            using (var xmlReader = XmlReader.Create(reader))
+            {
+                var serializer = GetSerializer<TEntity>();
 
-            return entities;
+                if (serializer.CanDeserialize(xmlReader))
+                    return (List<TEntity>)serializer.Deserialize(xmlReader);
+
+                Logger.Debug("Unable deserialize file.");
+
+                return Enumerable.Empty<TEntity>();
+            }
         }
 
         /// <summary>
@@ -40,7 +81,7 @@
         /// </summary>
         protected override void OnSaved<TEntity>(StreamWriter writer, IEnumerable<TEntity> entities)
         {
-            var serializer = new XmlSerializer(typeof(List<TEntity>));
+            var serializer = GetSerializer<TEntity>();
 
             serializer.Serialize(writer, entities);
         }

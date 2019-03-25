@@ -7,6 +7,8 @@
     {
         public System.Data.Entity.DbSet<Customer> Customers { get; set; }
         public System.Data.Entity.DbSet<CustomerAddress> CustomerAddresses { get; set; }
+        public System.Data.Entity.DbSet<CustomerWithMultipleAddresses> CustomerWithMultipleAddresses { get; set; }
+        public System.Data.Entity.DbSet<CustomerWithCompositeAddress> CustomersWithCompositeAddress { get; set; }
         public System.Data.Entity.DbSet<CustomerWithTwoCompositePrimaryKey> CustomersWithTwoCompositePrimaryKey { get; set; }
         public System.Data.Entity.DbSet<CustomerWithThreeCompositePrimaryKey> CustomersWithThreeCompositePrimaryKey { get; set; }
         public System.Data.Entity.DbSet<CustomerWithNoIdentity> CustomersWithNoIdentity { get; set; }
@@ -18,21 +20,27 @@
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<CustomerAddress>()
-                .HasKey(e => e.CustomerId);
-
-            modelBuilder.Entity<CustomerWithNoIdentity>()
-                .HasKey(e => e.Id);
-
             modelBuilder.Entity<Customer>()
-                 .HasOptional(s => s.Address)
-                 .WithRequired(ad => ad.Customer);
+                .HasOptional(x => x.Address)
+                .WithRequired(x => x.Customer);
+
+            modelBuilder.Entity<CustomerCompositeAddress>()
+                .HasRequired(x => x.Customer)
+                .WithOptional(x => x.Address);
+
+            modelBuilder.Entity<CustomerAddressWithMultipleAddresses>()
+                .HasRequired<CustomerWithMultipleAddresses>(x => x.Customer)
+                .WithMany(x => x.Addresses)
+                .HasForeignKey(x => x.CustomerId);
 
             modelBuilder.Entity<CustomerWithTwoCompositePrimaryKey>()
-                .HasKey(e => new { e.Id1, e.Id2 });
+                .HasKey(x => new { x.Id1, x.Id2 });
 
             modelBuilder.Entity<CustomerWithThreeCompositePrimaryKey>()
-                .HasKey(e => new { e.Id1, e.Id2, e.Id3 });
+                .HasKey(x => new { x.Id1, x.Id2, x.Id3 });
+
+            modelBuilder.Entity<CustomerCompositeAddress>()
+                .HasKey(x => new { x.Id, x.CustomerId });
         }
     }
 }

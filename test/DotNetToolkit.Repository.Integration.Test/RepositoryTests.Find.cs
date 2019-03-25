@@ -3,10 +3,10 @@
     using Data;
     using Factories;
     using Queries;
+    using Queries.Strategies;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Queries.Strategies;
     using Xunit;
 
     public partial class RepositoryTests : TestBase
@@ -78,6 +78,42 @@
         }
 
         [Fact]
+        public void FindWithNavigationProperty_OneToOneRelationship()
+        {
+            ForAllRepositoryFactories(TestFindWithNavigationProperty_OneToOneRelationship);
+        }
+
+        [Fact]
+        public void FindWithNavigationPropertyByKey_OneToOneRelationship()
+        {
+            ForAllRepositoryFactories(TestFindWithNavigationPropertyByKey_OneToOneRelationship);
+        }
+
+        [Fact]
+        public void FindWithNavigationPropertyByCompositeKey_OneToOneRelationship()
+        {
+            ForAllRepositoryFactories(TestFindWithNavigationPropertyByCompositeKey_OneToOneRelationship);
+        }
+
+        [Fact]
+        public void FindAllWithNavigationProperty_OneToOneRelationship()
+        {
+            ForAllRepositoryFactories(TestFindAllWithNavigationProperty_OneToOneRelationship);
+        }
+
+        [Fact]
+        public void FindWithNavigationProperty_OneToManyRelationship()
+        {
+            ForAllRepositoryFactories(TestFindWithNavigationProperty_OneToManyRelationship);
+        }
+
+        [Fact]
+        public void FindAllWithNavigationProperty_OneToManyRelationship()
+        {
+            ForAllRepositoryFactories(TestFindAllWithNavigationProperty_OneToManyRelationship);
+        }
+
+        [Fact]
         public void FindAsync()
         {
             ForAllRepositoryFactoriesAsync(TestFindAsync);
@@ -141,6 +177,36 @@
         public void FindWithThreeCompositePrimaryKeyAsync()
         {
             ForAllRepositoryFactoriesAsync(TestFindWithThreeCompositePrimaryKeyAsync);
+        }
+
+        [Fact]
+        public void FindWithNavigationPropertyByKeyAsync_OneToOneRelationship()
+        {
+            ForAllRepositoryFactoriesAsync(TestFindWithNavigationPropertyByKeyAsync_OneToOneRelationship);
+        }
+
+        [Fact]
+        public void FindWithNavigationPropertyAsync_OneToOneRelationship()
+        {
+            ForAllRepositoryFactoriesAsync(TestFindWithNavigationPropertyAsync_OneToOneRelationship);
+        }
+
+        [Fact]
+        public void FindAllWithNavigationPropertyAsync_OneToOneRelationship()
+        {
+            ForAllRepositoryFactoriesAsync(TestFindAllWithNavigationPropertyAsync_OneToOneRelationship);
+        }
+
+        [Fact]
+        public void FindWithNavigationPropertyAsync_OneToManyRelationship()
+        {
+            ForAllRepositoryFactoriesAsync(TestFindWithNavigationPropertyAsync_OneToManyRelationship);
+        }
+
+        [Fact]
+        public void FindAllWithNavigationPropertyAsync_OneToManyRelationship()
+        {
+            ForAllRepositoryFactoriesAsync(TestFindAllWithNavigationPropertyAsync_OneToManyRelationship);
         }
 
         private static void TestFind(IRepositoryFactory repoFactory)
@@ -514,6 +580,228 @@
             Assert.NotNull(repo.Find(key1, key2, key3, fetchStrategy));
         }
 
+        private static void TestFindWithNavigationPropertyByKey_OneToOneRelationship(IRepositoryFactory repoFactory, ContextProviderType providerType)
+        {
+            var addressRepo = repoFactory.Create<CustomerAddress>();
+            var customerRepo = repoFactory.Create<Customer>();
+            var fetchStrategy = new FetchQueryStrategy<Customer>().Fetch(x => x.Address);
+
+            var entity = new Customer
+            {
+                Name = "Random Name",
+            };
+
+            customerRepo.Add(entity);
+
+            var address = new CustomerAddress
+            {
+                Street = "Street",
+                City = "New City",
+                State = "ST",
+                CustomerId = entity.Id
+            };
+
+            Assert.Null(customerRepo.Find(entity.Id).Address);
+            Assert.Null(customerRepo.Find(entity.Id, fetchStrategy).Address);
+
+            // The customer is required here, otherwise it will throw an exception for entity framework
+            if (providerType == ContextProviderType.EntityFramework)
+            {
+                address.Customer = entity;
+            }
+
+            addressRepo.Add(address);
+
+            // The customer needs to be added after for ef core, other wise it will try to add the customer to the database,
+            // and will throw an exception because it already has been added
+            if (providerType != ContextProviderType.EntityFramework)
+            {
+                address.Customer = entity;
+            }
+
+            Assert.Null(customerRepo.Find(entity.Id).Address);
+
+            TestCustomerAddress(address, customerRepo.Find(entity.Id, fetchStrategy).Address);
+        }
+        private static void TestFindAllWithNavigationProperty_OneToOneRelationship(IRepositoryFactory repoFactory, ContextProviderType providerType)
+        {
+            var addressRepo = repoFactory.Create<CustomerAddress>();
+            var customerRepo = repoFactory.Create<Customer>();
+
+            var queryOptions = new QueryOptions<Customer>();
+
+            var entity = new Customer
+            {
+                Name = "Random Name"
+            };
+
+            customerRepo.Add(entity);
+
+            var address = new CustomerAddress
+            {
+                Street = "Street",
+                City = "New City",
+                State = "ST",
+                CustomerId = entity.Id
+            };
+
+            Assert.Null(customerRepo.FindAll(x => x.Id == entity.Id)?.FirstOrDefault()?.Address);
+            Assert.Null(customerRepo.FindAll(queryOptions.SatisfyBy(x => x.Id == entity.Id)).Result?.FirstOrDefault()?.Address);
+
+            // The customer is required here, otherwise it will throw an exception for entity framework
+            if (providerType == ContextProviderType.EntityFramework)
+            {
+                address.Customer = entity;
+            }
+
+            addressRepo.Add(address);
+
+            // The customer needs to be added after for ef core, other wise it will try to add the customer to the database,
+            // and will throw an exception because it already has been added
+            if (providerType != ContextProviderType.EntityFramework)
+            {
+                address.Customer = entity;
+            }
+
+            // for one to one, the navigation properties will be included automatically (no need to fetch)
+            TestCustomerAddress(address, customerRepo.FindAll(x => x.Id == entity.Id)?.FirstOrDefault()?.Address);
+            TestCustomerAddress(address, customerRepo.FindAll(queryOptions.SatisfyBy(x => x.Id == entity.Id)).Result?.FirstOrDefault()?.Address);
+        }
+
+        private static void TestFindWithNavigationPropertyByCompositeKey_OneToOneRelationship(IRepositoryFactory repoFactory, ContextProviderType providerType)
+        {
+            var addressRepo = repoFactory.Create<CustomerCompositeAddress, int, int>();
+            var customerRepo = repoFactory.Create<CustomerWithCompositeAddress>();
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithCompositeAddress>().Fetch(x => x.Address);
+
+            var entity = new CustomerWithCompositeAddress
+            {
+                Name = "Random Name"
+            };
+
+            customerRepo.Add(entity);
+
+            var address = new CustomerCompositeAddress
+            {
+                Street = "Street",
+                City = "New City",
+                State = "ST",
+                CustomerId = entity.Id
+            };
+
+            Assert.Null(customerRepo.Find(entity.Id).Address);
+            Assert.Null(customerRepo.Find(entity.Id, customerFetchStrategy).Address);
+
+            // The customer is required here, otherwise it will throw an exception for entity framework
+            if (providerType == ContextProviderType.EntityFramework)
+            {
+                address.Customer = entity;
+            }
+
+            addressRepo.Add(address);
+
+            // The customer needs to be added after for ef core, other wise it will try to add the customer to the database,
+            // and will throw an exception because it already has been added
+            if (providerType != ContextProviderType.EntityFramework)
+            {
+                address.Customer = entity;
+            }
+
+            Assert.Null(customerRepo.Find(entity.Id).Address);
+
+            TestCustomerAddress(address, customerRepo.Find(entity.Id, customerFetchStrategy).Address);
+        }
+
+        private static void TestFindWithNavigationProperty_OneToManyRelationship(IRepositoryFactory repoFactory)
+        {
+            var addressRepo = repoFactory.Create<CustomerAddressWithMultipleAddresses>();
+            var customerRepo = repoFactory.Create<CustomerWithMultipleAddresses>();
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
+            var queryOptions = new QueryOptions<CustomerWithMultipleAddresses>();
+            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
+
+            var entity = new CustomerWithMultipleAddresses
+            {
+                Name = "Random Name",
+            };
+
+            customerRepo.Add(entity);
+
+            var addresses = new List<CustomerAddressWithMultipleAddresses>();
+
+            for (int i = 0; i < 5; i++)
+            {
+                addresses.Add(new CustomerAddressWithMultipleAddresses()
+                {
+                    Street = $"Street {i}",
+                    City = $"New City {i}",
+                    State = $"ST {i}",
+                    CustomerId = entity.Id
+                });
+            }
+
+            Assert.Empty(customerRepo.Find(entity.Id)?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+            Assert.Empty(customerRepo.Find(queryOptions.SatisfyBy(x => x.Id == entity.Id))?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+            Assert.Empty(customerRepo.Find(entity.Id, customerFetchStrategy)?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+            Assert.Empty(customerRepo.Find(optionsWithFetchStrategy.SatisfyBy(x => x.Id == entity.Id))?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+
+            addressRepo.Add(addresses);
+
+            foreach (var address in addresses)
+            {
+                address.Customer = entity;
+            }
+
+            Assert.Empty(customerRepo.Find(entity.Id)?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+            Assert.Empty(customerRepo.Find(queryOptions.SatisfyBy(x => x.Id == entity.Id))?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+
+            TestCustomerAddress(addresses, customerRepo.Find(entity.Id, customerFetchStrategy).Addresses);
+            TestCustomerAddress(addresses, customerRepo.Find(optionsWithFetchStrategy.SatisfyBy(x => x.Id == entity.Id)).Addresses);
+        }
+
+        private static void TestFindAllWithNavigationProperty_OneToManyRelationship(IRepositoryFactory repoFactory)
+        {
+            var addressRepo = repoFactory.Create<CustomerAddressWithMultipleAddresses>();
+            var customerRepo = repoFactory.Create<CustomerWithMultipleAddresses>();
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
+            var queryOptions = new QueryOptions<CustomerWithMultipleAddresses>();
+            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
+
+            var entity = new CustomerWithMultipleAddresses
+            {
+                Name = "Random Name"
+            };
+
+            customerRepo.Add(entity);
+
+            var addresses = new List<CustomerAddressWithMultipleAddresses>();
+
+            for (int i = 0; i < 5; i++)
+            {
+                addresses.Add(new CustomerAddressWithMultipleAddresses()
+                {
+                    Street = $"Street {i}",
+                    City = $"New City {i}",
+                    State = $"ST {i}",
+                    CustomerId = entity.Id
+                });
+            }
+
+            Assert.Empty(customerRepo.FindAll(queryOptions.SatisfyBy(x => x.Id == entity.Id)).Result?.FirstOrDefault()?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+            Assert.Empty(customerRepo.FindAll(optionsWithFetchStrategy.SatisfyBy(x => x.Id == entity.Id)).Result.FirstOrDefault().Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+
+            addressRepo.Add(addresses);
+
+            foreach (var address in addresses)
+            {
+                address.Customer = entity;
+            }
+
+            Assert.Empty(customerRepo.FindAll(queryOptions.SatisfyBy(x => x.Id == entity.Id)).Result?.FirstOrDefault()?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+
+            TestCustomerAddress(addresses, customerRepo.FindAll(optionsWithFetchStrategy.SatisfyBy(x => x.Id == entity.Id)).Result.FirstOrDefault().Addresses);
+        }
+
         private static async Task TestFindAsync(IRepositoryFactory repoFactory)
         {
             var repo = repoFactory.Create<Customer>();
@@ -883,6 +1171,353 @@
             Assert.Null(await repo.FindAsync(key1, key2, randomKey, fetchStrategy));
             Assert.NotNull(await repo.FindAsync(key1, key2, key3));
             Assert.NotNull(await repo.FindAsync(key1, key2, key3, fetchStrategy));
+        }
+
+        private static async Task TestFindWithNavigationPropertyByKeyAsync_OneToOneRelationship(IRepositoryFactory repoFactory, ContextProviderType providerType)
+        {
+            var addressRepo = repoFactory.Create<CustomerAddress>();
+            var customerRepo = repoFactory.Create<Customer>();
+            var fetchStrategy = new FetchQueryStrategy<Customer>();
+
+            var entity = new Customer
+            {
+                Name = "Random Name"
+            };
+
+            await customerRepo.AddAsync(entity);
+
+            var address = new CustomerAddress
+            {
+                Street = "Street",
+                City = "New City",
+                State = "ST",
+                CustomerId = entity.Id
+            };
+
+            Assert.Null((await customerRepo.FindAsync(entity.Id, fetchStrategy)).Address);
+            Assert.Null((await customerRepo.FindAsync(entity.Id)).Address);
+
+            // The customer is required here, otherwise it will throw an exception for entity framework
+            if (providerType == ContextProviderType.EntityFramework)
+            {
+                address.Customer = entity;
+            }
+
+            addressRepo.Add(address);
+
+            // The customer needs to be added after for ef core, other wise it will try to add the customer to the database,
+            // and will throw an exception because it already has been added
+            if (providerType != ContextProviderType.EntityFramework)
+            {
+                address.Customer = entity;
+            }
+
+            Assert.Null((await customerRepo.FindAsync(entity.Id)).Address);
+
+            TestCustomerAddress(address, (await customerRepo.FindAsync(entity.Id, fetchStrategy)).Address);
+        }
+
+        private static void TestFindWithNavigationProperty_OneToOneRelationship(IRepositoryFactory repoFactory, ContextProviderType providerType)
+        {
+            var addressRepo = repoFactory.Create<CustomerAddress>();
+            var customerRepo = repoFactory.Create<Customer>();
+
+            var queryOptions = new QueryOptions<Customer>();
+
+            var entity = new Customer
+            {
+                Name = "Random Name"
+            };
+
+            customerRepo.Add(entity);
+
+            var address = new CustomerAddress
+            {
+                Street = "Street",
+                City = "New City",
+                State = "ST",
+                CustomerId = entity.Id
+            };
+
+            Assert.Null(customerRepo.Find(x => x.Id == entity.Id).Address);
+            Assert.Null(customerRepo.Find(queryOptions.SatisfyBy(x => x.Id == entity.Id)).Address);
+
+            // The customer is required here, otherwise it will throw an exception for entity framework
+            if (providerType == ContextProviderType.EntityFramework)
+            {
+                address.Customer = entity;
+            }
+
+            addressRepo.Add(address);
+
+            // The customer needs to be added after for ef core, other wise it will try to add the customer to the database,
+            // and will throw an exception because it already has been added
+            if (providerType != ContextProviderType.EntityFramework)
+            {
+                address.Customer = entity;
+            }
+
+            // for one to one, the navigation properties will be included automatically (no need to fetch)
+            TestCustomerAddress(address, customerRepo.Find(x => x.Id == entity.Id).Address);
+            TestCustomerAddress(address, customerRepo.Find(queryOptions.SatisfyBy(x => x.Id == entity.Id)).Address);
+        }
+
+        private static async Task TestFindWithNavigationPropertyAsync_OneToOneRelationship(IRepositoryFactory repoFactory, ContextProviderType providerType)
+        {
+            var addressRepo = repoFactory.Create<CustomerAddress>();
+            var customerRepo = repoFactory.Create<Customer>();
+
+            var queryOptions = new QueryOptions<Customer>();
+
+            var entity = new Customer
+            {
+                Name = "Random Name"
+            };
+
+            await customerRepo.AddAsync(entity);
+
+            var address = new CustomerAddress
+            {
+                Street = "Street",
+                City = "New City",
+                State = "ST",
+                CustomerId = entity.Id
+            };
+
+            Assert.Null((await customerRepo.FindAsync(x => x.Id == entity.Id)).Address);
+            Assert.Null((await customerRepo.FindAsync(queryOptions.SatisfyBy(x => x.Id == entity.Id))).Address);
+
+            // The customer is required here, otherwise it will throw an exception for entity framework
+            if (providerType == ContextProviderType.EntityFramework)
+            {
+                address.Customer = entity;
+            }
+
+            await addressRepo.AddAsync(address);
+
+            // The customer needs to be added after for ef core, other wise it will try to add the customer to the database,
+            // and will throw an exception because it already has been added
+            if (providerType != ContextProviderType.EntityFramework)
+            {
+                address.Customer = entity;
+            }
+
+            // for one to one, the navigation properties will be included automatically (no need to fetch)
+            TestCustomerAddress(address, (await customerRepo.FindAsync(x => x.Id == entity.Id)).Address);
+            TestCustomerAddress(address, (await customerRepo.FindAsync(queryOptions.SatisfyBy(x => x.Id == entity.Id))).Address);
+        }
+
+        private static async Task TestFindAllWithNavigationPropertyAsync_OneToOneRelationship(IRepositoryFactory repoFactory, ContextProviderType providerType)
+        {
+            var addressRepo = repoFactory.Create<CustomerAddress>();
+            var customerRepo = repoFactory.Create<Customer>();
+
+            var queryOptions = new QueryOptions<Customer>();
+
+            var entity = new Customer
+            {
+                Name = "Random Name"
+            };
+
+            await customerRepo.AddAsync(entity);
+
+            var address = new CustomerAddress
+            {
+                Street = "Street",
+                City = "New City",
+                State = "ST",
+                CustomerId = entity.Id
+            };
+
+            Assert.Null((await customerRepo.FindAllAsync(x => x.Id == entity.Id))?.FirstOrDefault()?.Address);
+            Assert.Null((await customerRepo.FindAllAsync(queryOptions.SatisfyBy(x => x.Id == entity.Id))).Result?.FirstOrDefault()?.Address);
+
+            // The customer is required here, otherwise it will throw an exception for entity framework
+            if (providerType == ContextProviderType.EntityFramework)
+            {
+                address.Customer = entity;
+            }
+
+            await addressRepo.AddAsync(address);
+
+            address.Customer = entity;
+
+            // for one to one, the navigation properties will be included automatically (no need to fetch)
+            TestCustomerAddress(address, (await customerRepo.FindAllAsync(x => x.Id == entity.Id))?.FirstOrDefault()?.Address);
+            TestCustomerAddress(address, (await customerRepo.FindAllAsync(queryOptions.SatisfyBy(x => x.Id == entity.Id))).Result?.FirstOrDefault()?.Address);
+        }
+
+        private static async Task TestFindWithNavigationPropertyAsync_OneToManyRelationship(IRepositoryFactory repoFactory)
+        {
+            var addressRepo = repoFactory.Create<CustomerAddressWithMultipleAddresses>();
+            var customerRepo = repoFactory.Create<CustomerWithMultipleAddresses>();
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
+            var queryOptions = new QueryOptions<CustomerWithMultipleAddresses>();
+            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
+
+            var entity = new CustomerWithMultipleAddresses
+            {
+                Name = "Random Name"
+            };
+
+            await customerRepo.AddAsync(entity);
+
+            var addresses = new List<CustomerAddressWithMultipleAddresses>();
+
+            for (int i = 0; i < 5; i++)
+            {
+                addresses.Add(new CustomerAddressWithMultipleAddresses()
+                {
+                    Street = $"Street {i}",
+                    City = $"New City {i}",
+                    State = $"ST {i}",
+                    CustomerId = entity.Id
+                });
+            }
+
+            Assert.Empty((await customerRepo.FindAsync(entity.Id))?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+            Assert.Empty((await customerRepo.FindAsync(queryOptions.SatisfyBy(x => x.Id == entity.Id)))?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+            Assert.Empty((await customerRepo.FindAsync(entity.Id, customerFetchStrategy))?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+            Assert.Empty((await customerRepo.FindAsync(optionsWithFetchStrategy.SatisfyBy(x => x.Id == entity.Id)))?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+
+            await addressRepo.AddAsync(addresses);
+
+            foreach (var address in addresses)
+            {
+                address.Customer = entity;
+            }
+
+            Assert.Empty((await customerRepo.FindAsync(entity.Id)).Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+            Assert.Empty((await customerRepo.FindAsync(queryOptions.SatisfyBy(x => x.Id == entity.Id))).Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+
+            TestCustomerAddress(addresses, (await customerRepo.FindAsync(entity.Id, customerFetchStrategy)).Addresses);
+            TestCustomerAddress(addresses, (await customerRepo.FindAsync(optionsWithFetchStrategy.SatisfyBy(x => x.Id == entity.Id))).Addresses);
+        }
+
+        private static async Task TestFindAllWithNavigationPropertyAsync_OneToManyRelationship(IRepositoryFactory repoFactory)
+        {
+            var addressRepo = repoFactory.Create<CustomerAddressWithMultipleAddresses>();
+            var customerRepo = repoFactory.Create<CustomerWithMultipleAddresses>();
+            var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
+            var queryOptions = new QueryOptions<CustomerWithMultipleAddresses>();
+            var optionsWithStrategies = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
+
+            var entity = new CustomerWithMultipleAddresses
+            {
+                Name = "Random Name"
+            };
+
+            await customerRepo.AddAsync(entity);
+
+            var addresses = new List<CustomerAddressWithMultipleAddresses>();
+
+            for (int i = 0; i < 5; i++)
+            {
+                addresses.Add(new CustomerAddressWithMultipleAddresses()
+                {
+                    Street = $"Street {i}",
+                    City = $"New City {i}",
+                    State = $"ST {i}",
+                    CustomerId = entity.Id
+                });
+            }
+
+            Assert.Empty((await customerRepo.FindAllAsync(queryOptions.SatisfyBy(x => x.Id == entity.Id))).Result?.FirstOrDefault()?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+            Assert.Empty((await customerRepo.FindAllAsync(optionsWithStrategies.SatisfyBy(x => x.Id == entity.Id))).Result?.FirstOrDefault()?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+
+            await addressRepo.AddAsync(addresses);
+
+            foreach (var address in addresses)
+            {
+                address.Customer = entity;
+            }
+
+            Assert.Null((await customerRepo.FindAllAsync(queryOptions.SatisfyBy(x => x.Id == entity.Id))).Result?.FirstOrDefault()?.Addresses);
+
+            TestCustomerAddress(addresses, (await customerRepo.FindAllAsync(optionsWithStrategies.SatisfyBy(x => x.Id == entity.Id))).Result?.FirstOrDefault()?.Addresses);
+        }
+
+        private static void TestCustomerAddress(CustomerAddress expected, CustomerAddress actual)
+        {
+            Assert.NotNull(expected);
+            Assert.NotNull(actual);
+            Assert.NotEqual(expected, actual);
+
+            // The navigation property should have all the values mapped correctly
+            Assert.Equal(expected.Street, actual.Street);
+            Assert.Equal(expected.City, actual.City);
+            Assert.Equal(expected.State, actual.State);
+
+            // The navigation property should have a key linking back to the main class (customer)
+            Assert.NotEqual(0, actual.CustomerId);
+            Assert.NotEqual(0, expected.CustomerId);
+            Assert.Equal(expected.CustomerId, actual.CustomerId);
+
+            // If the navigation property has also a navigation property linking back to the main class (customer),
+            // then that navigation property should also be mapped correctly
+            Assert.NotNull(expected.Customer);
+            Assert.NotNull(actual.Customer);
+            Assert.Equal(expected.Customer.Id, expected.Customer.Id);
+            Assert.Equal(expected.Customer.Name, expected.Customer.Name);
+        }
+
+        private static void TestCustomerAddress(CustomerCompositeAddress expected, CustomerCompositeAddress actual)
+        {
+            Assert.NotNull(expected);
+            Assert.NotNull(actual);
+            Assert.NotEqual(expected, actual);
+
+            // The navigation property should have all the values mapped correctly
+            Assert.Equal(expected.Street, actual.Street);
+            Assert.Equal(expected.City, actual.City);
+            Assert.Equal(expected.State, actual.State);
+
+            // The navigation property should have a key linking back to the main class (customer)
+            Assert.NotEqual(0, actual.CustomerId);
+            Assert.NotEqual(0, expected.CustomerId);
+            Assert.Equal(expected.CustomerId, actual.CustomerId);
+
+            // If the navigation property has also a navigation property linking back to the main class (customer),
+            // then that navigation property should also be mapped correctly
+            Assert.NotNull(expected.Customer);
+            Assert.NotNull(actual.Customer);
+            Assert.Equal(expected.Customer.Id, expected.Customer.Id);
+            Assert.Equal(expected.Customer.Name, expected.Customer.Name);
+        }
+
+        private static void TestCustomerAddress(IEnumerable<CustomerAddressWithMultipleAddresses> expectedList, IEnumerable<CustomerAddressWithMultipleAddresses> actualList)
+        {
+            Assert.NotEmpty(expectedList);
+            Assert.NotEmpty(actualList);
+            Assert.NotEqual(expectedList, actualList);
+            Assert.Equal(expectedList.Count(), actualList.Count());
+
+            for (var i = 0; i < expectedList.Count(); i++)
+            {
+                var expected = expectedList.ElementAt(i);
+                var actual = actualList.ElementAt(i);
+
+                Assert.NotNull(expected);
+                Assert.NotNull(actual);
+                Assert.NotEqual(expected, actual);
+
+                // The navigation property should have all the values mapped correctly
+                Assert.Equal(expected.Street, actual.Street);
+                Assert.Equal(expected.City, actual.City);
+                Assert.Equal(expected.State, actual.State);
+
+                // The navigation property should have a key linking back to the main class (customer)
+                Assert.NotEqual(0, actual.CustomerId);
+                Assert.NotEqual(0, expected.CustomerId);
+                Assert.Equal(expected.CustomerId, actual.CustomerId);
+
+                // If the navigation property has also a navigation property linking back to the main class (customer),
+                // then that navigation property should also be mapped correctly
+                Assert.NotNull(expected.Customer);
+                Assert.NotNull(actual.Customer);
+                Assert.Equal(expected.Customer.Id, expected.Customer.Id);
+                Assert.Equal(expected.Customer.Name, expected.Customer.Name);
+            }
         }
     }
 }

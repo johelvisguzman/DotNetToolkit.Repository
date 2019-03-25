@@ -16,7 +16,6 @@
         #region Fields
 
         private readonly IComparer<ExpressionType> _comparer = new OperatorPrecedenceComparer();
-        private readonly StringBuilder _sb = new StringBuilder();
         private readonly Dictionary<string, object> _parameters = new Dictionary<string, object>();
         private Func<Type, string> _getTableAlias;
         private Func<PropertyInfo, string> _getColumnAlias;
@@ -42,13 +41,13 @@
             _getTableAlias = getTableAlias;
             _getColumnAlias = getColumnAlias;
 
-            _sb.Append("(");
+            var sb = new StringBuilder();
 
-            Visit(predicate.Body);
+            sb.Append("(");
+            Visit(predicate.Body, sb);
+            sb.Append(")");
 
-            _sb.Append(")");
-
-            sql = _sb.ToString();
+            sql = sb.ToString();
             parameters = _parameters;
         }
 
@@ -56,7 +55,7 @@
 
         #region Private Methods
 
-        private void Visit(Expression node)
+        private void Visit(Expression node, StringBuilder sb)
         {
             if (node == null)
                 throw new ArgumentNullException(nameof(node));
@@ -64,7 +63,7 @@
             switch (node.NodeType)
             {
                 case ExpressionType.Call:
-                    TranslateMethodCall((MethodCallExpression)node);
+                    TranslateMethodCall((MethodCallExpression)node, sb);
                     break;
                 case ExpressionType.Equal:
                 case ExpressionType.GreaterThan:
@@ -77,31 +76,38 @@
                 case ExpressionType.AndAlso:
                 case ExpressionType.Or:
                 case ExpressionType.OrElse:
-                    TranslateComparison((BinaryExpression)node);
+                    TranslateComparison((BinaryExpression)node, sb);
                     break;
                 case ExpressionType.Constant:
-                    TranslateConstant((ConstantExpression)node);
+                    TranslateConstant((ConstantExpression)node, sb);
                     break;
                 default:
                     throw new NotSupportedException($"The expression operator '{node.NodeType}' is not supported");
             }
         }
 
-        private void Visit(Expression parent, Expression child)
+        private void Visit(Expression parent, Expression child, StringBuilder sb)
         {
             if (_comparer.Compare(child.NodeType, parent.NodeType) > 0)
             {
-                _sb.Append("(");
-                Visit(child);
-                _sb.Append(")");
+                var temp = new StringBuilder();
+
+                Visit(child, temp);
+
+                if (temp.Length > 0)
+                {
+                    sb.Append("(");
+                    sb.Append(temp);
+                    sb.Append(")");
+                }
             }
             else
             {
-                Visit(child);
+                Visit(child, sb);
             }
         }
 
-        private void TranslateMethodCall(MethodCallExpression node)
+        private void TranslateMethodCall(MethodCallExpression node, StringBuilder sb)
         {
             var arguments = node.Arguments.ToArray();
 
@@ -154,48 +160,55 @@
                         TranslateParameterizedVariableExpression(firstExpression, rightConstantExpression, node.Method.Name, out left, out right);
                 }
 
-                _sb.Append(left);
+                sb.Append(left);
 
                 switch (node.Method.Name)
                 {
                     case "Equals":
-                        _sb.Append(" = ");
+                        sb.Append(" = ");
                         break;
                     case "StartsWith":
                     case "EndsWith":
                     case "Contains":
-                        _sb.Append(" LIKE ");
+                        sb.Append(" LIKE ");
                         break;
                     default:
                         throw new NotSupportedException(node.Method.Name + " isn't supported");
                 }
 
-                _sb.Append(right);
+                sb.Append(right);
             }
         }
 
-        private void TranslateComparison(BinaryExpression node)
+        private void TranslateComparison(BinaryExpression node, StringBuilder sb)
         {
             if (node.NodeType == ExpressionType.And ||
                 node.NodeType == ExpressionType.AndAlso ||
                 node.NodeType == ExpressionType.Or ||
                 node.NodeType == ExpressionType.OrElse)
             {
-                Visit(node, node.Left);
+                var temp = new StringBuilder();
 
-                switch (node.NodeType)
+                Visit(node, node.Left, temp);
+
+                if (temp.Length > 0)
                 {
-                    case ExpressionType.And:
-                    case ExpressionType.AndAlso:
-                        _sb.Append(" AND ");
-                        break;
-                    case ExpressionType.Or:
-                    case ExpressionType.OrElse:
-                        _sb.Append(" OR ");
-                        break;
+                    switch (node.NodeType)
+                    {
+                        case ExpressionType.And:
+                        case ExpressionType.AndAlso:
+                            temp.Append(" AND ");
+                            break;
+                        case ExpressionType.Or:
+                        case ExpressionType.OrElse:
+                            temp.Append(" OR ");
+                            break;
+                    }
                 }
 
-                Visit(node, node.Right);
+                Visit(node, node.Right, temp);
+
+                sb.Append(temp);
             }
             else
             {
@@ -223,33 +236,36 @@
                         TranslateParameterizedVariableExpression(node.Left, rightConstantExpression, out left, out right);
                 }
 
-                _sb.Append(left);
+                if (string.IsNullOrEmpty(left) || string.IsNullOrEmpty(right))
+                    return;
+
+                sb.Append(left);
 
                 switch (node.NodeType)
                 {
                     case ExpressionType.Equal:
-                        _sb.Append(IsNullConstant(rightConstantExpression) ? " IS " : " = ");
+                        sb.Append(IsNullConstant(rightConstantExpression) ? " IS " : " = ");
                         break;
                     case ExpressionType.NotEqual:
-                        _sb.Append(IsNullConstant(rightConstantExpression) ? " IS NOT " : " <> ");
+                        sb.Append(IsNullConstant(rightConstantExpression) ? " IS NOT " : " <> ");
                         break;
                     case ExpressionType.LessThan:
-                        _sb.Append(" < ");
+                        sb.Append(" < ");
                         break;
                     case ExpressionType.LessThanOrEqual:
-                        _sb.Append(" <= ");
+                        sb.Append(" <= ");
                         break;
                     case ExpressionType.GreaterThan:
-                        _sb.Append(" > ");
+                        sb.Append(" > ");
                         break;
                     case ExpressionType.GreaterThanOrEqual:
-                        _sb.Append(" >= ");
+                        sb.Append(" >= ");
                         break;
                     default:
                         throw new NotSupportedException($"The binary operator '{node.NodeType}' is not supported");
                 }
 
-                _sb.Append(right);
+                sb.Append(right);
             }
         }
 
@@ -260,7 +276,9 @@
             var tableAlias = _getTableAlias(tableType);
 
             columnAlias = _getColumnAlias(propertyInfo);
-            column = $"[{tableAlias}].[{columnAlias}]";
+            column = !string.IsNullOrEmpty(columnAlias)
+                ? $"[{tableAlias}].[{columnAlias}]"
+                : null;
         }
 
         private void TranslateVariableExpression(Expression variableExpression, out string column)
@@ -271,6 +289,12 @@
         private void TranslateParameterizedVariableExpression(Expression variableExpression, ConstantExpression constantExpression, string methodName, out string column, out string parameter)
         {
             TranslateVariableExpression(variableExpression, out column, out var columnAlias);
+
+            if (string.IsNullOrEmpty(column))
+            {
+                parameter = null;
+                return;
+            }
 
             // In cases where the same property is being used multiple times in an expression, we need to generate
             // an alias for that property
@@ -325,11 +349,11 @@
             TranslateParameterizedVariableExpression(variableExpression, constantExpression, null, out column, out parameter);
         }
 
-        private void TranslateConstant(ConstantExpression node)
+        private void TranslateConstant(ConstantExpression node, StringBuilder sb)
         {
             var value = (bool)node.Value ? 1 : 0;
 
-            _sb.Append($"1 = {value}");
+            sb.Append($"1 = {value}");
         }
 
         private static bool IsNullConstant(ConstantExpression exp)

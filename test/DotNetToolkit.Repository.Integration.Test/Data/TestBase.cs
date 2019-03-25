@@ -1,11 +1,15 @@
 namespace DotNetToolkit.Repository.Integration.Test.Data
 {
+    using AdoNet;
     using Configuration.Logging;
     using Configuration.Options;
-    using Extensions.Microsoft.Caching.Memory;
+    using EntityFramework;
+    using EntityFrameworkCore;
     using Factories;
     using InMemory;
     using Json;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Infrastructure;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -25,28 +29,31 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 
         protected ILoggerProvider TestXUnitLoggerProvider { get; }
 
-        protected void ForAllRepositoryFactories(Action<IRepositoryFactory> action, params ContextProviderType[] contextTypeExceptionList)
+        protected void ForAllRepositoryFactories(Action<IRepositoryFactory, ContextProviderType> action, params ContextProviderType[] exclude)
         {
             Providers()
                 .ForEach(x =>
                 {
-                    if (contextTypeExceptionList != null && contextTypeExceptionList.Contains(x))
+                    if (exclude != null && exclude.Contains(x))
                         return;
 
-                    action(new RepositoryFactory(BuildOptions(x)));
+                    action(new RepositoryFactory(BuildOptions(x)), x);
                 });
         }
 
-        protected void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactory, Task> action, params ContextProviderType[] contextTypeExceptionList)
+        protected void ForAllRepositoryFactories(Action<IRepositoryFactory> action, params ContextProviderType[] exclude)
+            => ForAllRepositoryFactories((factory, type) => action(factory), exclude);
+
+        protected void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactory, ContextProviderType, Task> action, params ContextProviderType[] exclude)
         {
             Providers()
                 .ForEach(async x =>
                 {
-                    if (contextTypeExceptionList != null && contextTypeExceptionList.Contains(x))
+                    if (exclude != null && exclude.Contains(x))
                         return;
 
                     // Perform test
-                    var task = Record.ExceptionAsync(() => action(new RepositoryFactory(BuildOptions(x))));
+                    var task = Record.ExceptionAsync(() => action(new RepositoryFactory(BuildOptions(x)), x));
 
                     // Checks to see if we have any un-handled exception
                     if (task != null)
@@ -58,39 +65,51 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                 });
         }
 
-        protected void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory> action)
+        protected void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactory, Task> action, params ContextProviderType[] exclude)
+            => ForAllRepositoryFactoriesAsync((factory, type) => action(factory), exclude);
+
+        protected void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory, ContextProviderType> action)
         {
             Providers()
                 .Where(SupportsTransactions)
                 .ForEach(x =>
                 {
-                    action(new UnitOfWorkFactory(BuildOptions(x)));
+                    action(new UnitOfWorkFactory(BuildOptions(x)), x);
+                });
+        }
+
+        protected void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory> action) 
+            => ForAllUnitOfWorkFactories((factory, type) => action(factory));
+
+        protected void ForAllUnitOfWorkFactoriesAsync(Func<IUnitOfWorkFactory, ContextProviderType, Task> action)
+        {
+            Providers()
+                .Where(SupportsTransactions)
+                .ForEach(async x =>
+                {
+                    // Perform test
+                    var task = Record.ExceptionAsync(() => action(new UnitOfWorkFactory(BuildOptions(x)), x));
+
+                    // Checks to see if we have any un-handled exception
+                    if (task != null)
+                    {
+                        var ex = await task;
+
+                        Assert.Null(ex);
+                    }
                 });
         }
 
         protected void ForAllUnitOfWorkFactoriesAsync(Func<IUnitOfWorkFactory, Task> action)
+            => ForAllUnitOfWorkFactoriesAsync((factory, type) => action(factory));
+
+        protected void ForAllFileStreamContextProviders(Action<IRepositoryOptions, ContextProviderType> action)
         {
-            Providers()
-                .Where(SupportsTransactions)
-                .ForEach(async x =>
-                {
-                    // Perform test
-                    var task = Record.ExceptionAsync(() => action(new UnitOfWorkFactory(BuildOptions(x))));
-
-                    // Checks to see if we have any un-handled exception
-                    if (task != null)
-                    {
-                        var ex = await task;
-
-                        Assert.Null(ex);
-                    }
-                });
+            FileStreamProviders().ForEach(x => action(BuildOptions(x), x));
         }
 
-        protected void ForAllFileStreamContextProviders(Action<IRepositoryOptions> action)
-        {
-            FileStreamProviders().Select(BuildOptions).ForEach(action);
-        }
+        protected void ForAllFileStreamContextProviders(Action<IRepositoryOptions> action) 
+            => ForAllFileStreamContextProviders((options, type) => action(options));
 
         private static bool SupportsTransactions(ContextProviderType x)
         {
@@ -99,50 +118,50 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 
         protected RepositoryOptionsBuilder GetRepositoryOptionsBuilder(ContextProviderType provider)
         {
-            RepositoryOptionsBuilder builder;
+            var builder = new RepositoryOptionsBuilder();
 
             switch (provider)
             {
                 case ContextProviderType.InMemory:
                     {
-                        builder = new RepositoryOptionsBuilder();
                         builder.UseInMemoryDatabase(Guid.NewGuid().ToString());
                         break;
                     }
                 case ContextProviderType.Json:
                     {
-                        builder = new RepositoryOptionsBuilder();
                         builder.UseJsonDatabase(Path.GetTempPath() + Guid.NewGuid().ToString("N"));
                         break;
                     }
                 case ContextProviderType.Xml:
                     {
-                        builder = new RepositoryOptionsBuilder();
                         builder.UseXmlDatabase(Path.GetTempPath() + Guid.NewGuid().ToString("N"));
                         break;
                     }
                 case ContextProviderType.AdoNet:
                     {
-                        builder = TestAdoNetOptionsBuilderFactory.Create();
+                        builder.UseAdoNet(TestDbConnectionHelper.CreateConnection());
                         break;
                     }
                 case ContextProviderType.EntityFramework:
                     {
-                        builder = TestEfOptionsBuilderFactory.Create();
+                        builder.UseEntityFramework<TestEfDbContext>(TestDbConnectionHelper.CreateConnection());
                         break;
                     }
                 case ContextProviderType.EntityFrameworkCore:
                     {
-                        builder = TestEfCoreOptionsBuilderFactory.Create();
+                        builder.UseEntityFrameworkCore<TestEfCoreDbContext>(options =>
+                        {
+                            options
+                                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+                        });
                         break;
                     }
                 default:
                     throw new ArgumentOutOfRangeException(nameof(provider));
             }
 
-            builder
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .UseLoggerProvider(TestXUnitLoggerProvider);
+            builder.UseLoggerProvider(TestXUnitLoggerProvider);
 
             return builder;
         }

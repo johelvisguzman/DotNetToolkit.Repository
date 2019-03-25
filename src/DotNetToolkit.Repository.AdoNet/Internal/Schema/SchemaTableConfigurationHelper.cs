@@ -483,11 +483,15 @@
                     throw new InvalidOperationException(string.Format(Resources.UnableToDetermineCompositePrimaryKeyOrdering, "primary", entityType.FullName));
             }
 
-            // Check if has composite foreign keys (more than one key for a given navigation property), and if so, it needs to defined an ordering
-            var keyMappingFromSource = GetForeignKeyPropertyInfosMapping(entityType, false);
-
-            var propertiesMapping = entityType
+            var properties = entityType
                 .GetRuntimeProperties()
+                .ToList();
+
+            var keyMappingFromSource = GetForeignKeyPropertyInfosMapping(entityType, false);
+            var navigationPropertiesInfo = properties.Where(x => x.IsComplex() || x.PropertyType.IsGenericCollection());
+
+            // Check if has composite foreign keys (more than one key for a given navigation property), and if so, it needs to defined an ordering
+            var propertiesMapping = properties
                 .Where(x => x.IsPrimitive())
                 .OrderBy(x => x.GetColumnOrder())
                 .ToDictionary(x => x.GetColumnName(), x => x);
@@ -497,9 +501,20 @@
             var foreignKeyConstraints = new Dictionary<string, List<Tuple<string, string>>>();
             var foreignKeyOrder = 0;
 
-            var sb = new StringBuilder();
+            Action<Type, bool> foreignTableCreateAction = (foreignNavigationType, dependentHasPrincipal) =>
+            {
+                if (!_tableCreationMapping.ContainsKey(foreignNavigationType))
+                {
+                    _tableCreationMapping[foreignNavigationType] = true;
 
-            sb.Append($"CREATE TABLE {tableName} (");
+                    var sql = PrepareCreateTableQuery(foreignNavigationType);
+
+                    if (dependentHasPrincipal == true)
+                        _foreignTableCreationMapping[foreignNavigationType] = Tuple.Create(sql, entityType);
+                    else
+                        _foreignTableCreationMapping[foreignNavigationType] = Tuple.Create(sql, default(Type));
+                }
+            };
 
             Action<string, PropertyInfo, bool> foreignKeyConstraintAction = (foreignKeyName, foreignNavigationPropertyInfo, getFromForeign) =>
             {
@@ -527,17 +542,8 @@
                     }
                 }
 
-                if (!_tableCreationMapping.ContainsKey(foreignNavigationType))
-                {
-                    _tableCreationMapping[foreignNavigationType] = true;
-
-                    var sql = PrepareCreateTableQuery(foreignNavigationType);
-
-                    if (dependentHasPrincipal == true)
-                        _foreignTableCreationMapping[foreignNavigationType] = Tuple.Create(sql, entityType);
-                    else
-                        _foreignTableCreationMapping[foreignNavigationType] = Tuple.Create(sql, default(Type));
-                }
+                // Prepares the sql for the foreign table that needs to be created
+                foreignTableCreateAction(foreignNavigationType, dependentHasPrincipal == true);
 
                 if (hasPrincipal)
                 {
@@ -555,6 +561,10 @@
                     foreignKeyConstraints[foreignNavigationTableName].Add(Tuple.Create(foreignKeyName, foreignPrimaryKeyColumnName)); /**/
                 }
             };
+
+            var sb = new StringBuilder();
+
+            sb.Append($"CREATE TABLE {tableName} (");
 
             foreach (var item in propertiesMapping)
             {
@@ -638,6 +648,17 @@
 
             sb.Length -= 1;
             sb.Append($"{Environment.NewLine});");
+
+            // Checks to see if there are any navigation properties that need to be created that don't have a foreign key on the current entity
+            // in that case, we still want to create it them here (this is the behaviour of entity framework... kind of :)
+            foreach (var propertyInfo in navigationPropertiesInfo)
+            {
+                var type = propertyInfo.PropertyType.IsGenericCollection()
+                    ? propertyInfo.PropertyType.GetGenericArguments().First()
+                    : propertyInfo.PropertyType;
+
+                foreignTableCreateAction(type, false);
+            }
 
             return sb.ToString();
         }
