@@ -20,6 +20,12 @@
         }
 
         [Fact]
+        public void AsReadOnly()
+        {
+            ForAllRepositoryFactories(TestAsReadOnly);
+        }
+
+        [Fact]
         public void ThrowsIfModelHasNoId()
         {
             ForAllRepositoryFactories(TestThrowsIfModelHasNoId);
@@ -56,6 +62,29 @@
             Assert.NotNull(repoFactory.Create<CustomerWithTwoCompositePrimaryKey, int, string>());
             Assert.NotNull(repoFactory.Create<CustomerWithThreeCompositePrimaryKey, int, string, int>());
             Assert.NotNull(repoFactory.CreateInstance<Repository<Customer>>());
+        }
+
+        private static void TestAsReadOnly(IRepositoryFactory repoFactory)
+        {
+            var repo1 = repoFactory.Create<Customer>();
+            var readOnlyRepo1 = repo1.AsReadOnly();
+
+            Assert.Equal(readOnlyRepo1, repo1.AsReadOnly());
+
+            var repo2 = repoFactory.Create<Customer, int>();
+            var readOnlyRepo2 = repo2.AsReadOnly();
+
+            Assert.Equal(readOnlyRepo2, repo2.AsReadOnly());
+
+            var repo3 = repoFactory.Create<CustomerWithTwoCompositePrimaryKey, int, string>();
+            var readOnlyRepo3 = repo3.AsReadOnly();
+
+            Assert.Equal(readOnlyRepo3, repo3.AsReadOnly());
+
+            var repo4 = repoFactory.Create<CustomerWithThreeCompositePrimaryKey, int, string, int>();
+            var readOnlyRepo4 = repo4.AsReadOnly();
+
+            Assert.Equal(readOnlyRepo4, repo4.AsReadOnly());
         }
 
         private static void TestThrowsIfModelHasNoId(IRepositoryFactory repoFactory)
