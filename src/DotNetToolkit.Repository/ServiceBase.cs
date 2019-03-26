@@ -2,6 +2,7 @@
 {
     using Configuration.Conventions;
     using Factories;
+    using Internal;
     using Queries;
     using Queries.Strategies;
     using System;
@@ -19,6 +20,12 @@
     /// <typeparam name="TKey3">The type of the third part of the composite primary key.</typeparam>
     public abstract class ServiceBase<TEntity, TKey1, TKey2, TKey3> : IService<TEntity, TKey1, TKey2, TKey3> where TEntity : class
     {
+        #region Fields
+
+        private IReadOnlyService<TEntity, TKey1, TKey2, TKey3> _wrapper;
+
+        #endregion
+
         #region Properties
 
         /// <summary>
@@ -47,6 +54,15 @@
         #endregion
 
         #region Implementation of IService<TEntity, TKey1, TKey2, TKey3>
+
+        /// <summary>
+        /// Returns a read-only <see cref="IReadOnlyService{TEntity, TKey1, TKey2, TKey3}" /> wrapper for the current service.
+        /// </summary>
+        /// <returns>An object that acts as a read-only wrapper around the current service.</returns>
+        public IReadOnlyService<TEntity, TKey1, TKey2, TKey3> AsReadOnly()
+        {
+            return _wrapper ?? (_wrapper = new ReadOnlyServiceWrapper<TEntity, TKey1, TKey2, TKey3>(this));
+        }
 
         /// <summary>
         /// Creates the specified <paramref name="entity" /> into the repository.
@@ -1246,6 +1262,12 @@
     /// <typeparam name="TKey2">The type of the second part of the composite primary key.</typeparam>
     public abstract class ServiceBase<TEntity, TKey1, TKey2> : IService<TEntity, TKey1, TKey2> where TEntity : class
     {
+        #region Fields
+
+        private IReadOnlyService<TEntity, TKey1, TKey2> _wrapper;
+
+        #endregion
+
         #region Properties
 
         /// <summary>
@@ -1274,6 +1296,15 @@
         #endregion
 
         #region Implementation of IService<TEntity, TKey1, TKey2>
+
+        /// <summary>
+        /// Returns a read-only <see cref="IReadOnlyService{TEntity, TKey1, TKey2}" /> wrapper for the current service.
+        /// </summary>
+        /// <returns>An object that acts as a read-only wrapper around the current service.</returns>
+        public IReadOnlyService<TEntity, TKey1, TKey2> AsReadOnly()
+        {
+            return _wrapper ?? (_wrapper = new ReadOnlyServiceWrapper<TEntity, TKey1, TKey2>(this));
+        }
 
         /// <summary>
         /// Creates the specified <paramref name="entity" /> into the repository.
@@ -2462,6 +2493,12 @@
     /// <typeparam name="TKey">The type of the key.</typeparam>
     public abstract class ServiceBase<TEntity, TKey> : IService<TEntity, TKey> where TEntity : class
     {
+        #region Fields
+
+        private IReadOnlyService<TEntity, TKey> _wrapper;
+
+        #endregion
+
         #region Properties
 
         /// <summary>
@@ -2490,6 +2527,15 @@
         #endregion
 
         #region Implementation of IService<TEntity, TKey>
+
+        /// <summary>
+        /// Returns a read-only <see cref="IReadOnlyService{TEntity, TKey}" /> wrapper for the current service.
+        /// </summary>
+        /// <returns>An object that acts as a read-only wrapper around the current service.</returns>
+        public IReadOnlyService<TEntity, TKey> AsReadOnly()
+        {
+            return _wrapper ?? (_wrapper = new ReadOnlyServiceWrapper<TEntity, TKey>(this));
+        }
 
         /// <summary>
         /// Creates the specified <paramref name="entity" /> into the repository.

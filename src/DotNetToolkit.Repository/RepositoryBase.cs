@@ -10,6 +10,7 @@
     using Extensions;
     using Factories;
     using Helpers;
+    using Internal;
     using Properties;
     using Queries;
     using Queries.Strategies;
@@ -33,6 +34,12 @@
     /// <typeparam name="TKey3">The type of the third part of the composite primary key.</typeparam>
     public abstract class RepositoryBase<TEntity, TKey1, TKey2, TKey3> : InternalRepositoryBase<TEntity>, IRepository<TEntity, TKey1, TKey2, TKey3> where TEntity : class
     {
+        #region Fields
+
+        private IReadOnlyRepository<TEntity, TKey1, TKey2, TKey3> _wrapper;
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -47,6 +54,15 @@
         #endregion
 
         #region Implementation of IRepository<TEntity, TKey1, TKey2, TKey3>
+
+        /// <summary>
+        /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey1, TKey2, TKey3}" /> wrapper for the current repository.
+        /// </summary>
+        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
+        public IReadOnlyRepository<TEntity, TKey1, TKey2, TKey3> AsReadOnly()
+        {
+            return _wrapper ?? (_wrapper = new ReadOnlyRepositoryWrapper<TEntity, TKey1, TKey2, TKey3>(this));
+        }
 
         /// <summary>
         /// Deletes an entity with the given composite primary key values in the repository.
@@ -243,6 +259,12 @@
     /// <typeparam name="TKey2">The type of the second part of the composite primary key.</typeparam>
     public abstract class RepositoryBase<TEntity, TKey1, TKey2> : InternalRepositoryBase<TEntity>, IRepository<TEntity, TKey1, TKey2> where TEntity : class
     {
+        #region Fields
+
+        private IReadOnlyRepository<TEntity, TKey1, TKey2> _wrapper;
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -257,6 +279,15 @@
         #endregion
 
         #region Implementation of IRepository<TEntity, TKey1, TKey2>
+
+        /// <summary>
+        /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey1, TKey2}" /> wrapper for the current repository.
+        /// </summary>
+        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
+        public IReadOnlyRepository<TEntity, TKey1, TKey2> AsReadOnly()
+        {
+            return _wrapper ?? (_wrapper = new ReadOnlyRepositoryWrapper<TEntity, TKey1, TKey2>(this));
+        }
 
         /// <summary>
         /// Deletes an entity with the given composite primary key values in the repository.
@@ -442,6 +473,12 @@
     /// <typeparam name="TKey">The type of the key.</typeparam>
     public abstract class RepositoryBase<TEntity, TKey> : InternalRepositoryBase<TEntity>, IRepository<TEntity, TKey> where TEntity : class
     {
+        #region Fields
+
+        private IReadOnlyRepository<TEntity, TKey> _wrapper;
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -456,6 +493,15 @@
         #endregion
 
         #region Implementation of IRepository<TEntity, TKey>
+
+        /// <summary>
+        /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey}" /> wrapper for the current repository.
+        /// </summary>
+        /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
+        public IReadOnlyRepository<TEntity, TKey> AsReadOnly()
+        {
+            return _wrapper ?? (_wrapper = new ReadOnlyRepositoryWrapper<TEntity, TKey>(this));
+        }
 
         /// <summary>
         /// Deletes an entity with the given primary key value in the repository.
