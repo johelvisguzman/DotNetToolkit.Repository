@@ -3,7 +3,7 @@
     using Configuration;
     using Configuration.Caching;
     using Configuration.Options;
-    using Internal;
+    using Factories;
     using System;
 
     /// <summary>
@@ -113,9 +113,8 @@
             _context = contextFactory.Create();
             _transactionManager = _context.BeginTransaction();
 
-            // The shared context for the repositories to use
-            _options = new RepositoryOptions(options)
-                .With(new SharedRepositoryContextFactory(_context));
+            // Re-configures the options and adds a shared context for the repositories to use
+            _options = new RepositoryOptions(options).With(new RepositoryContextFactory(_context));
         }
 
         #endregion
@@ -208,6 +207,25 @@
             ThrowIfDisposed();
 
             return (T)Activator.CreateInstance(typeof(T), new object[] { _options });
+        }
+
+        #endregion
+
+        #region Nested Type: RepositoryContextFactory
+
+        class RepositoryContextFactory : IRepositoryContextFactory
+        {
+            private readonly IRepositoryContext _context;
+
+            public RepositoryContextFactory(IRepositoryContext context)
+            {
+                if (context == null)
+                    throw new ArgumentNullException(nameof(context));
+
+                _context = context;
+            }
+
+            public IRepositoryContext Create() => _context;
         }
 
         #endregion
