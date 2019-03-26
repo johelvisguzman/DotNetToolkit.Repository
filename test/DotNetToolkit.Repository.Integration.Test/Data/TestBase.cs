@@ -139,7 +139,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                     }
                 case ContextProviderType.AdoNet:
                     {
-                        builder.UseAdoNet(TestDbConnectionHelper.CreateConnection());
+                        builder.UseAdoNet(TestDbConnectionHelper.CreateConnection(), ensureDatabaseCreated: true);
                         break;
                     }
                 case ContextProviderType.EntityFramework:

@@ -31,8 +31,8 @@
 
         private readonly BlockingCollection<EntitySet> _items = new BlockingCollection<EntitySet>();
         private readonly SchemaTableConfigurationHelper _schemaConfigHelper;
-
         private readonly DbHelper _dbHelper;
+        private readonly bool _ensureDatabaseCreated;
 
         #endregion
 
@@ -51,13 +51,19 @@
         /// Initializes a new instance of the <see cref="AdoNetRepositoryContext" /> class.
         /// </summary>
         /// <param name="nameOrConnectionString">Either the database name or a connection string.</param>
-        public AdoNetRepositoryContext(string nameOrConnectionString)
+		/// <param name="ensureDatabaseCreated">
+		/// Ensures that the database for the context exists. If it exists, no action is taken.
+		/// If it does not exist then the database and all its schema are created.
+        /// If the database exists, then no effort is made to ensure it is compatible with the model for this context.
+		/// </param>
+        public AdoNetRepositoryContext(string nameOrConnectionString, bool ensureDatabaseCreated = false)
         {
             if (nameOrConnectionString == null)
                 throw new ArgumentNullException(nameof(nameOrConnectionString));
 
             _dbHelper = new DbHelper(nameOrConnectionString);
             _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
+            _ensureDatabaseCreated = ensureDatabaseCreated;
         }
 
         /// <summary>
@@ -65,7 +71,12 @@
         /// </summary>
         /// <param name="providerName">The name of the provider.</param>
         /// <param name="connectionString">The connection string.</param>
-        public AdoNetRepositoryContext(string providerName, string connectionString)
+        /// <param name="ensureDatabaseCreated">
+		/// Ensures that the database for the context exists. If it exists, no action is taken.
+		/// If it does not exist then the database and all its schema are created.
+        /// If the database exists, then no effort is made to ensure it is compatible with the model for this context.
+		/// </param>
+        public AdoNetRepositoryContext(string providerName, string connectionString, bool ensureDatabaseCreated = false)
         {
             if (providerName == null)
                 throw new ArgumentNullException(nameof(providerName));
@@ -75,19 +86,26 @@
 
             _dbHelper = new DbHelper(providerName, connectionString);
             _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
+            _ensureDatabaseCreated = ensureDatabaseCreated;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdoNetRepositoryContext" /> class.
         /// </summary>
         /// <param name="existingConnection">The existing connection.</param>
-        public AdoNetRepositoryContext(DbConnection existingConnection)
+        /// <param name="ensureDatabaseCreated">
+		/// Ensures that the database for the context exists. If it exists, no action is taken.
+		/// If it does not exist then the database and all its schema are created.
+        /// If the database exists, then no effort is made to ensure it is compatible with the model for this context.
+		/// </param>
+        public AdoNetRepositoryContext(DbConnection existingConnection, bool ensureDatabaseCreated = false)
         {
             if (existingConnection == null)
                 throw new ArgumentNullException(nameof(existingConnection));
 
             _dbHelper = new DbHelper(existingConnection);
             _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
+            _ensureDatabaseCreated = ensureDatabaseCreated;
         }
 
         #endregion
@@ -139,6 +157,18 @@
                         break;
                     }
             }
+        }
+
+        private void ExecuteSchemaValidate(Type entityType)
+        {
+            if (_ensureDatabaseCreated)
+                _schemaConfigHelper.ExecuteSchemaValidate(entityType);
+        }
+
+        private async Task ExecuteSchemaValidateAsync(Type entityType, CancellationToken cancellationToken)
+        {
+            if (_ensureDatabaseCreated)
+                await _schemaConfigHelper.ExecuteSchemaValidateAsync(entityType, cancellationToken);
         }
 
         #endregion
@@ -276,7 +306,7 @@
                     {
                         var entityType = entitySet.Entity.GetType();
 
-                        _schemaConfigHelper.ExecuteSchemaValidate(entityType);
+                        ExecuteSchemaValidate(entityType);
 
                         var primaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
                         var isIdentity = primaryKeyPropertyInfo.IsColumnIdentity();
@@ -371,7 +401,7 @@
 
             var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
 
-            _schemaConfigHelper.ExecuteSchemaValidate(typeof(TEntity));
+            ExecuteSchemaValidate(typeof(TEntity));
 
             return _dbHelper.ExecuteObject<TEntity>(sql, parameters, reader => mapper.Map<TEntity>(reader, selectorFunc));
         }
@@ -403,7 +433,7 @@
 
             var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
 
-            _schemaConfigHelper.ExecuteSchemaValidate(typeof(TEntity));
+            ExecuteSchemaValidate(typeof(TEntity));
 
             return _dbHelper.ExecuteObject<TResult>(sql, parameters, reader => mapper.Map<TResult>(reader, selectorFunc));
         }
@@ -432,7 +462,7 @@
 
             var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
 
-            _schemaConfigHelper.ExecuteSchemaValidate(typeof(TEntity));
+            ExecuteSchemaValidate(typeof(TEntity));
 
             return _dbHelper.ExecuteList<TResult>(sql, parameters, reader => mapper.Map<TResult>(reader, selectorFunc));
         }
@@ -447,7 +477,7 @@
         {
             QueryBuilder.CreateSelectStatement<TEntity>(options, "COUNT(*)", out var sql, out var parameters);
 
-            _schemaConfigHelper.ExecuteSchemaValidate(typeof(TEntity));
+            ExecuteSchemaValidate(typeof(TEntity));
 
             var result = _dbHelper.ExecuteScalar<int>(sql, parameters);
 
@@ -467,7 +497,7 @@
 
             QueryBuilder.CreateSelectStatement<TEntity>(options, out var sql, out var parameters);
 
-            _schemaConfigHelper.ExecuteSchemaValidate(typeof(TEntity));
+            ExecuteSchemaValidate(typeof(TEntity));
 
             using (var reader = _dbHelper.ExecuteReader(sql, parameters))
             {
@@ -514,7 +544,7 @@
 
             var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
 
-            _schemaConfigHelper.ExecuteSchemaValidate(typeof(TEntity));
+            ExecuteSchemaValidate(typeof(TEntity));
 
             using (var reader = _dbHelper.ExecuteReader(sql, parameters))
             {
@@ -653,7 +683,7 @@
                     {
                         var entityType = entitySet.Entity.GetType();
 
-                        await _schemaConfigHelper.ExecuteSchemaValidateAsync(entityType, cancellationToken);
+                        await ExecuteSchemaValidateAsync(entityType, cancellationToken);
 
                         var primaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
                         var isIdentity = primaryKeyPropertyInfo.IsColumnIdentity();
@@ -749,7 +779,7 @@
 
             var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
 
-            await _schemaConfigHelper.ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
+            await ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 
             return await _dbHelper.ExecuteObjectAsync<TEntity>(sql, parameters, reader => mapper.Map<TEntity>(reader, selectorFunc), cancellationToken);
         }
@@ -782,7 +812,7 @@
 
             var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
 
-            await _schemaConfigHelper.ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
+            await ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 
             return await _dbHelper.ExecuteObjectAsync<TResult>(sql, parameters, reader => mapper.Map<TResult>(reader, selectorFunc), cancellationToken);
         }
@@ -812,7 +842,7 @@
 
             var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
 
-            await _schemaConfigHelper.ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
+            await ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 
             return await _dbHelper.ExecuteListAsync<TResult>(sql, parameters, reader => mapper.Map<TResult>(reader, selectorFunc), cancellationToken);
         }
@@ -828,7 +858,7 @@
         {
             QueryBuilder.CreateSelectStatement<TEntity>(options, "COUNT(*)", out var sql, out var parameters);
 
-            _schemaConfigHelper.ExecuteSchemaValidate(typeof(TEntity));
+            ExecuteSchemaValidate(typeof(TEntity));
 
             var result = await _dbHelper.ExecuteScalarAsync<int>(sql, parameters, cancellationToken);
 
@@ -849,7 +879,7 @@
 
             QueryBuilder.CreateSelectStatement<TEntity>(options, out var sql, out var parameters);
 
-            await _schemaConfigHelper.ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
+            await ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 
             using (var reader = await _dbHelper.ExecuteReaderAsync(sql, parameters, cancellationToken))
             {
@@ -897,7 +927,7 @@
 
             var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
 
-            await _schemaConfigHelper.ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
+            await ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 
             using (var reader = await _dbHelper.ExecuteReaderAsync(sql, parameters, cancellationToken))
             {

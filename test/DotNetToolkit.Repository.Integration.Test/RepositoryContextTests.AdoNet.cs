@@ -635,7 +635,7 @@
         {
             var connection = TestDbConnectionHelper.CreateConnection();
             var options = new RepositoryOptionsBuilder()
-                .UseAdoNet(connection)
+                .UseAdoNet(connection, ensureDatabaseCreated: true)
                 .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
@@ -710,12 +710,11 @@
         [Fact]
         public void CreateTableOnSaveChanges()
         {
-            //
+            var ensureDatabaseCreated = true;
             var connection = TestAdoNetContextFactory.CreateConnection();
-            var contextFactory = TestAdoNetContextFactory.Create(connection);
             var schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(connection));
             var options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(contextFactory)
+                .UseAdoNet(connection, ensureDatabaseCreated)
                 .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
             var classARepo = new Repository<ClassA>(options);
@@ -732,10 +731,9 @@
 
             //
             connection = TestAdoNetContextFactory.CreateConnection();
-            contextFactory = TestAdoNetContextFactory.Create(connection);
             schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(connection));
             options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(contextFactory)
+                .UseAdoNet(connection, ensureDatabaseCreated)
                 .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
@@ -760,10 +758,9 @@
 
             //
             connection = TestAdoNetContextFactory.CreateConnection();
-            contextFactory = TestAdoNetContextFactory.Create(connection);
             schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(connection));
             options = new RepositoryOptionsBuilder()
-                .UseInternalContextFactory(contextFactory)
+                .UseAdoNet(connection, ensureDatabaseCreated)
                 .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
@@ -789,6 +786,87 @@
             classCRepo.Add(new ClassC() { ClassBId = 1 });
 
             Assert.Equal(1, classCRepo.Count());
+        }
+
+        [Fact]
+        public async Task CreateTableOnSaveChangesAsync()
+        {
+            var ensureDatabaseCreated = true;
+            var connection = TestAdoNetContextFactory.CreateConnection();
+            var schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(connection));
+            var options = new RepositoryOptionsBuilder()
+                .UseAdoNet(connection, ensureDatabaseCreated)
+                .UseLoggerProvider(TestXUnitLoggerProvider)
+                .Options;
+            var classARepo = new Repository<ClassA>(options);
+
+            Assert.False(await schemaHelper.ExecuteTableExistsAsync<ClassB>());
+            Assert.False(await schemaHelper.ExecuteTableExistsAsync<ClassC>());
+            Assert.Equal(0, await classARepo.CountAsync());
+
+            await classARepo.AddAsync(new ClassA());
+
+            Assert.True(await schemaHelper.ExecuteTableExistsAsync<ClassB>());
+            Assert.True(await schemaHelper.ExecuteTableExistsAsync<ClassC>());
+            Assert.Equal(1, await classARepo.CountAsync());
+
+            //
+            connection = TestAdoNetContextFactory.CreateConnection();
+            schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(connection));
+            options = new RepositoryOptionsBuilder()
+                .UseAdoNet(connection, ensureDatabaseCreated)
+                .UseLoggerProvider(TestXUnitLoggerProvider)
+                .Options;
+
+            Assert.False(await schemaHelper.ExecuteTableExistsAsync<ClassA>());
+            Assert.False(await schemaHelper.ExecuteTableExistsAsync<ClassC>());
+
+            var ex = Assert.Throws<System.Data.SqlServerCe.SqlCeException>(() => new Repository<ClassB>(options).Add(new ClassB()));
+            Assert.Equal("A foreign key value cannot be inserted because a corresponding primary key value does not exist. [ Foreign key constraint name = FK_ClassAs ]", ex.Message);
+
+            Assert.True(await schemaHelper.ExecuteTableExistsAsync<ClassA>());
+            Assert.True(await schemaHelper.ExecuteTableExistsAsync<ClassC>());
+
+            new Repository<ClassA>(options).Add(new ClassA { Id = 1 });
+
+            var classBRepo = new Repository<ClassB>(options);
+
+            Assert.Equal(0, await classBRepo.CountAsync());
+
+            classBRepo.Add(new ClassB() { ClassAId = 1 });
+
+            Assert.Equal(1, await classBRepo.CountAsync());
+
+            //
+            connection = TestAdoNetContextFactory.CreateConnection();
+            schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(connection));
+            options = new RepositoryOptionsBuilder()
+                .UseAdoNet(connection, ensureDatabaseCreated)
+                .UseLoggerProvider(TestXUnitLoggerProvider)
+                .Options;
+
+            Assert.False(await schemaHelper.ExecuteTableExistsAsync<ClassA>());
+            Assert.False(await schemaHelper.ExecuteTableExistsAsync<ClassB>());
+
+            ex = Assert.Throws<System.Data.SqlServerCe.SqlCeException>(() => new Repository<ClassC>(options).Add(new ClassC()));
+            Assert.Equal("A foreign key value cannot be inserted because a corresponding primary key value does not exist. [ Foreign key constraint name = FK_ClassBs ]", ex.Message);
+
+            Assert.True(await schemaHelper.ExecuteTableExistsAsync<ClassA>());
+            Assert.True(await schemaHelper.ExecuteTableExistsAsync<ClassB>());
+
+            ex = Assert.Throws<System.Data.SqlServerCe.SqlCeException>(() => new Repository<ClassB>(options).Add(new ClassB { Id = 1 }));
+            Assert.Equal("A foreign key value cannot be inserted because a corresponding primary key value does not exist. [ Foreign key constraint name = FK_ClassAs ]", ex.Message);
+
+            new Repository<ClassA>(options).Add(new ClassA { Id = 1 });
+            new Repository<ClassB>(options).Add(new ClassB { Id = 1, ClassAId = 1 });
+
+            var classCRepo = new Repository<ClassC>(options);
+
+            Assert.Equal(0, await classCRepo.CountAsync());
+
+            await classCRepo.AddAsync(new ClassC() { ClassBId = 1 });
+
+            Assert.Equal(1, await classCRepo.CountAsync());
         }
 
         [Fact]
