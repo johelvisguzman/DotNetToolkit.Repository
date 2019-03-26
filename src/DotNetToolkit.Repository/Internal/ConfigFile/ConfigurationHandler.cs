@@ -1,6 +1,4 @@
-﻿#if NETSTANDARD2_0
-
-namespace DotNetToolkit.Repository.Internal.ConfigFile
+﻿namespace DotNetToolkit.Repository.Internal.ConfigFile
 {
     using Configuration.Interceptors;
     using Factories;
@@ -19,9 +17,7 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
         private const string RepositorySectionKey = "repository";
         private const string DefaultContextFactorySectionKey = "defaultContextFactory";
         private const string InterceptorCollectionSectionKey = "interceptors";
-        private const string InterceptorSectionKey = "interceptor";
         private const string ParameterCollectionSectionKey = "parameters";
-        private const string ParameterSectionKey = "parameter";
         private const string ValueKey = "value";
         private const string TypeKey = "type";
 
@@ -50,26 +46,18 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
 
             if (defaultContextFactorySection != null)
             {
+                if (defaultContextFactorySection[TypeKey] == null)
+                    throw new InvalidOperationException($"The '{TypeKey}' is missing for this interceptor section.");
+
+                var contextFactoryType = Type.GetType(defaultContextFactorySection[TypeKey], throwOnError: true);
+
                 var parameterCollectionSection = defaultContextFactorySection.GetSection(ParameterCollectionSectionKey);
                 var args = new List<object>();
 
                 if (parameterCollectionSection != null)
                 {
-                    foreach (var parameterCollectionSectionChildren in parameterCollectionSection.GetChildren())
-                    {
-                        var parameterSection = parameterCollectionSectionChildren.GetSection(ParameterSectionKey);
-
-                        if (parameterSection != null)
-                        {
-                            var parameterType = Type.GetType(parameterSection[TypeKey], throwOnError: true);
-                            var parameterValue = Convert.ChangeType(parameterSection[ValueKey], parameterType, CultureInfo.InvariantCulture);
-
-                            args.Add(parameterValue);
-                        }
-                    }
+                    args.AddRange(parameterCollectionSection.GetChildren().Select(ExtractParameterValue));
                 }
-
-                var contextFactoryType = Type.GetType(defaultContextFactorySection[TypeKey], throwOnError: true);
 
                 return CreateInstance<IRepositoryContextFactory>(contextFactoryType, args.ToArray());
             }
@@ -86,10 +74,8 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
             {
                 var defaultFactory = RepositoryInterceptorProvider.GetDefaultFactory();
 
-                foreach (var interceptorCollectionSectionChildren in interceptorCollectionSection.GetChildren())
+                foreach (var interceptorSection in interceptorCollectionSection.GetChildren())
                 {
-                    var interceptorSection = interceptorCollectionSectionChildren.GetSection(InterceptorSectionKey);
-
                     if (interceptorSection != null)
                     {
                         var interceptorType = Type.GetType(interceptorSection[TypeKey], throwOnError: true);
@@ -104,18 +90,7 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
 
                             if (parameterCollectionSection != null)
                             {
-                                foreach (var parameterCollectionSectionChildren in parameterCollectionSection.GetChildren())
-                                {
-                                    var parameterSection = parameterCollectionSectionChildren.GetSection(ParameterSectionKey);
-
-                                    if (parameterSection != null)
-                                    {
-                                        var parameterType = Type.GetType(parameterSection[TypeKey], throwOnError: true);
-                                        var parameterValue = Convert.ChangeType(parameterSection[ValueKey], parameterType, CultureInfo.InvariantCulture);
-
-                                        args.Add(parameterValue);
-                                    }
-                                }
+                                args.AddRange(parameterCollectionSection.GetChildren().Select(ExtractParameterValue));
                             }
 
                             return CreateInstance<IRepositoryInterceptor>(interceptorType, args.ToArray());
@@ -127,6 +102,20 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
             }
 
             return interceptorsDict;
+        }
+
+        private static object ExtractParameterValue(IConfigurationSection parameterSection)
+        {
+            if (parameterSection[TypeKey] == null)
+                throw new InvalidOperationException($"The '{TypeKey}' is missing for this parameter section.");
+
+            if (parameterSection[ValueKey] == null)
+                throw new InvalidOperationException($"The '{ValueKey}' is missing for this parameter section.");
+
+            var parameterType = Type.GetType(parameterSection[TypeKey], throwOnError: true);
+            var parameterValue = Convert.ChangeType(parameterSection[ValueKey], parameterType, CultureInfo.InvariantCulture);
+
+            return parameterValue;
         }
 
         #endregion
@@ -147,5 +136,3 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
         #endregion
     }
 }
-
-#endif

@@ -1,6 +1,4 @@
-﻿#if !NETSTANDARD1_3
-
-namespace DotNetToolkit.Repository.Internal.ConfigFile
+﻿namespace DotNetToolkit.Repository.Internal.ConfigFile
 {
     using System;
 
@@ -31,5 +29,3 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
         }
     }
 }
-
-#endif

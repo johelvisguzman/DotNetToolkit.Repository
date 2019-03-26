@@ -94,7 +94,6 @@
         }
 #endif
 
-#if NETSTANDARD2_0
         /// <summary>
         /// Configures the repository options using the specified configuration.
         /// </summary>
@@ -120,7 +119,6 @@
 
             return this;
         }
-#endif
 
         /// <summary>
         /// Configures the repository options with an interceptor that intercepts any activity within the repository.
