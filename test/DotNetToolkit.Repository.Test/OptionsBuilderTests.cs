@@ -3,6 +3,7 @@
     using Configuration.Options;
     using Data;
     using InMemory;
+    using Integration.Test.Data;
     using System.Linq;
     using Xunit;
 
@@ -50,6 +51,46 @@
         {
             var optionsBuilder = new RepositoryOptionsBuilder()
                 .UseInMemoryDatabase();
+
+            Assert.NotNull(optionsBuilder.Options.ContextFactory);
+        }
+
+        [Fact]
+        public void ConfigureInterceptorFromAppConfig()
+        {
+            var optionsBuilder = new RepositoryOptionsBuilder()
+                .UseConfiguration();
+
+            Assert.Equal(1, optionsBuilder.Options.Interceptors.Count());
+
+            Assert.True(optionsBuilder.Options.Interceptors.ContainsKey(typeof(TestRepositoryInterceptor)));
+        }
+
+        [Fact]
+        public void ConfigureDefaultContextFactoryFromAppConfig()
+        {
+            var optionsBuilder = new RepositoryOptionsBuilder()
+                .UseConfiguration();
+
+            Assert.NotNull(optionsBuilder.Options.ContextFactory);
+        }
+
+        [Fact]
+        public void ConfigureInterceptorFromAppSetting()
+        {
+            var optionsBuilder = new RepositoryOptionsBuilder()
+                .UseConfiguration(TestConfigurationHelper.GetConfiguration());
+
+            Assert.Equal(1, optionsBuilder.Options.Interceptors.Count());
+
+            Assert.True(optionsBuilder.Options.Interceptors.ContainsKey(typeof(TestRepositoryInterceptor)));
+        }
+
+        [Fact]
+        public void ConfigureDefaultContextFactoryFromAppSetting()
+        {
+            var optionsBuilder = new RepositoryOptionsBuilder()
+                .UseConfiguration(TestConfigurationHelper.GetConfiguration());
 
             Assert.NotNull(optionsBuilder.Options.ContextFactory);
         }

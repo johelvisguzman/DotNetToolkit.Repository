@@ -1,6 +1,4 @@
-﻿#if NETSTANDARD2_0
-
-namespace DotNetToolkit.Repository.Internal.ConfigFile
+﻿namespace DotNetToolkit.Repository.Internal.ConfigFile
 {
     using Configuration.Interceptors;
     using Factories;
@@ -147,5 +145,3 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
         #endregion
     }
 }
-
-#endif
