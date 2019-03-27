@@ -26,7 +26,18 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
 
         public Type Type
         {
-            get => _type ?? (_type = Type.GetType(TypeName, throwOnError: true));
+            get
+            {
+                if (_type == null)
+                {
+                    if (string.IsNullOrEmpty(TypeName))
+                        return null;
+
+                    _type = Type.GetType(TypeName, throwOnError: true);
+                }
+
+                return _type;
+            }
         }
 
         [ConfigurationProperty(ParametersKey, IsRequired = false)]
@@ -39,6 +50,10 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
         public virtual T GetTypedValue()
         {
             var type = Type;
+
+            if (type == null)
+                return default(T);
+
             var args = Parameters.GetTypedParameterValues();
 
             var defaultFactory = ConfigurationProvider.GetDefaultFactory();
