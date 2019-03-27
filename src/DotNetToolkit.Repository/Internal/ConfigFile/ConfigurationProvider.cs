@@ -3,14 +3,14 @@
     using System;
 
     /// <summary>
-    /// Represents a repository interceptor provider for providing a factory for constructing a repository interceptor from the App.config file.
+    /// Represents configuration provider for providing a factory for constructing the elements from the config file.
     /// </summary>
-    public sealed class RepositoryInterceptorProvider
+    public class ConfigurationProvider
     {
         private static Func<Type, object> _factory;
 
         /// <summary>
-        /// Sets a default factory for constructing a repository interceptor.
+        /// Sets a default factory for constructing the elements from the config file.
         /// </summary>
         public static void SetDefaultFactory(Func<Type, object> factory)
         {
@@ -21,7 +21,7 @@
         }
 
         /// <summary>
-        /// Gets a default factory for constructing a repository interceptor.
+        /// Gets a default factory for constructing the elements from the config file.
         /// </summary>
         public static Func<Type, object> GetDefaultFactory()
         {

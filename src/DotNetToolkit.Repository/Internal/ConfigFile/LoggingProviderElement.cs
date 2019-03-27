@@ -33,6 +33,11 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
             var type = Type.GetType(TypeName, throwOnError: true);
             var args = Parameters.GetTypedParameterValues();
 
+            var defaultFactory = ConfigurationProvider.GetDefaultFactory();
+
+            if (defaultFactory != null)
+                return (ILoggerProvider)defaultFactory(type);
+
             return (ILoggerProvider)Activator.CreateInstance(type, args);
         }
     }

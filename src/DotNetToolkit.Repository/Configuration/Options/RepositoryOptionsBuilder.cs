@@ -74,6 +74,7 @@
         /// Configures the repository options with the data from the App.config.
         /// </summary>
         /// <returns>The same builder instance.</returns>
+        /// <remarks>Any element that is defined in the config file can be resolved using the <see cref="DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationProvider.SetDefaultFactory"/></remarks>
         public virtual RepositoryOptionsBuilder UseConfiguration()
         {
             var config = (Internal.ConfigFile.ConfigurationSection)
@@ -111,6 +112,7 @@
         /// </summary>
         /// <param name="configuration">The configuration.</param>
         /// <returns>The same builder instance.</returns>
+        /// <remarks>Any element that is defined in the config file can be resolved using the <see cref="DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationProvider.SetDefaultFactory"/></remarks>
         public virtual RepositoryOptionsBuilder UseConfiguration(Microsoft.Extensions.Configuration.IConfiguration configuration)
         {
             if (configuration == null)

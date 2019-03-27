@@ -41,7 +41,11 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
             var type = Type.GetType(TypeName, throwOnError: true);
             var args = Parameters.GetTypedParameterValues();
 
-            var provider = (ICacheProvider)Activator.CreateInstance(type, args);
+            var defaultFactory = ConfigurationProvider.GetDefaultFactory();
+
+            var provider = defaultFactory != null
+                ? (ICacheProvider)defaultFactory(type)
+                : (ICacheProvider)Activator.CreateInstance(type, args);
 
             if (Expiry != null)
                 provider.CacheExpiration = Expiry;

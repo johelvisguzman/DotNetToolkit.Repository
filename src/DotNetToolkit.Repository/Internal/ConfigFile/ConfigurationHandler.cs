@@ -26,6 +26,8 @@
         private const string ValueKey = "value";
         private const string TypeKey = "type";
 
+        private readonly Func<Type, object> _defaultFactory;
+
         #endregion
 
         #region Constructors
@@ -39,6 +41,8 @@
 
             if (_root == null)
                 throw new InvalidOperationException("Unable to find a configuration for the repositories.");
+
+            _defaultFactory = ConfigurationProvider.GetDefaultFactory();
         }
 
         #endregion
@@ -95,7 +99,7 @@
 
             return null;
         }
-        
+
         public Dictionary<Type, Func<IRepositoryInterceptor>> GetInterceptors()
         {
             var interceptorsDict = new Dictionary<Type, Func<IRepositoryInterceptor>>();
@@ -103,8 +107,6 @@
 
             if (section != null)
             {
-                var defaultFactory = RepositoryInterceptorProvider.GetDefaultFactory();
-
                 foreach (var subSection in section.GetChildren())
                 {
                     if (subSection != null)
@@ -113,9 +115,6 @@
 
                         IRepositoryInterceptor Factory()
                         {
-                            if (defaultFactory != null)
-                                return (IRepositoryInterceptor)defaultFactory(type);
-
                             var args = ExtractParameters(subSection);
 
                             return CreateInstance<IRepositoryInterceptor>(type, args.ToArray());
@@ -169,7 +168,7 @@
 
             return type.ConvertTo(value);
         }
-        
+
         private static string Extract(IConfigurationSection section, string key, bool isRequired = true)
         {
             if (section[key] == null && isRequired)
@@ -178,13 +177,16 @@
             return section[key];
         }
 
-        private static TService CreateInstance<TService>(Type implementationType, object[] args)
+        private TService CreateInstance<TService>(Type implementationType, object[] args)
         {
             if (implementationType == null)
                 throw new ArgumentNullException(nameof(implementationType));
 
             if (args.Any())
                 return (TService)Activator.CreateInstance(implementationType, args);
+
+            if (_defaultFactory != null)
+                return (TService)_defaultFactory(implementationType);
 
             return (TService)Activator.CreateInstance(implementationType);
         }
