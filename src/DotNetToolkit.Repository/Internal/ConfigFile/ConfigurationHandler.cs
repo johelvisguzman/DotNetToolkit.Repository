@@ -158,7 +158,12 @@
 
         private static Type ExtractType(IConfigurationSection section)
         {
-            return Type.GetType(Extract(section, TypeKey), throwOnError: true);
+            var value = Extract(section, TypeKey, isRequired: false);
+
+            if (string.IsNullOrEmpty(value))
+                value = "System.String";
+
+            return Type.GetType(value, throwOnError: true);
         }
 
         private static object ExtractParameter(IConfigurationSection section)
