@@ -3,6 +3,7 @@
     using Configuration.Caching;
     using Configuration.Interceptors;
     using Configuration.Logging;
+    using Configuration.Mapper;
     using Extensions;
     using Factories;
     using Microsoft.Extensions.Configuration;
@@ -20,6 +21,7 @@
         private const string DefaultContextFactorySectionKey = "defaultContextFactory";
         private const string LoggingProviderSectionKey = "loggingProvider";
         private const string CachingProviderSectionKey = "cachingProvider";
+        private const string MappingProviderSectionKey = "mappingProvider";
         private const string ExpiryKey = "expiry";
         private const string InterceptorCollectionSectionKey = "interceptors";
         private const string ParameterCollectionSectionKey = "parameters";
@@ -95,6 +97,21 @@
                     provider.CacheExpiration = expiry;
 
                 return provider;
+            }
+
+            return null;
+        }
+
+        public IMapperProvider GetMappingProvider()
+        {
+            var section = _root.GetSection(MappingProviderSectionKey);
+
+            if (section != null)
+            {
+                var type = ExtractType(section, isRequired: true);
+                var args = ExtractParameters(section);
+
+                return CreateInstance<IMapperProvider>(type, args.ToArray());
             }
 
             return null;
