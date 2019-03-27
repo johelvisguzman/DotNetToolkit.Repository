@@ -2,13 +2,14 @@
 
 namespace DotNetToolkit.Repository.Internal.ConfigFile
 {
-    using Configuration.Logging;
+    using Configuration.Caching;
     using System;
     using System.Configuration;
 
-    internal class LoggingProviderElement : ConfigurationElement
+    internal class CachingProviderElement : ConfigurationElement
     {
         private const string TypeKey = "type";
+        private const string ExpiryKey = "expiry";
         private const string ParametersKey = "parameters";
 
         [ConfigurationProperty(TypeKey, IsKey = true, IsRequired = true)]
@@ -18,6 +19,13 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
             set => this[TypeKey] = value;
         }
 
+        [ConfigurationProperty(ExpiryKey, IsRequired = false)]
+        public TimeSpan? Expiry
+        {
+            get => (TimeSpan?)this[ExpiryKey];
+            set => this[ExpiryKey] = value;
+        }
+
         [ConfigurationProperty(ParametersKey, IsRequired = false)]
         public ParameterCollection Parameters
         {
@@ -25,7 +33,7 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
             set => this[ParametersKey] = value;
         }
 
-        public ILoggerProvider GetTypedValue()
+        public ICacheProvider GetTypedValue()
         {
             if (string.IsNullOrEmpty(TypeName))
                 return null;
@@ -33,7 +41,12 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
             var type = Type.GetType(TypeName, throwOnError: true);
             var args = Parameters.GetTypedParameterValues();
 
-            return (ILoggerProvider)Activator.CreateInstance(type, args);
+            var provider = (ICacheProvider)Activator.CreateInstance(type, args);
+
+            if (Expiry != null)
+                provider.CacheExpiration = Expiry;
+
+            return provider;
         }
     }
 }

@@ -91,6 +91,12 @@
                 UseLoggerProvider(loggingProvider);
             }
 
+            var cachingProvider = config.CachingProvider.GetTypedValue();
+            if (cachingProvider != null)
+            {
+                UseCachingProvider(cachingProvider);
+            }
+
             foreach (var item in config.Interceptors.GetTypedValues())
             {
                 UseInterceptor(item.Key, item.Value);
@@ -122,6 +128,12 @@
             if (loggingProvider != null)
             {
                 UseLoggerProvider(loggingProvider);
+            }
+
+            var cachingProvider = config.GetCachingProvider();
+            if (cachingProvider != null)
+            {
+                UseCachingProvider(cachingProvider);
             }
 
             foreach (var item in config.GetInterceptors())
