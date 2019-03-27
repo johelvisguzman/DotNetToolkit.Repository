@@ -134,7 +134,7 @@
 
         private static TimeSpan? ExtractExpiry(IConfigurationSection section)
         {
-            var value = Extract(section, ExpiryKey);
+            var value = Extract(section, ExpiryKey, isRequired: false);
 
             if (string.IsNullOrEmpty(value))
                 return null;
