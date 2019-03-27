@@ -28,8 +28,6 @@
         private const string ValueKey = "value";
         private const string TypeKey = "type";
 
-        private readonly Func<Type, object> _defaultFactory;
-
         #endregion
 
         #region Constructors
@@ -43,8 +41,6 @@
 
             if (_root == null)
                 throw new InvalidOperationException("Unable to find a configuration for the repositories.");
-
-            _defaultFactory = ConfigurationProvider.GetDefaultFactory();
         }
 
         #endregion
@@ -57,10 +53,7 @@
 
             if (section != null)
             {
-                var type = ExtractType(section, isRequired: true);
-                var args = ExtractParameters(section);
-
-                return CreateInstance<IRepositoryContextFactory>(type, args.ToArray());
+                return GetTypedValue<IRepositoryContextFactory>(section);
             }
 
             return null;
@@ -72,10 +65,7 @@
 
             if (section != null)
             {
-                var type = ExtractType(section, isRequired: true);
-                var args = ExtractParameters(section);
-
-                return CreateInstance<ILoggerProvider>(type, args.ToArray());
+                return GetTypedValue<ILoggerProvider>(section);
             }
 
             return null;
@@ -87,16 +77,13 @@
 
             if (section != null)
             {
-                var type = ExtractType(section, isRequired: true);
-                var args = ExtractParameters(section);
+                var value = GetTypedValue<ICacheProvider>(section);
                 var expiry = ExtractExpiry(section);
 
-                var provider = CreateInstance<ICacheProvider>(type, args.ToArray());
-
                 if (expiry != null)
-                    provider.CacheExpiration = expiry;
+                    value.CacheExpiration = expiry;
 
-                return provider;
+                return value;
             }
 
             return null;
@@ -108,10 +95,7 @@
 
             if (section != null)
             {
-                var type = ExtractType(section, isRequired: true);
-                var args = ExtractParameters(section);
-
-                return CreateInstance<IMapperProvider>(type, args.ToArray());
+                return GetTypedValue<IMapperProvider>(section);
             }
 
             return null;
@@ -130,14 +114,7 @@
                     {
                         var type = ExtractType(subSection, isRequired: true);
 
-                        IRepositoryInterceptor Factory()
-                        {
-                            var args = ExtractParameters(subSection);
-
-                            return CreateInstance<IRepositoryInterceptor>(type, args.ToArray());
-                        }
-
-                        interceptorsDict.Add(type, (Func<IRepositoryInterceptor>)Factory);
+                        interceptorsDict.Add(type, () => GetTypedValue<IRepositoryInterceptor>(section, type));
                     }
                 }
             }
@@ -159,7 +136,7 @@
             return TimeSpan.Parse(value);
         }
 
-        private static List<object> ExtractParameters(IConfigurationSection section)
+        private static object[] ExtractParameters(IConfigurationSection section)
         {
             var parameterCollectionSection = section.GetSection(ParameterCollectionSectionKey);
 
@@ -170,7 +147,7 @@
                 args.AddRange(parameterCollectionSection.GetChildren().Select(ExtractParameter));
             }
 
-            return args;
+            return args.ToArray();
         }
 
         private static Type ExtractType(IConfigurationSection section, bool isRequired)
@@ -199,18 +176,25 @@
             return section[key];
         }
 
-        private TService CreateInstance<TService>(Type implementationType, object[] args)
+        private T GetTypedValue<T>(IConfigurationSection section, Type type = null)
         {
-            if (implementationType == null)
-                throw new ArgumentNullException(nameof(implementationType));
+            if (section == null)
+                throw new ArgumentNullException(nameof(section));
+
+            if (type == null)
+                type = ExtractType(section, isRequired: true);
+
+            var args = ExtractParameters(section);
+
+            var defaultFactory = ConfigurationProvider.GetDefaultFactory();
+
+            if (defaultFactory != null)
+                return (T)defaultFactory(type);
 
             if (args.Any())
-                return (TService)Activator.CreateInstance(implementationType, args);
+                return (T)Activator.CreateInstance(type, args);
 
-            if (_defaultFactory != null)
-                return (TService)_defaultFactory(implementationType);
-
-            return (TService)Activator.CreateInstance(implementationType);
+            return (T)Activator.CreateInstance(type);
         }
 
         #endregion
