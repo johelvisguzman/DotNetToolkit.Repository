@@ -98,6 +98,12 @@
                 UseCachingProvider(cachingProvider);
             }
 
+            var mappingProvider = config.MappingProvider.GetTypedValue();
+            if (mappingProvider != null)
+            {
+                UseMapperProvider(mappingProvider);
+            }
+
             foreach (var item in config.Interceptors.GetTypedValues())
             {
                 UseInterceptor(item.Key, item.Value);
@@ -136,6 +142,12 @@
             if (cachingProvider != null)
             {
                 UseCachingProvider(cachingProvider);
+            }
+
+            var mappingProvider = config.GetMappingProvider();
+            if (mappingProvider != null)
+            {
+                UseMapperProvider(mappingProvider);
             }
 
             foreach (var item in config.GetInterceptors())

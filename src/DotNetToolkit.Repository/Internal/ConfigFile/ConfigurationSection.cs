@@ -10,10 +10,12 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
     internal class ConfigurationSection : System.Configuration.ConfigurationSection
     {
         public const string SectionName = "repository";
+
         private const string InterceptorsKey = "interceptors";
         private const string DefaultContextFactoryKey = "defaultContextFactory";
         private const string LoggingProviderKey = "loggingProvider";
         private const string CachingProviderKey = "cachingProvider";
+        private const string MappingProviderKey = "mappingProvider";
 
         [ConfigurationProperty(InterceptorsKey)]
         public virtual RepositoryInterceptorElementCollection Interceptors
@@ -37,6 +39,12 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
         public virtual CachingProviderElement CachingProvider
         {
             get => (CachingProviderElement)this[CachingProviderKey];
+        }
+
+        [ConfigurationProperty(MappingProviderKey, IsRequired = false)]
+        public virtual MappingProviderElement MappingProvider
+        {
+            get => (MappingProviderElement)this[MappingProviderKey];
         }
     }
 }

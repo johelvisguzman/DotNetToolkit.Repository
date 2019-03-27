@@ -32,46 +32,18 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
 
         protected override object GetElementKey(ConfigurationElement element)
         {
-            return ((RepositoryInterceptorElement)element).Type;
-        }
-
-        public RepositoryInterceptorElement AddInterceptor(string type)
-        {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
-
-            var element = (RepositoryInterceptorElement)CreateNewElement();
-
-            base.BaseAdd(element);
-
-            element.Type = type;
-
-            return element;
+            return ((RepositoryInterceptorElement)element).TypeName;
         }
 
         public Dictionary<Type, Func<IRepositoryInterceptor>> GetTypedValues()
         {
             var defaultFactory = ConfigurationProvider.GetDefaultFactory();
 
-            return this.Cast<RepositoryInterceptorElement>()
+            return this
+                .Cast<RepositoryInterceptorElement>()
                 .ToDictionary(
-                    x => Type.GetType(x.Type, throwOnError: true),
-                    x =>
-                    {
-                        IRepositoryInterceptor Factory()
-                        {
-                            var type = Type.GetType(x.Type, throwOnError: true);
-
-                            if (defaultFactory != null)
-                                return (IRepositoryInterceptor)defaultFactory(type);
-
-                            var args = x.Parameters.GetTypedParameterValues();
-
-                            return (IRepositoryInterceptor)Activator.CreateInstance(type, args);
-                        }
-
-                        return (Func<IRepositoryInterceptor>)Factory;
-                    });
+                    x => x.Type,
+                    x => (Func<IRepositoryInterceptor>)x.GetTypedValue);
         }
     }
 }

@@ -6,19 +6,10 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
     using System;
     using System.Configuration;
 
-    internal class CachingProviderElement : ConfigurationElement
+    internal class CachingProviderElement : TypedConfigurationElementBase<ICacheProvider>
     {
-        private const string TypeKey = "type";
         private const string ExpiryKey = "expiry";
-        private const string ParametersKey = "parameters";
-
-        [ConfigurationProperty(TypeKey, IsKey = true, IsRequired = true)]
-        public string TypeName
-        {
-            get => (string)this[TypeKey];
-            set => this[TypeKey] = value;
-        }
-
+        
         [ConfigurationProperty(ExpiryKey, IsRequired = false)]
         public TimeSpan? Expiry
         {
@@ -26,26 +17,9 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
             set => this[ExpiryKey] = value;
         }
 
-        [ConfigurationProperty(ParametersKey, IsRequired = false)]
-        public ParameterCollection Parameters
+        public override ICacheProvider GetTypedValue()
         {
-            get => (ParameterCollection)this[ParametersKey];
-            set => this[ParametersKey] = value;
-        }
-
-        public ICacheProvider GetTypedValue()
-        {
-            if (string.IsNullOrEmpty(TypeName))
-                return null;
-
-            var type = Type.GetType(TypeName, throwOnError: true);
-            var args = Parameters.GetTypedParameterValues();
-
-            var defaultFactory = ConfigurationProvider.GetDefaultFactory();
-
-            var provider = defaultFactory != null
-                ? (ICacheProvider)defaultFactory(type)
-                : (ICacheProvider)Activator.CreateInstance(type, args);
+            var provider = base.GetTypedValue();
 
             if (Expiry != null)
                 provider.CacheExpiration = Expiry;
