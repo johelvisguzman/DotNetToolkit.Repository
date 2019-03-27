@@ -22,7 +22,7 @@
             container.RegisterType<MainWindowViewModel>();
             container.RegisterType<CustomerWorkspaceViewModel>();
             container.RegisterType<IServiceLocator, UnityServiceLocator>(new InjectionConstructor(container));
-            container.RegisterRepositories(options => options.UseInMemoryDatabase());
+            container.RegisterRepositories(options => options.UseConfiguration());
 
             ViewModelLocator.SetDefaultViewModelFactory(type => container.Resolve(type));
         }
