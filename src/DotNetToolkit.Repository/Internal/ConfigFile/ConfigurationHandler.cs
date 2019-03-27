@@ -55,7 +55,7 @@
 
             if (section != null)
             {
-                var type = ExtractType(section);
+                var type = ExtractType(section, isRequired: true);
                 var args = ExtractParameters(section);
 
                 return CreateInstance<IRepositoryContextFactory>(type, args.ToArray());
@@ -70,7 +70,7 @@
 
             if (section != null)
             {
-                var type = ExtractType(section);
+                var type = ExtractType(section, isRequired: true);
                 var args = ExtractParameters(section);
 
                 return CreateInstance<ILoggerProvider>(type, args.ToArray());
@@ -85,7 +85,7 @@
 
             if (section != null)
             {
-                var type = ExtractType(section);
+                var type = ExtractType(section, isRequired: true);
                 var args = ExtractParameters(section);
                 var expiry = ExtractExpiry(section);
 
@@ -111,7 +111,7 @@
                 {
                     if (subSection != null)
                     {
-                        var type = ExtractType(subSection);
+                        var type = ExtractType(subSection, isRequired: true);
 
                         IRepositoryInterceptor Factory()
                         {
@@ -156,9 +156,9 @@
             return args;
         }
 
-        private static Type ExtractType(IConfigurationSection section)
+        private static Type ExtractType(IConfigurationSection section, bool isRequired)
         {
-            var value = Extract(section, TypeKey, isRequired: false);
+            var value = Extract(section, TypeKey, isRequired);
 
             if (string.IsNullOrEmpty(value))
                 value = "System.String";
@@ -168,7 +168,7 @@
 
         private static object ExtractParameter(IConfigurationSection section)
         {
-            var type = ExtractType(section);
+            var type = ExtractType(section, isRequired: false);
             var value = Extract(section, ValueKey);
 
             return type.ConvertTo(value);
