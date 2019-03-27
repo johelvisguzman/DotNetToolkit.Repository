@@ -2,14 +2,14 @@
 
 namespace DotNetToolkit.Repository.Internal.ConfigFile
 {
-    using Factories;
+    using Configuration.Logging;
     using System;
     using System.Configuration;
 
     /// <summary>
     /// Represents a repository context factory element.
     /// </summary>
-    internal class RepositoryContextFactoryElement : ConfigurationElement
+    internal class LoggingProviderElement : ConfigurationElement
     {
         private const string TypeKey = "type";
         private const string ParametersKey = "parameters";
@@ -28,7 +28,7 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
             set => this[ParametersKey] = value;
         }
 
-        public IRepositoryContextFactory GetTypedValue()
+        public ILoggerProvider GetTypedValue()
         {
             if (string.IsNullOrEmpty(TypeName))
                 return null;
@@ -36,7 +36,7 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
             var type = Type.GetType(TypeName, throwOnError: true);
             var args = Parameters.GetTypedParameterValues();
 
-            return (IRepositoryContextFactory)Activator.CreateInstance(type, args);
+            return (ILoggerProvider)Activator.CreateInstance(type, args);
         }
     }
 }

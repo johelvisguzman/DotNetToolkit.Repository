@@ -85,6 +85,12 @@
                 UseInternalContextFactory(defaultContextFactory);
             }
 
+            var loggingProvider = config.LoggingProvider.GetTypedValue();
+            if (loggingProvider != null)
+            {
+                UseLoggerProvider(loggingProvider);
+            }
+
             foreach (var item in config.Interceptors.GetTypedValues())
             {
                 UseInterceptor(item.Key, item.Value);
@@ -110,6 +116,12 @@
             if (defaultContextFactory != null)
             {
                 UseInternalContextFactory(defaultContextFactory);
+            }
+
+            var loggingProvider = config.GetLoggerProvider();
+            if (loggingProvider != null)
+            {
+                UseLoggerProvider(loggingProvider);
             }
 
             foreach (var item in config.GetInterceptors())

@@ -3,6 +3,7 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Reflection;
 
@@ -66,6 +67,20 @@
         public static bool IsGenericType(this Type type, Type genericType)
         {
             return type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == genericType;
+        }
+
+        /// <summary>
+        /// Converts the type to the specified string value.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="value">The value to convert to.</param>
+        /// <returns>The converted result.</returns>
+        public static object ConvertTo(this Type type, string value)
+        {
+            if (type.GetTypeInfo().IsEnum)
+                return Enum.Parse(type, value);
+
+            return Convert.ChangeType(value, type, CultureInfo.InvariantCulture);
         }
     }
 }
