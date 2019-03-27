@@ -56,43 +56,29 @@
         }
 
         [Fact]
-        public void ConfigureInterceptorFromAppConfig()
-        {
-            var optionsBuilder = new RepositoryOptionsBuilder()
-                .UseConfiguration();
-
-            Assert.Equal(1, optionsBuilder.Options.Interceptors.Count());
-
-            Assert.True(optionsBuilder.Options.Interceptors.ContainsKey(typeof(TestRepositoryInterceptor)));
-        }
-
-        [Fact]
-        public void ConfigureDefaultContextFactoryFromAppConfig()
+        public void ConfigureFromAppConfig()
         {
             var optionsBuilder = new RepositoryOptionsBuilder()
                 .UseConfiguration();
 
             Assert.NotNull(optionsBuilder.Options.ContextFactory);
-        }
-
-        [Fact]
-        public void ConfigureInterceptorFromAppSetting()
-        {
-            var optionsBuilder = new RepositoryOptionsBuilder()
-                .UseConfiguration(TestConfigurationHelper.GetConfiguration());
+            Assert.NotNull(optionsBuilder.Options.LoggerProvider);
 
             Assert.Equal(1, optionsBuilder.Options.Interceptors.Count());
-
             Assert.True(optionsBuilder.Options.Interceptors.ContainsKey(typeof(TestRepositoryInterceptor)));
         }
 
         [Fact]
-        public void ConfigureDefaultContextFactoryFromAppSetting()
+        public void ConfigureFromAppSetting()
         {
             var optionsBuilder = new RepositoryOptionsBuilder()
                 .UseConfiguration(TestConfigurationHelper.GetConfiguration());
 
             Assert.NotNull(optionsBuilder.Options.ContextFactory);
+            Assert.NotNull(optionsBuilder.Options.LoggerProvider);
+
+            Assert.Equal(1, optionsBuilder.Options.Interceptors.Count());
+            Assert.True(optionsBuilder.Options.Interceptors.ContainsKey(typeof(TestRepositoryInterceptor)));
         }
     }
 }

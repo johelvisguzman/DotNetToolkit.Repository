@@ -1,11 +1,12 @@
 ﻿namespace DotNetToolkit.Repository.Internal.ConfigFile
 {
     using Configuration.Interceptors;
+    using Configuration.Logging;
+    using Extensions;
     using Factories;
     using Microsoft.Extensions.Configuration;
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
 
     internal class ConfigurationHandler
@@ -16,6 +17,7 @@
 
         private const string RepositorySectionKey = "repository";
         private const string DefaultContextFactorySectionKey = "defaultContextFactory";
+        private const string LoggingProviderSectionKey = "loggingProvider";
         private const string InterceptorCollectionSectionKey = "interceptors";
         private const string ParameterCollectionSectionKey = "parameters";
         private const string ValueKey = "value";
@@ -46,20 +48,25 @@
 
             if (defaultContextFactorySection != null)
             {
-                if (defaultContextFactorySection[TypeKey] == null)
-                    throw new InvalidOperationException($"The '{TypeKey}' is missing for this interceptor section.");
+                var type = ExtractType(defaultContextFactorySection);
+                var args = ExtractParameters(defaultContextFactorySection);
 
-                var contextFactoryType = Type.GetType(defaultContextFactorySection[TypeKey], throwOnError: true);
+                return CreateInstance<IRepositoryContextFactory>(type, args.ToArray());
+            }
 
-                var parameterCollectionSection = defaultContextFactorySection.GetSection(ParameterCollectionSectionKey);
-                var args = new List<object>();
+            return null;
+        }
 
-                if (parameterCollectionSection != null)
-                {
-                    args.AddRange(parameterCollectionSection.GetChildren().Select(ExtractParameterValue));
-                }
+        public ILoggerProvider GetLoggerProvider()
+        {
+            var loggingProviderSection = _root.GetSection(LoggingProviderSectionKey);
 
-                return CreateInstance<IRepositoryContextFactory>(contextFactoryType, args.ToArray());
+            if (loggingProviderSection != null)
+            {
+                var type = ExtractType(loggingProviderSection);
+                var args = ExtractParameters(loggingProviderSection);
+
+                return CreateInstance<ILoggerProvider>(type, args.ToArray());
             }
 
             return null;
@@ -78,25 +85,19 @@
                 {
                     if (interceptorSection != null)
                     {
-                        var interceptorType = Type.GetType(interceptorSection[TypeKey], throwOnError: true);
+                        var type = ExtractType(interceptorSection);
 
                         IRepositoryInterceptor Factory()
                         {
                             if (defaultFactory != null)
-                                return (IRepositoryInterceptor)defaultFactory(interceptorType);
+                                return (IRepositoryInterceptor)defaultFactory(type);
 
-                            var parameterCollectionSection = interceptorSection.GetSection(ParameterCollectionSectionKey);
-                            var args = new List<object>();
+                            var args = ExtractParameters(interceptorSection);
 
-                            if (parameterCollectionSection != null)
-                            {
-                                args.AddRange(parameterCollectionSection.GetChildren().Select(ExtractParameterValue));
-                            }
-
-                            return CreateInstance<IRepositoryInterceptor>(interceptorType, args.ToArray());
+                            return CreateInstance<IRepositoryInterceptor>(type, args.ToArray());
                         }
 
-                        interceptorsDict.Add(interceptorType, (Func<IRepositoryInterceptor>)Factory);
+                        interceptorsDict.Add(type, (Func<IRepositoryInterceptor>)Factory);
                     }
                 }
             }
@@ -104,23 +105,44 @@
             return interceptorsDict;
         }
 
-        private static object ExtractParameterValue(IConfigurationSection parameterSection)
-        {
-            if (parameterSection[TypeKey] == null)
-                throw new InvalidOperationException($"The '{TypeKey}' is missing for this parameter section.");
-
-            if (parameterSection[ValueKey] == null)
-                throw new InvalidOperationException($"The '{ValueKey}' is missing for this parameter section.");
-
-            var parameterType = Type.GetType(parameterSection[TypeKey], throwOnError: true);
-            var parameterValue = Convert.ChangeType(parameterSection[ValueKey], parameterType, CultureInfo.InvariantCulture);
-
-            return parameterValue;
-        }
-
         #endregion
 
         #region Private Methods
+
+        private static List<object> ExtractParameters(IConfigurationSection section)
+        {
+            var parameterCollectionSection = section.GetSection(ParameterCollectionSectionKey);
+
+            var args = new List<object>();
+
+            if (parameterCollectionSection != null)
+            {
+                args.AddRange(parameterCollectionSection.GetChildren().Select(ExtractParameter));
+            }
+
+            return args;
+        }
+
+        private static Type ExtractType(IConfigurationSection section)
+        {
+            return Type.GetType(Extract(section, TypeKey), throwOnError: true);
+        }
+
+        private static object ExtractParameter(IConfigurationSection section)
+        {
+            var type = ExtractType(section);
+            var value = Extract(section, ValueKey);
+
+            return type.ConvertTo(value);
+        }
+        
+        private static string Extract(IConfigurationSection section, string key, bool isRequired = true)
+        {
+            if (section[key] == null && isRequired)
+                throw new InvalidOperationException($"The '{key}' key is missing for the '{section.Path}' section.");
+
+            return section[key];
+        }
 
         private TService CreateInstance<TService>(Type implementationType, object[] args)
         {

@@ -2,9 +2,9 @@
 
 namespace DotNetToolkit.Repository.Internal.ConfigFile
 {
+    using Extensions;
     using System;
     using System.Configuration;
-    using System.Globalization;
 
     /// <summary>
     /// Represents a parameter to be passed to a method
@@ -39,7 +39,7 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
         {
             var type = Type.GetType(TypeName, throwOnError: true);
 
-            return Convert.ChangeType(ValueString, type, CultureInfo.InvariantCulture);
+            return type.ConvertTo(ValueString);
         }
     }
 }

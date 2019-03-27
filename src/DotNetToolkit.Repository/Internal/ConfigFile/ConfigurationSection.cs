@@ -12,17 +12,24 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
         public const string SectionName = "repository";
         private const string InterceptorsKey = "interceptors";
         private const string DefaultContextFactoryKey = "defaultContextFactory";
+        private const string LoggingProviderKey = "loggingProvider";
 
         [ConfigurationProperty(InterceptorsKey)]
-        public virtual  RepositoryInterceptorElementCollection Interceptors
+        public virtual RepositoryInterceptorElementCollection Interceptors
         {
             get => (RepositoryInterceptorElementCollection)this[InterceptorsKey];
         }
 
-        [ConfigurationProperty(DefaultContextFactoryKey, IsRequired = true)]
-        public virtual  RepositoryContextFactoryElement DefaultContextFactory
+        [ConfigurationProperty(DefaultContextFactoryKey, IsRequired = false)]
+        public virtual RepositoryContextFactoryElement DefaultContextFactory
         {
             get => (RepositoryContextFactoryElement)this[DefaultContextFactoryKey];
+        }
+
+        [ConfigurationProperty(LoggingProviderKey, IsRequired = false)]
+        public virtual LoggingProviderElement LoggingProvider
+        {
+            get => (LoggingProviderElement)this[LoggingProviderKey];
         }
     }
 }
