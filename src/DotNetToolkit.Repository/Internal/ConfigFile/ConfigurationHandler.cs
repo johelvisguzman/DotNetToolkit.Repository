@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Internal.ConfigFile
 {
+    using Configuration.Caching;
     using Configuration.Interceptors;
     using Configuration.Logging;
     using Extensions;
@@ -18,10 +19,14 @@
         private const string RepositorySectionKey = "repository";
         private const string DefaultContextFactorySectionKey = "defaultContextFactory";
         private const string LoggingProviderSectionKey = "loggingProvider";
+        private const string CachingProviderSectionKey = "cachingProvider";
+        private const string ExpiryKey = "expiry";
         private const string InterceptorCollectionSectionKey = "interceptors";
         private const string ParameterCollectionSectionKey = "parameters";
         private const string ValueKey = "value";
         private const string TypeKey = "type";
+
+        private readonly Func<Type, object> _defaultFactory;
 
         #endregion
 
@@ -36,6 +41,8 @@
 
             if (_root == null)
                 throw new InvalidOperationException("Unable to find a configuration for the repositories.");
+
+            _defaultFactory = ConfigurationProvider.GetDefaultFactory();
         }
 
         #endregion
@@ -44,12 +51,12 @@
 
         public IRepositoryContextFactory GetDefaultContextFactory()
         {
-            var defaultContextFactorySection = _root.GetSection(DefaultContextFactorySectionKey);
+            var section = _root.GetSection(DefaultContextFactorySectionKey);
 
-            if (defaultContextFactorySection != null)
+            if (section != null)
             {
-                var type = ExtractType(defaultContextFactorySection);
-                var args = ExtractParameters(defaultContextFactorySection);
+                var type = ExtractType(section);
+                var args = ExtractParameters(section);
 
                 return CreateInstance<IRepositoryContextFactory>(type, args.ToArray());
             }
@@ -59,14 +66,35 @@
 
         public ILoggerProvider GetLoggerProvider()
         {
-            var loggingProviderSection = _root.GetSection(LoggingProviderSectionKey);
+            var section = _root.GetSection(LoggingProviderSectionKey);
 
-            if (loggingProviderSection != null)
+            if (section != null)
             {
-                var type = ExtractType(loggingProviderSection);
-                var args = ExtractParameters(loggingProviderSection);
+                var type = ExtractType(section);
+                var args = ExtractParameters(section);
 
                 return CreateInstance<ILoggerProvider>(type, args.ToArray());
+            }
+
+            return null;
+        }
+
+        public ICacheProvider GetCachingProvider()
+        {
+            var section = _root.GetSection(CachingProviderSectionKey);
+
+            if (section != null)
+            {
+                var type = ExtractType(section);
+                var args = ExtractParameters(section);
+                var expiry = ExtractExpiry(section);
+
+                var provider = CreateInstance<ICacheProvider>(type, args.ToArray());
+
+                if (expiry != null)
+                    provider.CacheExpiration = expiry;
+
+                return provider;
             }
 
             return null;
@@ -75,24 +103,19 @@
         public Dictionary<Type, Func<IRepositoryInterceptor>> GetInterceptors()
         {
             var interceptorsDict = new Dictionary<Type, Func<IRepositoryInterceptor>>();
-            var interceptorCollectionSection = _root.GetSection(InterceptorCollectionSectionKey);
+            var section = _root.GetSection(InterceptorCollectionSectionKey);
 
-            if (interceptorCollectionSection != null)
+            if (section != null)
             {
-                var defaultFactory = RepositoryInterceptorProvider.GetDefaultFactory();
-
-                foreach (var interceptorSection in interceptorCollectionSection.GetChildren())
+                foreach (var subSection in section.GetChildren())
                 {
-                    if (interceptorSection != null)
+                    if (subSection != null)
                     {
-                        var type = ExtractType(interceptorSection);
+                        var type = ExtractType(subSection);
 
                         IRepositoryInterceptor Factory()
                         {
-                            if (defaultFactory != null)
-                                return (IRepositoryInterceptor)defaultFactory(type);
-
-                            var args = ExtractParameters(interceptorSection);
+                            var args = ExtractParameters(subSection);
 
                             return CreateInstance<IRepositoryInterceptor>(type, args.ToArray());
                         }
@@ -108,6 +131,16 @@
         #endregion
 
         #region Private Methods
+
+        private static TimeSpan? ExtractExpiry(IConfigurationSection section)
+        {
+            var value = Extract(section, ExpiryKey);
+
+            if (string.IsNullOrEmpty(value))
+                return null;
+
+            return TimeSpan.Parse(value);
+        }
 
         private static List<object> ExtractParameters(IConfigurationSection section)
         {
@@ -135,7 +168,7 @@
 
             return type.ConvertTo(value);
         }
-        
+
         private static string Extract(IConfigurationSection section, string key, bool isRequired = true)
         {
             if (section[key] == null && isRequired)
@@ -151,6 +184,9 @@
 
             if (args.Any())
                 return (TService)Activator.CreateInstance(implementationType, args);
+
+            if (_defaultFactory != null)
+                return (TService)_defaultFactory(implementationType);
 
             return (TService)Activator.CreateInstance(implementationType);
         }

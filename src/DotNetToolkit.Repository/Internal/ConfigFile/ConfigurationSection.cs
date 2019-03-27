@@ -13,6 +13,7 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
         private const string InterceptorsKey = "interceptors";
         private const string DefaultContextFactoryKey = "defaultContextFactory";
         private const string LoggingProviderKey = "loggingProvider";
+        private const string CachingProviderKey = "cachingProvider";
 
         [ConfigurationProperty(InterceptorsKey)]
         public virtual RepositoryInterceptorElementCollection Interceptors
@@ -30,6 +31,12 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
         public virtual LoggingProviderElement LoggingProvider
         {
             get => (LoggingProviderElement)this[LoggingProviderKey];
+        }
+
+        [ConfigurationProperty(CachingProviderKey, IsRequired = false)]
+        public virtual CachingProviderElement CachingProvider
+        {
+            get => (CachingProviderElement)this[CachingProviderKey];
         }
     }
 }

@@ -63,6 +63,8 @@
 
             Assert.NotNull(optionsBuilder.Options.ContextFactory);
             Assert.NotNull(optionsBuilder.Options.LoggerProvider);
+            Assert.NotNull(optionsBuilder.Options.CachingProvider);
+            Assert.NotNull(optionsBuilder.Options.CachingProvider.CacheExpiration);
 
             Assert.Equal(1, optionsBuilder.Options.Interceptors.Count());
             Assert.True(optionsBuilder.Options.Interceptors.ContainsKey(typeof(TestRepositoryInterceptor)));
@@ -76,6 +78,8 @@
 
             Assert.NotNull(optionsBuilder.Options.ContextFactory);
             Assert.NotNull(optionsBuilder.Options.LoggerProvider);
+            Assert.NotNull(optionsBuilder.Options.CachingProvider);
+            Assert.NotNull(optionsBuilder.Options.CachingProvider.CacheExpiration);
 
             Assert.Equal(1, optionsBuilder.Options.Interceptors.Count());
             Assert.True(optionsBuilder.Options.Interceptors.ContainsKey(typeof(TestRepositoryInterceptor)));

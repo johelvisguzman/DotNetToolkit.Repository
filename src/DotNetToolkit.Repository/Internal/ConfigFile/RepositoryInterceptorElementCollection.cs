@@ -51,7 +51,7 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
 
         public Dictionary<Type, Func<IRepositoryInterceptor>> GetTypedValues()
         {
-            var defaultFactory = RepositoryInterceptorProvider.GetDefaultFactory();
+            var defaultFactory = ConfigurationProvider.GetDefaultFactory();
 
             return this.Cast<RepositoryInterceptorElement>()
                 .ToDictionary(

@@ -74,6 +74,7 @@
         /// Configures the repository options with the data from the App.config.
         /// </summary>
         /// <returns>The same builder instance.</returns>
+        /// <remarks>Any element that is defined in the config file can be resolved using the <see cref="DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationProvider.SetDefaultFactory"/></remarks>
         public virtual RepositoryOptionsBuilder UseConfiguration()
         {
             var config = (Internal.ConfigFile.ConfigurationSection)
@@ -91,6 +92,12 @@
                 UseLoggerProvider(loggingProvider);
             }
 
+            var cachingProvider = config.CachingProvider.GetTypedValue();
+            if (cachingProvider != null)
+            {
+                UseCachingProvider(cachingProvider);
+            }
+
             foreach (var item in config.Interceptors.GetTypedValues())
             {
                 UseInterceptor(item.Key, item.Value);
@@ -105,6 +112,7 @@
         /// </summary>
         /// <param name="configuration">The configuration.</param>
         /// <returns>The same builder instance.</returns>
+        /// <remarks>Any element that is defined in the config file can be resolved using the <see cref="DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationProvider.SetDefaultFactory"/></remarks>
         public virtual RepositoryOptionsBuilder UseConfiguration(Microsoft.Extensions.Configuration.IConfiguration configuration)
         {
             if (configuration == null)
@@ -122,6 +130,12 @@
             if (loggingProvider != null)
             {
                 UseLoggerProvider(loggingProvider);
+            }
+
+            var cachingProvider = config.GetCachingProvider();
+            if (cachingProvider != null)
+            {
+                UseCachingProvider(cachingProvider);
             }
 
             foreach (var item in config.GetInterceptors())
