@@ -16,18 +16,34 @@
         /// Initializes a new instance of the <see cref="InMemoryCacheProvider" /> class.
         /// </summary>
         /// <param name="cache">The underlying caching storage.</param>
-        public InMemoryCacheProvider(IMemoryCache cache)
+        public InMemoryCacheProvider(IMemoryCache cache) : this(cache, TimeSpan.Zero) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryCacheProvider" /> class.
+        /// </summary>
+        public InMemoryCacheProvider() : this(TimeSpan.Zero) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryCacheProvider" /> class.
+        /// </summary>
+        /// <param name="expiry">The the caching expiration time.</param>
+        public InMemoryCacheProvider(TimeSpan expiry) : this(new MemoryCache(new MemoryCacheOptions()), expiry) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InMemoryCacheProvider" /> class.
+        /// </summary>
+        /// <param name="cache">The underlying caching storage.</param>
+        /// <param name="expiry">The the caching expiration time.</param>
+        public InMemoryCacheProvider(IMemoryCache cache, TimeSpan expiry)
         {
             if (cache == null)
                 throw new ArgumentNullException(nameof(cache));
 
             Cache = new InMemoryCache(cache);
-        }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryCacheProvider" /> class.
-        /// </summary>
-        public InMemoryCacheProvider() : this(new MemoryCache(new MemoryCacheOptions())) { }
+            if (expiry != TimeSpan.Zero)
+                CacheExpiration = expiry;
+        }
 
         #endregion
 

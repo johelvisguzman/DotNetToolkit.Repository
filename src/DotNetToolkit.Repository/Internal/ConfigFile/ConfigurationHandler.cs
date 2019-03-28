@@ -23,7 +23,6 @@
         private const string LoggingProviderSectionKey = "loggingProvider";
         private const string CachingProviderSectionKey = "cachingProvider";
         private const string MappingProviderSectionKey = "mappingProvider";
-        private const string ExpiryKey = "expiry";
         private const string InterceptorCollectionSectionKey = "interceptors";
         private const string ParameterCollectionSectionKey = "parameters";
         private const string KeyValueCollectionKey = "keyValues";
@@ -80,10 +79,6 @@
             if (section != null)
             {
                 var value = GetTypedValue<ICacheProvider>(section);
-                var expiry = ExtractExpiry(section);
-
-                if (expiry != null)
-                    value.CacheExpiration = expiry;
 
                 return value;
             }
@@ -127,16 +122,6 @@
         #endregion
 
         #region Private Methods
-
-        private static TimeSpan? ExtractExpiry(IConfigurationSection section)
-        {
-            var value = Extract(section, ExpiryKey, isRequired: false);
-
-            if (string.IsNullOrEmpty(value))
-                return null;
-
-            return TimeSpan.Parse(value);
-        }
 
         private static object[] ExtractParameters(IConfigurationSection section, Type type)
         {
