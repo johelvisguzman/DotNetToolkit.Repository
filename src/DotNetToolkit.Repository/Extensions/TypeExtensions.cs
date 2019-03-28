@@ -77,10 +77,62 @@
         /// <returns>The converted result.</returns>
         public static object ConvertTo(this Type type, string value)
         {
-            if (type.GetTypeInfo().IsEnum)
-                return Enum.Parse(type, value);
+            object Result = null;
 
-            return Convert.ChangeType(value, type, CultureInfo.InvariantCulture);
+            if (type == typeof(string))
+            {
+                Result = value;
+            }
+            else if (type == typeof(int))
+            {
+                Result = int.Parse(value, NumberStyles.Integer, CultureInfo.CurrentCulture);
+            }
+            else if (type == typeof(byte))
+            {
+                Result = Convert.ToByte(value);
+            }
+            else if (type == typeof(decimal))
+            {
+                Result = decimal.Parse(value, NumberStyles.Any, CultureInfo.CurrentCulture);
+            }
+            else if (type == typeof(double))
+            {
+                Result = double.Parse(value, NumberStyles.Any, CultureInfo.CurrentCulture);
+            }
+            else if (type == typeof(bool))
+            {
+                if (value.ToLower() == "true" || value.ToLower() == "on" || value == "1")
+                    Result = true;
+                else
+                    Result = false;
+            }
+            else if (type == typeof(DateTime))
+            {
+                Result = Convert.ToDateTime(value, CultureInfo.CurrentCulture);
+            }
+            else if (type.GetTypeInfo().IsEnum)
+            {
+                Result = Enum.Parse(type, value);
+            }
+            else
+            {
+#if !NETSTANDARD1_3
+                var converter = System.ComponentModel.TypeDescriptor.GetConverter(type);
+
+                if (converter.CanConvertFrom(typeof(string)))
+                {
+                    Result = converter.ConvertFromString(value);
+                }
+                else
+                {
+                    throw new Exception("Type Conversion not handled in ConvertTo method.");
+                }
+#else
+                return Convert.ChangeType(value, type);
+#endif
+            }
+
+            return Result;
         }
     }
 }
