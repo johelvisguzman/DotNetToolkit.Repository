@@ -10,6 +10,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
 
     internal class ConfigurationHandler
     {
@@ -25,6 +26,7 @@
         private const string ExpiryKey = "expiry";
         private const string InterceptorCollectionSectionKey = "interceptors";
         private const string ParameterCollectionSectionKey = "parameters";
+        private const string KeyValueCollectionKey = "keyValues";
         private const string ValueKey = "value";
         private const string TypeKey = "type";
 
@@ -136,7 +138,7 @@
             return TimeSpan.Parse(value);
         }
 
-        private static object[] ExtractParameters(IConfigurationSection section)
+        private static object[] ExtractParameters(IConfigurationSection section, Type type)
         {
             var parameterCollectionSection = section.GetSection(ParameterCollectionSectionKey);
 
@@ -145,6 +147,37 @@
             if (parameterCollectionSection != null)
             {
                 args.AddRange(parameterCollectionSection.GetChildren().Select(ExtractParameter));
+            }
+
+            if (args.Count == 0)
+            {
+                var keyValueCollectionSection = section.GetSection(KeyValueCollectionKey);
+
+                if (keyValueCollectionSection != null)
+                {
+                    var keyValues = keyValueCollectionSection
+                        .GetChildren()
+                        .Select(ExtractKeyValue)
+                        .ToDictionary(x => x.Key, x => x.Value);
+
+                    if (keyValues.Any())
+                    {
+                        var keys = keyValues.Keys;
+                        var matchedCtorParams = type
+                            .GetConstructors()
+                            .Select(x => x.GetParameters())
+                            .FirstOrDefault(pi => pi
+                                .Select(x => x.Name)
+                                .OrderBy(x => x)
+                                .SequenceEqual(keys.OrderBy(x => x)));
+
+                        if (matchedCtorParams == null)
+                            return null;
+
+                        args.AddRange(matchedCtorParams
+                            .Select(ctorParam => ctorParam.ParameterType.ConvertTo(keyValues[ctorParam.Name])));
+                    }
+                }
             }
 
             return args.ToArray();
@@ -168,10 +201,21 @@
             return type.ConvertTo(value);
         }
 
+        private static KeyValuePair<string, string> ExtractKeyValue(IConfigurationSection section)
+        {
+            var key = section.Key;
+            var value = section.Value;
+
+            if (string.IsNullOrEmpty(section.Value))
+                throw new InvalidOperationException($"The value for '{key}' key is missing for '{section.Path}' section.");
+
+            return new KeyValuePair<string, string>(key, value);
+        }
+
         private static string Extract(IConfigurationSection section, string key, bool isRequired = true)
         {
             if (section[key] == null && isRequired)
-                throw new InvalidOperationException($"The '{key}' key is missing for the '{section.Path}' section.");
+                throw new InvalidOperationException($"The value for '{key}' key is missing for '{section.Path}' section.");
 
             return section[key];
         }
@@ -184,12 +228,12 @@
             if (type == null)
                 type = ExtractType(section, isRequired: true);
 
-            var args = ExtractParameters(section);
-
             var defaultFactory = ConfigurationProvider.GetDefaultFactory();
 
             if (defaultFactory != null)
                 return (T)defaultFactory(type);
+
+            var args = ExtractParameters(section, type);
 
             if (args.Any())
                 return (T)Activator.CreateInstance(type, args);

@@ -27,12 +27,18 @@
         /// Initializes a new instance of the <see cref="AdoNetRepositoryContextFactory"/> class.
         /// </summary>
         /// <param name="nameOrConnectionString">Either the database name or a connection string.</param>
+        public AdoNetRepositoryContextFactory(string nameOrConnectionString) : this(nameOrConnectionString, false) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryContextFactory"/> class.
+        /// </summary>
+        /// <param name="nameOrConnectionString">Either the database name or a connection string.</param>
         /// <param name="ensureDatabaseCreated">
         /// Ensures that the database for the context exists. If it exists, no action is taken.
         /// If it does not exist then the database and all its schema are created.
         /// If the database exists, then no effort is made to ensure it is compatible with the model for this context.
         /// </param>
-        public AdoNetRepositoryContextFactory(string nameOrConnectionString, bool ensureDatabaseCreated = false)
+        public AdoNetRepositoryContextFactory(string nameOrConnectionString, bool ensureDatabaseCreated)
         {
             if (nameOrConnectionString == null)
                 throw new ArgumentNullException(nameof(nameOrConnectionString));
@@ -46,12 +52,19 @@
         /// </summary>
         /// <param name="providerName">The name of the provider.</param>
         /// <param name="connectionString">The connection string.</param>
+        public AdoNetRepositoryContextFactory(string providerName, string connectionString) : this(providerName, connectionString, false) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryContextFactory"/> class.
+        /// </summary>
+        /// <param name="providerName">The name of the provider.</param>
+        /// <param name="connectionString">The connection string.</param>
         /// <param name="ensureDatabaseCreated">
         /// Ensures that the database for the context exists. If it exists, no action is taken.
         /// If it does not exist then the database and all its schema are created.
         /// If the database exists, then no effort is made to ensure it is compatible with the model for this context.
         /// </param>
-        public AdoNetRepositoryContextFactory(string providerName, string connectionString, bool ensureDatabaseCreated = false)
+        public AdoNetRepositoryContextFactory(string providerName, string connectionString, bool ensureDatabaseCreated)
         {
             if (providerName == null)
                 throw new ArgumentNullException(nameof(providerName));
@@ -68,12 +81,18 @@
         /// Initializes a new instance of the <see cref="AdoNetRepositoryContextFactory" /> class.
         /// </summary>
         /// <param name="existingConnection">The existing connection.</param>
+        public AdoNetRepositoryContextFactory(DbConnection existingConnection) : this(existingConnection, false) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdoNetRepositoryContextFactory" /> class.
+        /// </summary>
+        /// <param name="existingConnection">The existing connection.</param>
         /// <param name="ensureDatabaseCreated">
         /// Ensures that the database for the context exists. If it exists, no action is taken.
         /// If it does not exist then the database and all its schema are created.
         /// If the database exists, then no effort is made to ensure it is compatible with the model for this context.
         /// </param>
-        public AdoNetRepositoryContextFactory(DbConnection existingConnection, bool ensureDatabaseCreated = false)
+        public AdoNetRepositoryContextFactory(DbConnection existingConnection, bool ensureDatabaseCreated)
         {
             if (existingConnection == null)
                 throw new ArgumentNullException(nameof(existingConnection));
