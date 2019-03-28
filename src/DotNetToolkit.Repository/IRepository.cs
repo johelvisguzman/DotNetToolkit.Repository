@@ -15,7 +15,6 @@
     /// <typeparam name="TKey1">The type of the first part of the composite primary key.</typeparam>
     /// <typeparam name="TKey2">The type of the second part of the composite primary key.</typeparam>
     /// <typeparam name="TKey3">The type of the third part of the composite primary key.</typeparam>
-    /// <seealso cref="System.IDisposable" />
     /// <seealso cref="IReadOnlyRepository{TEntity, TKey1, TKey2, TKey3}" />
     public interface IRepository<TEntity, in TKey1, in TKey2, in TKey3> : IReadOnlyRepository<TEntity, TKey1, TKey2, TKey3> where TEntity : class
     {
@@ -232,7 +231,6 @@
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <typeparam name="TKey1">The type of the first part of the composite primary key.</typeparam>
     /// <typeparam name="TKey2">The type of the second part of the composite primary key.</typeparam>
-    /// <seealso cref="System.IDisposable" />
     /// <seealso cref="IReadOnlyRepository{TEntity, TKey1, TKey2}" />
     public interface IRepository<TEntity, in TKey1, in TKey2> : IReadOnlyRepository<TEntity, TKey1, TKey2> where TEntity : class
     {
@@ -444,7 +442,6 @@
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <typeparam name="TKey">The type of the primary key.</typeparam>
-    /// <seealso cref="System.IDisposable" />
     /// <seealso cref="IReadOnlyRepository{TEntity, TKey}" />
     public interface IRepository<TEntity, in TKey> : IReadOnlyRepository<TEntity, TKey> where TEntity : class
     {
@@ -651,7 +648,6 @@
     /// Represents a repository with a default primary key value of type integer.
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
-    /// <seealso cref="System.IDisposable" />
     /// <seealso cref="IReadOnlyRepository{TEntity}" />
     /// <seealso cref="IRepository{TEntity, Tkey}" />
     public interface IRepository<TEntity> : IReadOnlyRepository<TEntity>, IRepository<TEntity, int> where TEntity : class

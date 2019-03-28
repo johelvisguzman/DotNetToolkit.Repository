@@ -16,7 +16,6 @@
     /// <typeparam name="TKey1">The type of the first part of the composite primary key.</typeparam>
     /// <typeparam name="TKey2">The type of the second part of the composite primary key.</typeparam>
     /// <typeparam name="TKey3">The type of the third part of the composite primary key.</typeparam>
-    /// <seealso cref="System.IDisposable" />
     public interface IReadOnlyRepository<TEntity, in TKey1, in TKey2, in TKey3> where TEntity : class
     {
         /// <summary>
@@ -551,7 +550,6 @@
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <typeparam name="TKey1">The type of the first part of the composite primary key.</typeparam>
     /// <typeparam name="TKey2">The type of the second part of the composite primary key.</typeparam>
-    /// <seealso cref="System.IDisposable" />
     public interface IReadOnlyRepository<TEntity, in TKey1, in TKey2> where TEntity : class
     {
         /// <summary>
@@ -1079,7 +1077,6 @@
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <typeparam name="TKey">The type of the primary key.</typeparam>
-    /// <seealso cref="System.IDisposable" />
     public interface IReadOnlyRepository<TEntity, in TKey> where TEntity : class
     {
         /// <summary>

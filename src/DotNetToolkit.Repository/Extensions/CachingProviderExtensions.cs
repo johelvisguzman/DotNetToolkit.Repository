@@ -35,24 +35,24 @@
                 getter,
                 logger);
 
-        public static IQueryResult<T> GetOrSet<T>(this ICacheProvider cacheProvider, object[] keys, IFetchQueryStrategy<T> fetchStrategy, Func<IQueryResult<T>> getter, ILogger logger)
+        public static IQueryResult<T> GetOrSetFind<T>(this ICacheProvider cacheProvider, object[] keys, IFetchQueryStrategy<T> fetchStrategy, Func<IQueryResult<T>> getter, ILogger logger)
             => GetOrSet<T>(
                 cacheProvider,
-                FormatGetOrSetKey<T>(keys, fetchStrategy),
+                FormatGetOrSetFindKey<T>(keys, fetchStrategy),
                 getter,
                 logger);
 
-        public static IQueryResult<TResult> GetOrSet<T, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TResult>> selector, Func<IQueryResult<TResult>> getter, ILogger logger)
+        public static IQueryResult<TResult> GetOrSetFind<T, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TResult>> selector, Func<IQueryResult<TResult>> getter, ILogger logger)
             => GetOrSet<TResult>(
                 cacheProvider,
-                FormatGetOrSetKey<T, TResult>(options, selector),
+                FormatGetOrSetFindKey<T, TResult>(options, selector),
                 getter,
                 logger);
 
-        public static IPagedQueryResult<IEnumerable<TResult>> GetOrSetAll<T, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TResult>> selector, Func<IPagedQueryResult<IEnumerable<TResult>>> getter, ILogger logger)
+        public static IPagedQueryResult<IEnumerable<TResult>> GetOrSetFindAll<T, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TResult>> selector, Func<IPagedQueryResult<IEnumerable<TResult>>> getter, ILogger logger)
             => GetOrSet<IEnumerable<TResult>>(
                 cacheProvider,
-                FormatGetOrSetAllKey<T, TResult>(options, selector),
+                FormatGetOrSetFindAllKey<T, TResult>(options, selector),
                 getter,
                 logger);
 
@@ -91,24 +91,24 @@
                 getter,
                 logger);
 
-        public static Task<IQueryResult<T>> GetOrSetAsync<T>(this ICacheProvider cacheProvider, object[] keys, IFetchQueryStrategy<T> fetchStrategy, Func<Task<IQueryResult<T>>> getter, ILogger logger)
+        public static Task<IQueryResult<T>> GetOrSetFindAsync<T>(this ICacheProvider cacheProvider, object[] keys, IFetchQueryStrategy<T> fetchStrategy, Func<Task<IQueryResult<T>>> getter, ILogger logger)
             => GetOrSetAsync<T>(
                 cacheProvider,
-                FormatGetOrSetKey<T>(keys, fetchStrategy),
+                FormatGetOrSetFindKey<T>(keys, fetchStrategy),
                 getter,
                 logger);
 
-        public static Task<IQueryResult<TResult>> GetOrSetAsync<T, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TResult>> selector, Func<Task<IQueryResult<TResult>>> getter, ILogger logger)
+        public static Task<IQueryResult<TResult>> GetOrSetFindAsync<T, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TResult>> selector, Func<Task<IQueryResult<TResult>>> getter, ILogger logger)
             => GetOrSetAsync<TResult>(
                 cacheProvider,
-                FormatGetOrSetKey<T, TResult>(options, selector),
+                FormatGetOrSetFindKey<T, TResult>(options, selector),
                 getter,
                 logger);
 
-        public static Task<IPagedQueryResult<IEnumerable<TResult>>> GetOrSetAllAsync<T, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TResult>> selector, Func<Task<IPagedQueryResult<IEnumerable<TResult>>>> getter, ILogger logger)
+        public static Task<IPagedQueryResult<IEnumerable<TResult>>> GetOrSetFindAllAsync<T, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TResult>> selector, Func<Task<IPagedQueryResult<IEnumerable<TResult>>>> getter, ILogger logger)
             => GetOrSetAsync<IEnumerable<TResult>>(
                 cacheProvider,
-                FormatGetOrSetAllKey<T, TResult>(options, selector),
+                FormatGetOrSetFindAllKey<T, TResult>(options, selector),
                 getter,
                 logger);
 
@@ -452,23 +452,25 @@
             return sb.ToString();
         }
 
-        private static string FormatGetOrSetKey<T>(object[] keys, IFetchQueryStrategy<T> fetchStrategy)
+        private static string FormatGetOrSetFindKey<T>(object[] keys, IFetchQueryStrategy<T> fetchStrategy)
         {
             var f = FormatFetchQueryStrategy(fetchStrategy);
 
-            return $"GetOrSet<{typeof(T).Name}>: [ \n\tKeys = {string.Join(", ", keys.Select(x => x.ToString()).ToArray())},\n\t{f} ]";
+            return $"GetOrSetFind<{typeof(T).Name}>: [ \n\tKeys = {string.Join(", ", keys.Select(x => x.ToString()).ToArray())},\n\t{f} ]";
         }
 
-        private static string FormatGetOrSetAllKey<T, TResult>(IQueryOptions<T> options, Expression<Func<T, TResult>> selector)
+        private static string FormatGetOrSetFindAllKey<T, TResult>(IQueryOptions<T> options, Expression<Func<T, TResult>> selector)
         {
             var o = FormatQueryOptions<T>(options);
 
-            return $"GetOrSetAll<{typeof(T).Name}>: [ \n\t{o},\n\tSelector = {ExpressionHelper.TranslateToString(selector)} ]";
+            return $"GetOrSetFindAll<{typeof(T).Name}>: [ \n\t{o},\n\tSelector = {ExpressionHelper.TranslateToString(selector)} ]";
         }
 
-        private static string FormatGetOrSetKey<T, TResult>(IQueryOptions<T> options, Expression<Func<T, TResult>> selector)
+        private static string FormatGetOrSetFindKey<T, TResult>(IQueryOptions<T> options, Expression<Func<T, TResult>> selector)
         {
-            return $"GetOrSet<{typeof(T).Name}>: [ \n\t{options},\n\tSelector = {ExpressionHelper.TranslateToString(selector)} ]";
+            var o = FormatQueryOptions<T>(options);
+
+            return $"GetOrSetFind<{typeof(T).Name}>: [ \n\t{o},\n\tSelector = {ExpressionHelper.TranslateToString(selector)} ]";
         }
 
         private static string FormatGetOrSetCountKey<T>(IQueryOptions<T> options)

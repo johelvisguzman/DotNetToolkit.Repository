@@ -130,7 +130,7 @@
                     () => Context.Find<TEntity>(fetchStrategy, key1, key2, key3));
 
             var queryResult = CacheEnabled
-                ? CacheProvider.GetOrSet<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy, Getter, Logger)
+                ? CacheProvider.GetOrSetFind<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy, Getter, Logger)
                 : Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -196,7 +196,7 @@
                     () => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2, key3));
 
             var queryResult = CacheEnabled
-                ? await CacheProvider.GetOrSetAsync<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy, Getter, Logger)
+                ? await CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy, Getter, Logger)
                 : await Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -351,7 +351,7 @@
                     () => Context.Find<TEntity>(fetchStrategy, key1, key2));
 
             var queryResult = CacheEnabled
-                ? CacheProvider.GetOrSet<TEntity>(new object[] { key1, key2 }, fetchStrategy, Getter, Logger)
+                ? CacheProvider.GetOrSetFind<TEntity>(new object[] { key1, key2 }, fetchStrategy, Getter, Logger)
                 : Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -413,7 +413,7 @@
                     () => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2));
 
             var queryResult = CacheEnabled
-                ? await CacheProvider.GetOrSetAsync<TEntity>(new object[] { key1, key2 }, fetchStrategy, Getter, Logger)
+                ? await CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key1, key2 }, fetchStrategy, Getter, Logger)
                 : await Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -561,7 +561,7 @@
                     () => Context.Find<TEntity>(fetchStrategy, key));
 
             var queryResult = CacheEnabled
-                ? CacheProvider.GetOrSet<TEntity>(new object[] { key }, fetchStrategy, Getter, Logger)
+                ? CacheProvider.GetOrSetFind<TEntity>(new object[] { key }, fetchStrategy, Getter, Logger)
                 : Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -619,7 +619,7 @@
                     () => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key));
 
             var queryResult = CacheEnabled
-                ? await CacheProvider.GetOrSetAsync<TEntity>(new object[] { key }, fetchStrategy, Getter, Logger)
+                ? await CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key }, fetchStrategy, Getter, Logger)
                 : await Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -1351,7 +1351,7 @@
                     () => Context.Find<TEntity, TResult>(options, selector));
 
             var queryResult = CacheEnabled
-                ? CacheProvider.GetOrSet<TEntity, TResult>(options, selector, Getter, Logger)
+                ? CacheProvider.GetOrSetFind<TEntity, TResult>(options, selector, Getter, Logger)
                 : Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -1426,7 +1426,7 @@
                     () => Context.FindAll<TEntity, TResult>(options, selector));
 
             var queryResult = CacheEnabled
-                ? CacheProvider.GetOrSetAll<TEntity, TResult>(options, selector, Getter, Logger)
+                ? CacheProvider.GetOrSetFindAll<TEntity, TResult>(options, selector, Getter, Logger)
                 : Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -1902,7 +1902,7 @@
                     () => Context.AsAsync().FindAsync<TEntity, TResult>(options, selector, cancellationToken));
 
             var queryResult = CacheEnabled
-                ? await CacheProvider.GetOrSetAsync<TEntity, TResult>(options, selector, Getter, Logger)
+                ? await CacheProvider.GetOrSetFindAsync<TEntity, TResult>(options, selector, Getter, Logger)
                 : await Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -1983,7 +1983,7 @@
                     () => Context.AsAsync().FindAllAsync<TEntity, TResult>(options, selector, cancellationToken));
 
             var queryResult = CacheEnabled
-                ? await CacheProvider.GetOrSetAllAsync<TEntity, TResult>(options, selector, Getter, Logger)
+                ? await CacheProvider.GetOrSetFindAllAsync<TEntity, TResult>(options, selector, Getter, Logger)
                 : await Getter();
 
             CacheUsed = queryResult.CacheUsed;
