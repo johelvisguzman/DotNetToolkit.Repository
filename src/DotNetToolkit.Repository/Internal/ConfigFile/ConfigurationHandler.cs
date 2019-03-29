@@ -12,6 +12,9 @@
     using System.Linq;
     using System.Reflection;
 
+    /// <summary>
+    /// Represents a configuration section handler for configuring repositories from a file.
+    /// </summary>
     internal class ConfigurationHandler
     {
         #region Fields
@@ -25,8 +28,6 @@
         private const string MappingProviderSectionKey = "mappingProvider";
         private const string InterceptorCollectionSectionKey = "interceptors";
         private const string ParameterCollectionSectionKey = "parameters";
-        private const string KeyValueCollectionKey = "keyValues";
-        private const string ValueKey = "value";
         private const string TypeKey = "type";
 
         #endregion
@@ -131,38 +132,28 @@
 
             if (parameterCollectionSection != null)
             {
-                args.AddRange(parameterCollectionSection.GetChildren().Select(ExtractParameter));
-            }
+                var keyValues = parameterCollectionSection
+                    .GetChildren()
+                    .Select(ExtractKeyValue)
+                    .ToDictionary(x => x.Key, x => x.Value);
 
-            if (args.Count == 0)
-            {
-                var keyValueCollectionSection = section.GetSection(KeyValueCollectionKey);
+                if (keyValues.Count == 0)
+                    return null;
 
-                if (keyValueCollectionSection != null)
-                {
-                    var keyValues = keyValueCollectionSection
-                        .GetChildren()
-                        .Select(ExtractKeyValue)
-                        .ToDictionary(x => x.Key, x => x.Value);
+                var keys = keyValues.Keys;
+                var matchedCtorParams = type
+                    .GetConstructors()
+                    .Select(x => x.GetParameters())
+                    .FirstOrDefault(pi => pi
+                        .Select(x => x.Name)
+                        .OrderBy(x => x)
+                        .SequenceEqual(keys.OrderBy(x => x)));
 
-                    if (keyValues.Any())
-                    {
-                        var keys = keyValues.Keys;
-                        var matchedCtorParams = type
-                            .GetConstructors()
-                            .Select(x => x.GetParameters())
-                            .FirstOrDefault(pi => pi
-                                .Select(x => x.Name)
-                                .OrderBy(x => x)
-                                .SequenceEqual(keys.OrderBy(x => x)));
+                if (matchedCtorParams == null || !matchedCtorParams.Any())
+                    throw new InvalidOperationException($"Unable to find a constructor for '{type.FullName}' that matches the specified parameters: [ {string.Join(", ", keys)} ]");
 
-                        if (matchedCtorParams == null)
-                            return null;
-
-                        args.AddRange(matchedCtorParams
-                            .Select(ctorParam => ctorParam.ParameterType.ConvertTo(keyValues[ctorParam.Name])));
-                    }
-                }
+                args.AddRange(matchedCtorParams
+                    .Select(ctorParam => ctorParam.ParameterType.ConvertTo(keyValues[ctorParam.Name])));
             }
 
             return args.ToArray();
@@ -178,20 +169,15 @@
             return Type.GetType(value, throwOnError: true);
         }
 
-        private static object ExtractParameter(IConfigurationSection section)
-        {
-            var type = ExtractType(section, isRequired: false);
-            var value = Extract(section, ValueKey);
-
-            return type.ConvertTo(value);
-        }
-
         private static KeyValuePair<string, string> ExtractKeyValue(IConfigurationSection section)
         {
             var key = section.Key;
             var value = section.Value;
 
-            if (string.IsNullOrEmpty(section.Value))
+            if (string.IsNullOrEmpty(key))
+                throw new InvalidOperationException($"The key is missing for '{section.Path}' section.");
+
+            if (string.IsNullOrEmpty(value))
                 throw new InvalidOperationException($"The value for '{key}' key is missing for '{section.Path}' section.");
 
             return new KeyValuePair<string, string>(key, value);
@@ -220,7 +206,7 @@
 
             var args = ExtractParameters(section, type);
 
-            if (args.Any())
+            if (args != null && args.Any())
                 return (T)Activator.CreateInstance(type, args);
 
             return (T)Activator.CreateInstance(type);

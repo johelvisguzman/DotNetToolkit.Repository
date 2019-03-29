@@ -2,13 +2,24 @@
 
 namespace DotNetToolkit.Repository.Internal.ConfigFile
 {
+    using Configuration.Caching;
+    using Configuration.Interceptors;
+    using Configuration.Logging;
+    using Configuration.Mapper;
+    using Extensions;
+    using Factories;
+    using System;
+    using System.Collections.Generic;
     using System.Configuration;
+    using System.Linq;
 
     /// <summary>
     /// Represents a configuration section for configuring repositories from App.config.
     /// </summary>
     internal class ConfigurationSection : System.Configuration.ConfigurationSection
     {
+        #region Fields
+
         public const string SectionName = "repository";
 
         private const string InterceptorsKey = "interceptors";
@@ -16,6 +27,10 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
         private const string LoggingProviderKey = "loggingProvider";
         private const string CachingProviderKey = "cachingProvider";
         private const string MappingProviderKey = "mappingProvider";
+
+        #endregion
+
+        #region Properties
 
         [ConfigurationProperty(InterceptorsKey)]
         public virtual RepositoryInterceptorElementCollection Interceptors
@@ -45,6 +60,188 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
         public virtual MappingProviderElement MappingProvider
         {
             get => (MappingProviderElement)this[MappingProviderKey];
+        }
+
+        #endregion
+    }
+
+    class LoggingProviderElement : TypedConfigurationElementBase<ILoggerProvider> { }
+
+    class CachingProviderElement : TypedConfigurationElementBase<ICacheProvider> { }
+
+    class MappingProviderElement : TypedConfigurationElementBase<IMapperProvider> { }
+
+    class RepositoryContextFactoryElement : TypedConfigurationElementBase<IRepositoryContextFactory> { }
+
+    class RepositoryInterceptorElement : TypedConfigurationElementBase<IRepositoryInterceptor> { }
+
+    class RepositoryInterceptorElementCollection : ConfigurationElementCollection
+    {
+        private const string InterceptorKey = "interceptor";
+
+        public override ConfigurationElementCollectionType CollectionType
+        {
+            get { return ConfigurationElementCollectionType.BasicMap; }
+        }
+
+        protected override string ElementName
+        {
+            get { return InterceptorKey; }
+        }
+
+        protected override ConfigurationElement CreateNewElement()
+        {
+            return new RepositoryInterceptorElement();
+        }
+
+        protected override object GetElementKey(ConfigurationElement element)
+        {
+            return ((RepositoryInterceptorElement)element).TypeName;
+        }
+
+        public Dictionary<Type, Func<IRepositoryInterceptor>> GetTypedValues()
+        {
+            return this.Cast<RepositoryInterceptorElement>()
+                .ToDictionary(
+                    x => x.Type,
+                    x => (Func<IRepositoryInterceptor>)x.GetTypedValue);
+        }
+    }
+
+    class ParameterElement : ConfigurationElement
+    {
+        private const string ValueKey = "value";
+        private const string NameKey = "name";
+
+        [ConfigurationProperty(NameKey, IsKey = true, IsRequired = true)]
+        public string Name
+        {
+            get { return (string)this[NameKey]; }
+            set { this[NameKey] = value; }
+        }
+
+        [ConfigurationProperty(ValueKey, IsRequired = true)]
+        public string ValueString
+        {
+            get { return (string)this[ValueKey]; }
+            set { this[ValueKey] = value; }
+        }
+    }
+
+    class ParameterCollection : ConfigurationElementCollection
+    {
+        private const string ParameterKey = "parameter";
+
+        public override ConfigurationElementCollectionType CollectionType
+        {
+            get { return ConfigurationElementCollectionType.BasicMap; }
+        }
+
+        protected override ConfigurationElement CreateNewElement()
+        {
+            return new ParameterElement();
+        }
+
+        protected override object GetElementKey(ConfigurationElement element)
+        {
+            return ((ParameterElement)element).Name;
+        }
+
+        protected override string ElementName
+        {
+            get { return ParameterKey; }
+        }
+    }
+
+    abstract class TypedConfigurationElementBase<T> : ConfigurationElement
+    {
+        private const string TypeKey = "type";
+        private const string ParametersKey = "parameters";
+
+        private Type _type;
+
+        [ConfigurationProperty(TypeKey, IsKey = true, IsRequired = true)]
+        public string TypeName
+        {
+            get => (string)this[TypeKey];
+            set
+            {
+                this[TypeKey] = value;
+
+                _type = null;
+            }
+        }
+
+        public Type Type
+        {
+            get
+            {
+                if (_type == null)
+                {
+                    if (string.IsNullOrEmpty(TypeName))
+                        return null;
+
+                    _type = Type.GetType(TypeName, throwOnError: true);
+                }
+
+                return _type;
+            }
+        }
+
+        [ConfigurationProperty(ParametersKey, IsDefaultCollection = false)]
+        public ParameterCollection Parameters
+        {
+            get { return (ParameterCollection)this[ParametersKey]; }
+        }
+
+        public virtual T GetTypedValue()
+        {
+            var type = Type;
+
+            if (type == null)
+                return default(T);
+
+            var defaultFactory = ConfigurationProvider.GetDefaultFactory();
+
+            if (defaultFactory != null)
+                return (T)defaultFactory(type);
+
+            var args = GetParameters();
+
+            if (args != null && args.Any())
+                return (T)Activator.CreateInstance(type, args);
+
+            return (T)Activator.CreateInstance(type);
+        }
+
+        private object[] GetParameters()
+        {
+            var keyValues = Parameters
+                .Cast<ParameterElement>()
+                .ToDictionary(x => x.Name, x => x.ValueString);
+
+            if (keyValues.Count == 0)
+                return null;
+
+            var type = Type;
+            var keys = keyValues.Keys;
+            var matchedCtorParams = type
+                .GetConstructors()
+                .Select(x => x.GetParameters())
+                .FirstOrDefault(pi => pi
+                    .Select(x => x.Name)
+                    .OrderBy(x => x)
+                    .SequenceEqual(keys.OrderBy(x => x)));
+
+            if (matchedCtorParams == null || !matchedCtorParams.Any())
+                throw new InvalidOperationException($"Unable to find a constructor for '{type.FullName}' that matches the specified parameters: [ {string.Join(", ", keys)} ]");
+
+            var paramList = new List<object>();
+
+            paramList.AddRange(matchedCtorParams
+                .Select(ctorParam => ctorParam.ParameterType.ConvertTo(keyValues[ctorParam.Name])));
+
+            return paramList.ToArray();
         }
     }
 }
