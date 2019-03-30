@@ -134,5 +134,70 @@
 
             return Result;
         }
+
+        internal static object InvokeConstructor(this Type type, Dictionary<string, string> keyValues)
+        {
+            if (keyValues == null || keyValues.Count == 0)
+                return Activator.CreateInstance(type);
+
+            var ctors = type.GetConstructors();
+            var ctorsParams = ctors.ToDictionary(x => x, x => x.GetParameters());
+            var keys = keyValues.Keys;
+
+            // try to find an exact match
+            var matchedCtorParams = ctorsParams
+                 .FirstOrDefault(ctorParams => ctorParams.Value
+                     .Select(x => x.Name)
+                     .OrderBy(x => x)
+                     .SequenceEqual(keys.OrderBy(x => x)));
+
+            if (matchedCtorParams.Key == null)
+            {
+                // try to find at a constructor that has the highest count for matching parameters
+                var maxMatchedCount = 0;
+
+                foreach (var ctorParams in ctorsParams)
+                {
+                    // gets the number of matches found
+                    var count =
+                        (
+                            from pi in ctorParams.Value
+                            from key in keys
+                            where key.Equals(pi.Name)
+                            select pi
+                        )
+                        .Count();
+
+                    if (count > maxMatchedCount)
+                    {
+                        maxMatchedCount = count;
+                        matchedCtorParams = ctorParams;
+
+                        // This is the hightest match count we can possible get
+                        // and if so, break out of here
+                        if (maxMatchedCount == keys.Count)
+                            break;
+                    }
+                }
+            }
+
+            if (matchedCtorParams.Key != null)
+            {
+                // Try to get all the values for the parameters we already have,
+                // and set the rest to their default value
+                var args = new List<object>();
+
+                args.AddRange(matchedCtorParams.Value.Select(pi =>
+                    keyValues.ContainsKey(pi.Name)
+                        ? pi.ParameterType.ConvertTo(keyValues[pi.Name])
+                        : pi.ParameterType.GetDefault()));
+
+                // Create instance
+                return matchedCtorParams.Key.Invoke(args.ToArray());
+            }
+
+            // Try to invoke the default constructor
+            return Activator.CreateInstance(type);
+        }
     }
 }
