@@ -12,11 +12,11 @@
 
         private NullCache() { }
 
-        public void Set(object key, object value, CacheItemPriority priority, TimeSpan? cacheExpiration, Action<string> cacheRemovedCallback = null) { }
+        public void Set(string key, object value, CacheItemPriority priority, TimeSpan? cacheExpiration, Action<string> cacheRemovedCallback = null) { }
 
-        public void Remove(object key) { }
+        public void Remove(string key) { }
 
-        public bool TryGetValue(object key, out object value)
+        public bool TryGetValue(string key, out object value)
         {
             value = null;
 

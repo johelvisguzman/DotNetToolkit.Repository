@@ -41,7 +41,7 @@
         /// <param name="priority">The priority.</param>
         /// <param name="cacheExpiration">The cache expiration time.</param>
         /// <param name="cacheRemovedCallback">A callback function for a value is removed from the cache.</param>
-        public void Set(object key, object value, CacheItemPriority priority, TimeSpan? cacheExpiration, Action<string> cacheRemovedCallback = null)
+        public void Set(string key, object value, CacheItemPriority priority, TimeSpan? cacheExpiration, Action<string> cacheRemovedCallback = null)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
@@ -74,7 +74,7 @@
         /// Removes the object associated with the given key.
         /// </summary>
         /// <param name="key">An object identifying the entry.</param>
-        public void Remove(object key)
+        public void Remove(string key)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
@@ -88,7 +88,7 @@
         /// <param name="key">An object identifying the requested entry.</param>
         /// <param name="value">The object found in the cache.</param>
         /// <returns>c<c>true</c> if the an object was found with the specified key; otherwise, <c>false</c>.</returns>
-        public bool TryGetValue(object key, out object value)
+        public bool TryGetValue(string key, out object value)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
