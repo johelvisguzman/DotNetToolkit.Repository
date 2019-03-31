@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Extensions.InMemory.Caching
+﻿namespace DotNetToolkit.Repository.Extensions.Microsoft.Caching.Memory
 {
     using Configuration.Caching;
     using global::Microsoft.Extensions.Caching.Memory;
