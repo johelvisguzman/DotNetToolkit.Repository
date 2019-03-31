@@ -39,7 +39,7 @@
                 throw new ArgumentNullException(nameof(cache));
 
             Cache = new InMemoryCache(cache);
-            CacheExpiration = expiry;
+            Expiry = expiry;
         }
 
         #endregion
@@ -49,7 +49,7 @@
         /// <summary>
         /// Gets or sets the caching expiration time.
         /// </summary>
-        public TimeSpan? CacheExpiration { get; set; }
+        public TimeSpan? Expiry { get; set; }
 
         /// <summary>
         /// Gets the cache.

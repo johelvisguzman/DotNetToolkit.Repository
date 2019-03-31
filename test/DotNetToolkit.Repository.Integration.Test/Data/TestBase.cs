@@ -41,7 +41,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                     case CachingProviderType.MicrosoftInMemory:
                         builder.UseCachingProvider(new InMemoryCacheProvider());
                         break;
-                    default:
+                   default:
                         throw new ArgumentOutOfRangeException(nameof(cachingProvider));
                 }
 
@@ -63,7 +63,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                     case CachingProviderType.MicrosoftInMemory:
                         builder.UseCachingProvider(new InMemoryCacheProvider());
                         break;
-                    default:
+                   default:
                         throw new ArgumentOutOfRangeException(nameof(cachingProvider));
                 }
 
@@ -258,7 +258,8 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
         {
             return new[]
             {
-                CachingProviderType.MicrosoftInMemory
+                CachingProviderType.MicrosoftInMemory,
+                CachingProviderType.Redis
             };
         }
 
@@ -274,7 +275,8 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 
         public enum CachingProviderType
         {
-            MicrosoftInMemory
+            MicrosoftInMemory,
+            Redis
         }
     }
 }

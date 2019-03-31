@@ -12,7 +12,7 @@
 
         private NullCache() { }
 
-        public void Set(string key, object value, CacheItemPriority priority, TimeSpan? cacheExpiration, Action<string> cacheRemovedCallback = null) { }
+        public void Set(string key, object value, CacheItemPriority priority, TimeSpan? expiry, Action<string> cacheRemovedCallback = null) { }
 
         public void Remove(string key) { }
 

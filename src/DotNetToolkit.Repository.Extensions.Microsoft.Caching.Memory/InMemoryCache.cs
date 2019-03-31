@@ -39,9 +39,9 @@
         /// <param name="key">An object identifying the entry.</param>
         /// <param name="value">The value to cache.</param>
         /// <param name="priority">The priority.</param>
-        /// <param name="cacheExpiration">The cache expiration time.</param>
+        /// <param name="expiry">The cache expiration time.</param>
         /// <param name="cacheRemovedCallback">A callback function for a value is removed from the cache.</param>
-        public void Set(string key, object value, CacheItemPriority priority, TimeSpan? cacheExpiration, Action<string> cacheRemovedCallback = null)
+        public void Set(string key, object value, CacheItemPriority priority, TimeSpan? expiry, Action<string> cacheRemovedCallback = null)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
@@ -59,10 +59,10 @@
                 });
             }
 
-            if (cacheExpiration.HasValue && cacheExpiration.Value != TimeSpan.Zero)
-                policy.AbsoluteExpiration = DateTimeOffset.Now.Add(cacheExpiration.Value);
+            if (expiry.HasValue && expiry.Value != TimeSpan.Zero)
+                policy.AbsoluteExpiration = DateTimeOffset.Now.Add(expiry.Value);
 
-            if (cacheExpiration.HasValue && cacheExpiration.Value == TimeSpan.Zero && priority != CacheItemPriority.NeverRemove)
+            if (expiry.HasValue && expiry.Value == TimeSpan.Zero && priority != CacheItemPriority.NeverRemove)
                 policy.Priority = CacheItemPriority.NeverRemove;
             else
                 policy.Priority = priority;

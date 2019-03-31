@@ -14,9 +14,9 @@
         /// <param name="key">An object identifying the entry.</param>
         /// <param name="value">The value to cache.</param>
         /// <param name="priority">The priority.</param>
-        /// <param name="cacheExpiration">The cache expiration time.</param>
+        /// <param name="expiry">The cache expiration time.</param>
         /// <param name="cacheRemovedCallback">A callback function for a value is removed from the cache.</param>
-        void Set(string key, object value, CacheItemPriority priority, TimeSpan? cacheExpiration, Action<string> cacheRemovedCallback = null);
+        void Set(string key, object value, CacheItemPriority priority, TimeSpan? expiry, Action<string> cacheRemovedCallback = null);
 
         /// <summary>
         /// Removes the object associated with the given key.
