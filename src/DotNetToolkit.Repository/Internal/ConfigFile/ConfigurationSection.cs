@@ -206,42 +206,11 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
             if (defaultFactory != null)
                 return (T)defaultFactory(type);
 
-            var args = GetParameters();
-
-            if (args != null && args.Any())
-                return (T)Activator.CreateInstance(type, args);
-
-            return (T)Activator.CreateInstance(type);
-        }
-
-        private object[] GetParameters()
-        {
             var keyValues = Parameters
                 .Cast<ParameterElement>()
                 .ToDictionary(x => x.Name, x => x.ValueString);
 
-            if (keyValues.Count == 0)
-                return null;
-
-            var type = Type;
-            var keys = keyValues.Keys;
-            var matchedCtorParams = type
-                .GetConstructors()
-                .Select(x => x.GetParameters())
-                .FirstOrDefault(pi => pi
-                    .Select(x => x.Name)
-                    .OrderBy(x => x)
-                    .SequenceEqual(keys.OrderBy(x => x)));
-
-            if (matchedCtorParams == null || !matchedCtorParams.Any())
-                throw new InvalidOperationException($"Unable to find a constructor for '{type.FullName}' that matches the specified parameters: [ {string.Join(", ", keys)} ]");
-
-            var paramList = new List<object>();
-
-            paramList.AddRange(matchedCtorParams
-                .Select(ctorParam => ctorParam.ParameterType.ConvertTo(keyValues[ctorParam.Name])));
-
-            return paramList.ToArray();
+            return (T)type.InvokeConstructor(keyValues);
         }
     }
 }
