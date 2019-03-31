@@ -12,7 +12,7 @@
         [Fact]
         public void ExecuteQuery()
         {
-            var exclude = InMemoryProviders().Union(FileStreamProviders()).ToArray();
+            var exclude = InMemoryContextProviders().Union(FileStreamContextProviders()).ToArray();
 
             ForAllRepositoryFactories(TestExecuteQuery, exclude);
         }
@@ -20,7 +20,7 @@
         [Fact]
         public void ExecuteQueryWithDefaultMapper()
         {
-            var exclude = InMemoryProviders().Union(FileStreamProviders()).ToArray();
+            var exclude = InMemoryContextProviders().Union(FileStreamContextProviders()).ToArray();
 
             ForAllRepositoryFactories(TestExecuteQueryWithDefaultMapper, exclude);
         }
@@ -28,7 +28,7 @@
         [Fact]
         public void ExecuteQueryWithRegisteredMapper()
         {
-            var exclude = InMemoryProviders().Union(FileStreamProviders()).ToArray();
+            var exclude = InMemoryContextProviders().Union(FileStreamContextProviders()).ToArray();
 
             ForAllRepositoryFactories(TestExecuteQueryWithRegisteredMapper, exclude);
         }
@@ -36,7 +36,7 @@
         [Fact]
         public void ExecuteQueryAsync()
         {
-            var exclude = InMemoryProviders().Union(FileStreamProviders()).ToArray();
+            var exclude = InMemoryContextProviders().Union(FileStreamContextProviders()).ToArray();
 
             ForAllRepositoryFactoriesAsync(TestExecuteQueryAsync, exclude);
         }
@@ -44,7 +44,7 @@
         [Fact]
         public void ExecuteQueryWithDefaultMapperAsync()
         {
-            var exclude = InMemoryProviders().Union(FileStreamProviders()).ToArray();
+            var exclude = InMemoryContextProviders().Union(FileStreamContextProviders()).ToArray();
 
             ForAllRepositoryFactoriesAsync(TestExecuteQueryWithDefaultMapperAsync, exclude);
         }
@@ -52,7 +52,7 @@
         [Fact]
         public void ExecuteQueryWithRegisteredMapperAsync()
         {
-            var exclude = InMemoryProviders().Union(FileStreamProviders()).ToArray();
+            var exclude = InMemoryContextProviders().Union(FileStreamContextProviders()).ToArray();
 
             ForAllRepositoryFactoriesAsync(TestExecuteQueryWithRegisteredMapperAsync, exclude);
         }
