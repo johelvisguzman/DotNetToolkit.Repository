@@ -31,6 +31,7 @@
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.AdoNet\DotNetToolkit.Repository.AdoNet.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.EntityFrameworkCore\DotNetToolkit.Repository.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.EntityFramework\DotNetToolkit.Repository.EntityFramework.csproj" />
+    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Extensions.Caching.Redis\DotNetToolkit.Repository.Extensions.Caching.Redis.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Extensions.Microsoft.Caching.Memory\DotNetToolkit.Repository.Extensions.Microsoft.Caching.Memory.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Extensions.Unity\DotNetToolkit.Repository.Extensions.Unity.csproj" />

@@ -40,6 +40,10 @@ os: Visual Studio 2017
 before_build:
   - dotnet --info
   - dotnet restore
+  # start redis server
+  - choco install redis-64
+  - redis-server --service-install
+  - redis-server --service-start
 
 build:
   parallel: true                                    # enable MSBuild parallel builds
@@ -56,6 +60,7 @@ after_build:
   - dotnet pack .\src\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.csproj --configuration Release
   - dotnet pack .\src\DotNetToolkit.Repository.Extensions.Unity\DotNetToolkit.Repository.Extensions.Unity.csproj --configuration Release
   - dotnet pack .\src\DotNetToolkit.Repository.Extensions.Microsoft.Caching.Memory\DotNetToolkit.Repository.Extensions.Microsoft.Caching.Memory.csproj --configuration Release
+  - dotnet pack .\src\DotNetToolkit.Repository.Extensions.Caching.Redis\DotNetToolkit.Repository.Extensions.Caching.Redis.csproj --configuration Release
 
 #---------------------------------#
 #      artifacts configuration    #

@@ -5,6 +5,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
     using Configuration.Options;
     using EntityFramework;
     using EntityFrameworkCore;
+    using Extensions.Caching.Redis;
     using Extensions.Microsoft.Caching.Memory;
     using Factories;
     using InMemory;
@@ -36,14 +37,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             {
                 var builder = GetRepositoryOptionsBuilder(contextProvider);
 
-                switch (cachingProvider)
-                {
-                    case CachingProviderType.MicrosoftInMemory:
-                        builder.UseCachingProvider(new InMemoryCacheProvider());
-                        break;
-                   default:
-                        throw new ArgumentOutOfRangeException(nameof(cachingProvider));
-                }
+                ApplyCachingProvider(cachingProvider, builder);
 
                 action(new RepositoryFactory(builder.Options), cachingProvider);
             });
@@ -58,14 +52,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             {
                 var builder = GetRepositoryOptionsBuilder(contextProvider);
 
-                switch (cachingProvider)
-                {
-                    case CachingProviderType.MicrosoftInMemory:
-                        builder.UseCachingProvider(new InMemoryCacheProvider());
-                        break;
-                   default:
-                        throw new ArgumentOutOfRangeException(nameof(cachingProvider));
-                }
+                ApplyCachingProvider(cachingProvider, builder);
 
                 // Perform test
                 var task = Record.ExceptionAsync(() => action(new RepositoryFactory(builder.Options), cachingProvider));
@@ -212,6 +199,30 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             builder.UseLoggerProvider(TestXUnitLoggerProvider);
 
             return builder;
+        }
+
+        private static void ApplyCachingProvider(CachingProviderType cachingProvider, RepositoryOptionsBuilder builder)
+        {
+            switch (cachingProvider)
+            {
+                case CachingProviderType.MicrosoftInMemory:
+                    {
+                        builder.UseCachingProvider(new InMemoryCacheProvider());
+                        break;
+                    }
+                case CachingProviderType.Redis:
+                    {
+                        var redis = new RedisCacheProvider(allowAdmin: true, defaultDatabase: 0, expiry: null);
+
+                        redis.Server.FlushAllDatabases();
+
+                        builder.UseCachingProvider(redis);
+
+                        break;
+                    }
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(cachingProvider));
+            }
         }
 
         protected IRepositoryOptions BuildOptions(ContextProviderType provider) => GetRepositoryOptionsBuilder(provider).Options;
