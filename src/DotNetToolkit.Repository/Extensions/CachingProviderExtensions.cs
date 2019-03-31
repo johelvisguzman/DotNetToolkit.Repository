@@ -211,10 +211,8 @@
 
             lock (_syncRoot)
             {
-                if (cacheProvider.Cache.TryGetValue(key, out var obj))
+                if (cacheProvider.Cache.TryGetValue<IQueryResult<T>>(key, out var oldValue))
                 {
-                    var oldValue = (IQueryResult<T>)obj;
-
                     value = new QueryResult<T>(oldValue.Result)
                     {
                         CacheUsed = true
@@ -239,10 +237,8 @@
 
             lock (_syncRoot)
             {
-                if (cacheProvider.Cache.TryGetValue(key, out var obj))
+                if (cacheProvider.Cache.TryGetValue<IPagedQueryResult<T>>(key, out var oldValue))
                 {
-                    var oldValue = (IPagedQueryResult<T>)obj;
-
                     value = new PagedQueryResult<T>(oldValue.Result, oldValue.Total)
                     {
                         CacheUsed = true
@@ -277,7 +273,7 @@
                         ? $"Setting up cache for '{hashedKey}' expire handling in {expiry.Value.TotalSeconds} seconds"
                         : $"Setting up cache for '{hashedKey}'");
 
-                cacheProvider.Cache.Set(
+                cacheProvider.Cache.Set<IQueryResult<T>>(
                     hashedKey,
                     value,
                     priority,
