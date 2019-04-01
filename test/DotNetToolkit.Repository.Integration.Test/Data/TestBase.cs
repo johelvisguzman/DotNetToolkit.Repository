@@ -5,6 +5,8 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
     using Configuration.Options;
     using EntityFramework;
     using EntityFrameworkCore;
+    using Extensions.Caching.Redis;
+    using Extensions.Microsoft.Caching.Memory;
     using Factories;
     using InMemory;
     using Json;
@@ -29,16 +31,54 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 
         protected ILoggerProvider TestXUnitLoggerProvider { get; }
 
+        protected void ForRepositoryFactoryWithAllCachingProviders(ContextProviderType contextProvider, Action<IRepositoryFactory, CachingProviderType> action)
+        {
+            CachingProviders().ForEach(cachingProvider =>
+            {
+                var builder = GetRepositoryOptionsBuilder(contextProvider);
+
+                ApplyCachingProvider(cachingProvider, builder);
+
+                action(new RepositoryFactory(builder.Options), cachingProvider);
+            });
+        }
+
+        protected void ForRepositoryFactoryWithAllCachingProviders(ContextProviderType contextProvider, Action<IRepositoryFactory> action)
+            => ForRepositoryFactoryWithAllCachingProviders(contextProvider, (factory, type) => action(factory));
+
+        protected void ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType contextProvider, Func<IRepositoryFactory, CachingProviderType, Task> action)
+        {
+            CachingProviders().ForEach(async cachingProvider =>
+            {
+                var builder = GetRepositoryOptionsBuilder(contextProvider);
+
+                ApplyCachingProvider(cachingProvider, builder);
+
+                // Perform test
+                var task = Record.ExceptionAsync(() => action(new RepositoryFactory(builder.Options), cachingProvider));
+
+                // Checks to see if we have any un-handled exception
+                if (task != null)
+                {
+                    var ex = await task;
+
+                    Assert.Null(ex);
+                }
+            });
+        }
+
+        protected void ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType contextProvider, Func<IRepositoryFactory, Task> action)
+            => ForRepositoryFactoryWithAllCachingProvidersAsync(contextProvider, (factory, type) => action(factory));
+
         protected void ForAllRepositoryFactories(Action<IRepositoryFactory, ContextProviderType> action, params ContextProviderType[] exclude)
         {
-            Providers()
-                .ForEach(x =>
-                {
-                    if (exclude != null && exclude.Contains(x))
-                        return;
+            ContextProviders().ForEach(x =>
+            {
+                if (exclude != null && exclude.Contains(x))
+                    return;
 
-                    action(new RepositoryFactory(BuildOptions(x)), x);
-                });
+                action(new RepositoryFactory(BuildOptions(x)), x);
+            });
         }
 
         protected void ForAllRepositoryFactories(Action<IRepositoryFactory> action, params ContextProviderType[] exclude)
@@ -46,23 +86,22 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 
         protected void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactory, ContextProviderType, Task> action, params ContextProviderType[] exclude)
         {
-            Providers()
-                .ForEach(async x =>
+            ContextProviders().ForEach(async x =>
+            {
+                if (exclude != null && exclude.Contains(x))
+                    return;
+
+                // Perform test
+                var task = Record.ExceptionAsync(() => action(new RepositoryFactory(BuildOptions(x)), x));
+
+                // Checks to see if we have any un-handled exception
+                if (task != null)
                 {
-                    if (exclude != null && exclude.Contains(x))
-                        return;
+                    var ex = await task;
 
-                    // Perform test
-                    var task = Record.ExceptionAsync(() => action(new RepositoryFactory(BuildOptions(x)), x));
-
-                    // Checks to see if we have any un-handled exception
-                    if (task != null)
-                    {
-                        var ex = await task;
-
-                        Assert.Null(ex);
-                    }
-                });
+                    Assert.Null(ex);
+                }
+            });
         }
 
         protected void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactory, Task> action, params ContextProviderType[] exclude)
@@ -70,34 +109,30 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 
         protected void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory, ContextProviderType> action)
         {
-            Providers()
-                .Where(SupportsTransactions)
-                .ForEach(x =>
-                {
-                    action(new UnitOfWorkFactory(BuildOptions(x)), x);
-                });
+            ContextProviders().Where(SupportsTransactions).ForEach(x =>
+            {
+                action(new UnitOfWorkFactory(BuildOptions(x)), x);
+            });
         }
 
-        protected void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory> action) 
+        protected void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory> action)
             => ForAllUnitOfWorkFactories((factory, type) => action(factory));
 
         protected void ForAllUnitOfWorkFactoriesAsync(Func<IUnitOfWorkFactory, ContextProviderType, Task> action)
         {
-            Providers()
-                .Where(SupportsTransactions)
-                .ForEach(async x =>
+            ContextProviders().Where(SupportsTransactions).ForEach(async x =>
+            {
+                // Perform test
+                var task = Record.ExceptionAsync(() => action(new UnitOfWorkFactory(BuildOptions(x)), x));
+
+                // Checks to see if we have any un-handled exception
+                if (task != null)
                 {
-                    // Perform test
-                    var task = Record.ExceptionAsync(() => action(new UnitOfWorkFactory(BuildOptions(x)), x));
+                    var ex = await task;
 
-                    // Checks to see if we have any un-handled exception
-                    if (task != null)
-                    {
-                        var ex = await task;
-
-                        Assert.Null(ex);
-                    }
-                });
+                    Assert.Null(ex);
+                }
+            });
         }
 
         protected void ForAllUnitOfWorkFactoriesAsync(Func<IUnitOfWorkFactory, Task> action)
@@ -105,15 +140,15 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 
         protected void ForAllFileStreamContextProviders(Action<IRepositoryOptions, ContextProviderType> action)
         {
-            FileStreamProviders().ForEach(x => action(BuildOptions(x), x));
+            FileStreamContextProviders().ForEach(x => action(BuildOptions(x), x));
         }
 
-        protected void ForAllFileStreamContextProviders(Action<IRepositoryOptions> action) 
+        protected void ForAllFileStreamContextProviders(Action<IRepositoryOptions> action)
             => ForAllFileStreamContextProviders((options, type) => action(options));
 
         private static bool SupportsTransactions(ContextProviderType x)
         {
-            return SqlServerProviders().Contains(x);
+            return SqlServerContextProviders().Contains(x);
         }
 
         protected RepositoryOptionsBuilder GetRepositoryOptionsBuilder(ContextProviderType provider)
@@ -166,9 +201,33 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             return builder;
         }
 
+        private static void ApplyCachingProvider(CachingProviderType cachingProvider, RepositoryOptionsBuilder builder)
+        {
+            switch (cachingProvider)
+            {
+                case CachingProviderType.MicrosoftInMemory:
+                    {
+                        builder.UseCachingProvider(new InMemoryCacheProvider());
+                        break;
+                    }
+                case CachingProviderType.Redis:
+                    {
+                        var redis = new RedisCacheProvider(allowAdmin: true, defaultDatabase: 0, expiry: null);
+
+                        redis.Server.FlushAllDatabases();
+
+                        builder.UseCachingProvider(redis);
+
+                        break;
+                    }
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(cachingProvider));
+            }
+        }
+
         protected IRepositoryOptions BuildOptions(ContextProviderType provider) => GetRepositoryOptionsBuilder(provider).Options;
 
-        protected static IEnumerable<ContextProviderType> InMemoryProviders()
+        protected static IEnumerable<ContextProviderType> InMemoryContextProviders()
         {
             return new[]
             {
@@ -177,7 +236,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             };
         }
 
-        protected static IEnumerable<ContextProviderType> FileStreamProviders()
+        protected static IEnumerable<ContextProviderType> FileStreamContextProviders()
         {
             return new[]
             {
@@ -186,7 +245,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             };
         }
 
-        protected static IEnumerable<ContextProviderType> SqlServerProviders()
+        protected static IEnumerable<ContextProviderType> SqlServerContextProviders()
         {
             return new[]
             {
@@ -195,15 +254,24 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             };
         }
 
-        private static IEnumerable<ContextProviderType> Providers()
+        private static IEnumerable<ContextProviderType> ContextProviders()
         {
             var list = new List<ContextProviderType>();
 
-            list.AddRange(SqlServerProviders());
-            list.AddRange(InMemoryProviders());
-            list.AddRange(FileStreamProviders());
+            list.AddRange(SqlServerContextProviders());
+            list.AddRange(InMemoryContextProviders());
+            list.AddRange(FileStreamContextProviders());
 
             return list;
+        }
+
+        private static IEnumerable<CachingProviderType> CachingProviders()
+        {
+            return new[]
+            {
+                CachingProviderType.MicrosoftInMemory,
+                CachingProviderType.Redis
+            };
         }
 
         public enum ContextProviderType
@@ -214,6 +282,12 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             AdoNet,
             EntityFramework,
             EntityFrameworkCore,
+        }
+
+        public enum CachingProviderType
+        {
+            MicrosoftInMemory,
+            Redis
         }
     }
 }

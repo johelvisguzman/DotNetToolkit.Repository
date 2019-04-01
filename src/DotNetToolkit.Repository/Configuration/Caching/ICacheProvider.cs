@@ -10,7 +10,7 @@
         /// <summary>
         /// Gets or sets the caching expiration time.
         /// </summary>
-        TimeSpan? CacheExpiration { get; set; }
+        TimeSpan? Expiry { get; set; }
 
         /// <summary>
         /// Gets the cache.

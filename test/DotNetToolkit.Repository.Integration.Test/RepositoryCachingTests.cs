@@ -3,6 +3,7 @@
     using Configuration.Caching;
     using Data;
     using Extensions.Microsoft.Caching.Memory;
+    using Factories;
     using Queries;
     using System.Threading.Tasks;
     using Xunit;
@@ -36,7 +37,6 @@
             Assert.True(repo.CacheProvider is NullCacheProvider);
 
             options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(NullCacheProvider.Instance)
                 .Options;
 
             repo = new Repository<Customer>(options);
@@ -47,11 +47,174 @@
         [Fact]
         public void ExecuteQuery()
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.AdoNet)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestExecuteQuery);
+        }
 
-            var repo = new Repository<Customer>(options);
+        [Fact]
+        public void Find()
+        {
+            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestFind);
+        }
+
+        [Fact]
+        public void FindWithId()
+        {
+            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestFindWithId);
+        }
+
+        [Fact]
+        public void FindWithOptions()
+        {
+            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestFindWithOptions);
+        }
+
+        [Fact]
+        public void FindAll()
+        {
+            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestFindAll);
+        }
+
+        [Fact]
+        public void FindAllWithOptions()
+        {
+            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestFindAllWithOptions);
+        }
+
+        [Fact]
+        public void Count()
+        {
+            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestCount);
+        }
+
+        [Fact]
+        public void CountWithOptions()
+        {
+            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestCountWithOptions);
+        }
+
+        [Fact]
+        public void Exists()
+        {
+            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestExists);
+        }
+
+        [Fact]
+        public void ExistsWithOptions()
+        {
+            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestExistsWithOptions);
+        }
+
+        [Fact]
+        public void ToDictionary()
+        {
+            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestToDictionary);
+        }
+
+        [Fact]
+        public void ToDictionaryWithOptions()
+        {
+            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestToDictionaryWithOptions);
+        }
+
+        [Fact]
+        public void GroupBy()
+        {
+            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestGroupBy);
+        }
+
+        [Fact]
+        public void GroupByWithOptions()
+        {
+            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestGroupByWithOptions);
+        }
+
+        [Fact]
+        public void ExecuteQueryAsync()
+        {
+            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestExecuteQueryAsync);
+        }
+
+        [Fact]
+        public void FindAsync()
+        {
+            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestFindAsync);
+        }
+
+        [Fact]
+        public void FindWithIdAsync()
+        {
+            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestFindWithIdAsync);
+        }
+
+        [Fact]
+        public void FindWithOptionsAsync()
+        {
+            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestFindWithOptionsAsync);
+        }
+
+        [Fact]
+        public void FindAllAsync()
+        {
+            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestFindAllAsync);
+        }
+
+        [Fact]
+        public void FindAllWithOptionsAsync()
+        {
+            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestFindAllWithOptionsAsync);
+        }
+
+        [Fact]
+        public void CountAsync()
+        {
+            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestCountAsync);
+        }
+
+        [Fact]
+        public void CountWithOptionsAsync()
+        {
+            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestCountWithOptionsAsync);
+        }
+
+        [Fact]
+        public void ExistsAsync()
+        {
+            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestExistsAsync);
+        }
+
+        [Fact]
+        public void ExistsWithOptionsAsync()
+        {
+            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestExistsWithOptionsAsync);
+        }
+
+        [Fact]
+        public void ToDictionaryAsync()
+        {
+            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestToDictionaryAsync);
+        }
+
+        [Fact]
+        public void ToDictionaryWithOptionsAsync()
+        {
+            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestToDictionaryWithOptionsAsync);
+        }
+
+        [Fact]
+        public void GroupByAsync()
+        {
+            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestGroupByAsync);
+        }
+
+        [Fact]
+        public void GroupByWithOptionsAsync()
+        {
+            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestGroupByWithOptionsAsync);
+        }
+
+        private static void TestExecuteQuery(IRepositoryFactory repoFactory)
+        {
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -111,391 +274,362 @@ WHERE NewCustomers.Id = @p0",
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public void Find()
+        private static void TestFind(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            repo.Add(customer);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            repo.Find(x => x.Id == 0);
+            Assert.NotNull(repo.Find(x => x.Id == customer.Id));
 
             Assert.False(repo.CacheUsed);
 
-            repo.Find(x => x.Id == 0);
+            Assert.NotNull(repo.Find(x => x.Id == customer.Id));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            repo.Find(x => x.Id == 0);
+            Assert.NotNull(repo.Find(x => x.Id == customer.Id));
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public void FindWithId()
+        private static void TestFindWithId(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            repo.Add(customer);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            repo.Find(0);
+            Assert.NotNull(repo.Find(customer.Id));
 
             Assert.False(repo.CacheUsed);
 
-            repo.Find(0);
+            Assert.NotNull(repo.Find(customer.Id));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            repo.Find(0);
+            Assert.NotNull(repo.Find(customer.Id));
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public void FindWithOptions()
+        private static void TestFindWithOptions(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            repo.Add(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            repo.Find(queryOptions);
+            Assert.NotNull(repo.Find(queryOptions));
 
             Assert.False(repo.CacheUsed);
 
-            repo.Find(queryOptions);
+            Assert.NotNull(repo.Find(queryOptions));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            repo.Find(queryOptions);
+            Assert.NotNull(repo.Find(queryOptions));
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public void FindAll()
+        private static void TestFindAll(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            repo.Add(customer);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            repo.FindAll(x => x.Id == 0);
+            Assert.NotEmpty(repo.FindAll(x => x.Id == customer.Id));
 
             Assert.False(repo.CacheUsed);
 
-            repo.FindAll(x => x.Id == 0);
+            Assert.NotEmpty(repo.FindAll(x => x.Id == customer.Id));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            repo.FindAll(x => x.Id == 0);
+            Assert.NotEmpty(repo.FindAll(x => x.Id == customer.Id));
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public void FindAllWithOptions()
+        private static void TestFindAllWithOptions(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            repo.Add(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            repo.FindAll(queryOptions);
+            Assert.NotEmpty(repo.FindAll(queryOptions).Result);
 
             Assert.False(repo.CacheUsed);
 
-            repo.FindAll(queryOptions);
+            Assert.NotEmpty(repo.FindAll(queryOptions).Result);
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            repo.FindAll(queryOptions);
+            Assert.NotEmpty(repo.FindAll(queryOptions).Result);
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public void Count()
+        private static void TestCount(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            repo.Add(customer);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            repo.Count(x => x.Id == 0);
+            Assert.Equal(1, repo.Count(x => x.Id == customer.Id));
 
             Assert.False(repo.CacheUsed);
 
-            repo.Count(x => x.Id == 0);
+            Assert.Equal(1, repo.Count(x => x.Id == customer.Id));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            repo.Count(x => x.Id == 0);
+            Assert.Equal(1, repo.Count(x => x.Id == customer.Id));
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public void CountWithOptions()
+        private static void TestCountWithOptions(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            repo.Add(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            repo.Count(queryOptions);
+            Assert.Equal(1, repo.Count(queryOptions));
 
             Assert.False(repo.CacheUsed);
 
-            repo.Count(queryOptions);
+            Assert.Equal(1, repo.Count(queryOptions));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            repo.Count(queryOptions);
+            Assert.Equal(1, repo.Count(queryOptions));
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public void Exists()
+        private static void TestExists(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            repo.Add(customer);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            repo.Exists(x => x.Id == 0);
+            Assert.True(repo.Exists(x => x.Id == customer.Id));
 
             Assert.False(repo.CacheUsed);
 
-            repo.Exists(x => x.Id == 0);
+            Assert.True(repo.Exists(x => x.Id == customer.Id));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            repo.Exists(x => x.Id == 0);
+            Assert.True(repo.Exists(x => x.Id == customer.Id));
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public void ExistsWithOptions()
+        private static void TestExistsWithOptions(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            repo.Add(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            repo.Exists(queryOptions);
+            Assert.True(repo.Exists(queryOptions));
 
             Assert.False(repo.CacheUsed);
 
-            repo.Exists(queryOptions);
+            Assert.True(repo.Exists(queryOptions));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            repo.Exists(queryOptions);
+            Assert.True(repo.Exists(queryOptions));
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public void ToDictionary()
+        private static void TestToDictionary(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            repo.Add(customer);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            repo.ToDictionary(x => x.Id);
+            Assert.NotEmpty(repo.ToDictionary(x => x.Id));
 
             Assert.False(repo.CacheUsed);
 
-            repo.ToDictionary(x => x.Id);
+            Assert.NotEmpty(repo.ToDictionary(x => x.Id));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            repo.ToDictionary(x => x.Id);
+            Assert.NotEmpty(repo.ToDictionary(x => x.Id));
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public void ToDictionaryWithOptions()
+        private static void TestToDictionaryWithOptions(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            repo.Add(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            repo.ToDictionary(queryOptions, x => x.Id);
+            Assert.NotEmpty(repo.ToDictionary(queryOptions, x => x.Id).Result);
 
             Assert.False(repo.CacheUsed);
 
-            repo.ToDictionary(queryOptions, x => x.Id);
+            Assert.NotEmpty(repo.ToDictionary(queryOptions, x => x.Id).Result);
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            repo.ToDictionary(queryOptions, x => x.Id);
+            Assert.NotEmpty(repo.ToDictionary(queryOptions, x => x.Id).Result);
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public void GroupBy()
+        private static void TestGroupBy(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            repo.Add(customer);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            repo.GroupBy(x => x.Id, (key, g) => key);
+            Assert.NotEmpty(repo.GroupBy(x => x.Id, (key, g) => key));
 
             Assert.False(repo.CacheUsed);
 
-            repo.GroupBy(x => x.Id, (key, g) => key);
+            Assert.NotEmpty(repo.GroupBy(x => x.Id, (key, g) => key));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            repo.GroupBy(x => x.Id, (key, g) => key);
+            Assert.NotEmpty(repo.GroupBy(x => x.Id, (key, g) => key));
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public void GroupByWithOptions()
+        private static void TestGroupByWithOptions(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            repo.Add(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            repo.GroupBy(queryOptions, x => x.Id, (key, g) => key);
+            Assert.NotEmpty(repo.GroupBy(queryOptions, x => x.Id, (key, g) => key).Result);
 
             Assert.False(repo.CacheUsed);
 
-            repo.GroupBy(queryOptions, x => x.Id, (key, g) => key);
+            Assert.NotEmpty(repo.GroupBy(queryOptions, x => x.Id, (key, g) => key).Result);
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            repo.GroupBy(queryOptions, x => x.Id, (key, g) => key);
+            Assert.NotEmpty(repo.GroupBy(queryOptions, x => x.Id, (key, g) => key).Result);
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public async Task ExecuteQueryAsync()
+        private static async Task TestExecuteQueryAsync(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.AdoNet)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
-
-            var repo = new Repository<Customer>(options);
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            await repo.ExecuteSqlCommandAsync(@"
+            repo.ExecuteSqlCommand(@"
 CREATE TABLE NewCustomers (
     Id int,
-    Name nvarchar(255)
+    Name nvarchar(255),
+    AddressId int
 )");
 
             await repo.ExecuteSqlQueryAsync(@"
 SELECT
     NewCustomers.Id,
-    NewCustomers.Name
+    NewCustomers.Name,
+    NewCustomers.AddressId
 FROM NewCustomers
 WHERE NewCustomers.Id = @p0",
                 r => new Customer
@@ -509,7 +643,8 @@ WHERE NewCustomers.Id = @p0",
             await repo.ExecuteSqlQueryAsync(@"
 SELECT
     NewCustomers.Id,
-    NewCustomers.Name
+    NewCustomers.Name,
+    NewCustomers.AddressId
 FROM NewCustomers
 WHERE NewCustomers.Id = @p0",
                 r => new Customer
@@ -525,7 +660,8 @@ WHERE NewCustomers.Id = @p0",
             await repo.ExecuteSqlQueryAsync(@"
 SELECT
     NewCustomers.Id,
-    NewCustomers.Name
+    NewCustomers.Name,
+    NewCustomers.AddressId
 FROM NewCustomers
 WHERE NewCustomers.Id = @p0",
                 r => new Customer
@@ -537,365 +673,339 @@ WHERE NewCustomers.Id = @p0",
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public async Task FindAsync()
+        private static async Task TestFindAsync(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            await repo.AddAsync(customer);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            await repo.FindAsync(x => x.Id == 0);
+            Assert.NotNull(await repo.FindAsync(x => x.Id == customer.Id));
 
             Assert.False(repo.CacheUsed);
 
-            await repo.FindAsync(x => x.Id == 0);
+            Assert.NotNull(await repo.FindAsync(x => x.Id == customer.Id));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            await repo.FindAsync(x => x.Id == 0);
+            Assert.NotNull(await repo.FindAsync(x => x.Id == customer.Id));
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public async Task FindWithIdAsync()
+        private static async Task TestFindWithIdAsync(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            await repo.AddAsync(customer);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            await repo.FindAsync(0);
+            Assert.NotNull(await repo.FindAsync(customer.Id));
 
             Assert.False(repo.CacheUsed);
 
-            await repo.FindAsync(0);
+            Assert.NotNull(await repo.FindAsync(customer.Id));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            await repo.FindAsync(0);
+            Assert.NotNull(await repo.FindAsync(customer.Id));
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public async Task FindWithOptionsAsync()
+        private static async Task TestFindWithOptionsAsync(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            await repo.AddAsync(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            await repo.FindAsync(queryOptions);
+            Assert.NotNull(await repo.FindAsync(queryOptions));
 
             Assert.False(repo.CacheUsed);
 
-            await repo.FindAsync(queryOptions);
+            Assert.NotNull(await repo.FindAsync(queryOptions));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            await repo.FindAsync(queryOptions);
+            Assert.NotNull(await repo.FindAsync(queryOptions));
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public async Task FindAllAsync()
+        private static async Task TestFindAllAsync(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            await repo.AddAsync(customer);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            await repo.FindAllAsync(x => x.Id == 0);
+            Assert.NotEmpty(await repo.FindAllAsync(x => x.Id == customer.Id));
 
             Assert.False(repo.CacheUsed);
 
-            await repo.FindAllAsync(x => x.Id == 0);
+            Assert.NotEmpty(await repo.FindAllAsync(x => x.Id == customer.Id));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            await repo.FindAllAsync(x => x.Id == 0);
+            Assert.NotEmpty(await repo.FindAllAsync(x => x.Id == customer.Id));
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public async Task FindAllWithOptionsAsync()
+        private static async Task TestFindAllWithOptionsAsync(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            await repo.AddAsync(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            await repo.FindAllAsync(queryOptions);
+            Assert.NotEmpty((await repo.FindAllAsync(queryOptions)).Result);
 
             Assert.False(repo.CacheUsed);
 
-            await repo.FindAllAsync(queryOptions);
+            Assert.NotEmpty((await repo.FindAllAsync(queryOptions)).Result);
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            await repo.FindAllAsync(queryOptions);
+            Assert.NotEmpty((await repo.FindAllAsync(queryOptions)).Result);
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public async Task CountAsync()
+        private static async Task TestCountAsync(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            await repo.AddAsync(customer);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            await repo.CountAsync(x => x.Id == 0);
+            Assert.Equal(1, await repo.CountAsync(x => x.Id == customer.Id));
 
             Assert.False(repo.CacheUsed);
 
-            await repo.CountAsync(x => x.Id == 0);
+            Assert.Equal(1, await repo.CountAsync(x => x.Id == customer.Id));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            await repo.CountAsync(x => x.Id == 0);
+            Assert.Equal(1, await repo.CountAsync(x => x.Id == customer.Id));
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public async Task CountWithOptionsAsync()
+        private static async Task TestCountWithOptionsAsync(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            await repo.AddAsync(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            await repo.CountAsync(queryOptions);
+            Assert.Equal(1, await repo.CountAsync(queryOptions));
 
             Assert.False(repo.CacheUsed);
 
-            await repo.CountAsync(queryOptions);
+            Assert.Equal(1, await repo.CountAsync(queryOptions));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            await repo.CountAsync(queryOptions);
+            Assert.Equal(1, await repo.CountAsync(queryOptions));
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public async Task ExistsAsync()
+        private static async Task TestExistsAsync(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            await repo.AddAsync(customer);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            await repo.ExistsAsync(x => x.Id == 0);
+            Assert.True(await repo.ExistsAsync(x => x.Id == customer.Id));
 
             Assert.False(repo.CacheUsed);
 
-            await repo.ExistsAsync(x => x.Id == 0);
+            Assert.True(await repo.ExistsAsync(x => x.Id == customer.Id));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            await repo.ExistsAsync(x => x.Id == 0);
+            Assert.True(await repo.ExistsAsync(x => x.Id == customer.Id));
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public async Task ExistsWithOptionsAsync()
+        private static async Task TestExistsWithOptionsAsync(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            await repo.AddAsync(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            await repo.ExistsAsync(queryOptions);
+            Assert.True(await repo.ExistsAsync(queryOptions));
 
             Assert.False(repo.CacheUsed);
 
-            await repo.ExistsAsync(queryOptions);
+            Assert.True(await repo.ExistsAsync(queryOptions));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            await repo.ExistsAsync(queryOptions);
+            Assert.True(await repo.ExistsAsync(queryOptions));
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public async Task ToDictionaryAsync()
+        private static async Task TestToDictionaryAsync(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            await repo.AddAsync(customer);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            await repo.ToDictionaryAsync(x => x.Id);
+            Assert.NotEmpty(await repo.ToDictionaryAsync(x => x.Id));
 
             Assert.False(repo.CacheUsed);
 
-            await repo.ToDictionaryAsync(x => x.Id);
+            Assert.NotEmpty(await repo.ToDictionaryAsync(x => x.Id));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            await repo.ToDictionaryAsync(x => x.Id);
+            Assert.NotEmpty(await repo.ToDictionaryAsync(x => x.Id));
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public async Task ToDictionaryWithOptionsAsync()
+        private static async Task TestToDictionaryWithOptionsAsync(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            await repo.AddAsync(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            await repo.ToDictionaryAsync(queryOptions, x => x.Id);
+            Assert.NotEmpty((await repo.ToDictionaryAsync(queryOptions, x => x.Id)).Result);
 
             Assert.False(repo.CacheUsed);
 
-            await repo.ToDictionaryAsync(queryOptions, x => x.Id);
+            Assert.NotEmpty((await repo.ToDictionaryAsync(queryOptions, x => x.Id)).Result);
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            await repo.ToDictionaryAsync(queryOptions, x => x.Id);
+            Assert.NotEmpty((await repo.ToDictionaryAsync(queryOptions, x => x.Id)).Result);
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public async Task GroupByAsync()
+        private static async Task TestGroupByAsync(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            await repo.AddAsync(customer);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            await repo.GroupByAsync(x => x.Id, (key, g) => key);
+            Assert.NotEmpty(await repo.GroupByAsync(x => x.Id, (key, g) => key));
 
             Assert.False(repo.CacheUsed);
 
-            await repo.GroupByAsync(x => x.Id, (key, g) => key);
+            Assert.NotEmpty(await repo.GroupByAsync(x => x.Id, (key, g) => key));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            await repo.GroupByAsync(x => x.Id, (key, g) => key);
+            Assert.NotEmpty(await repo.GroupByAsync(x => x.Id, (key, g) => key));
 
             Assert.False(repo.CacheUsed);
         }
 
-        [Fact]
-        public async Task GroupByWithOptionsAsync()
+        private static async Task TestGroupByWithOptionsAsync(IRepositoryFactory repoFactory)
         {
-            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
-                .Options;
+            var repo = (Repository<Customer>)repoFactory.Create<Customer>();
+            var customer = new Customer { Name = "Random Name" };
 
-            var repo = new Repository<Customer>(options);
+            await repo.AddAsync(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == 0);
+            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            await repo.GroupByAsync(queryOptions, x => x.Id, (key, g) => key);
+            Assert.NotEmpty((await repo.GroupByAsync(queryOptions, x => x.Id, (key, g) => key)).Result);
 
             Assert.False(repo.CacheUsed);
 
-            await repo.GroupByAsync(queryOptions, x => x.Id, (key, g) => key);
+            Assert.NotEmpty((await repo.GroupByAsync(queryOptions, x => x.Id, (key, g) => key)).Result);
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            await repo.GroupByAsync(queryOptions, x => x.Id, (key, g) => key);
+            Assert.NotEmpty((await repo.GroupByAsync(queryOptions, x => x.Id, (key, g) => key)).Result);
 
             Assert.False(repo.CacheUsed);
         }

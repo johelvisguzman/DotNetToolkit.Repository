@@ -11,7 +11,7 @@
 
         private NullCacheProvider() { }
 
-        public TimeSpan? CacheExpiration { get; set; }
+        public TimeSpan? Expiry { get; set; }
 
         public ICache Cache { get; } = NullCache.Instance;
     }
