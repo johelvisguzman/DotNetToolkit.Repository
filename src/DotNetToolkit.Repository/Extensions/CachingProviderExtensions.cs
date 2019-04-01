@@ -201,7 +201,19 @@
                 cacheProvider.Expiry,
                 logger);
 
-        private static bool TryGetQueryResultValue<T>(this ICacheProvider cacheProvider, string key, out IQueryResult<T> value)
+        private static PagedQueryResult<T> CreatePagedQueryResult<T>(IPagedQueryResult<T> oldValue, bool cachedUsed = false)
+            => new PagedQueryResult<T>(oldValue.Result, oldValue.Total)
+            {
+                CacheUsed = cachedUsed
+            };
+
+        private static QueryResult<T> CreateQueryResult<T>(IQueryResult<T> oldValue, bool cachedUsed = false)
+            => new QueryResult<T>(oldValue.Result)
+            {
+                CacheUsed = cachedUsed
+            };
+
+        private static bool TryGetQueryResultValue<T>(this ICacheProvider cacheProvider, string key, out QueryResult<T> value)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -211,23 +223,16 @@
 
             lock (_syncRoot)
             {
-                if (cacheProvider.Cache.TryGetValue<IQueryResult<T>>(key, out var oldValue))
-                {
-                    value = new QueryResult<T>(oldValue.Result)
-                    {
-                        CacheUsed = true
-                    };
-
+                if (cacheProvider.Cache.TryGetValue<QueryResult<T>>(key, out value))
                     return true;
-                }
             }
 
-            value = default(IQueryResult<T>);
+            value = default(QueryResult<T>);
 
             return false;
         }
 
-        private static bool TryGetPagedQueryResultValue<T>(this ICacheProvider cacheProvider, string key, out IPagedQueryResult<T> value)
+        private static bool TryGetPagedQueryResultValue<T>(this ICacheProvider cacheProvider, string key, out PagedQueryResult<T> value)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -237,18 +242,11 @@
 
             lock (_syncRoot)
             {
-                if (cacheProvider.Cache.TryGetValue<IPagedQueryResult<T>>(key, out var oldValue))
-                {
-                    value = new PagedQueryResult<T>(oldValue.Result, oldValue.Total)
-                    {
-                        CacheUsed = true
-                    };
-
+                if (cacheProvider.Cache.TryGetValue<PagedQueryResult<T>>(key, out value))
                     return true;
-                }
             }
 
-            value = default(IPagedQueryResult<T>);
+            value = default(PagedQueryResult<T>);
 
             return false;
         }
@@ -282,7 +280,7 @@
             }
         }
 
-        private static IQueryResult<T> GetOrSet<T>(ICacheProvider cacheProvider, string key, Func<IQueryResult<T>> getter, CacheItemPriority priority, TimeSpan? expiry, ILogger logger)
+        private static QueryResult<T> GetOrSet<T>(ICacheProvider cacheProvider, string key, Func<IQueryResult<T>> getter, CacheItemPriority priority, TimeSpan? expiry, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -300,9 +298,13 @@
 
             if (!cacheProvider.TryGetQueryResultValue<T>(hashedKey, out var value))
             {
-                value = getter();
+                value = CreateQueryResult(getter(), cachedUsed: false);
 
                 cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
+            }
+            else
+            {
+                value = CreateQueryResult(value, cachedUsed: true);
             }
 
             return value;
@@ -326,9 +328,13 @@
 
             if (!cacheProvider.TryGetQueryResultValue<T>(hashedKey, out var value))
             {
-                value = await getter();
+                value = CreateQueryResult(await getter(), cachedUsed: false);
 
                 cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
+            }
+            else
+            {
+                value = CreateQueryResult(value, cachedUsed: true);
             }
 
             return value;
@@ -352,9 +358,13 @@
 
             if (!cacheProvider.TryGetPagedQueryResultValue<T>(hashedKey, out var value))
             {
-                value = getter();
+                value = CreatePagedQueryResult(getter(), cachedUsed: false);
 
                 cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
+            }
+            else
+            {
+                value = CreatePagedQueryResult(value, cachedUsed: true);
             }
 
             return value;
@@ -378,9 +388,13 @@
 
             if (!cacheProvider.TryGetPagedQueryResultValue<T>(hashedKey, out var value))
             {
-                value = await getter();
+                value = CreatePagedQueryResult(await getter(), cachedUsed: false);
 
                 cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
+            }
+            else
+            {
+                value = CreatePagedQueryResult(value, cachedUsed: true);
             }
 
             return value;
