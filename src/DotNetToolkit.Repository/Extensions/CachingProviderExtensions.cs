@@ -213,44 +213,6 @@
                 CacheUsed = cachedUsed
             };
 
-        private static bool TryGetQueryResultValue<T>(this ICacheProvider cacheProvider, string key, out QueryResult<T> value)
-        {
-            if (cacheProvider == null)
-                throw new ArgumentNullException(nameof(cacheProvider));
-
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            lock (_syncRoot)
-            {
-                if (cacheProvider.Cache.TryGetValue<QueryResult<T>>(key, out value))
-                    return true;
-            }
-
-            value = default(QueryResult<T>);
-
-            return false;
-        }
-
-        private static bool TryGetPagedQueryResultValue<T>(this ICacheProvider cacheProvider, string key, out PagedQueryResult<T> value)
-        {
-            if (cacheProvider == null)
-                throw new ArgumentNullException(nameof(cacheProvider));
-
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            lock (_syncRoot)
-            {
-                if (cacheProvider.Cache.TryGetValue<PagedQueryResult<T>>(key, out value))
-                    return true;
-            }
-
-            value = default(PagedQueryResult<T>);
-
-            return false;
-        }
-
         private static void SetValue<T>(this ICacheProvider cacheProvider, string hashedKey, string key, IQueryResult<T> value, CacheItemPriority priority, TimeSpan? expiry, ILogger logger)
         {
             if (cacheProvider == null)
@@ -296,11 +258,14 @@
 
             var hashedKey = FormatHashKey(key);
 
-            if (!cacheProvider.TryGetQueryResultValue<T>(hashedKey, out var value))
+            if (!cacheProvider.Cache.TryGetValue<QueryResult<T>>(hashedKey, out var value))
             {
                 value = CreateQueryResult(getter(), cachedUsed: false);
 
-                cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
+                lock (_syncRoot)
+                {
+                    cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
+                }
             }
             else
             {
@@ -326,11 +291,14 @@
 
             var hashedKey = FormatHashKey(key);
 
-            if (!cacheProvider.TryGetQueryResultValue<T>(hashedKey, out var value))
+            if (!cacheProvider.Cache.TryGetValue<QueryResult<T>>(hashedKey, out var value))
             {
                 value = CreateQueryResult(await getter(), cachedUsed: false);
 
-                cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
+                lock (_syncRoot)
+                {
+                    cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
+                }
             }
             else
             {
@@ -356,11 +324,14 @@
 
             var hashedKey = FormatHashKey(key);
 
-            if (!cacheProvider.TryGetPagedQueryResultValue<T>(hashedKey, out var value))
+            if (!cacheProvider.Cache.TryGetValue<PagedQueryResult<T>>(hashedKey, out var value))
             {
                 value = CreatePagedQueryResult(getter(), cachedUsed: false);
 
-                cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
+                lock (_syncRoot)
+                {
+                    cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
+                }
             }
             else
             {
@@ -386,11 +357,14 @@
 
             var hashedKey = FormatHashKey(key);
 
-            if (!cacheProvider.TryGetPagedQueryResultValue<T>(hashedKey, out var value))
+            if (!cacheProvider.Cache.TryGetValue<PagedQueryResult<T>>(hashedKey, out var value))
             {
                 value = CreatePagedQueryResult(await getter(), cachedUsed: false);
 
-                cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
+                lock (_syncRoot)
+                {
+                    cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
+                }
             }
             else
             {
