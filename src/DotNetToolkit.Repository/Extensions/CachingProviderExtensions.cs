@@ -262,10 +262,7 @@
             {
                 value = CreateQueryResult(getter(), cachedUsed: false);
 
-                lock (_syncRoot)
-                {
-                    cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
-                }
+                cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
             }
             else
             {
@@ -295,10 +292,7 @@
             {
                 value = CreateQueryResult(await getter(), cachedUsed: false);
 
-                lock (_syncRoot)
-                {
-                    cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
-                }
+                cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
             }
             else
             {
@@ -328,10 +322,7 @@
             {
                 value = CreatePagedQueryResult(getter(), cachedUsed: false);
 
-                lock (_syncRoot)
-                {
-                    cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
-                }
+                cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
             }
             else
             {
@@ -361,10 +352,7 @@
             {
                 value = CreatePagedQueryResult(await getter(), cachedUsed: false);
 
-                lock (_syncRoot)
-                {
-                    cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
-                }
+                cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
             }
             else
             {
