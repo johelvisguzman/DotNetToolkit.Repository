@@ -256,7 +256,7 @@
             if (logger == null)
                 throw new ArgumentNullException(nameof(logger));
 
-            var hashedKey = FormatHashKey(key);
+            var hashedKey = FormatHashedKey<T>(cacheProvider, key);
 
             if (!cacheProvider.Cache.TryGetValue<QueryResult<T>>(hashedKey, out var value))
             {
@@ -286,7 +286,7 @@
             if (logger == null)
                 throw new ArgumentNullException(nameof(logger));
 
-            var hashedKey = FormatHashKey(key);
+            var hashedKey = FormatHashedKey<T>(cacheProvider, key);
 
             if (!cacheProvider.Cache.TryGetValue<QueryResult<T>>(hashedKey, out var value))
             {
@@ -316,7 +316,7 @@
             if (logger == null)
                 throw new ArgumentNullException(nameof(logger));
 
-            var hashedKey = FormatHashKey(key);
+            var hashedKey = FormatHashedKey<T>(cacheProvider, key);
 
             if (!cacheProvider.Cache.TryGetValue<PagedQueryResult<T>>(hashedKey, out var value))
             {
@@ -346,7 +346,7 @@
             if (logger == null)
                 throw new ArgumentNullException(nameof(logger));
 
-            var hashedKey = FormatHashKey(key);
+            var hashedKey = FormatHashedKey<T>(cacheProvider, key);
 
             if (!cacheProvider.Cache.TryGetValue<PagedQueryResult<T>>(hashedKey, out var value))
             {
@@ -362,26 +362,58 @@
             return value;
         }
 
-        private static string FormatHashKey(string key)
+        public static void IncrementCounter<T>(this ICacheProvider cacheProvider)
         {
-            return $"{CacheProviderManager.CachePrefix}_{CacheProviderManager.GlobalCachingPrefixCounter}_{key.ToSHA256()}";
+            if (cacheProvider == null)
+                throw new ArgumentNullException(nameof(cacheProvider));
+
+            cacheProvider.Cache.Increment(FormatCachePrefixCounterKey<T>(), 1, 1, CacheItemPriority.NeverRemove);
+        }
+
+        private static int GetCachingPrefixCounter<T>(this ICacheProvider cacheProvider)
+        {
+            if (cacheProvider == null)
+                throw new ArgumentNullException(nameof(cacheProvider));
+
+            return !cacheProvider.Cache.TryGetValue<int>(FormatCachePrefixCounterKey<T>(), out var key) ? 1 : key;
+        }
+
+        private static string Name<T>() => typeof(T).FullName;
+        private static string CacheGlue => CacheProviderManager.CachePrefixGlue;
+
+        private static string FormatCachePrefixCounterKey<T>()
+        {
+            return string.Format("{1}{0}{2}",
+                CacheGlue,
+                Name<T>(),
+                CacheProviderManager.CacheCounterPrefix);
+        }
+
+        private static string FormatHashedKey<T>(ICacheProvider cacheProvider, string key)
+        {
+            return string.Format("{1}{0}{2}{0}{3}{0}{4}",
+                CacheGlue,
+                CacheProviderManager.GlobalCachingPrefixCounter,
+                cacheProvider.GetCachingPrefixCounter<T>(),
+                key.ToSHA256(),
+                CacheProviderManager.CachePrefix);
         }
 
         private static string FormatQueryOptions<T>(IQueryOptions<T> options)
         {
-            return options != null ? options.ToString() : $"QueryOptions<{typeof(T).Name}>: [ null ]";
+            return options != null ? options.ToString() : $"QueryOptions<{Name<T>()}>: [ null ]";
         }
 
         private static string FormatFetchQueryStrategy<T>(IFetchQueryStrategy<T> fetchStrategy)
         {
-            return fetchStrategy != null ? fetchStrategy.ToString() : $"FetchQueryStrategy<{typeof(T).Name}>: [ null ]";
+            return fetchStrategy != null ? fetchStrategy.ToString() : $"FetchQueryStrategy<{Name<T>()}>: [ null ]";
         }
 
         private static string FormatGetOrSetExecuteSqlQueryKey<T>(string sql, CommandType cmdType, Dictionary<string, object> parameters)
         {
             var sb = new StringBuilder();
 
-            sb.Append($"GetOrSetExecuteSqlQuery<{typeof(T).Name}>: [ \n\tSql = {sql},");
+            sb.Append($"GetOrSetExecuteSqlQuery<{Name<T>()}>: [ \n\tSql = {sql},");
 
             if (parameters != null && parameters.Any())
             {
@@ -397,7 +429,7 @@
         {
             var sb = new StringBuilder();
 
-            sb.Append($"GetOrSetExecuteSqlCommand<{typeof(T).Name}>: [ \n\tSql = {sql},");
+            sb.Append($"GetOrSetExecuteSqlCommand<{Name<T>()}>: [ \n\tSql = {sql},");
 
             if (parameters != null && parameters.Any())
             {
@@ -413,42 +445,42 @@
         {
             var f = FormatFetchQueryStrategy(fetchStrategy);
 
-            return $"GetOrSetFind<{typeof(T).Name}>: [ \n\tKeys = {string.Join(", ", keys.Select(x => x.ToString()).ToArray())},\n\t{f} ]";
+            return $"GetOrSetFind<{Name<T>()}>: [ \n\tKeys = {string.Join(", ", keys.Select(x => x.ToString()).ToArray())},\n\t{f} ]";
         }
 
         private static string FormatGetOrSetFindAllKey<T, TResult>(IQueryOptions<T> options, Expression<Func<T, TResult>> selector)
         {
             var o = FormatQueryOptions<T>(options);
 
-            return $"GetOrSetFindAll<{typeof(T).Name}>: [ \n\t{o},\n\tSelector = {ExpressionHelper.TranslateToString(selector)} ]";
+            return $"GetOrSetFindAll<{Name<T>()}>: [ \n\t{o},\n\tSelector = {ExpressionHelper.TranslateToString(selector)} ]";
         }
 
         private static string FormatGetOrSetFindKey<T, TResult>(IQueryOptions<T> options, Expression<Func<T, TResult>> selector)
         {
             var o = FormatQueryOptions<T>(options);
 
-            return $"GetOrSetFind<{typeof(T).Name}>: [ \n\t{o},\n\tSelector = {ExpressionHelper.TranslateToString(selector)} ]";
+            return $"GetOrSetFind<{Name<T>()}>: [ \n\t{o},\n\tSelector = {ExpressionHelper.TranslateToString(selector)} ]";
         }
 
         private static string FormatGetOrSetCountKey<T>(IQueryOptions<T> options)
         {
             var o = FormatQueryOptions<T>(options);
 
-            return $"GetOrSetCount<{typeof(T).Name}>: [ \n\t{o} ]";
+            return $"GetOrSetCount<{Name<T>()}>: [ \n\t{o} ]";
         }
 
         private static string FormatGetOrSetDictionaryKey<T, TDictionaryKey, TElement>(IQueryOptions<T> options, Expression<Func<T, TDictionaryKey>> keySelector, Expression<Func<T, TElement>> elementSelector)
         {
             var o = FormatQueryOptions<T>(options);
 
-            return $"GetOrSetDictionary<{typeof(T).Name}, {typeof(TDictionaryKey).Name}, {typeof(TElement).Name}>: [ \n\t{o},\n\tKeySelector = {ExpressionHelper.TranslateToString(keySelector)},\n\tElementSelector = {ExpressionHelper.TranslateToString(elementSelector)} ]";
+            return $"GetOrSetDictionary<{Name<T>()}, {typeof(TDictionaryKey).Name}, {typeof(TElement).Name}>: [ \n\t{o},\n\tKeySelector = {ExpressionHelper.TranslateToString(keySelector)},\n\tElementSelector = {ExpressionHelper.TranslateToString(elementSelector)} ]";
         }
 
         private static string FormatGetOrSetGroupKey<T, TGroupKey, TResult>(IQueryOptions<T> options, Expression<Func<T, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<T>, TResult>> resultSelector)
         {
             var o = FormatQueryOptions<T>(options);
 
-            return $"GetOrSetGroup<{typeof(T).Name}, {typeof(TGroupKey).Name}, {typeof(TResult).Name}>: [ \n\t{o},\n\tKeySelector = {ExpressionHelper.TranslateToString(keySelector)},\n\tResultSelector = {ExpressionHelper.TranslateToString(resultSelector)} ]";
+            return $"GetOrSetGroup<{Name<T>()}, {typeof(TGroupKey).Name}, {typeof(TResult).Name}>: [ \n\t{o},\n\tKeySelector = {ExpressionHelper.TranslateToString(keySelector)},\n\tResultSelector = {ExpressionHelper.TranslateToString(resultSelector)} ]";
         }
     }
 }

@@ -10,9 +10,19 @@
         private static int _counter = 1;
 
         /// <summary>
-        /// Gets the caching prefix
+        /// Gets the caching prefix.
         /// </summary>
-        public static string CachePrefix = "§";
+        public static string CachePrefix = "RepositoriesCachingPrefix";
+
+        /// <summary>
+        /// Gets the caching counter prefix.
+        /// </summary>
+        public static string CacheCounterPrefix = "RepositoriesCachingCounterPrefix";
+
+        /// <summary>
+        /// Gets the caching glue.
+        /// </summary>
+        public static string CachePrefixGlue = "§";
 
         /// <summary>
         /// Gets the global caching prefix counter.
@@ -20,7 +30,7 @@
         public static int GlobalCachingPrefixCounter { get { return _counter; } }
 
         /// <summary>
-        /// Increments the caching prefix counter.
+        /// Increments the global caching prefix counter.
         /// </summary>
         public static void IncrementCounter()
         {
@@ -28,7 +38,7 @@
         }
 
         /// <summary>
-        /// Decrements the caching prefix counter.
+        /// Decrements the global caching prefix counter.
         /// </summary>
         public static void DecrementCounter()
         {

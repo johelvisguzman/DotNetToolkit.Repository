@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Caching
 {
-    using System;
     using Microsoft.Extensions.Caching.Memory;
+    using System;
 
     /// <summary>
     /// An implementation of <see cref="ICache" />.
@@ -21,6 +21,11 @@
             value = default(T);
 
             return false;
+        }
+
+        public int Increment(string key, int defaultValue, int incrementValue, CacheItemPriority priority = CacheItemPriority.Normal)
+        {
+            return 1;
         }
     }
 }

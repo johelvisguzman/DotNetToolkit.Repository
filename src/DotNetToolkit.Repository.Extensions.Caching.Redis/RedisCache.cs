@@ -246,6 +246,24 @@
             return value != null;
         }
 
+        /// <summary>
+        /// Increments the number stored at key by one
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <param name="defaultValue">The default value.</param>
+        /// <param name="incrementValue">The increment value.</param>
+        /// <param name="priority">The priority.</param>
+        /// <returns>The value of key after the increment.</returns>
+        public int Increment(string key, int defaultValue, int incrementValue, CacheItemPriority priority = CacheItemPriority.Normal)
+        {
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+
+            var value = _redis.StringIncrement(key, incrementValue);
+
+            return Convert.ToInt32(value);
+        }
+
         #endregion
     }
 }

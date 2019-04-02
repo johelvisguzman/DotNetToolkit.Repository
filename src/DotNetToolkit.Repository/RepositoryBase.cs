@@ -2319,7 +2319,7 @@
             var canClearCache = s.Contains("UPDATE") || s.Contains("DELETE FROM") || s.Contains("INSERT INTO");
 
             if (canClearCache)
-                CacheProviderManager.IncrementCounter();
+                CacheProvider.IncrementCounter<TEntity>();
         }
 
         private static Dictionary<string, object> ConvertToParametersDictionary(object[] parameters)
