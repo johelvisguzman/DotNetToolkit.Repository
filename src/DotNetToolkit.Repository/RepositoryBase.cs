@@ -780,6 +780,15 @@
         #region Public Methods
 
         /// <summary>
+        /// Clears the cache.
+        /// </summary>
+        public void ClearCache()
+        {
+            if (CacheEnabled)
+                CacheProvider.IncrementCounter<TEntity>();
+        }
+
+        /// <summary>
         /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
         /// </summary>
         /// <param name="sql">The SQL query string.</param>
@@ -2319,7 +2328,7 @@
             var canClearCache = s.Contains("UPDATE") || s.Contains("DELETE FROM") || s.Contains("INSERT INTO");
 
             if (canClearCache)
-                CacheProvider.IncrementCounter<TEntity>();
+                ClearCache();
         }
 
         private static Dictionary<string, object> ConvertToParametersDictionary(object[] parameters)

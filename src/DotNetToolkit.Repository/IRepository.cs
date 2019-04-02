@@ -25,6 +25,11 @@
         IReadOnlyRepository<TEntity, TKey1, TKey2, TKey3> AsReadOnly();
 
         /// <summary>
+        /// Clears the cache.
+        /// </summary>
+        void ClearCache();
+
+        /// <summary>
         /// Creates a raw SQL query that is executed directly in the database.
         /// </summary>
         /// <param name="sql">The SQL query string.</param>
@@ -241,6 +246,11 @@
         IReadOnlyRepository<TEntity, TKey1, TKey2> AsReadOnly();
 
         /// <summary>
+        /// Clears the cache.
+        /// </summary>
+        void ClearCache();
+
+        /// <summary>
         /// Creates a raw SQL query that is executed directly in the database.
         /// </summary>
         /// <param name="sql">The SQL query string.</param>
@@ -450,6 +460,11 @@
         /// </summary>
         /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
         IReadOnlyRepository<TEntity, TKey> AsReadOnly();
+
+        /// <summary>
+        /// Clears the cache.
+        /// </summary>
+        void ClearCache();
 
         /// <summary>
         /// Creates a raw SQL query that is executed directly in the database.
