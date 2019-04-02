@@ -45,6 +45,52 @@
         }
 
         [Fact]
+        public void ClearCache()
+        {
+            var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+                .UseCachingProvider(new InMemoryCacheProvider())
+                .Options;
+
+            var customerRepo = new Repository<Customer>(options);
+            var customer = new Customer { Name = "Random Name" };
+
+            customerRepo.Add(customer);
+
+            var customerAddressRepo = new Repository<CustomerAddress>(options);
+            var customerAddress = new CustomerAddress() {CustomerId = customer.Id};
+
+            customerAddressRepo.Add(customerAddress);
+
+            Assert.True(customerRepo.CacheEnabled);
+            Assert.False(customerRepo.CacheUsed);
+
+            Assert.NotNull(customerRepo.Find(x => x.Id == customer.Id));
+            Assert.False(customerRepo.CacheUsed);
+
+            Assert.NotNull(customerAddressRepo.Find(x => x.Id == customerAddress.Id));
+            Assert.False(customerAddressRepo.CacheUsed);
+
+            Assert.NotNull(customerRepo.Find(x => x.Id == customer.Id));
+            Assert.True(customerRepo.CacheUsed);
+
+            Assert.NotNull(customerAddressRepo.Find(x => x.Id == customerAddress.Id));
+            Assert.True(customerAddressRepo.CacheUsed);
+
+            customerRepo.ClearCache();
+
+            Assert.NotNull(customerRepo.Find(x => x.Id == customer.Id));
+            Assert.False(customerRepo.CacheUsed);
+
+            Assert.NotNull(customerAddressRepo.Find(x => x.Id == customerAddress.Id));
+            Assert.True(customerAddressRepo.CacheUsed);
+
+            customerAddressRepo.ClearCache();
+
+            Assert.NotNull(customerAddressRepo.Find(x => x.Id == customerAddress.Id));
+            Assert.False(customerAddressRepo.CacheUsed);
+        }
+
+        [Fact]
         public void ExecuteQuery()
         {
             ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestExecuteQuery);
