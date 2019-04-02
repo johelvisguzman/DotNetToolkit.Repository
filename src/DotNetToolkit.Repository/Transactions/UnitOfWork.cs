@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Transactions
 {
     using Configuration;
-    using Configuration.Caching;
     using Configuration.Options;
     using Factories;
     using System;
@@ -67,12 +66,6 @@
             {
                 if (_transactionManager != null)
                 {
-                    // If the transaction has not been committed we probably want to clear the cache
-                    if (_transactionManager.Status == TransactionStatus.Active)
-                    {
-                        CacheProviderManager.IncrementCounter();
-                    }
-
                     _transactionManager.Rollback();
                     _transactionManager.Dispose();
                     _transactionManager = null;
