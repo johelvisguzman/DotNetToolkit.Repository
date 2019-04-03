@@ -18,7 +18,8 @@
         /// </summary>
         /// <param name="path">The database directory to create.</param>
         /// <param name="ignoreTransactionWarning">If a transaction operation is requested, ignore any warnings since the context provider does not support transactions.</param>
-        public JsonRepositoryContext(string path, bool ignoreTransactionWarning = false) : base(path, ".json", ignoreTransactionWarning) { }
+        /// <param name="ignoreSqlQueryWarning">If a SQL query is executed, ignore any warnings since the in-memory provider does not support SQL query execution.</param>
+        public JsonRepositoryContext(string path, bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false) : base(path, ".json", ignoreTransactionWarning, ignoreSqlQueryWarning) { }
 
         #endregion
 
