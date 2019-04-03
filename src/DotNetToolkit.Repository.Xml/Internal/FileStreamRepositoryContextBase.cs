@@ -4,10 +4,12 @@
     using Configuration.Conventions;
     using Configuration.Logging;
     using Properties;
+    using Queries;
     using System;
     using System.Collections;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Data;
     using System.Globalization;
     using System.IO;
     using System.Linq;
@@ -22,6 +24,7 @@
         #region Fields
 
         private readonly bool _ignoreTransactionWarning;
+        private readonly bool _ignoreSqlQueryWarning;
         private readonly string _path;
         private readonly string _extension;
         private readonly BlockingCollection<EntitySet> _items;
@@ -36,7 +39,8 @@
         /// <param name="path">The database directory to create.</param>
         /// <param name="extension">The file extension.</param>
         /// <param name="ignoreTransactionWarning">If a transaction operation is requested, ignore any warnings since the context provider does not support transactions.</param>
-        protected FileStreamRepositoryContextBase(string path, string extension, bool ignoreTransactionWarning = false)
+        /// <param name="ignoreSqlQueryWarning">If a SQL query is executed, ignore any warnings since the in-memory provider does not support SQL query execution.</param>
+        protected FileStreamRepositoryContextBase(string path, string extension, bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false)
         {
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
@@ -58,6 +62,7 @@
 
             _items = new BlockingCollection<EntitySet>();
             _ignoreTransactionWarning = ignoreTransactionWarning;
+            _ignoreSqlQueryWarning = ignoreSqlQueryWarning;
             _path = path;
             _extension = extension;
         }
@@ -298,6 +303,37 @@
             }
 
             return count;
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        public override IQueryResult<IEnumerable<TEntity>> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector)
+        {
+            if (!_ignoreSqlQueryWarning)
+                throw new NotSupportedException(Repository.Properties.Resources.QueryExecutionNotSupported);
+
+            return new QueryResult<IEnumerable<TEntity>>(Enumerable.Empty<TEntity>());
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <returns>The number of rows affected.</returns>
+        public override IQueryResult<int> ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters)
+        {
+            if (!_ignoreSqlQueryWarning)
+                throw new NotSupportedException(Repository.Properties.Resources.QueryExecutionNotSupported);
+
+            return new QueryResult<int>(0);
         }
 
         #endregion
