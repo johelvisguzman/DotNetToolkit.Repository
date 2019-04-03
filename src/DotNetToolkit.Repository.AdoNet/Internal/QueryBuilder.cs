@@ -359,6 +359,12 @@
 
                 if (options.PageSize != -1 && string.IsNullOrEmpty(defaultSelect))
                 {
+                    if (string.IsNullOrEmpty(crossJoinTableAlias))
+                    {
+                        crossJoinTableAlias = EnsureTableAlias(DEFAULT_CROSS_JOIN_TABLE_ALIAS);
+                        crossJoinCountColumnAlias = EnsureColumnAlias(DEFAULT_CROSS_JOIN_COLUMN_ALIAS);
+                    }
+
                     sb.Append(Environment.NewLine);
                     sb.Append("CROSS JOIN (");
                     sb.Append(Environment.NewLine);
