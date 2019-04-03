@@ -242,6 +242,17 @@
             }
         }
 
+        private static bool TryGetValue<T>(this ICacheProvider cacheProvider, string key, out T value)
+        {
+            if (cacheProvider == null)
+                throw new ArgumentNullException(nameof(cacheProvider));
+
+            lock (_syncRoot)
+            {
+                return cacheProvider.Cache.TryGetValue<T>(key, out value);
+            }
+        }
+
         private static QueryResult<T> GetOrSet<T>(ICacheProvider cacheProvider, string key, Func<IQueryResult<T>> getter, CacheItemPriority priority, TimeSpan? expiry, ILogger logger)
         {
             if (cacheProvider == null)
@@ -258,7 +269,7 @@
 
             var hashedKey = FormatHashedKey<T>(cacheProvider, key);
 
-            if (!cacheProvider.Cache.TryGetValue<QueryResult<T>>(hashedKey, out var value))
+            if (!cacheProvider.TryGetValue<QueryResult<T>>(hashedKey, out var value))
             {
                 value = CreateQueryResult(getter(), cachedUsed: false);
 
@@ -288,7 +299,7 @@
 
             var hashedKey = FormatHashedKey<T>(cacheProvider, key);
 
-            if (!cacheProvider.Cache.TryGetValue<QueryResult<T>>(hashedKey, out var value))
+            if (!cacheProvider.TryGetValue<QueryResult<T>>(hashedKey, out var value))
             {
                 value = CreateQueryResult(await getter(), cachedUsed: false);
 
@@ -318,7 +329,7 @@
 
             var hashedKey = FormatHashedKey<T>(cacheProvider, key);
 
-            if (!cacheProvider.Cache.TryGetValue<PagedQueryResult<T>>(hashedKey, out var value))
+            if (!cacheProvider.TryGetValue<PagedQueryResult<T>>(hashedKey, out var value))
             {
                 value = CreatePagedQueryResult(getter(), cachedUsed: false);
 
@@ -348,7 +359,7 @@
 
             var hashedKey = FormatHashedKey<T>(cacheProvider, key);
 
-            if (!cacheProvider.Cache.TryGetValue<PagedQueryResult<T>>(hashedKey, out var value))
+            if (!cacheProvider.TryGetValue<PagedQueryResult<T>>(hashedKey, out var value))
             {
                 value = CreatePagedQueryResult(await getter(), cachedUsed: false);
 
@@ -367,7 +378,10 @@
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
 
-            cacheProvider.Cache.Increment(FormatCachePrefixCounterKey<T>(), 1, 1, CacheItemPriority.NeverRemove);
+            lock (_syncRoot)
+            {
+                cacheProvider.Cache.Increment(FormatCachePrefixCounterKey<T>(), 1, 1, CacheItemPriority.NeverRemove);
+            }
         }
 
         private static int GetCachingPrefixCounter<T>(this ICacheProvider cacheProvider)
@@ -375,7 +389,7 @@
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
 
-            return !cacheProvider.Cache.TryGetValue<int>(FormatCachePrefixCounterKey<T>(), out var key) ? 1 : key;
+            return !cacheProvider.TryGetValue<int>(FormatCachePrefixCounterKey<T>(), out var key) ? 1 : key;
         }
 
         private static string Name<T>() => typeof(T).FullName;
