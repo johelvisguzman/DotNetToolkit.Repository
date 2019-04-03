@@ -24,6 +24,11 @@
         bool CacheEnabled { get; set; }
 
         /// <summary>
+        /// Clears the cache.
+        /// </summary>
+        void ClearCache();
+
+        /// <summary>
         /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
         /// </summary>
         /// <param name="sql">The SQL query string.</param>
@@ -558,6 +563,11 @@
         bool CacheEnabled { get; set; }
 
         /// <summary>
+        /// Clears the cache.
+        /// </summary>
+        void ClearCache();
+
+        /// <summary>
         /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
         /// </summary>
         /// <param name="sql">The SQL query string.</param>
@@ -1083,6 +1093,11 @@
         /// Gets or sets the value indicating whether caching is enabled or not.
         /// </summary>
         bool CacheEnabled { get; set; }
+
+        /// <summary>
+        /// Clears the cache.
+        /// </summary>
+        void ClearCache();
 
         /// <summary>
         /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
