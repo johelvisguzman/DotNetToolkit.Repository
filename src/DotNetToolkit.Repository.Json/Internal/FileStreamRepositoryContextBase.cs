@@ -1,9 +1,9 @@
-﻿namespace DotNetToolkit.Repository.Configuration
+﻿namespace DotNetToolkit.Repository.Json.Internal
 {
-    using Conventions;
-    using Logging;
+    using Configuration;
+    using Configuration.Conventions;
+    using Configuration.Logging;
     using Properties;
-    using Queries;
     using System;
     using System.Collections;
     using System.Collections.Concurrent;
