@@ -7,6 +7,8 @@
     using Queries.Strategies;
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.Data;
     using System.Globalization;
     using System.Linq;
     using Transactions;
@@ -22,6 +24,7 @@
         private const string DefaultDatabaseName = "DotNetToolkit.Repository.InMemory";
 
         private readonly bool _ignoreTransactionWarning;
+        private readonly bool _ignoreSqlQueryWarning;
         private readonly BlockingCollection<EntitySet> _items = new BlockingCollection<EntitySet>();
 
         #endregion
@@ -41,10 +44,13 @@
         /// Initializes a new instance of the <see cref="InMemoryRepositoryContext" /> class.
         /// </summary>
         /// <param name="ignoreTransactionWarning">If a transaction operation is requested, ignore any warnings since the in-memory provider does not support transactions.</param>
-        public InMemoryRepositoryContext(bool ignoreTransactionWarning = false)
+        /// <param name="ignoreSqlQueryWarning">If a SQL query is executed, ignore any warnings since the in-memory provider does not support SQL query execution.</param>
+        public InMemoryRepositoryContext(bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false)
         {
             DatabaseName = DefaultDatabaseName;
+
             _ignoreTransactionWarning = ignoreTransactionWarning;
+            _ignoreSqlQueryWarning = ignoreSqlQueryWarning;
         }
 
         /// <summary>
@@ -52,10 +58,13 @@
         /// </summary>
         /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
         /// <param name="ignoreTransactionWarning">If a transaction operation is requested, ignore any warnings since the in-memory provider does not support transactions.</param>
-        public InMemoryRepositoryContext(string databaseName, bool ignoreTransactionWarning = false)
+        /// <param name="ignoreSqlQueryWarning">If a SQL query is executed, ignore any warnings since the in-memory provider does not support SQL query execution.</param>
+        public InMemoryRepositoryContext(string databaseName, bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false)
         {
             DatabaseName = string.IsNullOrEmpty(databaseName) ? DefaultDatabaseName : databaseName;
+
             _ignoreTransactionWarning = ignoreTransactionWarning;
+            _ignoreSqlQueryWarning = ignoreSqlQueryWarning;
         }
 
         #endregion
@@ -256,6 +265,37 @@
             }
 
             return count;
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        public override IQueryResult<IEnumerable<TEntity>> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector)
+        {
+            if (!_ignoreSqlQueryWarning)
+                throw new NotSupportedException(Repository.Properties.Resources.QueryExecutionNotSupported);
+
+            return new QueryResult<IEnumerable<TEntity>>(Enumerable.Empty<TEntity>());
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <returns>The number of rows affected.</returns>
+        public override IQueryResult<int> ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters)
+        {
+            if (!_ignoreSqlQueryWarning)
+                throw new NotSupportedException(Repository.Properties.Resources.QueryExecutionNotSupported);
+
+            return new QueryResult<int>(0);
         }
 
         /// <summary>
