@@ -42,6 +42,11 @@
             set { _underlyingRepo.CacheEnabled = value; }
         }
 
+        public void ClearCache()
+        {
+            _underlyingRepo.ClearCache();
+        }
+
         public IEnumerable<TEntity> ExecuteSqlQuery(string sql, CommandType cmdType, object[] parameters)
         {
             return _underlyingRepo.ExecuteSqlQuery(sql, cmdType, parameters);
@@ -377,6 +382,11 @@
             set { _underlyingRepo.CacheEnabled = value; }
         }
 
+        public void ClearCache()
+        {
+            _underlyingRepo.ClearCache();
+        }
+
         public IEnumerable<TEntity> ExecuteSqlQuery(string sql, CommandType cmdType, object[] parameters)
         {
             return _underlyingRepo.ExecuteSqlQuery(sql, cmdType, parameters);
@@ -710,6 +720,11 @@
         {
             get { return _underlyingRepo.CacheEnabled; }
             set { _underlyingRepo.CacheEnabled = value; }
+        }
+
+        public void ClearCache()
+        {
+            _underlyingRepo.ClearCache();
         }
 
         public IEnumerable<TEntity> ExecuteSqlQuery(string sql, CommandType cmdType, object[] parameters)
