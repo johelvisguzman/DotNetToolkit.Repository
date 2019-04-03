@@ -28,41 +28,45 @@
 
         protected IRepositoryOptions BuildOptions(ContextProviderType provider)
         {
+            var builder = new RepositoryOptionsBuilder();
+
             switch (provider)
             {
                 case ContextProviderType.InMemory:
                     {
-                        return new RepositoryOptionsBuilder()
-                            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                            .Options;
+                        builder.UseInMemoryDatabase(Guid.NewGuid().ToString());
+                        break;
                     }
                 case ContextProviderType.Json:
                     {
-                        return new RepositoryOptionsBuilder()
-                            .UseJsonDatabase(Path.GetTempPath() + Guid.NewGuid().ToString("N"))
-                            .Options;
+                        builder.UseJsonDatabase(Path.GetTempPath() + Guid.NewGuid().ToString("N"));
+                        break;
+                    }
+                case ContextProviderType.Xml:
+                    {
+                        builder.UseJsonDatabase(Path.GetTempPath() + Guid.NewGuid().ToString("N"));
+                        break;
                     }
                 case ContextProviderType.AdoNet:
                     {
-                        return new RepositoryOptionsBuilder()
-                            .UseAdoNet(_connection)
-                            .Options;
+                        builder.UseAdoNet(_connection);
+                        break;
                     }
                 case ContextProviderType.EntityFramework:
                     {
-                        return new RepositoryOptionsBuilder()
-                            .UseEntityFramework<EfDbContext>(_connection)
-                            .Options;
+                        builder.UseEntityFramework<EfDbContext>(_connection);
+                        break;
                     }
                 case ContextProviderType.EntityFrameworkCore:
                     {
-                        return new RepositoryOptionsBuilder()
-                            .UseEntityFrameworkCore<EfCoreDbContext>(x => x.UseSqlServer(ConnectionString))
-                            .Options;
+                        builder.UseEntityFrameworkCore<EfCoreDbContext>(x => x.UseSqlServer(ConnectionString));
+                        break;
                     }
                 default:
                     throw new ArgumentOutOfRangeException(nameof(provider));
             }
+
+            return builder.Options;
         }
 
         public virtual IEnumerable<ContextProviderType> Providers()
