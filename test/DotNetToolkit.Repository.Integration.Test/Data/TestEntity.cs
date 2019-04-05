@@ -55,6 +55,25 @@
         [Column(Order = 2)]
         public string Id2 { get; set; }
         public string Name { get; set; }
+
+        public override int GetHashCode()
+        {
+            int hashCode = 0;
+
+            hashCode = hashCode ^ Id1.GetHashCode() ^ Id2.GetHashCode();
+
+            return hashCode;
+        }
+
+        public override bool Equals(object obj)
+        {
+            var toCompare = obj as CustomerWithTwoCompositePrimaryKey;
+            if (toCompare == null)
+            {
+                return false;
+            }
+            return (this.GetHashCode() != toCompare.GetHashCode());
+        }
     }
 
     public class CustomerWithThreeCompositePrimaryKey
@@ -69,6 +88,25 @@
         [Column(Order = 3)]
         public int Id3 { get; set; }
         public string Name { get; set; }
+
+        public override int GetHashCode()
+        {
+            int hashCode = 0;
+
+            hashCode = hashCode ^ Id1.GetHashCode() ^ Id2.GetHashCode() ^ Id3.GetHashCode();
+
+            return hashCode;
+        }
+
+        public override bool Equals(object obj)
+        {
+            var toCompare = obj as CustomerWithThreeCompositePrimaryKey;
+            if (toCompare == null)
+            {
+                return false;
+            }
+            return (this.GetHashCode() != toCompare.GetHashCode());
+        }
     }
 
     public class CustomerWithTimeStamp : IHaveTimeStamp

@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
     /// <summary>
-    /// Represents an internal entity set in the in-memory store, which holds the entity and it's state representing the operation that was performed at the time.
+    /// Represents an internal entity set, which holds the entity and it's state representing the operation that was performed at the time.
     /// </summary>
     internal class EntitySet
     {

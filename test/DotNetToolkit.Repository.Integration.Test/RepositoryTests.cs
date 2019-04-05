@@ -52,7 +52,8 @@
         [Fact]
         public void ThrowsIfEntityCompositePrimaryKeyMissingOrdering()
         {
-            ForAllRepositoryFactories(TestThrowsIfEntityCompositePrimaryKeyMissingOrdering);
+            // not needed for hibernate
+            ForAllRepositoryFactories(TestThrowsIfEntityCompositePrimaryKeyMissingOrdering, ContextProviderType.NHibernate);
         }
 
         private static void TestFactoryCreate(IRepositoryFactory repoFactory)

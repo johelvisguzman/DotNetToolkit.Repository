@@ -363,7 +363,7 @@
         /// <summary>
         /// Deletes an entity with the given primary key value in the repository.
         /// </summary>
-        /// <param name="key"></param>
+        /// <param name="key">The value of the primary key used to match entities against.</param>
         /// <returns><c>true</c> is able to successfully delete an entity with the given primary key; otherwise, <c>false</c>.</returns>
         bool TryDelete(TKey key);
 
@@ -428,7 +428,7 @@
         /// <summary>
         ///  Asynchronously deletes an entity with the given primary key value in the repository.
         /// </summary>
-        /// <param name="key"></param>
+        /// <param name="key">The value of the primary key used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given primary key; otherwise, <c>false</c>.</returns>
         Task<bool> TryDeleteAsync(TKey key, CancellationToken cancellationToken = new CancellationToken());
