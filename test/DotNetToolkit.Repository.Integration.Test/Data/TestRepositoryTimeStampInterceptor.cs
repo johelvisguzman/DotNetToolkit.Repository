@@ -2,7 +2,7 @@
 {
     using Configuration.Interceptors;
     using System;
-    using Unity.Attributes;
+    using Unity;
 
     public class TestRepositoryTimeStampInterceptor : RepositoryInterceptorBase
     {

@@ -17,7 +17,6 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-    using Unity.Interception.Utilities;
     using Xml;
     using Xunit;
     using Xunit.Abstractions;
@@ -33,7 +32,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 
         protected void ForRepositoryFactoryWithAllCachingProviders(ContextProviderType contextProvider, Action<IRepositoryFactory, CachingProviderType> action)
         {
-            CachingProviders().ForEach(cachingProvider =>
+            CachingProviders().ToList().ForEach(cachingProvider =>
             {
                 var builder = GetRepositoryOptionsBuilder(contextProvider);
 
@@ -48,7 +47,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 
         protected void ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType contextProvider, Func<IRepositoryFactory, CachingProviderType, Task> action)
         {
-            CachingProviders().ForEach(async cachingProvider =>
+            CachingProviders().ToList().ForEach(async cachingProvider =>
             {
                 var builder = GetRepositoryOptionsBuilder(contextProvider);
 
@@ -72,7 +71,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 
         protected void ForAllRepositoryFactories(Action<IRepositoryFactory, ContextProviderType> action, params ContextProviderType[] exclude)
         {
-            ContextProviders().ForEach(x =>
+            ContextProviders().ToList().ForEach(x =>
             {
                 if (exclude != null && exclude.Contains(x))
                     return;
@@ -86,7 +85,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 
         protected void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactory, ContextProviderType, Task> action, params ContextProviderType[] exclude)
         {
-            ContextProviders().ForEach(async x =>
+            ContextProviders().ToList().ForEach(async x =>
             {
                 if (exclude != null && exclude.Contains(x))
                     return;
@@ -109,7 +108,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 
         protected void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory, ContextProviderType> action)
         {
-            ContextProviders().Where(SupportsTransactions).ForEach(x =>
+            ContextProviders().Where(SupportsTransactions).ToList().ForEach(x =>
             {
                 action(new UnitOfWorkFactory(BuildOptions(x)), x);
             });
@@ -120,7 +119,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 
         protected void ForAllUnitOfWorkFactoriesAsync(Func<IUnitOfWorkFactory, ContextProviderType, Task> action)
         {
-            ContextProviders().Where(SupportsTransactions).ForEach(async x =>
+            ContextProviders().Where(SupportsTransactions).ToList().ForEach(async x =>
             {
                 // Perform test
                 var task = Record.ExceptionAsync(() => action(new UnitOfWorkFactory(BuildOptions(x)), x));
@@ -140,7 +139,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 
         protected void ForAllFileStreamContextProviders(Action<IRepositoryOptions, ContextProviderType> action)
         {
-            FileStreamContextProviders().ForEach(x => action(BuildOptions(x), x));
+            FileStreamContextProviders().ToList().ForEach(x => action(BuildOptions(x), x));
         }
 
         protected void ForAllFileStreamContextProviders(Action<IRepositoryOptions> action)

@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Data
 {
     using Configuration.Interceptors;
-    using Unity.Attributes;
+    using Unity;
 
     public class TestRepositoryInterceptor : RepositoryInterceptorBase
     {
