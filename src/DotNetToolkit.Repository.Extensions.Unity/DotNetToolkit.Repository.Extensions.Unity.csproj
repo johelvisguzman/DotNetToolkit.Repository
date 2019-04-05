@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Unity" Version="5.8.12" />
+    <PackageReference Include="Unity" Version="5.10.3" />
   </ItemGroup>
 
   <ItemGroup>
