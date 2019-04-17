@@ -11,7 +11,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
     using InMemory;
     using Json;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Infrastructure;
+    using Microsoft.EntityFrameworkCore.Diagnostics;
     using System;
     using System.Collections.Generic;
     using System.IO;
