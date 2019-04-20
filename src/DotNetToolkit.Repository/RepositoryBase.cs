@@ -1128,7 +1128,7 @@
 
                 Intercept(x => x.AddExecuted(entity));
 
-                CacheProviderManager.IncrementCounter();
+                ClearCache();
 
                 Logger.Debug("Executed [ Method = Add ]");
             });
@@ -1161,7 +1161,7 @@
                     Intercept(x => x.AddExecuted(entity));
                 }
 
-                CacheProviderManager.IncrementCounter();
+                ClearCache();
 
                 Logger.Debug("Executed [ Method = Add ]");
             });
@@ -1188,7 +1188,7 @@
 
                 Intercept(x => x.UpdateExecuted(entity));
 
-                CacheProviderManager.IncrementCounter();
+                ClearCache();
 
                 Logger.Debug("Executed [ Method = Update ]");
             });
@@ -1221,7 +1221,7 @@
                     Intercept(x => x.UpdateExecuted(entity));
                 }
 
-                CacheProviderManager.IncrementCounter();
+                ClearCache();
 
                 Logger.Debug("Executed [ Method = Update ]");
             });
@@ -1248,7 +1248,7 @@
 
                 Intercept(x => x.DeleteExecuted(entity));
 
-                CacheProviderManager.IncrementCounter();
+                ClearCache();
 
                 Logger.Debug("Executed [ Method = Delete ]");
             });
@@ -1308,7 +1308,7 @@
                     Intercept(x => x.DeleteExecuted(entity));
                 }
 
-                CacheProviderManager.IncrementCounter();
+                ClearCache();
 
                 Logger.Debug("Executed [ Method = Delete ]");
             });
@@ -1647,7 +1647,7 @@
 
                 Intercept(x => x.AddExecuted(entity));
 
-                CacheProviderManager.IncrementCounter();
+                ClearCache();
 
                 Logger.Debug("Executed [ Method = AddAsync ]");
             });
@@ -1684,7 +1684,7 @@
                     Intercept(x => x.AddExecuted(entity));
                 }
 
-                CacheProviderManager.IncrementCounter();
+                ClearCache();
 
                 Logger.Debug("Executed [ Method = AddAsync ]");
             });
@@ -1715,7 +1715,7 @@
 
                 Intercept(x => x.UpdateExecuted(entity));
 
-                CacheProviderManager.IncrementCounter();
+                ClearCache();
 
                 Logger.Debug("Executed [ Method = UpdateAsync ]");
             });
@@ -1752,7 +1752,7 @@
                     Intercept(x => x.UpdateExecuted(entity));
                 }
 
-                CacheProviderManager.IncrementCounter();
+                ClearCache();
 
                 Logger.Debug("Executed [ Method = UpdateAsync ]");
             });
@@ -1783,7 +1783,7 @@
 
                 Intercept(x => x.DeleteExecuted(entity));
 
-                CacheProviderManager.IncrementCounter();
+                ClearCache();
 
                 Logger.Debug("Executed [ Method = DeleteAsync ]");
             });
@@ -1855,7 +1855,7 @@
                     Intercept(x => x.DeleteExecuted(entity));
                 }
 
-                CacheProviderManager.IncrementCounter();
+                ClearCache();
 
                 Logger.Debug("Executed [ Method = DeleteAsync ]");
             });
