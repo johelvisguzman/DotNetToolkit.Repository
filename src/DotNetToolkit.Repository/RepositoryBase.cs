@@ -126,8 +126,8 @@
             Logger.Debug($"Executing [ Method = Find, CacheEnabled = {CacheEnabled} ]");
 
             IQueryResult<TEntity> Getter() =>
-                InterceptError<IQueryResult<TEntity>>(
-                    () => Context.Find<TEntity>(fetchStrategy, key1, key2, key3));
+                UseContext<IQueryResult<TEntity>>(
+                    context => context.Find<TEntity>(fetchStrategy, key1, key2, key3));
 
             var queryResult = CacheEnabled
                 ? CacheProvider.GetOrSetFind<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy, Getter, Logger)
@@ -192,8 +192,8 @@
             Logger.Debug($"Executing [ Method = FindAsync, CacheEnabled = {CacheEnabled} ]");
 
             Task<IQueryResult<TEntity>> Getter() =>
-                InterceptErrorAsync<IQueryResult<TEntity>>(
-                    () => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2, key3));
+                UseContextAsync<IQueryResult<TEntity>>(
+                    context => context.FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2, key3));
 
             var queryResult = CacheEnabled
                 ? await CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy, Getter, Logger)
@@ -347,8 +347,8 @@
             Logger.Debug($"Executing [ Method = Find, CacheEnabled = {CacheEnabled} ]");
 
             IQueryResult<TEntity> Getter() =>
-                InterceptError<IQueryResult<TEntity>>(
-                    () => Context.Find<TEntity>(fetchStrategy, key1, key2));
+                UseContext<IQueryResult<TEntity>>(
+                    context => context.Find<TEntity>(fetchStrategy, key1, key2));
 
             var queryResult = CacheEnabled
                 ? CacheProvider.GetOrSetFind<TEntity>(new object[] { key1, key2 }, fetchStrategy, Getter, Logger)
@@ -409,8 +409,8 @@
             Logger.Debug($"Executing [ Method = FindAsync, CacheEnabled = {CacheEnabled} ]");
 
             Task<IQueryResult<TEntity>> Getter() =>
-                InterceptErrorAsync<IQueryResult<TEntity>>(
-                    () => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2));
+                UseContextAsync<IQueryResult<TEntity>>(
+                    context => context.FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2));
 
             var queryResult = CacheEnabled
                 ? await CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key1, key2 }, fetchStrategy, Getter, Logger)
@@ -557,8 +557,8 @@
             Logger.Debug($"Executing [ Method = Find, CacheEnabled = {CacheEnabled} ]");
 
             IQueryResult<TEntity> Getter() =>
-                InterceptError<IQueryResult<TEntity>>(
-                    () => Context.Find<TEntity>(fetchStrategy, key));
+                UseContext<IQueryResult<TEntity>>(
+                    context => context.Find<TEntity>(fetchStrategy, key));
 
             var queryResult = CacheEnabled
                 ? CacheProvider.GetOrSetFind<TEntity>(new object[] { key }, fetchStrategy, Getter, Logger)
@@ -615,8 +615,8 @@
             Logger.Debug($"Executing [ Method = FindAsync, CacheEnabled = {CacheEnabled} ]");
 
             Task<IQueryResult<TEntity>> Getter() =>
-                InterceptErrorAsync<IQueryResult<TEntity>>(
-                    () => Context.AsAsync().FindAsync<TEntity>(cancellationToken, fetchStrategy, key));
+                UseContextAsync<IQueryResult<TEntity>>(
+                    context => context.FindAsync<TEntity>(cancellationToken, fetchStrategy, key));
 
             var queryResult = CacheEnabled
                 ? await CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key }, fetchStrategy, Getter, Logger)
@@ -684,7 +684,6 @@
 
         private readonly IRepositoryOptions _options;
         private readonly IRepositoryContextFactory _contextFactory;
-        private IRepositoryContext _context;
         private IEnumerable<IRepositoryInterceptor> _interceptors;
 
         #endregion
@@ -700,23 +699,6 @@
         /// Gets a value indicating whether the cached was used or not on the previous executed query.
         /// </summary>
         public bool CacheUsed { get; internal set; }
-
-        /// <summary>
-        /// Gets the repository context.
-        /// </summary>
-        internal IRepositoryContext Context
-        {
-            get
-            {
-                if (_context == null)
-                {
-                    _context = _contextFactory.Create();
-                    _context.UseLoggerProvider(_options.LoggerProvider ?? new ConsoleLoggerProvider(LogLevel.Debug));
-                }
-
-                return _context;
-            }
-        }
 
         /// <summary>
         /// Gets the repository logger.
@@ -812,8 +794,8 @@
             var parametersDict = ConvertToParametersDictionary(parameters);
 
             IQueryResult<IEnumerable<TEntity>> Getter() =>
-                InterceptError<IQueryResult<IEnumerable<TEntity>>>(
-                    () => Context.ExecuteSqlQuery(sql, cmdType, parametersDict, projector));
+                UseContext<IQueryResult<IEnumerable<TEntity>>>(
+                    context => context.ExecuteSqlQuery(sql, cmdType, parametersDict, projector));
 
             var queryResult = CacheEnabled
                 ? CacheProvider.GetOrSetExecuteSqlQuery<TEntity>(sql, cmdType, parametersDict, projector, Getter, Logger)
@@ -906,8 +888,8 @@
             var parametersDict = ConvertToParametersDictionary(parameters);
 
             IQueryResult<int> Getter() =>
-                InterceptError<IQueryResult<int>>(
-                    () => Context.ExecuteSqlCommand(sql, cmdType, parametersDict));
+                UseContext<IQueryResult<int>>(
+                    context => context.ExecuteSqlCommand(sql, cmdType, parametersDict));
 
             var queryResult = CacheEnabled
                 ? CacheProvider.GetOrSetExecuteSqlCommand<TEntity>(sql, cmdType, parametersDict, Getter, Logger)
@@ -968,8 +950,8 @@
             var parametersDict = ConvertToParametersDictionary(parameters);
 
             Task<IQueryResult<IEnumerable<TEntity>>> Getter() =>
-                InterceptErrorAsync<IQueryResult<IEnumerable<TEntity>>>(
-                    () => Context.AsAsync().ExecuteSqlQueryAsync(sql, cmdType, parametersDict, projector, cancellationToken));
+                UseContextAsync<IQueryResult<IEnumerable<TEntity>>>(
+                    context => context.ExecuteSqlQueryAsync(sql, cmdType, parametersDict, projector, cancellationToken));
 
             var queryResult = CacheEnabled
                 ? await CacheProvider.GetOrSetExecuteSqlQueryAsync<TEntity>(sql, cmdType, parametersDict, projector, Getter, Logger)
@@ -1068,8 +1050,8 @@
             var parametersDict = ConvertToParametersDictionary(parameters);
 
             Task<IQueryResult<int>> Getter() =>
-                InterceptErrorAsync<IQueryResult<int>>(
-                    () => Context.AsAsync().ExecuteSqlCommandAsync(sql, cmdType, parametersDict, cancellationToken));
+                UseContextAsync<IQueryResult<int>>(
+                    context => context.ExecuteSqlCommandAsync(sql, cmdType, parametersDict, cancellationToken));
 
             var queryResult = CacheEnabled
                 ? await CacheProvider.GetOrSetExecuteSqlCommandAsync<TEntity>(sql, cmdType, parametersDict, Getter, Logger)
@@ -1117,21 +1099,23 @@
             {
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
-
-                Logger.Debug("Executing [ Method = Add ]");
-
-                Intercept(x => x.AddExecuting(entity));
-
-                Context.Add(entity);
-
-                Context.SaveChanges();
-
-                Intercept(x => x.AddExecuted(entity));
-
-                ClearCache();
-
-                Logger.Debug("Executed [ Method = Add ]");
             });
+
+            Logger.Debug("Executing [ Method = Add ]");
+
+            Intercept(x => x.AddExecuting(entity));
+
+            UseContext(context =>
+            {
+                context.Add(entity);
+                context.SaveChanges();
+            });
+
+            Intercept(x => x.AddExecuted(entity));
+
+            ClearCache();
+
+            Logger.Debug("Executed [ Method = Add ]");
         }
 
         /// <summary>
@@ -1144,27 +1128,30 @@
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
+            });
 
-                Logger.Debug("Executing [ Method = Add ]");
+            Logger.Debug("Executing [ Method = Add ]");
 
+            UseContext(context =>
+            {
                 foreach (var entity in entities)
                 {
                     Intercept(x => x.AddExecuting(entity));
 
-                    Context.Add(entity);
+                    context.Add(entity);
                 }
 
-                Context.SaveChanges();
+                context.SaveChanges();
 
                 foreach (var entity in entities)
                 {
                     Intercept(x => x.AddExecuted(entity));
                 }
-
-                ClearCache();
-
-                Logger.Debug("Executed [ Method = Add ]");
             });
+
+            ClearCache();
+
+            Logger.Debug("Executed [ Method = Add ]");
         }
 
         /// <summary>
@@ -1177,21 +1164,23 @@
             {
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
-
-                Logger.Debug("Executing [ Method = Update ]");
-
-                Intercept(x => x.UpdateExecuting(entity));
-
-                Context.Update(entity);
-
-                Context.SaveChanges();
-
-                Intercept(x => x.UpdateExecuted(entity));
-
-                ClearCache();
-
-                Logger.Debug("Executed [ Method = Update ]");
             });
+
+            Logger.Debug("Executing [ Method = Update ]");
+
+            Intercept(x => x.UpdateExecuting(entity));
+
+            UseContext(context =>
+            {
+                context.Update(entity);
+                context.SaveChanges();
+            });
+
+            Intercept(x => x.UpdateExecuted(entity));
+
+            ClearCache();
+
+            Logger.Debug("Executed [ Method = Update ]");
         }
 
         /// <summary>
@@ -1204,27 +1193,30 @@
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
+            });
 
-                Logger.Debug("Executing [ Method = Update ]");
+            Logger.Debug("Executing [ Method = Update ]");
 
+            UseContext(context =>
+            {
                 foreach (var entity in entities)
                 {
                     Intercept(x => x.UpdateExecuting(entity));
 
-                    Context.Update(entity);
+                    context.Update(entity);
                 }
 
-                Context.SaveChanges();
+                context.SaveChanges();
 
                 foreach (var entity in entities)
                 {
                     Intercept(x => x.UpdateExecuted(entity));
                 }
-
-                ClearCache();
-
-                Logger.Debug("Executed [ Method = Update ]");
             });
+
+            ClearCache();
+
+            Logger.Debug("Executed [ Method = Update ]");
         }
 
         /// <summary>
@@ -1237,21 +1229,23 @@
             {
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
-
-                Logger.Debug("Executing [ Method = Delete ]");
-
-                Intercept(x => x.DeleteExecuting(entity));
-
-                Context.Remove(entity);
-
-                Context.SaveChanges();
-
-                Intercept(x => x.DeleteExecuted(entity));
-
-                ClearCache();
-
-                Logger.Debug("Executed [ Method = Delete ]");
             });
+
+            Logger.Debug("Executing [ Method = Delete ]");
+
+            Intercept(x => x.DeleteExecuting(entity));
+
+            UseContext(context =>
+            {
+                context.Remove(entity);
+                context.SaveChanges();
+            });
+
+            Intercept(x => x.DeleteExecuted(entity));
+
+            ClearCache();
+
+            Logger.Debug("Executed [ Method = Delete ]");
         }
 
         /// <summary>
@@ -1291,27 +1285,30 @@
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
+            });
 
-                Logger.Debug("Executing [ Method = Delete ]");
+            Logger.Debug("Executing [ Method = Delete ]");
 
+            UseContext(context =>
+            {
                 foreach (var entity in entities)
                 {
                     Intercept(x => x.DeleteExecuting(entity));
 
-                    Context.Remove(entity);
+                    context.Remove(entity);
                 }
 
-                Context.SaveChanges();
+                context.SaveChanges();
 
                 foreach (var entity in entities)
                 {
                     Intercept(x => x.DeleteExecuted(entity));
                 }
-
-                ClearCache();
-
-                Logger.Debug("Executed [ Method = Delete ]");
             });
+
+            ClearCache();
+
+            Logger.Debug("Executed [ Method = Delete ]");
         }
 
         /// <summary>
@@ -1356,8 +1353,8 @@
             Logger.Debug($"Executing [ Method = Find, CacheEnabled = {CacheEnabled} ]");
 
             IQueryResult<TResult> Getter() =>
-                InterceptError<IQueryResult<TResult>>(
-                    () => Context.Find<TEntity, TResult>(options, selector));
+                UseContext<IQueryResult<TResult>>(
+                    context => context.Find<TEntity, TResult>(options, selector));
 
             var queryResult = CacheEnabled
                 ? CacheProvider.GetOrSetFind<TEntity, TResult>(options, selector, Getter, Logger)
@@ -1431,8 +1428,8 @@
             Logger.Debug($"Executing [ Method = FindAll, CacheEnabled = {CacheEnabled} ]");
 
             IPagedQueryResult<IEnumerable<TResult>> Getter() =>
-                InterceptError<IPagedQueryResult<IEnumerable<TResult>>>(
-                    () => Context.FindAll<TEntity, TResult>(options, selector));
+                UseContext<IPagedQueryResult<IEnumerable<TResult>>>(
+                    context => context.FindAll<TEntity, TResult>(options, selector));
 
             var queryResult = CacheEnabled
                 ? CacheProvider.GetOrSetFindAll<TEntity, TResult>(options, selector, Getter, Logger)
@@ -1503,8 +1500,8 @@
             Logger.Debug($"Executing [ Method = Count, CacheEnabled = {CacheEnabled} ]");
 
             IQueryResult<int> Getter() =>
-                InterceptError<IQueryResult<int>>(
-                    () => Context.Count<TEntity>(options));
+                UseContext<IQueryResult<int>>(
+                    context => context.Count<TEntity>(options));
 
             var queryResult = CacheEnabled
                 ? CacheProvider.GetOrSetCount<TEntity>(options, Getter, Logger)
@@ -1567,8 +1564,8 @@
             Logger.Debug($"Executing [ Method = ToDictionary, CacheEnabled = {CacheEnabled} ]");
 
             IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> Getter() =>
-                InterceptError<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
-                    () => Context.ToDictionary(options, keySelector, elementSelector));
+                UseContext<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
+                    context => context.ToDictionary(options, keySelector, elementSelector));
 
             var queryResult = CacheEnabled
                 ? CacheProvider.GetOrSetDictionary<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector, Getter, Logger)
@@ -1608,8 +1605,8 @@
             Logger.Debug($"Executing [ Method = GroupBy, CacheEnabled = {CacheEnabled} ]");
 
             IPagedQueryResult<IEnumerable<TResult>> Getter() =>
-                InterceptError<IPagedQueryResult<IEnumerable<TResult>>>(
-                    () => Context.GroupBy(options, keySelector, resultSelector));
+                UseContext<IPagedQueryResult<IEnumerable<TResult>>>(
+                    context => context.GroupBy(options, keySelector, resultSelector));
 
             var queryResult = CacheEnabled
                 ? CacheProvider.GetOrSetGroup<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector, Getter, Logger)
@@ -1628,29 +1625,31 @@
         /// <param name="entity">The entity to add.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        public Task AddAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
+        public async Task AddAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync(async () =>
+            InterceptError(() =>
             {
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
-
-                Logger.Debug("Executing [ Method = AddAsync ]");
-
-                cancellationToken.ThrowIfCancellationRequested();
-
-                Intercept(x => x.AddExecuting(entity));
-
-                Context.Add(entity);
-
-                await Context.AsAsync().SaveChangesAsync(cancellationToken);
-
-                Intercept(x => x.AddExecuted(entity));
-
-                ClearCache();
-
-                Logger.Debug("Executed [ Method = AddAsync ]");
             });
+
+            Logger.Debug("Executing [ Method = AddAsync ]");
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            Intercept(x => x.AddExecuting(entity));
+
+            await UseContextAsync(async context =>
+            {
+                context.Add(entity);
+                await context.SaveChangesAsync(cancellationToken);
+            });
+
+            Intercept(x => x.AddExecuted(entity));
+
+            ClearCache();
+
+            Logger.Debug("Executed [ Method = AddAsync ]");
         }
 
         /// <summary>
@@ -1659,35 +1658,38 @@
         /// <param name="entities">The collection of entities to add.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        public Task AddAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
+        public async Task AddAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync(async () =>
+            InterceptError(() =>
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
+            });
 
-                Logger.Debug("Executing [ Method = AddAsync ]");
+            Logger.Debug("Executing [ Method = AddAsync ]");
 
-                cancellationToken.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
 
+            await UseContextAsync(async context =>
+            {
                 foreach (var entity in entities)
                 {
                     Intercept(x => x.AddExecuting(entity));
 
-                    Context.Add(entity);
+                    context.Add(entity);
                 }
 
-                await Context.AsAsync().SaveChangesAsync(cancellationToken);
+                await context.SaveChangesAsync(cancellationToken);
 
                 foreach (var entity in entities)
                 {
                     Intercept(x => x.AddExecuted(entity));
                 }
-
-                ClearCache();
-
-                Logger.Debug("Executed [ Method = AddAsync ]");
             });
+
+            ClearCache();
+
+            Logger.Debug("Executed [ Method = AddAsync ]");
         }
 
         /// <summary>
@@ -1696,29 +1698,31 @@
         /// <param name="entity">The entity to update.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        public Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
+        public async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync(async () =>
+            InterceptError(() =>
             {
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
-
-                Logger.Debug("Executing [ Method = UpdateAsync ]");
-
-                cancellationToken.ThrowIfCancellationRequested();
-
-                Intercept(x => x.UpdateExecuting(entity));
-
-                Context.Update(entity);
-
-                await Context.AsAsync().SaveChangesAsync(cancellationToken);
-
-                Intercept(x => x.UpdateExecuted(entity));
-
-                ClearCache();
-
-                Logger.Debug("Executed [ Method = UpdateAsync ]");
             });
+
+            Logger.Debug("Executing [ Method = UpdateAsync ]");
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            Intercept(x => x.UpdateExecuting(entity));
+
+            await UseContextAsync(async context =>
+            {
+                context.Update(entity);
+                await context.SaveChangesAsync(cancellationToken);
+            });
+
+            Intercept(x => x.UpdateExecuted(entity));
+
+            ClearCache();
+
+            Logger.Debug("Executed [ Method = UpdateAsync ]");
         }
 
         /// <summary>
@@ -1727,35 +1731,38 @@
         /// <param name="entities">The collection of entities to update.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        public Task UpdateAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
+        public async Task UpdateAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync(async () =>
+            InterceptError(() =>
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
+            });
 
-                Logger.Debug("Executing [ Method = UpdateAsync ]");
+            Logger.Debug("Executing [ Method = UpdateAsync ]");
 
-                cancellationToken.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
 
+            await UseContextAsync(async context =>
+            {
                 foreach (var entity in entities)
                 {
                     Intercept(x => x.UpdateExecuting(entity));
 
-                    Context.Update(entity);
+                    context.Update(entity);
                 }
 
-                await Context.AsAsync().SaveChangesAsync(cancellationToken);
+                await context.SaveChangesAsync(cancellationToken);
 
                 foreach (var entity in entities)
                 {
                     Intercept(x => x.UpdateExecuted(entity));
                 }
-
-                ClearCache();
-
-                Logger.Debug("Executed [ Method = UpdateAsync ]");
             });
+
+            ClearCache();
+
+            Logger.Debug("Executed [ Method = UpdateAsync ]");
         }
 
         /// <summary>
@@ -1764,29 +1771,31 @@
         /// <param name="entity">The entity to delete.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        public Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
+        public async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync(async () =>
+            InterceptError(() =>
             {
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
-
-                Logger.Debug("Executing [ Method = DeleteAsync ]");
-
-                cancellationToken.ThrowIfCancellationRequested();
-
-                Intercept(x => x.DeleteExecuting(entity));
-
-                Context.Remove(entity);
-
-                await Context.AsAsync().SaveChangesAsync(cancellationToken);
-
-                Intercept(x => x.DeleteExecuted(entity));
-
-                ClearCache();
-
-                Logger.Debug("Executed [ Method = DeleteAsync ]");
             });
+
+            Logger.Debug("Executing [ Method = DeleteAsync ]");
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            Intercept(x => x.DeleteExecuting(entity));
+
+            await UseContextAsync(async context =>
+            {
+                context.Remove(entity);
+                await context.SaveChangesAsync(cancellationToken);
+            });
+
+            Intercept(x => x.DeleteExecuted(entity));
+
+            ClearCache();
+
+            Logger.Debug("Executed [ Method = DeleteAsync ]");
         }
 
         /// <summary>
@@ -1830,35 +1839,38 @@
         /// <param name="entities">The collection of entities to delete.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        public Task DeleteAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
+        public async Task DeleteAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
-            return InterceptErrorAsync(async () =>
+            InterceptError(() =>
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
+            });
 
-                Logger.Debug("Executing [ Method = DeleteAsync ]");
+            Logger.Debug("Executing [ Method = DeleteAsync ]");
 
-                cancellationToken.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
 
+            await UseContextAsync(async context =>
+            {
                 foreach (var entity in entities)
                 {
                     Intercept(x => x.DeleteExecuting(entity));
 
-                    Context.Remove(entity);
+                    context.Remove(entity);
                 }
 
-                await Context.AsAsync().SaveChangesAsync(cancellationToken);
+                await context.SaveChangesAsync(cancellationToken);
 
                 foreach (var entity in entities)
                 {
                     Intercept(x => x.DeleteExecuted(entity));
                 }
-
-                ClearCache();
-
-                Logger.Debug("Executed [ Method = DeleteAsync ]");
             });
+
+            ClearCache();
+
+            Logger.Debug("Executed [ Method = DeleteAsync ]");
         }
 
         /// <summary>
@@ -1907,8 +1919,8 @@
             Logger.Debug($"Executing [ Method = FindAsync, CacheEnabled = {CacheEnabled} ]");
 
             Task<IQueryResult<TResult>> Getter() =>
-                InterceptErrorAsync<IQueryResult<TResult>>(
-                    () => Context.AsAsync().FindAsync<TEntity, TResult>(options, selector, cancellationToken));
+                UseContextAsync<IQueryResult<TResult>>(
+                    context => context.FindAsync<TEntity, TResult>(options, selector, cancellationToken));
 
             var queryResult = CacheEnabled
                 ? await CacheProvider.GetOrSetFindAsync<TEntity, TResult>(options, selector, Getter, Logger)
@@ -1988,8 +2000,8 @@
             Logger.Debug($"Executing [ Method = FindAllAsync, CacheEnabled = {CacheEnabled} ]");
 
             Task<IPagedQueryResult<IEnumerable<TResult>>> Getter() =>
-                InterceptErrorAsync<IPagedQueryResult<IEnumerable<TResult>>>(
-                    () => Context.AsAsync().FindAllAsync<TEntity, TResult>(options, selector, cancellationToken));
+                UseContextAsync<IPagedQueryResult<IEnumerable<TResult>>>(
+                    context => context.FindAllAsync<TEntity, TResult>(options, selector, cancellationToken));
 
             var queryResult = CacheEnabled
                 ? await CacheProvider.GetOrSetFindAllAsync<TEntity, TResult>(options, selector, Getter, Logger)
@@ -2065,8 +2077,8 @@
             Logger.Debug($"Executing [ Method = CountAsync, CacheEnabled = {CacheEnabled} ]");
 
             Task<IQueryResult<int>> Getter() =>
-                InterceptErrorAsync<IQueryResult<int>>(
-                    () => Context.AsAsync().CountAsync<TEntity>(options, cancellationToken));
+                UseContextAsync<IQueryResult<int>>(
+                    context => context.CountAsync<TEntity>(options, cancellationToken));
 
             var queryResult = CacheEnabled
                 ? await CacheProvider.GetOrSetCountAsync<TEntity>(options, Getter, Logger)
@@ -2133,8 +2145,8 @@
             Logger.Debug($"Executing [ Method = ToDictionaryAsync, CacheEnabled = {CacheEnabled} ]");
 
             Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> Getter() =>
-                InterceptErrorAsync<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
-                    () => Context.AsAsync().ToDictionaryAsync(options, keySelector, elementSelector, cancellationToken));
+                UseContextAsync<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
+                    context => context.ToDictionaryAsync(options, keySelector, elementSelector, cancellationToken));
 
             var queryResult = CacheEnabled
                 ? await CacheProvider.GetOrSetDictionaryAsync<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector, Getter, Logger)
@@ -2177,8 +2189,8 @@
             Logger.Debug($"Executing [ Method = GroupByAsync, CacheEnabled = {CacheEnabled} ]");
 
             Task<IPagedQueryResult<IEnumerable<TResult>>> Getter() =>
-                InterceptErrorAsync<IPagedQueryResult<IEnumerable<TResult>>>(
-                    () => Context.AsAsync().GroupByAsync(options, keySelector, resultSelector, cancellationToken));
+                UseContextAsync<IPagedQueryResult<IEnumerable<TResult>>>(
+                    context => context.GroupByAsync(options, keySelector, resultSelector, cancellationToken));
 
             var queryResult = CacheEnabled
                 ? await CacheProvider.GetOrSetGroupAsync<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector, Getter, Logger)
@@ -2200,6 +2212,98 @@
         /// </summary>
         /// <param name="optionsBuilder">A builder used to create or modify options for this repository.</param>
         protected virtual void OnConfiguring(RepositoryOptionsBuilder optionsBuilder) { }
+
+        /// <summary>
+        /// A method for using a disposable repository context.
+        /// </summary>
+        protected void UseContext(Action<IRepositoryContext> action)
+        {
+            var context = GetContext();
+
+            try
+            {
+                action(context);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex);
+
+                throw;
+            }
+            finally
+            {
+                DisposeContext(context);
+            }
+        }
+
+        /// <summary>
+        /// A method for using a disposable repository context.
+        /// </summary>
+        protected T UseContext<T>(Func<IRepositoryContext, T> action)
+        {
+            var context = GetContext();
+
+            try
+            {
+                return action(context);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex);
+
+                throw;
+            }
+            finally
+            {
+                DisposeContext(context);
+            }
+        }
+
+        /// <summary>
+        /// A method for using a disposable repository context asynchronously.
+        /// </summary>
+        protected async Task UseContextAsync(Func<IRepositoryContextAsync, Task> action)
+        {
+            var context = GetContext().AsAsync();
+
+            try
+            {
+                await action(context);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex);
+
+                throw;
+            }
+            finally
+            {
+                DisposeContext(context);
+            }
+        }
+
+        /// <summary>
+        /// A method for using a disposable repository context asynchronously.
+        /// </summary>
+        protected async Task<T> UseContextAsync<T>(Func<IRepositoryContextAsync, Task<T>> action)
+        {
+            var context = GetContext().AsAsync();
+
+            try
+            {
+                return await action(context);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex);
+
+                throw;
+            }
+            finally
+            {
+                DisposeContext(context);
+            }
+        }
 
         #endregion
 
@@ -2225,10 +2329,6 @@
 
                 throw;
             }
-            finally
-            {
-                DisposeContext();
-            }
         }
 
         internal T InterceptError<T>(Func<T> action)
@@ -2242,10 +2342,6 @@
                 Logger.Error(ex);
 
                 throw;
-            }
-            finally
-            {
-                DisposeContext();
             }
         }
 
@@ -2261,10 +2357,6 @@
 
                 throw;
             }
-            finally
-            {
-                DisposeContext();
-            }
         }
 
         internal async Task InterceptErrorAsync(Func<Task> action)
@@ -2278,10 +2370,6 @@
                 Logger.Error(ex);
 
                 throw;
-            }
-            finally
-            {
-                DisposeContext();
             }
         }
 
@@ -2309,13 +2397,19 @@
             return _interceptors;
         }
 
-        private void DisposeContext()
+        private IRepositoryContext GetContext()
         {
-            if (_context != null && _context.CurrentTransaction == null)
-            {
-                _context.Dispose();
-                _context = null;
-            }
+            var context = _contextFactory.Create();
+            
+            context.UseLoggerProvider(_options.LoggerProvider ?? new ConsoleLoggerProvider(LogLevel.Debug));
+
+            return context;
+        }
+
+        private static void DisposeContext(IRepositoryContext context)
+        {
+            if (context != null && context.CurrentTransaction == null)
+                context.Dispose();
         }
 
         private void IncrementCacheCounter(string sql)
