@@ -127,15 +127,15 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         #region Public Methods
 
         /// <summary>
-        /// Sets the repository context logger provider to use.
+        /// Sets the repository context logger to use.
         /// </summary>
-        /// <param name="loggerProvider">The logger provider.</param>
-        public void UseLoggerProvider(ILoggerProvider loggerProvider)
+        /// <param name="logger">The logger.</param>
+        public void UseLogger(ILogger logger)
         {
-            if (loggerProvider == null)
-                throw new ArgumentNullException(nameof(loggerProvider));
+            if (logger == null)
+                throw new ArgumentNullException(nameof(logger));
 
-            Logger = loggerProvider.Create(GetType().FullName);
+            Logger = logger;
         }
 
         /// <summary>

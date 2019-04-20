@@ -39,6 +39,8 @@
                 throw new ArgumentNullException(nameof(context));
 
             _context = context;
+
+            _context.Database.Log = s => Logger?.Debug(s.TrimEnd(Environment.NewLine.ToCharArray()));
         }
 
         #endregion
@@ -152,20 +154,6 @@
             CurrentTransaction = new EfTransactionManager(_context.Database.BeginTransaction());
 
             return CurrentTransaction;
-        }
-
-        /// <summary>
-        /// Sets the repository context logger provider to use.
-        /// </summary>
-        /// <param name="loggerProvider">The logger provider.</param>
-        public override void UseLoggerProvider(ILoggerProvider loggerProvider)
-        {
-            if (loggerProvider == null)
-                throw new ArgumentNullException(nameof(loggerProvider));
-
-            Logger = loggerProvider.Create(typeof(DbContext).FullName);
-
-            _context.Database.Log = s => Logger.Debug(s.TrimEnd(Environment.NewLine.ToCharArray()));
         }
 
         /// <summary>

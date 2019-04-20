@@ -96,12 +96,12 @@
         public ITransactionManager CurrentTransaction { get { return _context.CurrentTransaction; } }
 
         /// <summary>
-        /// Sets the repository context logger provider to use.
+        /// Gets or sets the repository context logger.
         /// </summary>
-        /// <param name="loggerProvider">The logger provider.</param>
-        public void UseLoggerProvider(ILoggerProvider loggerProvider)
+        public ILogger Logger
         {
-            _context.UseLoggerProvider(loggerProvider);
+            get { return _context.Logger; }
+            set { _context.Logger = value; }
         }
 
         /// <summary>

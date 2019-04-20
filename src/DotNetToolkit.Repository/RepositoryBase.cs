@@ -706,6 +706,11 @@
         internal ILogger Logger { get; }
 
         /// <summary>
+        /// Gets the repository logger provider.
+        /// </summary>
+        internal ILoggerProvider LoggerProvider { get; }
+
+        /// <summary>
         /// Gets the caching provider.
         /// </summary>
         internal ICacheProvider CacheProvider { get; private set; }
@@ -735,9 +740,9 @@
             OnConfiguring(optionsBuilder);
 
             // Sets the default logger provider (prints all messages levels)
-            var loggerProvider = optionsBuilder.Options.LoggerProvider ?? new ConsoleLoggerProvider(LogLevel.Debug);
+            LoggerProvider = optionsBuilder.Options.LoggerProvider ?? new ConsoleLoggerProvider(LogLevel.Debug);
 
-            Logger = loggerProvider.Create($"DotNetToolkit.Repository<{typeof(TEntity).Name}>");
+            Logger = LoggerProvider.Create($"DotNetToolkit.Repository<{typeof(TEntity).Name}>");
 
             var contextFactory = optionsBuilder.Options.ContextFactory;
             if (contextFactory == null)
@@ -2400,8 +2405,9 @@
         private IRepositoryContext GetContext()
         {
             var context = _contextFactory.Create();
-            
-            context.UseLoggerProvider(_options.LoggerProvider ?? new ConsoleLoggerProvider(LogLevel.Debug));
+
+            if (context.Logger == null || context.Logger is NullLogger)
+                context.Logger = LoggerProvider.Create(context.GetType().FullName);
 
             return context;
         }

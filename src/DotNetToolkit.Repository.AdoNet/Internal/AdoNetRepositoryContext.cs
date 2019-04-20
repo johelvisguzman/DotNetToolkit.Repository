@@ -33,15 +33,26 @@
         private readonly SchemaTableConfigurationHelper _schemaConfigHelper;
         private readonly DbHelper _dbHelper;
         private readonly bool _ensureDatabaseCreated;
+        private ILogger _logger = NullLogger.Instance;
 
         #endregion
 
         #region Properties
 
         /// <summary>
-        /// Gets the repository context logger.
+        /// Gets or sets the repository context logger.
         /// </summary>
-        public ILogger Logger { get; private set; } = NullLogger.Instance;
+        public ILogger Logger
+        {
+            get { return _logger; }
+            set
+            {
+                _logger = value;
+
+                if (_dbHelper != null)
+                    _dbHelper.UseLogger(_logger);
+            }
+        }
 
         #endregion
 
@@ -236,20 +247,6 @@
         /// Gets the current transaction.
         /// </summary>
         public ITransactionManager CurrentTransaction { get; private set; }
-
-        /// <summary>
-        /// Sets the repository context logger provider to use.
-        /// </summary>
-        /// <param name="loggerProvider">The logger provider.</param>
-        public void UseLoggerProvider(ILoggerProvider loggerProvider)
-        {
-            if (loggerProvider == null)
-                throw new ArgumentNullException(nameof(loggerProvider));
-
-            _dbHelper.UseLoggerProvider(loggerProvider);
-
-            Logger = loggerProvider.Create(GetType().FullName);
-        }
 
         /// <summary>
         /// Tracks the specified entity in memory and will be inserted into the database when <see cref="SaveChanges" /> is called.

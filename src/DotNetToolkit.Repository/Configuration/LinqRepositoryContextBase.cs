@@ -22,9 +22,9 @@
         #region Properties
 
         /// <summary>
-        /// Gets the logger.
+        /// Gets or sets the repository context logger.
         /// </summary>
-        public ILogger Logger { get; internal set; } = NullLogger.Instance;
+        public ILogger Logger { get; set; } = NullLogger.Instance;
 
         #endregion
 
@@ -104,18 +104,6 @@
         /// Gets the current transaction.
         /// </summary>
         public ITransactionManager CurrentTransaction { get; internal set; }
-
-        /// <summary>
-        /// Sets the repository context logger provider to use.
-        /// </summary>
-        /// <param name="loggerProvider">The logger provider.</param>
-        public virtual void UseLoggerProvider(ILoggerProvider loggerProvider)
-        {
-            if (loggerProvider == null)
-                throw new ArgumentNullException(nameof(loggerProvider));
-
-            Logger = loggerProvider.Create(GetType().FullName);
-        }
 
         /// <summary>
         /// Tracks the specified entity in memory and will be inserted into the database when <see cref="IRepositoryContext.SaveChanges" /> is called.
