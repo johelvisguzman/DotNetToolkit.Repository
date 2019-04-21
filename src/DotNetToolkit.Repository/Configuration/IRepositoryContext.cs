@@ -46,10 +46,9 @@
         ITransactionManager CurrentTransaction { get; }
 
         /// <summary>
-        /// Sets the repository context logger provider to use.
+        /// Gets or sets the repository context logger.
         /// </summary>
-        /// <param name="loggerProvider">The logger provider.</param>
-        void UseLoggerProvider(ILoggerProvider loggerProvider);
+        ILogger Logger { get; set; }
 
         /// <summary>
         /// Tracks the specified entity in memory and will be inserted into the database when <see cref="SaveChanges()" /> is called.
