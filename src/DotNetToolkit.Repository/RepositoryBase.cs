@@ -21,6 +21,7 @@
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
@@ -72,6 +73,8 @@
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
         public void Delete(TKey1 key1, TKey2 key2, TKey3 key3)
         {
+            LogExecutingMethod(false);
+
             if (!TryDelete(key1, key2, key3))
             {
                 var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3));
@@ -80,6 +83,8 @@
 
                 throw ex;
             }
+
+            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -91,12 +96,16 @@
         /// <returns><c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
         public bool TryDelete(TKey1 key1, TKey2 key2, TKey3 key3)
         {
+            LogExecutingMethod(false);
+
             var entity = Find(key1, key2, key3);
 
             if (entity == null)
                 return false;
 
             Delete(entity);
+
+            LogExecutedMethod(false);
 
             return true;
         }
@@ -123,7 +132,7 @@
         /// <return>The entity found.</return>
         public TEntity Find(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
-            Logger.Debug($"Executing [ Method = Find, CacheEnabled = {CacheEnabled} ]");
+            LogExecutingMethod();
 
             IQueryResult<TEntity> Getter() =>
                 UseContext<IQueryResult<TEntity>>(
@@ -135,7 +144,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed [ Method = Find, CacheUsed = {queryResult.CacheUsed} ]");
+            LogExecutedMethod();
 
             return queryResult.Result;
         }
@@ -149,7 +158,13 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public bool Exists(TKey1 key1, TKey2 key2, TKey3 key3)
         {
-            return Find(key1, key2, key3) != null;
+            LogExecutingMethod();
+
+            var result = Find(key1, key2, key3) != null;
+
+            LogExecutedMethod();
+
+            return result;
         }
 
         /// <summary>
@@ -162,7 +177,13 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public async Task<bool> ExistsAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
-            return await FindAsync(key1, key2, key3, cancellationToken) != null;
+            LogExecutingMethod();
+
+            var result = await FindAsync(key1, key2, key3, cancellationToken) != null;
+
+            LogExecutedMethod();
+
+            return result;
         }
 
         /// <summary>
@@ -189,7 +210,7 @@
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         public async Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            Logger.Debug($"Executing [ Method = FindAsync, CacheEnabled = {CacheEnabled} ]");
+            LogExecutingMethod();
 
             Task<IQueryResult<TEntity>> Getter() =>
                 UseContextAsync<IQueryResult<TEntity>>(
@@ -201,7 +222,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed [ Method = FindAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            LogExecutedMethod();
 
             return queryResult.Result;
         }
@@ -216,14 +237,14 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
+            LogExecutingMethod(false);
+
             if (!await TryDeleteAsync(key1, key2, key3, cancellationToken))
             {
-                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3));
-
-                Logger.Error(ex);
-
-                throw ex;
+                InterceptError(() => throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3)));
             }
+
+            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -236,6 +257,8 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
         public async Task<bool> TryDeleteAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
+            LogExecutingMethod(false);
+
             InterceptError(cancellationToken.ThrowIfCancellationRequested);
 
             var entity = await FindAsync(key1, key2, key3, cancellationToken);
@@ -244,6 +267,8 @@
                 return false;
 
             await DeleteAsync(entity, cancellationToken);
+
+            LogExecutedMethod(false);
 
             return true;
         }
@@ -296,14 +321,14 @@
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         public void Delete(TKey1 key1, TKey2 key2)
         {
+            LogExecutingMethod(false);
+
             if (!TryDelete(key1, key2))
             {
-                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2));
-
-                Logger.Error(ex);
-
-                throw ex;
+                InterceptError(() => throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2)));
             }
+
+            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -314,12 +339,16 @@
         /// <returns><c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
         public bool TryDelete(TKey1 key1, TKey2 key2)
         {
+            LogExecutingMethod(false);
+
             var entity = Find(key1, key2);
 
             if (entity == null)
                 return false;
 
             Delete(entity);
+
+            LogExecutedMethod(false);
 
             return true;
         }
@@ -344,7 +373,7 @@
         /// <return>The entity found.</return>
         public TEntity Find(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
-            Logger.Debug($"Executing [ Method = Find, CacheEnabled = {CacheEnabled} ]");
+            LogExecutingMethod();
 
             IQueryResult<TEntity> Getter() =>
                 UseContext<IQueryResult<TEntity>>(
@@ -356,7 +385,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed [ Method = Find, CacheUsed = {queryResult.CacheUsed} ]");
+            LogExecutedMethod();
 
             return queryResult.Result;
         }
@@ -369,7 +398,13 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public bool Exists(TKey1 key1, TKey2 key2)
         {
-            return Find(key1, key2) != null;
+            LogExecutingMethod();
+
+            var result = Find(key1, key2) != null;
+
+            LogExecutedMethod();
+
+            return result;
         }
 
         /// <summary>
@@ -381,7 +416,13 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public async Task<bool> ExistsAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
-            return await FindAsync(key1, key2, cancellationToken) != null;
+            LogExecutingMethod();
+
+            var result = await FindAsync(key1, key2, cancellationToken) != null;
+
+            LogExecutedMethod();
+
+            return result;
         }
 
         /// <summary>
@@ -406,7 +447,7 @@
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         public async Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            Logger.Debug($"Executing [ Method = FindAsync, CacheEnabled = {CacheEnabled} ]");
+            LogExecutingMethod();
 
             Task<IQueryResult<TEntity>> Getter() =>
                 UseContextAsync<IQueryResult<TEntity>>(
@@ -418,7 +459,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed [ Method = FindAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            LogExecutedMethod();
 
             return queryResult.Result;
         }
@@ -432,14 +473,14 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
+            LogExecutingMethod(false);
+
             if (!await TryDeleteAsync(key1, key2, cancellationToken))
             {
-                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2));
-
-                Logger.Error(ex);
-
-                throw ex;
+                InterceptError(() => throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2)));
             }
+
+            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -451,6 +492,8 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
         public async Task<bool> TryDeleteAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
+            LogExecutingMethod(false);
+
             InterceptError(cancellationToken.ThrowIfCancellationRequested);
 
             var entity = await FindAsync(key1, key2, cancellationToken);
@@ -459,6 +502,8 @@
                 return false;
 
             await DeleteAsync(entity, cancellationToken);
+
+            LogExecutedMethod(false);
 
             return true;
         }
@@ -509,14 +554,14 @@
         /// <param name="key">The value of the primary key used to match entities against.</param>
         public void Delete(TKey key)
         {
+            LogExecutingMethod(false);
+
             if (!TryDelete(key))
             {
-                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
-
-                Logger.Error(ex);
-
-                throw ex;
+                InterceptError(() => throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key)));
             }
+
+            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -526,12 +571,16 @@
         /// <returns><c>true</c> is able to successfully delete an entity with the given primary key; otherwise, <c>false</c>.</returns>
         public bool TryDelete(TKey key)
         {
+            LogExecutingMethod(false);
+
             var entity = Find(key);
 
             if (entity == null)
                 return false;
 
             Delete(entity);
+
+            LogExecutedMethod(false);
 
             return true;
         }
@@ -554,7 +603,7 @@
         /// <return>The entity found.</return>
         public TEntity Find(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
-            Logger.Debug($"Executing [ Method = Find, CacheEnabled = {CacheEnabled} ]");
+            LogExecutingMethod();
 
             IQueryResult<TEntity> Getter() =>
                 UseContext<IQueryResult<TEntity>>(
@@ -566,7 +615,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed [ Method = Find, CacheUsed = {queryResult.CacheUsed} ]");
+            LogExecutedMethod();
 
             return queryResult.Result;
         }
@@ -578,7 +627,13 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public bool Exists(TKey key)
         {
-            return Find(key) != null;
+            LogExecutingMethod();
+
+            var result = Find(key) != null;
+
+            LogExecutedMethod();
+
+            return result;
         }
 
         /// <summary>
@@ -589,7 +644,13 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public async Task<bool> ExistsAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
-            return await FindAsync(key, cancellationToken) != null;
+            LogExecutingMethod();
+
+            var result = await FindAsync(key, cancellationToken) != null;
+
+            LogExecutedMethod();
+
+            return result;
         }
 
         /// <summary>
@@ -612,7 +673,7 @@
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         public async Task<TEntity> FindAsync(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            Logger.Debug($"Executing [ Method = FindAsync, CacheEnabled = {CacheEnabled} ]");
+            LogExecutingMethod();
 
             Task<IQueryResult<TEntity>> Getter() =>
                 UseContextAsync<IQueryResult<TEntity>>(
@@ -624,7 +685,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed [ Method = FindAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            LogExecutedMethod();
 
             return queryResult.Result;
         }
@@ -637,14 +698,14 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
+            LogExecutingMethod(false);
+
             if (!await TryDeleteAsync(key, cancellationToken))
             {
-                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key));
-
-                Logger.Error(ex);
-
-                throw ex;
+                InterceptError(() => throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key)));
             }
+
+            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -655,6 +716,8 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given primary key; otherwise, <c>false</c>.</returns>
         public async Task<bool> TryDeleteAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
+            LogExecutingMethod(false);
+
             InterceptError(cancellationToken.ThrowIfCancellationRequested);
 
             var entity = await FindAsync(key, cancellationToken);
@@ -663,6 +726,8 @@
                 return false;
 
             await DeleteAsync(entity, cancellationToken);
+
+            LogExecutedMethod(false);
 
             return true;
         }
@@ -685,6 +750,7 @@
         private readonly IRepositoryOptions _options;
         private readonly IRepositoryContextFactory _contextFactory;
         private IEnumerable<IRepositoryInterceptor> _interceptors;
+        private string _currentExecutingLoggingMethod;
 
         #endregion
 
@@ -785,16 +851,7 @@
         /// <returns>A list which each entity has been projected into a new form.</returns>
         public IEnumerable<TEntity> ExecuteSqlQuery(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector)
         {
-            InterceptError(() =>
-            {
-                if (sql == null)
-                    throw new ArgumentNullException(nameof(sql));
-
-                if (projector == null)
-                    throw new ArgumentNullException(nameof(projector));
-            });
-
-            Logger.Debug($"Executing [ Method = ExecuteSqlQuery, CacheEnabled = {CacheEnabled} ]");
+            LogExecutingMethod();
 
             var parametersDict = ConvertToParametersDictionary(parameters);
 
@@ -806,11 +863,11 @@
                 ? CacheProvider.GetOrSetExecuteSqlQuery<TEntity>(sql, cmdType, parametersDict, projector, Getter, Logger)
                 : Getter();
 
-            IncrementCacheCounter(sql);
+            ClearCache(sql);
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed [ Method = ExecuteSqlQuery, CacheUsed = {queryResult.CacheUsed} ]");
+            LogExecutedMethod();
 
             return queryResult.Result;
         }
@@ -882,13 +939,7 @@
         /// <returns>The number of rows affected.</returns>
         public int ExecuteSqlCommand(string sql, CommandType cmdType, object[] parameters)
         {
-            InterceptError(() =>
-            {
-                if (sql == null)
-                    throw new ArgumentNullException(nameof(sql));
-            });
-
-            Logger.Debug($"Executing [ Method = ExecutesSqlCommand, CacheEnabled = {CacheEnabled} ]");
+            LogExecutingMethod();
 
             var parametersDict = ConvertToParametersDictionary(parameters);
 
@@ -900,11 +951,11 @@
                 ? CacheProvider.GetOrSetExecuteSqlCommand<TEntity>(sql, cmdType, parametersDict, Getter, Logger)
                 : Getter();
 
-            IncrementCacheCounter(sql);
+            ClearCache(sql);
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed [ Method = ExecutesSqlCommand, CacheUsed = {queryResult.CacheUsed} ]");
+            LogExecutedMethod();
 
             return queryResult.Result;
         }
@@ -941,16 +992,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
         public async Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
         {
-            InterceptError(() =>
-            {
-                if (sql == null)
-                    throw new ArgumentNullException(nameof(sql));
-
-                if (projector == null)
-                    throw new ArgumentNullException(nameof(projector));
-            });
-
-            Logger.Debug($"Executing [ Method = ExecuteSqlQueryAsync, CacheEnabled = {CacheEnabled} ]");
+            LogExecutingMethod();
 
             var parametersDict = ConvertToParametersDictionary(parameters);
 
@@ -962,11 +1004,11 @@
                 ? await CacheProvider.GetOrSetExecuteSqlQueryAsync<TEntity>(sql, cmdType, parametersDict, projector, Getter, Logger)
                 : await Getter();
 
-            IncrementCacheCounter(sql);
+            ClearCache(sql);
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed [ Method = ExecuteSqlQueryAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            LogExecutedMethod();
 
             return queryResult.Result;
         }
@@ -1044,13 +1086,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
         public async Task<int> ExecuteSqlCommandAsync(string sql, CommandType cmdType, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
         {
-            InterceptError(() =>
-            {
-                if (sql == null)
-                    throw new ArgumentNullException(nameof(sql));
-            });
-
-            Logger.Debug($"Executing [ Method = ExecuteSqlCommandAsync, CacheEnabled = {CacheEnabled} ]");
+            LogExecutingMethod();
 
             var parametersDict = ConvertToParametersDictionary(parameters);
 
@@ -1062,11 +1098,11 @@
                 ? await CacheProvider.GetOrSetExecuteSqlCommandAsync<TEntity>(sql, cmdType, parametersDict, Getter, Logger)
                 : await Getter();
 
-            IncrementCacheCounter(sql);
+            ClearCache(sql);
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed [ Method = ExecuteSqlCommandAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            LogExecutedMethod();
 
             return queryResult.Result;
         }
@@ -1100,13 +1136,13 @@
         /// <param name="entity">The entity to add.</param>
         public void Add(TEntity entity)
         {
+            LogExecutingMethod(false);
+
             InterceptError(() =>
             {
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
             });
-
-            Logger.Debug("Executing [ Method = Add ]");
 
             Intercept(x => x.AddExecuting(entity));
 
@@ -1120,7 +1156,7 @@
 
             ClearCache();
 
-            Logger.Debug("Executed [ Method = Add ]");
+            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1129,13 +1165,13 @@
         /// <param name="entities">The collection of entities to add.</param>
         public void Add(IEnumerable<TEntity> entities)
         {
+            LogExecutingMethod(false);
+
             InterceptError(() =>
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
             });
-
-            Logger.Debug("Executing [ Method = Add ]");
 
             UseContext(context =>
             {
@@ -1156,7 +1192,7 @@
 
             ClearCache();
 
-            Logger.Debug("Executed [ Method = Add ]");
+            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1165,13 +1201,13 @@
         /// <param name="entity">The entity to update.</param>
         public void Update(TEntity entity)
         {
+            LogExecutingMethod(false);
+
             InterceptError(() =>
             {
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
             });
-
-            Logger.Debug("Executing [ Method = Update ]");
 
             Intercept(x => x.UpdateExecuting(entity));
 
@@ -1185,7 +1221,7 @@
 
             ClearCache();
 
-            Logger.Debug("Executed [ Method = Update ]");
+            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1194,13 +1230,13 @@
         /// <param name="entities">The collection of entities to update.</param>
         public void Update(IEnumerable<TEntity> entities)
         {
+            LogExecutingMethod(false);
+
             InterceptError(() =>
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
             });
-
-            Logger.Debug("Executing [ Method = Update ]");
 
             UseContext(context =>
             {
@@ -1221,7 +1257,7 @@
 
             ClearCache();
 
-            Logger.Debug("Executed [ Method = Update ]");
+            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1230,13 +1266,13 @@
         /// <param name="entity">The entity to delete.</param>
         public void Delete(TEntity entity)
         {
+            LogExecutingMethod(false);
+
             InterceptError(() =>
             {
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
             });
-
-            Logger.Debug("Executing [ Method = Delete ]");
 
             Intercept(x => x.DeleteExecuting(entity));
 
@@ -1250,7 +1286,7 @@
 
             ClearCache();
 
-            Logger.Debug("Executed [ Method = Delete ]");
+            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1259,7 +1295,17 @@
         /// <param name="predicate">A function to filter each entity.</param>
         public void Delete(Expression<Func<TEntity, bool>> predicate)
         {
-            Delete(FindAll(predicate));
+            LogExecutingMethod();
+
+            InterceptError(() =>
+            {
+                if (predicate == null)
+                    throw new ArgumentNullException(nameof(predicate));
+            });
+
+            Delete(new QueryOptions<TEntity>().SatisfyBy(predicate));
+
+            LogExecutedMethod();
         }
 
         /// <summary>
@@ -1268,6 +1314,8 @@
         /// <param name="options">The options to apply to the query.</param>
         public void Delete(IQueryOptions<TEntity> options)
         {
+            LogExecutingMethod(false);
+
             InterceptError(() =>
             {
                 if (options == null)
@@ -1278,6 +1326,8 @@
             });
 
             Delete(FindAll(options).Result);
+
+            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1286,13 +1336,13 @@
         /// <param name="entities">The collection of entities to delete.</param>
         public void Delete(IEnumerable<TEntity> entities)
         {
+            LogExecutingMethod(false);
+
             InterceptError(() =>
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
             });
-
-            Logger.Debug("Executing [ Method = Delete ]");
 
             UseContext(context =>
             {
@@ -1313,7 +1363,7 @@
 
             ClearCache();
 
-            Logger.Debug("Executed [ Method = Delete ]");
+            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1344,7 +1394,19 @@
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public TResult Find<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector)
         {
-            return Find<TResult>(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)), selector);
+            LogExecutingMethod();
+
+            InterceptError(() =>
+            {
+                if (predicate == null)
+                    throw new ArgumentNullException(nameof(predicate));
+            });
+
+            var result = Find<TResult>(new QueryOptions<TEntity>().SatisfyBy(predicate), selector);
+
+            LogExecutedMethod();
+
+            return result;
         }
 
         /// <summary>
@@ -1355,7 +1417,7 @@
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public TResult Find<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
-            Logger.Debug($"Executing [ Method = Find, CacheEnabled = {CacheEnabled} ]");
+            LogExecutingMethod();
 
             IQueryResult<TResult> Getter() =>
                 UseContext<IQueryResult<TResult>>(
@@ -1367,7 +1429,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed [ Method = Find, CacheUsed = {queryResult.CacheUsed} ]");
+            LogExecutedMethod();
 
             return queryResult.Result;
         }
@@ -1419,7 +1481,19 @@
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
         public IEnumerable<TResult> FindAll<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector)
         {
-            return FindAll<TResult>(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)), selector).Result;
+            LogExecutingMethod();
+
+            InterceptError(() =>
+            {
+                if (predicate == null)
+                    throw new ArgumentNullException(nameof(predicate));
+            });
+
+            var result = FindAll<TResult>(new QueryOptions<TEntity>().SatisfyBy(predicate), selector).Result;
+
+            LogExecutedMethod();
+
+            return result;
         }
 
         /// <summary>
@@ -1430,7 +1504,7 @@
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public IPagedQueryResult<IEnumerable<TResult>> FindAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
-            Logger.Debug($"Executing [ Method = FindAll, CacheEnabled = {CacheEnabled} ]");
+            LogExecutingMethod();
 
             IPagedQueryResult<IEnumerable<TResult>> Getter() =>
                 UseContext<IPagedQueryResult<IEnumerable<TResult>>>(
@@ -1442,7 +1516,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed [ Method = FindAll, CacheUsed = {queryResult.CacheUsed} ]");
+            LogExecutedMethod();
 
             return queryResult;
         }
@@ -1454,7 +1528,19 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified predicate; otherwise, <c>false</c>.</returns>
         public bool Exists(Expression<Func<TEntity, bool>> predicate)
         {
-            return Exists(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)));
+            LogExecutingMethod();
+
+            InterceptError(() =>
+            {
+                if (predicate == null)
+                    throw new ArgumentNullException(nameof(predicate));
+            });
+
+            var result = Exists(new QueryOptions<TEntity>().SatisfyBy(predicate));
+
+            LogExecutedMethod();
+
+            return result;
         }
 
         /// <summary>
@@ -1464,6 +1550,8 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
         public bool Exists(IQueryOptions<TEntity> options)
         {
+            LogExecutingMethod();
+
             InterceptError(() =>
             {
                 if (options == null)
@@ -1473,7 +1561,11 @@
                     throw new InvalidOperationException("The specified query options is missing a specification predicate.");
             });
 
-            return Find(options) != null;
+            var result = Find(options) != null;
+
+            LogExecutedMethod();
+
+            return result;
         }
 
         /// <summary>
@@ -1492,7 +1584,19 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
         public int Count(Expression<Func<TEntity, bool>> predicate)
         {
-            return Count(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)));
+            LogExecutingMethod();
+
+            InterceptError(() =>
+            {
+                if (predicate == null)
+                    throw new ArgumentNullException(nameof(predicate));
+            });
+
+            var result = Count(new QueryOptions<TEntity>().SatisfyBy(predicate));
+
+            LogExecutedMethod();
+
+            return result;
         }
 
         /// <summary>
@@ -1502,7 +1606,7 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public int Count(IQueryOptions<TEntity> options)
         {
-            Logger.Debug($"Executing [ Method = Count, CacheEnabled = {CacheEnabled} ]");
+            LogExecutingMethod();
 
             IQueryResult<int> Getter() =>
                 UseContext<IQueryResult<int>>(
@@ -1514,7 +1618,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed [ Method = Count, CacheUsed = {queryResult.CacheUsed} ]");
+            LogExecutedMethod();
 
             return queryResult.Result;
         }
@@ -1566,7 +1670,7 @@
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
-            Logger.Debug($"Executing [ Method = ToDictionary, CacheEnabled = {CacheEnabled} ]");
+            LogExecutingMethod();
 
             IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> Getter() =>
                 UseContext<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
@@ -1578,7 +1682,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed [ Method = ToDictionary, CacheUsed = {queryResult.CacheUsed} ]");
+            LogExecutedMethod();
 
             return queryResult;
         }
@@ -1607,7 +1711,7 @@
         /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public IPagedQueryResult<IEnumerable<TResult>> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
-            Logger.Debug($"Executing [ Method = GroupBy, CacheEnabled = {CacheEnabled} ]");
+            LogExecutingMethod();
 
             IPagedQueryResult<IEnumerable<TResult>> Getter() =>
                 UseContext<IPagedQueryResult<IEnumerable<TResult>>>(
@@ -1619,7 +1723,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed [ Method = GroupBy, CacheUsed = {queryResult.CacheUsed} ]");
+            LogExecutedMethod();
 
             return queryResult;
         }
@@ -1632,15 +1736,15 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task AddAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
+            LogExecutingMethod(false);
+
             InterceptError(() =>
             {
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
+
+                cancellationToken.ThrowIfCancellationRequested();
             });
-
-            Logger.Debug("Executing [ Method = AddAsync ]");
-
-            cancellationToken.ThrowIfCancellationRequested();
 
             Intercept(x => x.AddExecuting(entity));
 
@@ -1654,7 +1758,7 @@
 
             ClearCache();
 
-            Logger.Debug("Executed [ Method = AddAsync ]");
+            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1665,15 +1769,15 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task AddAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
+            LogExecutingMethod(false);
+
             InterceptError(() =>
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
+
+                cancellationToken.ThrowIfCancellationRequested();
             });
-
-            Logger.Debug("Executing [ Method = AddAsync ]");
-
-            cancellationToken.ThrowIfCancellationRequested();
 
             await UseContextAsync(async context =>
             {
@@ -1694,7 +1798,7 @@
 
             ClearCache();
 
-            Logger.Debug("Executed [ Method = AddAsync ]");
+            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1705,15 +1809,15 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
+            LogExecutingMethod(false);
+
             InterceptError(() =>
             {
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
+
+                cancellationToken.ThrowIfCancellationRequested();
             });
-
-            Logger.Debug("Executing [ Method = UpdateAsync ]");
-
-            cancellationToken.ThrowIfCancellationRequested();
 
             Intercept(x => x.UpdateExecuting(entity));
 
@@ -1727,7 +1831,7 @@
 
             ClearCache();
 
-            Logger.Debug("Executed [ Method = UpdateAsync ]");
+            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1738,15 +1842,15 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task UpdateAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
+            LogExecutingMethod(false);
+
             InterceptError(() =>
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
+
+                cancellationToken.ThrowIfCancellationRequested();
             });
-
-            Logger.Debug("Executing [ Method = UpdateAsync ]");
-
-            cancellationToken.ThrowIfCancellationRequested();
 
             await UseContextAsync(async context =>
             {
@@ -1767,7 +1871,7 @@
 
             ClearCache();
 
-            Logger.Debug("Executed [ Method = UpdateAsync ]");
+            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1778,15 +1882,15 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
+            LogExecutingMethod(false);
+
             InterceptError(() =>
             {
                 if (entity == null)
                     throw new ArgumentNullException(nameof(entity));
+
+                cancellationToken.ThrowIfCancellationRequested();
             });
-
-            Logger.Debug("Executing [ Method = DeleteAsync ]");
-
-            cancellationToken.ThrowIfCancellationRequested();
 
             Intercept(x => x.DeleteExecuting(entity));
 
@@ -1800,7 +1904,7 @@
 
             ClearCache();
 
-            Logger.Debug("Executed [ Method = DeleteAsync ]");
+            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1811,9 +1915,17 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
-            var entitiesInDb = await FindAllAsync(predicate, cancellationToken);
+            LogExecutingMethod(false);
 
-            await DeleteAsync(entitiesInDb, cancellationToken);
+            InterceptError(() =>
+            {
+                if (predicate == null)
+                    throw new ArgumentNullException(nameof(predicate));
+            });
+
+            await DeleteAsync(new QueryOptions<TEntity>().SatisfyBy(predicate), cancellationToken);
+
+            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1824,6 +1936,8 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
+            LogExecutingMethod(false);
+
             InterceptError(() =>
             {
                 if (options == null)
@@ -1836,6 +1950,8 @@
             var entitiesInDb = (await FindAllAsync(options, cancellationToken)).Result;
 
             await DeleteAsync(entitiesInDb, cancellationToken);
+
+            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1846,15 +1962,15 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
+            LogExecutingMethod(false);
+
             InterceptError(() =>
             {
                 if (entities == null)
                     throw new ArgumentNullException(nameof(entities));
+
+                cancellationToken.ThrowIfCancellationRequested();
             });
-
-            Logger.Debug("Executing [ Method = DeleteAsync ]");
-
-            cancellationToken.ThrowIfCancellationRequested();
 
             await UseContextAsync(async context =>
             {
@@ -1875,7 +1991,7 @@
 
             ClearCache();
 
-            Logger.Debug("Executed [ Method = DeleteAsync ]");
+            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1909,7 +2025,19 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public Task<TResult> FindAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return FindAsync<TResult>(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)), selector, cancellationToken);
+            LogExecutingMethod();
+
+            InterceptError(() =>
+            {
+                if (predicate == null)
+                    throw new ArgumentNullException(nameof(predicate));
+            });
+
+            var result = FindAsync<TResult>(new QueryOptions<TEntity>().SatisfyBy(predicate), selector, cancellationToken);
+
+            LogExecutedMethod();
+
+            return result;
         }
 
         /// <summary>
@@ -1921,7 +2049,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public async Task<TResult> FindAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            Logger.Debug($"Executing [ Method = FindAsync, CacheEnabled = {CacheEnabled} ]");
+            LogExecutingMethod();
 
             Task<IQueryResult<TResult>> Getter() =>
                 UseContextAsync<IQueryResult<TResult>>(
@@ -1933,7 +2061,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed [ Method = FindAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            LogExecutedMethod();
 
             return queryResult.Result;
         }
@@ -1990,7 +2118,19 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
         public async Task<IEnumerable<TResult>> FindAllAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return (await FindAllAsync<TResult>(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)), selector, cancellationToken)).Result;
+            LogExecutingMethod();
+
+            InterceptError(() =>
+            {
+                if (predicate == null)
+                    throw new ArgumentNullException(nameof(predicate));
+            });
+
+            var result = (await FindAllAsync<TResult>(new QueryOptions<TEntity>().SatisfyBy(predicate), selector, cancellationToken)).Result;
+
+            LogExecutedMethod();
+
+            return result;
         }
 
         /// <summary>
@@ -2002,7 +2142,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public async Task<IPagedQueryResult<IEnumerable<TResult>>> FindAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            Logger.Debug($"Executing [ Method = FindAllAsync, CacheEnabled = {CacheEnabled} ]");
+            LogExecutingMethod();
 
             Task<IPagedQueryResult<IEnumerable<TResult>>> Getter() =>
                 UseContextAsync<IPagedQueryResult<IEnumerable<TResult>>>(
@@ -2014,7 +2154,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed [ Method = FindAllAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            LogExecutedMethod();
 
             return queryResult;
         }
@@ -2027,7 +2167,19 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified predicate; otherwise, <c>false</c>.</returns>
         public Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
-            return ExistsAsync(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)), cancellationToken);
+            LogExecutingMethod();
+
+            InterceptError(() =>
+            {
+                if (predicate == null)
+                    throw new ArgumentNullException(nameof(predicate));
+            });
+
+            var result = ExistsAsync(new QueryOptions<TEntity>().SatisfyBy(predicate), cancellationToken);
+
+            LogExecutedMethod();
+
+            return result;
         }
 
         /// <summary>
@@ -2038,6 +2190,8 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
         public async Task<bool> ExistsAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
+            LogExecutingMethod();
+
             InterceptError(() =>
             {
                 if (options == null)
@@ -2047,7 +2201,11 @@
                     throw new InvalidOperationException("The specified query options is missing a specification predicate.");
             });
 
-            return await FindAsync(options, cancellationToken) != null;
+            var result = await FindAsync(options, cancellationToken) != null;
+
+            LogExecutedMethod();
+
+            return result;
         }
 
         /// <summary>
@@ -2068,7 +2226,19 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
         public Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
-            return CountAsync(InterceptError<IQueryOptions<TEntity>>(() => new QueryOptions<TEntity>().SatisfyBy(predicate)), cancellationToken);
+            LogExecutingMethod();
+
+            InterceptError(() =>
+            {
+                if (predicate == null)
+                    throw new ArgumentNullException(nameof(predicate));
+            });
+
+            var result = CountAsync(new QueryOptions<TEntity>().SatisfyBy(predicate), cancellationToken);
+
+            LogExecutedMethod();
+
+            return result;
         }
 
         /// <summary>
@@ -2079,7 +2249,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public async Task<int> CountAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            Logger.Debug($"Executing [ Method = CountAsync, CacheEnabled = {CacheEnabled} ]");
+            LogExecutingMethod();
 
             Task<IQueryResult<int>> Getter() =>
                 UseContextAsync<IQueryResult<int>>(
@@ -2091,7 +2261,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed [ Method = CountAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            LogExecutedMethod();
 
             return queryResult.Result;
         }
@@ -2147,7 +2317,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public async Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            Logger.Debug($"Executing [ Method = ToDictionaryAsync, CacheEnabled = {CacheEnabled} ]");
+            LogExecutingMethod();
 
             Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> Getter() =>
                 UseContextAsync<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
@@ -2159,7 +2329,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed [ Method = ToDictionaryAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            LogExecutedMethod();
 
             return queryResult;
 
@@ -2191,7 +2361,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public async Task<IPagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            Logger.Debug($"Executing [ Method = GroupByAsync, CacheEnabled = {CacheEnabled} ]");
+            LogExecutingMethod();
 
             Task<IPagedQueryResult<IEnumerable<TResult>>> Getter() =>
                 UseContextAsync<IPagedQueryResult<IEnumerable<TResult>>>(
@@ -2203,7 +2373,7 @@
 
             CacheUsed = queryResult.CacheUsed;
 
-            Logger.Debug($"Executed [ Method = GroupByAsync, CacheUsed = {queryResult.CacheUsed} ]");
+            LogExecutedMethod();
 
             return queryResult;
         }
@@ -2227,13 +2397,7 @@
 
             try
             {
-                action(context);
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex);
-
-                throw;
+                InterceptError(() => action(context));
             }
             finally
             {
@@ -2250,13 +2414,7 @@
 
             try
             {
-                return action(context);
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex);
-
-                throw;
+                return InterceptError<T>(() => action(context));
             }
             finally
             {
@@ -2273,13 +2431,7 @@
 
             try
             {
-                await action(context);
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex);
-
-                throw;
+                await InterceptError(() => action(context));
             }
             finally
             {
@@ -2296,13 +2448,7 @@
 
             try
             {
-                return await action(context);
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex);
-
-                throw;
+                return await InterceptError(() => action(context));
             }
             finally
             {
@@ -2378,6 +2524,30 @@
             }
         }
 
+        internal void LogExecutingMethod(bool appendCachingDetails = true, [CallerMemberName] string method = null)
+        {
+            if (!string.IsNullOrEmpty(_currentExecutingLoggingMethod))
+                return;
+
+            _currentExecutingLoggingMethod = method;
+
+            Logger.Debug(appendCachingDetails
+                ? $"Executing [ Method = {method}, CacheEnabled = {CacheEnabled} ]"
+                : $"Executing [ Method = {method} ]");
+        }
+
+        internal void LogExecutedMethod(bool appendCachingDetails = true, [CallerMemberName] string method = null)
+        {
+            if (string.IsNullOrEmpty(_currentExecutingLoggingMethod) || !_currentExecutingLoggingMethod.Equals(method))
+                return;
+
+            _currentExecutingLoggingMethod = null;
+
+            Logger.Debug(appendCachingDetails
+                ? $"Executed [ Method = {method}, CacheUsed = {CacheUsed} ]"
+                : $"Executed [ Method = {method} ]");
+        }
+
         #endregion
 
         #region Private Methods
@@ -2418,7 +2588,7 @@
                 context.Dispose();
         }
 
-        private void IncrementCacheCounter(string sql)
+        private void ClearCache(string sql)
         {
             if (sql == null)
                 throw new ArgumentNullException(nameof(sql));
