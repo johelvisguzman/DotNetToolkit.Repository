@@ -7,6 +7,7 @@
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
+    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
@@ -118,7 +119,8 @@
 
             var propInfos = GetPrimaryKeyPropertyInfos<TEntity>().ToList();
 
-            ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
+            if (keyValues.Length != propInfos.Count)
+                throw new ArgumentException(Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
 
             var parameter = Expression.Parameter(typeof(TEntity), "x");
 
@@ -151,6 +153,13 @@
                 throw new ArgumentNullException(nameof(keyTypes));
 
             var definedKeyInfos = GetPrimaryKeyPropertyInfos<TEntity>().ToList();
+
+            if (!definedKeyInfos.Any())
+            {
+                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
+                    Resources.EntityRequiresPrimaryKey,
+                    typeof(TEntity).FullName));
+            }
 
             if (definedKeyInfos.Count > 1)
             {
@@ -185,7 +194,7 @@
         public static void ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(object[] keyValues) where TEntity : class
         {
             if (keyValues.Length != GetPrimaryKeyPropertyInfos<TEntity>().Count())
-                throw new ArgumentException(DotNetToolkit.Repository.Properties.Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
+                throw new ArgumentException(Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
         }
 
         /// <summary>
