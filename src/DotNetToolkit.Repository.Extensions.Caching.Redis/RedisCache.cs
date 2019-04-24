@@ -13,7 +13,8 @@
     {
         #region Fields
 
-        private readonly IDatabase _redis;
+        private readonly Lazy<ConnectionMultiplexer> _lazyConnection;
+        private IDatabase _redis;
 
         #endregion
 
@@ -22,7 +23,12 @@
         /// <summary>
         /// Gets the redis connection multiplexer.
         /// </summary>
-        public ConnectionMultiplexer Connection { get; }
+        public ConnectionMultiplexer Connection { get { return _lazyConnection.Value; } }
+
+        /// <summary>
+        /// Gets the redis database.
+        /// </summary>
+        protected IDatabase Redis { get { return _redis ?? (_redis = Connection.GetDatabase()); } }
 
         #endregion
 
@@ -37,9 +43,7 @@
             if (configuration == null)
                 throw new ArgumentNullException(nameof(configuration));
 
-            Connection = ConnectionMultiplexer.Connect(configuration);
-
-            _redis = Connection.GetDatabase();
+            _lazyConnection = new Lazy<ConnectionMultiplexer>(() => ConnectionMultiplexer.Connect(configuration));
         }
 
         /// <summary>
@@ -51,9 +55,7 @@
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            Connection = ConnectionMultiplexer.Connect(options);
-
-            _redis = Connection.GetDatabase();
+            _lazyConnection = new Lazy<ConnectionMultiplexer>(() => ConnectionMultiplexer.Connect(options));
         }
 
         /// <summary>
@@ -93,9 +95,7 @@
                 DefaultDatabase = defaultDatabase
             };
 
-            Connection = ConnectionMultiplexer.Connect(options);
-
-            _redis = Connection.GetDatabase();
+            _lazyConnection = new Lazy<ConnectionMultiplexer>(() => ConnectionMultiplexer.Connect(options));
         }
 
         /// <summary>
@@ -122,9 +122,7 @@
                 DefaultDatabase = defaultDatabase
             };
 
-            Connection = ConnectionMultiplexer.Connect(options);
-
-            _redis = Connection.GetDatabase();
+            _lazyConnection = new Lazy<ConnectionMultiplexer>(() => ConnectionMultiplexer.Connect(options));
         }
 
         /// <summary>
@@ -156,9 +154,7 @@
                 DefaultDatabase = defaultDatabase
             };
 
-            Connection = ConnectionMultiplexer.Connect(options);
-
-            _redis = Connection.GetDatabase();
+            _lazyConnection = new Lazy<ConnectionMultiplexer>(() => ConnectionMultiplexer.Connect(options));
         }
 
         #endregion
@@ -201,7 +197,7 @@
             if (cacheRemovedCallback != null)
             {
                 var subscriber = Connection.GetSubscriber();
-                var notificationChannel = "__keyspace@" + _redis.Database + "__:" + key;
+                var notificationChannel = "__keyspace@" + Redis.Database + "__:" + key;
 
                 subscriber.Subscribe(notificationChannel, (channel, notificationType) =>
                 {
@@ -215,7 +211,7 @@
                 });
             }
 
-            _redis.StringSet(key, Serialize(value), cacheExpiration);
+            Redis.StringSet(key, Serialize(value), cacheExpiration);
         }
 
         /// <summary>
@@ -227,7 +223,7 @@
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            _redis.KeyDelete(key);
+            Redis.KeyDelete(key);
         }
 
         /// <summary>
@@ -241,7 +237,7 @@
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            value = Deserialize<T>(_redis.StringGet(key));
+            value = Deserialize<T>(Redis.StringGet(key));
 
             return value != null;
         }
@@ -259,7 +255,7 @@
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            var value = _redis.StringIncrement(key, incrementValue);
+            var value = Redis.StringIncrement(key, incrementValue);
 
             return Convert.ToInt32(value);
         }
