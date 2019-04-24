@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Caching
 {
-    using Microsoft.Extensions.Caching.Memory;
     using System;
 
     /// <summary>
@@ -12,7 +11,7 @@
 
         private NullCache() { }
 
-        public void Set<T>(string key, T value, CacheItemPriority priority, TimeSpan? expiry, Action<string> cacheRemovedCallback = null) { }
+        public void Set<T>(string key, T value, TimeSpan? expiry, Action<string> cacheRemovedCallback = null) { }
 
         public void Remove(string key) { }
 
@@ -23,7 +22,7 @@
             return false;
         }
 
-        public int Increment(string key, int defaultValue, int incrementValue, CacheItemPriority priority = CacheItemPriority.Normal)
+        public int Increment(string key, int defaultValue, int incrementValue)
         {
             return 1;
         }
