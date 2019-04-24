@@ -379,8 +379,6 @@
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));
 
-            PrimaryKeyConventionHelper.ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
-
             var options = new QueryOptions<TEntity>().Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
 
             if (fetchStrategy != null)
@@ -756,8 +754,6 @@
         {
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));
-
-            PrimaryKeyConventionHelper.ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
 
             var options = new QueryOptions<TEntity>().Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
 

@@ -251,8 +251,6 @@
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));
 
-            PrimaryKeyConventionHelper.ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
-
             if (fetchStrategy == null)
             {
                 var result = _context.Set<TEntity>().Find(keyValues);
@@ -410,8 +408,6 @@
         {
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));
-
-            PrimaryKeyConventionHelper.ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
 
             if (fetchStrategy == null)
             {
