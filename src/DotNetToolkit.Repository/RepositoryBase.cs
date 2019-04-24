@@ -799,8 +799,6 @@
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
-            ThrowsIfEntityPrimaryKeyMissing();
-
             var optionsBuilder = new RepositoryOptionsBuilder(options);
 
             OnConfiguring(optionsBuilder);
@@ -2575,12 +2573,6 @@
         #endregion
 
         #region Private Methods
-
-        private void ThrowsIfEntityPrimaryKeyMissing()
-        {
-            if (!PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<TEntity>().Any())
-                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityRequiresPrimaryKey, typeof(TEntity).FullName));
-        }
 
         private IEnumerable<IRepositoryInterceptor> GetInterceptors()
         {
