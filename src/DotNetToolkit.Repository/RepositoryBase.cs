@@ -1303,7 +1303,7 @@
                     throw new ArgumentNullException(nameof(predicate));
             });
 
-            Delete(new QueryOptions<TEntity>().SatisfyBy(predicate));
+            Delete(predicate.ToQueryOptions<TEntity>());
 
             LogExecutedMethod();
         }
@@ -1402,7 +1402,7 @@
                     throw new ArgumentNullException(nameof(predicate));
             });
 
-            var result = Find<TResult>(new QueryOptions<TEntity>().SatisfyBy(predicate), selector);
+            var result = Find<TResult>(predicate.ToQueryOptions<TEntity>(), selector);
 
             LogExecutedMethod();
 
@@ -1489,7 +1489,7 @@
                     throw new ArgumentNullException(nameof(predicate));
             });
 
-            var result = FindAll<TResult>(new QueryOptions<TEntity>().SatisfyBy(predicate), selector).Result;
+            var result = FindAll<TResult>(predicate.ToQueryOptions<TEntity>(), selector).Result;
 
             LogExecutedMethod();
 
@@ -1536,7 +1536,7 @@
                     throw new ArgumentNullException(nameof(predicate));
             });
 
-            var result = Exists(new QueryOptions<TEntity>().SatisfyBy(predicate));
+            var result = Exists(predicate.ToQueryOptions<TEntity>());
 
             LogExecutedMethod();
 
@@ -1592,7 +1592,7 @@
                     throw new ArgumentNullException(nameof(predicate));
             });
 
-            var result = Count(new QueryOptions<TEntity>().SatisfyBy(predicate));
+            var result = Count(predicate.ToQueryOptions<TEntity>());
 
             LogExecutedMethod();
 
@@ -1923,7 +1923,7 @@
                     throw new ArgumentNullException(nameof(predicate));
             });
 
-            await DeleteAsync(new QueryOptions<TEntity>().SatisfyBy(predicate), cancellationToken);
+            await DeleteAsync(predicate.ToQueryOptions<TEntity>(), cancellationToken);
 
             LogExecutedMethod(false);
         }
@@ -2033,7 +2033,7 @@
                     throw new ArgumentNullException(nameof(predicate));
             });
 
-            var result = FindAsync<TResult>(new QueryOptions<TEntity>().SatisfyBy(predicate), selector, cancellationToken);
+            var result = FindAsync<TResult>(predicate.ToQueryOptions<TEntity>(), selector, cancellationToken);
 
             LogExecutedMethod();
 
@@ -2126,7 +2126,7 @@
                     throw new ArgumentNullException(nameof(predicate));
             });
 
-            var result = (await FindAllAsync<TResult>(new QueryOptions<TEntity>().SatisfyBy(predicate), selector, cancellationToken)).Result;
+            var result = (await FindAllAsync<TResult>(predicate.ToQueryOptions<TEntity>(), selector, cancellationToken)).Result;
 
             LogExecutedMethod();
 
@@ -2175,7 +2175,7 @@
                     throw new ArgumentNullException(nameof(predicate));
             });
 
-            var result = ExistsAsync(new QueryOptions<TEntity>().SatisfyBy(predicate), cancellationToken);
+            var result = ExistsAsync(predicate.ToQueryOptions<TEntity>(), cancellationToken);
 
             LogExecutedMethod();
 
@@ -2234,7 +2234,7 @@
                     throw new ArgumentNullException(nameof(predicate));
             });
 
-            var result = CountAsync(new QueryOptions<TEntity>().SatisfyBy(predicate), cancellationToken);
+            var result = CountAsync(predicate.ToQueryOptions<TEntity>(), cancellationToken);
 
             LogExecutedMethod();
 
