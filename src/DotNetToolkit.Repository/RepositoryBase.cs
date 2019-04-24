@@ -769,22 +769,22 @@
         /// <summary>
         /// Gets the repository logger.
         /// </summary>
-        internal ILogger Logger { get; }
+        protected internal ILogger Logger { get; }
 
         /// <summary>
         /// Gets the repository logger provider.
         /// </summary>
-        internal ILoggerProvider LoggerProvider { get; }
+        protected internal ILoggerProvider LoggerProvider { get; }
 
         /// <summary>
         /// Gets the caching provider.
         /// </summary>
-        internal ICacheProvider CacheProvider { get; private set; }
+        protected internal ICacheProvider CacheProvider { get; private set; }
 
         /// <summary>
         /// Gets the mapping provider.
         /// </summary>
-        internal IMapperProvider MapperProvider { get; }
+        protected internal IMapperProvider MapperProvider { get; }
 
         #endregion
 
