@@ -2431,7 +2431,7 @@
 
             try
             {
-                await InterceptError(() => action(context));
+                await InterceptErrorAsync(() => action(context));
             }
             finally
             {
@@ -2448,7 +2448,7 @@
 
             try
             {
-                return await InterceptError(() => action(context));
+                return await InterceptErrorAsync<T>(() => action(context));
             }
             finally
             {
@@ -2456,19 +2456,11 @@
             }
         }
 
-        #endregion
-
-        #region Internal Methods
-
-        internal void Intercept(Action<IRepositoryInterceptor> action)
-        {
-            foreach (var interceptor in GetInterceptors())
-            {
-                action(interceptor);
-            }
-        }
-
-        internal void InterceptError(Action action)
+        /// <summary>
+        /// Intercepts an error while executing the specified <paramref name="action"/>.
+        /// </summary>
+        /// <param name="action">The action to intercept.</param>
+        protected void InterceptError(Action action)
         {
             try
             {
@@ -2482,7 +2474,13 @@
             }
         }
 
-        internal T InterceptError<T>(Func<T> action)
+        /// <summary>
+        /// Intercepts an error while executing the specified <paramref name="action"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of the result returned by the specified <paramref name="action"/>.</typeparam>
+        /// <param name="action">The action to intercept.</param>
+        /// <returns>The result returned by the specified <paramref name="action"/>.</returns>
+        protected T InterceptError<T>(Func<T> action)
         {
             try
             {
@@ -2496,7 +2494,12 @@
             }
         }
 
-        internal async Task<T> InterceptErrorAsync<T>(Func<Task<T>> action)
+        /// <summary>
+        /// Asynchronously intercepts an error while executing the specified <paramref name="action"/>.
+        /// </summary>
+        /// <param name="action">The action to intercept.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the result returned by the specified <paramref name="action"/>.</returns>
+        protected async Task<T> InterceptErrorAsync<T>(Func<Task<T>> action)
         {
             try
             {
@@ -2510,7 +2513,12 @@
             }
         }
 
-        internal async Task InterceptErrorAsync(Func<Task> action)
+        /// <summary>
+        /// Asynchronously intercepts an error while executing the specified <paramref name="action"/>.
+        /// </summary>
+        /// <param name="action">The action to intercept.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        protected async Task InterceptErrorAsync(Func<Task> action)
         {
             try
             {
@@ -2523,6 +2531,22 @@
                 throw;
             }
         }
+
+        /// <summary>
+        /// Intercepts the specified action.
+        /// </summary>
+        /// <param name="action">The action to intercept.</param>
+        protected void Intercept(Action<IRepositoryInterceptor> action)
+        {
+            foreach (var interceptor in GetInterceptors())
+            {
+                action(interceptor);
+            }
+        }
+
+        #endregion
+
+        #region Internal Methods
 
         internal void LogExecutingMethod(bool appendCachingDetails = true, [CallerMemberName] string method = null)
         {
@@ -2562,10 +2586,8 @@
         {
             if (_interceptors == null)
             {
-                _interceptors = _options.Interceptors.Values.Any()
-                    ? _options.Interceptors.Values
-                        .Select(lazyInterceptor => lazyInterceptor.Value)
-                        .Where(value => value != null)
+                _interceptors = _options.Interceptors.Any()
+                    ? _options.Interceptors.Values.Select(lazyInterceptor => lazyInterceptor.Value)
                     : Enumerable.Empty<IRepositoryInterceptor>();
             }
 
