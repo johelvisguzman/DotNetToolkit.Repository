@@ -3,7 +3,6 @@
     using Configuration.Caching;
     using Configuration.Logging;
     using Helpers;
-    using Microsoft.Extensions.Caching.Memory;
     using Queries;
     using Queries.Strategies;
     using System;
@@ -133,30 +132,12 @@
                 getter,
                 logger);
 
-        private static Task<IQueryResult<T>> GetOrSetAsync<T>(ICacheProvider cacheProvider, string key, Func<Task<IQueryResult<T>>> getter, TimeSpan? expiry, ILogger logger)
-            => GetOrSetAsync<T>(
-                cacheProvider,
-                key,
-                getter,
-                CacheItemPriority.Normal,
-                expiry,
-                logger);
-
         private static Task<IQueryResult<T>> GetOrSetAsync<T>(ICacheProvider cacheProvider, string key, Func<Task<IQueryResult<T>>> getter, ILogger logger)
             => GetOrSetAsync<T>(
                 cacheProvider,
                 key,
                 getter,
                 cacheProvider.Expiry,
-                logger);
-
-        private static IQueryResult<T> GetOrSet<T>(ICacheProvider cacheProvider, string key, Func<IQueryResult<T>> getter, TimeSpan? expiry, ILogger logger)
-            => GetOrSet<T>(
-                cacheProvider,
-                key,
-                getter,
-                CacheItemPriority.Normal,
-                expiry,
                 logger);
 
         private static IQueryResult<T> GetOrSet<T>(ICacheProvider cacheProvider, string key, Func<IQueryResult<T>> getter, ILogger logger)
@@ -167,30 +148,12 @@
                 cacheProvider.Expiry,
                 logger);
 
-        private static Task<IPagedQueryResult<T>> GetOrSetAsync<T>(ICacheProvider cacheProvider, string key, Func<Task<IPagedQueryResult<T>>> getter, TimeSpan? expiry, ILogger logger)
-            => GetOrSetAsync<T>(
-                cacheProvider,
-                key,
-                getter,
-                CacheItemPriority.Normal,
-                expiry,
-                logger);
-
         private static Task<IPagedQueryResult<T>> GetOrSetAsync<T>(ICacheProvider cacheProvider, string key, Func<Task<IPagedQueryResult<T>>> getter, ILogger logger)
             => GetOrSetAsync<T>(
                 cacheProvider,
                 key,
                 getter,
                 cacheProvider.Expiry,
-                logger);
-
-        private static IPagedQueryResult<T> GetOrSet<T>(ICacheProvider cacheProvider, string key, Func<IPagedQueryResult<T>> getter, TimeSpan? expiry, ILogger logger)
-            => GetOrSet<T>(
-                cacheProvider,
-                key,
-                getter,
-                CacheItemPriority.Normal,
-                expiry,
                 logger);
 
         private static IPagedQueryResult<T> GetOrSet<T>(ICacheProvider cacheProvider, string key, Func<IPagedQueryResult<T>> getter, ILogger logger)
@@ -201,19 +164,19 @@
                 cacheProvider.Expiry,
                 logger);
 
-        private static PagedQueryResult<T> CreatePagedQueryResult<T>(IPagedQueryResult<T> oldValue, bool cachedUsed = false)
+        private static PagedQueryResult<T> CreatePagedQueryResult<T>(IPagedQueryResult<T> oldValue, bool cachedUsed = false) 
             => new PagedQueryResult<T>(oldValue.Result, oldValue.Total)
             {
                 CacheUsed = cachedUsed
             };
 
-        private static QueryResult<T> CreateQueryResult<T>(IQueryResult<T> oldValue, bool cachedUsed = false)
+        private static QueryResult<T> CreateQueryResult<T>(IQueryResult<T> oldValue, bool cachedUsed = false) 
             => new QueryResult<T>(oldValue.Result)
             {
                 CacheUsed = cachedUsed
             };
 
-        private static void SetValue<T>(this ICacheProvider cacheProvider, string hashedKey, string key, IQueryResult<T> value, CacheItemPriority priority, TimeSpan? expiry, ILogger logger)
+        private static void SetValue<T>(this ICacheProvider cacheProvider, string hashedKey, string key, IQueryResult<T> value, TimeSpan? expiry, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -236,7 +199,6 @@
                 cacheProvider.Cache.Set<IQueryResult<T>>(
                     hashedKey,
                     value,
-                    priority,
                     expiry,
                     reason => logger.Debug($"Cache for '{hashedKey}' has expired. Evicting from cache for '{reason}'"));
             }
@@ -253,7 +215,7 @@
             }
         }
 
-        private static QueryResult<T> GetOrSet<T>(ICacheProvider cacheProvider, string key, Func<IQueryResult<T>> getter, CacheItemPriority priority, TimeSpan? expiry, ILogger logger)
+        private static QueryResult<T> GetOrSet<T>(ICacheProvider cacheProvider, string key, Func<IQueryResult<T>> getter, TimeSpan? expiry, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -271,19 +233,19 @@
 
             if (!cacheProvider.TryGetValue<QueryResult<T>>(hashedKey, out var value))
             {
-                value = CreateQueryResult(getter(), cachedUsed: false);
+                value = CreateQueryResult<T>(getter(), cachedUsed: false);
 
-                cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
+                cacheProvider.SetValue(hashedKey, key, value, expiry, logger);
             }
             else
             {
-                value = CreateQueryResult(value, cachedUsed: true);
+                value = CreateQueryResult<T>(value, cachedUsed: true);
             }
 
             return value;
         }
 
-        private static async Task<IQueryResult<T>> GetOrSetAsync<T>(ICacheProvider cacheProvider, string key, Func<Task<IQueryResult<T>>> getter, CacheItemPriority priority, TimeSpan? expiry, ILogger logger)
+        private static async Task<IQueryResult<T>> GetOrSetAsync<T>(ICacheProvider cacheProvider, string key, Func<Task<IQueryResult<T>>> getter, TimeSpan? expiry, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -301,19 +263,19 @@
 
             if (!cacheProvider.TryGetValue<QueryResult<T>>(hashedKey, out var value))
             {
-                value = CreateQueryResult(await getter(), cachedUsed: false);
+                value = CreateQueryResult<T>(await getter(), cachedUsed: false);
 
-                cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
+                cacheProvider.SetValue(hashedKey, key, value, expiry, logger);
             }
             else
             {
-                value = CreateQueryResult(value, cachedUsed: true);
+                value = CreateQueryResult<T>(value, cachedUsed: true);
             }
 
             return value;
         }
 
-        private static IPagedQueryResult<T> GetOrSet<T>(ICacheProvider cacheProvider, string key, Func<IPagedQueryResult<T>> getter, CacheItemPriority priority, TimeSpan? expiry, ILogger logger)
+        private static IPagedQueryResult<T> GetOrSet<T>(ICacheProvider cacheProvider, string key, Func<IPagedQueryResult<T>> getter, TimeSpan? expiry, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -331,19 +293,19 @@
 
             if (!cacheProvider.TryGetValue<PagedQueryResult<T>>(hashedKey, out var value))
             {
-                value = CreatePagedQueryResult(getter(), cachedUsed: false);
+                value = CreatePagedQueryResult<T>(getter(), cachedUsed: false);
 
-                cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
+                cacheProvider.SetValue(hashedKey, key, value, expiry, logger);
             }
             else
             {
-                value = CreatePagedQueryResult(value, cachedUsed: true);
+                value = CreatePagedQueryResult<T>(value, cachedUsed: true);
             }
 
             return value;
         }
 
-        private static async Task<IPagedQueryResult<T>> GetOrSetAsync<T>(ICacheProvider cacheProvider, string key, Func<Task<IPagedQueryResult<T>>> getter, CacheItemPriority priority, TimeSpan? expiry, ILogger logger)
+        private static async Task<IPagedQueryResult<T>> GetOrSetAsync<T>(ICacheProvider cacheProvider, string key, Func<Task<IPagedQueryResult<T>>> getter, TimeSpan? expiry, ILogger logger)
         {
             if (cacheProvider == null)
                 throw new ArgumentNullException(nameof(cacheProvider));
@@ -361,13 +323,13 @@
 
             if (!cacheProvider.TryGetValue<PagedQueryResult<T>>(hashedKey, out var value))
             {
-                value = CreatePagedQueryResult(await getter(), cachedUsed: false);
+                value = CreatePagedQueryResult<T>(await getter(), cachedUsed: false);
 
-                cacheProvider.SetValue(hashedKey, key, value, priority, expiry, logger);
+                cacheProvider.SetValue(hashedKey, key, value, expiry, logger);
             }
             else
             {
-                value = CreatePagedQueryResult(value, cachedUsed: true);
+                value = CreatePagedQueryResult<T>(value, cachedUsed: true);
             }
 
             return value;
@@ -380,7 +342,7 @@
 
             lock (_syncRoot)
             {
-                cacheProvider.Cache.Increment(FormatCachePrefixCounterKey<T>(), 1, 1, CacheItemPriority.NeverRemove);
+                cacheProvider.Cache.Increment(FormatCachePrefixCounterKey<T>(), 1, 1);
             }
         }
 

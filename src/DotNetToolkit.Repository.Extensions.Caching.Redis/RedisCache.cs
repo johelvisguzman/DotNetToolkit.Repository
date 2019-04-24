@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Extensions.Caching.Redis
 {
     using Configuration.Caching;
-    using Microsoft.Extensions.Caching.Memory;
     using Newtonsoft.Json;
     using StackExchange.Redis;
     using System;
@@ -186,10 +185,9 @@
         /// </summary>
         /// <param name="key">An object identifying the entry.</param>
         /// <param name="value">The value to cache.</param>
-        /// <param name="priority">The priority.</param>
         /// <param name="cacheExpiration">The cache expiration time.</param>
         /// <param name="cacheRemovedCallback">A callback function for a value is removed from the cache.</param>
-        public void Set<T>(string key, T value, CacheItemPriority priority, TimeSpan? cacheExpiration, Action<string> cacheRemovedCallback = null)
+        public void Set<T>(string key, T value, TimeSpan? cacheExpiration, Action<string> cacheRemovedCallback = null)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
@@ -248,9 +246,8 @@
         /// <param name="key">The key.</param>
         /// <param name="defaultValue">The default value.</param>
         /// <param name="incrementValue">The increment value.</param>
-        /// <param name="priority">The priority.</param>
         /// <returns>The value of key after the increment.</returns>
-        public int Increment(string key, int defaultValue, int incrementValue, CacheItemPriority priority = CacheItemPriority.Normal)
+        public int Increment(string key, int defaultValue, int incrementValue)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));

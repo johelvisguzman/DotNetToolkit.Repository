@@ -31,18 +31,9 @@
 
         #endregion
 
-        #region Implementation of ICache
+        #region Private Methods
 
-        /// <summary>
-        /// Create or overwrite an entry in the cache.
-        /// </summary>
-        /// <typeparam name="T">The type of the cache value.</typeparam>
-        /// <param name="key">An object identifying the entry.</param>
-        /// <param name="value">The value to cache.</param>
-        /// <param name="priority">The priority.</param>
-        /// <param name="expiry">The cache expiration time.</param>
-        /// <param name="cacheRemovedCallback">A callback function for a value is removed from the cache.</param>
-        public void Set<T>(string key, T value, CacheItemPriority priority, TimeSpan? expiry, Action<string> cacheRemovedCallback = null)
+        private void Set<T>(string key, T value, CacheItemPriority priority, TimeSpan? expiry, Action<string> cacheRemovedCallback = null)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
@@ -69,6 +60,26 @@
                 policy.Priority = priority;
 
             _cache.Set<T>(key, value, policy);
+        }
+
+        #endregion
+
+        #region Implementation of ICache
+
+        /// <summary>
+        /// Create or overwrite an entry in the cache.
+        /// </summary>
+        /// <typeparam name="T">The type of the cache value.</typeparam>
+        /// <param name="key">An object identifying the entry.</param>
+        /// <param name="value">The value to cache.</param>
+        /// <param name="expiry">The cache expiration time.</param>
+        /// <param name="cacheRemovedCallback">A callback function for a value is removed from the cache.</param>
+        public void Set<T>(string key, T value, TimeSpan? expiry, Action<string> cacheRemovedCallback = null)
+        {
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+
+            Set<T>(key, value, CacheItemPriority.Normal, expiry, cacheRemovedCallback);
         }
 
         /// <summary>
@@ -104,9 +115,8 @@
         /// <param name="key">The key.</param>
         /// <param name="defaultValue">The default value.</param>
         /// <param name="incrementValue">The increment value.</param>
-        /// <param name="priority">The priority.</param>
         /// <returns>The value of key after the increment.</returns>
-        public int Increment(string key, int defaultValue, int incrementValue, CacheItemPriority priority = CacheItemPriority.Normal)
+        public int Increment(string key, int defaultValue, int incrementValue)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
@@ -118,7 +128,7 @@
 
             var value = current + incrementValue;
 
-            Set<int>(key, value, priority, expiry: null);
+            Set<int>(key, value, CacheItemPriority.NeverRemove, expiry: null);
 
             return value;
         }
