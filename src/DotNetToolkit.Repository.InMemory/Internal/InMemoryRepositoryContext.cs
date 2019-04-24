@@ -310,8 +310,6 @@
             if (keyValues == null)
                 throw new ArgumentNullException(nameof(keyValues));
 
-            PrimaryKeyConventionHelper.ThrowsIfEntityPrimaryKeyValuesLengthMismatch<TEntity>(keyValues);
-
             if (fetchStrategy == null)
             {
                 var entityType = typeof(TEntity);
