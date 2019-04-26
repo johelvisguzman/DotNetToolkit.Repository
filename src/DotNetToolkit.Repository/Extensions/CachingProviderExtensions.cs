@@ -2,7 +2,6 @@
 {
     using Configuration.Caching;
     using Configuration.Logging;
-    using Helpers;
     using Queries;
     using Queries.Strategies;
     using System;
@@ -12,6 +11,7 @@
     using System.Linq.Expressions;
     using System.Text;
     using System.Threading.Tasks;
+    using Utility;
 
     /// <summary>
     /// Contains various extension methods for <see cref="ICacheProvider" />

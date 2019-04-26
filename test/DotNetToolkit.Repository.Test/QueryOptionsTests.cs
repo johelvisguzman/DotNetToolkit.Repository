@@ -1,12 +1,12 @@
 ﻿namespace DotNetToolkit.Repository.Test
 {
     using Data;
-    using Helpers;
     using Queries;
     using Queries.Strategies;
     using System;
     using System.Linq;
     using System.Linq.Expressions;
+    using Utility;
     using Xunit;
 
     public class QueryOptionsTests

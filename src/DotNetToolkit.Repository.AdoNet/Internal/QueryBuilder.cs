@@ -2,14 +2,13 @@
 {
     using Configuration.Conventions;
     using Extensions;
-    using Helpers;
-    using Properties;
     using Queries;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
     using System.Text;
+    using Utility;
 
     /// <summary>
     /// Represents an internal query builder for building various queries.

@@ -1,11 +1,11 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
-    using Helpers;
     using System;
     using System.Collections.Generic;
     using System.Linq.Expressions;
     using System.Reflection;
     using System.Text;
+    using Utility;
 
     // https://github.com/SharpRepository/SharpRepository/tree/master/SharpRepository.Repository/FetchStrategies/FetchQueryStrategyExtensions.cs
     internal static class FetchQueryStrategyExtensions

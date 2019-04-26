@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Conventions
 {
-    using Helpers;
     using Properties;
     using Queries.Strategies;
     using System;
@@ -11,6 +10,7 @@
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
+    using Utility;
 
     internal class PrimaryKeyConventionHelper
     {

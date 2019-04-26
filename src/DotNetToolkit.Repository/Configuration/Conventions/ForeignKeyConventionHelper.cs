@@ -1,13 +1,13 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Conventions
 {
     using Extensions;
-    using Helpers;
     using Properties;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
     using System.Reflection;
+    using Utility;
 
     internal class ForeignKeyConventionHelper
     {

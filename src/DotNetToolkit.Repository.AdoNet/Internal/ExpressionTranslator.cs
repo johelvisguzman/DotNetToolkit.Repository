@@ -1,12 +1,12 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
-    using Helpers;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
     using System.Text;
+    using Utility;
 
     /// <summary>
     /// Represents an internal sql expression translator.

@@ -1,13 +1,13 @@
 ﻿namespace DotNetToolkit.Repository.Queries
 {
     using Extensions;
-    using Helpers;
     using Strategies;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Text;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="IQueryOptions{T}" />.

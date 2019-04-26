@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Helpers
+﻿namespace DotNetToolkit.Repository.Utility
 {
     using System;
     using System.Collections.Generic;

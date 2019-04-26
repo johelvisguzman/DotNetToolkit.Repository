@@ -1,11 +1,11 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Conventions
 {
     using Extensions;
-    using Helpers;
     using System;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
     using System.Reflection;
+    using Utility;
 
     internal static class ModelConventionHelper
     {

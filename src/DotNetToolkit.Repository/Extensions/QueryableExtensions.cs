@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
     using Configuration.Conventions;
-    using Helpers;
     using Queries;
     using System;
     using System.Collections;
@@ -9,6 +8,7 @@
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
+    using Utility;
 
     /// <summary>
     /// Contains various utility methods for applying options to the specified <see cref="IQueryable{T}" />.

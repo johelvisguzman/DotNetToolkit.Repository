@@ -4,7 +4,6 @@
     using Configuration.Conventions;
     using Configuration.Logging;
     using Extensions;
-    using Helpers;
     using Properties;
     using Queries;
     using Queries.Strategies;
@@ -20,6 +19,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Transactions;
+    using Utility;
 
     /// <summary>
     /// Represents an internal ado.net repository context.

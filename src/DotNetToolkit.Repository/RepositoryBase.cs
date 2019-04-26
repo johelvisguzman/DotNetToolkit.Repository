@@ -9,7 +9,6 @@
     using Configuration.Options;
     using Extensions;
     using Factories;
-    using Helpers;
     using Internal;
     using Properties;
     using Queries;
@@ -25,6 +24,7 @@
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="IRepository{TEntity, TKey1, TKey2, TKey3}" />.
