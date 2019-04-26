@@ -25,7 +25,7 @@
             var tableName = type.GetTypeInfo().GetCustomAttribute<TableAttribute>()?.Name;
 
             if (String.IsNullOrEmpty(tableName))
-                tableName = PluralizationHelper.Pluralize(type.Name);
+                tableName = PluralizationService.Pluralize(type.Name);
 
             InMemoryCache.Instance.TableNameMapping[type] = tableName;
 

@@ -3,7 +3,7 @@
     using System;
     using System.Collections.Generic;
 
-    internal static class PluralizationHelper
+    internal static class PluralizationService
     {
         // https://gist.github.com/andrewjk/3186582
         public static string Pluralize(string text)
