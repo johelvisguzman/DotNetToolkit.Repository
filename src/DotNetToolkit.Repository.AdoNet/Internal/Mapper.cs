@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
-    using Configuration.Conventions;
+    using Configuration.Conventions.Internal;
     using Extensions;
     using System;
     using System.Collections.Concurrent;

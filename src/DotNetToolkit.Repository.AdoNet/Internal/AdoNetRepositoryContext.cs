@@ -1,11 +1,13 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
     using Configuration;
-    using Configuration.Conventions;
+    using Configuration.Conventions.Internal;
     using Configuration.Logging;
+    using Configuration.Logging.Internal;
     using Extensions;
     using Properties;
     using Queries;
+    using Queries.Internal;
     using Queries.Strategies;
     using Schema;
     using System;

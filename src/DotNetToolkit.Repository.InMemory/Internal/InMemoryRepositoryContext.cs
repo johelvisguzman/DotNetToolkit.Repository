@@ -1,9 +1,10 @@
 ﻿namespace DotNetToolkit.Repository.InMemory.Internal
 {
     using Configuration;
-    using Configuration.Conventions;
+    using Configuration.Conventions.Internal;
     using Properties;
     using Queries;
+    using Queries.Internal;
     using Queries.Strategies;
     using System;
     using System.Collections.Concurrent;
@@ -12,6 +13,7 @@
     using System.Globalization;
     using System.Linq;
     using Transactions;
+    using Transactions.Internal;
 
     /// <summary>
     /// Represents an internal repository context for in-memory operations (for testing purposes).

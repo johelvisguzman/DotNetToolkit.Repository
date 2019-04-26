@@ -3,6 +3,7 @@
     using Caching;
     using Factories;
     using Interceptors;
+    using Internal;
     using Logging;
     using Mapper;
     using System;
@@ -77,8 +78,8 @@
         /// <remarks>Any element that is defined in the config file can be resolved using the <see cref="DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationProvider.SetDefaultFactory"/></remarks>
         public virtual RepositoryOptionsBuilder UseConfiguration()
         {
-            var config = (Internal.ConfigFile.ConfigurationSection)
-                System.Configuration.ConfigurationManager.GetSection(Internal.ConfigFile.ConfigurationSection.SectionName);
+            var config = (DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationSection)
+                System.Configuration.ConfigurationManager.GetSection(DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationSection.SectionName);
 
             var defaultContextFactory = config.DefaultContextFactory.GetTypedValue();
             if (defaultContextFactory != null)
@@ -124,7 +125,7 @@
             if (configuration == null)
                 throw new ArgumentNullException(nameof(configuration));
 
-            var config = new Internal.ConfigFile.ConfigurationHandler(configuration);
+            var config = new DotNetToolkit.Repository.Internal.ConfigFile.Json.ConfigurationSection(configuration);
 
             var defaultContextFactory = config.GetDefaultContextFactory();
             if (defaultContextFactory != null)

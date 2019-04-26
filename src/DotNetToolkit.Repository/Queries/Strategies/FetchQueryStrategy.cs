@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Queries.Strategies
 {
-    using Configuration.Conventions;
+    using Configuration.Conventions.Internal;
     using Extensions;
     using System;
     using System.Collections.Generic;

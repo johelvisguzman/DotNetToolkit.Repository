@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Mapper
 {
+    using Internal;
     using System;
     using System.Collections.Generic;
 

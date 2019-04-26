@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
-    using Configuration.Conventions;
+    using Configuration.Conventions.Internal;
     using Queries;
     using System;
     using System.Collections;

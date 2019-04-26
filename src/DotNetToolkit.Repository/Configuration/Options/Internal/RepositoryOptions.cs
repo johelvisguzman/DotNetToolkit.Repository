@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Configuration.Options
+﻿namespace DotNetToolkit.Repository.Configuration.Options.Internal
 {
     using Caching;
     using Factories;

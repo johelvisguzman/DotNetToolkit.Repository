@@ -2,6 +2,7 @@
 {
     using Configuration;
     using Configuration.Options;
+    using Configuration.Options.Internal;
     using Factories;
     using System;
 

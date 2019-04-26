@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Queries
+﻿namespace DotNetToolkit.Repository.Queries.Internal
 {
     /// <summary>
     /// An implementation of <see cref="IPagedQueryResult{TResult}" />.

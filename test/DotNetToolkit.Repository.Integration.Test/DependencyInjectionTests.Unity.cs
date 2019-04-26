@@ -2,6 +2,7 @@
 {
     using Configuration.Interceptors;
     using Configuration.Options;
+    using Configuration.Options.Internal;
     using Data;
     using Extensions.Unity;
     using Factories;

@@ -2,9 +2,11 @@
 {
     using Configuration;
     using Configuration.Caching;
-    using Configuration.Conventions;
+    using Configuration.Caching.Internal;
+    using Configuration.Conventions.Internal;
     using Configuration.Interceptors;
     using Configuration.Logging;
+    using Configuration.Logging.Internal;
     using Configuration.Mapper;
     using Configuration.Options;
     using Extensions;

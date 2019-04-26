@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Transactions
+﻿namespace DotNetToolkit.Repository.Transactions.Internal
 {
     internal class NullTransactionManager : ITransactionManager
     {

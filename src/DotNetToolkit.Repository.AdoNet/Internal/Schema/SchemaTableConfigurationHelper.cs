@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal.Schema
 {
-    using Configuration.Conventions;
+    using Configuration.Conventions.Internal;
     using Configuration.Logging;
     using Extensions;
     using Properties;

@@ -1,9 +1,10 @@
 ﻿namespace DotNetToolkit.Repository.Configuration
 {
-    using Conventions;
+    using Conventions.Internal;
     using Extensions;
     using Properties;
     using Queries;
+    using Queries.Internal;
     using Queries.Strategies;
     using System;
     using System.Collections.Generic;

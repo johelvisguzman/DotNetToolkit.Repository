@@ -2,10 +2,10 @@
 {
     using Configuration.Interceptors;
     using Configuration.Options;
+    using Configuration.Options.Internal;
     using Factories;
     using global::Unity;
     using global::Unity.Injection;
-    using global::Unity.Lifetime;
     using System;
     using System.Collections.Generic;
     using System.Linq;

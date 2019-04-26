@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Configuration.Conventions
+﻿namespace DotNetToolkit.Repository.Configuration.Conventions.Internal
 {
     using Extensions;
     using System;

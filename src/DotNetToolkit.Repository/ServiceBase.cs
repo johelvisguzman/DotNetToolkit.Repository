@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository
 {
-    using Configuration.Conventions;
+    using Configuration.Conventions.Internal;
     using Factories;
     using Internal;
     using Queries;

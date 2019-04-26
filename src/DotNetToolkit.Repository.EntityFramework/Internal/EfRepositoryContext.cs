@@ -1,10 +1,11 @@
 ﻿namespace DotNetToolkit.Repository.EntityFramework.Internal
 {
     using Configuration;
-    using Configuration.Conventions;
+    using Configuration.Conventions.Internal;
     using Configuration.Logging;
     using Extensions;
     using Queries;
+    using Queries.Internal;
     using Queries.Strategies;
     using System;
     using System.Collections.Generic;

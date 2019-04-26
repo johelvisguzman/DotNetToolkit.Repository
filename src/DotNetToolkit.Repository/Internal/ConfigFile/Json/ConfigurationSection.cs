@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Internal.ConfigFile
+﻿namespace DotNetToolkit.Repository.Internal.ConfigFile.Json
 {
     using Configuration.Caching;
     using Configuration.Interceptors;
@@ -15,7 +15,7 @@
     /// <summary>
     /// Represents a configuration section handler for configuring repositories from a file.
     /// </summary>
-    internal class ConfigurationHandler
+    internal class ConfigurationSection
     {
         #region Fields
 
@@ -34,7 +34,7 @@
 
         #region Constructors
 
-        public ConfigurationHandler(IConfiguration config)
+        public ConfigurationSection(IConfiguration config)
         {
             if (config == null)
                 throw new ArgumentNullException(nameof(config));

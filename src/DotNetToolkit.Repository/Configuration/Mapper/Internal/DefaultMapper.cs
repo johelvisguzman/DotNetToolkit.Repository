@@ -1,6 +1,6 @@
-﻿namespace DotNetToolkit.Repository.Configuration.Mapper
+﻿namespace DotNetToolkit.Repository.Configuration.Mapper.Internal
 {
-    using Conventions;
+    using Conventions.Internal;
     using Extensions;
     using System;
     using System.Collections.Generic;

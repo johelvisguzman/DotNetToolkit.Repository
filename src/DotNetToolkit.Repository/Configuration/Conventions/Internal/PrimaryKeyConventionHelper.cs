@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Configuration.Conventions
+﻿namespace DotNetToolkit.Repository.Configuration.Conventions.Internal
 {
     using Properties;
     using Queries.Strategies;

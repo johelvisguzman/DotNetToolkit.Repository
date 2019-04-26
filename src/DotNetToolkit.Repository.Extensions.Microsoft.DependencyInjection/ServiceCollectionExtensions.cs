@@ -2,6 +2,7 @@
 {
     using Configuration.Interceptors;
     using Configuration.Options;
+    using Configuration.Options.Internal;
     using Factories;
     using global::Microsoft.Extensions.DependencyInjection;
     using System;

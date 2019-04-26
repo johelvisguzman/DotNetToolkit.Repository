@@ -1,10 +1,11 @@
 ﻿namespace DotNetToolkit.Repository.Json.Internal
 {
     using Configuration;
-    using Configuration.Conventions;
+    using Configuration.Conventions.Internal;
     using Configuration.Logging;
     using Properties;
     using Queries;
+    using Queries.Internal;
     using System;
     using System.Collections;
     using System.Collections.Concurrent;
@@ -15,6 +16,7 @@
     using System.Linq;
     using System.Reflection;
     using Transactions;
+    using Transactions.Internal;
 
     /// <summary>
     /// Represents a repository context class which handles reading and writing to a file.

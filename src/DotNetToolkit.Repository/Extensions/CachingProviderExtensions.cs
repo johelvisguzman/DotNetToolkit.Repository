@@ -3,6 +3,7 @@
     using Configuration.Caching;
     using Configuration.Logging;
     using Queries;
+    using Queries.Internal;
     using Queries.Strategies;
     using System;
     using System.Collections.Generic;
