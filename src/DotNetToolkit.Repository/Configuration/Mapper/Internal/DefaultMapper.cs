@@ -2,11 +2,13 @@
 {
     using Conventions.Internal;
     using Extensions;
+    using JetBrains.Annotations;
     using System;
     using System.Collections.Generic;
     using System.Data;
     using System.Linq;
     using System.Reflection;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="IMapper{T}" />.
@@ -41,10 +43,9 @@
         /// </summary>
         /// <param name="reader">The data reader used for transforming each element.</param>
         /// <returns>The new projected element form.</returns>
-        public T Map(IDataReader reader)
+        public T Map([NotNull] IDataReader reader)
         {
-            if (reader == null)
-                throw new ArgumentNullException(nameof(reader));
+            Guard.NotNull(reader);
 
             var entity = Activator.CreateInstance<T>();
 

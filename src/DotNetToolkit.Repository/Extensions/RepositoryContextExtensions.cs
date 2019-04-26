@@ -2,16 +2,14 @@
 {
     using Configuration;
     using Internal;
-    using System;
+    using JetBrains.Annotations;
+    using Utility;
 
     internal static class RepositoryContextExtensions
     {
-        public static IRepositoryContextAsync AsAsync(this IRepositoryContext source)
+        public static IRepositoryContextAsync AsAsync([NotNull] this IRepositoryContext source)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-            
-            return new RepositoryContextAsyncWrapper(source);
+            return new RepositoryContextAsyncWrapper(Guard.NotNull(source));
         }
     }
 }

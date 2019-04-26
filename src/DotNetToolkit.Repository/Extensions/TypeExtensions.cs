@@ -1,11 +1,13 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
+    using JetBrains.Annotations;
     using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
     using System.Reflection;
+    using Utility;
 
     internal static class TypeExtensions
     {
@@ -14,10 +16,9 @@
         /// </summary>
         /// <param name="type">The type.</param>
         /// <returns>The default value of the specified type.</returns>
-        public static object GetDefault(this Type type)
+        public static object GetDefault([NotNull] this Type type)
         {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
+            Guard.NotNull(type);
 
             return type.GetTypeInfo().IsValueType ? Activator.CreateInstance(type) : null;
         }
@@ -27,12 +28,23 @@
         /// </summary>
         /// <param name="type"></param>
         /// <returns><c>true</c> if the specified type is a <see cref="ICollection{T}"/>; otherwise, <c>false</c>.</returns>
-        public static bool IsGenericCollection(this Type type)
+        public static bool IsGenericCollection([NotNull] this Type type)
         {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
+            Guard.NotNull(type);
 
             return type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>);
+        }
+
+        /// <summary>
+        /// Determines whether if the specified type is nullable.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns><c>true</c> if the specified type is nullable; otherwise, <c>false</c>.</returns>
+        public static bool IsNullableType([NotNull] this Type type)
+        {
+            Guard.NotNull(type);
+
+            return type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
         }
 
         /// <summary>
@@ -40,9 +52,9 @@
         /// </summary>
         /// <param name="type">The type.</param>
         /// <returns><c>true</c> if the specified type is enumerable; otherwise, <c>false</c>.</returns>
-        public static bool IsEnumerable(this Type type)
+        public static bool IsEnumerable([NotNull] this Type type)
         {
-            return typeof(IEnumerable).IsAssignableFrom(type);
+            return typeof(IEnumerable).IsAssignableFrom(Guard.NotNull(type));
         }
 
         /// <summary>
@@ -51,8 +63,11 @@
         /// <param name="type">The type.</param>
         /// <param name="interfaceType">The interface type to check</param>
         /// <returns><c>true</c> if specified type implements the specified interface type; otherwise, <c>false</c>.</returns>
-        public static bool ImplementsInterface(this Type type, Type interfaceType)
+        public static bool ImplementsInterface([NotNull] this Type type, [NotNull] Type interfaceType)
         {
+            Guard.NotNull(type);
+            Guard.NotNull(interfaceType);
+
             return interfaceType.IsAssignableFrom(type) ||
                    type.IsGenericType(interfaceType) ||
                    type.GetTypeInfo().ImplementedInterfaces.Any(@interface => IsGenericType(@interface, interfaceType));
@@ -64,8 +79,11 @@
         /// <param name="type">The type.</param>
         /// <param name="genericType">The generic type to check</param>
         /// <returns><c>true</c> if the specified type is a generic type of the specified interface type; otherwise, <c>false</c>.</returns>
-        public static bool IsGenericType(this Type type, Type genericType)
+        public static bool IsGenericType([NotNull] this Type type, [NotNull] Type genericType)
         {
+            Guard.NotNull(type);
+            Guard.NotNull(genericType);
+
             return type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == genericType;
         }
 
@@ -75,8 +93,10 @@
         /// <param name="type">The type.</param>
         /// <param name="value">The value to convert to.</param>
         /// <returns>The converted result.</returns>
-        public static object ConvertTo(this Type type, string value)
+        public static object ConvertTo([NotNull] this Type type, [CanBeNull] string value)
         {
+            Guard.NotNull(type);
+
             object Result = null;
 
             if (type == typeof(string))
@@ -135,8 +155,10 @@
             return Result;
         }
 
-        internal static object InvokeConstructor(this Type type, Dictionary<string, string> keyValues)
+        internal static object InvokeConstructor([NotNull] this Type type, [CanBeNull] Dictionary<string, string> keyValues)
         {
+            Guard.NotNull(type);
+
             if (keyValues == null || keyValues.Count == 0)
                 return Activator.CreateInstance(type);
 

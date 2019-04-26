@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Conventions.Internal
 {
     using Extensions;
+    using JetBrains.Annotations;
     using Properties;
     using System;
     using System.Collections.Generic;
@@ -17,13 +18,10 @@
         /// <param name="sourceType">The source type.</param>
         /// <param name="foreignType">The foreign type to match.</param>
         /// <returns>The collection of foreign key properties.</returns>
-        public static IEnumerable<PropertyInfo> GetForeignKeyPropertyInfos(Type sourceType, Type foreignType)
+        public static IEnumerable<PropertyInfo> GetForeignKeyPropertyInfos([NotNull] Type sourceType, [NotNull] Type foreignType)
         {
-            if (sourceType == null)
-                throw new ArgumentNullException(nameof(sourceType));
-
-            if (foreignType == null)
-                throw new ArgumentNullException(nameof(foreignType));
+            Guard.NotNull(sourceType);
+            Guard.NotNull(foreignType);
 
             if (sourceType.IsEnumerable() || foreignType.IsEnumerable())
                 return Enumerable.Empty<PropertyInfo>();

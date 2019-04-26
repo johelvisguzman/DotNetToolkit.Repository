@@ -6,11 +6,13 @@
     using Factories;
     using global::Unity;
     using global::Unity.Injection;
+    using JetBrains.Annotations;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
     using Transactions;
+    using Utility;
 
     /// <summary>
     /// Contains various extension methods for <see cref="IUnityContainer" />
@@ -26,16 +28,11 @@
         /// <remarks>
         /// This method will scan for repositories and interceptors from the specified assemblies collection, and will register them to the service collection.
         /// </remarks>
-        public static void RegisterRepositories(this IUnityContainer container, Action<RepositoryOptionsBuilder> optionsAction, params Assembly[] assembliesToScan)
+        public static void RegisterRepositories([NotNull] this IUnityContainer container, [NotNull] Action<RepositoryOptionsBuilder> optionsAction, [NotNull] params Assembly[] assembliesToScan)
         {
-            if (container == null)
-                throw new ArgumentNullException(nameof(container));
-
-            if (optionsAction == null)
-                throw new ArgumentNullException(nameof(optionsAction));
-
-            if (assembliesToScan == null)
-                throw new ArgumentNullException(nameof(assembliesToScan));
+            Guard.NotNull(container);
+            Guard.NotNull(optionsAction);
+            Guard.NotNull(assembliesToScan);
 
             var baseAssembly = Assembly.Load("DotNetToolkit.Repository");
 
@@ -124,7 +121,7 @@
         /// This method will scan for repositories and interceptors from the assemblies that have been loaded into the
         /// execution context of this application domain, and will register them to the service collection.
         /// </remarks>
-        public static void RegisterRepositories(this IUnityContainer container, Action<RepositoryOptionsBuilder> optionsAction)
+        public static void RegisterRepositories([NotNull] this IUnityContainer container, [NotNull] Action<RepositoryOptionsBuilder> optionsAction)
         {
             RegisterRepositories(container, optionsAction, AppDomain.CurrentDomain.GetAssemblies());
         }

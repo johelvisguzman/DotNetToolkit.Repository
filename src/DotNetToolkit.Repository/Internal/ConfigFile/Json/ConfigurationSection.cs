@@ -6,11 +6,12 @@
     using Configuration.Mapper;
     using Extensions;
     using Factories;
+    using JetBrains.Annotations;
     using Microsoft.Extensions.Configuration;
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
+    using Utility;
 
     /// <summary>
     /// Represents a configuration section handler for configuring repositories from a file.
@@ -34,15 +35,13 @@
 
         #region Constructors
 
-        public ConfigurationSection(IConfiguration config)
+        public ConfigurationSection([NotNull] IConfiguration config)
         {
-            if (config == null)
-                throw new ArgumentNullException(nameof(config));
+            Guard.NotNull(config);
 
-            _root = config.GetSection(RepositorySectionKey);
-
-            if (_root == null)
-                throw new InvalidOperationException("Unable to find a configuration for the repositories.");
+            _root = Guard.EnsureNotNull(
+                config.GetSection(RepositorySectionKey), 
+                "Unable to find a configuration for the repositories.");
         }
 
         #endregion
@@ -124,8 +123,10 @@
 
         #region Private Methods
 
-        private static Dictionary<string, string> ExtractParameters(IConfigurationSection section, Type type)
+        private static Dictionary<string, string> ExtractParameters([NotNull] IConfigurationSection section)
         {
+            Guard.NotNull(section);
+
             var parameterCollectionSection = section.GetSection(ParameterCollectionSectionKey);
 
             if (parameterCollectionSection != null)
@@ -139,8 +140,10 @@
             return null;
         }
 
-        private static Type ExtractType(IConfigurationSection section, bool isRequired)
+        private static Type ExtractType([NotNull] IConfigurationSection section, bool isRequired)
         {
+            Guard.NotNull(section);
+
             var value = Extract(section, TypeKey, isRequired);
 
             if (string.IsNullOrEmpty(value))
@@ -149,8 +152,10 @@
             return Type.GetType(value, throwOnError: true);
         }
 
-        private static KeyValuePair<string, string> ExtractKeyValue(IConfigurationSection section)
+        private static KeyValuePair<string, string> ExtractKeyValue([NotNull] IConfigurationSection section)
         {
+            Guard.NotNull(section);
+
             var key = section.Key;
             var value = section.Value;
 
@@ -163,18 +168,20 @@
             return new KeyValuePair<string, string>(key, value);
         }
 
-        private static string Extract(IConfigurationSection section, string key, bool isRequired = true)
+        private static string Extract([NotNull] IConfigurationSection section, [NotNull] string key, bool isRequired = true)
         {
+            Guard.NotNull(section);
+            Guard.NotEmpty(key);
+
             if (section[key] == null && isRequired)
                 throw new InvalidOperationException($"The value for '{key}' key is missing for '{section.Path}' section.");
 
             return section[key];
         }
 
-        private T GetTypedValue<T>(IConfigurationSection section, Type type = null)
+        private T GetTypedValue<T>([NotNull] IConfigurationSection section, [CanBeNull] Type type = null)
         {
-            if (section == null)
-                throw new ArgumentNullException(nameof(section));
+            Guard.NotNull(section);
 
             if (type == null)
                 type = ExtractType(section, isRequired: true);
@@ -184,7 +191,7 @@
             if (defaultFactory != null)
                 return (T)defaultFactory(type);
 
-            var keyValues = ExtractParameters(section, type);
+            var keyValues = ExtractParameters(section);
 
             return (T)type.InvokeConstructor(keyValues);
         }

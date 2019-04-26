@@ -1,11 +1,12 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
-    using System;
+    using JetBrains.Annotations;
     using System.Text;
+    using Utility;
 
     internal static class StringExtensions
     {
-        public static string Indent(this string value, int size)
+        public static string Indent([CanBeNull] this string value, int size)
         {
             if (string.IsNullOrEmpty(value))
                 return string.Empty;
@@ -23,10 +24,9 @@
             return sb.ToString().Substring(1);
         }
 
-        public static string ToSHA256(this string value)
+        public static string ToSHA256([NotNull] this string value)
         {
-            if (string.IsNullOrEmpty(value))
-                throw new ArgumentNullException(nameof(value));
+            Guard.NotEmpty(value);
 
             var sha256 = System.Security.Cryptography.SHA256.Create();
             var hashInBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(value));

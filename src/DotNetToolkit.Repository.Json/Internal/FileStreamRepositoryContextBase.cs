@@ -17,6 +17,7 @@
     using System.Reflection;
     using Transactions;
     using Transactions.Internal;
+    using Utility;
 
     /// <summary>
     /// Represents a repository context class which handles reading and writing to a file.
@@ -44,11 +45,8 @@
         /// <param name="ignoreSqlQueryWarning">If a SQL query is executed, ignore any warnings since the in-memory provider does not support SQL query execution.</param>
         protected FileStreamRepositoryContextBase(string path, string extension, bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false)
         {
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
-
-            if (extension == null)
-                throw new ArgumentNullException(nameof(extension));
+            Guard.NotEmpty(path);
+            Guard.NotEmpty(extension);
 
             if (!string.IsNullOrEmpty(Path.GetExtension(path)))
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, "The specified '{0}' path cannot be a file name.", path));
@@ -204,7 +202,7 @@
         /// <param name="entity">The entity.</param>
         public override void Add<TEntity>(TEntity entity)
         {
-            _items.Add(new EntitySet(entity, EntityState.Added));
+            _items.Add(new EntitySet(Guard.NotNull(entity), EntityState.Added));
         }
 
         /// <summary>
@@ -214,7 +212,7 @@
         /// <param name="entity">The entity.</param>
         public override void Update<TEntity>(TEntity entity)
         {
-            _items.Add(new EntitySet(entity, EntityState.Modified));
+            _items.Add(new EntitySet(Guard.NotNull(entity), EntityState.Modified));
         }
 
         /// <summary>
@@ -224,7 +222,7 @@
         /// <param name="entity">The entity.</param>
         public override void Remove<TEntity>(TEntity entity)
         {
-            _items.Add(new EntitySet(entity, EntityState.Removed));
+            _items.Add(new EntitySet(Guard.NotNull(entity), EntityState.Removed));
         }
 
         /// <summary>
@@ -320,6 +318,9 @@
             if (!_ignoreSqlQueryWarning)
                 throw new NotSupportedException(Repository.Properties.Resources.QueryExecutionNotSupported);
 
+            Guard.NotEmpty(sql);
+            Guard.NotNull(projector);
+
             return new QueryResult<IEnumerable<TEntity>>(Enumerable.Empty<TEntity>());
         }
 
@@ -334,6 +335,8 @@
         {
             if (!_ignoreSqlQueryWarning)
                 throw new NotSupportedException(Repository.Properties.Resources.QueryExecutionNotSupported);
+
+            Guard.NotEmpty(sql);
 
             return new QueryResult<int>(0);
         }

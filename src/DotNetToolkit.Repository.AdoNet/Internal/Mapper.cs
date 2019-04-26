@@ -36,8 +36,7 @@
 
         public Mapper(Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, Func<string, Type> getTableTypeByColumnAliasCallback)
         {
-            if (getTableTypeByColumnAliasCallback == null)
-                throw new ArgumentNullException(nameof(getTableTypeByColumnAliasCallback));
+            Guard.NotNull(getTableTypeByColumnAliasCallback);
 
             _properties = typeof(T).GetRuntimeProperties()
                 .Where(x => x.IsPrimitive() && x.IsColumnMapped())

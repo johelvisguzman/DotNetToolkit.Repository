@@ -2,8 +2,9 @@
 {
     using Configuration.Options;
     using Internal;
-    using System;
+    using JetBrains.Annotations;
     using System.Data.Common;
+    using Utility;
 
     /// <summary>
     /// Contains various extension methods for <see cref="RepositoryOptionsBuilder" />
@@ -21,13 +22,10 @@
         /// If the database exists, then no effort is made to ensure it is compatible with the model for this context.
         /// </param>
         /// <returns>The same builder instance.</returns>
-        public static RepositoryOptionsBuilder UseAdoNet(this RepositoryOptionsBuilder source, string nameOrConnectionString, bool ensureDatabaseCreated = false)
+        public static RepositoryOptionsBuilder UseAdoNet([NotNull] this RepositoryOptionsBuilder source, [NotNull] string nameOrConnectionString, bool ensureDatabaseCreated = false)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            if (nameOrConnectionString == null)
-                throw new ArgumentNullException(nameof(nameOrConnectionString));
+            Guard.NotNull(source);
+            Guard.NotEmpty(nameOrConnectionString);
 
             source.UseInternalContextFactory(new AdoNetRepositoryContextFactory(nameOrConnectionString, ensureDatabaseCreated));
 
@@ -46,16 +44,11 @@
         /// If the database exists, then no effort is made to ensure it is compatible with the model for this context.
         /// </param>
         /// <returns>The same builder instance.</returns>
-        public static RepositoryOptionsBuilder UseAdoNet(this RepositoryOptionsBuilder source, string providerName, string connectionString, bool ensureDatabaseCreated = false)
+        public static RepositoryOptionsBuilder UseAdoNet([NotNull] this RepositoryOptionsBuilder source, [NotNull] string providerName, [NotNull] string connectionString, bool ensureDatabaseCreated = false)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            if (providerName == null)
-                throw new ArgumentNullException(nameof(providerName));
-
-            if (connectionString == null)
-                throw new ArgumentNullException(nameof(connectionString));
+            Guard.NotNull(source);
+            Guard.NotEmpty(providerName);
+            Guard.NotEmpty(connectionString);
 
             source.UseInternalContextFactory(new AdoNetRepositoryContextFactory(providerName, connectionString, ensureDatabaseCreated));
 
@@ -73,13 +66,10 @@
         /// If the database exists, then no effort is made to ensure it is compatible with the model for this context.
         /// </param>
         /// <returns>The same builder instance.</returns>
-        public static RepositoryOptionsBuilder UseAdoNet(this RepositoryOptionsBuilder source, DbConnection existingConnection, bool ensureDatabaseCreated = false)
+        public static RepositoryOptionsBuilder UseAdoNet([NotNull] this RepositoryOptionsBuilder source, [NotNull] DbConnection existingConnection, bool ensureDatabaseCreated = false)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            if (existingConnection == null)
-                throw new ArgumentNullException(nameof(existingConnection));
+            Guard.NotNull(source);
+            Guard.NotNull(existingConnection);
 
             source.UseInternalContextFactory(new AdoNetRepositoryContextFactory(existingConnection, ensureDatabaseCreated));
 

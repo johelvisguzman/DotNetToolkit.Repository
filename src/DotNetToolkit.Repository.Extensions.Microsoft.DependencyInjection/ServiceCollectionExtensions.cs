@@ -5,11 +5,13 @@
     using Configuration.Options.Internal;
     using Factories;
     using global::Microsoft.Extensions.DependencyInjection;
+    using JetBrains.Annotations;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
     using Transactions;
+    using Utility;
 
     /// <summary>
     /// Contains various extension methods for <see cref="IServiceCollection" />
@@ -26,16 +28,11 @@
         /// <remarks>
         /// This method will scan for repositories and interceptors from the specified assemblies collection, and will register them to the service collection.
         /// </remarks>
-        public static IServiceCollection AddRepositories(this IServiceCollection services, Action<RepositoryOptionsBuilder> optionsAction, params Assembly[] assembliesToScan)
+        public static IServiceCollection AddRepositories([NotNull] this IServiceCollection services, [NotNull] Action<RepositoryOptionsBuilder> optionsAction, [NotNull] params Assembly[] assembliesToScan)
         {
-            if (services == null)
-                throw new ArgumentNullException(nameof(services));
-
-            if (optionsAction == null)
-                throw new ArgumentNullException(nameof(optionsAction));
-
-            if (assembliesToScan == null)
-                throw new ArgumentNullException(nameof(assembliesToScan));
+            Guard.NotNull(services);
+            Guard.NotNull(optionsAction);
+            Guard.NotNull(assembliesToScan);
 
             var baseAssembly = Assembly.Load("DotNetToolkit.Repository");
 
@@ -127,7 +124,7 @@
         /// This method will scan for repositories and interceptors from the assemblies that have been loaded into the
         /// execution context of this application domain, and will register them to the service collection.
         /// </remarks>
-        public static IServiceCollection AddRepositories(this IServiceCollection services, Action<RepositoryOptionsBuilder> optionsAction)
+        public static IServiceCollection AddRepositories([NotNull] this IServiceCollection services, [NotNull] Action<RepositoryOptionsBuilder> optionsAction)
         {
             return AddRepositories(services, optionsAction, AppDomain.CurrentDomain.GetAssemblies());
         }

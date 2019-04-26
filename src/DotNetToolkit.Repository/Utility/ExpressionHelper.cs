@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Utility
 {
+    using JetBrains.Annotations;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -14,13 +15,10 @@
         /// <summary>    
         /// Combines the first predicate with the second using the logical "and".
         /// </summary>    
-        public static Expression<Func<T, bool>> And<T>(this Expression<Func<T, bool>> first, Expression<Func<T, bool>> second)
+        public static Expression<Func<T, bool>> And<T>([NotNull] this Expression<Func<T, bool>> first, [NotNull] Expression<Func<T, bool>> second)
         {
-            if (first == null)
-                throw new ArgumentNullException(nameof(first));
-
-            if (second == null)
-                throw new ArgumentNullException(nameof(second));
+            Guard.NotNull(first);
+            Guard.NotNull(second);
 
             return first.Compose(second, Expression.AndAlso);
         }
@@ -28,13 +26,10 @@
         /// <summary>    
         /// Combines the first predicate with the second using the logical "or".
         /// </summary>    
-        public static Expression<Func<T, bool>> Or<T>(this Expression<Func<T, bool>> first, Expression<Func<T, bool>> second)
+        public static Expression<Func<T, bool>> Or<T>([NotNull] this Expression<Func<T, bool>> first, [NotNull] Expression<Func<T, bool>> second)
         {
-            if (first == null)
-                throw new ArgumentNullException(nameof(first));
-
-            if (second == null)
-                throw new ArgumentNullException(nameof(second));
+            Guard.NotNull(first);
+            Guard.NotNull(second);
 
             return first.Compose(second, Expression.OrElse);
         }
@@ -42,10 +37,9 @@
         /// <summary>    
         /// Negates the predicate.
         /// </summary>    
-        public static Expression<Func<T, bool>> Not<T>(this Expression<Func<T, bool>> exp)
+        public static Expression<Func<T, bool>> Not<T>([NotNull] this Expression<Func<T, bool>> exp)
         {
-            if (exp == null)
-                throw new ArgumentNullException(nameof(exp));
+            Guard.NotNull(exp);
 
             var negated = Expression.Not(exp.Body);
             return Expression.Lambda<Func<T, bool>>(negated, exp.Parameters);
@@ -54,10 +48,9 @@
         /// <summary>
         /// Returns an expression property selector for the specified property path.
         /// </summary>
-        public static Expression GetExpression<T>(string propertyPath)
+        public static Expression GetExpression<T>([NotNull] string propertyPath)
         {
-            if (propertyPath == null)
-                throw new ArgumentNullException(nameof(propertyPath));
+            Guard.NotEmpty(propertyPath);
 
             var parts = (propertyPath ?? "").Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
             var type = typeof(T);
@@ -81,10 +74,9 @@
         /// </summary>
         /// <param name="exp">The expression.</param>
         /// <returns>The value of the property for the specified expression</returns>
-        public static object GetExpressionValue(Expression exp)
+        public static object GetExpressionValue([NotNull] Expression exp)
         {
-            if (exp == null)
-                throw new ArgumentNullException(nameof(exp));
+            Guard.NotNull(exp);
 
             if (exp.NodeType == ExpressionType.Constant)
                 return ((ConstantExpression)exp).Value;
@@ -149,10 +141,9 @@
         /// </summary>
         /// <param name="exp">The expression.</param>
         /// <returns>The name of the property for the specified expression</returns>
-        public static string GetPropertyName(Expression exp)
+        public static string GetPropertyName([NotNull] Expression exp)
         {
-            if (exp == null)
-                throw new ArgumentNullException(nameof(exp));
+            Guard.NotNull(exp);
 
             return GetMemberExpression(exp)?.Member.Name;
         }
@@ -162,10 +153,9 @@
         /// </summary>
         /// <param name="exp">The exp.</param>
         /// <returns>The property path built from the specified expression</returns>
-        public static string GetPropertyPath(Expression exp)
+        public static string GetPropertyPath([NotNull] Expression exp)
         {
-            if (exp == null)
-                throw new ArgumentNullException(nameof(exp));
+            Guard.NotNull(exp);
 
             var stack = new Stack<string>();
 
@@ -185,10 +175,9 @@
         /// </summary>
         /// <param name="exp">The exp.</param>
         /// <returns>The property info from the specified expression</returns>
-        public static PropertyInfo GetPropertyInfo(Expression exp)
+        public static PropertyInfo GetPropertyInfo([NotNull] Expression exp)
         {
-            if (exp == null)
-                throw new ArgumentNullException(nameof(exp));
+            Guard.NotNull(exp);
 
             return (PropertyInfo)GetMemberExpression(exp)?.Member;
         }
@@ -199,10 +188,9 @@
         /// <param name="exp">The expression.</param>
         /// <returns>The generated hash.</returns>
         // https://blogs.msdn.microsoft.com/mattwar/2007/08/01/linq-building-an-iqueryable-provider-part-iii/
-        public static string TranslateToString(Expression exp)
+        public static string TranslateToString([NotNull] Expression exp)
         {
-            if (exp == null)
-                throw new ArgumentNullException(nameof(exp));
+            Guard.NotNull(exp);
 
             // locally evaluate as much of the query as possible
             exp = Evaluator.PartialEval(exp);
@@ -218,10 +206,9 @@
         /// </summary>
         /// <param name="exp">The expression.</param>
         /// <returns>The member expression.</returns>
-        public static MemberExpression GetMemberExpression(Expression exp)
+        public static MemberExpression GetMemberExpression([NotNull] Expression exp)
         {
-            if (exp == null)
-                throw new ArgumentNullException(nameof(exp));
+            Guard.NotNull(exp);
 
             switch (exp)
             {
@@ -266,10 +253,9 @@
         /// </summary>
         /// <param name="exp">The expression.</param>
         /// <returns>The constant expression.</returns>
-        internal static ConstantExpression AsConstantExpression(this Expression exp)
+        internal static ConstantExpression AsConstantExpression([NotNull] this Expression exp)
         {
-            if (exp == null)
-                throw new ArgumentNullException(nameof(exp));
+            Guard.NotNull(exp);
 
             if (exp is ConstantExpression constantExpression)
                 return constantExpression;
@@ -279,7 +265,7 @@
             return value != null ? Expression.Constant(value) : null;
         }
 
-        internal static void CollectRelationalMembers(Expression exp, IList<PropertyInfo> members)
+        internal static void CollectRelationalMembers([NotNull] Expression exp, IList<PropertyInfo> members)
         {
             switch (exp.NodeType)
             {

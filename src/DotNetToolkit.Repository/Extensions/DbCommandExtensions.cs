@@ -1,9 +1,11 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
+    using JetBrains.Annotations;
     using System;
     using System.Collections.Generic;
     using System.Data.Common;
     using System.Linq;
+    using Utility;
 
     /// <summary>
     /// Contains various extensions for <see cref="DbCommand" />.
@@ -16,10 +18,10 @@
         /// <param name="command">The command.</param>
         /// <param name="name">The name.</param>
         /// <param name="value">The value.</param>
-        public static void AddParameter(this DbCommand command, string name, object value)
+        public static void AddParameter([NotNull] this DbCommand command, [NotNull] string name, [CanBeNull] object value)
         {
-            if (command == null)
-                throw new ArgumentNullException(nameof(command));
+            Guard.NotNull(command);
+            Guard.NotEmpty(name);
 
             name = name.StartsWith("@") ? name : "@" + name;
 
@@ -37,13 +39,10 @@
         /// <param name="command">The command.</param>
         /// <param name="name">The name.</param>
         /// <param name="values">The collection of values.</param>
-        public static void AddParameter(this DbCommand command, string name, object[] values)
+        public static void AddParameter([NotNull] this DbCommand command, [NotNull] string name, [CanBeNull] object[] values)
         {
-            if (command == null)
-                throw new ArgumentNullException(nameof(command));
-
-            if (values == null)
-                throw new ArgumentNullException(nameof(values));
+            Guard.NotNull(command);
+            Guard.NotEmpty(name);
 
             name = name.StartsWith("@") ? name : "@" + name;
 
@@ -66,10 +65,9 @@
         /// <param name="command">The command.</param>
         /// <param name="parameters">The parameters.</param>
         /// <exception cref="System.ArgumentNullException">command</exception>
-        public static void AddParameters(this DbCommand command, Dictionary<string, object> parameters)
+        public static void AddParameters([NotNull] this DbCommand command, [CanBeNull] Dictionary<string, object> parameters)
         {
-            if (command == null)
-                throw new ArgumentNullException(nameof(command));
+            Guard.NotNull(command);
 
             if (parameters == null || parameters.Count == 0)
                 return;

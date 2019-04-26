@@ -2,12 +2,12 @@
 {
     using Configuration.Conventions.Internal;
     using Extensions;
-    using System;
     using System.Data;
     using System.Data.Common;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Utility;
 
     /// <summary>
     /// Contains various extensions for <see cref="DbCommand" />.
@@ -16,11 +16,9 @@
     {
         internal static bool ExecuteObjectExist(this DbHelper dbHelper, DbCommand command, object obj)
         {
-            if (command == null)
-                throw new ArgumentNullException(nameof(command));
-
-            if (obj == null)
-                throw new ArgumentNullException(nameof(obj));
+            Guard.NotNull(dbHelper);
+            Guard.NotNull(command);
+            Guard.NotNull(obj);
 
             var entityType = obj.GetType();
             var tableName = entityType.GetTableName();
@@ -49,11 +47,9 @@
 
         internal static async Task<bool> ExecuteObjectExistAsync(this DbHelper dbHelper, DbCommand command, object obj, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (command == null)
-                throw new ArgumentNullException(nameof(command));
-
-            if (obj == null)
-                throw new ArgumentNullException(nameof(obj));
+            Guard.NotNull(dbHelper);
+            Guard.NotNull(command);
+            Guard.NotNull(obj);
 
             var entityType = obj.GetType();
             var tableName = entityType.GetTableName();

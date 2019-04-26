@@ -1,17 +1,18 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
+    using JetBrains.Annotations;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using Utility;
 
     internal static class AssemblyExtensions
     {
         // EntityFramework6/src/Common/AssemblyExtensions.cs
-        public static IEnumerable<Type> GetAccessibleTypes(this Assembly assembly)
+        public static IEnumerable<Type> GetAccessibleTypes([NotNull] this Assembly assembly)
         {
-            if (assembly == null)
-                throw new ArgumentNullException(nameof(assembly));
+            Guard.NotNull(assembly);
 
             try
             {

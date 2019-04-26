@@ -1,5 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Queries.Internal
 {
+    using JetBrains.Annotations;
+
     /// <summary>
     /// An implementation of <see cref="IPagedQueryResult{TResult}" />.
     /// </summary>
@@ -16,7 +18,7 @@
         /// </summary>
         /// <param name="result">The result.</param>
         /// <param name="total">The total number of records.</param>
-        public PagedQueryResult(TResult result, int total) : base(result)
+        public PagedQueryResult([CanBeNull] TResult result, int total) : base(result)
         {
             Total = total;
         }

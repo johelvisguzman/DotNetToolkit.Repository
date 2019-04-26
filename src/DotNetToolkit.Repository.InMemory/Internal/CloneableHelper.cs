@@ -4,13 +4,13 @@
     using System;
     using System.Linq;
     using System.Reflection;
+    using Utility;
 
     internal static class CloneableHelper
     {
         public static object DeepCopy(object entity)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
+            Guard.NotNull(entity);
 
             var newItem = Activator.CreateInstance(entity.GetType());
             var properties = entity.GetType().GetRuntimeProperties().Where(x => x.IsPrimitive());

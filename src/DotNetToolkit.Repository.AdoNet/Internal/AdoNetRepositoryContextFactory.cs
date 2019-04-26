@@ -2,9 +2,8 @@
 {
     using Configuration;
     using Factories;
-    using System;
-    using System.Data;
     using System.Data.Common;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryContextFactory" />.
@@ -40,10 +39,7 @@
         /// </param>
         public AdoNetRepositoryContextFactory(string nameOrConnectionString, bool ensureDatabaseCreated)
         {
-            if (nameOrConnectionString == null)
-                throw new ArgumentNullException(nameof(nameOrConnectionString));
-
-            _nameOrConnectionString = nameOrConnectionString;
+            _nameOrConnectionString = Guard.NotEmpty(nameOrConnectionString);
             _ensureDatabaseCreated = ensureDatabaseCreated;
         }
 
@@ -66,14 +62,8 @@
         /// </param>
         public AdoNetRepositoryContextFactory(string providerName, string connectionString, bool ensureDatabaseCreated)
         {
-            if (providerName == null)
-                throw new ArgumentNullException(nameof(providerName));
-
-            if (connectionString == null)
-                throw new ArgumentNullException(nameof(connectionString));
-
-            _providerName = providerName;
-            _nameOrConnectionString = connectionString;
+            _providerName = Guard.NotEmpty(providerName);
+            _nameOrConnectionString = Guard.NotEmpty(connectionString);
             _ensureDatabaseCreated = ensureDatabaseCreated;
         }
 
@@ -94,13 +84,7 @@
         /// </param>
         public AdoNetRepositoryContextFactory(DbConnection existingConnection, bool ensureDatabaseCreated)
         {
-            if (existingConnection == null)
-                throw new ArgumentNullException(nameof(existingConnection));
-
-            if (existingConnection.State == ConnectionState.Closed)
-                existingConnection.Open();
-
-            _existingConnection = existingConnection;
+            _existingConnection = Guard.NotNull(existingConnection);
             _ensureDatabaseCreated = ensureDatabaseCreated;
         }
 

@@ -2,7 +2,7 @@
 {
     using Configuration;
     using Factories;
-    using System;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryContextFactory" />.
@@ -63,10 +63,7 @@
         /// <param name="ignoreSqlQueryWarning">If a SQL query is executed, ignore any warnings since the in-memory provider does not support SQL query execution.</param>
         public InMemoryRepositoryContextFactory(string databaseName, bool ignoreTransactionWarning, bool ignoreSqlQueryWarning)
         {
-            if (databaseName == null)
-                throw new ArgumentNullException(nameof(databaseName));
-
-            _databaseName = databaseName;
+            _databaseName = Guard.NotEmpty(databaseName);
             _ignoreTransactionWarning = ignoreTransactionWarning;
             _ignoreSqlQueryWarning = ignoreSqlQueryWarning;
         }

@@ -1,8 +1,10 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Mapper
 {
     using Internal;
+    using JetBrains.Annotations;
     using System;
     using System.Collections.Generic;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="IMapperProvider" />.
@@ -51,10 +53,9 @@
         /// </summary>
         /// <typeparam name="T">The type of the entity.</typeparam>
         /// <param name="mapper">The mapper to register.</param>
-        public MapperProvider Register<T>(IMapper<T> mapper) where T : class
+        public MapperProvider Register<T>([NotNull] IMapper<T> mapper) where T : class
         {
-            if (mapper == null)
-                throw new ArgumentNullException(nameof(mapper));
+            Guard.NotNull(mapper);
 
             if (_mappings.ContainsKey(typeof(T)))
                 _mappings[typeof(T)] = mapper;

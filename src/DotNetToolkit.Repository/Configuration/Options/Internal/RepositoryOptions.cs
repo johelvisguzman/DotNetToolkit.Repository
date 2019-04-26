@@ -8,6 +8,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryOptions" />.
@@ -66,8 +67,7 @@
         /// <param name="options">The repository options to clone.</param>
         public RepositoryOptions(IRepositoryOptions options)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
+            Guard.NotNull(options);
 
             _interceptors = options.Interceptors.ToDictionary(x => x.Key, x => x.Value);
             _cachingProvider = options.CachingProvider;
@@ -97,11 +97,8 @@
         /// <returns>The same option instance.</returns>
         public RepositoryOptions With(Type underlyingType, Func<IRepositoryInterceptor> interceptorFactory)
         {
-            if (underlyingType == null)
-                throw new ArgumentNullException(nameof(underlyingType));
-
-            if (interceptorFactory == null)
-                throw new ArgumentNullException(nameof(interceptorFactory));
+            Guard.NotNull(underlyingType);
+            Guard.NotNull(interceptorFactory);
 
             var lazy = new Lazy<IRepositoryInterceptor>(interceptorFactory);
 
@@ -120,10 +117,7 @@
         /// <returns>The same option instance.</returns>
         public RepositoryOptions With(IRepositoryContextFactory contextFactory)
         {
-            if (contextFactory == null)
-                throw new ArgumentNullException(nameof(contextFactory));
-
-            _contextFactory = contextFactory;
+            _contextFactory = Guard.NotNull(contextFactory);
 
             return this;
         }
@@ -135,10 +129,7 @@
         /// <returns>The same option instance.</returns>
         public RepositoryOptions With(ILoggerProvider loggerProvider)
         {
-            if (loggerProvider == null)
-                throw new ArgumentNullException(nameof(loggerProvider));
-
-            _loggerProvider = loggerProvider;
+            _loggerProvider = Guard.NotNull(loggerProvider);
 
             return this;
         }
@@ -150,10 +141,7 @@
         /// <returns>The same option instance.</returns>
         public RepositoryOptions With(ICacheProvider cacheProvider)
         {
-            if (cacheProvider == null)
-                throw new ArgumentNullException(nameof(cacheProvider));
-
-            _cachingProvider = cacheProvider;
+            _cachingProvider = Guard.NotNull(cacheProvider);
 
             return this;
         }
@@ -165,10 +153,7 @@
         /// <returns>The same option instance.</returns>
         public RepositoryOptions With(IMapperProvider mapperProvider)
         {
-            if (mapperProvider == null)
-                throw new ArgumentNullException(nameof(mapperProvider));
-
-            _mapperProvider = mapperProvider;
+            _mapperProvider = Guard.NotNull(mapperProvider);
 
             return this;
         }

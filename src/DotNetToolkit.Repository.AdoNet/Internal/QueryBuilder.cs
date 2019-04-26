@@ -17,8 +17,7 @@
     {
         public static void CreateInsertStatement(object entity, out string sql, out Dictionary<string, object> parameters)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
+            Guard.NotNull(entity);
 
             parameters = new Dictionary<string, object>();
 
@@ -53,8 +52,7 @@
 
         public static void CreateUpdateStatement(object entity, out string sql, out Dictionary<string, object> parameters)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
+            Guard.NotNull(entity);
 
             parameters = new Dictionary<string, object>();
 
@@ -90,8 +88,7 @@
 
         public static void CreateDeleteStatement(object entity, out string sql, out Dictionary<string, object> parameters)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
+            Guard.NotNull(entity);
 
             parameters = new Dictionary<string, object>();
 
@@ -528,8 +525,7 @@
 
         public static void ExtractCrossJoinColumnName(string sql, out string columnName)
         {
-            if (sql == null)
-                throw new ArgumentNullException(nameof(sql));
+            Guard.NotEmpty(sql);
 
             columnName = string.Empty;
 
@@ -548,8 +544,7 @@
 
         private static Dictionary<string, PropertyInfo> GetProperties(Type entityType)
         {
-            if (entityType == null)
-                throw new ArgumentNullException(nameof(entityType));
+            Guard.NotNull(entityType);
 
             return entityType
                 .GetRuntimeProperties()

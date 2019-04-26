@@ -2,8 +2,10 @@
 {
     using Configuration.Options;
     using Internal;
+    using JetBrains.Annotations;
     using Microsoft.EntityFrameworkCore;
     using System;
+    using Utility;
 
     /// <summary>
     /// Contains various extension methods for <see cref="RepositoryOptionsBuilder" />
@@ -15,10 +17,9 @@
         /// </summary>
         /// <param name="source">The repository options builder.</param>
         /// <returns>The same builder instance.</returns>
-        public static RepositoryOptionsBuilder UseEntityFrameworkCore<TDbContext>(this RepositoryOptionsBuilder source) where TDbContext : DbContext
+        public static RepositoryOptionsBuilder UseEntityFrameworkCore<TDbContext>([NotNull] this RepositoryOptionsBuilder source) where TDbContext : DbContext
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
+            Guard.NotNull(source);
 
             source.UseInternalContextFactory(new EfCoreRepositoryContextFactory<TDbContext>());
 
@@ -31,13 +32,10 @@
         /// <param name="source">The repository options builder.</param>
         /// <param name="optionsAction">The context options builder action.</param>
         /// <returns>The same builder instance.</returns>
-        public static RepositoryOptionsBuilder UseEntityFrameworkCore<TDbContext>(this RepositoryOptionsBuilder source, Action<DbContextOptionsBuilder> optionsAction) where TDbContext : DbContext
+        public static RepositoryOptionsBuilder UseEntityFrameworkCore<TDbContext>([NotNull] this RepositoryOptionsBuilder source, [NotNull] Action<DbContextOptionsBuilder> optionsAction) where TDbContext : DbContext
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            if (optionsAction == null)
-                throw new ArgumentNullException(nameof(optionsAction));
+            Guard.NotNull(source);
+            Guard.NotNull(optionsAction);
 
             var optionsBuilder = new DbContextOptionsBuilder<TDbContext>();
 
@@ -52,13 +50,10 @@
         /// <param name="source">The repository options builder.</param>
         /// <param name="options">The context options.</param>
         /// <returns>The same builder instance.</returns>
-        public static RepositoryOptionsBuilder UseEntityFrameworkCore<TDbContext>(this RepositoryOptionsBuilder source, DbContextOptions options) where TDbContext : DbContext
+        public static RepositoryOptionsBuilder UseEntityFrameworkCore<TDbContext>([NotNull] this RepositoryOptionsBuilder source, [NotNull] DbContextOptions options) where TDbContext : DbContext
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
+            Guard.NotNull(source);
+            Guard.NotNull(options);
 
             source.UseInternalContextFactory(new EfCoreRepositoryContextFactory<TDbContext>(options));
 

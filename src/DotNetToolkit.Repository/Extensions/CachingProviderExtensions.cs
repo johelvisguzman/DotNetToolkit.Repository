@@ -2,6 +2,7 @@
 {
     using Configuration.Caching;
     using Configuration.Logging;
+    using JetBrains.Annotations;
     using Queries;
     using Queries.Internal;
     using Queries.Strategies;
@@ -21,119 +22,209 @@
     {
         private static readonly object _syncRoot = new object();
 
-        public static IQueryResult<IEnumerable<T>> GetOrSetExecuteSqlQuery<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, T> projector, Func<IQueryResult<IEnumerable<T>>> getter, ILogger logger)
+        public static IQueryResult<IEnumerable<T>> GetOrSetExecuteSqlQuery<T>(
+            [NotNull] this ICacheProvider cacheProvider, 
+            [NotNull] string sql, CommandType cmdType, 
+            [CanBeNull] Dictionary<string, object> parameters, 
+            [NotNull] Func<IDataReader, T> projector, 
+            [NotNull] Func<IQueryResult<IEnumerable<T>>> getter, 
+            [NotNull] ILogger logger)
             => GetOrSet<IEnumerable<T>>(
                 cacheProvider,
                 FormatGetOrSetExecuteSqlQueryKey<T>(sql, cmdType, parameters),
                 getter,
                 logger);
 
-        public static IQueryResult<int> GetOrSetExecuteSqlCommand<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IQueryResult<int>> getter, ILogger logger)
+        public static IQueryResult<int> GetOrSetExecuteSqlCommand<T>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [NotNull] string sql, CommandType cmdType, 
+            [CanBeNull] Dictionary<string, object> parameters, 
+            [NotNull] Func<IQueryResult<int>> getter, 
+            [NotNull] ILogger logger)
             => GetOrSet<int>(
                 cacheProvider,
                 FormatGetOrSetExecuteSqlCommandKey<T>(sql, cmdType, parameters),
                 getter,
                 logger);
 
-        public static IQueryResult<T> GetOrSetFind<T>(this ICacheProvider cacheProvider, object[] keys, IFetchQueryStrategy<T> fetchStrategy, Func<IQueryResult<T>> getter, ILogger logger)
+        public static IQueryResult<T> GetOrSetFind<T>(
+            [NotNull] this ICacheProvider cacheProvider, 
+            [NotNull] object[] keys, 
+            [CanBeNull] IFetchQueryStrategy<T> fetchStrategy, 
+            [NotNull] Func<IQueryResult<T>> getter, 
+            [NotNull] ILogger logger)
             => GetOrSet<T>(
                 cacheProvider,
                 FormatGetOrSetFindKey<T>(keys, fetchStrategy),
                 getter,
                 logger);
 
-        public static IQueryResult<TResult> GetOrSetFind<T, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TResult>> selector, Func<IQueryResult<TResult>> getter, ILogger logger)
+        public static IQueryResult<TResult> GetOrSetFind<T, TResult>(
+            [NotNull] this ICacheProvider cacheProvider, 
+            [CanBeNull] IQueryOptions<T> options, 
+            [NotNull] Expression<Func<T, TResult>> selector, 
+            [NotNull] Func<IQueryResult<TResult>> getter, 
+            [NotNull] ILogger logger)
             => GetOrSet<TResult>(
                 cacheProvider,
                 FormatGetOrSetFindKey<T, TResult>(options, selector),
                 getter,
                 logger);
 
-        public static IPagedQueryResult<IEnumerable<TResult>> GetOrSetFindAll<T, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TResult>> selector, Func<IPagedQueryResult<IEnumerable<TResult>>> getter, ILogger logger)
+        public static IPagedQueryResult<IEnumerable<TResult>> GetOrSetFindAll<T, TResult>(
+            [NotNull] this ICacheProvider cacheProvider, 
+            [CanBeNull] IQueryOptions<T> options, 
+            [NotNull] Expression<Func<T, TResult>> selector, 
+            [NotNull] Func<IPagedQueryResult<IEnumerable<TResult>>> getter, 
+            [NotNull] ILogger logger)
             => GetOrSet<IEnumerable<TResult>>(
                 cacheProvider,
                 FormatGetOrSetFindAllKey<T, TResult>(options, selector),
                 getter,
                 logger);
 
-        public static IQueryResult<int> GetOrSetCount<T>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Func<IQueryResult<int>> getter, ILogger logger)
+        public static IQueryResult<int> GetOrSetCount<T>(
+            [NotNull] this ICacheProvider cacheProvider, 
+            [CanBeNull] IQueryOptions<T> options, 
+            [NotNull] Func<IQueryResult<int>> getter, 
+            [NotNull] ILogger logger)
             => GetOrSet<int>(
                 cacheProvider,
                 FormatGetOrSetCountKey<T>(options),
                 getter,
                 logger);
 
-        public static IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> GetOrSetDictionary<T, TDictionaryKey, TElement>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TDictionaryKey>> keySelector, Expression<Func<T, TElement>> elementSelector, Func<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> getter, ILogger logger)
+        public static IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> GetOrSetDictionary<T, TDictionaryKey, TElement>(
+            [NotNull] this ICacheProvider cacheProvider, 
+            [CanBeNull] IQueryOptions<T> options, 
+            [NotNull] Expression<Func<T, TDictionaryKey>> keySelector, 
+            [NotNull] Expression<Func<T, TElement>> elementSelector, 
+            [NotNull] Func<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> getter, 
+            [NotNull] ILogger logger)
             => GetOrSet<Dictionary<TDictionaryKey, TElement>>(
                 cacheProvider,
                 FormatGetOrSetDictionaryKey<T, TDictionaryKey, TElement>(options, keySelector, elementSelector),
                 getter,
                 logger);
 
-        public static IPagedQueryResult<IEnumerable<TResult>> GetOrSetGroup<T, TGroupKey, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<T>, TResult>> resultSelector, Func<IPagedQueryResult<IEnumerable<TResult>>> getter, ILogger logger)
+        public static IPagedQueryResult<IEnumerable<TResult>> GetOrSetGroup<T, TGroupKey, TResult>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [CanBeNull] IQueryOptions<T> options, 
+            [NotNull] Expression<Func<T, TGroupKey>> keySelector, 
+            [NotNull] Expression<Func<TGroupKey, IEnumerable<T>, TResult>> resultSelector, 
+            [NotNull] Func<IPagedQueryResult<IEnumerable<TResult>>> getter, 
+            [NotNull] ILogger logger)
             => GetOrSet<IEnumerable<TResult>>(
                 cacheProvider,
                 FormatGetOrSetGroupKey<T, TGroupKey, TResult>(options, keySelector, resultSelector),
                 getter,
                 logger);
 
-        public static Task<IQueryResult<IEnumerable<T>>> GetOrSetExecuteSqlQueryAsync<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, T> projector, Func<Task<IQueryResult<IEnumerable<T>>>> getter, ILogger logger)
+        public static Task<IQueryResult<IEnumerable<T>>> GetOrSetExecuteSqlQueryAsync<T>(
+            [NotNull] this ICacheProvider cacheProvider, 
+            [NotNull] string sql, 
+            CommandType cmdType, 
+            [CanBeNull] Dictionary<string, object> parameters, 
+            [NotNull] Func<IDataReader, T> projector, 
+            [NotNull] Func<Task<IQueryResult<IEnumerable<T>>>> getter, 
+            [NotNull] ILogger logger)
             => GetOrSetAsync<IEnumerable<T>>(
                 cacheProvider,
                 FormatGetOrSetExecuteSqlQueryKey<T>(sql, cmdType, parameters),
                 getter,
                 logger);
 
-        public static Task<IQueryResult<int>> GetOrSetExecuteSqlCommandAsync<T>(this ICacheProvider cacheProvider, string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<Task<IQueryResult<int>>> getter, ILogger logger)
+        public static Task<IQueryResult<int>> GetOrSetExecuteSqlCommandAsync<T>(
+            [NotNull] this ICacheProvider cacheProvider, 
+            [NotNull] string sql, 
+            CommandType cmdType, 
+            [CanBeNull] Dictionary<string, object> parameters, 
+            [NotNull] Func<Task<IQueryResult<int>>> getter, 
+            [NotNull] ILogger logger)
             => GetOrSetAsync<int>(
                 cacheProvider,
                 FormatGetOrSetExecuteSqlCommandKey<T>(sql, cmdType, parameters),
                 getter,
                 logger);
 
-        public static Task<IQueryResult<T>> GetOrSetFindAsync<T>(this ICacheProvider cacheProvider, object[] keys, IFetchQueryStrategy<T> fetchStrategy, Func<Task<IQueryResult<T>>> getter, ILogger logger)
+        public static Task<IQueryResult<T>> GetOrSetFindAsync<T>(
+            [NotNull] this ICacheProvider cacheProvider, 
+            [NotNull] object[] keys, 
+            [CanBeNull] IFetchQueryStrategy<T> fetchStrategy,
+            [NotNull] Func<Task<IQueryResult<T>>> getter,
+            [NotNull] ILogger logger)
             => GetOrSetAsync<T>(
                 cacheProvider,
                 FormatGetOrSetFindKey<T>(keys, fetchStrategy),
                 getter,
                 logger);
 
-        public static Task<IQueryResult<TResult>> GetOrSetFindAsync<T, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TResult>> selector, Func<Task<IQueryResult<TResult>>> getter, ILogger logger)
+        public static Task<IQueryResult<TResult>> GetOrSetFindAsync<T, TResult>(
+            [NotNull] this ICacheProvider cacheProvider, 
+            [CanBeNull] IQueryOptions<T> options, 
+            [NotNull] Expression<Func<T, TResult>> selector, 
+            [NotNull] Func<Task<IQueryResult<TResult>>> getter, 
+            [NotNull] ILogger logger)
             => GetOrSetAsync<TResult>(
                 cacheProvider,
                 FormatGetOrSetFindKey<T, TResult>(options, selector),
                 getter,
                 logger);
 
-        public static Task<IPagedQueryResult<IEnumerable<TResult>>> GetOrSetFindAllAsync<T, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TResult>> selector, Func<Task<IPagedQueryResult<IEnumerable<TResult>>>> getter, ILogger logger)
+        public static Task<IPagedQueryResult<IEnumerable<TResult>>> GetOrSetFindAllAsync<T, TResult>(
+            [NotNull] this ICacheProvider cacheProvider, 
+            [CanBeNull] IQueryOptions<T> options, 
+            [NotNull] Expression<Func<T, TResult>> selector, 
+            [NotNull] Func<Task<IPagedQueryResult<IEnumerable<TResult>>>> getter, 
+            [NotNull] ILogger logger)
             => GetOrSetAsync<IEnumerable<TResult>>(
                 cacheProvider,
                 FormatGetOrSetFindAllKey<T, TResult>(options, selector),
                 getter,
                 logger);
 
-        public static Task<IQueryResult<int>> GetOrSetCountAsync<T>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Func<Task<IQueryResult<int>>> getter, ILogger logger)
+        public static Task<IQueryResult<int>> GetOrSetCountAsync<T>(
+            [NotNull] this ICacheProvider cacheProvider, 
+            [CanBeNull] IQueryOptions<T> options, 
+            [NotNull] Func<Task<IQueryResult<int>>> getter, 
+            [NotNull] ILogger logger)
             => GetOrSetAsync<int>(
                 cacheProvider,
                 FormatGetOrSetCountKey<T>(options),
                 getter,
                 logger);
 
-        public static Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> GetOrSetDictionaryAsync<T, TDictionaryKey, TElement>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TDictionaryKey>> keySelector, Expression<Func<T, TElement>> elementSelector, Func<Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>>> getter, ILogger logger)
+        public static Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> GetOrSetDictionaryAsync<T, TDictionaryKey, TElement>(
+            [NotNull] this ICacheProvider cacheProvider, 
+            [CanBeNull] IQueryOptions<T> options, 
+            [NotNull] Expression<Func<T, TDictionaryKey>> keySelector, 
+            [NotNull] Expression<Func<T, TElement>> elementSelector, 
+            [NotNull] Func<Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>>> getter, 
+            [NotNull] ILogger logger)
             => GetOrSetAsync<Dictionary<TDictionaryKey, TElement>>(
                 cacheProvider,
                 FormatGetOrSetDictionaryKey<T, TDictionaryKey, TElement>(options, keySelector, elementSelector),
                 getter,
                 logger);
 
-        public static Task<IPagedQueryResult<IEnumerable<TResult>>> GetOrSetGroupAsync<T, TGroupKey, TResult>(this ICacheProvider cacheProvider, IQueryOptions<T> options, Expression<Func<T, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<T>, TResult>> resultSelector, Func<Task<IPagedQueryResult<IEnumerable<TResult>>>> getter, ILogger logger)
+        public static Task<IPagedQueryResult<IEnumerable<TResult>>> GetOrSetGroupAsync<T, TGroupKey, TResult>(
+            [NotNull] this ICacheProvider cacheProvider, 
+            [CanBeNull] IQueryOptions<T> options, 
+            [NotNull] Expression<Func<T, TGroupKey>> keySelector, 
+            [NotNull] Expression<Func<TGroupKey, IEnumerable<T>, TResult>> resultSelector, 
+            [NotNull] Func<Task<IPagedQueryResult<IEnumerable<TResult>>>> getter, 
+            [NotNull] ILogger logger)
             => GetOrSetAsync<IEnumerable<TResult>>(
                 cacheProvider,
                 FormatGetOrSetGroupKey<T, TGroupKey, TResult>(options, keySelector, resultSelector),
                 getter,
                 logger);
 
-        private static Task<IQueryResult<T>> GetOrSetAsync<T>(ICacheProvider cacheProvider, string key, Func<Task<IQueryResult<T>>> getter, ILogger logger)
+        private static Task<IQueryResult<T>> GetOrSetAsync<T>(
+            [NotNull] this ICacheProvider cacheProvider, 
+            [NotNull] string key, 
+            [NotNull] Func<Task<IQueryResult<T>>> getter, 
+            [NotNull] ILogger logger)
             => GetOrSetAsync<T>(
                 cacheProvider,
                 key,
@@ -141,7 +232,11 @@
                 cacheProvider.Expiry,
                 logger);
 
-        private static IQueryResult<T> GetOrSet<T>(ICacheProvider cacheProvider, string key, Func<IQueryResult<T>> getter, ILogger logger)
+        private static IQueryResult<T> GetOrSet<T>(
+            [NotNull] this ICacheProvider cacheProvider, 
+            [NotNull] string key, 
+            [NotNull] Func<IQueryResult<T>> getter, 
+            [NotNull] ILogger logger)
             => GetOrSet<T>(
                 cacheProvider,
                 key,
@@ -149,7 +244,11 @@
                 cacheProvider.Expiry,
                 logger);
 
-        private static Task<IPagedQueryResult<T>> GetOrSetAsync<T>(ICacheProvider cacheProvider, string key, Func<Task<IPagedQueryResult<T>>> getter, ILogger logger)
+        private static Task<IPagedQueryResult<T>> GetOrSetAsync<T>(
+            [NotNull] this ICacheProvider cacheProvider, 
+            [NotNull] string key, 
+            [NotNull] Func<Task<IPagedQueryResult<T>>> getter, 
+            [NotNull] ILogger logger)
             => GetOrSetAsync<T>(
                 cacheProvider,
                 key,
@@ -157,7 +256,11 @@
                 cacheProvider.Expiry,
                 logger);
 
-        private static IPagedQueryResult<T> GetOrSet<T>(ICacheProvider cacheProvider, string key, Func<IPagedQueryResult<T>> getter, ILogger logger)
+        private static IPagedQueryResult<T> GetOrSet<T>(
+            [NotNull] this ICacheProvider cacheProvider, 
+            [NotNull] string key, 
+            [NotNull] Func<IPagedQueryResult<T>> getter, 
+            [NotNull] ILogger logger)
             => GetOrSet<T>(
                 cacheProvider,
                 key,
@@ -165,31 +268,24 @@
                 cacheProvider.Expiry,
                 logger);
 
-        private static PagedQueryResult<T> CreatePagedQueryResult<T>(IPagedQueryResult<T> oldValue, bool cachedUsed = false) 
+        private static PagedQueryResult<T> CreatePagedQueryResult<T>([NotNull] IPagedQueryResult<T> oldValue, bool cachedUsed = false) 
             => new PagedQueryResult<T>(oldValue.Result, oldValue.Total)
             {
                 CacheUsed = cachedUsed
             };
 
-        private static QueryResult<T> CreateQueryResult<T>(IQueryResult<T> oldValue, bool cachedUsed = false) 
+        private static QueryResult<T> CreateQueryResult<T>([NotNull] IQueryResult<T> oldValue, bool cachedUsed = false) 
             => new QueryResult<T>(oldValue.Result)
             {
                 CacheUsed = cachedUsed
             };
 
-        private static void SetValue<T>(this ICacheProvider cacheProvider, string hashedKey, string key, IQueryResult<T> value, TimeSpan? expiry, ILogger logger)
+        private static void SetValue<T>([NotNull] this ICacheProvider cacheProvider, [NotNull] string hashedKey, [NotNull] string key, [NotNull] IQueryResult<T> value, [CanBeNull] TimeSpan? expiry, [NotNull] ILogger logger)
         {
-            if (cacheProvider == null)
-                throw new ArgumentNullException(nameof(cacheProvider));
-
-            if (hashedKey == null)
-                throw new ArgumentNullException(nameof(hashedKey));
-
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            if (logger == null)
-                throw new ArgumentNullException(nameof(logger));
+            Guard.NotNull(cacheProvider);
+            Guard.NotEmpty(hashedKey);
+            Guard.NotEmpty(key);
+            Guard.NotNull(logger);
 
             lock (_syncRoot)
             {
@@ -205,10 +301,10 @@
             }
         }
 
-        private static bool TryGetValue<T>(this ICacheProvider cacheProvider, string key, out T value)
+        private static bool TryGetValue<T>([NotNull] this ICacheProvider cacheProvider, [NotNull] string key, out T value)
         {
-            if (cacheProvider == null)
-                throw new ArgumentNullException(nameof(cacheProvider));
+            Guard.NotNull(cacheProvider);
+            Guard.NotEmpty(key);
 
             lock (_syncRoot)
             {
@@ -216,19 +312,11 @@
             }
         }
 
-        private static QueryResult<T> GetOrSet<T>(ICacheProvider cacheProvider, string key, Func<IQueryResult<T>> getter, TimeSpan? expiry, ILogger logger)
+        private static QueryResult<T> GetOrSet<T>([NotNull] this ICacheProvider cacheProvider, [NotNull] string key, [NotNull] Func<IQueryResult<T>> getter, [CanBeNull] TimeSpan? expiry, [NotNull] ILogger logger)
         {
-            if (cacheProvider == null)
-                throw new ArgumentNullException(nameof(cacheProvider));
-
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            if (getter == null)
-                throw new ArgumentNullException(nameof(getter));
-
-            if (logger == null)
-                throw new ArgumentNullException(nameof(logger));
+            Guard.NotNull(cacheProvider);
+            Guard.NotEmpty(key);
+            Guard.NotNull(logger);
 
             var hashedKey = FormatHashedKey<T>(cacheProvider, key);
 
@@ -246,19 +334,12 @@
             return value;
         }
 
-        private static async Task<IQueryResult<T>> GetOrSetAsync<T>(ICacheProvider cacheProvider, string key, Func<Task<IQueryResult<T>>> getter, TimeSpan? expiry, ILogger logger)
+        private static async Task<IQueryResult<T>> GetOrSetAsync<T>([NotNull] this ICacheProvider cacheProvider, [NotNull] string key, [NotNull] Func<Task<IQueryResult<T>>> getter, [CanBeNull] TimeSpan? expiry, [NotNull] ILogger logger)
         {
-            if (cacheProvider == null)
-                throw new ArgumentNullException(nameof(cacheProvider));
-
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            if (getter == null)
-                throw new ArgumentNullException(nameof(getter));
-
-            if (logger == null)
-                throw new ArgumentNullException(nameof(logger));
+            Guard.NotNull(cacheProvider);
+            Guard.NotEmpty(key);
+            Guard.NotNull(getter);
+            Guard.NotNull(logger);
 
             var hashedKey = FormatHashedKey<T>(cacheProvider, key);
 
@@ -276,19 +357,12 @@
             return value;
         }
 
-        private static IPagedQueryResult<T> GetOrSet<T>(ICacheProvider cacheProvider, string key, Func<IPagedQueryResult<T>> getter, TimeSpan? expiry, ILogger logger)
+        private static IPagedQueryResult<T> GetOrSet<T>([NotNull] this ICacheProvider cacheProvider, [NotNull] string key, [NotNull] Func<IPagedQueryResult<T>> getter, [CanBeNull] TimeSpan? expiry, [NotNull] ILogger logger)
         {
-            if (cacheProvider == null)
-                throw new ArgumentNullException(nameof(cacheProvider));
-
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            if (getter == null)
-                throw new ArgumentNullException(nameof(getter));
-
-            if (logger == null)
-                throw new ArgumentNullException(nameof(logger));
+            Guard.NotNull(cacheProvider);
+            Guard.NotEmpty(key);
+            Guard.NotNull(getter);
+            Guard.NotNull(logger);
 
             var hashedKey = FormatHashedKey<T>(cacheProvider, key);
 
@@ -306,19 +380,12 @@
             return value;
         }
 
-        private static async Task<IPagedQueryResult<T>> GetOrSetAsync<T>(ICacheProvider cacheProvider, string key, Func<Task<IPagedQueryResult<T>>> getter, TimeSpan? expiry, ILogger logger)
+        private static async Task<IPagedQueryResult<T>> GetOrSetAsync<T>([NotNull] this ICacheProvider cacheProvider, [NotNull] string key, [NotNull] Func<Task<IPagedQueryResult<T>>> getter, [CanBeNull] TimeSpan? expiry, [NotNull] ILogger logger)
         {
-            if (cacheProvider == null)
-                throw new ArgumentNullException(nameof(cacheProvider));
-
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            if (getter == null)
-                throw new ArgumentNullException(nameof(getter));
-
-            if (logger == null)
-                throw new ArgumentNullException(nameof(logger));
+            Guard.NotNull(cacheProvider);
+            Guard.NotEmpty(key);
+            Guard.NotNull(getter);
+            Guard.NotNull(logger);
 
             var hashedKey = FormatHashedKey<T>(cacheProvider, key);
 
@@ -336,10 +403,9 @@
             return value;
         }
 
-        public static void IncrementCounter<T>(this ICacheProvider cacheProvider)
+        public static void IncrementCounter<T>([NotNull] this ICacheProvider cacheProvider)
         {
-            if (cacheProvider == null)
-                throw new ArgumentNullException(nameof(cacheProvider));
+            Guard.NotNull(cacheProvider);
 
             lock (_syncRoot)
             {
@@ -347,47 +413,51 @@
             }
         }
 
-        private static int GetCachingPrefixCounter<T>(this ICacheProvider cacheProvider)
+        private static int GetCachingPrefixCounter<T>([NotNull] this ICacheProvider cacheProvider)
         {
-            if (cacheProvider == null)
-                throw new ArgumentNullException(nameof(cacheProvider));
+            Guard.NotNull(cacheProvider);
 
             return !cacheProvider.TryGetValue<int>(FormatCachePrefixCounterKey<T>(), out var key) ? 1 : key;
         }
 
         private static string Name<T>() => typeof(T).FullName;
-        private static string CacheGlue => CacheProviderManager.CachePrefixGlue;
+        private static string Glue => CacheProviderManager.CachePrefixGlue;
 
         private static string FormatCachePrefixCounterKey<T>()
         {
             return string.Format("{1}{0}{2}",
-                CacheGlue,
+                Glue,
                 Name<T>(),
                 CacheProviderManager.CacheCounterPrefix);
         }
 
-        private static string FormatHashedKey<T>(ICacheProvider cacheProvider, string key)
+        private static string FormatHashedKey<T>([NotNull] this ICacheProvider cacheProvider, [NotNull] string key)
         {
+            Guard.NotNull(cacheProvider);
+            Guard.NotEmpty(key);
+            
             return string.Format("{1}{0}{2}{0}{3}{0}{4}",
-                CacheGlue,
+                Glue,
                 CacheProviderManager.GlobalCachingPrefixCounter,
                 cacheProvider.GetCachingPrefixCounter<T>(),
                 key.ToSHA256(),
                 CacheProviderManager.CachePrefix);
         }
 
-        private static string FormatQueryOptions<T>(IQueryOptions<T> options)
+        private static string FormatQueryOptions<T>([CanBeNull] IQueryOptions<T> options)
         {
             return options != null ? options.ToString() : $"QueryOptions<{Name<T>()}>: [ null ]";
         }
 
-        private static string FormatFetchQueryStrategy<T>(IFetchQueryStrategy<T> fetchStrategy)
+        private static string FormatFetchQueryStrategy<T>([CanBeNull] IFetchQueryStrategy<T> fetchStrategy)
         {
             return fetchStrategy != null ? fetchStrategy.ToString() : $"FetchQueryStrategy<{Name<T>()}>: [ null ]";
         }
 
-        private static string FormatGetOrSetExecuteSqlQueryKey<T>(string sql, CommandType cmdType, Dictionary<string, object> parameters)
+        private static string FormatGetOrSetExecuteSqlQueryKey<T>([NotNull] string sql, CommandType cmdType, [CanBeNull] Dictionary<string, object> parameters)
         {
+            Guard.NotEmpty(sql);
+
             var sb = new StringBuilder();
 
             sb.Append($"GetOrSetExecuteSqlQuery<{Name<T>()}>: [ \n\tSql = {sql},");
@@ -402,8 +472,10 @@
             return sb.ToString();
         }
 
-        private static string FormatGetOrSetExecuteSqlCommandKey<T>(string sql, CommandType cmdType, Dictionary<string, object> parameters)
+        private static string FormatGetOrSetExecuteSqlCommandKey<T>([NotNull] string sql, CommandType cmdType, [CanBeNull] Dictionary<string, object> parameters)
         {
+            Guard.NotEmpty(sql);
+
             var sb = new StringBuilder();
 
             sb.Append($"GetOrSetExecuteSqlCommand<{Name<T>()}>: [ \n\tSql = {sql},");
@@ -418,43 +490,55 @@
             return sb.ToString();
         }
 
-        private static string FormatGetOrSetFindKey<T>(object[] keys, IFetchQueryStrategy<T> fetchStrategy)
+        private static string FormatGetOrSetFindKey<T>([NotNull] object[] keys, [CanBeNull] IFetchQueryStrategy<T> fetchStrategy)
         {
+            Guard.NotEmpty(keys);
+
             var f = FormatFetchQueryStrategy(fetchStrategy);
 
             return $"GetOrSetFind<{Name<T>()}>: [ \n\tKeys = {string.Join(", ", keys.Select(x => x.ToString()).ToArray())},\n\t{f} ]";
         }
 
-        private static string FormatGetOrSetFindAllKey<T, TResult>(IQueryOptions<T> options, Expression<Func<T, TResult>> selector)
+        private static string FormatGetOrSetFindAllKey<T, TResult>([CanBeNull] IQueryOptions<T> options, [NotNull] Expression<Func<T, TResult>> selector)
         {
+            Guard.NotNull(selector);
+
             var o = FormatQueryOptions<T>(options);
 
             return $"GetOrSetFindAll<{Name<T>()}>: [ \n\t{o},\n\tSelector = {ExpressionHelper.TranslateToString(selector)} ]";
         }
 
-        private static string FormatGetOrSetFindKey<T, TResult>(IQueryOptions<T> options, Expression<Func<T, TResult>> selector)
+        private static string FormatGetOrSetFindKey<T, TResult>([CanBeNull] IQueryOptions<T> options, [NotNull] Expression<Func<T, TResult>> selector)
         {
+            Guard.NotNull(selector);
+
             var o = FormatQueryOptions<T>(options);
 
             return $"GetOrSetFind<{Name<T>()}>: [ \n\t{o},\n\tSelector = {ExpressionHelper.TranslateToString(selector)} ]";
         }
 
-        private static string FormatGetOrSetCountKey<T>(IQueryOptions<T> options)
+        private static string FormatGetOrSetCountKey<T>([CanBeNull] IQueryOptions<T> options)
         {
             var o = FormatQueryOptions<T>(options);
 
             return $"GetOrSetCount<{Name<T>()}>: [ \n\t{o} ]";
         }
 
-        private static string FormatGetOrSetDictionaryKey<T, TDictionaryKey, TElement>(IQueryOptions<T> options, Expression<Func<T, TDictionaryKey>> keySelector, Expression<Func<T, TElement>> elementSelector)
+        private static string FormatGetOrSetDictionaryKey<T, TDictionaryKey, TElement>([CanBeNull] IQueryOptions<T> options, [NotNull] Expression<Func<T, TDictionaryKey>> keySelector, [NotNull] Expression<Func<T, TElement>> elementSelector)
         {
+            Guard.NotNull(keySelector);
+            Guard.NotNull(elementSelector);
+
             var o = FormatQueryOptions<T>(options);
 
             return $"GetOrSetDictionary<{Name<T>()}, {typeof(TDictionaryKey).Name}, {typeof(TElement).Name}>: [ \n\t{o},\n\tKeySelector = {ExpressionHelper.TranslateToString(keySelector)},\n\tElementSelector = {ExpressionHelper.TranslateToString(elementSelector)} ]";
         }
 
-        private static string FormatGetOrSetGroupKey<T, TGroupKey, TResult>(IQueryOptions<T> options, Expression<Func<T, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<T>, TResult>> resultSelector)
+        private static string FormatGetOrSetGroupKey<T, TGroupKey, TResult>([CanBeNull] IQueryOptions<T> options, [NotNull] Expression<Func<T, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<T>, TResult>> resultSelector)
         {
+            Guard.NotNull(keySelector);
+            Guard.NotNull(resultSelector);
+
             var o = FormatQueryOptions<T>(options);
 
             return $"GetOrSetGroup<{Name<T>()}, {typeof(TGroupKey).Name}, {typeof(TResult).Name}>: [ \n\t{o},\n\tKeySelector = {ExpressionHelper.TranslateToString(keySelector)},\n\tResultSelector = {ExpressionHelper.TranslateToString(resultSelector)} ]";

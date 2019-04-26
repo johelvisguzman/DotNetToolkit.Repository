@@ -1,5 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Queries.Internal
 {
+    using JetBrains.Annotations;
+
     /// <summary>
     /// An implementation of <see cref="IQueryResult{TResult}" />.
     /// </summary>
@@ -33,7 +35,7 @@
         /// Initializes a new instance of the <see cref="QueryResult{TResult}"/> class.
         /// </summary>
         /// <param name="result">The result.</param>
-        public QueryResult(TResult result)
+        public QueryResult([CanBeNull] TResult result)
         {
             _result = result;
         }

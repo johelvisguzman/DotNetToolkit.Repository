@@ -2,7 +2,7 @@
 {
     using Configuration;
     using Factories;
-    using System;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryContextFactory" />.
@@ -41,10 +41,7 @@
         /// <param name="ignoreSqlQueryWarning">If a SQL query is executed, ignore any warnings since the in-memory provider does not support SQL query execution.</param>
         public JsonRepositoryContextFactory(string path, bool ignoreTransactionWarning, bool ignoreSqlQueryWarning)
         {
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
-
-            _path = path;
+            _path = Guard.NotEmpty(path);
             _ignoreTransactionWarning = ignoreTransactionWarning;
             _ignoreSqlQueryWarning = ignoreSqlQueryWarning;
         }
