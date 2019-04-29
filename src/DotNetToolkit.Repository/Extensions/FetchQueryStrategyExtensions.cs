@@ -1,11 +1,12 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
-    using Helpers;
+    using JetBrains.Annotations;
     using System;
     using System.Collections.Generic;
     using System.Linq.Expressions;
     using System.Reflection;
     using System.Text;
+    using Utility;
 
     // https://github.com/SharpRepository/SharpRepository/tree/master/SharpRepository.Repository/FetchStrategies/FetchQueryStrategyExtensions.cs
     internal static class FetchQueryStrategyExtensions
@@ -16,8 +17,10 @@
         /// <typeparam name="T">Type being evaluated</typeparam>
         /// <param name="selector">Name of the property per the Linq expression</param>
         /// <returns></returns>
-        public static string ToIncludeString<T>(this Expression<Func<T, object>> selector)
+        public static string ToIncludeString<T>([NotNull] this Expression<Func<T, object>> selector)
         {
+            Guard.NotNull(selector);
+
             // Retrieve member path:
             var members = new List<PropertyInfo>();
             ExpressionHelper.CollectRelationalMembers(selector, members);

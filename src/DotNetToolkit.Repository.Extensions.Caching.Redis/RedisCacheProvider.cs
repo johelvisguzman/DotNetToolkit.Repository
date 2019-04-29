@@ -1,8 +1,10 @@
 ﻿namespace DotNetToolkit.Repository.Extensions.Caching.Redis
 {
     using Configuration.Caching;
+    using JetBrains.Annotations;
     using StackExchange.Redis;
     using System;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="ICacheProvider" />.
@@ -48,7 +50,7 @@
         /// </summary>
         /// <param name="expiry">The the caching expiration time.</param>
         /// <remarks>This will connect to a single server on the local machine using the default redis port (6379).</remarks>
-        public RedisCacheProvider(TimeSpan? expiry)
+        public RedisCacheProvider([CanBeNull] TimeSpan? expiry)
         {
             _redis = new RedisCache();
 
@@ -62,7 +64,7 @@
         /// <param name="defaultDatabase">Specifies the default database to be used when calling ConnectionMultiplexer.GetDatabase() without any parameters.</param>
         /// <param name="expiry">The the caching expiration time.</param>
         /// <remarks>This will connect to a single server on the local machine using the default redis port (6379).</remarks>
-        public RedisCacheProvider(bool allowAdmin, int? defaultDatabase, TimeSpan? expiry)
+        public RedisCacheProvider(bool allowAdmin, [CanBeNull] int? defaultDatabase, [CanBeNull] TimeSpan? expiry)
         {
             _redis = new RedisCache(allowAdmin, defaultDatabase);
 
@@ -74,10 +76,9 @@
         /// </summary>
         /// <param name="configuration">The string configuration to use for the redis multiplexer.</param>
         /// <param name="expiry">The the caching expiration time.</param>
-        public RedisCacheProvider(string configuration, TimeSpan? expiry)
+        public RedisCacheProvider([NotNull] string configuration, [CanBeNull] TimeSpan? expiry)
         {
-            if (configuration == null)
-                throw new ArgumentNullException(nameof(configuration));
+            Guard.NotNull(configuration);
 
             _redis = new RedisCache(configuration);
 
@@ -89,10 +90,9 @@
         /// </summary>
         /// <param name="options">The configuration options to use for the redis multiplexer.</param>
         /// <param name="expiry">The the caching expiration time.</param>
-        public RedisCacheProvider(ConfigurationOptions options, TimeSpan? expiry)
+        public RedisCacheProvider([NotNull] ConfigurationOptions options, [CanBeNull] TimeSpan? expiry)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
+            Guard.NotNull(options);
 
             _redis = new RedisCache(options);
 
@@ -107,10 +107,9 @@
         /// <param name="allowAdmin">Indicates whether admin operations should be allowed.</param>
         /// <param name="defaultDatabase">Specifies the default database to be used when calling ConnectionMultiplexer.GetDatabase() without any parameters.</param>
         /// <param name="expiry">The the caching expiration time.</param>
-        public RedisCacheProvider(string host, bool ssl, bool allowAdmin, int? defaultDatabase, TimeSpan? expiry)
+        public RedisCacheProvider([NotNull] string host, bool ssl, bool allowAdmin, [CanBeNull] int? defaultDatabase, [CanBeNull] TimeSpan? expiry)
         {
-            if (host == null)
-                throw new ArgumentNullException(nameof(host));
+            Guard.NotEmpty(host);
 
             _redis = new RedisCache(host, ssl, allowAdmin, defaultDatabase);
 
@@ -127,13 +126,10 @@
         /// <param name="allowAdmin">Indicates whether admin operations should be allowed.</param>
         /// <param name="defaultDatabase">Specifies the default database to be used when calling ConnectionMultiplexer.GetDatabase() without any parameters.</param>
         /// <param name="expiry">The the caching expiration time.</param>
-        public RedisCacheProvider(string host, int port, string password, bool ssl, bool allowAdmin, int? defaultDatabase, TimeSpan? expiry)
+        public RedisCacheProvider([NotNull] string host, int port, [NotNull] string password, bool ssl, bool allowAdmin, [CanBeNull] int? defaultDatabase, [CanBeNull] TimeSpan? expiry)
         {
-            if (host == null)
-                throw new ArgumentNullException(nameof(host));
-
-            if (password == null)
-                throw new ArgumentNullException(nameof(password));
+            Guard.NotEmpty(host);
+            Guard.NotEmpty(password);
 
             _redis = new RedisCache(host, port, password, ssl, allowAdmin, defaultDatabase);
 

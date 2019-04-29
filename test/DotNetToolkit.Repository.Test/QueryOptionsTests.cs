@@ -1,12 +1,12 @@
 ﻿namespace DotNetToolkit.Repository.Test
 {
     using Data;
-    using Helpers;
     using Queries;
     using Queries.Strategies;
     using System;
     using System.Linq;
     using System.Linq.Expressions;
+    using Utility;
     using Xunit;
 
     public class QueryOptionsTests
@@ -33,13 +33,13 @@
             Assert.Equal(pageIndex, ((IQueryOptions<Customer>)options).PageIndex);
             Assert.Equal(pageSize, ((IQueryOptions<Customer>)options).PageSize);
 
-            var ex = Assert.Throws<ArgumentException>(() => options.Page(0, 1));
+            var ex = Assert.Throws<ArgumentOutOfRangeException>(() => options.Page(0, 1));
             Assert.Equal("Cannot be lower than 1.\r\nParameter name: pageIndex", ex.Message);
 
-            ex = Assert.Throws<ArgumentException>(() => options.Page(1, 0));
+            ex = Assert.Throws<ArgumentOutOfRangeException>(() => options.Page(1, 0));
             Assert.Equal("Cannot be lower than zero.\r\nParameter name: pageSize", ex.Message);
 
-            ex = Assert.Throws<ArgumentException>(() => options.Page(0));
+            ex = Assert.Throws<ArgumentOutOfRangeException>(() => options.Page(0));
             Assert.Equal("Cannot be lower than 1.\r\nParameter name: pageIndex", ex.Message);
 
             options = new QueryOptions<Customer>().Page(pageIndex);

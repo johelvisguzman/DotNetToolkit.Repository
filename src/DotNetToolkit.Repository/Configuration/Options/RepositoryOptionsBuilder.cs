@@ -3,10 +3,14 @@
     using Caching;
     using Factories;
     using Interceptors;
+    using Internal;
+    using JetBrains.Annotations;
     using Logging;
     using Mapper;
+    using Microsoft.Extensions.Configuration;
     using System;
     using System.Linq;
+    using Utility;
 
     /// <summary>
     /// Represents a builder used to create or modify options for a repository.
@@ -57,12 +61,9 @@
         /// Initializes a new instance of the <see cref="RepositoryOptionsBuilder"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        public RepositoryOptionsBuilder(IRepositoryOptions options)
+        public RepositoryOptionsBuilder([NotNull] IRepositoryOptions options)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            _options = new RepositoryOptions(options);
+            _options = new RepositoryOptions(Guard.NotNull(options));
         }
 
         #endregion
@@ -77,8 +78,8 @@
         /// <remarks>Any element that is defined in the config file can be resolved using the <see cref="DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationProvider.SetDefaultFactory"/></remarks>
         public virtual RepositoryOptionsBuilder UseConfiguration()
         {
-            var config = (Internal.ConfigFile.ConfigurationSection)
-                System.Configuration.ConfigurationManager.GetSection(Internal.ConfigFile.ConfigurationSection.SectionName);
+            var config = (DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationSection)
+                System.Configuration.ConfigurationManager.GetSection(DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationSection.SectionName);
 
             var defaultContextFactory = config.DefaultContextFactory.GetTypedValue();
             if (defaultContextFactory != null)
@@ -119,12 +120,11 @@
         /// <param name="configuration">The configuration.</param>
         /// <returns>The same builder instance.</returns>
         /// <remarks>Any element that is defined in the config file can be resolved using the <see cref="DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationProvider.SetDefaultFactory"/></remarks>
-        public virtual RepositoryOptionsBuilder UseConfiguration(Microsoft.Extensions.Configuration.IConfiguration configuration)
+        public virtual RepositoryOptionsBuilder UseConfiguration([NotNull] IConfiguration configuration)
         {
-            if (configuration == null)
-                throw new ArgumentNullException(nameof(configuration));
+            Guard.NotNull(configuration);
 
-            var config = new Internal.ConfigFile.ConfigurationHandler(configuration);
+            var config = new DotNetToolkit.Repository.Internal.ConfigFile.Json.ConfigurationSection(configuration);
 
             var defaultContextFactory = config.GetDefaultContextFactory();
             if (defaultContextFactory != null)
@@ -164,15 +164,9 @@
         /// <param name="underlyingType">The type of interceptor.</param>
         /// <param name="interceptorFactory">The interceptor factory.</param>
         /// <returns>The same builder instance.</returns>
-        public virtual RepositoryOptionsBuilder UseInterceptor(Type underlyingType, Func<IRepositoryInterceptor> interceptorFactory)
+        public virtual RepositoryOptionsBuilder UseInterceptor([NotNull] Type underlyingType, [NotNull] Func<IRepositoryInterceptor> interceptorFactory)
         {
-            if (underlyingType == null)
-                throw new ArgumentNullException(nameof(underlyingType));
-
-            if (interceptorFactory == null)
-                throw new ArgumentNullException(nameof(interceptorFactory));
-
-            _options.With(underlyingType, interceptorFactory);
+            _options.With(Guard.NotNull(underlyingType), Guard.NotNull(interceptorFactory));
 
             return this;
         }
@@ -183,7 +177,7 @@
         /// <typeparam name="TInterceptor">The type of interceptor.</typeparam>
         /// <param name="interceptorFactory">The interceptor factory.</param>
         /// <returns>The same builder instance.</returns>
-        public RepositoryOptionsBuilder UseInterceptor<TInterceptor>(Func<TInterceptor> interceptorFactory) where TInterceptor : class, IRepositoryInterceptor
+        public virtual RepositoryOptionsBuilder UseInterceptor<TInterceptor>([NotNull] Func<TInterceptor> interceptorFactory) where TInterceptor : class, IRepositoryInterceptor
         {
             return UseInterceptor(typeof(TInterceptor), interceptorFactory);
         }
@@ -194,7 +188,7 @@
         /// <typeparam name="TInterceptor">The type of interceptor.</typeparam>
         /// <param name="interceptor">The interceptor.</param>
         /// <returns>The same builder instance.</returns>
-        public RepositoryOptionsBuilder UseInterceptor<TInterceptor>(TInterceptor interceptor) where TInterceptor : class, IRepositoryInterceptor
+        public virtual RepositoryOptionsBuilder UseInterceptor<TInterceptor>([NotNull] TInterceptor interceptor) where TInterceptor : class, IRepositoryInterceptor
         {
             return UseInterceptor<TInterceptor>(() => interceptor);
         }
@@ -204,12 +198,9 @@
         /// </summary>
         /// <param name="loggerProvider">The logger provider.</param>
         /// <returns>The same builder instance.</returns>
-        public RepositoryOptionsBuilder UseLoggerProvider(ILoggerProvider loggerProvider)
+        public virtual RepositoryOptionsBuilder UseLoggerProvider([NotNull] ILoggerProvider loggerProvider)
         {
-            if (loggerProvider == null)
-                throw new ArgumentNullException(nameof(loggerProvider));
-
-            _options.With(loggerProvider);
+            _options.With(Guard.NotNull(loggerProvider));
 
             return this;
         }
@@ -219,12 +210,9 @@
         /// </summary>
         /// <param name="cacheProvider">The caching provider.</param>
         /// <returns>The same builder instance.</returns>
-        public RepositoryOptionsBuilder UseCachingProvider(ICacheProvider cacheProvider)
+        public virtual RepositoryOptionsBuilder UseCachingProvider([NotNull] ICacheProvider cacheProvider)
         {
-            if (cacheProvider == null)
-                throw new ArgumentNullException(nameof(cacheProvider));
-
-            _options.With(cacheProvider);
+            _options.With(Guard.NotNull(cacheProvider));
 
             return this;
         }
@@ -234,12 +222,9 @@
         /// </summary>
         /// <param name="mapperProvider">The entity mapper provider.</param>
         /// <returns>The same builder instance.</returns>
-        public virtual RepositoryOptionsBuilder UseMapperProvider(IMapperProvider mapperProvider)
+        public virtual RepositoryOptionsBuilder UseMapperProvider([NotNull] IMapperProvider mapperProvider)
         {
-            if (mapperProvider == null)
-                throw new ArgumentNullException(nameof(mapperProvider));
-
-            _options.With(mapperProvider);
+            _options.With(Guard.NotNull(mapperProvider));
 
             return this;
         }
@@ -249,12 +234,9 @@
         /// </summary>
         /// <param name="contextFactory">The context factory.</param>
         /// <returns>The same builder instance.</returns>
-        public virtual RepositoryOptionsBuilder UseInternalContextFactory(IRepositoryContextFactory contextFactory)
+        public virtual RepositoryOptionsBuilder UseInternalContextFactory([NotNull] IRepositoryContextFactory contextFactory)
         {
-            if (contextFactory == null)
-                throw new ArgumentNullException(nameof(contextFactory));
-
-            _options.With(contextFactory);
+            _options.With(Guard.NotNull(contextFactory));
 
             return this;
         }

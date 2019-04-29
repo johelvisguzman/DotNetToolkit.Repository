@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository
 {
     using Configuration.Options;
+    using JetBrains.Annotations;
 
     /// <summary>
     /// An implementation of <see cref="IRepository{TEntity, TKey1, TKey2, TKey3}" />.
@@ -18,7 +19,7 @@
         /// Initializes a new instance of the <see cref="Repository{TEntity, TKey1, TKey2, TKey3}"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        public Repository(IRepositoryOptions options) : base(options) { }
+        public Repository([NotNull] IRepositoryOptions options) : base(options) { }
 
         #endregion
     }
@@ -38,7 +39,7 @@
         /// Initializes a new instance of the <see cref="Repository{TEntity, TKey1, TKey2}"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        public Repository(IRepositoryOptions options) : base(options) { }
+        public Repository([NotNull] IRepositoryOptions options) : base(options) { }
 
         #endregion
     }
@@ -57,7 +58,7 @@
         /// Initializes a new instance of the <see cref="Repository{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        public Repository(IRepositoryOptions options) : base(options) { }
+        public Repository([NotNull] IRepositoryOptions options) : base(options) { }
 
         #endregion
     }
@@ -75,7 +76,7 @@
         /// Initializes a new instance of the <see cref="Repository{TEntity}"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        public Repository(IRepositoryOptions options) : base(options) { }
+        public Repository([NotNull] IRepositoryOptions options) : base(options) { }
 
         #endregion
     }

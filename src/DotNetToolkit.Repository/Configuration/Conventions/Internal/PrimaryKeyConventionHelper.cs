@@ -1,6 +1,6 @@
-﻿namespace DotNetToolkit.Repository.Configuration.Conventions
+﻿namespace DotNetToolkit.Repository.Configuration.Conventions.Internal
 {
-    using Helpers;
+    using JetBrains.Annotations;
     using Properties;
     using Queries.Strategies;
     using System;
@@ -11,6 +11,7 @@
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
+    using Utility;
 
     internal class PrimaryKeyConventionHelper
     {
@@ -23,10 +24,9 @@
         /// If the entity type is defined with a composite primary key collection,
         /// then the list of keys found will be returned ordered as defined by their specified <see cref="ColumnAttribute"/> attribute.
         /// </remarks>
-        public static IEnumerable<PropertyInfo> GetPrimaryKeyPropertyInfos(Type entityType)
+        public static IEnumerable<PropertyInfo> GetPrimaryKeyPropertyInfos([NotNull] Type entityType)
         {
-            if (entityType == null)
-                throw new ArgumentNullException(nameof(entityType));
+            Guard.NotNull(entityType);
 
             if (InMemoryCache.Instance.PrimaryKeyMapping.ContainsKey(entityType))
                 return InMemoryCache.Instance.PrimaryKeyMapping[entityType];
@@ -75,10 +75,9 @@
         /// Determines whether the specified entity type has a composite primary key defined.
         /// </summary>
         /// <param name="entityType">The type of the entity.</param>
-        public static bool HasCompositePrimaryKey(Type entityType)
+        public static bool HasCompositePrimaryKey([NotNull] Type entityType)
         {
-            if (entityType == null)
-                throw new ArgumentNullException(nameof(entityType));
+            Guard.NotNull(entityType);
 
             return GetPrimaryKeyPropertyInfos(entityType).Count() > 1;
         }
@@ -96,10 +95,9 @@
         /// Gets the collection of primary key values for the specified object.
         /// </summary>
         /// <returns>The primary key value.</returns>
-        public static object[] GetPrimaryKeyValues(object obj)
+        public static object[] GetPrimaryKeyValues([NotNull] object obj)
         {
-            if (obj == null)
-                throw new ArgumentNullException(nameof(obj));
+            Guard.NotNull(obj);
 
             var keyValues = GetPrimaryKeyPropertyInfos(obj.GetType())
                 .Select(x => x.GetValue(obj, null))
@@ -112,10 +110,9 @@
         /// Returns a specification for getting an entity by it's primary key.
         /// </summary>
         /// <returns>The new specification.</returns>
-        public static ISpecificationQueryStrategy<TEntity> GetByPrimaryKeySpecification<TEntity>(params object[] keyValues) where TEntity : class
+        public static ISpecificationQueryStrategy<TEntity> GetByPrimaryKeySpecification<TEntity>([NotNull] params object[] keyValues) where TEntity : class
         {
-            if (keyValues == null)
-                throw new ArgumentNullException(nameof(keyValues));
+            Guard.NotEmpty(keyValues);
 
             var propInfos = GetPrimaryKeyPropertyInfos<TEntity>().ToList();
 
@@ -147,10 +144,9 @@
         /// Throws an exception if the specified key type collection does not match the ones defined for the entity.
         /// </summary>
         /// <param name="keyTypes">The key type collection to check against.</param>
-        public static void ThrowsIfInvalidPrimaryKeyDefinition<TEntity>(params Type[] keyTypes) where TEntity : class
+        public static void ThrowsIfInvalidPrimaryKeyDefinition<TEntity>([NotNull] params Type[] keyTypes) where TEntity : class
         {
-            if (keyTypes == null)
-                throw new ArgumentNullException(nameof(keyTypes));
+            Guard.NotEmpty(keyTypes);
 
             var definedKeyInfos = GetPrimaryKeyPropertyInfos<TEntity>().ToList();
 
@@ -193,8 +189,10 @@
         /// <param name="entityType">The entity type to get the primary key from.</param>
         /// <remarks>Assumes the entity has either an 'Id' property or 'EntityName' + 'Id'.</remarks>
         /// <returns>The list of primary key names to check.</returns>
-        private static IEnumerable<string> GetDefaultPrimaryKeyNameChecks(Type entityType)
+        private static IEnumerable<string> GetDefaultPrimaryKeyNameChecks([NotNull] Type entityType)
         {
+            Guard.NotNull(entityType);
+
             const string suffix = "Id";
 
             return new[] { suffix, entityType.Name + suffix };

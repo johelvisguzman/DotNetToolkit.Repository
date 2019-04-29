@@ -1,11 +1,12 @@
 ﻿namespace DotNetToolkit.Repository.EntityFrameworkCore.Internal
 {
     using Configuration;
-    using Configuration.Conventions;
+    using Configuration.Conventions.Internal;
     using Configuration.Logging;
     using Extensions;
     using Microsoft.EntityFrameworkCore;
     using Queries;
+    using Queries.Internal;
     using Queries.Strategies;
     using System;
     using System.Collections.Generic;
@@ -14,6 +15,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Transactions;
+    using Utility;
 
     /// <summary>
     /// Represents an internal entity framework core repository context.
@@ -35,11 +37,7 @@
         /// <param name="context">The context.</param>
         public EfCoreRepositoryContext(DbContext context)
         {
-            if (context == null)
-                throw new ArgumentNullException(nameof(context));
-
-            _context = context;
-
+            _context = Guard.NotNull(context);
             _context.ConfigureLogging(s => Logger.Debug(s.TrimEnd(Environment.NewLine.ToCharArray())));
         }
 
@@ -76,11 +74,8 @@
         /// <returns>A list which each entity has been projected into a new form.</returns>
         public override IQueryResult<IEnumerable<TEntity>> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector)
         {
-            if (sql == null)
-                throw new ArgumentNullException(nameof(sql));
-
-            if (projector == null)
-                throw new ArgumentNullException(nameof(projector));
+            Guard.NotEmpty(sql);
+            Guard.NotNull(projector);
 
             var connection = _context.Database.GetDbConnection();
             var command = connection.CreateCommand();
@@ -116,8 +111,7 @@
         /// <returns>The number of rows affected.</returns>
         public override IQueryResult<int> ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters)
         {
-            if (sql == null)
-                throw new ArgumentNullException(nameof(sql));
+            Guard.NotEmpty(sql);
 
             var connection = _context.Database.GetDbConnection();
             var shouldOpenConnection = connection.State != ConnectionState.Open;
@@ -166,10 +160,7 @@
         /// <param name="entity">The entity.</param>
         public override void Add<TEntity>(TEntity entity)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
-            _context.Set<TEntity>().Add(entity);
+            _context.Set<TEntity>().Add(Guard.NotNull(entity));
         }
 
         /// <summary>
@@ -179,8 +170,7 @@
         /// <param name="entity">The entity.</param>
         public override void Update<TEntity>(TEntity entity)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
+            Guard.NotNull(entity);
 
             var entry = _context.Entry(entity);
 
@@ -208,8 +198,7 @@
         /// <param name="entity">The entity.</param>
         public override void Remove<TEntity>(TEntity entity)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
+            Guard.NotNull(entity);
 
             if (_context.Entry(entity).State == EntityState.Detached)
             {
@@ -248,8 +237,7 @@
         /// <returns>The entity found in the repository.</returns>
         public override IQueryResult<TEntity> Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues)
         {
-            if (keyValues == null)
-                throw new ArgumentNullException(nameof(keyValues));
+            Guard.NotEmpty(keyValues);
 
             if (fetchStrategy == null)
             {
@@ -316,11 +304,8 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
         public override async Task<IQueryResult<IEnumerable<TEntity>>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (sql == null)
-                throw new ArgumentNullException(nameof(sql));
-
-            if (projector == null)
-                throw new ArgumentNullException(nameof(projector));
+            Guard.NotEmpty(sql);
+            Guard.NotNull(projector);
 
             var connection = _context.Database.GetDbConnection();
             var command = connection.CreateCommand();
@@ -357,8 +342,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
         public override async Task<IQueryResult<int>> ExecuteSqlCommandAsync(string sql, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (sql == null)
-                throw new ArgumentNullException(nameof(sql));
+            Guard.NotEmpty(sql);
 
             var connection = _context.Database.GetDbConnection();
             var shouldOpenConnection = connection.State != ConnectionState.Open;
@@ -406,8 +390,7 @@
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found in the repository.</returns>
         public override async Task<IQueryResult<TEntity>> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues)
         {
-            if (keyValues == null)
-                throw new ArgumentNullException(nameof(keyValues));
+            Guard.NotEmpty(keyValues);
 
             if (fetchStrategy == null)
             {

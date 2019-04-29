@@ -2,9 +2,10 @@
 {
     using Configuration.Options;
     using Internal;
-    using System;
+    using JetBrains.Annotations;
     using System.Data.Common;
     using System.Data.Entity;
+    using Utility;
 
     /// <summary>
     /// Contains various extension methods for <see cref="RepositoryOptionsBuilder" />
@@ -16,10 +17,9 @@
         /// </summary>
         /// <param name="source">The repository options builder.</param>
         /// <returns>The same builder instance.</returns>
-        public static RepositoryOptionsBuilder UseEntityFramework<TDbContext>(this RepositoryOptionsBuilder source) where TDbContext : DbContext
+        public static RepositoryOptionsBuilder UseEntityFramework<TDbContext>([NotNull] this RepositoryOptionsBuilder source) where TDbContext : DbContext
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
+            Guard.NotNull(source);
 
             source.UseInternalContextFactory(new EfRepositoryContextFactory<TDbContext>());
 
@@ -32,13 +32,10 @@
         /// <param name="source">The repository options builder.</param>
         /// <param name="nameOrConnectionString">Either the database name or a connection string.</param>
         /// <returns>The same builder instance.</returns>
-        public static RepositoryOptionsBuilder UseEntityFramework<TDbContext>(this RepositoryOptionsBuilder source, string nameOrConnectionString) where TDbContext : DbContext
+        public static RepositoryOptionsBuilder UseEntityFramework<TDbContext>([NotNull] this RepositoryOptionsBuilder source, [NotNull] string nameOrConnectionString) where TDbContext : DbContext
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            if (nameOrConnectionString == null)
-                throw new ArgumentNullException(nameof(nameOrConnectionString));
+            Guard.NotNull(source);
+            Guard.NotEmpty(nameOrConnectionString);
 
             source.UseInternalContextFactory(new EfRepositoryContextFactory<TDbContext>(nameOrConnectionString));
 
@@ -51,13 +48,10 @@
         /// <param name="source">The repository options builder.</param>
         /// <param name="existingConnection">The existing connection.</param>
         /// <returns>The same builder instance.</returns>
-        public static RepositoryOptionsBuilder UseEntityFramework<TDbContext>(this RepositoryOptionsBuilder source, DbConnection existingConnection) where TDbContext : DbContext
+        public static RepositoryOptionsBuilder UseEntityFramework<TDbContext>([NotNull] this RepositoryOptionsBuilder source, [NotNull] DbConnection existingConnection) where TDbContext : DbContext
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            if (existingConnection == null)
-                throw new ArgumentNullException(nameof(existingConnection));
+            Guard.NotNull(source);
+            Guard.NotNull(existingConnection);
 
             source.UseInternalContextFactory(new EfRepositoryContextFactory<TDbContext>(existingConnection));
 

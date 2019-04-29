@@ -1,7 +1,9 @@
 ﻿namespace DotNetToolkit.Repository.Factories
 {
     using Configuration.Options;
+    using JetBrains.Annotations;
     using System;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryFactory" />.
@@ -21,10 +23,9 @@
         /// Initializes a new instance of the <see cref="RepositoryFactory" /> class.
         /// </summary>
         /// <param name="optionsAction">A builder action used to create or modify options for this repository factory.</param>
-        public RepositoryFactory(Action<RepositoryOptionsBuilder> optionsAction)
+        public RepositoryFactory([NotNull] Action<RepositoryOptionsBuilder> optionsAction)
         {
-            if (optionsAction == null)
-                throw new ArgumentNullException(nameof(optionsAction));
+            Guard.NotNull(optionsAction);
 
             var optionsBuilder = new RepositoryOptionsBuilder();
 
@@ -37,10 +38,9 @@
         /// Initializes a new instance of the <see cref="RepositoryFactory" /> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        public RepositoryFactory(IRepositoryOptions options)
+        public RepositoryFactory([NotNull] IRepositoryOptions options)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
+            Guard.NotNull(options);
 
             _options = options;
         }

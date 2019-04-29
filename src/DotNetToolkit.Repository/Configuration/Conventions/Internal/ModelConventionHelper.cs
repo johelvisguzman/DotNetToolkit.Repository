@@ -1,11 +1,12 @@
-﻿namespace DotNetToolkit.Repository.Configuration.Conventions
+﻿namespace DotNetToolkit.Repository.Configuration.Conventions.Internal
 {
     using Extensions;
-    using Helpers;
+    using JetBrains.Annotations;
     using System;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
     using System.Reflection;
+    using Utility;
 
     internal static class ModelConventionHelper
     {
@@ -14,18 +15,17 @@
         /// </summary>
         /// <param name="type">The type.</param>
         /// <returns>The name of the table.</returns>
-        public static string GetTableName(this Type type)
+        public static string GetTableName([NotNull] this Type type)
         {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
+            Guard.NotNull(type);
 
             if (InMemoryCache.Instance.TableNameMapping.ContainsKey(type))
                 return InMemoryCache.Instance.TableNameMapping[type];
 
             var tableName = type.GetTypeInfo().GetCustomAttribute<TableAttribute>()?.Name;
 
-            if (String.IsNullOrEmpty(tableName))
-                tableName = PluralizationHelper.Pluralize(type.Name);
+            if (string.IsNullOrEmpty(tableName))
+                tableName = PluralizationService.Pluralize(type.Name);
 
             InMemoryCache.Instance.TableNameMapping[type] = tableName;
 
@@ -48,10 +48,9 @@
         /// <returns>
         ///   <c>true</c> if the property is mapped; otherwise, <c>false</c>.
         /// </returns>
-        public static bool IsColumnMapped(this PropertyInfo pi)
+        public static bool IsColumnMapped([NotNull] this PropertyInfo pi)
         {
-            if (pi == null)
-                throw new ArgumentNullException(nameof(pi));
+            Guard.NotNull(pi);
 
             if (pi.GetCustomAttribute<NotMappedAttribute>() != null)
                 return false;
@@ -65,10 +64,9 @@
         /// </summary>
         /// <param name="pi">The property info.</param>
         /// <returns>The name of the column.</returns>
-        public static string GetColumnName(this PropertyInfo pi)
+        public static string GetColumnName([NotNull] this PropertyInfo pi)
         {
-            if (pi == null)
-                throw new ArgumentNullException(nameof(pi));
+            Guard.NotNull(pi);
 
             // If this is a complex object then don't worry about finding a column attribute for it
             if (pi.IsComplex())
@@ -87,10 +85,9 @@
         /// </summary>
         /// <param name="pi">The property info.</param>
         /// <returns>The column order.</returns>
-        public static int GetColumnOrder(this PropertyInfo pi)
+        public static int GetColumnOrder([NotNull] this PropertyInfo pi)
         {
-            if (pi == null)
-                throw new ArgumentNullException(nameof(pi));
+            Guard.NotNull(pi);
 
             var columnAttribute = pi.GetCustomAttribute<ColumnAttribute>();
             if (columnAttribute == null)
@@ -114,10 +111,9 @@
         /// <param name="pi">The property info.</param>
         /// <returns><c>true</c> if the specified property is defined as identity; otherwise, <c>false</c>.</returns>
         /// <remarks>If no the property does not have a <see cref="DatabaseGeneratedOption.Identity" /> option defined, this function will returned <c>true</c> as default.</remarks>
-        public static bool IsColumnIdentity(this PropertyInfo pi)
+        public static bool IsColumnIdentity([NotNull] this PropertyInfo pi)
         {
-            if (pi == null)
-                throw new ArgumentNullException(nameof(pi));
+            Guard.NotNull(pi);
 
             var databaseGeneratedAttribute = pi.GetCustomAttribute<DatabaseGeneratedAttribute>();
             if (databaseGeneratedAttribute == null)

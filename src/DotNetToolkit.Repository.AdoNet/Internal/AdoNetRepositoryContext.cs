@@ -1,12 +1,13 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
     using Configuration;
-    using Configuration.Conventions;
+    using Configuration.Conventions.Internal;
     using Configuration.Logging;
+    using Configuration.Logging.Internal;
     using Extensions;
-    using Helpers;
     using Properties;
     using Queries;
+    using Queries.Internal;
     using Queries.Strategies;
     using Schema;
     using System;
@@ -20,6 +21,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Transactions;
+    using Utility;
 
     /// <summary>
     /// Represents an internal ado.net repository context.
@@ -69,10 +71,7 @@
 		/// </param>
         public AdoNetRepositoryContext(string nameOrConnectionString, bool ensureDatabaseCreated = false)
         {
-            if (nameOrConnectionString == null)
-                throw new ArgumentNullException(nameof(nameOrConnectionString));
-
-            _dbHelper = new DbHelper(nameOrConnectionString);
+            _dbHelper = new DbHelper(Guard.NotEmpty(nameOrConnectionString));
             _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
             _ensureDatabaseCreated = ensureDatabaseCreated;
         }
@@ -89,13 +88,7 @@
 		/// </param>
         public AdoNetRepositoryContext(string providerName, string connectionString, bool ensureDatabaseCreated = false)
         {
-            if (providerName == null)
-                throw new ArgumentNullException(nameof(providerName));
-
-            if (connectionString == null)
-                throw new ArgumentNullException(nameof(connectionString));
-
-            _dbHelper = new DbHelper(providerName, connectionString);
+            _dbHelper = new DbHelper(Guard.NotEmpty(providerName), Guard.NotEmpty(connectionString));
             _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
             _ensureDatabaseCreated = ensureDatabaseCreated;
         }
@@ -111,10 +104,7 @@
 		/// </param>
         public AdoNetRepositoryContext(DbConnection existingConnection, bool ensureDatabaseCreated = false)
         {
-            if (existingConnection == null)
-                throw new ArgumentNullException(nameof(existingConnection));
-
-            _dbHelper = new DbHelper(existingConnection);
+            _dbHelper = new DbHelper(Guard.NotNull(existingConnection));
             _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
             _ensureDatabaseCreated = ensureDatabaseCreated;
         }
@@ -196,11 +186,8 @@
         /// <returns>A list which each entity has been projected into a new form.</returns>
         public IQueryResult<IEnumerable<TEntity>> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector) where TEntity : class
         {
-            if (sql == null)
-                throw new ArgumentNullException(nameof(sql));
-
-            if (projector == null)
-                throw new ArgumentNullException(nameof(projector));
+            Guard.NotEmpty(sql);
+            Guard.NotNull(projector);
 
             using (var reader = _dbHelper.ExecuteReader(sql, cmdType, parameters))
             {
@@ -224,8 +211,7 @@
         /// <returns>The number of rows affected.</returns>
         public IQueryResult<int> ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters)
         {
-            if (sql == null)
-                throw new ArgumentNullException(nameof(sql));
+            Guard.NotEmpty(sql);
 
             return new QueryResult<int>(_dbHelper.ExecuteNonQuery(sql, cmdType, parameters));
         }
@@ -255,6 +241,8 @@
         /// <param name="entity">The entity.</param>
         public void Add<TEntity>(TEntity entity) where TEntity : class
         {
+            Guard.NotNull(entity);
+
             _items.Add(new EntitySet(entity, EntityState.Added));
         }
 
@@ -265,6 +253,8 @@
         /// <param name="entity">The entity.</param>
         public void Update<TEntity>(TEntity entity) where TEntity : class
         {
+            Guard.NotNull(entity);
+
             _items.Add(new EntitySet(entity, EntityState.Modified));
         }
 
@@ -275,6 +265,8 @@
         /// <param name="entity">The entity.</param>
         public void Remove<TEntity>(TEntity entity) where TEntity : class
         {
+            Guard.NotNull(entity);
+
             _items.Add(new EntitySet(entity, EntityState.Removed));
         }
 
@@ -376,8 +368,7 @@
         /// <returns>The entity found in the repository.</returns>
         public IQueryResult<TEntity> Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
-            if (keyValues == null)
-                throw new ArgumentNullException(nameof(keyValues));
+            Guard.NotEmpty(keyValues);
 
             var options = new QueryOptions<TEntity>().Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
 
@@ -411,11 +402,7 @@
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public IQueryResult<TResult> Find<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
+            Guard.NotNull(selector);
 
             var selectorFunc = selector.Compile();
 
@@ -443,8 +430,7 @@
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public IPagedQueryResult<IEnumerable<TResult>> FindAll<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
         {
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
+            Guard.NotNull(selector);
 
             var selectorFunc = selector.Compile();
 
@@ -487,8 +473,7 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
         public IQueryResult<bool> Exists<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
+            Guard.NotNull(options);
 
             QueryBuilder.CreateSelectStatement<TEntity>(options, out var sql, out var parameters);
 
@@ -521,11 +506,8 @@
         /// <returns>A new <see cref="T:System.Collections.Generic.Dictionary`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector) where TEntity : class
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
-            if (elementSelector == null)
-                throw new ArgumentNullException(nameof(elementSelector));
+            Guard.NotNull(keySelector);
+            Guard.NotNull(elementSelector);
 
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
@@ -585,11 +567,8 @@
         /// <returns>A new <see cref="T:System.Linq.IGrouping`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public IPagedQueryResult<IEnumerable<TResult>> GroupBy<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector) where TEntity : class
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
-            if (resultSelector == null)
-                throw new ArgumentNullException(nameof(resultSelector));
+            Guard.NotNull(keySelector);
+            Guard.NotNull(resultSelector);
 
             var keySelectFunc = keySelector.Compile();
             var resultSelectorFunc = resultSelector.Compile();
@@ -618,11 +597,8 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
         public async Task<IQueryResult<IEnumerable<TEntity>>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            if (sql == null)
-                throw new ArgumentNullException(nameof(sql));
-
-            if (projector == null)
-                throw new ArgumentNullException(nameof(projector));
+            Guard.NotEmpty(sql);
+            Guard.NotNull(projector);
 
             using (var reader = await _dbHelper.ExecuteReaderAsync(sql, cmdType, parameters, cancellationToken))
             {
@@ -647,8 +623,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
         public async Task<IQueryResult<int>> ExecuteSqlCommandAsync(string sql, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (sql == null)
-                throw new ArgumentNullException(nameof(sql));
+            Guard.NotEmpty(sql);
 
             return new QueryResult<int>(await _dbHelper.ExecuteNonQueryAsync(sql, cmdType, parameters, cancellationToken));
         }
@@ -752,8 +727,7 @@
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found in the repository.</returns>
         public async Task<IQueryResult<TEntity>> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
-            if (keyValues == null)
-                throw new ArgumentNullException(nameof(keyValues));
+            Guard.NotEmpty(keyValues);
 
             var options = new QueryOptions<TEntity>().Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
 
@@ -788,11 +762,7 @@
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public async Task<IQueryResult<TResult>> FindAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
+            Guard.NotNull(selector);
 
             var selectorFunc = selector.Compile();
 
@@ -821,8 +791,7 @@
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public async Task<IPagedQueryResult<IEnumerable<TResult>>> FindAllAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            if (selector == null)
-                throw new ArgumentNullException(nameof(selector));
+            Guard.NotNull(selector);
 
             var selectorFunc = selector.Compile();
 
@@ -867,8 +836,7 @@
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
         public async Task<IQueryResult<bool>> ExistsAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
+            Guard.NotNull(options);
 
             QueryBuilder.CreateSelectStatement<TEntity>(options, out var sql, out var parameters);
 
@@ -902,11 +870,8 @@
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="T:System.Collections.Generic.Dictionary`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public async Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
-            if (elementSelector == null)
-                throw new ArgumentNullException(nameof(elementSelector));
+            Guard.NotNull(keySelector);
+            Guard.NotNull(elementSelector);
 
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
@@ -967,11 +932,8 @@
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="T:System.Linq.IGrouping`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public async Task<IPagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            if (keySelector == null)
-                throw new ArgumentNullException(nameof(keySelector));
-
-            if (resultSelector == null)
-                throw new ArgumentNullException(nameof(resultSelector));
+            Guard.NotNull(keySelector);
+            Guard.NotNull(resultSelector);
 
             var keySelectFunc = keySelector.Compile();
             var resultSelectorFunc = resultSelector.Compile();

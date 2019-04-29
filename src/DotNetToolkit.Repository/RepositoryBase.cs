@@ -2,15 +2,17 @@
 {
     using Configuration;
     using Configuration.Caching;
-    using Configuration.Conventions;
+    using Configuration.Caching.Internal;
+    using Configuration.Conventions.Internal;
     using Configuration.Interceptors;
     using Configuration.Logging;
+    using Configuration.Logging.Internal;
     using Configuration.Mapper;
     using Configuration.Options;
     using Extensions;
     using Factories;
-    using Helpers;
     using Internal;
+    using JetBrains.Annotations;
     using Properties;
     using Queries;
     using Queries.Strategies;
@@ -25,6 +27,7 @@
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="IRepository{TEntity, TKey1, TKey2, TKey3}" />.
@@ -47,7 +50,7 @@
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2, TKey3}"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        protected RepositoryBase(IRepositoryOptions options) : base(options)
+        protected RepositoryBase([NotNull] IRepositoryOptions options) : base(options)
         {
             PrimaryKeyConventionHelper.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>(typeof(TKey1), typeof(TKey2), typeof(TKey3));
         }
@@ -71,7 +74,7 @@
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
-        public void Delete(TKey1 key1, TKey2 key2, TKey3 key3)
+        public void Delete([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3)
         {
             LogExecutingMethod(false);
 
@@ -94,7 +97,7 @@
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
         /// <returns><c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
-        public bool TryDelete(TKey1 key1, TKey2 key2, TKey3 key3)
+        public bool TryDelete([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3)
         {
             LogExecutingMethod(false);
 
@@ -117,7 +120,7 @@
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
         /// <return>The entity found.</return>
-        public TEntity Find(TKey1 key1, TKey2 key2, TKey3 key3)
+        public TEntity Find([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3)
         {
             return Find(key1, key2, key3, (IFetchQueryStrategy<TEntity>)null);
         }
@@ -130,13 +133,22 @@
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <return>The entity found.</return>
-        public TEntity Find(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy)
+        public TEntity Find([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy)
         {
             LogExecutingMethod();
 
+            InterceptError(() =>
+            {
+                Guard.NotNull(key1);
+                Guard.NotNull(key2);
+                Guard.NotNull(key3);
+            });
+
             IQueryResult<TEntity> Getter() =>
                 UseContext<IQueryResult<TEntity>>(
-                    context => context.Find<TEntity>(fetchStrategy, key1, key2, key3));
+                    context => Guard.EnsureNotNull(
+                        context.Find<TEntity>(fetchStrategy, key1, key2, key3),
+                        Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
                 ? CacheProvider.GetOrSetFind<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy, Getter, Logger)
@@ -156,7 +168,7 @@
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
         /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
-        public bool Exists(TKey1 key1, TKey2 key2, TKey3 key3)
+        public bool Exists([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3)
         {
             LogExecutingMethod();
 
@@ -175,7 +187,7 @@
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
-        public async Task<bool> ExistsAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<bool> ExistsAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod();
 
@@ -194,7 +206,7 @@
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
             return FindAsync(key1, key2, key3, (IFetchQueryStrategy<TEntity>)null, cancellationToken);
         }
@@ -208,13 +220,22 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        public async Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<TEntity> FindAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod();
 
+            InterceptError(() =>
+            {
+                Guard.NotNull(key1);
+                Guard.NotNull(key2);
+                Guard.NotNull(key3);
+            });
+
             Task<IQueryResult<TEntity>> Getter() =>
                 UseContextAsync<IQueryResult<TEntity>>(
-                    context => context.FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2, key3));
+                    context => Guard.EnsureNotNull(
+                        context.FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2, key3),
+                        Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
                 ? await CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy, Getter, Logger)
@@ -235,7 +256,7 @@
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        public async Task DeleteAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
+        public async Task DeleteAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod(false);
 
@@ -255,7 +276,7 @@
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
-        public async Task<bool> TryDeleteAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<bool> TryDeleteAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod(false);
 
@@ -296,7 +317,7 @@
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2}"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        protected RepositoryBase(IRepositoryOptions options) : base(options)
+        protected RepositoryBase([NotNull] IRepositoryOptions options) : base(options)
         {
             PrimaryKeyConventionHelper.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>(typeof(TKey1), typeof(TKey2));
         }
@@ -319,7 +340,7 @@
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        public void Delete(TKey1 key1, TKey2 key2)
+        public void Delete([NotNull] TKey1 key1, [NotNull] TKey2 key2)
         {
             LogExecutingMethod(false);
 
@@ -337,7 +358,7 @@
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <returns><c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
-        public bool TryDelete(TKey1 key1, TKey2 key2)
+        public bool TryDelete([NotNull] TKey1 key1, [NotNull] TKey2 key2)
         {
             LogExecutingMethod(false);
 
@@ -359,7 +380,7 @@
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <return>The entity found.</return>
-        public TEntity Find(TKey1 key1, TKey2 key2)
+        public TEntity Find([NotNull] TKey1 key1, [NotNull] TKey2 key2)
         {
             return Find(key1, key2, (IFetchQueryStrategy<TEntity>)null);
         }
@@ -371,13 +392,21 @@
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <return>The entity found.</return>
-        public TEntity Find(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy)
+        public TEntity Find([NotNull] TKey1 key1, [NotNull] TKey2 key2, [CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy)
         {
             LogExecutingMethod();
 
+            InterceptError(() =>
+            {
+                Guard.NotNull(key1);
+                Guard.NotNull(key2);
+            });
+
             IQueryResult<TEntity> Getter() =>
                 UseContext<IQueryResult<TEntity>>(
-                    context => context.Find<TEntity>(fetchStrategy, key1, key2));
+                    context => Guard.EnsureNotNull(
+                        context.Find<TEntity>(fetchStrategy, key1, key2),
+                        Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
                 ? CacheProvider.GetOrSetFind<TEntity>(new object[] { key1, key2 }, fetchStrategy, Getter, Logger)
@@ -396,7 +425,7 @@
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
-        public bool Exists(TKey1 key1, TKey2 key2)
+        public bool Exists([NotNull] TKey1 key1, [NotNull] TKey2 key2)
         {
             LogExecutingMethod();
 
@@ -414,7 +443,7 @@
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
-        public async Task<bool> ExistsAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<bool> ExistsAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod();
 
@@ -432,7 +461,7 @@
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
             return FindAsync(key1, key2, (IFetchQueryStrategy<TEntity>)null, cancellationToken);
         }
@@ -445,13 +474,21 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        public async Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<TEntity> FindAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod();
 
+            InterceptError(() =>
+            {
+                Guard.NotNull(key1);
+                Guard.NotNull(key2);
+            });
+
             Task<IQueryResult<TEntity>> Getter() =>
                 UseContextAsync<IQueryResult<TEntity>>(
-                    context => context.FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2));
+                    context => Guard.EnsureNotNull(
+                        context.FindAsync<TEntity>(cancellationToken, fetchStrategy, key1, key2),
+                        Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
                 ? await CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key1, key2 }, fetchStrategy, Getter, Logger)
@@ -471,7 +508,7 @@
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        public async Task DeleteAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
+        public async Task DeleteAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod(false);
 
@@ -490,7 +527,7 @@
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
-        public async Task<bool> TryDeleteAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<bool> TryDeleteAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod(false);
 
@@ -530,7 +567,7 @@
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        protected RepositoryBase(IRepositoryOptions options) : base(options)
+        protected RepositoryBase([NotNull] IRepositoryOptions options) : base(options)
         {
             PrimaryKeyConventionHelper.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>(typeof(TKey));
         }
@@ -552,7 +589,7 @@
         /// Deletes an entity with the given primary key value in the repository.
         /// </summary>
         /// <param name="key">The value of the primary key used to match entities against.</param>
-        public void Delete(TKey key)
+        public void Delete([NotNull] TKey key)
         {
             LogExecutingMethod(false);
 
@@ -569,7 +606,7 @@
         /// </summary>
         /// <param name="key"></param>
         /// <returns><c>true</c> is able to successfully delete an entity with the given primary key; otherwise, <c>false</c>.</returns>
-        public bool TryDelete(TKey key)
+        public bool TryDelete([NotNull] TKey key)
         {
             LogExecutingMethod(false);
 
@@ -590,7 +627,7 @@
         /// </summary>
         /// <param name="key">The value of the primary key for the entity to be found.</param>
         /// <return>The entity found.</return>
-        public TEntity Find(TKey key)
+        public TEntity Find([NotNull] TKey key)
         {
             return Find(key, (IFetchQueryStrategy<TEntity>)null);
         }
@@ -601,13 +638,17 @@
         /// <param name="key">The value of the primary key for the entity to be found.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <return>The entity found.</return>
-        public TEntity Find(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy)
+        public TEntity Find([NotNull] TKey key, [CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy)
         {
             LogExecutingMethod();
 
+            InterceptError(() => Guard.NotNull(key));
+
             IQueryResult<TEntity> Getter() =>
                 UseContext<IQueryResult<TEntity>>(
-                    context => context.Find<TEntity>(fetchStrategy, key));
+                    context => Guard.EnsureNotNull(
+                        context.Find<TEntity>(fetchStrategy, key),
+                        Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
                 ? CacheProvider.GetOrSetFind<TEntity>(new object[] { key }, fetchStrategy, Getter, Logger)
@@ -625,7 +666,7 @@
         /// </summary>
         /// <param name="key">The value of the primary key used to match entities against.</param>
         /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
-        public bool Exists(TKey key)
+        public bool Exists([NotNull] TKey key)
         {
             LogExecutingMethod();
 
@@ -642,7 +683,7 @@
         /// <param name="key">The value of the primary key used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
-        public async Task<bool> ExistsAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<bool> ExistsAsync([NotNull] TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod();
 
@@ -659,7 +700,7 @@
         /// <param name="key">The value of the primary key for the entity to be found.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        public Task<TEntity> FindAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync([NotNull] TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
             return FindAsync(key, (IFetchQueryStrategy<TEntity>)null, cancellationToken);
         }
@@ -671,13 +712,17 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        public async Task<TEntity> FindAsync(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<TEntity> FindAsync([NotNull] TKey key, [CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod();
 
+            InterceptError(() => Guard.NotNull(key));
+
             Task<IQueryResult<TEntity>> Getter() =>
                 UseContextAsync<IQueryResult<TEntity>>(
-                    context => context.FindAsync<TEntity>(cancellationToken, fetchStrategy, key));
+                    context => Guard.EnsureNotNull(
+                        context.FindAsync<TEntity>(cancellationToken, fetchStrategy, key),
+                        Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
                 ? await CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key }, fetchStrategy, Getter, Logger)
@@ -696,7 +741,7 @@
         /// <param name="key">The value of the primary key used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        public async Task DeleteAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
+        public async Task DeleteAsync([NotNull] TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod(false);
 
@@ -714,7 +759,7 @@
         /// <param name="key"></param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given primary key; otherwise, <c>false</c>.</returns>
-        public async Task<bool> TryDeleteAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<bool> TryDeleteAsync([NotNull] TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod(false);
 
@@ -794,36 +839,29 @@
         /// Initializes a new instance of the <see cref="InternalRepositoryBase{TEntity}"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        internal InternalRepositoryBase(IRepositoryOptions options)
+        internal InternalRepositoryBase([NotNull] IRepositoryOptions options)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
+            Guard.NotNull(options);
 
             var optionsBuilder = new RepositoryOptionsBuilder(options);
 
             OnConfiguring(optionsBuilder);
 
+            _options = optionsBuilder.Options;
+
+            _contextFactory = Guard.EnsureNotNull(_options.ContextFactory, "No context provider has been configured for this repository.");
+
             // Sets the default logger provider (prints all messages levels)
-            LoggerProvider = optionsBuilder.Options.LoggerProvider ?? new ConsoleLoggerProvider(LogLevel.Debug);
+            LoggerProvider = _options.LoggerProvider ?? new ConsoleLoggerProvider(LogLevel.Debug);
 
             Logger = LoggerProvider.Create($"DotNetToolkit.Repository<{typeof(TEntity).Name}>");
 
-            var contextFactory = optionsBuilder.Options.ContextFactory;
-            if (contextFactory == null)
-                throw new InvalidOperationException("No context provider has been configured for this repository.");
+            CacheProvider = _options.CachingProvider ?? NullCacheProvider.Instance;
 
-            _contextFactory = contextFactory;
-
-            var cachingProvider = options.CachingProvider ?? NullCacheProvider.Instance;
-
-            if (cachingProvider.GetType() != typeof(NullCacheProvider))
+            if (CacheProvider.GetType() != typeof(NullCacheProvider))
                 CacheEnabled = true;
 
-            CacheProvider = cachingProvider;
-
-            MapperProvider = optionsBuilder.Options.MapperProvider ?? Configuration.Mapper.MapperProvider.Instance;
-
-            _options = optionsBuilder.Options;
+            MapperProvider = _options.MapperProvider ?? Configuration.Mapper.MapperProvider.Instance;
         }
 
         #endregion
@@ -847,15 +885,23 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector)
+        public IEnumerable<TEntity> ExecuteSqlQuery([NotNull] string sql, CommandType cmdType, [CanBeNull] object[] parameters, [NotNull] Func<IDataReader, TEntity> projector)
         {
             LogExecutingMethod();
+
+            InterceptError(() =>
+            {
+                Guard.NotEmpty(sql);
+                Guard.NotNull(projector);
+            });
 
             var parametersDict = ConvertToParametersDictionary(parameters);
 
             IQueryResult<IEnumerable<TEntity>> Getter() =>
                 UseContext<IQueryResult<IEnumerable<TEntity>>>(
-                    context => context.ExecuteSqlQuery(sql, cmdType, parametersDict, projector));
+                    context => Guard.EnsureNotNull(
+                        context.ExecuteSqlQuery(sql, cmdType, parametersDict, projector),
+                        Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
                 ? CacheProvider.GetOrSetExecuteSqlQuery<TEntity>(sql, cmdType, parametersDict, projector, Getter, Logger)
@@ -877,7 +923,7 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, object[] parameters, Func<IDataReader, TEntity> projector)
+        public IEnumerable<TEntity> ExecuteSqlQuery([NotNull] string sql, [CanBeNull] object[] parameters, [NotNull] Func<IDataReader, TEntity> projector)
         {
             return ExecuteSqlQuery(sql, CommandType.Text, parameters, projector);
         }
@@ -888,7 +934,7 @@
         /// <param name="sql">The SQL query string.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, Func<IDataReader, TEntity> projector)
+        public IEnumerable<TEntity> ExecuteSqlQuery([NotNull] string sql, [NotNull] Func<IDataReader, TEntity> projector)
         {
             return ExecuteSqlQuery(sql, (object[])null, projector);
         }
@@ -900,9 +946,11 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <returns>A list which each entity has been projected into a new form using a default mapping provider.</returns>
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, CommandType cmdType, object[] parameters)
+        public IEnumerable<TEntity> ExecuteSqlQuery([NotNull] string sql, CommandType cmdType, [CanBeNull] object[] parameters)
         {
-            var mapper = MapperProvider.Create<TEntity>();
+            var mapper = InterceptError(() => Guard.EnsureNotNull(
+                MapperProvider.Create<TEntity>(), 
+                $"The mapping provider is unable to create a mapper for '{typeof(TEntity).FullName}'"));
 
             return ExecuteSqlQuery(sql, CommandType.Text, parameters, r => mapper.Map(r));
         }
@@ -913,7 +961,7 @@
         /// <param name="sql">The SQL query string.</param>
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <returns>A list which each entity has been projected into a new form using a default mapping provider.</returns>
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, object[] parameters)
+        public IEnumerable<TEntity> ExecuteSqlQuery([NotNull] string sql, [CanBeNull] object[] parameters)
         {
             return ExecuteSqlQuery(sql, CommandType.Text, parameters);
         }
@@ -923,7 +971,7 @@
         /// </summary>
         /// <param name="sql">The SQL query string.</param>
         /// <returns>A list which each entity has been projected into a new form using a default mapping provider.</returns>
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql)
+        public IEnumerable<TEntity> ExecuteSqlQuery([NotNull] string sql)
         {
             return ExecuteSqlQuery(sql, (object[])null);
         }
@@ -935,15 +983,19 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <returns>The number of rows affected.</returns>
-        public int ExecuteSqlCommand(string sql, CommandType cmdType, object[] parameters)
+        public int ExecuteSqlCommand([NotNull] string sql, CommandType cmdType, [CanBeNull] object[] parameters)
         {
             LogExecutingMethod();
+
+            InterceptError(() => Guard.NotEmpty(sql));
 
             var parametersDict = ConvertToParametersDictionary(parameters);
 
             IQueryResult<int> Getter() =>
                 UseContext<IQueryResult<int>>(
-                    context => context.ExecuteSqlCommand(sql, cmdType, parametersDict));
+                    context => Guard.EnsureNotNull(
+                        context.ExecuteSqlCommand(sql, cmdType, parametersDict),
+                        Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
                 ? CacheProvider.GetOrSetExecuteSqlCommand<TEntity>(sql, cmdType, parametersDict, Getter, Logger)
@@ -964,7 +1016,7 @@
         /// <param name="sql">The SQL query string.</param>
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <returns>The number of rows affected.</returns>
-        public int ExecuteSqlCommand(string sql, object[] parameters)
+        public int ExecuteSqlCommand([NotNull] string sql, [CanBeNull] object[] parameters)
         {
             return ExecuteSqlCommand(sql, CommandType.Text, parameters);
         }
@@ -974,7 +1026,7 @@
         /// </summary>
         /// <param name="sql">The SQL query string.</param>
         /// <returns>The number of rows affected.</returns>
-        public int ExecuteSqlCommand(string sql)
+        public int ExecuteSqlCommand([NotNull] string sql)
         {
             return ExecuteSqlCommand(sql, (object[])null);
         }
@@ -988,15 +1040,23 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
-        public async Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync([NotNull] string sql, CommandType cmdType, [CanBeNull] object[] parameters, [NotNull] Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod();
+
+            InterceptError(() =>
+            {
+                Guard.NotEmpty(sql);
+                Guard.NotNull(projector);
+            });
 
             var parametersDict = ConvertToParametersDictionary(parameters);
 
             Task<IQueryResult<IEnumerable<TEntity>>> Getter() =>
                 UseContextAsync<IQueryResult<IEnumerable<TEntity>>>(
-                    context => context.ExecuteSqlQueryAsync(sql, cmdType, parametersDict, projector, cancellationToken));
+                    context => Guard.EnsureNotNull(
+                        context.ExecuteSqlQueryAsync(sql, cmdType, parametersDict, projector, cancellationToken),
+                        Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
                 ? await CacheProvider.GetOrSetExecuteSqlQueryAsync<TEntity>(sql, cmdType, parametersDict, projector, Getter, Logger)
@@ -1019,7 +1079,7 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync([NotNull] string sql, [CanBeNull] object[] parameters, [NotNull] Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteSqlQueryAsync(sql, CommandType.Text, parameters, projector, cancellationToken);
         }
@@ -1031,7 +1091,7 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync([NotNull] string sql, [NotNull] Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteSqlQueryAsync(sql, (object[])null, projector, cancellationToken);
         }
@@ -1044,9 +1104,11 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing A list which each entity has been projected into a new form using a default mapping provider.</returns> 
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CommandType cmdType, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync([NotNull] string sql, CommandType cmdType, [CanBeNull] object[] parameters, CancellationToken cancellationToken = new CancellationToken())
         {
-            var mapper = MapperProvider.Create<TEntity>();
+            var mapper = InterceptError(() => Guard.EnsureNotNull(
+                MapperProvider.Create<TEntity>(),
+                $"The mapping provider is unable to create a mapper for '{typeof(TEntity).FullName}'"));
 
             return ExecuteSqlQueryAsync(sql, CommandType.Text, parameters, r => mapper.Map(r), cancellationToken);
         }
@@ -1058,7 +1120,7 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing A list which each entity has been projected into a new form using a default mapping provider.</returns> 
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync([NotNull] string sql, [CanBeNull] object[] parameters, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteSqlQueryAsync(sql, CommandType.Text, parameters, cancellationToken);
         }
@@ -1069,7 +1131,7 @@
         /// <param name="sql">The SQL query string.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing A list which each entity has been projected into a new form using a default mapping provider.</returns> 
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CancellationToken cancellationToken = new CancellationToken())
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync([NotNull] string sql, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteSqlQueryAsync(sql, (object[])null, cancellationToken);
         }
@@ -1082,15 +1144,19 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
-        public async Task<int> ExecuteSqlCommandAsync(string sql, CommandType cmdType, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<int> ExecuteSqlCommandAsync([NotNull] string sql, CommandType cmdType, [CanBeNull] object[] parameters, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod();
+
+            InterceptError(() => Guard.NotEmpty(sql));
 
             var parametersDict = ConvertToParametersDictionary(parameters);
 
             Task<IQueryResult<int>> Getter() =>
                 UseContextAsync<IQueryResult<int>>(
-                    context => context.ExecuteSqlCommandAsync(sql, cmdType, parametersDict, cancellationToken));
+                    context => Guard.EnsureNotNull(
+                        context.ExecuteSqlCommandAsync(sql, cmdType, parametersDict, cancellationToken),
+                        Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
                 ? await CacheProvider.GetOrSetExecuteSqlCommandAsync<TEntity>(sql, cmdType, parametersDict, Getter, Logger)
@@ -1112,7 +1178,7 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
-        public Task<int> ExecuteSqlCommandAsync(string sql, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
+        public Task<int> ExecuteSqlCommandAsync([NotNull] string sql, [CanBeNull] object[] parameters, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteSqlCommandAsync(sql, CommandType.Text, parameters, cancellationToken);
         }
@@ -1123,7 +1189,7 @@
         /// <param name="sql">The SQL query string.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
-        public Task<int> ExecuteSqlCommandAsync(string sql, CancellationToken cancellationToken = new CancellationToken())
+        public Task<int> ExecuteSqlCommandAsync([NotNull] string sql, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteSqlCommandAsync(sql, (object[])null, cancellationToken);
         }
@@ -1132,15 +1198,11 @@
         /// Adds the specified <paramref name="entity" /> into the repository.
         /// </summary>
         /// <param name="entity">The entity to add.</param>
-        public void Add(TEntity entity)
+        public void Add([NotNull] TEntity entity)
         {
             LogExecutingMethod(false);
 
-            InterceptError(() =>
-            {
-                if (entity == null)
-                    throw new ArgumentNullException(nameof(entity));
-            });
+            InterceptError(() => Guard.NotNull(entity));
 
             Intercept(x => x.AddExecuting(entity));
 
@@ -1161,15 +1223,11 @@
         /// Adds the specified <paramref name="entities" /> collection into the repository.
         /// </summary>
         /// <param name="entities">The collection of entities to add.</param>
-        public void Add(IEnumerable<TEntity> entities)
+        public void Add([NotNull] IEnumerable<TEntity> entities)
         {
             LogExecutingMethod(false);
 
-            InterceptError(() =>
-            {
-                if (entities == null)
-                    throw new ArgumentNullException(nameof(entities));
-            });
+            InterceptError(() => Guard.NotNull(entities));
 
             UseContext(context =>
             {
@@ -1197,15 +1255,11 @@
         /// Updates the specified <paramref name="entity" /> into the repository.
         /// </summary>
         /// <param name="entity">The entity to update.</param>
-        public void Update(TEntity entity)
+        public void Update([NotNull] TEntity entity)
         {
             LogExecutingMethod(false);
 
-            InterceptError(() =>
-            {
-                if (entity == null)
-                    throw new ArgumentNullException(nameof(entity));
-            });
+            InterceptError(() => Guard.NotNull(entity));
 
             Intercept(x => x.UpdateExecuting(entity));
 
@@ -1226,15 +1280,11 @@
         /// Updates the specified <paramref name="entities" /> collection into the repository.
         /// </summary>
         /// <param name="entities">The collection of entities to update.</param>
-        public void Update(IEnumerable<TEntity> entities)
+        public void Update([NotNull] IEnumerable<TEntity> entities)
         {
             LogExecutingMethod(false);
 
-            InterceptError(() =>
-            {
-                if (entities == null)
-                    throw new ArgumentNullException(nameof(entities));
-            });
+            InterceptError(() => Guard.NotNull(entities));
 
             UseContext(context =>
             {
@@ -1262,15 +1312,11 @@
         /// Deletes the specified <paramref name="entity" /> into the repository.
         /// </summary>
         /// <param name="entity">The entity to delete.</param>
-        public void Delete(TEntity entity)
+        public void Delete([NotNull] TEntity entity)
         {
             LogExecutingMethod(false);
 
-            InterceptError(() =>
-            {
-                if (entity == null)
-                    throw new ArgumentNullException(nameof(entity));
-            });
+            InterceptError(() => Guard.NotNull(entity));
 
             Intercept(x => x.DeleteExecuting(entity));
 
@@ -1291,36 +1337,29 @@
         /// Deletes all the entities in the repository that satisfies the criteria specified by the <paramref name="predicate" />.
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
-        public void Delete(Expression<Func<TEntity, bool>> predicate)
+        public void Delete([NotNull] Expression<Func<TEntity, bool>> predicate)
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                if (predicate == null)
-                    throw new ArgumentNullException(nameof(predicate));
-            });
+            InterceptError(() => Guard.NotNull(predicate));
 
             Delete(predicate.ToQueryOptions<TEntity>());
 
             LogExecutedMethod();
         }
-
+        
         /// <summary>
         /// Deletes all entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
         /// </summary>
         /// <param name="options">The options to apply to the query.</param>
-        public void Delete(IQueryOptions<TEntity> options)
+        public void Delete([NotNull] IQueryOptions<TEntity> options)
         {
             LogExecutingMethod(false);
 
             InterceptError(() =>
             {
-                if (options == null)
-                    throw new ArgumentNullException(nameof(options));
-
-                if (options.SpecificationStrategy == null)
-                    throw new InvalidOperationException("The specified query options is missing a specification predicate.");
+                Guard.NotNull(options);
+                Guard.EnsureNotNull(options.SpecificationStrategy, "The specified query options is missing a specification predicate.");
             });
 
             Delete(FindAll(options).Result);
@@ -1332,15 +1371,11 @@
         /// Deletes the specified <paramref name="entities" /> collection into the repository.
         /// </summary>
         /// <param name="entities">The collection of entities to delete.</param>
-        public void Delete(IEnumerable<TEntity> entities)
+        public void Delete([NotNull] IEnumerable<TEntity> entities)
         {
             LogExecutingMethod(false);
 
-            InterceptError(() =>
-            {
-                if (entities == null)
-                    throw new ArgumentNullException(nameof(entities));
-            });
+            InterceptError(() => Guard.NotNull(entities));
 
             UseContext(context =>
             {
@@ -1369,7 +1404,7 @@
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
         /// <returns>The entity that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
-        public TEntity Find(Expression<Func<TEntity, bool>> predicate)
+        public TEntity Find([NotNull] Expression<Func<TEntity, bool>> predicate)
         {
             return Find<TEntity>(predicate, IdentityExpression<TEntity>.Instance);
         }
@@ -1379,7 +1414,7 @@
         /// </summary>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>The entity that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public TEntity Find(IQueryOptions<TEntity> options)
+        public TEntity Find([CanBeNull] IQueryOptions<TEntity> options)
         {
             return Find<TEntity>(options, IdentityExpression<TEntity>.Instance);
         }
@@ -1390,14 +1425,14 @@
         /// <param name="predicate">A function to filter each entity.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public TResult Find<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector)
+        public TResult Find<TResult>([NotNull] Expression<Func<TEntity, bool>> predicate, [NotNull] Expression<Func<TEntity, TResult>> selector)
         {
             LogExecutingMethod();
 
             InterceptError(() =>
             {
-                if (predicate == null)
-                    throw new ArgumentNullException(nameof(predicate));
+                Guard.NotNull(predicate);
+                Guard.NotNull(selector);
             });
 
             var result = Find<TResult>(predicate.ToQueryOptions<TEntity>(), selector);
@@ -1413,13 +1448,17 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public TResult Find<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
+        public TResult Find<TResult>(IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TResult>> selector)
         {
             LogExecutingMethod();
 
+            InterceptError(() => Guard.NotNull(selector));
+
             IQueryResult<TResult> Getter() =>
                 UseContext<IQueryResult<TResult>>(
-                    context => context.Find<TEntity, TResult>(options, selector));
+                    context => Guard.EnsureNotNull(
+                        context.Find<TEntity, TResult>(options, selector),
+                        Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
                 ? CacheProvider.GetOrSetFind<TEntity, TResult>(options, selector, Getter, Logger)
@@ -1446,7 +1485,7 @@
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
         /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
-        public IEnumerable<TEntity> FindAll(Expression<Func<TEntity, bool>> predicate)
+        public IEnumerable<TEntity> FindAll([NotNull] Expression<Func<TEntity, bool>> predicate)
         {
             return FindAll<TEntity>(predicate, IdentityExpression<TEntity>.Instance);
         }
@@ -1456,7 +1495,7 @@
         /// </summary>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public IPagedQueryResult<IEnumerable<TEntity>> FindAll(IQueryOptions<TEntity> options)
+        public IPagedQueryResult<IEnumerable<TEntity>> FindAll([CanBeNull] IQueryOptions<TEntity> options)
         {
             return FindAll<TEntity>(options, IdentityExpression<TEntity>.Instance);
         }
@@ -1466,7 +1505,7 @@
         /// </summary>
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <returns>The collection of projected entity results in the repository.</returns>
-        public IEnumerable<TResult> FindAll<TResult>(Expression<Func<TEntity, TResult>> selector)
+        public IEnumerable<TResult> FindAll<TResult>([NotNull] Expression<Func<TEntity, TResult>> selector)
         {
             return FindAll<TResult>((IQueryOptions<TEntity>)null, selector).Result;
         }
@@ -1477,14 +1516,14 @@
         /// <param name="predicate">A function to filter each entity.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
-        public IEnumerable<TResult> FindAll<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector)
+        public IEnumerable<TResult> FindAll<TResult>([NotNull] Expression<Func<TEntity, bool>> predicate, [NotNull] Expression<Func<TEntity, TResult>> selector)
         {
             LogExecutingMethod();
 
             InterceptError(() =>
             {
-                if (predicate == null)
-                    throw new ArgumentNullException(nameof(predicate));
+                Guard.NotNull(predicate);
+                Guard.NotNull(selector);
             });
 
             var result = FindAll<TResult>(predicate.ToQueryOptions<TEntity>(), selector).Result;
@@ -1500,13 +1539,17 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public IPagedQueryResult<IEnumerable<TResult>> FindAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
+        public IPagedQueryResult<IEnumerable<TResult>> FindAll<TResult>(IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TResult>> selector)
         {
             LogExecutingMethod();
 
+            InterceptError(() => Guard.NotNull(selector));
+
             IPagedQueryResult<IEnumerable<TResult>> Getter() =>
                 UseContext<IPagedQueryResult<IEnumerable<TResult>>>(
-                    context => context.FindAll<TEntity, TResult>(options, selector));
+                    context => Guard.EnsureNotNull(
+                        context.FindAll<TEntity, TResult>(options, selector),
+                        Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
                 ? CacheProvider.GetOrSetFindAll<TEntity, TResult>(options, selector, Getter, Logger)
@@ -1524,20 +1567,16 @@
         /// </summary>
         /// <param name="predicate">The predicate used to match entities against.</param>
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified predicate; otherwise, <c>false</c>.</returns>
-        public bool Exists(Expression<Func<TEntity, bool>> predicate)
+        public bool Exists([NotNull] Expression<Func<TEntity, bool>> predicate)
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                if (predicate == null)
-                    throw new ArgumentNullException(nameof(predicate));
-            });
+            InterceptError(() => Guard.NotNull(predicate));
 
             var result = Exists(predicate.ToQueryOptions<TEntity>());
 
             LogExecutedMethod();
-
+            
             return result;
         }
 
@@ -1546,17 +1585,14 @@
         /// </summary>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
-        public bool Exists(IQueryOptions<TEntity> options)
+        public bool Exists([NotNull] IQueryOptions<TEntity> options)
         {
             LogExecutingMethod();
 
             InterceptError(() =>
             {
-                if (options == null)
-                    throw new ArgumentNullException(nameof(options));
-
-                if (options.SpecificationStrategy == null)
-                    throw new InvalidOperationException("The specified query options is missing a specification predicate.");
+                Guard.NotNull(options);
+                Guard.EnsureNotNull(options.SpecificationStrategy, "The specified query options is missing a specification predicate.");
             });
 
             var result = Find(options) != null;
@@ -1580,15 +1616,11 @@
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
-        public int Count(Expression<Func<TEntity, bool>> predicate)
+        public int Count([NotNull] Expression<Func<TEntity, bool>> predicate)
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                if (predicate == null)
-                    throw new ArgumentNullException(nameof(predicate));
-            });
+            InterceptError(() => Guard.NotNull(predicate));
 
             var result = Count(predicate.ToQueryOptions<TEntity>());
 
@@ -1602,13 +1634,15 @@
         /// </summary>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public int Count(IQueryOptions<TEntity> options)
+        public int Count([CanBeNull] IQueryOptions<TEntity> options)
         {
             LogExecutingMethod();
 
             IQueryResult<int> Getter() =>
                 UseContext<IQueryResult<int>>(
-                    context => context.Count<TEntity>(options));
+                    context => Guard.EnsureNotNull(
+                        context.Count<TEntity>(options),
+                        Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
                 ? CacheProvider.GetOrSetCount<TEntity>(options, Getter, Logger)
@@ -1627,7 +1661,7 @@
         /// <typeparam name="TDictionaryKey">The type of the dictionary key.</typeparam>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector)
+        public Dictionary<TDictionaryKey, TEntity> ToDictionary<TDictionaryKey>([NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector)
         {
             return ToDictionary<TDictionaryKey>((IQueryOptions<TEntity>)null, keySelector).Result;
         }
@@ -1639,7 +1673,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public IPagedQueryResult<Dictionary<TDictionaryKey, TEntity>> ToDictionary<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector)
+        public IPagedQueryResult<Dictionary<TDictionaryKey, TEntity>> ToDictionary<TDictionaryKey>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector)
         {
             return ToDictionary<TDictionaryKey, TEntity>(options, keySelector, IdentityExpression<TEntity>.Instance);
         }
@@ -1652,7 +1686,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
+        public Dictionary<TDictionaryKey, TElement> ToDictionary<TDictionaryKey, TElement>([NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector, [NotNull] Expression<Func<TEntity, TElement>> elementSelector)
         {
             return ToDictionary<TDictionaryKey, TElement>((IQueryOptions<TEntity>)null, keySelector, elementSelector).Result;
         }
@@ -1666,13 +1700,21 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
+        public IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TDictionaryKey, TElement>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector, [NotNull] Expression<Func<TEntity, TElement>> elementSelector)
         {
             LogExecutingMethod();
 
+            InterceptError(() =>
+            {
+                Guard.NotNull(keySelector);
+                Guard.NotNull(elementSelector);
+            });
+
             IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> Getter() =>
                 UseContext<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
-                    context => context.ToDictionary(options, keySelector, elementSelector));
+                    context => Guard.EnsureNotNull(
+                        context.ToDictionary(options, keySelector, elementSelector),
+                        Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
                 ? CacheProvider.GetOrSetDictionary<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector, Getter, Logger)
@@ -1693,7 +1735,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="resultSelector">A transform function to produce a result value from each element.</param>
         /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains the grouped result.</returns>
-        public IEnumerable<TResult> GroupBy<TGroupKey, TResult>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
+        public IEnumerable<TResult> GroupBy<TGroupKey, TResult>([NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
             return GroupBy<TGroupKey, TResult>((IQueryOptions<TEntity>)null, keySelector, resultSelector).Result;
         }
@@ -1707,13 +1749,21 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="resultSelector">A transform function to produce a result value from each element.</param>
         /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public IPagedQueryResult<IEnumerable<TResult>> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
+        public IPagedQueryResult<IEnumerable<TResult>> GroupBy<TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
             LogExecutingMethod();
 
+            InterceptError(() =>
+            {
+                Guard.NotNull(keySelector);
+                Guard.NotNull(resultSelector);
+            });
+
             IPagedQueryResult<IEnumerable<TResult>> Getter() =>
                 UseContext<IPagedQueryResult<IEnumerable<TResult>>>(
-                    context => context.GroupBy(options, keySelector, resultSelector));
+                    context => Guard.EnsureNotNull(
+                        context.GroupBy(options, keySelector, resultSelector),
+                        Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
                 ? CacheProvider.GetOrSetGroup<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector, Getter, Logger)
@@ -1732,14 +1782,13 @@
         /// <param name="entity">The entity to add.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        public async Task AddAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
+        public async Task AddAsync([NotNull] TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod(false);
 
             InterceptError(() =>
             {
-                if (entity == null)
-                    throw new ArgumentNullException(nameof(entity));
+                Guard.NotNull(entity);
 
                 cancellationToken.ThrowIfCancellationRequested();
             });
@@ -1765,14 +1814,13 @@
         /// <param name="entities">The collection of entities to add.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        public async Task AddAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
+        public async Task AddAsync([NotNull] IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod(false);
 
             InterceptError(() =>
             {
-                if (entities == null)
-                    throw new ArgumentNullException(nameof(entities));
+                Guard.NotNull(entities);
 
                 cancellationToken.ThrowIfCancellationRequested();
             });
@@ -1805,14 +1853,13 @@
         /// <param name="entity">The entity to update.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        public async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
+        public async Task UpdateAsync([NotNull] TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod(false);
 
             InterceptError(() =>
             {
-                if (entity == null)
-                    throw new ArgumentNullException(nameof(entity));
+                Guard.NotNull(entity);
 
                 cancellationToken.ThrowIfCancellationRequested();
             });
@@ -1838,14 +1885,13 @@
         /// <param name="entities">The collection of entities to update.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        public async Task UpdateAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
+        public async Task UpdateAsync([NotNull] IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod(false);
 
             InterceptError(() =>
             {
-                if (entities == null)
-                    throw new ArgumentNullException(nameof(entities));
+                Guard.NotNull(entities);
 
                 cancellationToken.ThrowIfCancellationRequested();
             });
@@ -1878,14 +1924,13 @@
         /// <param name="entity">The entity to delete.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        public async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
+        public async Task DeleteAsync([NotNull] TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod(false);
 
             InterceptError(() =>
             {
-                if (entity == null)
-                    throw new ArgumentNullException(nameof(entity));
+                Guard.NotNull(entity);
 
                 cancellationToken.ThrowIfCancellationRequested();
             });
@@ -1911,15 +1956,11 @@
         /// <param name="predicate">A function to filter each entity.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        public async Task DeleteAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
+        public async Task DeleteAsync([NotNull] Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod(false);
 
-            InterceptError(() =>
-            {
-                if (predicate == null)
-                    throw new ArgumentNullException(nameof(predicate));
-            });
+            InterceptError(() => Guard.NotNull(predicate));
 
             await DeleteAsync(predicate.ToQueryOptions<TEntity>(), cancellationToken);
 
@@ -1932,17 +1973,14 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        public async Task DeleteAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        public async Task DeleteAsync([NotNull] IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod(false);
 
             InterceptError(() =>
             {
-                if (options == null)
-                    throw new ArgumentNullException(nameof(options));
-
-                if (options.SpecificationStrategy == null)
-                    throw new InvalidOperationException("The specified query options is missing a specification predicate.");
+                Guard.NotNull(options);
+                Guard.EnsureNotNull(options.SpecificationStrategy, "The specified query options is missing a specification predicate.");
             });
 
             var entitiesInDb = (await FindAllAsync(options, cancellationToken)).Result;
@@ -1958,14 +1996,13 @@
         /// <param name="entities">The collection of entities to delete.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        public async Task DeleteAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
+        public async Task DeleteAsync([NotNull] IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod(false);
 
             InterceptError(() =>
             {
-                if (entities == null)
-                    throw new ArgumentNullException(nameof(entities));
+                Guard.NotNull(entities);
 
                 cancellationToken.ThrowIfCancellationRequested();
             });
@@ -1998,7 +2035,7 @@
         /// <param name="predicate">A function to filter each entity.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
-        public Task<TEntity> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync([NotNull] Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
             return FindAsync<TEntity>(predicate, IdentityExpression<TEntity>.Instance, cancellationToken);
         }
@@ -2009,7 +2046,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public Task<TEntity> FindAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync([CanBeNull] IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             return FindAsync<TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken);
         }
@@ -2021,15 +2058,11 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public Task<TResult> FindAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TResult> FindAsync<TResult>([NotNull] Expression<Func<TEntity, bool>> predicate, [NotNull] Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                if (predicate == null)
-                    throw new ArgumentNullException(nameof(predicate));
-            });
+            InterceptError(() => Guard.NotNull(predicate));
 
             var result = FindAsync<TResult>(predicate.ToQueryOptions<TEntity>(), selector, cancellationToken);
 
@@ -2045,13 +2078,17 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public async Task<TResult> FindAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<TResult> FindAsync<TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod();
 
+            InterceptError(() => Guard.NotNull(selector));
+
             Task<IQueryResult<TResult>> Getter() =>
                 UseContextAsync<IQueryResult<TResult>>(
-                    context => context.FindAsync<TEntity, TResult>(options, selector, cancellationToken));
+                    context => Guard.EnsureNotNull(
+                        context.FindAsync<TEntity, TResult>(options, selector, cancellationToken),
+                        Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
                 ? await CacheProvider.GetOrSetFindAsync<TEntity, TResult>(options, selector, Getter, Logger)
@@ -2080,7 +2117,7 @@
         /// <param name="predicate">A function to filter each entity.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of entities in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
-        public Task<IEnumerable<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
+        public Task<IEnumerable<TEntity>> FindAllAsync([NotNull] Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
             return FindAllAsync<TEntity>(predicate, IdentityExpression<TEntity>.Instance, cancellationToken);
         }
@@ -2102,7 +2139,7 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository.</returns>
-        public async Task<IEnumerable<TResult>> FindAllAsync<TResult>(Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<IEnumerable<TResult>> FindAllAsync<TResult>([NotNull] Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             return (await FindAllAsync<TResult>((IQueryOptions<TEntity>)null, selector, cancellationToken)).Result;
         }
@@ -2114,15 +2151,11 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
-        public async Task<IEnumerable<TResult>> FindAllAsync<TResult>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<IEnumerable<TResult>> FindAllAsync<TResult>([NotNull] Expression<Func<TEntity, bool>> predicate, [NotNull] Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                if (predicate == null)
-                    throw new ArgumentNullException(nameof(predicate));
-            });
+            InterceptError(() => Guard.NotNull(predicate));
 
             var result = (await FindAllAsync<TResult>(predicate.ToQueryOptions<TEntity>(), selector, cancellationToken)).Result;
 
@@ -2138,13 +2171,17 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public async Task<IPagedQueryResult<IEnumerable<TResult>>> FindAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<IPagedQueryResult<IEnumerable<TResult>>> FindAllAsync<TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod();
 
+            InterceptError(() => Guard.NotNull(selector));
+
             Task<IPagedQueryResult<IEnumerable<TResult>>> Getter() =>
                 UseContextAsync<IPagedQueryResult<IEnumerable<TResult>>>(
-                    context => context.FindAllAsync<TEntity, TResult>(options, selector, cancellationToken));
+                    context => Guard.EnsureNotNull(
+                        context.FindAllAsync<TEntity, TResult>(options, selector, cancellationToken),
+                        Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
                 ? await CacheProvider.GetOrSetFindAllAsync<TEntity, TResult>(options, selector, Getter, Logger)
@@ -2163,15 +2200,11 @@
         /// <param name="predicate">The predicate used to match entities against.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified predicate; otherwise, <c>false</c>.</returns>
-        public Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
+        public Task<bool> ExistsAsync([NotNull] Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                if (predicate == null)
-                    throw new ArgumentNullException(nameof(predicate));
-            });
+            InterceptError(() => Guard.NotNull(predicate));
 
             var result = ExistsAsync(predicate.ToQueryOptions<TEntity>(), cancellationToken);
 
@@ -2186,17 +2219,14 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
-        public async Task<bool> ExistsAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<bool> ExistsAsync([NotNull] IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod();
 
             InterceptError(() =>
             {
-                if (options == null)
-                    throw new ArgumentNullException(nameof(options));
-
-                if (options.SpecificationStrategy == null)
-                    throw new InvalidOperationException("The specified query options is missing a specification predicate.");
+                Guard.NotNull(options);
+                Guard.EnsureNotNull(options.SpecificationStrategy, "The specified query options is missing a specification predicate.");
             });
 
             var result = await FindAsync(options, cancellationToken) != null;
@@ -2222,15 +2252,11 @@
         /// <param name="predicate">A function to filter each entity.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
-        public Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
+        public Task<int> CountAsync([NotNull] Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                if (predicate == null)
-                    throw new ArgumentNullException(nameof(predicate));
-            });
+            InterceptError(() => Guard.NotNull(predicate));
 
             var result = CountAsync(predicate.ToQueryOptions<TEntity>(), cancellationToken);
 
@@ -2245,13 +2271,15 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public async Task<int> CountAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<int> CountAsync([CanBeNull] IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod();
 
             Task<IQueryResult<int>> Getter() =>
                 UseContextAsync<IQueryResult<int>>(
-                    context => context.CountAsync<TEntity>(options, cancellationToken));
+                    context => Guard.EnsureNotNull(
+                        context.CountAsync<TEntity>(options, cancellationToken),
+                        Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
                 ? await CacheProvider.GetOrSetCountAsync<TEntity>(options, Getter, Logger)
@@ -2271,7 +2299,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public async Task<Dictionary<TDictionaryKey, TEntity>> ToDictionaryAsync<TDictionaryKey>(Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<Dictionary<TDictionaryKey, TEntity>> ToDictionaryAsync<TDictionaryKey>([NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
         {
             return (await ToDictionaryAsync<TDictionaryKey>((IQueryOptions<TEntity>)null, keySelector, cancellationToken)).Result;
         }
@@ -2284,7 +2312,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public Task<IPagedQueryResult<Dictionary<TDictionaryKey, TEntity>>> ToDictionaryAsync<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<IPagedQueryResult<Dictionary<TDictionaryKey, TEntity>>> ToDictionaryAsync<TDictionaryKey>(IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ToDictionaryAsync<TDictionaryKey, TEntity>(options, keySelector, IdentityExpression<TEntity>.Instance, cancellationToken);
         }
@@ -2298,7 +2326,7 @@
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public async Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TDictionaryKey, TElement>(Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TDictionaryKey, TElement>([NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector, [NotNull] Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             return (await ToDictionaryAsync<TDictionaryKey, TElement>((IQueryOptions<TEntity>)null, keySelector, elementSelector, cancellationToken)).Result;
         }
@@ -2313,13 +2341,21 @@
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public async Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TDictionaryKey, TElement>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector, [NotNull] Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod();
 
+            InterceptError(() =>
+            {
+                Guard.NotNull(keySelector);
+                Guard.NotNull(elementSelector);
+            });
+
             Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> Getter() =>
                 UseContextAsync<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
-                    context => context.ToDictionaryAsync(options, keySelector, elementSelector, cancellationToken));
+                    context => Guard.EnsureNotNull(
+                        context.ToDictionaryAsync(options, keySelector, elementSelector, cancellationToken),
+                        Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
                 ? await CacheProvider.GetOrSetDictionaryAsync<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector, Getter, Logger)
@@ -2342,7 +2378,7 @@
         /// <param name="resultSelector">A transform function to produce a result value from each element.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains the grouped result.</returns>
-        public async Task<IEnumerable<TResult>> GroupByAsync<TGroupKey, TResult>(Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<IEnumerable<TResult>> GroupByAsync<TGroupKey, TResult>([NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             return (await GroupByAsync<TGroupKey, TResult>((IQueryOptions<TEntity>)null, keySelector, resultSelector, cancellationToken)).Result;
         }
@@ -2357,13 +2393,21 @@
         /// <param name="resultSelector">A transform function to produce a result value from each element.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public async Task<IPagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<IPagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod();
 
+            InterceptError(() =>
+            {
+                Guard.NotNull(keySelector);
+                Guard.NotNull(resultSelector);
+            });
+
             Task<IPagedQueryResult<IEnumerable<TResult>>> Getter() =>
                 UseContextAsync<IPagedQueryResult<IEnumerable<TResult>>>(
-                    context => context.GroupByAsync(options, keySelector, resultSelector, cancellationToken));
+                    context => Guard.EnsureNotNull(
+                        context.GroupByAsync(options, keySelector, resultSelector, cancellationToken), 
+                        Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
                 ? await CacheProvider.GetOrSetGroupAsync<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector, Getter, Logger)
@@ -2596,17 +2640,14 @@
             return context;
         }
 
-        private static void DisposeContext(IRepositoryContext context)
+        private static void DisposeContext([CanBeNull] IRepositoryContext context)
         {
             if (context != null && context.CurrentTransaction == null)
                 context.Dispose();
         }
 
-        private void ClearCache(string sql)
+        private void ClearCache([NotNull] string sql)
         {
-            if (sql == null)
-                throw new ArgumentNullException(nameof(sql));
-
             var s = sql.ToUpperInvariant();
 
             var canClearCache = s.Contains("UPDATE") || s.Contains("DELETE FROM") || s.Contains("INSERT INTO");
@@ -2615,7 +2656,7 @@
                 ClearCache();
         }
 
-        private static Dictionary<string, object> ConvertToParametersDictionary(object[] parameters)
+        private static Dictionary<string, object> ConvertToParametersDictionary([CanBeNull] object[] parameters)
         {
             var parametersDict = new Dictionary<string, object>();
 

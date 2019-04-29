@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Concurrent;
+    using Utility;
 
     /// <summary>
     /// Represents an internal thread safe database storage which will store any information for the in-memory
@@ -62,8 +63,7 @@
         /// <returns>The scoped database context by the specified database name.</returns>
         public ConcurrentDictionary<Type, ConcurrentDictionary<object, object>> GetDatabaseStore(string name)
         {
-            if (name == null)
-                throw new ArgumentNullException(nameof(name));
+            Guard.NotEmpty(name);
 
             if (!_storage.ContainsKey(name))
             {

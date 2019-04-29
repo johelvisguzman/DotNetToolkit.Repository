@@ -1,7 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
-    using System;
+    using JetBrains.Annotations;
     using System.Reflection;
+    using Utility;
 
     internal static class PropertyInfoExtensions
     {
@@ -10,10 +11,9 @@
         /// </summary>
         /// <param name="pi">The property info.</param>
         /// <returns><c>true</c> if the specified type is a complex type; otherwise, <c>false</c>.</returns>
-        public static bool IsComplex(this PropertyInfo pi)
+        public static bool IsComplex([NotNull] this PropertyInfo pi)
         {
-            if (pi == null)
-                throw new ArgumentNullException(nameof(pi));
+            Guard.NotNull(pi);
 
             return pi.PropertyType.Namespace != "System";
         }
@@ -23,11 +23,8 @@
         /// </summary>
         /// <param name="pi">The property info.</param>
         /// <returns><c>true</c> if the specified type is a primitive type; otherwise, <c>false</c>.</returns>
-        public static bool IsPrimitive(this PropertyInfo pi)
+        public static bool IsPrimitive([NotNull] this PropertyInfo pi)
         {
-            if (pi == null)
-                throw new ArgumentNullException(nameof(pi));
-
             return !IsComplex(pi);
         }
     }

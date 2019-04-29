@@ -1,9 +1,9 @@
 ﻿namespace DotNetToolkit.Repository.Queries.Strategies
 {
-    using Helpers;
     using System;
     using System.Linq;
     using System.Linq.Expressions;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="ISpecificationQueryStrategy{T}" />.

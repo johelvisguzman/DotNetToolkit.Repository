@@ -1,8 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
-    using Configuration.Conventions;
+    using Configuration.Conventions.Internal;
     using Extensions;
-    using Helpers;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -10,6 +9,7 @@
     using System.Linq;
     using System.Reflection;
     using System.Text.RegularExpressions;
+    using Utility;
 
     internal class Mapper<T>
     {
@@ -36,8 +36,7 @@
 
         public Mapper(Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, Func<string, Type> getTableTypeByColumnAliasCallback)
         {
-            if (getTableTypeByColumnAliasCallback == null)
-                throw new ArgumentNullException(nameof(getTableTypeByColumnAliasCallback));
+            Guard.NotNull(getTableTypeByColumnAliasCallback);
 
             _properties = typeof(T).GetRuntimeProperties()
                 .Where(x => x.IsPrimitive() && x.IsColumnMapped())

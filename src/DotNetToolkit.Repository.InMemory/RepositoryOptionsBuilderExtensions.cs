@@ -2,7 +2,8 @@
 {
     using Configuration.Options;
     using Internal;
-    using System;
+    using JetBrains.Annotations;
+    using Utility;
 
     /// <summary>
     /// Contains various extension methods for <see cref="RepositoryOptionsBuilder" />
@@ -16,10 +17,9 @@
         /// <param name="ignoreTransactionWarning">If a transaction operation is requested, ignore any warnings since the in-memory provider does not support transactions.</param>
         /// <param name="ignoreSqlQueryWarning">If a SQL query is executed, ignore any warnings since the in-memory provider does not support SQL query execution.</param>
         /// <returns>The same builder instance.</returns>
-        public static RepositoryOptionsBuilder UseInMemoryDatabase(this RepositoryOptionsBuilder source, bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false)
+        public static RepositoryOptionsBuilder UseInMemoryDatabase([NotNull] this RepositoryOptionsBuilder source, bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
+            Guard.NotNull(source);
 
             source.UseInternalContextFactory(new InMemoryRepositoryContextFactory(ignoreTransactionWarning, ignoreSqlQueryWarning));
 
@@ -34,13 +34,10 @@
         /// <param name="ignoreTransactionWarning">If a transaction operation is requested, ignore any warnings since the in-memory provider does not support transactions.</param>
         /// <param name="ignoreSqlQueryWarning">If a SQL query is executed, ignore any warnings since the in-memory provider does not support SQL query execution.</param>
         /// <returns>The same builder instance.</returns>
-        public static RepositoryOptionsBuilder UseInMemoryDatabase(this RepositoryOptionsBuilder source, string databaseName, bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false)
+        public static RepositoryOptionsBuilder UseInMemoryDatabase([NotNull] this RepositoryOptionsBuilder source, [NotNull] string databaseName, bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            if (databaseName == null)
-                throw new ArgumentNullException(nameof(databaseName));
+            Guard.NotNull(source);
+            Guard.NotEmpty(databaseName);
 
             source.UseInternalContextFactory(new InMemoryRepositoryContextFactory(databaseName, ignoreTransactionWarning, ignoreSqlQueryWarning));
 

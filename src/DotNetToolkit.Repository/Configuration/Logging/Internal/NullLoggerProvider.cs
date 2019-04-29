@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Configuration.Logging
+﻿namespace DotNetToolkit.Repository.Configuration.Logging.Internal
 {
     /// <summary>
     /// An implementation of <see cref="ILoggerProvider" />.

@@ -1,6 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Logging
 {
+    using JetBrains.Annotations;
     using System;
+    using Utility;
 
     /// <summary>
     /// Represents a logger for that output to the console.
@@ -15,10 +17,9 @@
         /// </summary>
         /// <param name="minLogLevel">Indicates that only message of this level or higher will be logged.</param>
         /// <param name="categoryName">The name of the category.</param>
-        public ConsoleLogger(LogLevel minLogLevel, string categoryName)
+        public ConsoleLogger(LogLevel minLogLevel, [NotNull] string categoryName)
         {
-            if (categoryName == null)
-                throw new ArgumentNullException(nameof(categoryName));
+            Guard.NotEmpty(categoryName);
 
             _minLogLevel = minLogLevel;
             _categoryName = categoryName;
@@ -39,7 +40,7 @@
         /// </summary>
         /// <param name="logLevel">The log level severity.</param>
         /// <param name="message">The message to log.</param>
-        public virtual void Log(LogLevel logLevel, string message)
+        public virtual void Log(LogLevel logLevel, [CanBeNull] string message)
         {
             if (!IsEnabled(logLevel))
                 return;

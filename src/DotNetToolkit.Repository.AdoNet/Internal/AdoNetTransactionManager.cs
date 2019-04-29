@@ -1,9 +1,9 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
     using Configuration.Logging;
-    using System;
     using System.Data.Common;
     using Transactions;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="ITransactionManager" />.
@@ -35,16 +35,10 @@
         /// <param name="logger">The logger.</param>
         public AdoNetTransactionManager(DbTransaction transaction, ILogger logger)
         {
-            if (transaction == null)
-                throw new ArgumentNullException(nameof(transaction));
-
-            if (logger == null)
-                throw new ArgumentNullException(nameof(logger));
-
-            _logger = logger;
-            Transaction = transaction;
-
+            _logger = Guard.NotNull(logger);
             _logger.Debug("Started transaction");
+
+            Transaction = Guard.NotNull(transaction);
         }
 
         #endregion

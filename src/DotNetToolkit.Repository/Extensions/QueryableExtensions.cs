@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
-    using Configuration.Conventions;
-    using Helpers;
+    using Configuration.Conventions.Internal;
+    using JetBrains.Annotations;
     using Queries;
     using System;
     using System.Collections;
@@ -9,6 +9,7 @@
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
+    using Utility;
 
     /// <summary>
     /// Contains various utility methods for applying options to the specified <see cref="IQueryable{T}" />.
@@ -22,10 +23,9 @@
         /// Apply a specification strategy options to the specified entity's query.
         /// </summary>
         /// <returns>The entity's query with the applied options.</returns>
-        public static IQueryable<T> ApplySpecificationOptions<T>(this IQueryable<T> query, IQueryOptions<T> options) where T : class
+        public static IQueryable<T> ApplySpecificationOptions<T>([NotNull] this IQueryable<T> query, [CanBeNull] IQueryOptions<T> options) where T : class
         {
-            if (query == null)
-                throw new ArgumentNullException(nameof(query));
+            Guard.NotNull(query);
 
             if (options != null && options.SpecificationStrategy != null)
                 query = options.SpecificationStrategy.SatisfyingEntitiesFrom(query);
@@ -37,10 +37,9 @@
         /// Apply a sorting options to the specified entity's query.
         /// </summary>
         /// <returns>The entity's query with the applied options.</returns>
-        public static IOrderedQueryable<T> ApplySortingOptions<T>(this IQueryable<T> query, IQueryOptions<T> options) where T : class
+        public static IOrderedQueryable<T> ApplySortingOptions<T>([NotNull] this IQueryable<T> query, [CanBeNull] IQueryOptions<T> options) where T : class
         {
-            if (query == null)
-                throw new ArgumentNullException(nameof(query));
+            Guard.NotNull(query);
 
             var sorting = new Dictionary<string, SortOrder>();
 
@@ -82,10 +81,9 @@
         /// Apply a paging options to the specified entity's query.
         /// </summary>
         /// <returns>The entity's query with the applied options.</returns>
-        public static IQueryable<T> ApplyPagingOptions<T>(this IQueryable<T> query, IQueryOptions<T> options)
+        public static IQueryable<T> ApplyPagingOptions<T>([NotNull] this IQueryable<T> query, [CanBeNull] IQueryOptions<T> options)
         {
-            if (query == null)
-                throw new ArgumentNullException(nameof(query));
+            Guard.NotNull(query);
 
             if (options != null && options.PageSize != -1)
             {
@@ -99,13 +97,10 @@
         /// Apply a fetching options to the specified entity's query.
         /// </summary>
         /// <returns>The entity's query with the applied options.</returns>
-        public static IQueryable<T> ApplyFetchingOptions<T>(this IQueryable<T> query, IQueryOptions<T> options, Func<Type, IQueryable<object>> joinQueryCallback) where T : class
+        public static IQueryable<T> ApplyFetchingOptions<T>([NotNull] this IQueryable<T> query, [CanBeNull] IQueryOptions<T> options, [NotNull] Func<Type, IQueryable<object>> joinQueryCallback) where T : class
         {
-            if (query == null)
-                throw new ArgumentNullException(nameof(query));
-
-            if (joinQueryCallback == null)
-                throw new ArgumentNullException(nameof(joinQueryCallback));
+            Guard.NotNull(query);
+            Guard.NotNull(joinQueryCallback);
 
             var mainTableType = typeof(T);
             var mainTableProperties = mainTableType.GetRuntimeProperties().ToList();
@@ -226,10 +221,11 @@
             return (IList)list;
         }
 
-        private static IOrderedQueryable<T> ApplyOrder<T>(IQueryable<T> source, string propertyName, string methodName)
+        private static IOrderedQueryable<T> ApplyOrder<T>([NotNull] IQueryable<T> source, [NotNull] string propertyName, [NotNull] string methodName)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
+            Guard.NotNull(source);
+            Guard.NotEmpty(propertyName);
+            Guard.NotEmpty(methodName);
 
             var lambda = ExpressionHelper.GetExpression<T>(propertyName);
             var type = ExpressionHelper.GetMemberExpression(lambda).Type;
@@ -246,24 +242,24 @@
             return (IOrderedQueryable<T>)result;
         }
 
-        private static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> source, string propertyName)
+        private static IOrderedQueryable<T> OrderBy<T>([NotNull] this IQueryable<T> query, [NotNull] string propertyName)
         {
-            return ApplyOrder<T>(source, propertyName, "OrderBy");
+            return ApplyOrder<T>(query, propertyName, "OrderBy");
         }
 
-        private static IOrderedQueryable<T> OrderByDescending<T>(this IQueryable<T> source, string propertyName)
+        private static IOrderedQueryable<T> OrderByDescending<T>([NotNull] this IQueryable<T> query, [NotNull] string propertyName)
         {
-            return ApplyOrder<T>(source, propertyName, "OrderByDescending");
+            return ApplyOrder<T>(query, propertyName, "OrderByDescending");
         }
 
-        private static IOrderedQueryable<T> ThenBy<T>(this IOrderedQueryable<T> source, string propertyName)
+        private static IOrderedQueryable<T> ThenBy<T>([NotNull] this IOrderedQueryable<T> query, [NotNull] string propertyName)
         {
-            return ApplyOrder<T>(source, propertyName, "ThenBy");
+            return ApplyOrder<T>(query, propertyName, "ThenBy");
         }
 
-        private static IOrderedQueryable<T> ThenByDescending<T>(this IOrderedQueryable<T> source, string propertyName)
+        private static IOrderedQueryable<T> ThenByDescending<T>([NotNull] this IOrderedQueryable<T> query, [NotNull] string propertyName)
         {
-            return ApplyOrder<T>(source, propertyName, "ThenByDescending");
+            return ApplyOrder<T>(query, propertyName, "ThenByDescending");
         }
     }
 }

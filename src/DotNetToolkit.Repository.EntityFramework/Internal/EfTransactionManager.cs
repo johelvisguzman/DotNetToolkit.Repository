@@ -1,8 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.EntityFramework.Internal
 {
-    using System;
     using System.Data.Entity;
     using Transactions;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="ITransactionManager" />.
@@ -27,10 +27,7 @@
         /// <param name="transaction">The underlying transaction.</param>
         public EfTransactionManager(DbContextTransaction transaction)
         {
-            if (transaction == null)
-                throw new ArgumentNullException(nameof(transaction));
-
-            Transaction = transaction;
+            Transaction = Guard.NotNull(transaction);
         }
 
         #endregion

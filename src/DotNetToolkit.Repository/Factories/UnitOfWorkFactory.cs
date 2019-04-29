@@ -1,8 +1,10 @@
 ﻿namespace DotNetToolkit.Repository.Factories
 {
     using Configuration.Options;
+    using JetBrains.Annotations;
     using System;
     using Transactions;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="IUnitOfWorkFactory" />.
@@ -22,10 +24,9 @@
         /// Initializes a new instance of the <see cref="UnitOfWorkFactory" /> class.
         /// </summary>
         /// <param name="optionsAction">A builder action used to create or modify options for this unit of work factory.</param>
-        public UnitOfWorkFactory(Action<RepositoryOptionsBuilder> optionsAction)
+        public UnitOfWorkFactory([NotNull] Action<RepositoryOptionsBuilder> optionsAction)
         {
-            if (optionsAction == null)
-                throw new ArgumentNullException(nameof(optionsAction));
+            Guard.NotNull(optionsAction);
 
             var optionsBuilder = new RepositoryOptionsBuilder();
 
@@ -38,12 +39,9 @@
         /// Initializes a new instance of the <see cref="UnitOfWorkFactory" /> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        public UnitOfWorkFactory(IRepositoryOptions options)
+        public UnitOfWorkFactory([NotNull] IRepositoryOptions options)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            _options = options;
+            _options = Guard.NotNull(options);
         }
 
         #endregion

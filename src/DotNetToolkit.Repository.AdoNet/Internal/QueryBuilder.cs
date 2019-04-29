@@ -1,15 +1,14 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
-    using Configuration.Conventions;
+    using Configuration.Conventions.Internal;
     using Extensions;
-    using Helpers;
-    using Properties;
     using Queries;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
     using System.Text;
+    using Utility;
 
     /// <summary>
     /// Represents an internal query builder for building various queries.
@@ -18,8 +17,7 @@
     {
         public static void CreateInsertStatement(object entity, out string sql, out Dictionary<string, object> parameters)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
+            Guard.NotNull(entity);
 
             parameters = new Dictionary<string, object>();
 
@@ -54,8 +52,7 @@
 
         public static void CreateUpdateStatement(object entity, out string sql, out Dictionary<string, object> parameters)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
+            Guard.NotNull(entity);
 
             parameters = new Dictionary<string, object>();
 
@@ -91,8 +88,7 @@
 
         public static void CreateDeleteStatement(object entity, out string sql, out Dictionary<string, object> parameters)
         {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
+            Guard.NotNull(entity);
 
             parameters = new Dictionary<string, object>();
 
@@ -529,8 +525,7 @@
 
         public static void ExtractCrossJoinColumnName(string sql, out string columnName)
         {
-            if (sql == null)
-                throw new ArgumentNullException(nameof(sql));
+            Guard.NotEmpty(sql);
 
             columnName = string.Empty;
 
@@ -549,8 +544,7 @@
 
         private static Dictionary<string, PropertyInfo> GetProperties(Type entityType)
         {
-            if (entityType == null)
-                throw new ArgumentNullException(nameof(entityType));
+            Guard.NotNull(entityType);
 
             return entityType
                 .GetRuntimeProperties()

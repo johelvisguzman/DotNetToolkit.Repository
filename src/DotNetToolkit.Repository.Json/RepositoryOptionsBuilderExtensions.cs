@@ -2,7 +2,8 @@
 {
     using Configuration.Options;
     using Internal;
-    using System;
+    using JetBrains.Annotations;
+    using Utility;
 
     /// <summary>
     /// Contains various extension methods for <see cref="RepositoryOptionsBuilder" />
@@ -17,13 +18,10 @@
         /// <param name="ignoreTransactionWarning">If a transaction operation is requested, ignore any warnings since the context provider does not support transactions.</param>
         /// <param name="ignoreSqlQueryWarning">If a SQL query is executed, ignore any warnings since the in-memory provider does not support SQL query execution.</param>
         /// <returns>The same builder instance.</returns>
-        public static RepositoryOptionsBuilder UseJsonDatabase(this RepositoryOptionsBuilder source, string path, bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false)
+        public static RepositoryOptionsBuilder UseJsonDatabase([NotNull] this RepositoryOptionsBuilder source, [NotNull] string path, bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
+            Guard.NotNull(source);
+            Guard.NotEmpty(path);
 
             source.UseInternalContextFactory(new JsonRepositoryContextFactory(path, ignoreTransactionWarning, ignoreSqlQueryWarning));
 

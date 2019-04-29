@@ -2,7 +2,9 @@
 {
     using Configuration.Caching;
     using global::Microsoft.Extensions.Caching.Memory;
+    using JetBrains.Annotations;
     using System;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="ICache" />.
@@ -21,12 +23,9 @@
         /// Initializes a new instance of the <see cref="InMemoryCache" /> class.
         /// </summary>
         /// <param name="cache">The underlying caching storage.</param>
-        public InMemoryCache(IMemoryCache cache)
+        public InMemoryCache([NotNull] IMemoryCache cache)
         {
-            if (cache == null)
-                throw new ArgumentNullException(nameof(cache));
-
-            _cache = cache;
+            _cache = Guard.NotNull(cache);
         }
 
         #endregion
@@ -35,8 +34,7 @@
 
         private void Set<T>(string key, T value, CacheItemPriority priority, TimeSpan? expiry, Action<string> cacheRemovedCallback = null)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            Guard.NotEmpty(key);
 
             var policy = new MemoryCacheEntryOptions();
 
@@ -74,11 +72,8 @@
         /// <param name="value">The value to cache.</param>
         /// <param name="expiry">The cache expiration time.</param>
         /// <param name="cacheRemovedCallback">A callback function for a value is removed from the cache.</param>
-        public void Set<T>(string key, T value, TimeSpan? expiry, Action<string> cacheRemovedCallback = null)
+        public void Set<T>([NotNull] string key, T value, TimeSpan? expiry, Action<string> cacheRemovedCallback = null)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
             Set<T>(key, value, CacheItemPriority.Normal, expiry, cacheRemovedCallback);
         }
 
@@ -86,12 +81,9 @@
         /// Removes the object associated with the given key.
         /// </summary>
         /// <param name="key">An object identifying the entry.</param>
-        public void Remove(string key)
+        public void Remove([NotNull] string key)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            _cache.Remove(key);
+            _cache.Remove(Guard.NotEmpty(key));
         }
 
         /// <summary>
@@ -101,12 +93,9 @@
         /// <param name="key">An object identifying the requested entry.</param>
         /// <param name="value">The object found in the cache.</param>
         /// <returns>c<c>true</c> if the an object was found with the specified key; otherwise, <c>false</c>.</returns>
-        public bool TryGetValue<T>(string key, out T value)
+        public bool TryGetValue<T>([NotNull] string key, out T value)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            return _cache.TryGetValue<T>(key, out value);
+            return _cache.TryGetValue<T>(Guard.NotEmpty(key), out value);
         }
 
         /// <summary>
@@ -116,15 +105,12 @@
         /// <param name="defaultValue">The default value.</param>
         /// <param name="incrementValue">The increment value.</param>
         /// <returns>The value of key after the increment.</returns>
-        public int Increment(string key, int defaultValue, int incrementValue)
+        public int Increment([NotNull] string key, int defaultValue, int incrementValue)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            Guard.NotEmpty(key);
 
             if (!TryGetValue<int>(key, out var current))
-            {
                 current = defaultValue;
-            }
 
             var value = current + incrementValue;
 

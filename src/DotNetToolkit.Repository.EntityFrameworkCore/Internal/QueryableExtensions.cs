@@ -3,15 +3,14 @@
     using Extensions;
     using Microsoft.EntityFrameworkCore;
     using Queries;
-    using System;
     using System.Linq;
+    using Utility;
 
     internal static class QueryableExtensions
     {
         public static IQueryable<T> ApplyFetchingOptions<T>(this IQueryable<T> query, IQueryOptions<T> options) where T : class
         {
-            if (query == null)
-                throw new ArgumentNullException(nameof(query));
+            Guard.NotNull(query);
 
             var fetchingPaths = options.DefaultIfFetchStrategyEmpty().PropertyPaths.ToList();
 

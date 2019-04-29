@@ -2,8 +2,11 @@
 {
     using Configuration;
     using Configuration.Options;
+    using Configuration.Options.Internal;
     using Factories;
+    using JetBrains.Annotations;
     using System;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="IUnitOfWork" />.
@@ -26,10 +29,9 @@
         /// Initializes a new instance of the <see cref="UnitOfWork" /> class.
         /// </summary>
         /// <param name="optionsAction">A builder action used to create or modify options for this unit of work.</param>
-        public UnitOfWork(Action<RepositoryOptionsBuilder> optionsAction)
+        public UnitOfWork([NotNull] Action<RepositoryOptionsBuilder> optionsAction)
         {
-            if (optionsAction == null)
-                throw new ArgumentNullException(nameof(optionsAction));
+            Guard.NotNull(optionsAction);
 
             var optionsBuilder = new RepositoryOptionsBuilder();
 
@@ -42,12 +44,9 @@
         /// Initializes a new instance of the <see cref="UnitOfWork" /> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        public UnitOfWork(IRepositoryOptions options)
+        public UnitOfWork([NotNull] IRepositoryOptions options)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
-
-            Initialize(options);
+            Initialize(Guard.NotNull(options));
         }
 
         #endregion
@@ -94,14 +93,11 @@
 
         #region Private Methods
 
-        private void Initialize(IRepositoryOptions options)
+        private void Initialize([NotNull]  IRepositoryOptions options)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
+            Guard.NotNull(options);
 
-            var contextFactory = options.ContextFactory;
-            if (contextFactory == null)
-                throw new InvalidOperationException("No context provider has been configured for this unit of work.");
+            var contextFactory = Guard.EnsureNotNull(options.ContextFactory, "No context provider has been configured for this unit of work.");
 
             _context = contextFactory.Create();
             _transactionManager = _context.BeginTransaction();

@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Configuration.Caching
+﻿namespace DotNetToolkit.Repository.Configuration.Caching.Internal
 {
     using System;
 

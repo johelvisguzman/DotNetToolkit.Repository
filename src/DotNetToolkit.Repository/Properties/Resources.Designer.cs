@@ -10,8 +10,8 @@
 
 namespace DotNetToolkit.Repository.Properties {
     using System.Reflection;
-    
-    
+
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -129,6 +129,15 @@ namespace DotNetToolkit.Repository.Properties {
         internal static string ForeignKeyAttributeOnPropertyNotFoundOnDependentType {
             get {
                 return ResourceManager.GetString("ForeignKeyAttributeOnPropertyNotFoundOnDependentType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The repository context cannot returned a null query result for this operation..
+        /// </summary>
+        internal static string NullQueryResultOnContext {
+            get {
+                return ResourceManager.GetString("NullQueryResultOnContext", resourceCulture);
             }
         }
         

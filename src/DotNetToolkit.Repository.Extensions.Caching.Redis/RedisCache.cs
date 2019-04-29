@@ -1,9 +1,11 @@
 ﻿namespace DotNetToolkit.Repository.Extensions.Caching.Redis
 {
     using Configuration.Caching;
+    using JetBrains.Annotations;
     using Newtonsoft.Json;
     using StackExchange.Redis;
     using System;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="ICache" />.
@@ -37,10 +39,9 @@
         /// Initializes a new instance of the <see cref="RedisCache" /> class.
         /// </summary>
         /// <param name="configuration">The string configuration to use for the redis multiplexer.</param>
-        public RedisCache(string configuration)
+        public RedisCache([NotNull] string configuration)
         {
-            if (configuration == null)
-                throw new ArgumentNullException(nameof(configuration));
+            Guard.NotEmpty(configuration);
 
             _lazyConnection = new Lazy<ConnectionMultiplexer>(() => ConnectionMultiplexer.Connect(configuration));
         }
@@ -51,8 +52,7 @@
         /// <param name="options">The configuration options to use for the redis multiplexer.</param>
         public RedisCache(ConfigurationOptions options)
         {
-            if (options == null)
-                throw new ArgumentNullException(nameof(options));
+            Guard.NotNull(options);
 
             _lazyConnection = new Lazy<ConnectionMultiplexer>(() => ConnectionMultiplexer.Connect(options));
         }
@@ -69,7 +69,7 @@
         /// <param name="allowAdmin">Indicates whether admin operations should be allowed.</param>
         /// <param name="defaultDatabase">Specifies the default database to be used when calling ConnectionMultiplexer.GetDatabase() without any parameters.</param>
         /// <remarks>This will connect to a single server on the local machine using the default redis port (6379).</remarks>
-        public RedisCache(bool allowAdmin, int? defaultDatabase) : this("localhost", false, allowAdmin, defaultDatabase) { }
+        public RedisCache(bool allowAdmin, [CanBeNull] int? defaultDatabase) : this("localhost", false, allowAdmin, defaultDatabase) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCache" /> class.
@@ -78,10 +78,9 @@
         /// <param name="ssl">Specifies that SSL encryption should be used.</param>
         /// <param name="allowAdmin">Indicates whether admin operations should be allowed.</param>
         /// <param name="defaultDatabase">Specifies the default database to be used when calling ConnectionMultiplexer.GetDatabase() without any parameters.</param>
-        public RedisCache(string host, bool ssl, bool allowAdmin, int? defaultDatabase)
+        public RedisCache([NotNull] string host, bool ssl, bool allowAdmin, [CanBeNull] int? defaultDatabase)
         {
-            if (host == null)
-                throw new ArgumentNullException(nameof(host));
+            Guard.NotEmpty(host);
 
             var options = new ConfigurationOptions
             {
@@ -105,10 +104,9 @@
         /// <param name="ssl">Specifies that SSL encryption should be used.</param>
         /// <param name="allowAdmin">Indicates whether admin operations should be allowed.</param>
         /// <param name="defaultDatabase">Specifies the default database to be used when calling ConnectionMultiplexer.GetDatabase() without any parameters.</param>
-        public RedisCache(string host, int port, bool ssl, bool allowAdmin, int? defaultDatabase)
+        public RedisCache([NotNull] string host, int port, bool ssl, bool allowAdmin, [CanBeNull] int? defaultDatabase)
         {
-            if (host == null)
-                throw new ArgumentNullException(nameof(host));
+            Guard.NotEmpty(host);
 
             var options = new ConfigurationOptions
             {
@@ -133,13 +131,10 @@
         /// <param name="ssl">Specifies that SSL encryption should be used.</param>
         /// <param name="allowAdmin">Indicates whether admin operations should be allowed.</param>
         /// <param name="defaultDatabase">Specifies the default database to be used when calling ConnectionMultiplexer.GetDatabase() without any parameters.</param>
-        public RedisCache(string host, int port, string password, bool ssl, bool allowAdmin, int? defaultDatabase)
+        public RedisCache([NotNull] string host, int port, [NotNull] string password, bool ssl, bool allowAdmin, [CanBeNull] int? defaultDatabase)
         {
-            if (host == null)
-                throw new ArgumentNullException(nameof(host));
-
-            if (password == null)
-                throw new ArgumentNullException(nameof(password));
+            Guard.NotEmpty(host);
+            Guard.NotEmpty(password);
 
             var options = new ConfigurationOptions
             {
@@ -187,10 +182,9 @@
         /// <param name="value">The value to cache.</param>
         /// <param name="cacheExpiration">The cache expiration time.</param>
         /// <param name="cacheRemovedCallback">A callback function for a value is removed from the cache.</param>
-        public void Set<T>(string key, T value, TimeSpan? cacheExpiration, Action<string> cacheRemovedCallback = null)
+        public void Set<T>([NotNull] string key, [CanBeNull] T value, [CanBeNull] TimeSpan? cacheExpiration, [CanBeNull] Action<string> cacheRemovedCallback = null)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            Guard.NotEmpty(key);
 
             if (cacheRemovedCallback != null)
             {
@@ -216,12 +210,9 @@
         /// Removes the object associated with the given key.
         /// </summary>
         /// <param name="key">An object identifying the entry.</param>
-        public void Remove(string key)
+        public void Remove([NotNull] string key)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            Redis.KeyDelete(key);
+            Redis.KeyDelete(Guard.NotEmpty(key));
         }
 
         /// <summary>
@@ -230,12 +221,9 @@
         /// <param name="key">An object identifying the requested entry.</param>
         /// <param name="value">The object found in the cache.</param>
         /// <returns>c<c>true</c> if the an object was found with the specified key; otherwise, <c>false</c>.</returns>
-        public bool TryGetValue<T>(string key, out T value)
+        public bool TryGetValue<T>([NotNull] string key, out T value)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            value = Deserialize<T>(Redis.StringGet(key));
+            value = Deserialize<T>(Redis.StringGet(Guard.NotEmpty(key)));
 
             return value != null;
         }
@@ -247,12 +235,9 @@
         /// <param name="defaultValue">The default value.</param>
         /// <param name="incrementValue">The increment value.</param>
         /// <returns>The value of key after the increment.</returns>
-        public int Increment(string key, int defaultValue, int incrementValue)
+        public int Increment([NotNull] string key, int defaultValue, int incrementValue)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            var value = Redis.StringIncrement(key, incrementValue);
+            var value = Redis.StringIncrement(Guard.NotEmpty(key), incrementValue);
 
             return Convert.ToInt32(value);
         }

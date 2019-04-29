@@ -1,9 +1,10 @@
 ﻿namespace DotNetToolkit.Repository.InMemory.Internal
 {
     using Configuration;
-    using Configuration.Conventions;
+    using Configuration.Conventions.Internal;
     using Properties;
     using Queries;
+    using Queries.Internal;
     using Queries.Strategies;
     using System;
     using System.Collections.Concurrent;
@@ -12,6 +13,8 @@
     using System.Globalization;
     using System.Linq;
     using Transactions;
+    using Transactions.Internal;
+    using Utility;
 
     /// <summary>
     /// Represents an internal repository context for in-memory operations (for testing purposes).
@@ -117,16 +120,12 @@
 
         private static object GetPrimaryKeyValue(object obj)
         {
-            if (obj == null)
-                throw new ArgumentNullException(nameof(obj));
-
-            return Combine(PrimaryKeyConventionHelper.GetPrimaryKeyValues(obj));
+            return Combine(PrimaryKeyConventionHelper.GetPrimaryKeyValues(Guard.NotNull(obj)));
         }
 
         private static object Combine(object[] keyValues)
         {
-            if (keyValues == null)
-                throw new ArgumentNullException(nameof(keyValues));
+            Guard.NotEmpty(keyValues);
 
             return keyValues.Length == 1 ? keyValues[0] : string.Join(":", keyValues);
         }
@@ -177,7 +176,7 @@
         /// <param name="entity">The entity.</param>
         public override void Add<TEntity>(TEntity entity)
         {
-            _items.Add(new EntitySet(entity, EntityState.Added));
+            _items.Add(new EntitySet(Guard.NotNull(entity), EntityState.Added));
         }
 
         /// <summary>
@@ -187,7 +186,7 @@
         /// <param name="entity">The entity.</param>
         public override void Update<TEntity>(TEntity entity)
         {
-            _items.Add(new EntitySet(entity, EntityState.Modified));
+            _items.Add(new EntitySet(Guard.NotNull(entity), EntityState.Modified));
         }
 
         /// <summary>
@@ -197,7 +196,7 @@
         /// <param name="entity">The entity.</param>
         public override void Remove<TEntity>(TEntity entity)
         {
-            _items.Add(new EntitySet(entity, EntityState.Removed));
+            _items.Add(new EntitySet(Guard.NotNull(entity), EntityState.Removed));
         }
 
         /// <summary>
@@ -280,6 +279,9 @@
             if (!_ignoreSqlQueryWarning)
                 throw new NotSupportedException(Repository.Properties.Resources.QueryExecutionNotSupported);
 
+            Guard.NotEmpty(sql);
+            Guard.NotNull(projector);
+
             return new QueryResult<IEnumerable<TEntity>>(Enumerable.Empty<TEntity>());
         }
 
@@ -295,6 +297,8 @@
             if (!_ignoreSqlQueryWarning)
                 throw new NotSupportedException(Repository.Properties.Resources.QueryExecutionNotSupported);
 
+            Guard.NotEmpty(sql);
+
             return new QueryResult<int>(0);
         }
 
@@ -307,8 +311,7 @@
         /// <returns>The entity found in the repository.</returns>
         public override IQueryResult<TEntity> Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues)
         {
-            if (keyValues == null)
-                throw new ArgumentNullException(nameof(keyValues));
+            Guard.NotEmpty(keyValues);
 
             if (fetchStrategy == null)
             {

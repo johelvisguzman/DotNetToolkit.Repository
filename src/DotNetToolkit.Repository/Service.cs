@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository
 {
     using Factories;
+    using JetBrains.Annotations;
 
     /// <summary>
     /// An implementation of <see cref="IService{TEntity, TKey1, TKey2, TKey3}" />.
@@ -18,7 +19,7 @@
         /// Initializes a new instance of the <see cref="Service{TEntity, TKey1, TKey2, TKey3}"/> class.
         /// </summary>
         /// <param name="unitOfWorkFactory">The unit of work factory.</param>
-        public Service(IUnitOfWorkFactory unitOfWorkFactory) : base(unitOfWorkFactory) { }
+        public Service([NotNull] IUnitOfWorkFactory unitOfWorkFactory) : base(unitOfWorkFactory) { }
 
         #endregion
     }
@@ -38,7 +39,7 @@
         /// Initializes a new instance of the <see cref="Service{TEntity, TKey1, TKey2}"/> class.
         /// </summary>
         /// <param name="unitOfWorkFactory">The unit of work factory.</param>
-        public Service(IUnitOfWorkFactory unitOfWorkFactory) : base(unitOfWorkFactory) { }
+        public Service([NotNull] IUnitOfWorkFactory unitOfWorkFactory) : base(unitOfWorkFactory) { }
 
         #endregion
     }
@@ -57,7 +58,7 @@
         /// Initializes a new instance of the <see cref="Service{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="unitOfWorkFactory">The unit of work factory.</param>
-        public Service(IUnitOfWorkFactory unitOfWorkFactory) : base(unitOfWorkFactory) { }
+        public Service([NotNull] IUnitOfWorkFactory unitOfWorkFactory) : base(unitOfWorkFactory) { }
 
         #endregion
     }
@@ -75,7 +76,7 @@
         /// Initializes a new instance of the <see cref="Service{TEntity}"/> class.
         /// </summary>
         /// <param name="unitOfWorkFactory">The unit of work factory.</param>
-        public Service(IUnitOfWorkFactory unitOfWorkFactory) : base(unitOfWorkFactory) { }
+        public Service([NotNull] IUnitOfWorkFactory unitOfWorkFactory) : base(unitOfWorkFactory) { }
 
         #endregion
     }

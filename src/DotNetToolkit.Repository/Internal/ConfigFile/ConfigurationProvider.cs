@@ -1,6 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.Internal.ConfigFile
 {
+    using JetBrains.Annotations;
     using System;
+    using Utility;
 
     /// <summary>
     /// Represents configuration provider for providing a factory for constructing the elements from the config file.
@@ -12,12 +14,9 @@
         /// <summary>
         /// Sets a default factory for constructing the elements from the config file.
         /// </summary>
-        public static void SetDefaultFactory(Func<Type, object> factory)
+        public static void SetDefaultFactory([NotNull] Func<Type, object> factory)
         {
-            if (factory == null)
-                throw new ArgumentNullException(nameof(factory));
-
-            _factory = factory;
+            _factory = Guard.NotNull(factory);
         }
 
         /// <summary>

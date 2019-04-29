@@ -6,6 +6,7 @@
     using System.Collections.Generic;
     using System.Data.Common;
     using System.Data.Entity;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryContextFactory" />.
@@ -34,10 +35,7 @@
         /// <param name="nameOrConnectionString">Either the database name or a connection string.</param>
         public EfRepositoryContextFactory(string nameOrConnectionString)
         {
-            if (nameOrConnectionString == null)
-                throw new ArgumentNullException(nameof(nameOrConnectionString));
-
-            _nameOrConnectionString = nameOrConnectionString;
+            _nameOrConnectionString = Guard.NotEmpty(nameOrConnectionString);
         }
 
         /// <summary>
@@ -46,10 +44,7 @@
         /// <param name="existingConnection">The existing connection.</param>
         public EfRepositoryContextFactory(DbConnection existingConnection)
         {
-            if (existingConnection == null)
-                throw new ArgumentNullException(nameof(existingConnection));
-
-            _existingConnection = existingConnection;
+            _existingConnection = Guard.NotNull(existingConnection);
         }
 
         #endregion
