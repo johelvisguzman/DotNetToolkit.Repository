@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.EntityFrameworkCore.Internal
 {
     using Configuration;
-    using Configuration.Conventions.Internal;
+    using Configuration.Conventions;
     using Configuration.Logging;
     using Extensions;
     using Microsoft.EntityFrameworkCore;
@@ -37,6 +37,8 @@
         /// <param name="context">The context.</param>
         public EfCoreRepositoryContext(DbContext context)
         {
+            Conventions = RepositoryConventions.Default;
+
             _context = Guard.NotNull(context);
             _context.ConfigureLogging(s => Logger.Debug(s.TrimEnd(Environment.NewLine.ToCharArray())));
         }
@@ -61,7 +63,7 @@
         /// <returns>The entity's query with the applied options.</returns>
         protected override IQueryable<TEntity> ApplyFetchingOptions<TEntity>(IQueryable<TEntity> query, IQueryOptions<TEntity> options)
         {
-            return query.ApplyFetchingOptions(options);
+            return query.ApplyFetchingOptions(Conventions, options);
         }
 
         /// <summary>
@@ -176,7 +178,7 @@
 
             if (entry.State == EntityState.Detached)
             {
-                var keyValues = PrimaryKeyConventionHelper.GetPrimaryKeyValues(entity);
+                var keyValues = Conventions.GetPrimaryKeyValues(entity);
 
                 var entityInDb = _context.Set<TEntity>().Find(keyValues);
 
@@ -202,7 +204,7 @@
 
             if (_context.Entry(entity).State == EntityState.Detached)
             {
-                var keyValues = PrimaryKeyConventionHelper.GetPrimaryKeyValues(entity);
+                var keyValues = Conventions.GetPrimaryKeyValues(entity);
 
                 var entityInDb = _context.Set<TEntity>().Find(keyValues);
 

@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
-    using Configuration.Conventions.Internal;
+    using Configuration.Conventions;
     using Extensions;
     using System;
     using System.Collections.Concurrent;
@@ -19,32 +19,35 @@
         private readonly Dictionary<Type, Dictionary<string, PropertyInfo>> _navigationProperties;
         private readonly Func<string, Type> _getTableTypeByColumnAliasCallback;
         private readonly ConcurrentDictionary<object, object> _entityDataReaderMapping = new ConcurrentDictionary<object, object>();
+        private readonly IRepositoryConventions _conventions;
 
         #endregion
 
         #region Constructors
 
-        public Mapper()
+        public Mapper(IRepositoryConventions conventions)
         {
+            _conventions = Guard.NotNull(conventions);
+
             _properties = typeof(T).GetRuntimeProperties()
-                .Where(x => x.IsPrimitive() && x.IsColumnMapped())
-                .OrderBy(x => x.GetColumnOrder())
-                .ToDictionary(x => x.GetColumnName(), x => x);
+                .Where(x => x.IsPrimitive() && _conventions.IsColumnMapped(x))
+                .OrderBy(_conventions.GetColumnOrderOrDefault)
+                .ToDictionary(_conventions.GetColumnName, x => x);
 
             _navigationProperties = new Dictionary<Type, Dictionary<string, PropertyInfo>>();
         }
 
-        public Mapper(Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, Func<string, Type> getTableTypeByColumnAliasCallback)
+        public Mapper(IRepositoryConventions conventions, Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, Func<string, Type> getTableTypeByColumnAliasCallback)
         {
-            Guard.NotNull(getTableTypeByColumnAliasCallback);
+            _conventions = Guard.NotNull(conventions);
 
             _properties = typeof(T).GetRuntimeProperties()
-                .Where(x => x.IsPrimitive() && x.IsColumnMapped())
-                .OrderBy(x => x.GetColumnOrder())
-                .ToDictionary(x => x.GetColumnName(), x => x);
+                .Where(x => x.IsPrimitive() && _conventions.IsColumnMapped(x))
+                .OrderBy(_conventions.GetColumnOrderOrDefault)
+                .ToDictionary(_conventions.GetColumnName, x => x);
 
             _navigationProperties = navigationProperties ?? new Dictionary<Type, Dictionary<string, PropertyInfo>>();
-            _getTableTypeByColumnAliasCallback = getTableTypeByColumnAliasCallback;
+            _getTableTypeByColumnAliasCallback = Guard.NotNull(getTableTypeByColumnAliasCallback);
         }
 
         #endregion
@@ -108,14 +111,14 @@
             
             if (joinTableInstances.Any())
             {
-                var mainTablePrimaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<T>().First();
+                var mainTablePrimaryKeyPropertyInfo = _conventions.GetPrimaryKeyPropertyInfos<T>().First();
                 var mainTablePrimaryKeyValue = mainTablePrimaryKeyPropertyInfo.GetValue(entity);
 
                 // Needs to make sure we are not dealing with navigation properties that are not actually linked to this entity
                 var validJoinTableInstances = joinTableInstances
                     .Where(x =>
                     {
-                        var joinTableForeignKeyPropertyInfo = ForeignKeyConventionHelper
+                        var joinTableForeignKeyPropertyInfo = _conventions
                             .GetForeignKeyPropertyInfos(x.Key, entityType)
                             .First();
 
@@ -186,14 +189,14 @@
 
         #region Private Methods
 
-        private static object GetDataReaderPrimaryKey<T>(DbDataReader r)
+        private object GetDataReaderPrimaryKey<T>(DbDataReader r)
         {
             if (r == null)
                 throw new ArgumentNullException(nameof(r));
 
-            var primaryKeyValues = PrimaryKeyConventionHelper
+            var primaryKeyValues = _conventions
                 .GetPrimaryKeyPropertyInfos<T>()
-                .Select(x => r[x.GetColumnName()])
+                .Select(x => r[_conventions.GetColumnName(x)])
                 .ToList();
 
             switch (primaryKeyValues.Count)

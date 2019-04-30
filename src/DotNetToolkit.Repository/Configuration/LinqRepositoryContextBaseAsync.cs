@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Configuration
 {
-    using Conventions.Internal;
     using Extensions;
     using JetBrains.Annotations;
     using Properties;
@@ -99,7 +98,7 @@
             Guard.NotEmpty(keyValues);
 
             var options = new QueryOptions<TEntity>()
-                .Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
+                .Include(Conventions.GetByPrimaryKeySpecification<TEntity>(keyValues));
 
             var query = AsQueryable<TEntity>();
 
@@ -126,7 +125,7 @@
 
             var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
-                .ApplySortingOptions(options)
+                .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
                 .Select(selector);
 
@@ -150,7 +149,7 @@
 
             var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
-                .ApplySortingOptions(options);
+                .ApplySortingOptions(Conventions, options);
 
             var total = await CountAsync(query, cancellationToken);
 
@@ -174,7 +173,7 @@
         {
             var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
-                .ApplySortingOptions(options)
+                .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options);
 
             var result = await CountAsync(query, cancellationToken);
@@ -195,7 +194,7 @@
 
             var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
-                .ApplySortingOptions(options)
+                .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options);
 
             var result = await AnyAsync(query, cancellationToken);
@@ -224,7 +223,7 @@
 
             var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
-                .ApplySortingOptions(options);
+                .ApplySortingOptions(Conventions, options);
 
             Dictionary<TDictionaryKey, TElement> result;
             int total;

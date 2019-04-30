@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
     using Configuration;
-    using Configuration.Conventions.Internal;
+    using Configuration.Conventions;
     using Configuration.Logging;
     using Configuration.Logging.Internal;
     using Extensions;
@@ -42,6 +42,11 @@
         #region Properties
 
         /// <summary>
+        /// Gets or sets the configurable conventions.
+        /// </summary>
+        public IRepositoryConventions Conventions { get; set; }
+
+        /// <summary>
         /// Gets or sets the repository context logger.
         /// </summary>
         public ILogger Logger
@@ -71,8 +76,10 @@
 		/// </param>
         public AdoNetRepositoryContext(string nameOrConnectionString, bool ensureDatabaseCreated = false)
         {
-            _dbHelper = new DbHelper(Guard.NotEmpty(nameOrConnectionString));
-            _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
+            Conventions = RepositoryConventions.Default;
+
+            _dbHelper = new DbHelper(Conventions, Guard.NotEmpty(nameOrConnectionString));
+            _schemaConfigHelper = new SchemaTableConfigurationHelper(Conventions, _dbHelper);
             _ensureDatabaseCreated = ensureDatabaseCreated;
         }
 
@@ -88,8 +95,10 @@
 		/// </param>
         public AdoNetRepositoryContext(string providerName, string connectionString, bool ensureDatabaseCreated = false)
         {
-            _dbHelper = new DbHelper(Guard.NotEmpty(providerName), Guard.NotEmpty(connectionString));
-            _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
+            Conventions = RepositoryConventions.Default;
+
+            _dbHelper = new DbHelper(Conventions, Guard.NotEmpty(providerName), Guard.NotEmpty(connectionString));
+            _schemaConfigHelper = new SchemaTableConfigurationHelper(Conventions, _dbHelper);
             _ensureDatabaseCreated = ensureDatabaseCreated;
         }
 
@@ -104,8 +113,10 @@
 		/// </param>
         public AdoNetRepositoryContext(DbConnection existingConnection, bool ensureDatabaseCreated = false)
         {
-            _dbHelper = new DbHelper(Guard.NotNull(existingConnection));
-            _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
+            Conventions = RepositoryConventions.Default;
+
+            _dbHelper = new DbHelper(Conventions, Guard.NotNull(existingConnection));
+            _schemaConfigHelper = new SchemaTableConfigurationHelper(Conventions, _dbHelper);
             _ensureDatabaseCreated = ensureDatabaseCreated;
         }
 
@@ -125,7 +136,7 @@
                         if (existInDb)
                             throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
 
-                        QueryBuilder.CreateInsertStatement(entitySet.Entity, out sql, out parameters);
+                        QueryBuilder.CreateInsertStatement(Conventions, entitySet.Entity, out sql, out parameters);
 
                         var canGetScopeIdentity = true;
 
@@ -144,7 +155,7 @@
                         if (!existInDb)
                             throw new InvalidOperationException(Resources.EntityNotFoundInStore);
 
-                        QueryBuilder.CreateDeleteStatement(entitySet.Entity, out sql, out parameters);
+                        QueryBuilder.CreateDeleteStatement(Conventions, entitySet.Entity, out sql, out parameters);
 
                         break;
                     }
@@ -153,7 +164,7 @@
                         if (!existInDb)
                             throw new InvalidOperationException(Resources.EntityNotFoundInStore);
 
-                        QueryBuilder.CreateUpdateStatement(entitySet.Entity, out sql, out parameters);
+                        QueryBuilder.CreateUpdateStatement(Conventions, entitySet.Entity, out sql, out parameters);
 
                         break;
                     }
@@ -297,11 +308,11 @@
 
                         ExecuteSchemaValidate(entityType);
 
-                        var primaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-                        var isIdentity = primaryKeyPropertyInfo.IsColumnIdentity();
+                        var primaryKeyPropertyInfo = Conventions.GetPrimaryKeyPropertyInfos(entityType).First();
+                        var isIdentity = Conventions.IsColumnIdentity(primaryKeyPropertyInfo);
 
                         // Checks if the entity exist in the database
-                        var existInDb = _dbHelper.ExecuteObjectExist(command, entitySet.Entity);
+                        var existInDb = _dbHelper.ExecuteObjectExist(Conventions, command, entitySet.Entity);
 
                         // Prepare the sql statement
                         PrepareEntitySetQuery(
@@ -370,7 +381,8 @@
         {
             Guard.NotEmpty(keyValues);
 
-            var options = new QueryOptions<TEntity>().Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
+            var options = new QueryOptions<TEntity>()
+                .Include(Conventions.GetByPrimaryKeySpecification<TEntity>(keyValues));
 
             if (fetchStrategy != null)
                 options.Include(fetchStrategy);
@@ -378,6 +390,7 @@
             var selectorFunc = IdentityFunction<TEntity>.Instance;
 
             QueryBuilder.CreateSelectStatement<TEntity>(
+                Conventions,
                 options,
                 fetchStrategy != null,
                 out var sql,
@@ -385,7 +398,7 @@
                 out var navigationProperties,
                 out var getPropertyFromColumnAliasCallback);
 
-            var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
+            var mapper = new Mapper<TEntity>(Conventions, navigationProperties, getPropertyFromColumnAliasCallback);
 
             ExecuteSchemaValidate(typeof(TEntity));
 
@@ -407,13 +420,14 @@
             var selectorFunc = selector.Compile();
 
             QueryBuilder.CreateSelectStatement<TEntity>(
+                Conventions, 
                 options,
                 out var sql,
                 out var parameters,
                 out var navigationProperties,
                 out var getPropertyFromColumnAliasCallback);
 
-            var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
+            var mapper = new Mapper<TEntity>(Conventions, navigationProperties, getPropertyFromColumnAliasCallback);
 
             ExecuteSchemaValidate(typeof(TEntity));
 
@@ -435,13 +449,14 @@
             var selectorFunc = selector.Compile();
 
             QueryBuilder.CreateSelectStatement<TEntity>(
+                Conventions, 
                 options,
                 out var sql,
                 out var parameters,
                 out var navigationProperties,
                 out var getPropertyFromColumnAliasCallback);
 
-            var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
+            var mapper = new Mapper<TEntity>(Conventions, navigationProperties, getPropertyFromColumnAliasCallback);
 
             ExecuteSchemaValidate(typeof(TEntity));
 
@@ -456,7 +471,7 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public IQueryResult<int> Count<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
         {
-            QueryBuilder.CreateSelectStatement<TEntity>(options, "COUNT(*)", out var sql, out var parameters);
+            QueryBuilder.CreateSelectStatement<TEntity>(Conventions, options, "COUNT(*)", out var sql, out var parameters);
 
             ExecuteSchemaValidate(typeof(TEntity));
 
@@ -475,7 +490,7 @@
         {
             Guard.NotNull(options);
 
-            QueryBuilder.CreateSelectStatement<TEntity>(options, out var sql, out var parameters);
+            QueryBuilder.CreateSelectStatement<TEntity>(Conventions, options, out var sql, out var parameters);
 
             ExecuteSchemaValidate(typeof(TEntity));
 
@@ -513,13 +528,14 @@
             var elementSelectorFunc = elementSelector.Compile();
 
             QueryBuilder.CreateSelectStatement<TEntity>(
+                Conventions, 
                 options,
                 out var sql,
                 out var parameters,
                 out var navigationProperties,
                 out var getPropertyFromColumnAliasCallback);
 
-            var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
+            var mapper = new Mapper<TEntity>(Conventions, navigationProperties, getPropertyFromColumnAliasCallback);
 
             ExecuteSchemaValidate(typeof(TEntity));
 
@@ -655,11 +671,11 @@
 
                         await ExecuteSchemaValidateAsync(entityType, cancellationToken);
 
-                        var primaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-                        var isIdentity = primaryKeyPropertyInfo.IsColumnIdentity();
+                        var primaryKeyPropertyInfo = Conventions.GetPrimaryKeyPropertyInfos(entityType).First();
+                        var isIdentity = Conventions.IsColumnIdentity(primaryKeyPropertyInfo);
 
                         // Checks if the entity exist in the database
-                        var existInDb = await _dbHelper.ExecuteObjectExistAsync(command, entitySet.Entity, cancellationToken);
+                        var existInDb = await _dbHelper.ExecuteObjectExistAsync(Conventions, command, entitySet.Entity, cancellationToken);
 
                         // Prepare the sql statement
                         PrepareEntitySetQuery(
@@ -729,7 +745,8 @@
         {
             Guard.NotEmpty(keyValues);
 
-            var options = new QueryOptions<TEntity>().Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
+            var options = new QueryOptions<TEntity>()
+                .Include(Conventions.GetByPrimaryKeySpecification<TEntity>(keyValues));
 
             if (fetchStrategy != null)
                 options.Include(fetchStrategy);
@@ -737,6 +754,7 @@
             var selectorFunc = IdentityFunction<TEntity>.Instance;
 
             QueryBuilder.CreateSelectStatement<TEntity>(
+                Conventions, 
                 options,
                 fetchStrategy != null,
                 out var sql,
@@ -744,7 +762,7 @@
                 out var navigationProperties,
                 out var getPropertyFromColumnAliasCallback);
 
-            var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
+            var mapper = new Mapper<TEntity>(Conventions, navigationProperties, getPropertyFromColumnAliasCallback);
 
             await ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 
@@ -767,13 +785,14 @@
             var selectorFunc = selector.Compile();
 
             QueryBuilder.CreateSelectStatement<TEntity>(
+                Conventions, 
                 options,
                 out var sql,
                 out var parameters,
                 out var navigationProperties,
                 out var getPropertyFromColumnAliasCallback);
 
-            var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
+            var mapper = new Mapper<TEntity>(Conventions, navigationProperties, getPropertyFromColumnAliasCallback);
 
             await ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 
@@ -796,13 +815,14 @@
             var selectorFunc = selector.Compile();
 
             QueryBuilder.CreateSelectStatement<TEntity>(
+                Conventions, 
                 options,
                 out var sql,
                 out var parameters,
                 out var navigationProperties,
                 out var getPropertyFromColumnAliasCallback);
 
-            var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
+            var mapper = new Mapper<TEntity>(Conventions, navigationProperties, getPropertyFromColumnAliasCallback);
 
             await ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 
@@ -818,7 +838,7 @@
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public async Task<IQueryResult<int>> CountAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            QueryBuilder.CreateSelectStatement<TEntity>(options, "COUNT(*)", out var sql, out var parameters);
+            QueryBuilder.CreateSelectStatement<TEntity>(Conventions, options, "COUNT(*)", out var sql, out var parameters);
 
             ExecuteSchemaValidate(typeof(TEntity));
 
@@ -838,7 +858,7 @@
         {
             Guard.NotNull(options);
 
-            QueryBuilder.CreateSelectStatement<TEntity>(options, out var sql, out var parameters);
+            QueryBuilder.CreateSelectStatement<TEntity>(Conventions, options, out var sql, out var parameters);
 
             await ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 
@@ -877,13 +897,14 @@
             var elementSelectorFunc = elementSelector.Compile();
 
             QueryBuilder.CreateSelectStatement<TEntity>(
+                Conventions, 
                 options,
                 out var sql,
                 out var parameters,
                 out var navigationProperties,
                 out var getPropertyFromColumnAliasCallback);
 
-            var mapper = new Mapper<TEntity>(navigationProperties, getPropertyFromColumnAliasCallback);
+            var mapper = new Mapper<TEntity>(Conventions, navigationProperties, getPropertyFromColumnAliasCallback);
 
             await ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 

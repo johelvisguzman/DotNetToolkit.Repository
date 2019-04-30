@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Mapper.Internal
 {
-    using Conventions.Internal;
+    using Conventions;
     using Extensions;
     using JetBrains.Annotations;
     using System;
@@ -17,21 +17,24 @@
     {
         #region Fields
 
-        private readonly Dictionary<string, PropertyInfo> _propertiesMapping;
+        private Dictionary<string, PropertyInfo> _propertiesMapping;
 
         #endregion
 
-        #region Constructors
+        #region Private Methods
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DefaultMapper{T}"/> class.
-        /// </summary>
-        public DefaultMapper()
+        private Dictionary<string, PropertyInfo> GetProperties([NotNull] IRepositoryConventions conventions)
         {
-            _propertiesMapping = typeof(T).GetRuntimeProperties()
-                .Where(x => x.IsPrimitive() && x.IsColumnMapped())
-                .OrderBy(x => x.GetColumnOrder())
-                .ToDictionary(x => x.GetColumnName(), x => x);
+            Guard.NotNull(conventions);
+
+            if (_propertiesMapping == null || _propertiesMapping.Count == 0)
+            {
+                _propertiesMapping = typeof(T).GetRuntimeProperties()
+                    .Where(x => x.IsPrimitive() && conventions.IsColumnMapped(x))
+                    .ToDictionary(conventions.GetColumnName, x => x);
+            }
+
+            return _propertiesMapping;
         }
 
         #endregion
@@ -42,11 +45,14 @@
         /// Maps each element to a new form.
         /// </summary>
         /// <param name="reader">The data reader used for transforming each element.</param>
+        /// <param name="conventions">The configurable conventions.</param>
         /// <returns>The new projected element form.</returns>
-        public T Map([NotNull] IDataReader reader)
+        public T Map([NotNull] IDataReader reader, [NotNull] IRepositoryConventions conventions)
         {
             Guard.NotNull(reader);
+            Guard.NotNull(conventions);
 
+            var properties = GetProperties(conventions);
             var entity = Activator.CreateInstance<T>();
 
             for (var i = 0; i < reader.FieldCount; i++)
@@ -57,11 +63,11 @@
                 if (value == DBNull.Value)
                     value = null;
 
-                if (_propertiesMapping.ContainsKey(name))
+                if (properties.ContainsKey(name))
                 {
                     if (!reader.IsDBNull(reader.GetOrdinal(name)))
                     {
-                        var pi = _propertiesMapping[name];
+                        var pi = properties[name];
 
                         pi.SetValue(entity, value);
                     }

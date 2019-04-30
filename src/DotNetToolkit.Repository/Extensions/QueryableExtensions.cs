@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
-    using Configuration.Conventions.Internal;
+    using Configuration.Conventions;
     using JetBrains.Annotations;
     using Queries;
     using System;
@@ -37,7 +37,7 @@
         /// Apply a sorting options to the specified entity's query.
         /// </summary>
         /// <returns>The entity's query with the applied options.</returns>
-        public static IOrderedQueryable<T> ApplySortingOptions<T>([NotNull] this IQueryable<T> query, [CanBeNull] IQueryOptions<T> options) where T : class
+        public static IOrderedQueryable<T> ApplySortingOptions<T>([NotNull] this IQueryable<T> query, [NotNull] IRepositoryConventions conventions, [CanBeNull] IQueryOptions<T> options) where T : class
         {
             Guard.NotNull(query);
 
@@ -49,7 +49,7 @@
             // Sorts on the composite key by default if no sorting is provided
             if (!sorting.Any())
             {
-                foreach (var primaryKeyPropertyInfo in PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos<T>())
+                foreach (var primaryKeyPropertyInfo in conventions.GetPrimaryKeyPropertyInfos<T>())
                 {
                     sorting.Add(primaryKeyPropertyInfo.Name, SortOrder.Ascending);
                 }
@@ -97,14 +97,14 @@
         /// Apply a fetching options to the specified entity's query.
         /// </summary>
         /// <returns>The entity's query with the applied options.</returns>
-        public static IQueryable<T> ApplyFetchingOptions<T>([NotNull] this IQueryable<T> query, [CanBeNull] IQueryOptions<T> options, [NotNull] Func<Type, IQueryable<object>> joinQueryCallback) where T : class
+        public static IQueryable<T> ApplyFetchingOptions<T>([NotNull] this IQueryable<T> query, [NotNull] IRepositoryConventions conventions, [CanBeNull] IQueryOptions<T> options, [NotNull] Func<Type, IQueryable<object>> joinQueryCallback) where T : class
         {
             Guard.NotNull(query);
             Guard.NotNull(joinQueryCallback);
 
             var mainTableType = typeof(T);
             var mainTableProperties = mainTableType.GetRuntimeProperties().ToList();
-            var fetchingPaths = options.DefaultIfFetchStrategyEmpty().PropertyPaths.ToList();
+            var fetchingPaths = options.DefaultIfFetchStrategyEmpty(conventions).PropertyPaths.ToList();
 
             if (fetchingPaths.Any())
             {
@@ -119,21 +119,19 @@
                     var innerQuery = joinQueryCallback(joinTableType);
 
                     // Only do a join when the primary table has a foreign key property for the join table
-                    var joinTableForeignKeyPropertyInfo = ForeignKeyConventionHelper
+                    var joinTableForeignKeyPropertyInfo = conventions
                         .GetForeignKeyPropertyInfos(joinTableType, mainTableType)
                         .FirstOrDefault();
 
                     if (joinTableForeignKeyPropertyInfo != null)
                     {
-                        var mainTablePrimaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(mainTableType).First();
+                        var mainTablePrimaryKeyPropertyInfo = conventions.GetPrimaryKeyPropertyInfos(mainTableType).First();
                         var mainTablePropertyInfo = joinTableType.GetRuntimeProperties().Single(x => x.PropertyType == mainTableType);
 
                         // TODO: NEEDS TO COME BACK TO THIS
                         // Needs a way to dynamically set the child and parent property to point at each other using the Queryable extension methods.
                         if (isJoinPropertyCollection)
                         {
-                            var collectionTypeParam = joinTablePropertyInfo.PropertyType.GetGenericArguments().First();
-
                             var innerList = innerQuery.ToList();
 
                             query = query.LeftJoin(
@@ -158,7 +156,7 @@
                                         if (outer != null)
                                         {
                                             // Type casting
-                                            var items = CastToList(collectionTypeParam, inner);
+                                            var items = CastToList(joinTableType, inner);
 
                                             // Sets the join table property in the main table
                                             joinTablePropertyInfo.SetValue(outer, items);
@@ -244,22 +242,22 @@
 
         private static IOrderedQueryable<T> OrderBy<T>([NotNull] this IQueryable<T> query, [NotNull] string propertyName)
         {
-            return ApplyOrder<T>(query, propertyName, "OrderBy");
+            return ApplyOrder<T>(query, propertyName, nameof(Queryable.OrderBy));
         }
 
         private static IOrderedQueryable<T> OrderByDescending<T>([NotNull] this IQueryable<T> query, [NotNull] string propertyName)
         {
-            return ApplyOrder<T>(query, propertyName, "OrderByDescending");
+            return ApplyOrder<T>(query, propertyName, nameof(Queryable.OrderByDescending));
         }
 
         private static IOrderedQueryable<T> ThenBy<T>([NotNull] this IOrderedQueryable<T> query, [NotNull] string propertyName)
         {
-            return ApplyOrder<T>(query, propertyName, "ThenBy");
+            return ApplyOrder<T>(query, propertyName, nameof(Queryable.ThenBy));
         }
 
         private static IOrderedQueryable<T> ThenByDescending<T>([NotNull] this IOrderedQueryable<T> query, [NotNull] string propertyName)
         {
-            return ApplyOrder<T>(query, propertyName, "ThenByDescending");
+            return ApplyOrder<T>(query, propertyName, nameof(Queryable.ThenByDescending));
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Options
 {
     using Caching;
+    using Conventions;
     using Factories;
     using Interceptors;
     using Logging;
@@ -37,5 +38,10 @@
         /// Gets the configured internal context factory.
         /// </summary>
         IRepositoryContextFactory ContextFactory { get; }
+
+        /// <summary>
+        /// Gets the configured conventions.
+        /// </summary>
+        IRepositoryConventions Conventions { get; }
     }
 }

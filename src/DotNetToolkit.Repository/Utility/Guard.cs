@@ -55,8 +55,7 @@
 
         [NotNull]
         [ContractAnnotation("value:null => halt")]
-        public static T EnsureNotNull<T>([ValidatedNotNull] [NoEnumeration] T value, string message, params object[] args)
-            where T : class
+        public static T EnsureNotNull<T>([ValidatedNotNull] [NoEnumeration] T value, string message, params object[] args) where T : class
         {
 #if NETSTANDARD2_0
             if (typeof(T).IsNullableType() && value == null)

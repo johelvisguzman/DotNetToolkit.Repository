@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.EntityFrameworkCore.Internal
 {
+    using Configuration.Conventions;
     using Extensions;
     using Microsoft.EntityFrameworkCore;
     using Queries;
@@ -8,11 +9,11 @@
 
     internal static class QueryableExtensions
     {
-        public static IQueryable<T> ApplyFetchingOptions<T>(this IQueryable<T> query, IQueryOptions<T> options) where T : class
+        public static IQueryable<T> ApplyFetchingOptions<T>(this IQueryable<T> query, IRepositoryConventions conventions, IQueryOptions<T> options) where T : class
         {
             Guard.NotNull(query);
 
-            var fetchingPaths = options.DefaultIfFetchStrategyEmpty().PropertyPaths.ToList();
+            var fetchingPaths = options.DefaultIfFetchStrategyEmpty(conventions).PropertyPaths.ToList();
 
             if (fetchingPaths.Any())
                 query = fetchingPaths.Aggregate(query, (current, path) => current.Include(path));

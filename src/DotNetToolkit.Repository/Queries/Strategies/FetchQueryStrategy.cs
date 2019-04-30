@@ -1,12 +1,14 @@
 ﻿namespace DotNetToolkit.Repository.Queries.Strategies
 {
-    using Configuration.Conventions.Internal;
+    using Configuration.Conventions;
     using Extensions;
+    using JetBrains.Annotations;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="IFetchQueryStrategy{T}" />.
@@ -36,17 +38,19 @@
         /// <summary>
         /// Defaults this instance.
         /// </summary>
-        /// <typeparam name="T">The type of the entity.</typeparam>
+        /// <param name="conventions">The configurable conventions.</param>
         /// <returns>The default fetch strategy.</returns>
-        public static IFetchQueryStrategy<T> Default()
+        public static IFetchQueryStrategy<T> Default([NotNull] IRepositoryConventions conventions)
         {
+            Guard.NotNull(conventions);
+
             var mainTableProperties = typeof(T).GetRuntimeProperties().ToList();
 
             // Assumes we want to perform a join when the navigation property from the primary table has also a navigation property of
             // the same type as the primary table
             // Only do a join when the primary table has a foreign key property for the join table
             var paths = mainTableProperties
-                .Where(x => x.IsComplex() && PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(x.PropertyType).Any())
+                .Where(x => x.IsComplex() && conventions.GetPrimaryKeyPropertyInfos(x.PropertyType).Any())
                 .Select(x => x.Name)
                 .ToList();
 

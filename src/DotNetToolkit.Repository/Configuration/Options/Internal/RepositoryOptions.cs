@@ -1,8 +1,10 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Options.Internal
 {
     using Caching;
+    using Conventions;
     using Factories;
     using Interceptors;
+    using JetBrains.Annotations;
     using Logging;
     using Mapper;
     using System;
@@ -22,6 +24,7 @@
         private ILoggerProvider _loggerProvider;
         private ICacheProvider _cachingProvider;
         private IMapperProvider _mapperProvider;
+        private IRepositoryConventions _conventions;
 
         #endregion
 
@@ -52,6 +55,11 @@
         /// </summary>
         public IRepositoryContextFactory ContextFactory { get { return _contextFactory; } }
 
+        /// <summary>
+        /// Gets the configured conventions.
+        /// </summary>
+        public IRepositoryConventions Conventions => _conventions;
+
         #endregion
 
         #region Constructors
@@ -74,6 +82,7 @@
             _loggerProvider = options.LoggerProvider;
             _mapperProvider = options.MapperProvider;
             _contextFactory = options.ContextFactory;
+            _conventions = options.Conventions;
         }
 
         #endregion
@@ -95,7 +104,7 @@
         /// <param name="underlyingType">The type of interceptor.</param>
         /// <param name="interceptorFactory">The interceptor factory.</param>
         /// <returns>The same option instance.</returns>
-        public RepositoryOptions With(Type underlyingType, Func<IRepositoryInterceptor> interceptorFactory)
+        public RepositoryOptions With([NotNull] Type underlyingType, Func<IRepositoryInterceptor> interceptorFactory)
         {
             Guard.NotNull(underlyingType);
             Guard.NotNull(interceptorFactory);
@@ -115,7 +124,7 @@
         /// </summary>
         /// <param name="contextFactory">The context factory.</param>
         /// <returns>The same option instance.</returns>
-        public RepositoryOptions With(IRepositoryContextFactory contextFactory)
+        public RepositoryOptions With([NotNull] IRepositoryContextFactory contextFactory)
         {
             _contextFactory = Guard.NotNull(contextFactory);
 
@@ -127,7 +136,7 @@
         /// </summary>
         /// <param name="loggerProvider">The logger factory.</param>
         /// <returns>The same option instance.</returns>
-        public RepositoryOptions With(ILoggerProvider loggerProvider)
+        public RepositoryOptions With([NotNull] ILoggerProvider loggerProvider)
         {
             _loggerProvider = Guard.NotNull(loggerProvider);
 
@@ -139,7 +148,7 @@
         /// </summary>
         /// <param name="cacheProvider">The caching provider.</param>
         /// <returns>The same option instance.</returns>
-        public RepositoryOptions With(ICacheProvider cacheProvider)
+        public RepositoryOptions With([NotNull] ICacheProvider cacheProvider)
         {
             _cachingProvider = Guard.NotNull(cacheProvider);
 
@@ -151,9 +160,21 @@
         /// </summary>
         /// <param name="mapperProvider">The entity mapper provider.</param>
         /// <returns>The same option instance.</returns>
-        public RepositoryOptions With(IMapperProvider mapperProvider)
+        public RepositoryOptions With([NotNull] IMapperProvider mapperProvider)
         {
             _mapperProvider = Guard.NotNull(mapperProvider);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Returns the option instance with a configured conventions.
+        /// </summary>
+        /// <param name="conventions">The configurable conventions.</param>
+        /// <returns>The same option instance.</returns>
+        public RepositoryOptions With([NotNull] IRepositoryConventions conventions)
+        {
+            _conventions = Guard.NotNull(conventions);
 
             return this;
         }
