@@ -1212,8 +1212,6 @@
                 context.SaveChanges();
             });
 
-            Intercept(x => x.AddExecuted(entity));
-
             ClearCache();
 
             LogExecutedMethod(false);
@@ -1239,11 +1237,6 @@
                 }
 
                 context.SaveChanges();
-
-                foreach (var entity in entities)
-                {
-                    Intercept(x => x.AddExecuted(entity));
-                }
             });
 
             ClearCache();
@@ -1268,8 +1261,6 @@
                 context.Update(entity);
                 context.SaveChanges();
             });
-
-            Intercept(x => x.UpdateExecuted(entity));
 
             ClearCache();
 
@@ -1296,11 +1287,6 @@
                 }
 
                 context.SaveChanges();
-
-                foreach (var entity in entities)
-                {
-                    Intercept(x => x.UpdateExecuted(entity));
-                }
             });
 
             ClearCache();
@@ -1325,8 +1311,6 @@
                 context.Remove(entity);
                 context.SaveChanges();
             });
-
-            Intercept(x => x.DeleteExecuted(entity));
 
             ClearCache();
 
@@ -1387,11 +1371,6 @@
                 }
 
                 context.SaveChanges();
-
-                foreach (var entity in entities)
-                {
-                    Intercept(x => x.DeleteExecuted(entity));
-                }
             });
 
             ClearCache();
@@ -1801,8 +1780,6 @@
                 await context.SaveChangesAsync(cancellationToken);
             });
 
-            Intercept(x => x.AddExecuted(entity));
-
             ClearCache();
 
             LogExecutedMethod(false);
@@ -1835,11 +1812,6 @@
                 }
 
                 await context.SaveChangesAsync(cancellationToken);
-
-                foreach (var entity in entities)
-                {
-                    Intercept(x => x.AddExecuted(entity));
-                }
             });
 
             ClearCache();
@@ -1871,8 +1843,6 @@
                 context.Update(entity);
                 await context.SaveChangesAsync(cancellationToken);
             });
-
-            Intercept(x => x.UpdateExecuted(entity));
 
             ClearCache();
 
@@ -1906,11 +1876,6 @@
                 }
 
                 await context.SaveChangesAsync(cancellationToken);
-
-                foreach (var entity in entities)
-                {
-                    Intercept(x => x.UpdateExecuted(entity));
-                }
             });
 
             ClearCache();
@@ -1942,8 +1907,6 @@
                 context.Remove(entity);
                 await context.SaveChangesAsync(cancellationToken);
             });
-
-            Intercept(x => x.DeleteExecuted(entity));
 
             ClearCache();
 
@@ -2017,11 +1980,6 @@
                 }
 
                 await context.SaveChangesAsync(cancellationToken);
-
-                foreach (var entity in entities)
-                {
-                    Intercept(x => x.DeleteExecuted(entity));
-                }
             });
 
             ClearCache();
