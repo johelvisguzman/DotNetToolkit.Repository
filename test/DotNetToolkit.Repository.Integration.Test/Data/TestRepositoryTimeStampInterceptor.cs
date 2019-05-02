@@ -2,6 +2,8 @@
 {
     using Configuration.Interceptors;
     using System;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Unity;
 
     public class TestRepositoryTimeStampInterceptor : RepositoryInterceptorBase
@@ -21,8 +23,6 @@
 
         public override void AddExecuting<TEntity>(TEntity entity)
         {
-            base.AddExecuting(entity);
-
             if (entity is IHaveTimeStamp haveStamp)
             {
                 var currentTime = DateTime.UtcNow;
@@ -43,6 +43,34 @@
                 haveStamp.ModTime = currentTime;
                 haveStamp.ModUser = _user;
             }
+        }
+
+        public override Task AddExecutingAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
+        {
+            if (entity is IHaveTimeStamp haveStamp)
+            {
+                var currentTime = DateTime.UtcNow;
+
+                haveStamp.CreateTime = currentTime;
+                haveStamp.CreateUser = _user;
+                haveStamp.ModTime = currentTime;
+                haveStamp.ModUser = _user;
+            }
+
+            return Task.FromResult(0);
+        }
+
+        public override Task UpdateExecutingAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
+        {
+            if (entity is IHaveTimeStamp haveStamp)
+            {
+                var currentTime = DateTime.UtcNow;
+
+                haveStamp.ModTime = currentTime;
+                haveStamp.ModUser = _user;
+            }
+
+            return Task.FromResult(0);
         }
     }
 }
