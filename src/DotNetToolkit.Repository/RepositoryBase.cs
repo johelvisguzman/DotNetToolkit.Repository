@@ -1772,7 +1772,7 @@
                 cancellationToken.ThrowIfCancellationRequested();
             });
 
-            Intercept(x => x.AddExecuting(entity));
+            await InterceptAsync(x => x.AddExecutingAsync(entity, cancellationToken));
 
             await UseContextAsync(async context =>
             {
@@ -1806,7 +1806,7 @@
             {
                 foreach (var entity in entities)
                 {
-                    Intercept(x => x.AddExecuting(entity));
+                    await InterceptAsync(x => x.AddExecutingAsync(entity, cancellationToken));
 
                     context.Add(entity);
                 }
@@ -1836,7 +1836,7 @@
                 cancellationToken.ThrowIfCancellationRequested();
             });
 
-            Intercept(x => x.UpdateExecuting(entity));
+            await InterceptAsync(x => x.UpdateExecutingAsync(entity, cancellationToken));
 
             await UseContextAsync(async context =>
             {
@@ -1870,7 +1870,7 @@
             {
                 foreach (var entity in entities)
                 {
-                    Intercept(x => x.UpdateExecuting(entity));
+                    await InterceptAsync(x => x.UpdateExecutingAsync(entity, cancellationToken));
 
                     context.Update(entity);
                 }
@@ -1900,7 +1900,7 @@
                 cancellationToken.ThrowIfCancellationRequested();
             });
 
-            Intercept(x => x.DeleteExecuting(entity));
+            await InterceptAsync(x => x.DeleteExecutingAsync(entity, cancellationToken));
 
             await UseContextAsync(async context =>
             {
@@ -1974,7 +1974,7 @@
             {
                 foreach (var entity in entities)
                 {
-                    Intercept(x => x.DeleteExecuting(entity));
+                    await InterceptAsync(x => x.DeleteExecutingAsync(entity, cancellationToken));
 
                     context.Remove(entity);
                 }
@@ -2541,6 +2541,19 @@
             foreach (var interceptor in GetInterceptors())
             {
                 action(interceptor);
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously intercepts the specified action.
+        /// </summary>
+        /// <param name="action">The action to intercept.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
+        protected async Task InterceptAsync(Func<IRepositoryInterceptor, Task> action)
+        {
+            foreach (var interceptor in GetInterceptors())
+            {
+                await action(interceptor);
             }
         }
 
