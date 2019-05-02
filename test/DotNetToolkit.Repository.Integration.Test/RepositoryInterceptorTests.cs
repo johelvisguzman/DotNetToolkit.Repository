@@ -27,12 +27,10 @@
             var repo = new Repository<Customer>(options);
 
             mock.Verify(x => x.AddExecuting(It.IsAny<Customer>()), Times.Never);
-            mock.Verify(x => x.AddExecuted(It.IsAny<Customer>()), Times.Never);
 
             repo.Add(entity);
 
             mock.Verify(x => x.AddExecuting(It.Is<Customer>(z => z == entity)), Times.Once);
-            mock.Verify(x => x.AddExecuted(It.Is<Customer>(z => z == entity)), Times.Once);
         }
 
         [Fact]
@@ -51,12 +49,10 @@
             repo.Add(entity);
 
             mock.Verify(x => x.UpdateExecuting(It.IsAny<Customer>()), Times.Never);
-            mock.Verify(x => x.UpdateExecuted(It.IsAny<Customer>()), Times.Never);
 
             repo.Update(entity);
 
             mock.Verify(x => x.UpdateExecuting(It.Is<Customer>(z => z == entity)), Times.Once);
-            mock.Verify(x => x.UpdateExecuted(It.Is<Customer>(z => z == entity)), Times.Once);
         }
 
         [Fact]
@@ -75,12 +71,10 @@
             repo.Add(entity);
 
             mock.Verify(x => x.DeleteExecuting(It.IsAny<Customer>()), Times.Never);
-            mock.Verify(x => x.DeleteExecuted(It.IsAny<Customer>()), Times.Never);
 
             repo.Delete(entity);
 
             mock.Verify(x => x.DeleteExecuting(It.Is<Customer>(z => z == entity)), Times.Once);
-            mock.Verify(x => x.DeleteExecuted(It.Is<Customer>(z => z == entity)), Times.Once);
         }
 
         [Fact]
