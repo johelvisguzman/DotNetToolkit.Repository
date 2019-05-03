@@ -98,39 +98,42 @@
                     return ((ConstantExpression)expr1).Value.ToString();
             }
 
-            var memberExpression = GetMemberExpression(exp);
-
             object value = null;
 
-            if (memberExpression.Expression is ConstantExpression container)
+            var memberExpression = GetMemberExpression(exp);
+
+            if (memberExpression != null)
             {
-                switch (memberExpression.Member)
+                if (memberExpression.Expression is ConstantExpression container)
                 {
-                    case FieldInfo fieldInfo:
-                        value = fieldInfo.GetValue(container.Value);
-                        break;
-                    case PropertyInfo propertyInfo:
-                        value = propertyInfo.GetValue(container.Value, null);
-                        break;
+                    switch (memberExpression.Member)
+                    {
+                        case FieldInfo fieldInfo:
+                            value = fieldInfo.GetValue(container.Value);
+                            break;
+                        case PropertyInfo propertyInfo:
+                            value = propertyInfo.GetValue(container.Value, null);
+                            break;
+                    }
                 }
-            }
-            else if (memberExpression.Expression.NodeType != ExpressionType.Parameter)
-            {
-                var innerMemberExpression = GetMemberExpression(memberExpression.Expression);
-
-                while (innerMemberExpression.Expression.NodeType == ExpressionType.MemberAccess)
+                else if (memberExpression.Expression.NodeType != ExpressionType.Parameter)
                 {
-                    innerMemberExpression = (MemberExpression)innerMemberExpression.Expression;
-                }
+                    var innerMemberExpression = GetMemberExpression(memberExpression.Expression);
 
-                if (innerMemberExpression.Expression.NodeType != ExpressionType.Parameter)
-                {
-                    var objectMember = Expression.Convert(memberExpression, typeof(object));
-                    var getterLambda = Expression.Lambda<Func<object>>(objectMember);
-                    var getter = getterLambda.Compile();
+                    while (innerMemberExpression.Expression.NodeType == ExpressionType.MemberAccess)
+                    {
+                        innerMemberExpression = (MemberExpression)innerMemberExpression.Expression;
+                    }
 
-                    value = getter();
-                }
+                    if (innerMemberExpression.Expression.NodeType != ExpressionType.Parameter)
+                    {
+                        var objectMember = Expression.Convert(memberExpression, typeof(object));
+                        var getterLambda = Expression.Lambda<Func<object>>(objectMember);
+                        var getter = getterLambda.Compile();
+
+                        value = getter();
+                    }
+                } 
             }
 
             return convertToString && value != null ? value.ToString() : value;
