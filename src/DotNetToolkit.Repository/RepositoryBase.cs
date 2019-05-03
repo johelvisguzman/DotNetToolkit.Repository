@@ -796,6 +796,7 @@
         private readonly IRepositoryContextFactory _contextFactory;
         private IEnumerable<IRepositoryInterceptor> _interceptors;
         private string _currentExecutingLoggingMethod;
+        private IRepositoryConventions _conventions;
 
         #endregion
 
@@ -838,11 +839,13 @@
         {
             get
             {
-                IRepositoryConventions conventions = null;
+                if (_conventions == null)
+                {
+                    // gets the conventions from the context (since it is context specific)
+                    UseContext(context => { _conventions = context.Conventions; });
+                }
 
-                UseContext(context => { conventions = context.Conventions; });
-
-                return conventions;
+                return _conventions;
             }
         }
 

@@ -253,6 +253,22 @@
             return this;
         }
 
+        /// <summary>
+        /// Configures the repository options with the specified conventions.
+        /// </summary>
+        /// <param name="conventionsAction">The configurable conventions action.</param>
+        /// <returns>The same builder instance.</returns>
+        public virtual RepositoryOptionsBuilder UseConventions([NotNull] Action<IRepositoryConventions> conventionsAction)
+        {
+            Guard.NotNull(conventionsAction);
+
+            var conventions = new RepositoryConventions();
+
+            conventionsAction(conventions);
+
+            return UseConventions(conventions);
+        }
+
         #endregion
     }
 }
