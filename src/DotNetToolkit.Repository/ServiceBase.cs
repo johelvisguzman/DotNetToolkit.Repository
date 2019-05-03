@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository
 {
-    using Configuration.Conventions.Internal;
     using Factories;
     using Internal;
     using JetBrains.Annotations;
@@ -45,9 +44,7 @@
         /// <param name="unitOfWorkFactory">The unit of work factory.</param>
         protected ServiceBase([NotNull] IUnitOfWorkFactory unitOfWorkFactory)
         {
-            UnitOfWorkFactory = Guard.NotNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
-
-            PrimaryKeyConventionHelper.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>(typeof(TKey1), typeof(TKey2), typeof(TKey3));
+            UnitOfWorkFactory = Guard.NotNull(unitOfWorkFactory);
         }
 
         #endregion
@@ -1284,9 +1281,7 @@
         /// <param name="unitOfWorkFactory">The unit of work factory.</param>
         protected ServiceBase([NotNull] IUnitOfWorkFactory unitOfWorkFactory)
         {
-            UnitOfWorkFactory = Guard.NotNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
-
-            PrimaryKeyConventionHelper.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>(typeof(TKey1), typeof(TKey2));
+            UnitOfWorkFactory = Guard.NotNull(unitOfWorkFactory);
         }
 
         #endregion
@@ -2512,9 +2507,7 @@
         /// <param name="unitOfWorkFactory">The unit of work factory.</param>
         protected ServiceBase([NotNull] IUnitOfWorkFactory unitOfWorkFactory)
         {
-            UnitOfWorkFactory = Guard.NotNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
-
-            PrimaryKeyConventionHelper.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>(typeof(TKey));
+            UnitOfWorkFactory = Guard.NotNull(unitOfWorkFactory);
         }
 
         #endregion

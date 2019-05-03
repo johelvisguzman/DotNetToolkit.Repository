@@ -1,8 +1,9 @@
 ﻿namespace DotNetToolkit.Repository.Json.Internal
 {
     using Configuration;
-    using Configuration.Conventions.Internal;
+    using Configuration.Conventions;
     using Configuration.Logging;
+    using Extensions;
     using Properties;
     using Queries;
     using Queries.Internal;
@@ -60,6 +61,8 @@
             if (!path.EndsWith(@"\"))
                 path += @"\";
 
+            Conventions = RepositoryConventions.Default;
+
             _items = new BlockingCollection<EntitySet>();
             _ignoreTransactionWarning = ignoreTransactionWarning;
             _ignoreSqlQueryWarning = ignoreSqlQueryWarning;
@@ -87,7 +90,7 @@
 
         private string GetFileName(Type type)
         {
-            return $"{_path}{type.GetTableName()}{_extension}";
+            return $"{_path}{Conventions.GetTableName(type)}{_extension}";
         }
 
         private IEnumerable LoadFile(Type type)
@@ -138,19 +141,19 @@
         internal void SaveFile<TEntity>(StreamWriter writer, IEnumerable entities)
             => OnSaved<TEntity>(writer, entities.Cast<TEntity>().ToList());
 
-        private static object GetPrimaryKeyValue(object obj)
+        private object GetPrimaryKeyValue(object obj)
         {
             if (obj == null)
                 throw new ArgumentNullException(nameof(obj));
 
-            var keyValues = PrimaryKeyConventionHelper.GetPrimaryKeyValues(obj);
+            var keyValues = Conventions.GetPrimaryKeyValues(obj);
 
             return keyValues.Length == 1 ? keyValues[0] : string.Join(":", keyValues);
         }
 
-        private static object GeneratePrimaryKey(Type entityType, object lastKeyInFile)
+        private object GeneratePrimaryKey(Type entityType, object lastKeyInFile)
         {
-            var propertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+            var propertyInfo = Conventions.GetPrimaryKeyPropertyInfos(entityType).First();
             var propertyType = propertyInfo.PropertyType;
 
             if (propertyType == typeof(Guid))
@@ -262,9 +265,9 @@
                                 Resources.EntityAlreadyBeingTrackedInStore, entityType));
                         }
 
-                        var primaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+                        var primaryKeyPropertyInfo = Conventions.GetPrimaryKeyPropertyInfos(entityType).First();
 
-                        if (primaryKeyPropertyInfo.IsColumnIdentity())
+                        if (Conventions.IsColumnIdentity(primaryKeyPropertyInfo))
                         {
                             key = GeneratePrimaryKey(entityType, context.Keys.LastOrDefault());
 

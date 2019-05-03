@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Configuration
 {
-    using Conventions.Internal;
+    using Conventions;
     using Extensions;
     using JetBrains.Annotations;
     using Logging;
@@ -26,9 +26,26 @@
         #region Properties
 
         /// <summary>
+        /// Gets or sets the configurable conventions.
+        /// </summary>
+        public IRepositoryConventions Conventions { get; set; }
+
+        /// <summary>
         /// Gets or sets the repository context logger.
         /// </summary>
         public ILogger Logger { get; set; } = NullLogger.Instance;
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LinqRepositoryContextBase"/> class.
+        /// </summary>
+        protected LinqRepositoryContextBase()
+        {
+            Conventions = RepositoryConventions.Default;
+        }
 
         #endregion
 
@@ -47,7 +64,7 @@
         /// <returns>The entity's query with the applied options.</returns>
         protected virtual IQueryable<TEntity> ApplyFetchingOptions<TEntity>(IQueryable<TEntity> query, IQueryOptions<TEntity> options) where TEntity : class
         {
-            return query.ApplyFetchingOptions(options, InvokeAsQueryable);
+            return query.ApplyFetchingOptions(Conventions, options, InvokeAsQueryable);
         }
 
         #endregion
@@ -148,7 +165,7 @@
             Guard.NotEmpty(keyValues);
 
             var options = new QueryOptions<TEntity>()
-                .Include(PrimaryKeyConventionHelper.GetByPrimaryKeySpecification<TEntity>(keyValues));
+                .Include(Conventions.GetByPrimaryKeySpecification<TEntity>(keyValues));
 
             var query = AsQueryable<TEntity>();
 
@@ -176,7 +193,7 @@
 
             var result = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
-                .ApplySortingOptions(options)
+                .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
                 .Select(selector)
                 .FirstOrDefault();
@@ -198,7 +215,7 @@
 
             var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
-                .ApplySortingOptions(options);
+                .ApplySortingOptions(Conventions, options);
 
             var total = query.Count();
 
@@ -220,7 +237,7 @@
         {
             var result = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
-                .ApplySortingOptions(options)
+                .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
                 .Count();
 
@@ -239,7 +256,7 @@
 
             var result = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
-                .ApplySortingOptions(options)
+                .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
                 .Any();
 
@@ -266,7 +283,7 @@
 
             var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
-                .ApplySortingOptions(options);
+                .ApplySortingOptions(Conventions, options);
 
             Dictionary<TDictionaryKey, TElement> result;
             int total;
@@ -309,7 +326,7 @@
 
             var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
-                .ApplySortingOptions(options);
+                .ApplySortingOptions(Conventions, options);
 
             var total = query.Count();
 

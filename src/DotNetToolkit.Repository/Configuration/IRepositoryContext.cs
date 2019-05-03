@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Configuration
 {
+    using Conventions;
     using Logging;
     using Queries;
     using Queries.Strategies;
@@ -44,6 +45,11 @@
         /// Gets the current transaction.
         /// </summary>
         ITransactionManager CurrentTransaction { get; }
+
+        /// <summary>
+        /// Gets or sets the configurable conventions.
+        /// </summary>
+        IRepositoryConventions Conventions { get; set; }
 
         /// <summary>
         /// Gets or sets the repository context logger.

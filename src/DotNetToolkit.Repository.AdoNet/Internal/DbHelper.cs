@@ -1,5 +1,6 @@
 namespace DotNetToolkit.Repository.AdoNet.Internal
 {
+    using Configuration.Conventions;
     using Configuration.Logging;
     using Configuration.Logging.Internal;
     using Extensions;
@@ -29,6 +30,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         private DbConnection _connection;
         private readonly bool _ownsConnection;
         private readonly DataAccessProviderType _providerType;
+        private readonly IRepositoryConventions _conventions;
 
         #endregion
 
@@ -71,13 +73,16 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <summary>
         /// Initializes a new instance of the <see cref="DbHelper" /> class.
         /// </summary>
+        /// <param name="conventions">The configurable conventions.</param>
         /// <param name="nameOrConnectionString">Either the database name or a connection string.</param>
-        public DbHelper(string nameOrConnectionString)
+        public DbHelper(IRepositoryConventions conventions, string nameOrConnectionString)
         {
+            Guard.NotNull(conventions);
             Guard.NotEmpty(nameOrConnectionString);
 
             var css = GetConnectionStringSettings(nameOrConnectionString);
 
+            _conventions = conventions;
             _factory = DbProviderFactories.GetFactory(css.ProviderName);
             _connectionString = css.ConnectionString;
             _ownsConnection = true;
@@ -87,13 +92,16 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <summary>
         /// Initializes a new instance of the <see cref="DbHelper" /> class.
         /// </summary>
+        /// <param name="conventions">The configurable conventions.</param>
         /// <param name="providerName">The name of the provider.</param>
         /// <param name="connectionString">The connection string.</param>
-        public DbHelper(string providerName, string connectionString)
+        public DbHelper(IRepositoryConventions conventions, string providerName, string connectionString)
         {
+            Guard.NotNull(conventions);
             Guard.NotEmpty(providerName);
             Guard.NotEmpty(connectionString);
 
+            _conventions = conventions;
             _factory = DbProviderFactories.GetFactory(providerName);
             _connectionString = connectionString;
             _ownsConnection = true;
@@ -103,14 +111,17 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <summary>
         /// Initializes a new instance of the <see cref="DbHelper" /> class.
         /// </summary>
+        /// <param name="conventions">The configurable conventions.</param>
         /// <param name="existingConnection">The existing connection.</param>
-        public DbHelper(DbConnection existingConnection)
+        public DbHelper(IRepositoryConventions conventions, DbConnection existingConnection)
         {
+            Guard.NotNull(conventions);
             Guard.NotNull(existingConnection);
 
             if (existingConnection.State == ConnectionState.Closed)
                 existingConnection.Open();
 
+            _conventions = conventions;
             _connection = existingConnection;
             _ownsConnection = false;
 
@@ -468,7 +479,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <returns>A list which each entity has been projected into a new form.</returns>
         public PagedQueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, Dictionary<string, object> parameters) where T : class
         {
-            var mapper = new Mapper<T>();
+            var mapper = new Mapper<T>(_conventions);
 
             return ExecuteList<T>(cmdText, parameters, mapper.Map);
         }
@@ -819,7 +830,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
         public Task<PagedQueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken()) where T : class
         {
-            var mapper = new Mapper<T>();
+            var mapper = new Mapper<T>(_conventions);
 
             return ExecuteListAsync<T>(cmdText, parameters, mapper.Map, cancellationToken);
         }

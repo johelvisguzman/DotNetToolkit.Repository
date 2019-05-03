@@ -3,7 +3,7 @@
     using Configuration;
     using Configuration.Caching;
     using Configuration.Caching.Internal;
-    using Configuration.Conventions.Internal;
+    using Configuration.Conventions;
     using Configuration.Interceptors;
     using Configuration.Logging;
     using Configuration.Logging.Internal;
@@ -52,7 +52,7 @@
         /// <param name="options">The repository options.</param>
         protected RepositoryBase([NotNull] IRepositoryOptions options) : base(options)
         {
-            PrimaryKeyConventionHelper.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>(typeof(TKey1), typeof(TKey2), typeof(TKey3));
+            Conventions.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>(typeof(TKey1), typeof(TKey2), typeof(TKey3));
         }
 
         #endregion
@@ -319,7 +319,7 @@
         /// <param name="options">The repository options.</param>
         protected RepositoryBase([NotNull] IRepositoryOptions options) : base(options)
         {
-            PrimaryKeyConventionHelper.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>(typeof(TKey1), typeof(TKey2));
+            Conventions.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>(typeof(TKey1), typeof(TKey2));
         }
 
         #endregion
@@ -569,7 +569,7 @@
         /// <param name="options">The repository options.</param>
         protected RepositoryBase([NotNull] IRepositoryOptions options) : base(options)
         {
-            PrimaryKeyConventionHelper.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>(typeof(TKey));
+            Conventions.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>(typeof(TKey));
         }
 
         #endregion
@@ -831,6 +831,21 @@
         /// </summary>
         protected internal IMapperProvider MapperProvider { get; }
 
+        /// <summary>
+        /// Gets the configurable conventions.
+        /// </summary>
+        protected internal IRepositoryConventions Conventions
+        {
+            get
+            {
+                IRepositoryConventions conventions = null;
+
+                UseContext(context => { conventions = context.Conventions; });
+
+                return conventions;
+            }
+        }
+
         #endregion
 
         #region Constructors
@@ -949,10 +964,10 @@
         public IEnumerable<TEntity> ExecuteSqlQuery([NotNull] string sql, CommandType cmdType, [CanBeNull] object[] parameters)
         {
             var mapper = InterceptError(() => Guard.EnsureNotNull(
-                MapperProvider.Create<TEntity>(), 
-                $"The mapping provider is unable to create a mapper for '{typeof(TEntity).FullName}'"));
+                MapperProvider.Create<TEntity>(),
+                string.Format(Resources.UnableToCreateMappingForType, typeof(TEntity).FullName)));
 
-            return ExecuteSqlQuery(sql, CommandType.Text, parameters, r => mapper.Map(r));
+            return ExecuteSqlQuery(sql, CommandType.Text, parameters, r => mapper.Map(r, Conventions));
         }
 
         /// <summary>
@@ -1108,9 +1123,9 @@
         {
             var mapper = InterceptError(() => Guard.EnsureNotNull(
                 MapperProvider.Create<TEntity>(),
-                $"The mapping provider is unable to create a mapper for '{typeof(TEntity).FullName}'"));
+                string.Format(Resources.UnableToCreateMappingForType, typeof(TEntity).FullName)));
 
-            return ExecuteSqlQueryAsync(sql, CommandType.Text, parameters, r => mapper.Map(r), cancellationToken);
+            return ExecuteSqlQueryAsync(sql, CommandType.Text, parameters, r => mapper.Map(r, Conventions), cancellationToken);
         }
 
         /// <summary>
@@ -1331,7 +1346,7 @@
 
             LogExecutedMethod();
         }
-        
+
         /// <summary>
         /// Deletes all entities in the repository that satisfied the criteria specified by the <paramref name="options" />.
         /// </summary>
@@ -1555,7 +1570,7 @@
             var result = Exists(predicate.ToQueryOptions<TEntity>());
 
             LogExecutedMethod();
-            
+
             return result;
         }
 
@@ -2364,7 +2379,7 @@
             Task<IPagedQueryResult<IEnumerable<TResult>>> Getter() =>
                 UseContextAsync<IPagedQueryResult<IEnumerable<TResult>>>(
                     context => Guard.EnsureNotNull(
-                        context.GroupByAsync(options, keySelector, resultSelector, cancellationToken), 
+                        context.GroupByAsync(options, keySelector, resultSelector, cancellationToken),
                         Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
@@ -2605,8 +2620,17 @@
         {
             var context = _contextFactory.Create();
 
+            Guard.EnsureNotNull(context.Conventions, "No conventions have been configured for this context.");
+
+            if (_options.Conventions != null)
+            {
+                context.Conventions = _options.Conventions;
+            }
+
             if (context.Logger == null || context.Logger is NullLogger)
+            {
                 context.Logger = LoggerProvider.Create(context.GetType().FullName);
+            }
 
             return context;
         }

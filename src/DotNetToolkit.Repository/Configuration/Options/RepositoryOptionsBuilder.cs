@@ -1,13 +1,13 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Options
 {
     using Caching;
+    using Conventions;
     using Factories;
     using Interceptors;
     using Internal;
     using JetBrains.Annotations;
     using Logging;
     using Mapper;
-    using Microsoft.Extensions.Configuration;
     using System;
     using System.Linq;
     using Utility;
@@ -120,7 +120,7 @@
         /// <param name="configuration">The configuration.</param>
         /// <returns>The same builder instance.</returns>
         /// <remarks>Any element that is defined in the config file can be resolved using the <see cref="DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationProvider.SetDefaultFactory"/></remarks>
-        public virtual RepositoryOptionsBuilder UseConfiguration([NotNull] IConfiguration configuration)
+        public virtual RepositoryOptionsBuilder UseConfiguration([NotNull]  Microsoft.Extensions.Configuration.IConfiguration configuration)
         {
             Guard.NotNull(configuration);
 
@@ -237,6 +237,18 @@
         public virtual RepositoryOptionsBuilder UseInternalContextFactory([NotNull] IRepositoryContextFactory contextFactory)
         {
             _options.With(Guard.NotNull(contextFactory));
+
+            return this;
+        }
+
+        /// <summary>
+        /// Configures the repository options with the specified conventions.
+        /// </summary>
+        /// <param name="conventions">The configurable conventions.</param>
+        /// <returns>The same builder instance.</returns>
+        public virtual RepositoryOptionsBuilder UseConventions([NotNull] IRepositoryConventions conventions)
+        {
+            _options.With(Guard.NotNull(conventions));
 
             return this;
         }

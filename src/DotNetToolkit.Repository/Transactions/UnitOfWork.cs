@@ -93,7 +93,7 @@
 
         #region Private Methods
 
-        private void Initialize([NotNull]  IRepositoryOptions options)
+        private void Initialize([NotNull] IRepositoryOptions options)
         {
             Guard.NotNull(options);
 

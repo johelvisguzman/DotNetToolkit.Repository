@@ -1,7 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.InMemory.Internal
 {
     using Configuration;
-    using Configuration.Conventions.Internal;
+    using Configuration.Conventions;
+    using Extensions;
     using Properties;
     using Queries;
     using Queries.Internal;
@@ -48,13 +49,7 @@
         /// </summary>
         /// <param name="ignoreTransactionWarning">If a transaction operation is requested, ignore any warnings since the in-memory provider does not support transactions.</param>
         /// <param name="ignoreSqlQueryWarning">If a SQL query is executed, ignore any warnings since the in-memory provider does not support SQL query execution.</param>
-        public InMemoryRepositoryContext(bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false)
-        {
-            DatabaseName = DefaultDatabaseName;
-
-            _ignoreTransactionWarning = ignoreTransactionWarning;
-            _ignoreSqlQueryWarning = ignoreSqlQueryWarning;
-        }
+        public InMemoryRepositoryContext(bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false) : this(DefaultDatabaseName, ignoreTransactionWarning, ignoreSqlQueryWarning) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InMemoryRepositoryContext" /> class.
@@ -65,6 +60,7 @@
         public InMemoryRepositoryContext(string databaseName, bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false)
         {
             DatabaseName = string.IsNullOrEmpty(databaseName) ? DefaultDatabaseName : databaseName;
+            Conventions = RepositoryConventions.Default;
 
             _ignoreTransactionWarning = ignoreTransactionWarning;
             _ignoreSqlQueryWarning = ignoreSqlQueryWarning;
@@ -94,7 +90,7 @@
 
         private object GeneratePrimaryKey(Type entityType)
         {
-            var propertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+            var propertyInfo = Conventions.GetPrimaryKeyPropertyInfos(entityType).First();
             var propertyType = propertyInfo.PropertyType;
 
             if (propertyType == typeof(Guid))
@@ -118,9 +114,9 @@
             throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyValueTypeInvalid, entityType.FullName, propertyType));
         }
 
-        private static object GetPrimaryKeyValue(object obj)
+        private object GetPrimaryKeyValue(object obj)
         {
-            return Combine(PrimaryKeyConventionHelper.GetPrimaryKeyValues(Guard.NotNull(obj)));
+            return Combine(Conventions.GetPrimaryKeyValues(Guard.NotNull(obj)));
         }
 
         private static object Combine(object[] keyValues)
@@ -228,9 +224,9 @@
                                 Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
                         }
 
-                        var primaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
+                        var primaryKeyPropertyInfo = Conventions.GetPrimaryKeyPropertyInfos(entityType).First();
 
-                        if (primaryKeyPropertyInfo.IsColumnIdentity())
+                        if (Conventions.IsColumnIdentity(primaryKeyPropertyInfo))
                         {
                             key = GeneratePrimaryKey(entityType);
 

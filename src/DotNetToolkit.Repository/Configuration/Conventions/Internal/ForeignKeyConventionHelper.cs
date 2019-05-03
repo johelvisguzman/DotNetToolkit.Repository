@@ -12,39 +12,29 @@
 
     internal class ForeignKeyConventionHelper
     {
-        /// <summary>
-        /// Gets the collection of foreign key properties that matches the specified foreign type.
-        /// </summary>
-        /// <param name="sourceType">The source type.</param>
-        /// <param name="foreignType">The foreign type to match.</param>
-        /// <returns>The collection of foreign key properties.</returns>
-        public static IEnumerable<PropertyInfo> GetForeignKeyPropertyInfos([NotNull] Type sourceType, [NotNull] Type foreignType)
+        public static PropertyInfo[] GetForeignKeyPropertyInfos([NotNull] IRepositoryConventions conventions, [NotNull] Type sourceType, [NotNull] Type foreignType)
         {
             Guard.NotNull(sourceType);
             Guard.NotNull(foreignType);
 
             if (sourceType.IsEnumerable() || foreignType.IsEnumerable())
-                return Enumerable.Empty<PropertyInfo>();
+                return new PropertyInfo[0];
 
-            var tupleKey = Tuple.Create(sourceType, foreignType);
-
-            if (InMemoryCache.Instance.ForeignKeyMapping.ContainsKey(tupleKey))
-                return InMemoryCache.Instance.ForeignKeyMapping[tupleKey];
-
-            var properties = sourceType.GetRuntimeProperties().Where(x => x.IsColumnMapped());
+            var properties = sourceType.GetRuntimeProperties().Where(conventions.IsColumnMapped).ToList();
             var foreignNavigationPropertyInfo = properties.SingleOrDefault(x => x.PropertyType == foreignType);
             var propertyInfos = new List<PropertyInfo>();
 
             if (foreignNavigationPropertyInfo != null)
             {
-                var propertyInfosWithForeignKeys = properties.Where(x => x.GetCustomAttribute<ForeignKeyAttribute>() != null);
+                // Gets by checking the annotations
+                var propertyInfosWithForeignKeys = properties.Where(x => x.GetCustomAttribute<ForeignKeyAttribute>() != null).ToList();
                 if (propertyInfosWithForeignKeys.Any())
                 {
                     // Ensure that the foreign key names are valid
                     foreach (var propertyInfosWithForeignKey in propertyInfosWithForeignKeys)
                     {
                         var foreignKeyAttributeName = propertyInfosWithForeignKey.GetCustomAttribute<ForeignKeyAttribute>().Name;
-                        if (!properties.Any(x => foreignKeyAttributeName.Equals(x.GetColumnName())))
+                        if (!properties.Any(x => foreignKeyAttributeName.Equals(conventions.GetColumnName(x))))
                         {
                             throw new InvalidOperationException(
                                 string.Format(
@@ -57,7 +47,7 @@
 
                     // Try to find by checking on the foreign key property
                     propertyInfos = propertyInfosWithForeignKeys
-                        .Where(Extensions.PropertyInfoExtensions.IsPrimitive)
+                        .Where(DotNetToolkit.Repository.Extensions.PropertyInfoExtensions.IsPrimitive)
                         .Where(x => x.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(foreignNavigationPropertyInfo.Name))
                         .ToList();
 
@@ -65,32 +55,29 @@
                     if (!propertyInfos.Any())
                     {
                         propertyInfos = properties
-                            .Where(Extensions.PropertyInfoExtensions.IsPrimitive)
-                            .Where(x => foreignNavigationPropertyInfo.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(x.GetColumnName()))
+                            .Where(DotNetToolkit.Repository.Extensions.PropertyInfoExtensions.IsPrimitive)
+                            .Where(x => foreignNavigationPropertyInfo.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(conventions.GetColumnName(x)))
                             .ToList();
                     }
                 }
 
                 // Try to find by naming convention
-                if (!propertyInfos.Any() && !PrimaryKeyConventionHelper.HasCompositePrimaryKey(foreignType))
-                {
-                    var primaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(foreignType).FirstOrDefault();
-                    if (primaryKeyPropertyInfo != null)
-                    {
-                        var foreignPrimaryKeyName = primaryKeyPropertyInfo.GetColumnName();
-                        var propertyInfo = properties.SingleOrDefault(x => x.Name == $"{foreignNavigationPropertyInfo.Name}{foreignPrimaryKeyName}");
+                var primaryKeyPropertyInfos = conventions.GetPrimaryKeyPropertyInfos(foreignType);
 
-                        if (propertyInfo != null)
-                        {
-                            propertyInfos.Add(propertyInfo);
-                        }
+                if (!propertyInfos.Any() && primaryKeyPropertyInfos.Length == 1)
+                {
+                    var primaryKeyPropertyInfo = primaryKeyPropertyInfos.First();
+                    var foreignPrimaryKeyName = conventions.GetColumnName(primaryKeyPropertyInfo);
+                    var propertyInfo = properties.SingleOrDefault(x => x.Name == $"{foreignNavigationPropertyInfo.Name}{foreignPrimaryKeyName}");
+
+                    if (propertyInfo != null)
+                    {
+                        propertyInfos.Add(propertyInfo);
                     }
                 }
             }
 
-            InMemoryCache.Instance.ForeignKeyMapping[tupleKey] = propertyInfos;
-
-            return propertyInfos;
+            return propertyInfos.ToArray();
         }
     }
 }

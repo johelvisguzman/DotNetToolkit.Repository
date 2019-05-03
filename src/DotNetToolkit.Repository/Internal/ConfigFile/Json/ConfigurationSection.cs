@@ -37,10 +37,8 @@
 
         public ConfigurationSection([NotNull] IConfiguration config)
         {
-            Guard.NotNull(config);
-
             _root = Guard.EnsureNotNull(
-                config.GetSection(RepositorySectionKey), 
+                Guard.NotNull(config).GetSection(RepositorySectionKey), 
                 "Unable to find a configuration for the repositories.");
         }
 

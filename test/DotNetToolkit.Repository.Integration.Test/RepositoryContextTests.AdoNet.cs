@@ -3,6 +3,7 @@
     using AdoNet;
     using AdoNet.Internal;
     using AdoNet.Internal.Schema;
+    using Configuration.Conventions;
     using Configuration.Options;
     using Data;
     using Factories;
@@ -710,9 +711,10 @@
         [Fact]
         public void CreateTableOnSaveChanges()
         {
+            var conventions = RepositoryConventions.Default;
             var ensureDatabaseCreated = true;
             var connection = TestAdoNetContextFactory.CreateConnection();
-            var schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(connection));
+            var schemaHelper = new SchemaTableConfigurationHelper(conventions, new DbHelper(conventions, connection));
             var options = new RepositoryOptionsBuilder()
                 .UseAdoNet(connection, ensureDatabaseCreated)
                 .UseLoggerProvider(TestXUnitLoggerProvider)
@@ -731,7 +733,7 @@
 
             //
             connection = TestAdoNetContextFactory.CreateConnection();
-            schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(connection));
+            schemaHelper = new SchemaTableConfigurationHelper(conventions, new DbHelper(conventions, connection));
             options = new RepositoryOptionsBuilder()
                 .UseAdoNet(connection, ensureDatabaseCreated)
                 .UseLoggerProvider(TestXUnitLoggerProvider)
@@ -758,7 +760,7 @@
 
             //
             connection = TestAdoNetContextFactory.CreateConnection();
-            schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(connection));
+            schemaHelper = new SchemaTableConfigurationHelper(conventions, new DbHelper(conventions, connection));
             options = new RepositoryOptionsBuilder()
                 .UseAdoNet(connection, ensureDatabaseCreated)
                 .UseLoggerProvider(TestXUnitLoggerProvider)
@@ -791,9 +793,10 @@
         [Fact]
         public async Task CreateTableOnSaveChangesAsync()
         {
+            var conventions = RepositoryConventions.Default;
             var ensureDatabaseCreated = true;
             var connection = TestAdoNetContextFactory.CreateConnection();
-            var schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(connection));
+            var schemaHelper = new SchemaTableConfigurationHelper(conventions, new DbHelper(conventions, connection));
             var options = new RepositoryOptionsBuilder()
                 .UseAdoNet(connection, ensureDatabaseCreated)
                 .UseLoggerProvider(TestXUnitLoggerProvider)
@@ -812,7 +815,7 @@
 
             //
             connection = TestAdoNetContextFactory.CreateConnection();
-            schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(connection));
+            schemaHelper = new SchemaTableConfigurationHelper(conventions, new DbHelper(conventions, connection));
             options = new RepositoryOptionsBuilder()
                 .UseAdoNet(connection, ensureDatabaseCreated)
                 .UseLoggerProvider(TestXUnitLoggerProvider)
@@ -839,7 +842,7 @@
 
             //
             connection = TestAdoNetContextFactory.CreateConnection();
-            schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(connection));
+            schemaHelper = new SchemaTableConfigurationHelper(conventions, new DbHelper(conventions, connection));
             options = new RepositoryOptionsBuilder()
                 .UseAdoNet(connection, ensureDatabaseCreated)
                 .UseLoggerProvider(TestXUnitLoggerProvider)

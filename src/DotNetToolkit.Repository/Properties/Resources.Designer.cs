@@ -160,6 +160,15 @@ namespace DotNetToolkit.Repository.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The mapping provider is unable to create a mapper for &apos;{0}&apos;..
+        /// </summary>
+        internal static string UnableToCreateMappingForType {
+            get {
+                return ResourceManager.GetString("UnableToCreateMappingForType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to determine composite primary key ordering for type &apos;{0}&apos;. Use the ColumnAttribute to specify an order for composite primary keys..
         /// </summary>
         internal static string UnableToDetermineCompositePrimaryKeyOrdering {

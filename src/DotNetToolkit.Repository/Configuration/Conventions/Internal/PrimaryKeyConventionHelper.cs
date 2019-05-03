@@ -1,40 +1,26 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Conventions.Internal
 {
+    using Extensions;
     using JetBrains.Annotations;
-    using Properties;
-    using Queries.Strategies;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-    using System.Globalization;
     using System.Linq;
-    using System.Linq.Expressions;
     using System.Reflection;
     using Utility;
 
     internal class PrimaryKeyConventionHelper
     {
-        /// <summary>
-        /// Gets the composite primary key property information for the specified type.
-        /// </summary>
-        /// <param name="entityType">The entity type to get the primary key from.</param>
-        /// <returns>The composite primary key property infos.</returns>
-        /// <remarks>
-        /// If the entity type is defined with a composite primary key collection,
-        /// then the list of keys found will be returned ordered as defined by their specified <see cref="ColumnAttribute"/> attribute.
-        /// </remarks>
-        public static IEnumerable<PropertyInfo> GetPrimaryKeyPropertyInfos([NotNull] Type entityType)
+        public static PropertyInfo[] GetPrimaryKeyPropertyInfos([NotNull] IRepositoryConventions conventions, [NotNull] Type entityType)
         {
+            Guard.NotNull(conventions);
             Guard.NotNull(entityType);
-
-            if (InMemoryCache.Instance.PrimaryKeyMapping.ContainsKey(entityType))
-                return InMemoryCache.Instance.PrimaryKeyMapping[entityType];
-
+            
             // Gets by checking the annotations
             var propertyInfos = entityType
                 .GetRuntimeProperties()
-                .Where(x => x.IsColumnMapped() && x.GetCustomAttribute<KeyAttribute>() != null)
+                .Where(x => conventions.IsColumnMapped(x) && x.GetCustomAttribute<KeyAttribute>() != null)
                 .OrderBy(x =>
                 {
                     var columnAttribute = x.GetCustomAttribute<ColumnAttribute>();
@@ -52,7 +38,7 @@
                 {
                     var propertyInfo = entityType.GetTypeInfo().GetDeclaredProperty(propertyName);
 
-                    if (propertyInfo != null && propertyInfo.IsColumnMapped())
+                    if (propertyInfo != null && conventions.IsColumnMapped(propertyInfo))
                     {
                         propertyInfos.Add(propertyInfo);
 
@@ -61,134 +47,9 @@
                 }
             }
 
-            if (propertyInfos.Any())
-            {
-                InMemoryCache.Instance.PrimaryKeyMapping[entityType] = propertyInfos;
-
-                return propertyInfos;
-            }
-
-            return Enumerable.Empty<PropertyInfo>();
+            return propertyInfos.ToArray();
         }
 
-        /// <summary>
-        /// Determines whether the specified entity type has a composite primary key defined.
-        /// </summary>
-        /// <param name="entityType">The type of the entity.</param>
-        public static bool HasCompositePrimaryKey([NotNull] Type entityType)
-        {
-            Guard.NotNull(entityType);
-
-            return GetPrimaryKeyPropertyInfos(entityType).Count() > 1;
-        }
-
-        /// <summary>
-        /// Gets the composite primary key property information for the specified type.
-        /// </summary>
-        /// <returns>The primary key property infos.</returns>
-        public static IEnumerable<PropertyInfo> GetPrimaryKeyPropertyInfos<T>()
-        {
-            return GetPrimaryKeyPropertyInfos(typeof(T));
-        }
-
-        /// <summary>
-        /// Gets the collection of primary key values for the specified object.
-        /// </summary>
-        /// <returns>The primary key value.</returns>
-        public static object[] GetPrimaryKeyValues([NotNull] object obj)
-        {
-            Guard.NotNull(obj);
-
-            var keyValues = GetPrimaryKeyPropertyInfos(obj.GetType())
-                .Select(x => x.GetValue(obj, null))
-                .ToArray();
-
-            return keyValues;
-        }
-
-        /// <summary>
-        /// Returns a specification for getting an entity by it's primary key.
-        /// </summary>
-        /// <returns>The new specification.</returns>
-        public static ISpecificationQueryStrategy<TEntity> GetByPrimaryKeySpecification<TEntity>([NotNull] params object[] keyValues) where TEntity : class
-        {
-            Guard.NotEmpty(keyValues);
-
-            var propInfos = GetPrimaryKeyPropertyInfos<TEntity>().ToList();
-
-            if (keyValues.Length != propInfos.Count)
-                throw new ArgumentException(Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
-
-            var parameter = Expression.Parameter(typeof(TEntity), "x");
-
-            BinaryExpression exp = null;
-
-            for (var i = 0; i < propInfos.Count; i++)
-            {
-                var propInfo = propInfos[i];
-                var keyValue = keyValues[i];
-
-                var x = Expression.Equal(
-                    Expression.PropertyOrField(parameter, propInfo.Name),
-                    Expression.Constant(keyValue));
-
-                exp = exp == null ? x : Expression.AndAlso(x, exp);
-            }
-
-            var lambda = Expression.Lambda<Func<TEntity, bool>>(exp, parameter);
-
-            return new SpecificationQueryStrategy<TEntity>(lambda);
-        }
-
-        /// <summary>
-        /// Throws an exception if the specified key type collection does not match the ones defined for the entity.
-        /// </summary>
-        /// <param name="keyTypes">The key type collection to check against.</param>
-        public static void ThrowsIfInvalidPrimaryKeyDefinition<TEntity>([NotNull] params Type[] keyTypes) where TEntity : class
-        {
-            Guard.NotEmpty(keyTypes);
-
-            var definedKeyInfos = GetPrimaryKeyPropertyInfos<TEntity>().ToList();
-
-            if (!definedKeyInfos.Any())
-            {
-                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
-                    Resources.EntityRequiresPrimaryKey,
-                    typeof(TEntity).FullName));
-            }
-
-            if (definedKeyInfos.Count > 1)
-            {
-                var hasNoKeyOrdering = definedKeyInfos.Any(x =>
-                {
-                    var columnAttribute = x.GetCustomAttribute<ColumnAttribute>();
-                    if (columnAttribute == null)
-                        return true;
-
-                    return columnAttribute.Order <= 0;
-                });
-
-                if (hasNoKeyOrdering)
-                {
-                    throw new InvalidOperationException(string.Format(
-                        Resources.UnableToDetermineCompositePrimaryKeyOrdering, typeof(TEntity).FullName));
-                }
-            }
-
-            var definedKeyTypes = definedKeyInfos
-                .Select(x => x.PropertyType)
-                .ToArray();
-
-            if (keyTypes.Length != definedKeyTypes.Length || definedKeyTypes.Where((t, i) => t != keyTypes[i]).Any())
-                throw new InvalidOperationException(Resources.EntityPrimaryKeyTypesMismatch);
-        }
-
-        /// <summary>
-        /// Gets the primary key name checks.
-        /// </summary>
-        /// <param name="entityType">The entity type to get the primary key from.</param>
-        /// <remarks>Assumes the entity has either an 'Id' property or 'EntityName' + 'Id'.</remarks>
-        /// <returns>The list of primary key names to check.</returns>
         private static IEnumerable<string> GetDefaultPrimaryKeyNameChecks([NotNull] Type entityType)
         {
             Guard.NotNull(entityType);

@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
-    using Configuration.Conventions.Internal;
+    using Configuration.Conventions;
     using Extensions;
     using System.Data;
     using System.Data.Common;
@@ -14,16 +14,17 @@
     /// </summary>
     internal static class DbCommandExtensions
     {
-        internal static bool ExecuteObjectExist(this DbHelper dbHelper, DbCommand command, object obj)
+        internal static bool ExecuteObjectExist(this DbHelper dbHelper, IRepositoryConventions conventions, DbCommand command, object obj)
         {
             Guard.NotNull(dbHelper);
+            Guard.NotNull(conventions);
             Guard.NotNull(command);
             Guard.NotNull(obj);
 
             var entityType = obj.GetType();
-            var tableName = entityType.GetTableName();
-            var primaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-            var primaryKeyColumnName = primaryKeyPropertyInfo.GetColumnName();
+            var tableName = conventions.GetTableName(entityType);
+            var primaryKeyPropertyInfo = conventions.GetPrimaryKeyPropertyInfos(entityType).First();
+            var primaryKeyColumnName = conventions.GetColumnName(primaryKeyPropertyInfo);
 
             command.CommandText = $"SELECT * FROM [{tableName}]\nWHERE {primaryKeyColumnName} = @{primaryKeyColumnName}";
             command.CommandType = CommandType.Text;
@@ -45,16 +46,17 @@
             return existInDb;
         }
 
-        internal static async Task<bool> ExecuteObjectExistAsync(this DbHelper dbHelper, DbCommand command, object obj, CancellationToken cancellationToken = new CancellationToken())
+        internal static async Task<bool> ExecuteObjectExistAsync(this DbHelper dbHelper, IRepositoryConventions conventions, DbCommand command, object obj, CancellationToken cancellationToken = new CancellationToken())
         {
             Guard.NotNull(dbHelper);
+            Guard.NotNull(conventions);
             Guard.NotNull(command);
             Guard.NotNull(obj);
 
             var entityType = obj.GetType();
-            var tableName = entityType.GetTableName();
-            var primaryKeyPropertyInfo = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(entityType).First();
-            var primaryKeyColumnName = primaryKeyPropertyInfo.GetColumnName();
+            var tableName = conventions.GetTableName(entityType);
+            var primaryKeyPropertyInfo = conventions.GetPrimaryKeyPropertyInfos(entityType).First();
+            var primaryKeyColumnName = conventions.GetColumnName(primaryKeyPropertyInfo);
 
             command.CommandText = $"SELECT * FROM [{tableName}]\nWHERE {primaryKeyColumnName} = @{primaryKeyColumnName}";
             command.CommandType = CommandType.Text;

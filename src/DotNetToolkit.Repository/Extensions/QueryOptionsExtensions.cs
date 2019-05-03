@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
+    using Configuration.Conventions;
     using JetBrains.Annotations;
     using Queries;
     using Queries.Strategies;
@@ -18,12 +19,15 @@
         /// </summary>
         /// <typeparam name="T">The type of the entity.</typeparam>
         /// <param name="source">The source.</param>
+        /// <param name="conventions">The configurable conventions.</param>
         /// <returns>The fetching strategy.</returns>
-        public static IFetchQueryStrategy<T> DefaultIfFetchStrategyEmpty<T>([CanBeNull] this IQueryOptions<T> source)
+        public static IFetchQueryStrategy<T> DefaultIfFetchStrategyEmpty<T>([CanBeNull] this IQueryOptions<T> source, [NotNull] IRepositoryConventions conventions)
         {
+            Guard.NotNull(conventions);
+
             return source?.FetchStrategy != null && source.FetchStrategy.PropertyPaths.Any()
                 ? source.FetchStrategy
-                : FetchQueryStrategy<T>.Default();
+                : FetchQueryStrategy<T>.Default(conventions);
         }
 
         /// <summary>
