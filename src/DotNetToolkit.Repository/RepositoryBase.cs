@@ -2627,7 +2627,7 @@
 
             if (_options.Conventions != null)
             {
-                context.Conventions = _options.Conventions;
+                context.Conventions.Apply(_options.Conventions);
             }
 
             if (context.Logger == null || context.Logger is NullLogger)

@@ -1,9 +1,11 @@
 ﻿namespace DotNetToolkit.Repository.Test
 {
+    using Configuration.Conventions;
     using Configuration.Options;
     using Data;
     using InMemory;
     using Integration.Test.Data;
+    using System;
     using System.Linq;
     using Xunit;
 
@@ -53,6 +55,26 @@
                 .UseInMemoryDatabase();
 
             Assert.NotNull(optionsBuilder.Options.ContextFactory);
+        }
+
+        [Fact]
+        public void ConfigureConventions()
+        {
+            var conventions = new RepositoryConventions
+            {
+                PrimaryKeysCallback = (type) => null
+            };
+
+            var optionsBuilder = new RepositoryOptionsBuilder()
+                .UseInMemoryDatabase()
+                .UseConventions(conventions);
+
+            Assert.NotNull(optionsBuilder.Options.Conventions);
+
+            // will fail since it cannot find a primary key due to the conventions returning null
+            var ex = Assert.Throws<InvalidOperationException>(() => new Repository<Customer>(optionsBuilder.Options));
+
+            Assert.Equal($"The instance of entity type '{typeof(Customer).FullName}' requires a primary key to be defined.", ex.Message);
         }
 
         [Fact]

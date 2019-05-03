@@ -23,7 +23,7 @@
         /// <param name="type">The type.</param>
         /// <returns>The collection of primary keys for the specified type.</returns>
         public static PropertyInfo[] GetPrimaryKeyPropertyInfos([NotNull] this IRepositoryConventions source, [NotNull] Type type)
-            => EnsureCallback(Guard.NotNull(source).PrimaryKeysCallback)(Guard.NotNull(type));
+            => EnsureCallback(Guard.NotNull(source).PrimaryKeysCallback)(Guard.NotNull(type)) ?? new PropertyInfo[0];
 
         /// <summary>
         /// Gets a collection of primary keys for the specified type.
@@ -100,7 +100,7 @@
         /// <param name="foreignType">The foreign type to match.</param>
         /// <returns>The collection of foreign key properties that matches the specified foreign type.</returns>
         public static PropertyInfo[] GetForeignKeyPropertyInfos([NotNull] this IRepositoryConventions source, [NotNull] Type sourceType, [NotNull] Type foreignType)
-            => EnsureCallback(Guard.NotNull(source).ForeignKeysCallback)(Guard.NotNull(sourceType), Guard.NotNull(foreignType));
+            => EnsureCallback(Guard.NotNull(source).ForeignKeysCallback)(Guard.NotNull(sourceType), Guard.NotNull(foreignType)) ?? new PropertyInfo[0];
 
         /// <summary>
         /// Gets a table name for the specified type.
@@ -208,6 +208,32 @@
 
             if (keyTypes.Length != definedKeyTypes.Length || definedKeyTypes.Where((t, i) => t != keyTypes[i]).Any())
                 throw new InvalidOperationException(Resources.EntityPrimaryKeyTypesMismatch);
+        }
+
+        /// <summary>
+        /// Applies the specified conventions to the target.
+        /// </summary>
+        /// <param name="target">The target.</param>
+        /// <param name="source">The source.</param>
+        public static void Apply([NotNull] this IRepositoryConventions target, [NotNull] IRepositoryConventions source)
+        {
+            Guard.NotNull(source);
+            Guard.NotNull(target);
+
+            var properties = typeof(IRepositoryConventions).GetRuntimeProperties().ToArray();
+
+            foreach (var pi in properties)
+            {
+                if (pi.CanWrite)
+                {
+                    var value = pi.GetValue(source, null);
+
+                    if (value != null)
+                    {
+                        pi.SetValue(target, value);
+                    } 
+                }
+            }
         }
 
         private static T EnsureCallback<T>([ValidatedNotNull] [NoEnumeration]T value, [InvokerParameterName] string parameterName = null) where T : class
