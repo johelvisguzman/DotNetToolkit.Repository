@@ -215,12 +215,12 @@
         /// </summary>
         /// <param name="target">The target.</param>
         /// <param name="source">The source.</param>
-        public static void Apply([NotNull] this IRepositoryConventions target, [NotNull] IRepositoryConventions source)
+        public static void Apply<T>([NotNull] this T target, [NotNull] T source) where T : IRepositoryConventions
         {
             Guard.NotNull(source);
             Guard.NotNull(target);
 
-            var properties = typeof(IRepositoryConventions).GetRuntimeProperties().ToArray();
+            var properties = typeof(T).GetRuntimeProperties().ToArray();
 
             foreach (var pi in properties)
             {
