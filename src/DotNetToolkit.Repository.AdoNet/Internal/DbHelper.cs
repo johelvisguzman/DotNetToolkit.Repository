@@ -77,8 +77,8 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <param name="nameOrConnectionString">Either the database name or a connection string.</param>
         public DbHelper(IRepositoryConventions conventions, string nameOrConnectionString)
         {
-            Guard.NotNull(conventions);
-            Guard.NotEmpty(nameOrConnectionString);
+            Guard.NotNull(conventions, nameof(conventions));
+            Guard.NotEmpty(nameOrConnectionString, nameof(nameOrConnectionString));
 
             var css = GetConnectionStringSettings(nameOrConnectionString);
 
@@ -97,9 +97,9 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <param name="connectionString">The connection string.</param>
         public DbHelper(IRepositoryConventions conventions, string providerName, string connectionString)
         {
-            Guard.NotNull(conventions);
-            Guard.NotEmpty(providerName);
-            Guard.NotEmpty(connectionString);
+            Guard.NotNull(conventions, nameof(conventions));
+            Guard.NotEmpty(providerName, nameof(providerName));
+            Guard.NotEmpty(connectionString, nameof(connectionString));
 
             _conventions = conventions;
             _factory = DbProviderFactories.GetFactory(providerName);
@@ -115,8 +115,8 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <param name="existingConnection">The existing connection.</param>
         public DbHelper(IRepositoryConventions conventions, DbConnection existingConnection)
         {
-            Guard.NotNull(conventions);
-            Guard.NotNull(existingConnection);
+            Guard.NotNull(conventions, nameof(conventions));
+            Guard.NotNull(existingConnection, nameof(existingConnection));
 
             if (existingConnection.State == ConnectionState.Closed)
                 existingConnection.Open();
@@ -140,7 +140,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <param name="logger">The logger.</param>
         public void UseLogger(ILogger logger)
         {
-            Logger = Guard.NotNull(logger);
+            Logger = Guard.NotNull(logger, nameof(logger));
         }
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <returns>The new command.</returns>
         public DbCommand CreateCommand(string cmdText, CommandType cmdType, Dictionary<string, object> parameters)
         {
-            Guard.NotEmpty(cmdText);
+            Guard.NotEmpty(cmdText, nameof(cmdText));
 
             var command = CreateCommand();
 
@@ -275,7 +275,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <returns>A <see cref="System.Data.SqlClient.SqlDataReader" /> object.</returns>
         public DbDataReader ExecuteReader(DbCommand command)
         {
-            Guard.NotNull(command);
+            Guard.NotNull(command, nameof(command));
 
             var connection = command.Connection;
             var ownsConnection = _ownsConnection && command.Transaction == null;
@@ -325,7 +325,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <returns>The first column of the first row in the result set returned by the query.</returns>
         public T ExecuteScalar<T>(DbCommand command)
         {
-            Guard.NotNull(command);
+            Guard.NotNull(command, nameof(command));
 
             var connection = command.Connection;
             var ownsConnection = _ownsConnection && command.Transaction == null;
@@ -558,7 +558,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
         public async Task<int> ExecuteNonQueryAsync(DbCommand command, CancellationToken cancellationToken = new CancellationToken())
         {
-            Guard.NotNull(command);
+            Guard.NotNull(command, nameof(command));
 
             var connection = command.Connection;
             var ownsConnection = _ownsConnection && command.Transaction == null;
@@ -616,7 +616,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a <see cref="System.Data.SqlClient.SqlDataReader" /> object.</returns>
         public async Task<DbDataReader> ExecuteReaderAsync(DbCommand command, CancellationToken cancellationToken = new CancellationToken())
         {
-            Guard.NotNull(command);
+            Guard.NotNull(command, nameof(command));
 
             var connection = command.Connection;
             var ownsConnection = _ownsConnection && command.Transaction == null;
@@ -669,7 +669,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the first column of the first row in the result set returned by the query.</returns>
         public async Task<T> ExecuteScalarAsync<T>(DbCommand command, CancellationToken cancellationToken = new CancellationToken())
         {
-            Guard.NotNull(command);
+            Guard.NotNull(command, nameof(command));
 
             var connection = command.Connection;
             var ownsConnection = _ownsConnection && command.Transaction == null;

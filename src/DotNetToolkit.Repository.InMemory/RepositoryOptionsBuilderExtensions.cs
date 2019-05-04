@@ -19,7 +19,7 @@
         /// <returns>The same builder instance.</returns>
         public static RepositoryOptionsBuilder UseInMemoryDatabase([NotNull] this RepositoryOptionsBuilder source, bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false)
         {
-            Guard.NotNull(source);
+            Guard.NotNull(source, nameof(source));
 
             source.UseInternalContextFactory(new InMemoryRepositoryContextFactory(ignoreTransactionWarning, ignoreSqlQueryWarning));
 
@@ -36,8 +36,8 @@
         /// <returns>The same builder instance.</returns>
         public static RepositoryOptionsBuilder UseInMemoryDatabase([NotNull] this RepositoryOptionsBuilder source, [NotNull] string databaseName, bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false)
         {
-            Guard.NotNull(source);
-            Guard.NotEmpty(databaseName);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotEmpty(databaseName, nameof(databaseName));
 
             source.UseInternalContextFactory(new InMemoryRepositoryContextFactory(databaseName, ignoreTransactionWarning, ignoreSqlQueryWarning));
 

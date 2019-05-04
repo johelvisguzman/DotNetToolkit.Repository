@@ -20,8 +20,8 @@
         /// <param name="value">The value.</param>
         public static void AddParameter([NotNull] this DbCommand command, [NotNull] string name, [CanBeNull] object value)
         {
-            Guard.NotNull(command);
-            Guard.NotEmpty(name);
+            Guard.NotNull(command, nameof(command));
+            Guard.NotEmpty(name, nameof(name));
 
             name = name.StartsWith("@") ? name : "@" + name;
 
@@ -41,8 +41,8 @@
         /// <param name="values">The collection of values.</param>
         public static void AddParameter([NotNull] this DbCommand command, [NotNull] string name, [CanBeNull] object[] values)
         {
-            Guard.NotNull(command);
-            Guard.NotEmpty(name);
+            Guard.NotNull(command, nameof(command));
+            Guard.NotEmpty(name, nameof(name));
 
             name = name.StartsWith("@") ? name : "@" + name;
 
@@ -67,7 +67,7 @@
         /// <exception cref="System.ArgumentNullException">command</exception>
         public static void AddParameters([NotNull] this DbCommand command, [CanBeNull] Dictionary<string, object> parameters)
         {
-            Guard.NotNull(command);
+            Guard.NotNull(command, nameof(command));
 
             if (parameters == null || parameters.Count == 0)
                 return;

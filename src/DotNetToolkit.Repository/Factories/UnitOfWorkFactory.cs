@@ -26,7 +26,7 @@
         /// <param name="optionsAction">A builder action used to create or modify options for this unit of work factory.</param>
         public UnitOfWorkFactory([NotNull] Action<RepositoryOptionsBuilder> optionsAction)
         {
-            Guard.NotNull(optionsAction);
+            Guard.NotNull(optionsAction, nameof(optionsAction));
 
             var optionsBuilder = new RepositoryOptionsBuilder();
 
@@ -41,7 +41,7 @@
         /// <param name="options">The repository options.</param>
         public UnitOfWorkFactory([NotNull] IRepositoryOptions options)
         {
-            _options = Guard.NotNull(options);
+            _options = Guard.NotNull(options, nameof(options));
         }
 
         #endregion

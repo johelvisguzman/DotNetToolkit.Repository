@@ -11,7 +11,7 @@
     {
         public static IQueryable<T> ApplyFetchingOptions<T>(this IQueryable<T> query, IRepositoryConventions conventions, IQueryOptions<T> options) where T : class
         {
-            Guard.NotNull(query);
+            Guard.NotNull(query, nameof(query));
 
             var fetchingPaths = options.DefaultIfFetchStrategyEmpty(conventions).PropertyPaths.ToList();
 

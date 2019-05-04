@@ -20,8 +20,8 @@
         /// <returns>The same builder instance.</returns>
         public static RepositoryOptionsBuilder UseJsonDatabase([NotNull] this RepositoryOptionsBuilder source, [NotNull] string path, bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false)
         {
-            Guard.NotNull(source);
-            Guard.NotEmpty(path);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotEmpty(path, nameof(path));
 
             source.UseInternalContextFactory(new JsonRepositoryContextFactory(path, ignoreTransactionWarning, ignoreSqlQueryWarning));
 

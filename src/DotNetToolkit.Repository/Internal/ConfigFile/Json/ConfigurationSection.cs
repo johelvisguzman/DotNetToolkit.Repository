@@ -38,7 +38,7 @@
         public ConfigurationSection([NotNull] IConfiguration config)
         {
             _root = Guard.EnsureNotNull(
-                Guard.NotNull(config).GetSection(RepositorySectionKey), 
+                Guard.NotNull(config, nameof(config)).GetSection(RepositorySectionKey), 
                 "Unable to find a configuration for the repositories.");
         }
 
@@ -123,7 +123,7 @@
 
         private static Dictionary<string, string> ExtractParameters([NotNull] IConfigurationSection section)
         {
-            Guard.NotNull(section);
+            Guard.NotNull(section, nameof(section));
 
             var parameterCollectionSection = section.GetSection(ParameterCollectionSectionKey);
 
@@ -140,7 +140,7 @@
 
         private static Type ExtractType([NotNull] IConfigurationSection section, bool isRequired)
         {
-            Guard.NotNull(section);
+            Guard.NotNull(section, nameof(section));
 
             var value = Extract(section, TypeKey, isRequired);
 
@@ -152,7 +152,7 @@
 
         private static KeyValuePair<string, string> ExtractKeyValue([NotNull] IConfigurationSection section)
         {
-            Guard.NotNull(section);
+            Guard.NotNull(section, nameof(section));
 
             var key = section.Key;
             var value = section.Value;
@@ -168,8 +168,8 @@
 
         private static string Extract([NotNull] IConfigurationSection section, [NotNull] string key, bool isRequired = true)
         {
-            Guard.NotNull(section);
-            Guard.NotEmpty(key);
+            Guard.NotNull(section, nameof(section));
+            Guard.NotEmpty(key, nameof(key));
 
             if (section[key] == null && isRequired)
                 throw new InvalidOperationException($"The value for '{key}' key is missing for '{section.Path}' section.");
@@ -179,7 +179,7 @@
 
         private T GetTypedValue<T>([NotNull] IConfigurationSection section, [CanBeNull] Type type = null)
         {
-            Guard.NotNull(section);
+            Guard.NotNull(section, nameof(section));
 
             if (type == null)
                 type = ExtractType(section, isRequired: true);

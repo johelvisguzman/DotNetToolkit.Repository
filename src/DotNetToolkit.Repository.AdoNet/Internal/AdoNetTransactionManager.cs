@@ -35,10 +35,10 @@
         /// <param name="logger">The logger.</param>
         public AdoNetTransactionManager(DbTransaction transaction, ILogger logger)
         {
-            _logger = Guard.NotNull(logger);
+            _logger = Guard.NotNull(logger, nameof(logger));
             _logger.Debug("Started transaction");
 
-            Transaction = Guard.NotNull(transaction);
+            Transaction = Guard.NotNull(transaction, nameof(transaction));
         }
 
         #endregion

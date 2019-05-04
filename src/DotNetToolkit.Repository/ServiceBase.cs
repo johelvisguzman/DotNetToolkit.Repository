@@ -44,7 +44,7 @@
         /// <param name="unitOfWorkFactory">The unit of work factory.</param>
         protected ServiceBase([NotNull] IUnitOfWorkFactory unitOfWorkFactory)
         {
-            UnitOfWorkFactory = Guard.NotNull(unitOfWorkFactory);
+            UnitOfWorkFactory = Guard.NotNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
         }
 
         #endregion
@@ -1281,7 +1281,7 @@
         /// <param name="unitOfWorkFactory">The unit of work factory.</param>
         protected ServiceBase([NotNull] IUnitOfWorkFactory unitOfWorkFactory)
         {
-            UnitOfWorkFactory = Guard.NotNull(unitOfWorkFactory);
+            UnitOfWorkFactory = Guard.NotNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
         }
 
         #endregion
@@ -2507,7 +2507,7 @@
         /// <param name="unitOfWorkFactory">The unit of work factory.</param>
         protected ServiceBase([NotNull] IUnitOfWorkFactory unitOfWorkFactory)
         {
-            UnitOfWorkFactory = Guard.NotNull(unitOfWorkFactory);
+            UnitOfWorkFactory = Guard.NotNull(unitOfWorkFactory, nameof(unitOfWorkFactory));
         }
 
         #endregion

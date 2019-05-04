@@ -35,7 +35,7 @@
         /// <param name="nameOrConnectionString">Either the database name or a connection string.</param>
         public EfRepositoryContextFactory(string nameOrConnectionString)
         {
-            _nameOrConnectionString = Guard.NotEmpty(nameOrConnectionString);
+            _nameOrConnectionString = Guard.NotEmpty(nameOrConnectionString, nameof(nameOrConnectionString));
         }
 
         /// <summary>
@@ -44,7 +44,7 @@
         /// <param name="existingConnection">The existing connection.</param>
         public EfRepositoryContextFactory(DbConnection existingConnection)
         {
-            _existingConnection = Guard.NotNull(existingConnection);
+            _existingConnection = Guard.NotNull(existingConnection, nameof(existingConnection));
         }
 
         #endregion

@@ -63,7 +63,7 @@
         /// <param name="ignoreSqlQueryWarning">If a SQL query is executed, ignore any warnings since the in-memory provider does not support SQL query execution.</param>
         public InMemoryRepositoryContextFactory(string databaseName, bool ignoreTransactionWarning, bool ignoreSqlQueryWarning)
         {
-            _databaseName = Guard.NotEmpty(databaseName);
+            _databaseName = Guard.NotEmpty(databaseName, nameof(databaseName));
             _ignoreTransactionWarning = ignoreTransactionWarning;
             _ignoreSqlQueryWarning = ignoreSqlQueryWarning;
         }

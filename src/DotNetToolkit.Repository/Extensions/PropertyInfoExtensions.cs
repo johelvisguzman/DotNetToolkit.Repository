@@ -13,9 +13,7 @@
         /// <returns><c>true</c> if the specified type is a complex type; otherwise, <c>false</c>.</returns>
         public static bool IsComplex([NotNull] this PropertyInfo pi)
         {
-            Guard.NotNull(pi);
-
-            return pi.PropertyType.Namespace != "System";
+            return Guard.NotNull(pi, nameof(pi)).PropertyType.Namespace != "System";
         }
 
         /// <summary>

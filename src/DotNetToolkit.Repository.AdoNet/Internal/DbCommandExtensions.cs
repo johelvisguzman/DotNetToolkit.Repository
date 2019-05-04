@@ -16,10 +16,10 @@
     {
         internal static bool ExecuteObjectExist(this DbHelper dbHelper, IRepositoryConventions conventions, DbCommand command, object obj)
         {
-            Guard.NotNull(dbHelper);
-            Guard.NotNull(conventions);
-            Guard.NotNull(command);
-            Guard.NotNull(obj);
+            Guard.NotNull(dbHelper, nameof(dbHelper));
+            Guard.NotNull(conventions, nameof(conventions));
+            Guard.NotNull(command, nameof(command));
+            Guard.NotNull(obj, nameof(obj));
 
             var entityType = obj.GetType();
             var tableName = conventions.GetTableName(entityType);
@@ -48,10 +48,10 @@
 
         internal static async Task<bool> ExecuteObjectExistAsync(this DbHelper dbHelper, IRepositoryConventions conventions, DbCommand command, object obj, CancellationToken cancellationToken = new CancellationToken())
         {
-            Guard.NotNull(dbHelper);
-            Guard.NotNull(conventions);
-            Guard.NotNull(command);
-            Guard.NotNull(obj);
+            Guard.NotNull(dbHelper, nameof(dbHelper));
+            Guard.NotNull(conventions, nameof(conventions));
+            Guard.NotNull(command, nameof(command));
+            Guard.NotNull(obj, nameof(obj));
 
             var entityType = obj.GetType();
             var tableName = conventions.GetTableName(entityType);

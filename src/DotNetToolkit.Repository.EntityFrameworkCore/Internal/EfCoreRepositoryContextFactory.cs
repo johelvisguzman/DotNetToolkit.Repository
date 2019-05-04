@@ -32,7 +32,7 @@
         /// <param name="contextOptions">The context options.</param>
         public EfCoreRepositoryContextFactory(DbContextOptions contextOptions)
         {
-            _contextOptions = Guard.NotNull(contextOptions);
+            _contextOptions = Guard.NotNull(contextOptions, nameof(contextOptions));
         }
 
         #endregion

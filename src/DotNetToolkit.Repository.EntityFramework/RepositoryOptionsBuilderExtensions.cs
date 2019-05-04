@@ -19,7 +19,7 @@
         /// <returns>The same builder instance.</returns>
         public static RepositoryOptionsBuilder UseEntityFramework<TDbContext>([NotNull] this RepositoryOptionsBuilder source) where TDbContext : DbContext
         {
-            Guard.NotNull(source);
+            Guard.NotNull(source, nameof(source));
 
             source.UseInternalContextFactory(new EfRepositoryContextFactory<TDbContext>());
 
@@ -34,8 +34,8 @@
         /// <returns>The same builder instance.</returns>
         public static RepositoryOptionsBuilder UseEntityFramework<TDbContext>([NotNull] this RepositoryOptionsBuilder source, [NotNull] string nameOrConnectionString) where TDbContext : DbContext
         {
-            Guard.NotNull(source);
-            Guard.NotEmpty(nameOrConnectionString);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotEmpty(nameOrConnectionString, nameof(nameOrConnectionString));
 
             source.UseInternalContextFactory(new EfRepositoryContextFactory<TDbContext>(nameOrConnectionString));
 
@@ -50,8 +50,8 @@
         /// <returns>The same builder instance.</returns>
         public static RepositoryOptionsBuilder UseEntityFramework<TDbContext>([NotNull] this RepositoryOptionsBuilder source, [NotNull] DbConnection existingConnection) where TDbContext : DbContext
         {
-            Guard.NotNull(source);
-            Guard.NotNull(existingConnection);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotNull(existingConnection, nameof(existingConnection));
 
             source.UseInternalContextFactory(new EfRepositoryContextFactory<TDbContext>(existingConnection));
 

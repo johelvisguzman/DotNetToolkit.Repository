@@ -78,7 +78,7 @@
         /// <param name="expiry">The the caching expiration time.</param>
         public RedisCacheProvider([NotNull] string configuration, [CanBeNull] TimeSpan? expiry)
         {
-            Guard.NotNull(configuration);
+            Guard.NotNull(configuration, nameof(configuration));
 
             _redis = new RedisCache(configuration);
 
@@ -92,7 +92,7 @@
         /// <param name="expiry">The the caching expiration time.</param>
         public RedisCacheProvider([NotNull] ConfigurationOptions options, [CanBeNull] TimeSpan? expiry)
         {
-            Guard.NotNull(options);
+            Guard.NotNull(options, nameof(options));
 
             _redis = new RedisCache(options);
 
@@ -109,7 +109,7 @@
         /// <param name="expiry">The the caching expiration time.</param>
         public RedisCacheProvider([NotNull] string host, bool ssl, bool allowAdmin, [CanBeNull] int? defaultDatabase, [CanBeNull] TimeSpan? expiry)
         {
-            Guard.NotEmpty(host);
+            Guard.NotEmpty(host, nameof(host));
 
             _redis = new RedisCache(host, ssl, allowAdmin, defaultDatabase);
 
@@ -128,8 +128,8 @@
         /// <param name="expiry">The the caching expiration time.</param>
         public RedisCacheProvider([NotNull] string host, int port, [NotNull] string password, bool ssl, bool allowAdmin, [CanBeNull] int? defaultDatabase, [CanBeNull] TimeSpan? expiry)
         {
-            Guard.NotEmpty(host);
-            Guard.NotEmpty(password);
+            Guard.NotEmpty(host, nameof(host));
+            Guard.NotEmpty(password, nameof(password));
 
             _redis = new RedisCache(host, port, password, ssl, allowAdmin, defaultDatabase);
 

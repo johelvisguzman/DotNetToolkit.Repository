@@ -25,7 +25,7 @@
         /// <returns>The entity's query with the applied options.</returns>
         public static IQueryable<T> ApplySpecificationOptions<T>([NotNull] this IQueryable<T> query, [CanBeNull] IQueryOptions<T> options) where T : class
         {
-            Guard.NotNull(query);
+            Guard.NotNull(query, nameof(query));
 
             if (options != null && options.SpecificationStrategy != null)
                 query = options.SpecificationStrategy.SatisfyingEntitiesFrom(query);
@@ -39,7 +39,7 @@
         /// <returns>The entity's query with the applied options.</returns>
         public static IOrderedQueryable<T> ApplySortingOptions<T>([NotNull] this IQueryable<T> query, [NotNull] IRepositoryConventions conventions, [CanBeNull] IQueryOptions<T> options) where T : class
         {
-            Guard.NotNull(query);
+            Guard.NotNull(query, nameof(query));
 
             var sorting = new Dictionary<string, SortOrder>();
 
@@ -83,7 +83,7 @@
         /// <returns>The entity's query with the applied options.</returns>
         public static IQueryable<T> ApplyPagingOptions<T>([NotNull] this IQueryable<T> query, [CanBeNull] IQueryOptions<T> options)
         {
-            Guard.NotNull(query);
+            Guard.NotNull(query, nameof(query));
 
             if (options != null && options.PageSize != -1)
             {
@@ -99,8 +99,8 @@
         /// <returns>The entity's query with the applied options.</returns>
         public static IQueryable<T> ApplyFetchingOptions<T>([NotNull] this IQueryable<T> query, [NotNull] IRepositoryConventions conventions, [CanBeNull] IQueryOptions<T> options, [NotNull] Func<Type, IQueryable<object>> joinQueryCallback) where T : class
         {
-            Guard.NotNull(query);
-            Guard.NotNull(joinQueryCallback);
+            Guard.NotNull(query, nameof(query));
+            Guard.NotNull(joinQueryCallback, nameof(joinQueryCallback));
 
             var mainTableType = typeof(T);
             var mainTableProperties = mainTableType.GetRuntimeProperties().ToList();
@@ -221,9 +221,9 @@
 
         private static IOrderedQueryable<T> ApplyOrder<T>([NotNull] IQueryable<T> source, [NotNull] string propertyName, [NotNull] string methodName)
         {
-            Guard.NotNull(source);
-            Guard.NotEmpty(propertyName);
-            Guard.NotEmpty(methodName);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotEmpty(propertyName, nameof(propertyName));
+            Guard.NotEmpty(methodName, nameof(methodName));
 
             var lambda = ExpressionHelper.GetExpression<T>(propertyName);
             var type = ExpressionHelper.GetMemberExpression(lambda).Type;

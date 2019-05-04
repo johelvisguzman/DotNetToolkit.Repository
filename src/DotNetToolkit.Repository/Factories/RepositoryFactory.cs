@@ -25,7 +25,7 @@
         /// <param name="optionsAction">A builder action used to create or modify options for this repository factory.</param>
         public RepositoryFactory([NotNull] Action<RepositoryOptionsBuilder> optionsAction)
         {
-            Guard.NotNull(optionsAction);
+            Guard.NotNull(optionsAction, nameof(optionsAction));
 
             var optionsBuilder = new RepositoryOptionsBuilder();
 
@@ -40,7 +40,7 @@
         /// <param name="options">The repository options.</param>
         public RepositoryFactory([NotNull] IRepositoryOptions options)
         {
-            Guard.NotNull(options);
+            Guard.NotNull(options, nameof(options));
 
             _options = options;
         }

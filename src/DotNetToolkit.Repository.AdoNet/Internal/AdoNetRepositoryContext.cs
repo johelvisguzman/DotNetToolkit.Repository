@@ -76,9 +76,11 @@
 		/// </param>
         public AdoNetRepositoryContext(string nameOrConnectionString, bool ensureDatabaseCreated = false)
         {
+            Guard.NotEmpty(nameOrConnectionString, nameof(nameOrConnectionString));
+
             Conventions = RepositoryConventions.Default;
 
-            _dbHelper = new DbHelper(Conventions, Guard.NotEmpty(nameOrConnectionString));
+            _dbHelper = new DbHelper(Conventions, nameOrConnectionString);
             _schemaConfigHelper = new SchemaTableConfigurationHelper(Conventions, _dbHelper);
             _ensureDatabaseCreated = ensureDatabaseCreated;
         }
@@ -95,9 +97,12 @@
 		/// </param>
         public AdoNetRepositoryContext(string providerName, string connectionString, bool ensureDatabaseCreated = false)
         {
+            Guard.NotEmpty(providerName, nameof(providerName));
+            Guard.NotEmpty(connectionString, nameof(connectionString));
+
             Conventions = RepositoryConventions.Default;
 
-            _dbHelper = new DbHelper(Conventions, Guard.NotEmpty(providerName), Guard.NotEmpty(connectionString));
+            _dbHelper = new DbHelper(Conventions, providerName, connectionString);
             _schemaConfigHelper = new SchemaTableConfigurationHelper(Conventions, _dbHelper);
             _ensureDatabaseCreated = ensureDatabaseCreated;
         }
@@ -113,9 +118,11 @@
 		/// </param>
         public AdoNetRepositoryContext(DbConnection existingConnection, bool ensureDatabaseCreated = false)
         {
+            Guard.NotNull(existingConnection, nameof(existingConnection));
+
             Conventions = RepositoryConventions.Default;
 
-            _dbHelper = new DbHelper(Conventions, Guard.NotNull(existingConnection));
+            _dbHelper = new DbHelper(Conventions, existingConnection);
             _schemaConfigHelper = new SchemaTableConfigurationHelper(Conventions, _dbHelper);
             _ensureDatabaseCreated = ensureDatabaseCreated;
         }
@@ -197,8 +204,8 @@
         /// <returns>A list which each entity has been projected into a new form.</returns>
         public IQueryResult<IEnumerable<TEntity>> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector) where TEntity : class
         {
-            Guard.NotEmpty(sql);
-            Guard.NotNull(projector);
+            Guard.NotEmpty(sql, nameof(sql));
+            Guard.NotNull(projector, nameof(projector));
 
             using (var reader = _dbHelper.ExecuteReader(sql, cmdType, parameters))
             {
@@ -222,7 +229,7 @@
         /// <returns>The number of rows affected.</returns>
         public IQueryResult<int> ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters)
         {
-            Guard.NotEmpty(sql);
+            Guard.NotEmpty(sql, nameof(sql));
 
             return new QueryResult<int>(_dbHelper.ExecuteNonQuery(sql, cmdType, parameters));
         }
@@ -252,9 +259,7 @@
         /// <param name="entity">The entity.</param>
         public void Add<TEntity>(TEntity entity) where TEntity : class
         {
-            Guard.NotNull(entity);
-
-            _items.Add(new EntitySet(entity, EntityState.Added));
+            _items.Add(new EntitySet(Guard.NotNull(entity, nameof(entity)), EntityState.Added));
         }
 
         /// <summary>
@@ -264,9 +269,7 @@
         /// <param name="entity">The entity.</param>
         public void Update<TEntity>(TEntity entity) where TEntity : class
         {
-            Guard.NotNull(entity);
-
-            _items.Add(new EntitySet(entity, EntityState.Modified));
+            _items.Add(new EntitySet(Guard.NotNull(entity, nameof(entity)), EntityState.Modified));
         }
 
         /// <summary>
@@ -276,9 +279,7 @@
         /// <param name="entity">The entity.</param>
         public void Remove<TEntity>(TEntity entity) where TEntity : class
         {
-            Guard.NotNull(entity);
-
-            _items.Add(new EntitySet(entity, EntityState.Removed));
+            _items.Add(new EntitySet(Guard.NotNull(entity, nameof(entity)), EntityState.Removed));
         }
 
         /// <summary>
@@ -379,7 +380,7 @@
         /// <returns>The entity found in the repository.</returns>
         public IQueryResult<TEntity> Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
-            Guard.NotEmpty(keyValues);
+            Guard.NotEmpty(keyValues, nameof(keyValues));
 
             var options = new QueryOptions<TEntity>()
                 .Include(Conventions.GetByPrimaryKeySpecification<TEntity>(keyValues));
@@ -415,7 +416,7 @@
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public IQueryResult<TResult> Find<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
         {
-            Guard.NotNull(selector);
+            Guard.NotNull(selector, nameof(selector));
 
             var selectorFunc = selector.Compile();
 
@@ -444,7 +445,7 @@
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public IPagedQueryResult<IEnumerable<TResult>> FindAll<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
         {
-            Guard.NotNull(selector);
+            Guard.NotNull(selector, nameof(selector));
 
             var selectorFunc = selector.Compile();
 
@@ -488,7 +489,7 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
         public IQueryResult<bool> Exists<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
         {
-            Guard.NotNull(options);
+            Guard.NotNull(options, nameof(options));
 
             QueryBuilder.CreateSelectStatement<TEntity>(Conventions, options, out var sql, out var parameters);
 
@@ -521,8 +522,8 @@
         /// <returns>A new <see cref="T:System.Collections.Generic.Dictionary`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector) where TEntity : class
         {
-            Guard.NotNull(keySelector);
-            Guard.NotNull(elementSelector);
+            Guard.NotNull(keySelector, nameof(keySelector));
+            Guard.NotNull(elementSelector, nameof(elementSelector));
 
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
@@ -583,8 +584,8 @@
         /// <returns>A new <see cref="T:System.Linq.IGrouping`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public IPagedQueryResult<IEnumerable<TResult>> GroupBy<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector) where TEntity : class
         {
-            Guard.NotNull(keySelector);
-            Guard.NotNull(resultSelector);
+            Guard.NotNull(keySelector, nameof(keySelector));
+            Guard.NotNull(resultSelector, nameof(resultSelector));
 
             var keySelectFunc = keySelector.Compile();
             var resultSelectorFunc = resultSelector.Compile();
@@ -613,8 +614,8 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
         public async Task<IQueryResult<IEnumerable<TEntity>>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            Guard.NotEmpty(sql);
-            Guard.NotNull(projector);
+            Guard.NotEmpty(sql, nameof(sql));
+            Guard.NotNull(projector, nameof(projector));
 
             using (var reader = await _dbHelper.ExecuteReaderAsync(sql, cmdType, parameters, cancellationToken))
             {
@@ -639,7 +640,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
         public async Task<IQueryResult<int>> ExecuteSqlCommandAsync(string sql, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken())
         {
-            Guard.NotEmpty(sql);
+            Guard.NotEmpty(sql, nameof(sql));
 
             return new QueryResult<int>(await _dbHelper.ExecuteNonQueryAsync(sql, cmdType, parameters, cancellationToken));
         }
@@ -743,7 +744,7 @@
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found in the repository.</returns>
         public async Task<IQueryResult<TEntity>> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
-            Guard.NotEmpty(keyValues);
+            Guard.NotEmpty(keyValues, nameof(keyValues));
 
             var options = new QueryOptions<TEntity>()
                 .Include(Conventions.GetByPrimaryKeySpecification<TEntity>(keyValues));
@@ -780,7 +781,7 @@
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public async Task<IQueryResult<TResult>> FindAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            Guard.NotNull(selector);
+            Guard.NotNull(selector, nameof(selector));
 
             var selectorFunc = selector.Compile();
 
@@ -810,7 +811,7 @@
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public async Task<IPagedQueryResult<IEnumerable<TResult>>> FindAllAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            Guard.NotNull(selector);
+            Guard.NotNull(selector, nameof(selector));
 
             var selectorFunc = selector.Compile();
 
@@ -856,7 +857,7 @@
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
         public async Task<IQueryResult<bool>> ExistsAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            Guard.NotNull(options);
+            Guard.NotNull(options, nameof(options));
 
             QueryBuilder.CreateSelectStatement<TEntity>(Conventions, options, out var sql, out var parameters);
 
@@ -890,8 +891,8 @@
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="T:System.Collections.Generic.Dictionary`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public async Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            Guard.NotNull(keySelector);
-            Guard.NotNull(elementSelector);
+            Guard.NotNull(keySelector, nameof(keySelector));
+            Guard.NotNull(elementSelector, nameof(elementSelector));
 
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
@@ -953,8 +954,8 @@
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="T:System.Linq.IGrouping`2" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public async Task<IPagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            Guard.NotNull(keySelector);
-            Guard.NotNull(resultSelector);
+            Guard.NotNull(keySelector, nameof(keySelector));
+            Guard.NotNull(resultSelector, nameof(resultSelector));
 
             var keySelectFunc = keySelector.Compile();
             var resultSelectorFunc = resultSelector.Compile();

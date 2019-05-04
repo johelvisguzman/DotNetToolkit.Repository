@@ -19,7 +19,7 @@
         /// <returns></returns>
         public static string ToIncludeString<T>([NotNull] this Expression<Func<T, object>> selector)
         {
-            Guard.NotNull(selector);
+            Guard.NotNull(selector, nameof(selector));
 
             // Retrieve member path:
             var members = new List<PropertyInfo>();

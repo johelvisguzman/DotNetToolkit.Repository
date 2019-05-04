@@ -26,7 +26,7 @@
 
         public static string ToSHA256([NotNull] this string value)
         {
-            Guard.NotEmpty(value);
+            Guard.NotEmpty(value, nameof(value));
 
             var sha256 = System.Security.Cryptography.SHA256.Create();
             var hashInBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(value));

@@ -63,7 +63,7 @@
         /// <returns>The scoped database context by the specified database name.</returns>
         public ConcurrentDictionary<Type, ConcurrentDictionary<object, object>> GetDatabaseStore(string name)
         {
-            Guard.NotEmpty(name);
+            Guard.NotEmpty(name, nameof(name));
 
             if (!_storage.ContainsKey(name))
             {

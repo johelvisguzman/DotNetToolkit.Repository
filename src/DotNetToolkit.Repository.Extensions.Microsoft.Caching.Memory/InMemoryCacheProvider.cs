@@ -37,7 +37,7 @@
         /// <param name="expiry">The the caching expiration time.</param>
         public InMemoryCacheProvider([NotNull] IMemoryCache cache, [CanBeNull] TimeSpan? expiry)
         {
-            Cache = new InMemoryCache(Guard.NotNull(cache));
+            Cache = new InMemoryCache(Guard.NotNull(cache, nameof(cache)));
             Expiry = expiry;
         }
 

@@ -55,7 +55,7 @@
         /// <param name="mapper">The mapper to register.</param>
         public MapperProvider Register<T>([NotNull] IMapper<T> mapper) where T : class
         {
-            Guard.NotNull(mapper);
+            Guard.NotNull(mapper, nameof(mapper));
 
             if (_mappings.ContainsKey(typeof(T)))
                 _mappings[typeof(T)] = mapper;

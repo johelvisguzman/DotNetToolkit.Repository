@@ -30,9 +30,9 @@
         /// </remarks>
         public static IServiceCollection AddRepositories([NotNull] this IServiceCollection services, [NotNull] Action<RepositoryOptionsBuilder> optionsAction, [NotNull] params Assembly[] assembliesToScan)
         {
-            Guard.NotNull(services);
-            Guard.NotNull(optionsAction);
-            Guard.NotNull(assembliesToScan);
+            Guard.NotNull(services, nameof(services));
+            Guard.NotNull(optionsAction, nameof(optionsAction));
+            Guard.NotEmpty(assembliesToScan, nameof(assembliesToScan));
 
             var baseAssembly = Assembly.Load("DotNetToolkit.Repository");
 

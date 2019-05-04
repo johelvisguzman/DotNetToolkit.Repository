@@ -74,7 +74,7 @@
         /// <returns>The current instance.</returns>
         public QueryOptions<T> OrderBy([NotNull] string propertyName)
         {
-            Guard.NotEmpty(propertyName);
+            Guard.NotEmpty(propertyName, nameof(propertyName));
 
             if (!_sortingPropertiesMapping.ContainsKey(propertyName))
                 _sortingPropertiesMapping.Add(propertyName, SortOrder.Ascending);
@@ -91,7 +91,7 @@
         /// <returns>The current instance.</returns>
         public QueryOptions<T> OrderByDescending([NotNull] string propertyName)
         {
-            Guard.NotEmpty(propertyName);
+            Guard.NotEmpty(propertyName, nameof(propertyName));
 
             if (!_sortingPropertiesMapping.ContainsKey(propertyName))
                 _sortingPropertiesMapping.Add(propertyName, SortOrder.Descending);
@@ -108,7 +108,7 @@
         /// <returns>The current instance.</returns>
         public QueryOptions<T> OrderBy([NotNull] Expression<Func<T, object>> property)
         {
-            return OrderBy(ExpressionHelper.GetPropertyPath(Guard.NotNull(property)));
+            return OrderBy(ExpressionHelper.GetPropertyPath(Guard.NotNull(property, nameof(property))));
         }
 
         /// <summary>
@@ -118,7 +118,7 @@
         /// <returns>The current instance.</returns>
         public QueryOptions<T> OrderByDescending([NotNull] Expression<Func<T, object>> property)
         {
-            return OrderByDescending(ExpressionHelper.GetPropertyPath(Guard.NotNull(property)));
+            return OrderByDescending(ExpressionHelper.GetPropertyPath(Guard.NotNull(property, nameof(property))));
         }
 
         /// <summary>
@@ -160,7 +160,7 @@
         /// <returns>The current instance.</returns>
         public QueryOptions<T> Include([NotNull] ISpecificationQueryStrategy<T> criteria)
         {
-            Guard.NotNull(criteria);
+            Guard.NotNull(criteria, nameof(criteria));
 
             var predicate = _specificationStrategy != null ? _specificationStrategy.Predicate.And(criteria.Predicate) : criteria.Predicate;
 
@@ -176,7 +176,7 @@
         /// <returns>The current instance.</returns>
         public QueryOptions<T> SatisfyBy([NotNull] Expression<Func<T, bool>> predicate)
         {
-            Guard.NotNull(predicate);
+            Guard.NotNull(predicate, nameof(predicate));
 
             predicate = _specificationStrategy != null ? _specificationStrategy.Predicate.And(predicate) : predicate;
 
@@ -192,7 +192,7 @@
         /// <returns>The current instance.</returns>
         public QueryOptions<T> Include([NotNull] IFetchQueryStrategy<T> fetchStrategy)
         {
-            Guard.NotNull(fetchStrategy);
+            Guard.NotNull(fetchStrategy, nameof(fetchStrategy));
 
             var paths = _fetchStrategy != null ? ((IFetchQueryStrategy<T>)_fetchStrategy).PropertyPaths : new List<string>();
             var mergedPaths = paths.Union(fetchStrategy.PropertyPaths).ToList();
@@ -211,7 +211,7 @@
         /// <returns>The current instance.</returns>
         public QueryOptions<T> Fetch([NotNull] string path)
         {
-            Guard.NotEmpty(path);
+            Guard.NotEmpty(path, nameof(path));
 
             _fetchStrategy = _fetchStrategy ?? new FetchQueryStrategy<T>();
 
@@ -227,7 +227,7 @@
         /// <returns>The current instance.</returns>
         public QueryOptions<T> Fetch([NotNull] Expression<Func<T, object>> path)
         {
-            return Fetch(Guard.NotNull(path).ToIncludeString());
+            return Fetch(Guard.NotNull(path, nameof(path)).ToIncludeString());
         }
 
         #endregion

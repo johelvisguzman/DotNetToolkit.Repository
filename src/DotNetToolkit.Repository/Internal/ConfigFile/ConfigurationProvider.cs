@@ -16,7 +16,7 @@
         /// </summary>
         public static void SetDefaultFactory([NotNull] Func<Type, object> factory)
         {
-            _factory = Guard.NotNull(factory);
+            _factory = Guard.NotNull(factory, nameof(factory));
         }
 
         /// <summary>

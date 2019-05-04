@@ -16,8 +16,8 @@
         /// <param name="message">The message to log.</param>
         public static void Debug([NotNull] this ILogger source, [NotNull] string message)
         {
-            Guard.NotNull(source);
-            Guard.NotNull(message);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotNull(message, nameof(message));
 
             source.Log(LogLevel.Debug, message);
         }
@@ -30,8 +30,8 @@
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         public static void Debug([NotNull] this ILogger source, [NotNull] string message, [CanBeNull] params object[] args)
         {
-            Guard.NotNull(source);
-            Guard.NotNull(message);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotNull(message, nameof(message));
 
             Debug(source, string.Format(message, args));
         }
@@ -43,8 +43,8 @@
         /// <param name="message">The message to log.</param>
         public static void Info([NotNull] this ILogger source, [NotNull] string message)
         {
-            Guard.NotNull(source);
-            Guard.NotNull(message);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotNull(message, nameof(message));
 
             source.Log(LogLevel.Info, message);
         }
@@ -57,8 +57,8 @@
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         public static void Info([NotNull] this ILogger source, [NotNull] string message, [CanBeNull] params object[] args)
         {
-            Guard.NotNull(source);
-            Guard.NotNull(message);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotNull(message, nameof(message));
 
             Info(source, string.Format(message, args));
         }
@@ -70,8 +70,8 @@
         /// <param name="message">The message to log.</param>
         public static void Warning([NotNull] this ILogger source, [NotNull] string message)
         {
-            Guard.NotNull(source);
-            Guard.NotNull(message);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotNull(message, nameof(message));
 
             source.Log(LogLevel.Warning, message);
         }
@@ -84,8 +84,8 @@
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         public static void Warning([NotNull] this ILogger source, [NotNull] string message, [CanBeNull] params object[] args)
         {
-            Guard.NotNull(source);
-            Guard.NotNull(message);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotNull(message, nameof(message));
 
             Warning(source, string.Format(message, args));
         }
@@ -97,8 +97,8 @@
         /// <param name="message">The message to log.</param>
         public static void Error([NotNull] this ILogger source, [NotNull] string message)
         {
-            Guard.NotNull(source);
-            Guard.NotNull(message);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotNull(message, nameof(message));
 
             source.Log(LogLevel.Error, message);
         }
@@ -111,8 +111,8 @@
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         public static void Error([NotNull] this ILogger source, [NotNull] string message, [CanBeNull] params object[] args)
         {
-            Guard.NotNull(source);
-            Guard.NotNull(message);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotNull(message, nameof(message));
 
             Error(source, string.Format(message, args));
         }
@@ -125,9 +125,9 @@
         /// <param name="message">The message to log.</param>
         public static void Error([NotNull] this ILogger source, [NotNull] Exception exception, [NotNull] string message)
         {
-            Guard.NotNull(source);
-            Guard.NotNull(exception);
-            Guard.NotNull(message);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotNull(exception, nameof(exception));
+            Guard.NotNull(message, nameof(message));
 
             Error(source, $"{message}{Environment.NewLine}{exception}");
         }
@@ -139,7 +139,7 @@
         /// <param name="exception">The associated exception to log.</param>
         public static void Error([NotNull] this ILogger source, [NotNull] Exception exception)
         {
-            Guard.NotNull(source);
+            Guard.NotNull(source, nameof(source));
 
             Error(source, exception.ToString());
         }

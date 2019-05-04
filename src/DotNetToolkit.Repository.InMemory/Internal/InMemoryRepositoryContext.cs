@@ -116,12 +116,12 @@
 
         private object GetPrimaryKeyValue(object obj)
         {
-            return Combine(Conventions.GetPrimaryKeyValues(Guard.NotNull(obj)));
+            return Combine(Conventions.GetPrimaryKeyValues(Guard.NotNull(obj, nameof(obj))));
         }
 
         private static object Combine(object[] keyValues)
         {
-            Guard.NotEmpty(keyValues);
+            Guard.NotEmpty(keyValues, nameof(keyValues));
 
             return keyValues.Length == 1 ? keyValues[0] : string.Join(":", keyValues);
         }
@@ -172,7 +172,7 @@
         /// <param name="entity">The entity.</param>
         public override void Add<TEntity>(TEntity entity)
         {
-            _items.Add(new EntitySet(Guard.NotNull(entity), EntityState.Added));
+            _items.Add(new EntitySet(Guard.NotNull(entity, nameof(entity)), EntityState.Added));
         }
 
         /// <summary>
@@ -182,7 +182,7 @@
         /// <param name="entity">The entity.</param>
         public override void Update<TEntity>(TEntity entity)
         {
-            _items.Add(new EntitySet(Guard.NotNull(entity), EntityState.Modified));
+            _items.Add(new EntitySet(Guard.NotNull(entity, nameof(entity)), EntityState.Modified));
         }
 
         /// <summary>
@@ -192,7 +192,7 @@
         /// <param name="entity">The entity.</param>
         public override void Remove<TEntity>(TEntity entity)
         {
-            _items.Add(new EntitySet(Guard.NotNull(entity), EntityState.Removed));
+            _items.Add(new EntitySet(Guard.NotNull(entity, nameof(entity)), EntityState.Removed));
         }
 
         /// <summary>
@@ -275,8 +275,8 @@
             if (!_ignoreSqlQueryWarning)
                 throw new NotSupportedException(Repository.Properties.Resources.QueryExecutionNotSupported);
 
-            Guard.NotEmpty(sql);
-            Guard.NotNull(projector);
+            Guard.NotEmpty(sql, nameof(sql));
+            Guard.NotNull(projector, nameof(projector));
 
             return new QueryResult<IEnumerable<TEntity>>(Enumerable.Empty<TEntity>());
         }
@@ -293,7 +293,7 @@
             if (!_ignoreSqlQueryWarning)
                 throw new NotSupportedException(Repository.Properties.Resources.QueryExecutionNotSupported);
 
-            Guard.NotEmpty(sql);
+            Guard.NotEmpty(sql, nameof(sql));
 
             return new QueryResult<int>(0);
         }
@@ -307,7 +307,7 @@
         /// <returns>The entity found in the repository.</returns>
         public override IQueryResult<TEntity> Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues)
         {
-            Guard.NotEmpty(keyValues);
+            Guard.NotEmpty(keyValues, nameof(keyValues));
 
             if (fetchStrategy == null)
             {

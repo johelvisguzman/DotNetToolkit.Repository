@@ -14,8 +14,8 @@
     {
         public static PropertyInfo[] GetForeignKeyPropertyInfos([NotNull] IRepositoryConventions conventions, [NotNull] Type sourceType, [NotNull] Type foreignType)
         {
-            Guard.NotNull(sourceType);
-            Guard.NotNull(foreignType);
+            Guard.NotNull(sourceType, nameof(sourceType));
+            Guard.NotNull(foreignType, nameof(foreignType));
 
             if (sourceType.IsEnumerable() || foreignType.IsEnumerable())
                 return new PropertyInfo[0];

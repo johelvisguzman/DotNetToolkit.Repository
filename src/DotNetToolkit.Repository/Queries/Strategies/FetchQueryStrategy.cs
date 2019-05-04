@@ -42,7 +42,7 @@
         /// <returns>The default fetch strategy.</returns>
         public static IFetchQueryStrategy<T> Default([NotNull] IRepositoryConventions conventions)
         {
-            Guard.NotNull(conventions);
+            Guard.NotNull(conventions, nameof(conventions));
 
             var mainTableProperties = typeof(T).GetRuntimeProperties().ToList();
 

@@ -46,8 +46,8 @@
         /// <param name="ignoreSqlQueryWarning">If a SQL query is executed, ignore any warnings since the in-memory provider does not support SQL query execution.</param>
         protected FileStreamRepositoryContextBase(string path, string extension, bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false)
         {
-            Guard.NotEmpty(path);
-            Guard.NotEmpty(extension);
+            Guard.NotEmpty(path, nameof(path));
+            Guard.NotEmpty(extension, nameof(extension));
 
             if (!string.IsNullOrEmpty(Path.GetExtension(path)))
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, "The specified '{0}' path cannot be a file name.", path));
@@ -205,7 +205,7 @@
         /// <param name="entity">The entity.</param>
         public override void Add<TEntity>(TEntity entity)
         {
-            _items.Add(new EntitySet(Guard.NotNull(entity), EntityState.Added));
+            _items.Add(new EntitySet(Guard.NotNull(entity, nameof(entity)), EntityState.Added));
         }
 
         /// <summary>
@@ -215,7 +215,7 @@
         /// <param name="entity">The entity.</param>
         public override void Update<TEntity>(TEntity entity)
         {
-            _items.Add(new EntitySet(Guard.NotNull(entity), EntityState.Modified));
+            _items.Add(new EntitySet(Guard.NotNull(entity, nameof(entity)), EntityState.Modified));
         }
 
         /// <summary>
@@ -225,7 +225,7 @@
         /// <param name="entity">The entity.</param>
         public override void Remove<TEntity>(TEntity entity)
         {
-            _items.Add(new EntitySet(Guard.NotNull(entity), EntityState.Removed));
+            _items.Add(new EntitySet(Guard.NotNull(entity, nameof(entity)), EntityState.Removed));
         }
 
         /// <summary>
@@ -321,8 +321,8 @@
             if (!_ignoreSqlQueryWarning)
                 throw new NotSupportedException(Repository.Properties.Resources.QueryExecutionNotSupported);
 
-            Guard.NotEmpty(sql);
-            Guard.NotNull(projector);
+            Guard.NotEmpty(sql, nameof(sql));
+            Guard.NotNull(projector, nameof(projector));
 
             return new QueryResult<IEnumerable<TEntity>>(Enumerable.Empty<TEntity>());
         }
@@ -339,7 +339,7 @@
             if (!_ignoreSqlQueryWarning)
                 throw new NotSupportedException(Repository.Properties.Resources.QueryExecutionNotSupported);
 
-            Guard.NotEmpty(sql);
+            Guard.NotEmpty(sql, nameof(sql));
 
             return new QueryResult<int>(0);
         }

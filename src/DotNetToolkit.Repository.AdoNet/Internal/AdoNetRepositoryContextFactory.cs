@@ -39,7 +39,7 @@
         /// </param>
         public AdoNetRepositoryContextFactory(string nameOrConnectionString, bool ensureDatabaseCreated)
         {
-            _nameOrConnectionString = Guard.NotEmpty(nameOrConnectionString);
+            _nameOrConnectionString = Guard.NotEmpty(nameOrConnectionString, nameof(nameOrConnectionString));
             _ensureDatabaseCreated = ensureDatabaseCreated;
         }
 
@@ -62,8 +62,8 @@
         /// </param>
         public AdoNetRepositoryContextFactory(string providerName, string connectionString, bool ensureDatabaseCreated)
         {
-            _providerName = Guard.NotEmpty(providerName);
-            _nameOrConnectionString = Guard.NotEmpty(connectionString);
+            _providerName = Guard.NotEmpty(providerName, nameof(providerName));
+            _nameOrConnectionString = Guard.NotEmpty(connectionString, nameof(connectionString));
             _ensureDatabaseCreated = ensureDatabaseCreated;
         }
 
@@ -84,7 +84,7 @@
         /// </param>
         public AdoNetRepositoryContextFactory(DbConnection existingConnection, bool ensureDatabaseCreated)
         {
-            _existingConnection = Guard.NotNull(existingConnection);
+            _existingConnection = Guard.NotNull(existingConnection, nameof(existingConnection));
             _ensureDatabaseCreated = ensureDatabaseCreated;
         }
 

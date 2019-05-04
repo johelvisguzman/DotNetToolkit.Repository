@@ -14,8 +14,8 @@
     {
         public static PropertyInfo[] GetPrimaryKeyPropertyInfos([NotNull] IRepositoryConventions conventions, [NotNull] Type entityType)
         {
-            Guard.NotNull(conventions);
-            Guard.NotNull(entityType);
+            Guard.NotNull(conventions, nameof(conventions));
+            Guard.NotNull(entityType, nameof(entityType));
             
             // Gets by checking the annotations
             var propertyInfos = entityType
@@ -52,7 +52,7 @@
 
         private static IEnumerable<string> GetDefaultPrimaryKeyNameChecks([NotNull] Type entityType)
         {
-            Guard.NotNull(entityType);
+            Guard.NotNull(entityType, nameof(entityType));
 
             const string suffix = "Id";
 

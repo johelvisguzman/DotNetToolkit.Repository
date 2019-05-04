@@ -75,7 +75,7 @@
         /// <param name="options">The repository options to clone.</param>
         public RepositoryOptions(IRepositoryOptions options)
         {
-            Guard.NotNull(options);
+            Guard.NotNull(options, nameof(options));
 
             _interceptors = options.Interceptors.ToDictionary(x => x.Key, x => x.Value);
             _cachingProvider = options.CachingProvider;
@@ -106,8 +106,8 @@
         /// <returns>The same option instance.</returns>
         public RepositoryOptions With([NotNull] Type underlyingType, Func<IRepositoryInterceptor> interceptorFactory)
         {
-            Guard.NotNull(underlyingType);
-            Guard.NotNull(interceptorFactory);
+            Guard.NotNull(underlyingType, nameof(underlyingType));
+            Guard.NotNull(interceptorFactory, nameof(interceptorFactory));
 
             var lazy = new Lazy<IRepositoryInterceptor>(interceptorFactory);
 
@@ -126,7 +126,7 @@
         /// <returns>The same option instance.</returns>
         public RepositoryOptions With([NotNull] IRepositoryContextFactory contextFactory)
         {
-            _contextFactory = Guard.NotNull(contextFactory);
+            _contextFactory = Guard.NotNull(contextFactory, nameof(contextFactory));
 
             return this;
         }
@@ -138,7 +138,7 @@
         /// <returns>The same option instance.</returns>
         public RepositoryOptions With([NotNull] ILoggerProvider loggerProvider)
         {
-            _loggerProvider = Guard.NotNull(loggerProvider);
+            _loggerProvider = Guard.NotNull(loggerProvider, nameof(loggerProvider));
 
             return this;
         }
@@ -150,7 +150,7 @@
         /// <returns>The same option instance.</returns>
         public RepositoryOptions With([NotNull] ICacheProvider cacheProvider)
         {
-            _cachingProvider = Guard.NotNull(cacheProvider);
+            _cachingProvider = Guard.NotNull(cacheProvider, nameof(cacheProvider));
 
             return this;
         }
@@ -162,7 +162,7 @@
         /// <returns>The same option instance.</returns>
         public RepositoryOptions With([NotNull] IMapperProvider mapperProvider)
         {
-            _mapperProvider = Guard.NotNull(mapperProvider);
+            _mapperProvider = Guard.NotNull(mapperProvider, nameof(mapperProvider));
 
             return this;
         }
@@ -174,7 +174,7 @@
         /// <returns>The same option instance.</returns>
         public RepositoryOptions With([NotNull] IRepositoryConventions conventions)
         {
-            _conventions = Guard.NotNull(conventions);
+            _conventions = Guard.NotNull(conventions, nameof(conventions));
 
             return this;
         }

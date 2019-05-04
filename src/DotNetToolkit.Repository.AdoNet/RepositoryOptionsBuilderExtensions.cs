@@ -24,8 +24,8 @@
         /// <returns>The same builder instance.</returns>
         public static RepositoryOptionsBuilder UseAdoNet([NotNull] this RepositoryOptionsBuilder source, [NotNull] string nameOrConnectionString, bool ensureDatabaseCreated = false)
         {
-            Guard.NotNull(source);
-            Guard.NotEmpty(nameOrConnectionString);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotEmpty(nameOrConnectionString, nameof(nameOrConnectionString));
 
             source.UseInternalContextFactory(new AdoNetRepositoryContextFactory(nameOrConnectionString, ensureDatabaseCreated));
 
@@ -46,9 +46,9 @@
         /// <returns>The same builder instance.</returns>
         public static RepositoryOptionsBuilder UseAdoNet([NotNull] this RepositoryOptionsBuilder source, [NotNull] string providerName, [NotNull] string connectionString, bool ensureDatabaseCreated = false)
         {
-            Guard.NotNull(source);
-            Guard.NotEmpty(providerName);
-            Guard.NotEmpty(connectionString);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotEmpty(providerName, nameof(providerName));
+            Guard.NotEmpty(connectionString, nameof(connectionString));
 
             source.UseInternalContextFactory(new AdoNetRepositoryContextFactory(providerName, connectionString, ensureDatabaseCreated));
 
@@ -68,8 +68,8 @@
         /// <returns>The same builder instance.</returns>
         public static RepositoryOptionsBuilder UseAdoNet([NotNull] this RepositoryOptionsBuilder source, [NotNull] DbConnection existingConnection, bool ensureDatabaseCreated = false)
         {
-            Guard.NotNull(source);
-            Guard.NotNull(existingConnection);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotNull(existingConnection, nameof(existingConnection));
 
             source.UseInternalContextFactory(new AdoNetRepositoryContextFactory(existingConnection, ensureDatabaseCreated));
 

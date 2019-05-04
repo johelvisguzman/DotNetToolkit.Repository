@@ -162,7 +162,7 @@
         /// <returns>The entity found in the repository.</returns>
         public virtual IQueryResult<TEntity> Find<TEntity>([CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy, [NotNull] params object[] keyValues) where TEntity : class
         {
-            Guard.NotEmpty(keyValues);
+            Guard.NotEmpty(keyValues, nameof(keyValues));
 
             var options = new QueryOptions<TEntity>()
                 .Include(Conventions.GetByPrimaryKeySpecification<TEntity>(keyValues));
@@ -189,7 +189,7 @@
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public virtual IQueryResult<TResult> Find<TEntity, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TResult>> selector) where TEntity : class
         {
-            Guard.NotNull(selector);
+            Guard.NotNull(selector, nameof(selector));
 
             var result = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
@@ -211,7 +211,7 @@
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public virtual IPagedQueryResult<IEnumerable<TResult>> FindAll<TEntity, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TResult>> selector) where TEntity : class
         {
-            Guard.NotNull(selector);
+            Guard.NotNull(selector, nameof(selector));
 
             var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
@@ -252,7 +252,7 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
         public virtual IQueryResult<bool> Exists<TEntity>([NotNull] IQueryOptions<TEntity> options) where TEntity : class
         {
-            Guard.NotNull(options);
+            Guard.NotNull(options, nameof(options));
 
             var result = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
@@ -275,8 +275,8 @@
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public virtual IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TEntity, TDictionaryKey, TElement>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector, [NotNull] Expression<Func<TEntity, TElement>> elementSelector) where TEntity : class
         {
-            Guard.NotNull(keySelector);
-            Guard.NotNull(elementSelector);
+            Guard.NotNull(keySelector, nameof(keySelector));
+            Guard.NotNull(elementSelector, nameof(elementSelector));
 
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
@@ -318,8 +318,8 @@
         /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public virtual IPagedQueryResult<IEnumerable<TResult>> GroupBy<TEntity, TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector) where TEntity : class
         {
-            Guard.NotNull(keySelector);
-            Guard.NotNull(resultSelector);
+            Guard.NotNull(keySelector, nameof(keySelector));
+            Guard.NotNull(resultSelector, nameof(resultSelector));
 
             var keySelectFunc = keySelector.Compile();
             var resultSelectorFunc = resultSelector.Compile();

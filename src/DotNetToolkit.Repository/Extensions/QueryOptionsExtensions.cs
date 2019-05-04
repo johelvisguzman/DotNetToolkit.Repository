@@ -23,7 +23,7 @@
         /// <returns>The fetching strategy.</returns>
         public static IFetchQueryStrategy<T> DefaultIfFetchStrategyEmpty<T>([CanBeNull] this IQueryOptions<T> source, [NotNull] IRepositoryConventions conventions)
         {
-            Guard.NotNull(conventions);
+            Guard.NotNull(conventions, nameof(conventions));
 
             return source?.FetchStrategy != null && source.FetchStrategy.PropertyPaths.Any()
                 ? source.FetchStrategy
@@ -38,9 +38,7 @@
         /// <returns>The new query options instance.</returns>
         public static IQueryOptions<T> ToQueryOptions<T>([NotNull] this Expression<Func<T, bool>> predicate)
         {
-            Guard.NotNull(predicate);
-
-            return new QueryOptions<T>().SatisfyBy(predicate);
+            return new QueryOptions<T>().SatisfyBy(Guard.NotNull(predicate, nameof(predicate)));
         }
     }
 }
