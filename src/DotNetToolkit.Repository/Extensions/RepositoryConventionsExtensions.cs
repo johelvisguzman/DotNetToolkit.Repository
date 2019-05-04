@@ -23,7 +23,9 @@
         /// <param name="type">The type.</param>
         /// <returns>The collection of primary keys for the specified type.</returns>
         public static PropertyInfo[] GetPrimaryKeyPropertyInfos([NotNull] this IRepositoryConventions source, [NotNull] Type type)
-            => EnsureCallback(Guard.NotNull(source).PrimaryKeysCallback)(Guard.NotNull(type)) ?? new PropertyInfo[0];
+            => EnsureCallback(
+                   Guard.NotNull(source, nameof(source)).PrimaryKeysCallback,
+                   nameof(source.PrimaryKeysCallback))(Guard.NotNull(type, nameof(type))) ?? new PropertyInfo[0];
 
         /// <summary>
         /// Gets a collection of primary keys for the specified type.
@@ -49,7 +51,7 @@
         /// <param name="obj">The entity to get the key values from.</param>
         /// <returns>The primary key value.</returns>
         public static object[] GetPrimaryKeyValues([NotNull] this IRepositoryConventions source, [NotNull] object obj)
-            => GetPrimaryKeyPropertyInfos(source, Guard.NotNull(obj).GetType())
+            => GetPrimaryKeyPropertyInfos(source, Guard.NotNull(obj, nameof(obj)).GetType())
                 .Select(x => x.GetValue(obj, null))
                 .ToArray();
 
@@ -61,8 +63,8 @@
         /// <returns>The new specification.</returns>
         public static ISpecificationQueryStrategy<T> GetByPrimaryKeySpecification<T>([NotNull] this IRepositoryConventions source, [NotNull] params object[] keyValues) where T : class
         {
-            Guard.NotNull(source);
-            Guard.NotEmpty(keyValues);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotEmpty(keyValues, nameof(keyValues));
 
             var propInfos = source.GetPrimaryKeyPropertyInfos<T>();
 
@@ -100,7 +102,9 @@
         /// <param name="foreignType">The foreign type to match.</param>
         /// <returns>The collection of foreign key properties that matches the specified foreign type.</returns>
         public static PropertyInfo[] GetForeignKeyPropertyInfos([NotNull] this IRepositoryConventions source, [NotNull] Type sourceType, [NotNull] Type foreignType)
-            => EnsureCallback(Guard.NotNull(source).ForeignKeysCallback)(Guard.NotNull(sourceType), Guard.NotNull(foreignType)) ?? new PropertyInfo[0];
+            => EnsureCallback(
+                   Guard.NotNull(source, nameof(source)).ForeignKeysCallback,
+                   nameof(source.ForeignKeysCallback))(Guard.NotNull(sourceType, nameof(sourceType)), Guard.NotNull(foreignType, nameof(foreignType))) ?? new PropertyInfo[0];
 
         /// <summary>
         /// Gets a table name for the specified type.
@@ -109,7 +113,9 @@
         /// <param name="type">The type.</param>
         /// <returns>The table name for the specified type.</returns>
         public static string GetTableName([NotNull] this IRepositoryConventions source, [NotNull] Type type)
-            => EnsureCallback(Guard.NotNull(source).TableNameCallback)(Guard.NotNull(type));
+            => EnsureCallback(
+                Guard.NotNull(source, nameof(source)).TableNameCallback,
+                nameof(source.TableNameCallback))(Guard.NotNull(type, nameof(type)));
 
         /// <summary>
         /// Gets a table name for the specified type.
@@ -126,7 +132,9 @@
         /// <param name="pi">The property.</param>
         /// <returns>The column name for the specified property.</returns>
         public static string GetColumnName([NotNull] this IRepositoryConventions source, [NotNull] PropertyInfo pi)
-            => EnsureCallback(Guard.NotNull(source).ColumnNameCallback)(Guard.NotNull(pi));
+            => EnsureCallback(
+                Guard.NotNull(source, nameof(source)).ColumnNameCallback,
+                nameof(source.ColumnNameCallback))(Guard.NotNull(pi, nameof(pi)));
 
         /// <summary>
         /// Gets a column order for the specified property.
@@ -135,7 +143,9 @@
         /// <param name="pi">The property.</param>
         /// <returns>The column order for the specified property.</returns>
         public static int? GetColumnOrder([NotNull] this IRepositoryConventions source, [NotNull] PropertyInfo pi)
-            => EnsureCallback(Guard.NotNull(source).ColumnOrderCallback)(Guard.NotNull(pi));
+            => EnsureCallback(
+                Guard.NotNull(source, nameof(source)).ColumnOrderCallback,
+               nameof(source.ColumnOrderCallback))(Guard.NotNull(pi, nameof(pi)));
 
         /// <summary>
         /// Gets a column order for the specified property or a default value of <see cref="Int32.MaxValue" />.
@@ -153,7 +163,9 @@
         /// <param name="pi">The property.</param>
         /// <returns><c>true</c> if column is mapped; otherwise, <c>false</c>.</returns>
         public static bool IsColumnMapped([NotNull] this IRepositoryConventions source, [NotNull] PropertyInfo pi)
-            => EnsureCallback(Guard.NotNull(source).IsColumnMappedCallback)(Guard.NotNull(pi));
+            => EnsureCallback(
+                Guard.NotNull(source, nameof(source)).IsColumnMappedCallback,
+                nameof(source.IsColumnMappedCallback))(Guard.NotNull(pi, nameof(pi)));
 
         /// <summary>
         /// Determines whether the specified property is defined as identity.
@@ -162,7 +174,9 @@
         /// <param name="pi">The property.</param>
         /// <returns><c>true</c> if column is defined as identity.; otherwise, <c>false</c>.</returns>
         public static bool IsColumnIdentity([NotNull] this IRepositoryConventions source, [NotNull] PropertyInfo pi)
-            => EnsureCallback(Guard.NotNull(source).IsColumnIdentityCallback)(Guard.NotNull(pi));
+            => EnsureCallback(
+                Guard.NotNull(source, nameof(source)).IsColumnIdentityCallback,
+                nameof(source.IsColumnIdentityCallback))(Guard.NotNull(pi, nameof(pi)));
 
         /// <summary>
         /// Throws an exception if the specified key type collection does not match the ones defined for the entity.
@@ -171,8 +185,8 @@
         /// <param name="keyTypes">The key type collection to check against.</param>
         public static void ThrowsIfInvalidPrimaryKeyDefinition<T>([NotNull] this IRepositoryConventions source, [NotNull] params Type[] keyTypes) where T : class
         {
-            Guard.NotNull(source);
-            Guard.NotEmpty(keyTypes);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotEmpty(keyTypes, nameof(keyTypes));
 
             var definedKeyInfos = source.GetPrimaryKeyPropertyInfos<T>().ToList();
 
@@ -217,8 +231,8 @@
         /// <param name="source">The source.</param>
         public static void Apply<T>([NotNull] this T target, [NotNull] T source) where T : IRepositoryConventions
         {
-            Guard.NotNull(source);
-            Guard.NotNull(target);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotNull(target, nameof(target));
 
             var properties = typeof(T).GetRuntimeProperties().ToArray();
 
@@ -231,12 +245,16 @@
                     if (value != null)
                     {
                         pi.SetValue(target, value);
-                    } 
+                    }
                 }
             }
         }
 
-        private static T EnsureCallback<T>([ValidatedNotNull] [NoEnumeration]T value, [InvokerParameterName] string parameterName = null) where T : class
-            => Guard.EnsureNotNull(value, "The conventions callback function '{0}' cannot be null.", parameterName);
+        private static T EnsureCallback<T>([ValidatedNotNull] [NoEnumeration]T value, [InvokerParameterName] string parameterName) where T : class
+            => Guard.EnsureNotNull(
+                value,
+                "The conventions callback function '{0}.{1}' cannot be null.",
+                typeof(IRepositoryConventions).Name,
+                parameterName);
     }
 }

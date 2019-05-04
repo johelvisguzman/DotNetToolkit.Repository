@@ -95,7 +95,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found in the repository.</returns>
         public virtual async Task<IQueryResult<TEntity>> FindAsync<TEntity>(CancellationToken cancellationToken, [CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy, [NotNull] params object[] keyValues) where TEntity : class
         {
-            Guard.NotEmpty(keyValues);
+            Guard.NotEmpty(keyValues, nameof(keyValues));
 
             var options = new QueryOptions<TEntity>()
                 .Include(Conventions.GetByPrimaryKeySpecification<TEntity>(keyValues));
@@ -121,7 +121,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public virtual async Task<IQueryResult<TResult>> FindAsync<TEntity, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            Guard.NotNull(selector);
+            Guard.NotNull(selector, nameof(selector));
 
             var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
@@ -145,7 +145,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public virtual async Task<IPagedQueryResult<IEnumerable<TResult>>> FindAllAsync<TEntity, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            Guard.NotNull(selector);
+            Guard.NotNull(selector, nameof(selector));
 
             var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
@@ -190,7 +190,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
         public virtual async Task<IQueryResult<bool>> ExistsAsync<TEntity>([NotNull] IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            Guard.NotNull(options);
+            Guard.NotNull(options, nameof(options));
 
             var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
@@ -215,8 +215,8 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public virtual async Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TEntity, TDictionaryKey, TElement>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector, [NotNull] Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            Guard.NotNull(keySelector);
-            Guard.NotNull(elementSelector);
+            Guard.NotNull(keySelector, nameof(keySelector));
+            Guard.NotNull(elementSelector, nameof(elementSelector));
 
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();

@@ -31,7 +31,7 @@
         /// <param name="optionsAction">A builder action used to create or modify options for this unit of work.</param>
         public UnitOfWork([NotNull] Action<RepositoryOptionsBuilder> optionsAction)
         {
-            Guard.NotNull(optionsAction);
+            Guard.NotNull(optionsAction, nameof(optionsAction));
 
             var optionsBuilder = new RepositoryOptionsBuilder();
 
@@ -46,7 +46,7 @@
         /// <param name="options">The repository options.</param>
         public UnitOfWork([NotNull] IRepositoryOptions options)
         {
-            Initialize(Guard.NotNull(options));
+            Initialize(Guard.NotNull(options, nameof(options)));
         }
 
         #endregion
@@ -95,7 +95,7 @@
 
         private void Initialize([NotNull] IRepositoryOptions options)
         {
-            Guard.NotNull(options);
+            Guard.NotNull(options, nameof(options));
 
             var contextFactory = Guard.EnsureNotNull(options.ContextFactory, "No context provider has been configured for this unit of work.");
 

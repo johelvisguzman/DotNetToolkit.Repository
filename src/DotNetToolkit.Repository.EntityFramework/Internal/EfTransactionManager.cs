@@ -27,7 +27,7 @@
         /// <param name="transaction">The underlying transaction.</param>
         public EfTransactionManager(DbContextTransaction transaction)
         {
-            Transaction = Guard.NotNull(transaction);
+            Transaction = Guard.NotNull(transaction, nameof(transaction));
         }
 
         #endregion

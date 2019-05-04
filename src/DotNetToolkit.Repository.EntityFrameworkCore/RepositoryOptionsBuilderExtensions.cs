@@ -19,7 +19,7 @@
         /// <returns>The same builder instance.</returns>
         public static RepositoryOptionsBuilder UseEntityFrameworkCore<TDbContext>([NotNull] this RepositoryOptionsBuilder source) where TDbContext : DbContext
         {
-            Guard.NotNull(source);
+            Guard.NotNull(source, nameof(source));
 
             source.UseInternalContextFactory(new EfCoreRepositoryContextFactory<TDbContext>());
 
@@ -34,8 +34,8 @@
         /// <returns>The same builder instance.</returns>
         public static RepositoryOptionsBuilder UseEntityFrameworkCore<TDbContext>([NotNull] this RepositoryOptionsBuilder source, [NotNull] Action<DbContextOptionsBuilder> optionsAction) where TDbContext : DbContext
         {
-            Guard.NotNull(source);
-            Guard.NotNull(optionsAction);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotNull(optionsAction, nameof(optionsAction));
 
             var optionsBuilder = new DbContextOptionsBuilder<TDbContext>();
 
@@ -52,8 +52,8 @@
         /// <returns>The same builder instance.</returns>
         public static RepositoryOptionsBuilder UseEntityFrameworkCore<TDbContext>([NotNull] this RepositoryOptionsBuilder source, [NotNull] DbContextOptions options) where TDbContext : DbContext
         {
-            Guard.NotNull(source);
-            Guard.NotNull(options);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotNull(options, nameof(options));
 
             source.UseInternalContextFactory(new EfCoreRepositoryContextFactory<TDbContext>(options));
 

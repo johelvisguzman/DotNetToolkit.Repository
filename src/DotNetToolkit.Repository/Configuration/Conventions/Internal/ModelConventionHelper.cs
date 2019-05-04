@@ -12,7 +12,7 @@
     {
         public static string GetTableName([NotNull] Type type)
         {
-            Guard.NotNull(type);
+            Guard.NotNull(type, nameof(type));
 
             var tableName = type.GetTypeInfo().GetCustomAttribute<TableAttribute>()?.Name;
 
@@ -24,7 +24,7 @@
 
         public static bool IsColumnMapped([NotNull] PropertyInfo pi)
         {
-            Guard.NotNull(pi);
+            Guard.NotNull(pi, nameof(pi));
 
             if (pi.GetCustomAttribute<NotMappedAttribute>() != null)
                 return false;
@@ -35,7 +35,7 @@
 
         public static string GetColumnName([NotNull] PropertyInfo pi)
         {
-            Guard.NotNull(pi);
+            Guard.NotNull(pi, nameof(pi));
 
             // If  is a complex object then don't worry about finding a column attribute for it
             if (pi.IsComplex())
@@ -51,8 +51,8 @@
 
         public static int? GetColumnOrder([NotNull] IRepositoryConventions conventions, [NotNull] PropertyInfo pi)
         {
-            Guard.NotNull(conventions);
-            Guard.NotNull(pi);
+            Guard.NotNull(conventions, nameof(conventions));
+            Guard.NotNull(pi, nameof(pi));
 
             var columnAttribute = pi.GetCustomAttribute<ColumnAttribute>();
             if (columnAttribute == null)
@@ -73,7 +73,7 @@
 
         public static bool IsColumnIdentity([NotNull] IRepositoryConventions conventions, [NotNull] PropertyInfo pi)
         {
-            Guard.NotNull(pi);
+            Guard.NotNull(pi, nameof(pi));
 
             var databaseGeneratedAttribute = pi.GetCustomAttribute<DatabaseGeneratedAttribute>();
             if (databaseGeneratedAttribute == null)

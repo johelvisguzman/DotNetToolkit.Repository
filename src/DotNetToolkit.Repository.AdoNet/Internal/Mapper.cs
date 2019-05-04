@@ -27,7 +27,7 @@
 
         public Mapper(IRepositoryConventions conventions)
         {
-            _conventions = Guard.NotNull(conventions);
+            _conventions = Guard.NotNull(conventions, nameof(conventions));
 
             _properties = typeof(T).GetRuntimeProperties()
                 .Where(x => x.IsPrimitive() && _conventions.IsColumnMapped(x))
@@ -39,7 +39,7 @@
 
         public Mapper(IRepositoryConventions conventions, Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, Func<string, Type> getTableTypeByColumnAliasCallback)
         {
-            _conventions = Guard.NotNull(conventions);
+            _conventions = Guard.NotNull(conventions, nameof(conventions));
 
             _properties = typeof(T).GetRuntimeProperties()
                 .Where(x => x.IsPrimitive() && _conventions.IsColumnMapped(x))
@@ -47,7 +47,7 @@
                 .ToDictionary(_conventions.GetColumnName, x => x);
 
             _navigationProperties = navigationProperties ?? new Dictionary<Type, Dictionary<string, PropertyInfo>>();
-            _getTableTypeByColumnAliasCallback = Guard.NotNull(getTableTypeByColumnAliasCallback);
+            _getTableTypeByColumnAliasCallback = Guard.NotNull(getTableTypeByColumnAliasCallback, nameof(getTableTypeByColumnAliasCallback));
         }
 
         #endregion

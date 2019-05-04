@@ -30,9 +30,9 @@
         /// </remarks>
         public static void RegisterRepositories([NotNull] this IUnityContainer container, [NotNull] Action<RepositoryOptionsBuilder> optionsAction, [NotNull] params Assembly[] assembliesToScan)
         {
-            Guard.NotNull(container);
-            Guard.NotNull(optionsAction);
-            Guard.NotNull(assembliesToScan);
+            Guard.NotNull(container, nameof(container));
+            Guard.NotNull(optionsAction, nameof(optionsAction));
+            Guard.NotEmpty(assembliesToScan, nameof(assembliesToScan));
 
             var baseAssembly = Assembly.Load("DotNetToolkit.Repository");
 

@@ -10,7 +10,7 @@
     {
         public static object DeepCopy(object entity)
         {
-            Guard.NotNull(entity);
+            Guard.NotNull(entity, nameof(entity));
 
             var newItem = Activator.CreateInstance(entity.GetType());
             var properties = entity.GetType().GetRuntimeProperties().Where(x => x.IsPrimitive());

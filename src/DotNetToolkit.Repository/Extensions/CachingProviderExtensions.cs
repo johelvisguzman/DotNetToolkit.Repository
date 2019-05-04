@@ -41,9 +41,9 @@
             [CanBeNull] TimeSpan? expiry, 
             [NotNull] ILogger logger)
         {
-            Guard.NotNull(cacheProvider);
-            Guard.NotEmpty(key);
-            Guard.NotNull(logger);
+            Guard.NotNull(cacheProvider, nameof(cacheProvider));
+            Guard.NotEmpty(key, nameof(key));
+            Guard.NotNull(logger, nameof(logger));
 
             var hashedKey = FormatHashedKey<T>(cacheProvider, key);
 
@@ -78,10 +78,10 @@
             [CanBeNull] TimeSpan? expiry, 
             [NotNull] ILogger logger)
         {
-            Guard.NotNull(cacheProvider);
-            Guard.NotEmpty(key);
-            Guard.NotNull(getter);
-            Guard.NotNull(logger);
+            Guard.NotNull(cacheProvider, nameof(cacheProvider));
+            Guard.NotEmpty(key, nameof(key));
+            Guard.NotNull(getter, nameof(getter));
+            Guard.NotNull(logger, nameof(logger));
 
             var hashedKey = FormatHashedKey<T>(cacheProvider, key);
 
@@ -116,10 +116,10 @@
             [CanBeNull] TimeSpan? expiry, 
             [NotNull] ILogger logger)
         {
-            Guard.NotNull(cacheProvider);
-            Guard.NotEmpty(key);
-            Guard.NotNull(getter);
-            Guard.NotNull(logger);
+            Guard.NotNull(cacheProvider, nameof(cacheProvider));
+            Guard.NotEmpty(key, nameof(key));
+            Guard.NotNull(getter, nameof(getter));
+            Guard.NotNull(logger, nameof(logger));
 
             var hashedKey = FormatHashedKey<T>(cacheProvider, key);
 
@@ -154,10 +154,10 @@
             [CanBeNull] TimeSpan? expiry, 
             [NotNull] ILogger logger)
         {
-            Guard.NotNull(cacheProvider);
-            Guard.NotEmpty(key);
-            Guard.NotNull(getter);
-            Guard.NotNull(logger);
+            Guard.NotNull(cacheProvider, nameof(cacheProvider));
+            Guard.NotEmpty(key, nameof(key));
+            Guard.NotNull(getter, nameof(getter));
+            Guard.NotNull(logger, nameof(logger));
 
             var hashedKey = FormatHashedKey<T>(cacheProvider, key);
 
@@ -459,7 +459,7 @@
 
         internal static void IncrementCounter<T>([NotNull] this ICacheProvider cacheProvider)
         {
-            Guard.NotNull(cacheProvider);
+            Guard.NotNull(cacheProvider, nameof(cacheProvider));
 
             lock (_syncRoot)
             {
@@ -469,7 +469,7 @@
 
         private static PagedQueryResult<T> CreateInternalPagedQueryResult<T>([NotNull] this IPagedQueryResult<T> oldValue, bool cachedUsed = false)
         {
-            Guard.NotNull(oldValue);
+            Guard.NotNull(oldValue, nameof(oldValue));
 
             return new PagedQueryResult<T>(oldValue.Result, oldValue.Total)
             {
@@ -479,7 +479,7 @@
 
         private static QueryResult<T> CreateInternalQueryResult<T>([NotNull] this IQueryResult<T> oldValue, bool cachedUsed = false)
         {
-            Guard.NotNull(oldValue); 
+            Guard.NotNull(oldValue, nameof(oldValue)); 
 
             return new QueryResult<T>(oldValue.Result)
             {
@@ -495,10 +495,10 @@
             [CanBeNull] TimeSpan? expiry, 
             [NotNull] ILogger logger)
         {
-            Guard.NotNull(cacheProvider);
-            Guard.NotEmpty(hashedKey);
-            Guard.NotEmpty(key);
-            Guard.NotNull(logger);
+            Guard.NotNull(cacheProvider, nameof(cacheProvider));
+            Guard.NotEmpty(hashedKey, nameof(hashedKey));
+            Guard.NotEmpty(key, nameof(key));
+            Guard.NotNull(logger, nameof(logger));
 
             lock (_syncRoot)
             {
@@ -516,8 +516,8 @@
 
         private static bool TryGetValue<T>([NotNull] this ICacheProvider cacheProvider, [NotNull] string key, out T value)
         {
-            Guard.NotNull(cacheProvider);
-            Guard.NotEmpty(key);
+            Guard.NotNull(cacheProvider, nameof(cacheProvider));
+            Guard.NotEmpty(key, nameof(key));
 
             lock (_syncRoot)
             {
@@ -527,7 +527,7 @@
         
         private static int GetCachingPrefixCounter<T>([NotNull] this ICacheProvider cacheProvider)
         {
-            Guard.NotNull(cacheProvider);
+            Guard.NotNull(cacheProvider, nameof(cacheProvider));
 
             return !cacheProvider.TryGetValue<int>(FormatCachePrefixCounterKey<T>(), out var key) ? 1 : key;
         }
@@ -542,8 +542,8 @@
 
         private static string FormatHashedKey<T>([NotNull] this ICacheProvider cacheProvider, [NotNull] string key)
         {
-            Guard.NotNull(cacheProvider);
-            Guard.NotEmpty(key);
+            Guard.NotNull(cacheProvider, nameof(cacheProvider));
+            Guard.NotEmpty(key, nameof(key));
             
             return string.Format("{1}{0}{2}{0}{3}{0}{4}",
                 Glue,
@@ -565,7 +565,7 @@
 
         private static string FormatGetOrSetExecuteSqlQueryKey<T>([NotNull] string sql, CommandType cmdType, [CanBeNull] Dictionary<string, object> parameters)
         {
-            Guard.NotEmpty(sql);
+            Guard.NotEmpty(sql, nameof(sql));
 
             var sb = new StringBuilder();
 
@@ -583,7 +583,7 @@
 
         private static string FormatGetOrSetExecuteSqlCommandKey<T>([NotNull] string sql, CommandType cmdType, [CanBeNull] Dictionary<string, object> parameters)
         {
-            Guard.NotEmpty(sql);
+            Guard.NotEmpty(sql, nameof(sql));
 
             var sb = new StringBuilder();
 
@@ -601,7 +601,7 @@
 
         private static string FormatGetOrSetFindKey<T>([NotNull] object[] keys, [CanBeNull] IFetchQueryStrategy<T> fetchStrategy)
         {
-            Guard.NotEmpty(keys);
+            Guard.NotEmpty(keys, nameof(keys));
 
             var f = FormatFetchQueryStrategy(fetchStrategy);
 
@@ -610,7 +610,7 @@
 
         private static string FormatGetOrSetFindAllKey<T, TResult>([CanBeNull] IQueryOptions<T> options, [NotNull] Expression<Func<T, TResult>> selector)
         {
-            Guard.NotNull(selector);
+            Guard.NotNull(selector, nameof(selector));
 
             var o = FormatQueryOptions<T>(options);
 
@@ -619,7 +619,7 @@
 
         private static string FormatGetOrSetFindKey<T, TResult>([CanBeNull] IQueryOptions<T> options, [NotNull] Expression<Func<T, TResult>> selector)
         {
-            Guard.NotNull(selector);
+            Guard.NotNull(selector, nameof(selector));
 
             var o = FormatQueryOptions<T>(options);
 
@@ -635,8 +635,8 @@
 
         private static string FormatGetOrSetDictionaryKey<T, TDictionaryKey, TElement>([CanBeNull] IQueryOptions<T> options, [NotNull] Expression<Func<T, TDictionaryKey>> keySelector, [NotNull] Expression<Func<T, TElement>> elementSelector)
         {
-            Guard.NotNull(keySelector);
-            Guard.NotNull(elementSelector);
+            Guard.NotNull(keySelector, nameof(keySelector));
+            Guard.NotNull(elementSelector, nameof(elementSelector));
 
             var o = FormatQueryOptions<T>(options);
 
@@ -645,8 +645,8 @@
 
         private static string FormatGetOrSetGroupKey<T, TGroupKey, TResult>([CanBeNull] IQueryOptions<T> options, [NotNull] Expression<Func<T, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<T>, TResult>> resultSelector)
         {
-            Guard.NotNull(keySelector);
-            Guard.NotNull(resultSelector);
+            Guard.NotNull(keySelector, nameof(keySelector));
+            Guard.NotNull(resultSelector, nameof(resultSelector));
 
             var o = FormatQueryOptions<T>(options);
 

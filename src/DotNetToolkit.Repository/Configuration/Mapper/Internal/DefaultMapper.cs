@@ -25,7 +25,7 @@
 
         private Dictionary<string, PropertyInfo> GetProperties([NotNull] IRepositoryConventions conventions)
         {
-            Guard.NotNull(conventions);
+            Guard.NotNull(conventions, nameof(conventions));
 
             if (_propertiesMapping == null || _propertiesMapping.Count == 0)
             {
@@ -49,8 +49,8 @@
         /// <returns>The new projected element form.</returns>
         public T Map([NotNull] IDataReader reader, [NotNull] IRepositoryConventions conventions)
         {
-            Guard.NotNull(reader);
-            Guard.NotNull(conventions);
+            Guard.NotNull(reader, nameof(reader));
+            Guard.NotNull(conventions, nameof(conventions));
 
             var properties = GetProperties(conventions);
             var entity = Activator.CreateInstance<T>();

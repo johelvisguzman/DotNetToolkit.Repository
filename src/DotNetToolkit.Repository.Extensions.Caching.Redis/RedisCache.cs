@@ -41,7 +41,7 @@
         /// <param name="configuration">The string configuration to use for the redis multiplexer.</param>
         public RedisCache([NotNull] string configuration)
         {
-            Guard.NotEmpty(configuration);
+            Guard.NotEmpty(configuration, nameof(configuration));
 
             _lazyConnection = new Lazy<ConnectionMultiplexer>(() => ConnectionMultiplexer.Connect(configuration));
         }
@@ -52,7 +52,7 @@
         /// <param name="options">The configuration options to use for the redis multiplexer.</param>
         public RedisCache(ConfigurationOptions options)
         {
-            Guard.NotNull(options);
+            Guard.NotNull(options, nameof(options));
 
             _lazyConnection = new Lazy<ConnectionMultiplexer>(() => ConnectionMultiplexer.Connect(options));
         }
@@ -80,7 +80,7 @@
         /// <param name="defaultDatabase">Specifies the default database to be used when calling ConnectionMultiplexer.GetDatabase() without any parameters.</param>
         public RedisCache([NotNull] string host, bool ssl, bool allowAdmin, [CanBeNull] int? defaultDatabase)
         {
-            Guard.NotEmpty(host);
+            Guard.NotEmpty(host, nameof(host));
 
             var options = new ConfigurationOptions
             {
@@ -106,7 +106,7 @@
         /// <param name="defaultDatabase">Specifies the default database to be used when calling ConnectionMultiplexer.GetDatabase() without any parameters.</param>
         public RedisCache([NotNull] string host, int port, bool ssl, bool allowAdmin, [CanBeNull] int? defaultDatabase)
         {
-            Guard.NotEmpty(host);
+            Guard.NotEmpty(host, nameof(host));
 
             var options = new ConfigurationOptions
             {
@@ -133,8 +133,8 @@
         /// <param name="defaultDatabase">Specifies the default database to be used when calling ConnectionMultiplexer.GetDatabase() without any parameters.</param>
         public RedisCache([NotNull] string host, int port, [NotNull] string password, bool ssl, bool allowAdmin, [CanBeNull] int? defaultDatabase)
         {
-            Guard.NotEmpty(host);
-            Guard.NotEmpty(password);
+            Guard.NotEmpty(host, nameof(host));
+            Guard.NotEmpty(password, nameof(password));
 
             var options = new ConfigurationOptions
             {
@@ -184,7 +184,7 @@
         /// <param name="cacheRemovedCallback">A callback function for a value is removed from the cache.</param>
         public void Set<T>([NotNull] string key, [CanBeNull] T value, [CanBeNull] TimeSpan? cacheExpiration, [CanBeNull] Action<string> cacheRemovedCallback = null)
         {
-            Guard.NotEmpty(key);
+            Guard.NotEmpty(key, nameof(key));
 
             if (cacheRemovedCallback != null)
             {
@@ -212,7 +212,7 @@
         /// <param name="key">An object identifying the entry.</param>
         public void Remove([NotNull] string key)
         {
-            Redis.KeyDelete(Guard.NotEmpty(key));
+            Redis.KeyDelete(Guard.NotEmpty(key, nameof(key)));
         }
 
         /// <summary>
@@ -223,7 +223,7 @@
         /// <returns>c<c>true</c> if the an object was found with the specified key; otherwise, <c>false</c>.</returns>
         public bool TryGetValue<T>([NotNull] string key, out T value)
         {
-            value = Deserialize<T>(Redis.StringGet(Guard.NotEmpty(key)));
+            value = Deserialize<T>(Redis.StringGet(Guard.NotEmpty(key, nameof(key))));
 
             return value != null;
         }
@@ -237,7 +237,7 @@
         /// <returns>The value of key after the increment.</returns>
         public int Increment([NotNull] string key, int defaultValue, int incrementValue)
         {
-            var value = Redis.StringIncrement(Guard.NotEmpty(key), incrementValue);
+            var value = Redis.StringIncrement(Guard.NotEmpty(key, nameof(key)), incrementValue);
 
             return Convert.ToInt32(value);
         }

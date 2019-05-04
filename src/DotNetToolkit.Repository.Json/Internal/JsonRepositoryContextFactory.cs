@@ -41,7 +41,7 @@
         /// <param name="ignoreSqlQueryWarning">If a SQL query is executed, ignore any warnings since the in-memory provider does not support SQL query execution.</param>
         public JsonRepositoryContextFactory(string path, bool ignoreTransactionWarning, bool ignoreSqlQueryWarning)
         {
-            _path = Guard.NotEmpty(path);
+            _path = Guard.NotEmpty(path, nameof(path));
             _ignoreTransactionWarning = ignoreTransactionWarning;
             _ignoreSqlQueryWarning = ignoreSqlQueryWarning;
         }

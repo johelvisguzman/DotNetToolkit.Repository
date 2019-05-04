@@ -17,8 +17,8 @@
         /// </summary>    
         public static Expression<Func<T, bool>> And<T>([NotNull] this Expression<Func<T, bool>> first, [NotNull] Expression<Func<T, bool>> second)
         {
-            Guard.NotNull(first);
-            Guard.NotNull(second);
+            Guard.NotNull(first, nameof(first));
+            Guard.NotNull(second, nameof(second));
 
             return first.Compose(second, Expression.AndAlso);
         }
@@ -28,8 +28,8 @@
         /// </summary>    
         public static Expression<Func<T, bool>> Or<T>([NotNull] this Expression<Func<T, bool>> first, [NotNull] Expression<Func<T, bool>> second)
         {
-            Guard.NotNull(first);
-            Guard.NotNull(second);
+            Guard.NotNull(first, nameof(first));
+            Guard.NotNull(second, nameof(second));
 
             return first.Compose(second, Expression.OrElse);
         }
@@ -39,7 +39,7 @@
         /// </summary>    
         public static Expression<Func<T, bool>> Not<T>([NotNull] this Expression<Func<T, bool>> exp)
         {
-            Guard.NotNull(exp);
+            Guard.NotNull(exp, nameof(exp));
 
             var negated = Expression.Not(exp.Body);
             return Expression.Lambda<Func<T, bool>>(negated, exp.Parameters);
@@ -48,11 +48,11 @@
         /// <summary>
         /// Returns an expression property selector for the specified property path.
         /// </summary>
-        public static Expression GetExpression<T>([NotNull] string propertyPath)
+        public static Expression GetExpression<T>([NotNull] string path)
         {
-            Guard.NotEmpty(propertyPath);
+            Guard.NotEmpty(path, nameof(path));
 
-            var parts = (propertyPath ?? "").Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+            var parts = (path ?? "").Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
             var type = typeof(T);
             var param = Expression.Parameter(type, "x");
 
@@ -76,7 +76,7 @@
         /// <returns>The value of the property for the specified expression</returns>
         public static object GetExpressionValue([NotNull] Expression exp)
         {
-            Guard.NotNull(exp);
+            Guard.NotNull(exp, nameof(exp));
 
             if (exp.NodeType == ExpressionType.Constant)
                 return ((ConstantExpression)exp).Value;
@@ -146,7 +146,7 @@
         /// <returns>The name of the property for the specified expression</returns>
         public static string GetPropertyName([NotNull] Expression exp)
         {
-            Guard.NotNull(exp);
+            Guard.NotNull(exp, nameof(exp));
 
             return GetMemberExpression(exp)?.Member.Name;
         }
@@ -158,7 +158,7 @@
         /// <returns>The property path built from the specified expression</returns>
         public static string GetPropertyPath([NotNull] Expression exp)
         {
-            Guard.NotNull(exp);
+            Guard.NotNull(exp, nameof(exp));
 
             var stack = new Stack<string>();
 
@@ -180,7 +180,7 @@
         /// <returns>The property info from the specified expression</returns>
         public static PropertyInfo GetPropertyInfo([NotNull] Expression exp)
         {
-            Guard.NotNull(exp);
+            Guard.NotNull(exp, nameof(exp));
 
             return (PropertyInfo)GetMemberExpression(exp)?.Member;
         }
@@ -193,7 +193,7 @@
         // https://blogs.msdn.microsoft.com/mattwar/2007/08/01/linq-building-an-iqueryable-provider-part-iii/
         public static string TranslateToString([NotNull] Expression exp)
         {
-            Guard.NotNull(exp);
+            Guard.NotNull(exp, nameof(exp));
 
             // locally evaluate as much of the query as possible
             exp = Evaluator.PartialEval(exp);
@@ -211,7 +211,7 @@
         /// <returns>The member expression.</returns>
         public static MemberExpression GetMemberExpression([NotNull] Expression exp)
         {
-            Guard.NotNull(exp);
+            Guard.NotNull(exp, nameof(exp));
 
             switch (exp)
             {
@@ -258,7 +258,7 @@
         /// <returns>The constant expression.</returns>
         internal static ConstantExpression AsConstantExpression([NotNull] this Expression exp)
         {
-            Guard.NotNull(exp);
+            Guard.NotNull(exp, nameof(exp));
 
             if (exp is ConstantExpression constantExpression)
                 return constantExpression;

@@ -17,8 +17,8 @@
     {
         public static void CreateInsertStatement(IRepositoryConventions conventions, object entity, out string sql, out Dictionary<string, object> parameters)
         {
-            Guard.NotNull(conventions);
-            Guard.NotNull(entity);
+            Guard.NotNull(conventions, nameof(conventions));
+            Guard.NotNull(entity, nameof(entity));
 
             parameters = new Dictionary<string, object>();
 
@@ -53,8 +53,8 @@
 
         public static void CreateUpdateStatement(IRepositoryConventions conventions, object entity, out string sql, out Dictionary<string, object> parameters)
         {
-            Guard.NotNull(conventions);
-            Guard.NotNull(entity);
+            Guard.NotNull(conventions, nameof(conventions));
+            Guard.NotNull(entity, nameof(entity));
 
             parameters = new Dictionary<string, object>();
 
@@ -90,8 +90,8 @@
 
         public static void CreateDeleteStatement(IRepositoryConventions conventions, object entity, out string sql, out Dictionary<string, object> parameters)
         {
-            Guard.NotNull(conventions);
-            Guard.NotNull(entity);
+            Guard.NotNull(conventions, nameof(conventions));
+            Guard.NotNull(entity, nameof(entity));
 
             parameters = new Dictionary<string, object>();
 
@@ -114,7 +114,7 @@
 
         public static void CreateSelectStatement<T>(IRepositoryConventions conventions, IQueryOptions<T> options, string defaultSelect, bool applyFetchOptions, out string sql, out Dictionary<string, object> parameters, out Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, out Func<string, Type> getTableTypeByColumnAliasCallback)
         {
-            Guard.NotNull(conventions);
+            Guard.NotNull(conventions, nameof(conventions));
 
             parameters = new Dictionary<string, object>();
             navigationProperties = new Dictionary<Type, Dictionary<string, PropertyInfo>>();
@@ -534,7 +534,7 @@
 
         public static void ExtractCrossJoinColumnName(string sql, out string columnName)
         {
-            Guard.NotEmpty(sql);
+            Guard.NotEmpty(sql, nameof(sql));
 
             columnName = string.Empty;
 
@@ -553,8 +553,8 @@
 
         private static Dictionary<string, PropertyInfo> GetProperties(IRepositoryConventions conventions, Type entityType)
         {
-            Guard.NotNull(conventions);
-            Guard.NotNull(entityType);
+            Guard.NotNull(conventions, nameof(conventions));
+            Guard.NotNull(entityType, nameof(entityType));
 
             return entityType
                 .GetRuntimeProperties()

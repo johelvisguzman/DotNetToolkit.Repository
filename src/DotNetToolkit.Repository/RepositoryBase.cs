@@ -139,9 +139,9 @@
 
             InterceptError(() =>
             {
-                Guard.NotNull(key1);
-                Guard.NotNull(key2);
-                Guard.NotNull(key3);
+                Guard.NotNull(key1, nameof(key1));
+                Guard.NotNull(key2, nameof(key2));
+                Guard.NotNull(key3, nameof(key3));
             });
 
             IQueryResult<TEntity> Getter() =>
@@ -226,9 +226,9 @@
 
             InterceptError(() =>
             {
-                Guard.NotNull(key1);
-                Guard.NotNull(key2);
-                Guard.NotNull(key3);
+                Guard.NotNull(key1, nameof(key1));
+                Guard.NotNull(key2, nameof(key2));
+                Guard.NotNull(key3, nameof(key3));
             });
 
             Task<IQueryResult<TEntity>> Getter() =>
@@ -398,8 +398,8 @@
 
             InterceptError(() =>
             {
-                Guard.NotNull(key1);
-                Guard.NotNull(key2);
+                Guard.NotNull(key1, nameof(key1));
+                Guard.NotNull(key2, nameof(key2));
             });
 
             IQueryResult<TEntity> Getter() =>
@@ -480,8 +480,8 @@
 
             InterceptError(() =>
             {
-                Guard.NotNull(key1);
-                Guard.NotNull(key2);
+                Guard.NotNull(key1, nameof(key1));
+                Guard.NotNull(key2, nameof(key2));
             });
 
             Task<IQueryResult<TEntity>> Getter() =>
@@ -642,7 +642,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(key));
+            InterceptError(() => Guard.NotNull(key, nameof(key)));
 
             IQueryResult<TEntity> Getter() =>
                 UseContext<IQueryResult<TEntity>>(
@@ -716,7 +716,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(key));
+            InterceptError(() => Guard.NotNull(key, nameof(key)));
 
             Task<IQueryResult<TEntity>> Getter() =>
                 UseContextAsync<IQueryResult<TEntity>>(
@@ -859,7 +859,7 @@
         /// <param name="options">The repository options.</param>
         internal InternalRepositoryBase([NotNull] IRepositoryOptions options)
         {
-            Guard.NotNull(options);
+            Guard.NotNull(options, nameof(options));
 
             var optionsBuilder = new RepositoryOptionsBuilder(options);
 
@@ -909,8 +909,8 @@
 
             InterceptError(() =>
             {
-                Guard.NotEmpty(sql);
-                Guard.NotNull(projector);
+                Guard.NotEmpty(sql, nameof(sql));
+                Guard.NotNull(projector, nameof(projector));
             });
 
             var parametersDict = ConvertToParametersDictionary(parameters);
@@ -1005,7 +1005,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotEmpty(sql));
+            InterceptError(() => Guard.NotEmpty(sql, nameof(sql)));
 
             var parametersDict = ConvertToParametersDictionary(parameters);
 
@@ -1064,8 +1064,8 @@
 
             InterceptError(() =>
             {
-                Guard.NotEmpty(sql);
-                Guard.NotNull(projector);
+                Guard.NotEmpty(sql, nameof(sql));
+                Guard.NotNull(projector, nameof(projector));
             });
 
             var parametersDict = ConvertToParametersDictionary(parameters);
@@ -1166,7 +1166,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotEmpty(sql));
+            InterceptError(() => Guard.NotEmpty(sql, nameof(sql)));
 
             var parametersDict = ConvertToParametersDictionary(parameters);
 
@@ -1220,7 +1220,7 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() => Guard.NotNull(entity));
+            InterceptError(() => Guard.NotNull(entity, nameof(entity)));
 
             Intercept(x => x.AddExecuting(entity));
 
@@ -1243,7 +1243,7 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() => Guard.NotNull(entities));
+            InterceptError(() => Guard.NotNull(entities, nameof(entities)));
 
             UseContext(context =>
             {
@@ -1270,7 +1270,7 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() => Guard.NotNull(entity));
+            InterceptError(() => Guard.NotNull(entity, nameof(entity)));
 
             Intercept(x => x.UpdateExecuting(entity));
 
@@ -1293,7 +1293,7 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() => Guard.NotNull(entities));
+            InterceptError(() => Guard.NotNull(entities, nameof(entities)));
 
             UseContext(context =>
             {
@@ -1320,7 +1320,7 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() => Guard.NotNull(entity));
+            InterceptError(() => Guard.NotNull(entity, nameof(entity)));
 
             Intercept(x => x.DeleteExecuting(entity));
 
@@ -1343,7 +1343,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(predicate));
+            InterceptError(() => Guard.NotNull(predicate, nameof(predicate)));
 
             Delete(predicate.ToQueryOptions<TEntity>());
 
@@ -1360,7 +1360,7 @@
 
             InterceptError(() =>
             {
-                Guard.NotNull(options);
+                Guard.NotNull(options, nameof(options));
                 Guard.EnsureNotNull(options.SpecificationStrategy, "The specified query options is missing a specification predicate.");
             });
 
@@ -1377,7 +1377,7 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() => Guard.NotNull(entities));
+            InterceptError(() => Guard.NotNull(entities, nameof(entities)));
 
             UseContext(context =>
             {
@@ -1428,8 +1428,8 @@
 
             InterceptError(() =>
             {
-                Guard.NotNull(predicate);
-                Guard.NotNull(selector);
+                Guard.NotNull(predicate, nameof(predicate));
+                Guard.NotNull(selector, nameof(selector));
             });
 
             var result = Find<TResult>(predicate.ToQueryOptions<TEntity>(), selector);
@@ -1449,7 +1449,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(selector));
+            InterceptError(() => Guard.NotNull(selector, nameof(selector)));
 
             IQueryResult<TResult> Getter() =>
                 UseContext<IQueryResult<TResult>>(
@@ -1519,8 +1519,8 @@
 
             InterceptError(() =>
             {
-                Guard.NotNull(predicate);
-                Guard.NotNull(selector);
+                Guard.NotNull(predicate, nameof(predicate));
+                Guard.NotNull(selector, nameof(selector));
             });
 
             var result = FindAll<TResult>(predicate.ToQueryOptions<TEntity>(), selector).Result;
@@ -1540,7 +1540,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(selector));
+            InterceptError(() => Guard.NotNull(selector, nameof(selector)));
 
             IPagedQueryResult<IEnumerable<TResult>> Getter() =>
                 UseContext<IPagedQueryResult<IEnumerable<TResult>>>(
@@ -1568,7 +1568,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(predicate));
+            InterceptError(() => Guard.NotNull(predicate, nameof(predicate)));
 
             var result = Exists(predicate.ToQueryOptions<TEntity>());
 
@@ -1588,7 +1588,7 @@
 
             InterceptError(() =>
             {
-                Guard.NotNull(options);
+                Guard.NotNull(options, nameof(options));
                 Guard.EnsureNotNull(options.SpecificationStrategy, "The specified query options is missing a specification predicate.");
             });
 
@@ -1617,7 +1617,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(predicate));
+            InterceptError(() => Guard.NotNull(predicate, nameof(predicate)));
 
             var result = Count(predicate.ToQueryOptions<TEntity>());
 
@@ -1703,8 +1703,8 @@
 
             InterceptError(() =>
             {
-                Guard.NotNull(keySelector);
-                Guard.NotNull(elementSelector);
+                Guard.NotNull(keySelector, nameof(keySelector));
+                Guard.NotNull(elementSelector, nameof(elementSelector));
             });
 
             IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> Getter() =>
@@ -1752,8 +1752,8 @@
 
             InterceptError(() =>
             {
-                Guard.NotNull(keySelector);
-                Guard.NotNull(resultSelector);
+                Guard.NotNull(keySelector, nameof(keySelector));
+                Guard.NotNull(resultSelector, nameof(resultSelector));
             });
 
             IPagedQueryResult<IEnumerable<TResult>> Getter() =>
@@ -1785,7 +1785,7 @@
 
             InterceptError(() =>
             {
-                Guard.NotNull(entity);
+                Guard.NotNull(entity, nameof(entity));
 
                 cancellationToken.ThrowIfCancellationRequested();
             });
@@ -1815,7 +1815,7 @@
 
             InterceptError(() =>
             {
-                Guard.NotNull(entities);
+                Guard.NotNull(entities, nameof(entities));
 
                 cancellationToken.ThrowIfCancellationRequested();
             });
@@ -1849,7 +1849,7 @@
 
             InterceptError(() =>
             {
-                Guard.NotNull(entity);
+                Guard.NotNull(entity, nameof(entity));
 
                 cancellationToken.ThrowIfCancellationRequested();
             });
@@ -1879,7 +1879,7 @@
 
             InterceptError(() =>
             {
-                Guard.NotNull(entities);
+                Guard.NotNull(entities, nameof(entities));
 
                 cancellationToken.ThrowIfCancellationRequested();
             });
@@ -1913,7 +1913,7 @@
 
             InterceptError(() =>
             {
-                Guard.NotNull(entity);
+                Guard.NotNull(entity, nameof(entity));
 
                 cancellationToken.ThrowIfCancellationRequested();
             });
@@ -1941,7 +1941,7 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() => Guard.NotNull(predicate));
+            InterceptError(() => Guard.NotNull(predicate, nameof(predicate)));
 
             await DeleteAsync(predicate.ToQueryOptions<TEntity>(), cancellationToken);
 
@@ -1960,7 +1960,7 @@
 
             InterceptError(() =>
             {
-                Guard.NotNull(options);
+                Guard.NotNull(options, nameof(options));
                 Guard.EnsureNotNull(options.SpecificationStrategy, "The specified query options is missing a specification predicate.");
             });
 
@@ -1983,7 +1983,7 @@
 
             InterceptError(() =>
             {
-                Guard.NotNull(entities);
+                Guard.NotNull(entities, nameof(entities));
 
                 cancellationToken.ThrowIfCancellationRequested();
             });
@@ -2038,7 +2038,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(predicate));
+            InterceptError(() => Guard.NotNull(predicate, nameof(predicate)));
 
             var result = FindAsync<TResult>(predicate.ToQueryOptions<TEntity>(), selector, cancellationToken);
 
@@ -2058,7 +2058,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(selector));
+            InterceptError(() => Guard.NotNull(selector, nameof(selector)));
 
             Task<IQueryResult<TResult>> Getter() =>
                 UseContextAsync<IQueryResult<TResult>>(
@@ -2131,7 +2131,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(predicate));
+            InterceptError(() => Guard.NotNull(predicate, nameof(predicate)));
 
             var result = (await FindAllAsync<TResult>(predicate.ToQueryOptions<TEntity>(), selector, cancellationToken)).Result;
 
@@ -2151,7 +2151,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(selector));
+            InterceptError(() => Guard.NotNull(selector, nameof(selector)));
 
             Task<IPagedQueryResult<IEnumerable<TResult>>> Getter() =>
                 UseContextAsync<IPagedQueryResult<IEnumerable<TResult>>>(
@@ -2180,7 +2180,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(predicate));
+            InterceptError(() => Guard.NotNull(predicate, nameof(predicate)));
 
             var result = ExistsAsync(predicate.ToQueryOptions<TEntity>(), cancellationToken);
 
@@ -2201,7 +2201,7 @@
 
             InterceptError(() =>
             {
-                Guard.NotNull(options);
+                Guard.NotNull(options, nameof(options));
                 Guard.EnsureNotNull(options.SpecificationStrategy, "The specified query options is missing a specification predicate.");
             });
 
@@ -2232,7 +2232,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(predicate));
+            InterceptError(() => Guard.NotNull(predicate, nameof(predicate)));
 
             var result = CountAsync(predicate.ToQueryOptions<TEntity>(), cancellationToken);
 
@@ -2323,8 +2323,8 @@
 
             InterceptError(() =>
             {
-                Guard.NotNull(keySelector);
-                Guard.NotNull(elementSelector);
+                Guard.NotNull(keySelector, nameof(keySelector));
+                Guard.NotNull(elementSelector, nameof(elementSelector));
             });
 
             Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> Getter() =>
@@ -2375,8 +2375,8 @@
 
             InterceptError(() =>
             {
-                Guard.NotNull(keySelector);
-                Guard.NotNull(resultSelector);
+                Guard.NotNull(keySelector, nameof(keySelector));
+                Guard.NotNull(resultSelector, nameof(resultSelector));
             });
 
             Task<IPagedQueryResult<IEnumerable<TResult>>> Getter() =>

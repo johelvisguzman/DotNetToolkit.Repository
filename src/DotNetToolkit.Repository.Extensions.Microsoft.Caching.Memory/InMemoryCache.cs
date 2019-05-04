@@ -25,7 +25,7 @@
         /// <param name="cache">The underlying caching storage.</param>
         public InMemoryCache([NotNull] IMemoryCache cache)
         {
-            _cache = Guard.NotNull(cache);
+            _cache = Guard.NotNull(cache, nameof(cache));
         }
 
         #endregion
@@ -34,7 +34,7 @@
 
         private void Set<T>(string key, T value, CacheItemPriority priority, TimeSpan? expiry, Action<string> cacheRemovedCallback = null)
         {
-            Guard.NotEmpty(key);
+            Guard.NotEmpty(key, nameof(key));
 
             var policy = new MemoryCacheEntryOptions();
 
@@ -83,7 +83,7 @@
         /// <param name="key">An object identifying the entry.</param>
         public void Remove([NotNull] string key)
         {
-            _cache.Remove(Guard.NotEmpty(key));
+            _cache.Remove(Guard.NotEmpty(key, nameof(key)));
         }
 
         /// <summary>
@@ -95,7 +95,7 @@
         /// <returns>c<c>true</c> if the an object was found with the specified key; otherwise, <c>false</c>.</returns>
         public bool TryGetValue<T>([NotNull] string key, out T value)
         {
-            return _cache.TryGetValue<T>(Guard.NotEmpty(key), out value);
+            return _cache.TryGetValue<T>(Guard.NotEmpty(key, nameof(key)), out value);
         }
 
         /// <summary>
@@ -107,7 +107,7 @@
         /// <returns>The value of key after the increment.</returns>
         public int Increment([NotNull] string key, int defaultValue, int incrementValue)
         {
-            Guard.NotEmpty(key);
+            Guard.NotEmpty(key, nameof(key));
 
             if (!TryGetValue<int>(key, out var current))
                 current = defaultValue;

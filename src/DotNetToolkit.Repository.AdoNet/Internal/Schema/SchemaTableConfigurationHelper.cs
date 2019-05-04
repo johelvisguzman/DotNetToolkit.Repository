@@ -40,8 +40,8 @@
         /// <param name="dbHelper">The database helper.</param>
         public SchemaTableConfigurationHelper(IRepositoryConventions conventions, DbHelper dbHelper)
         {
-            _conventions = Guard.NotNull(conventions);
-            _dbHelper = Guard.NotNull(dbHelper);
+            _conventions = Guard.NotNull(conventions, nameof(conventions));
+            _dbHelper = Guard.NotNull(dbHelper, nameof(dbHelper));
         }
 
         #endregion

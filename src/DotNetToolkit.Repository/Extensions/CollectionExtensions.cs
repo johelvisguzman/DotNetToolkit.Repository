@@ -10,9 +10,9 @@
     {
         public static string ToConcatenatedString<T>([NotNull] this IEnumerable<T> source, [NotNull] Func<T, string> selector, [NotNull] string separator)
         {
-            Guard.NotNull(source);
-            Guard.NotNull(selector);
-            Guard.NotEmpty(separator);
+            Guard.NotNull(source, nameof(source));
+            Guard.NotNull(selector, nameof(selector));
+            Guard.NotEmpty(separator, nameof(separator));
 
             var b = new StringBuilder();
             bool needSeparator = false;
@@ -31,7 +31,7 @@
 
         public static LinkedList<T> ToLinkedList<T>([NotNull] this IEnumerable<T> source)
         {
-            Guard.NotNull(source);
+            Guard.NotNull(source, nameof(source));
 
             return new LinkedList<T>(source);
         }

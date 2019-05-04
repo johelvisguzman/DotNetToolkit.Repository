@@ -12,7 +12,7 @@
         // EntityFramework6/src/Common/AssemblyExtensions.cs
         public static IEnumerable<Type> GetAccessibleTypes([NotNull] this Assembly assembly)
         {
-            Guard.NotNull(assembly);
+            Guard.NotNull(assembly, nameof(assembly));
 
             try
             {

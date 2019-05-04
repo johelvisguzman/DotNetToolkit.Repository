@@ -9,7 +9,7 @@
     {
         public static IRepositoryContextAsync AsAsync([NotNull] this IRepositoryContext source)
         {
-            return new RepositoryContextAsyncWrapper(Guard.NotNull(source));
+            return new RepositoryContextAsyncWrapper(Guard.NotNull(source, nameof(source)));
         }
     }
 }

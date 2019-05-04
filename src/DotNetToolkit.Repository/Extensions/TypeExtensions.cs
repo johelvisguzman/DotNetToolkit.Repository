@@ -18,7 +18,7 @@
         /// <returns>The default value of the specified type.</returns>
         public static object GetDefault([NotNull] this Type type)
         {
-            Guard.NotNull(type);
+            Guard.NotNull(type, nameof(type));
 
             return type.GetTypeInfo().IsValueType ? Activator.CreateInstance(type) : null;
         }
@@ -30,7 +30,7 @@
         /// <returns><c>true</c> if the specified type is a <see cref="ICollection{T}"/>; otherwise, <c>false</c>.</returns>
         public static bool IsGenericCollection([NotNull] this Type type)
         {
-            Guard.NotNull(type);
+            Guard.NotNull(type, nameof(type));
 
             return type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>);
         }
@@ -42,7 +42,7 @@
         /// <returns><c>true</c> if the specified type is nullable; otherwise, <c>false</c>.</returns>
         public static bool IsNullableType([NotNull] this Type type)
         {
-            Guard.NotNull(type);
+            Guard.NotNull(type, nameof(type));
 
             return type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
         }
@@ -54,7 +54,7 @@
         /// <returns><c>true</c> if the specified type is enumerable; otherwise, <c>false</c>.</returns>
         public static bool IsEnumerable([NotNull] this Type type)
         {
-            return typeof(IEnumerable).IsAssignableFrom(Guard.NotNull(type));
+            return typeof(IEnumerable).IsAssignableFrom(Guard.NotNull(type, nameof(type)));
         }
 
         /// <summary>
@@ -65,8 +65,8 @@
         /// <returns><c>true</c> if specified type implements the specified interface type; otherwise, <c>false</c>.</returns>
         public static bool ImplementsInterface([NotNull] this Type type, [NotNull] Type interfaceType)
         {
-            Guard.NotNull(type);
-            Guard.NotNull(interfaceType);
+            Guard.NotNull(type, nameof(type));
+            Guard.NotNull(interfaceType, nameof(interfaceType));
 
             return interfaceType.IsAssignableFrom(type) ||
                    type.IsGenericType(interfaceType) ||
@@ -81,8 +81,8 @@
         /// <returns><c>true</c> if the specified type is a generic type of the specified interface type; otherwise, <c>false</c>.</returns>
         public static bool IsGenericType([NotNull] this Type type, [NotNull] Type genericType)
         {
-            Guard.NotNull(type);
-            Guard.NotNull(genericType);
+            Guard.NotNull(type, nameof(type));
+            Guard.NotNull(genericType, nameof(genericType));
 
             return type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == genericType;
         }
@@ -95,7 +95,7 @@
         /// <returns>The converted result.</returns>
         public static object ConvertTo([NotNull] this Type type, [CanBeNull] string value)
         {
-            Guard.NotNull(type);
+            Guard.NotNull(type, nameof(type));
 
             object Result = null;
 
@@ -157,7 +157,7 @@
 
         internal static object InvokeConstructor([NotNull] this Type type, [CanBeNull] Dictionary<string, string> keyValues)
         {
-            Guard.NotNull(type);
+            Guard.NotNull(type, nameof(type));
 
             if (keyValues == null || keyValues.Count == 0)
                 return Activator.CreateInstance(type);

@@ -19,10 +19,8 @@
         /// <param name="categoryName">The name of the category.</param>
         public ConsoleLogger(LogLevel minLogLevel, [NotNull] string categoryName)
         {
-            Guard.NotEmpty(categoryName);
-
             _minLogLevel = minLogLevel;
-            _categoryName = categoryName;
+            _categoryName = Guard.NotEmpty(categoryName, nameof(categoryName));
         }
 
         /// <summary>
