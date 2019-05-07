@@ -151,7 +151,8 @@
                         Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
-                ? CacheProvider.GetOrSetFind<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy, Getter, Logger)
+                ? InterceptError<IQueryResult<TEntity>>(
+                    () => CacheProvider.GetOrSetFind<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy, Getter, Logger))
                 : Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -238,7 +239,8 @@
                         Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
-                ? await CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy, Getter, Logger)
+                ? await InterceptErrorAsync<IQueryResult<TEntity>>(
+                    () => CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy, Getter, Logger))
                 : await Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -409,7 +411,8 @@
                         Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
-                ? CacheProvider.GetOrSetFind<TEntity>(new object[] { key1, key2 }, fetchStrategy, Getter, Logger)
+                ? InterceptError<IQueryResult<TEntity>>(
+                    () => CacheProvider.GetOrSetFind<TEntity>(new object[] { key1, key2 }, fetchStrategy, Getter, Logger))
                 : Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -491,7 +494,8 @@
                         Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
-                ? await CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key1, key2 }, fetchStrategy, Getter, Logger)
+                ? await InterceptErrorAsync<IQueryResult<TEntity>>(
+                    () => CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key1, key2 }, fetchStrategy, Getter, Logger))
                 : await Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -651,7 +655,8 @@
                         Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
-                ? CacheProvider.GetOrSetFind<TEntity>(new object[] { key }, fetchStrategy, Getter, Logger)
+                ? InterceptError<IQueryResult<TEntity>>(
+                    () => CacheProvider.GetOrSetFind<TEntity>(new object[] { key }, fetchStrategy, Getter, Logger))
                 : Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -725,7 +730,8 @@
                         Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
-                ? await CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key }, fetchStrategy, Getter, Logger)
+                ? await InterceptErrorAsync<IQueryResult<TEntity>>(
+                    () => CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key }, fetchStrategy, Getter, Logger))
                 : await Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -892,7 +898,7 @@
         public void ClearCache()
         {
             if (CacheEnabled)
-                CacheProvider.IncrementCounter<TEntity>();
+                InterceptError(() => CacheProvider.IncrementCounter<TEntity>());
         }
 
         /// <summary>
@@ -922,7 +928,8 @@
                         Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
-                ? CacheProvider.GetOrSetExecuteSqlQuery<TEntity>(sql, cmdType, parametersDict, projector, Getter, Logger)
+                ? InterceptError<IQueryResult<IEnumerable<TEntity>>>(
+                    () => CacheProvider.GetOrSetExecuteSqlQuery<TEntity>(sql, cmdType, parametersDict, projector, Getter, Logger))
                 : Getter();
 
             ClearCache(sql);
@@ -1016,7 +1023,8 @@
                         Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
-                ? CacheProvider.GetOrSetExecuteSqlCommand<TEntity>(sql, cmdType, parametersDict, Getter, Logger)
+                ? InterceptError<IQueryResult<int>>(
+                    () => CacheProvider.GetOrSetExecuteSqlCommand<TEntity>(sql, cmdType, parametersDict, Getter, Logger))
                 : Getter();
 
             ClearCache(sql);
@@ -1077,7 +1085,8 @@
                         Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
-                ? await CacheProvider.GetOrSetExecuteSqlQueryAsync<TEntity>(sql, cmdType, parametersDict, projector, Getter, Logger)
+                ? await InterceptErrorAsync<IQueryResult<IEnumerable<TEntity>>>(
+                    () => CacheProvider.GetOrSetExecuteSqlQueryAsync<TEntity>(sql, cmdType, parametersDict, projector, Getter, Logger))
                 : await Getter();
 
             ClearCache(sql);
@@ -1177,7 +1186,8 @@
                         Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
-                ? await CacheProvider.GetOrSetExecuteSqlCommandAsync<TEntity>(sql, cmdType, parametersDict, Getter, Logger)
+                ? await InterceptErrorAsync<IQueryResult<int>>(
+                    () => CacheProvider.GetOrSetExecuteSqlCommandAsync<TEntity>(sql, cmdType, parametersDict, Getter, Logger))
                 : await Getter();
 
             ClearCache(sql);
@@ -1458,7 +1468,8 @@
                         Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
-                ? CacheProvider.GetOrSetFind<TEntity, TResult>(options, selector, Getter, Logger)
+                ? InterceptError<IQueryResult<TResult>>(
+                    () => CacheProvider.GetOrSetFind<TEntity, TResult>(options, selector, Getter, Logger))
                 : Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -1549,7 +1560,8 @@
                         Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
-                ? CacheProvider.GetOrSetFindAll<TEntity, TResult>(options, selector, Getter, Logger)
+                ? InterceptError<IPagedQueryResult<IEnumerable<TResult>>>(
+                    () => CacheProvider.GetOrSetFindAll<TEntity, TResult>(options, selector, Getter, Logger))
                 : Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -1642,7 +1654,8 @@
                         Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
-                ? CacheProvider.GetOrSetCount<TEntity>(options, Getter, Logger)
+                ? InterceptError<IQueryResult<int>>(
+                    () => CacheProvider.GetOrSetCount<TEntity>(options, Getter, Logger))
                 : Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -1714,7 +1727,8 @@
                         Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
-                ? CacheProvider.GetOrSetDictionary<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector, Getter, Logger)
+                ? InterceptError<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
+                    () => CacheProvider.GetOrSetDictionary<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector, Getter, Logger))
                 : Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -1763,7 +1777,8 @@
                         Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
-                ? CacheProvider.GetOrSetGroup<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector, Getter, Logger)
+                ? InterceptError<IPagedQueryResult<IEnumerable<TResult>>>(
+                    () => CacheProvider.GetOrSetGroup<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector, Getter, Logger))
                 : Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -2067,7 +2082,8 @@
                         Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
-                ? await CacheProvider.GetOrSetFindAsync<TEntity, TResult>(options, selector, Getter, Logger)
+                ? await InterceptErrorAsync<IQueryResult<TResult>>(
+                    () => CacheProvider.GetOrSetFindAsync<TEntity, TResult>(options, selector, Getter, Logger))
                 : await Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -2160,7 +2176,8 @@
                         Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
-                ? await CacheProvider.GetOrSetFindAllAsync<TEntity, TResult>(options, selector, Getter, Logger)
+                ? await InterceptErrorAsync<IPagedQueryResult<IEnumerable<TResult>>>(
+                    () => CacheProvider.GetOrSetFindAllAsync<TEntity, TResult>(options, selector, Getter, Logger))
                 : await Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -2258,7 +2275,8 @@
                         Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
-                ? await CacheProvider.GetOrSetCountAsync<TEntity>(options, Getter, Logger)
+                ? await InterceptErrorAsync<IQueryResult<int>>(
+                    () => CacheProvider.GetOrSetCountAsync<TEntity>(options, Getter, Logger))
                 : await Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -2334,7 +2352,8 @@
                         Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
-                ? await CacheProvider.GetOrSetDictionaryAsync<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector, Getter, Logger)
+                ? await InterceptErrorAsync<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
+                    () => CacheProvider.GetOrSetDictionaryAsync<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector, Getter, Logger))
                 : await Getter();
 
             CacheUsed = queryResult.CacheUsed;
@@ -2386,7 +2405,8 @@
                         Resources.NullQueryResultOnContext));
 
             var queryResult = CacheEnabled
-                ? await CacheProvider.GetOrSetGroupAsync<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector, Getter, Logger)
+                ? await InterceptErrorAsync<IPagedQueryResult<IEnumerable<TResult>>>(
+                    () => CacheProvider.GetOrSetGroupAsync<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector, Getter, Logger))
                 : await Getter();
 
             CacheUsed = queryResult.CacheUsed;
