@@ -156,4 +156,7 @@
   <data name="UnableToCreateMappingForType" xml:space="preserve">
     <value>The mapping provider is unable to create a mapper for '{0}'.</value>
   </data>
+  <data name="SpecificationMissingFromQueryOptions" xml:space="preserve">
+    <value>The specified query options is missing a specification predicate.</value>
+  </data>
 </root>
