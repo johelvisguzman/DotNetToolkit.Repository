@@ -460,6 +460,7 @@
         internal static void IncrementCounter<T>([NotNull] this ICacheProvider cacheProvider)
         {
             Guard.NotNull(cacheProvider, nameof(cacheProvider));
+            Guard.EnsureNotNull(cacheProvider.Cache, "The caching cannot be null.");
 
             lock (_syncRoot)
             {
@@ -499,6 +500,7 @@
             Guard.NotEmpty(hashedKey, nameof(hashedKey));
             Guard.NotEmpty(key, nameof(key));
             Guard.NotNull(logger, nameof(logger));
+            Guard.EnsureNotNull(cacheProvider.Cache, "The caching cannot be null.");
 
             lock (_syncRoot)
             {
@@ -518,6 +520,7 @@
         {
             Guard.NotNull(cacheProvider, nameof(cacheProvider));
             Guard.NotEmpty(key, nameof(key));
+            Guard.EnsureNotNull(cacheProvider.Cache, "The caching cannot be null.");
 
             lock (_syncRoot)
             {
