@@ -151,6 +151,15 @@ namespace DotNetToolkit.Repository.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The specified query options is missing a specification predicate..
+        /// </summary>
+        internal static string SpecificationMissingFromQueryOptions {
+            get {
+                return ResourceManager.GetString("SpecificationMissingFromQueryOptions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This context provider does not support transactions..
         /// </summary>
         internal static string TransactionNotSupported {

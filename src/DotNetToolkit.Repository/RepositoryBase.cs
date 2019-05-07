@@ -1361,7 +1361,7 @@
             InterceptError(() =>
             {
                 Guard.NotNull(options, nameof(options));
-                Guard.EnsureNotNull(options.SpecificationStrategy, "The specified query options is missing a specification predicate.");
+                Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
             });
 
             Delete(FindAll(options).Result);
@@ -1589,7 +1589,7 @@
             InterceptError(() =>
             {
                 Guard.NotNull(options, nameof(options));
-                Guard.EnsureNotNull(options.SpecificationStrategy, "The specified query options is missing a specification predicate.");
+                Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
             });
 
             var result = Find(options) != null;
@@ -1961,7 +1961,7 @@
             InterceptError(() =>
             {
                 Guard.NotNull(options, nameof(options));
-                Guard.EnsureNotNull(options.SpecificationStrategy, "The specified query options is missing a specification predicate.");
+                Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
             });
 
             var entitiesInDb = (await FindAllAsync(options, cancellationToken)).Result;
@@ -2202,7 +2202,7 @@
             InterceptError(() =>
             {
                 Guard.NotNull(options, nameof(options));
-                Guard.EnsureNotNull(options.SpecificationStrategy, "The specified query options is missing a specification predicate.");
+                Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
             });
 
             var result = await FindAsync(options, cancellationToken) != null;
@@ -2409,80 +2409,100 @@
         /// <summary>
         /// A method for using a disposable repository context.
         /// </summary>
-        protected void UseContext(Action<IRepositoryContext> action)
+        protected void UseContext([NotNull] Action<IRepositoryContext> action)
         {
-            var context = GetContext();
+            InterceptError(() =>
+            {
+                Guard.NotNull(action, nameof(action));
 
-            try
-            {
-                InterceptError(() => action(context));
-            }
-            finally
-            {
-                DisposeContext(context);
-            }
+                var context = GetContext();
+
+                try
+                {
+                    action(context);
+                }
+                finally
+                {
+                    DisposeContext(context);
+                }
+            });
         }
 
         /// <summary>
         /// A method for using a disposable repository context.
         /// </summary>
-        protected T UseContext<T>(Func<IRepositoryContext, T> action)
+        protected T UseContext<T>([NotNull] Func<IRepositoryContext, T> action)
         {
-            var context = GetContext();
+            return InterceptError<T>(() =>
+            {
+                Guard.NotNull(action, nameof(action));
 
-            try
-            {
-                return InterceptError<T>(() => action(context));
-            }
-            finally
-            {
-                DisposeContext(context);
-            }
+                var context = GetContext();
+
+                try
+                {
+                    return action(context);
+                }
+                finally
+                {
+                    DisposeContext(context);
+                }
+            });
         }
 
         /// <summary>
         /// A method for using a disposable repository context asynchronously.
         /// </summary>
-        protected async Task UseContextAsync(Func<IRepositoryContextAsync, Task> action)
+        protected Task UseContextAsync([NotNull] Func<IRepositoryContextAsync, Task> action)
         {
-            var context = GetContext().AsAsync();
+            return InterceptErrorAsync(async () =>
+            {
+                Guard.NotNull(action, nameof(action));
 
-            try
-            {
-                await InterceptErrorAsync(() => action(context));
-            }
-            finally
-            {
-                DisposeContext(context);
-            }
+                var context = GetContext().AsAsync();
+
+                try
+                {
+                    await action(context);
+                }
+                finally
+                {
+                    DisposeContext(context);
+                }
+            });
         }
 
         /// <summary>
         /// A method for using a disposable repository context asynchronously.
         /// </summary>
-        protected async Task<T> UseContextAsync<T>(Func<IRepositoryContextAsync, Task<T>> action)
+        protected Task<T> UseContextAsync<T>([NotNull] Func<IRepositoryContextAsync, Task<T>> action)
         {
-            var context = GetContext().AsAsync();
+            return InterceptErrorAsync<T>(async () =>
+            {
+                Guard.NotNull(action, nameof(action));
 
-            try
-            {
-                return await InterceptErrorAsync<T>(() => action(context));
-            }
-            finally
-            {
-                DisposeContext(context);
-            }
+                var context = GetContext().AsAsync();
+
+                try
+                {
+                    return await action(context);
+                }
+                finally
+                {
+                    DisposeContext(context);
+                }
+            });
         }
 
         /// <summary>
         /// Intercepts an error while executing the specified <paramref name="action"/>.
         /// </summary>
         /// <param name="action">The action to intercept.</param>
-        protected void InterceptError(Action action)
+        protected void InterceptError([NotNull] Action action)
         {
             try
             {
-                action();
+                Guard.NotNull(action, nameof(action))();
             }
             catch (Exception ex)
             {
@@ -2498,11 +2518,11 @@
         /// <typeparam name="T">The type of the result returned by the specified <paramref name="action"/>.</typeparam>
         /// <param name="action">The action to intercept.</param>
         /// <returns>The result returned by the specified <paramref name="action"/>.</returns>
-        protected T InterceptError<T>(Func<T> action)
+        protected T InterceptError<T>([NotNull] Func<T> action)
         {
             try
             {
-                return action();
+                return Guard.NotNull(action, nameof(action))();
             }
             catch (Exception ex)
             {
@@ -2517,11 +2537,11 @@
         /// </summary>
         /// <param name="action">The action to intercept.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the result returned by the specified <paramref name="action"/>.</returns>
-        protected async Task<T> InterceptErrorAsync<T>(Func<Task<T>> action)
+        protected async Task<T> InterceptErrorAsync<T>([NotNull] Func<Task<T>> action)
         {
             try
             {
-                return await action();
+                return await Guard.NotNull(action, nameof(action))();
             }
             catch (Exception ex)
             {
@@ -2536,42 +2556,17 @@
         /// </summary>
         /// <param name="action">The action to intercept.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        protected async Task InterceptErrorAsync(Func<Task> action)
+        protected async Task InterceptErrorAsync([NotNull] Func<Task> action)
         {
             try
             {
-                await action();
+                await Guard.NotNull(action, nameof(action))();
             }
             catch (Exception ex)
             {
                 Logger.Error(ex);
 
                 throw;
-            }
-        }
-
-        /// <summary>
-        /// Intercepts the specified action.
-        /// </summary>
-        /// <param name="action">The action to intercept.</param>
-        protected void Intercept(Action<IRepositoryInterceptor> action)
-        {
-            foreach (var interceptor in GetInterceptors())
-            {
-                action(interceptor);
-            }
-        }
-
-        /// <summary>
-        /// Asynchronously intercepts the specified action.
-        /// </summary>
-        /// <param name="action">The action to intercept.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        protected async Task InterceptAsync(Func<IRepositoryInterceptor, Task> action)
-        {
-            foreach (var interceptor in GetInterceptors())
-            {
-                await action(interceptor);
             }
         }
 
@@ -2601,6 +2596,26 @@
             Logger.Debug(appendCachingDetails
                 ? $"Executed [ Method = {method}, CacheUsed = {CacheUsed} ]"
                 : $"Executed [ Method = {method} ]");
+        }
+
+        internal void Intercept([NotNull] Action<IRepositoryInterceptor> action)
+        {
+            Guard.NotNull(action, nameof(action));
+
+            foreach (var interceptor in GetInterceptors())
+            {
+                action(interceptor);
+            }
+        }
+
+        internal async Task InterceptAsync([NotNull] Func<IRepositoryInterceptor, Task> action)
+        {
+            Guard.NotNull(action, nameof(action));
+
+            foreach (var interceptor in GetInterceptors())
+            {
+                await action(interceptor);
+            }
         }
 
         #endregion
