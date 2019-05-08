@@ -16,13 +16,12 @@
     /// <summary>
     /// Represents a configuration section handler for configuring repositories from a file.
     /// </summary>
-    internal class ConfigurationSection
+    internal class ConfigurationSection : ConfigFile.IConfigurationSection
     {
         #region Fields
 
-        private readonly IConfigurationSection _root;
+        public const string SectionName = "repository";
 
-        private const string RepositorySectionKey = "repository";
         private const string DefaultContextFactorySectionKey = "defaultContextFactory";
         private const string LoggingProviderSectionKey = "loggingProvider";
         private const string CachingProviderSectionKey = "cachingProvider";
@@ -31,15 +30,15 @@
         private const string ParameterCollectionSectionKey = "parameters";
         private const string TypeKey = "type";
 
+        private readonly IConfigurationSection _root;
+        
         #endregion
 
         #region Constructors
 
-        public ConfigurationSection([NotNull] IConfiguration config)
+        public ConfigurationSection([NotNull] IConfigurationSection root)
         {
-            _root = Guard.EnsureNotNull(
-                Guard.NotNull(config, nameof(config)).GetSection(RepositorySectionKey), 
-                "Unable to find a configuration for the repositories.");
+            _root = Guard.NotNull(root, nameof(root));
         }
 
         #endregion
