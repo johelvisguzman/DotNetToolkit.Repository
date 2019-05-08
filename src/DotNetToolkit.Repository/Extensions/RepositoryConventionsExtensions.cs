@@ -114,8 +114,8 @@
         /// <returns>The table name for the specified type.</returns>
         public static string GetTableName([NotNull] this IRepositoryConventions source, [NotNull] Type type)
             => EnsureCallback(
-                Guard.NotNull(source, nameof(source)).TableNameCallback,
-                nameof(source.TableNameCallback))(Guard.NotNull(type, nameof(type)));
+                   Guard.NotNull(source, nameof(source)).TableNameCallback,
+                   nameof(source.TableNameCallback))(Guard.NotNull(type, nameof(type)));
 
         /// <summary>
         /// Gets a table name for the specified type.
@@ -133,8 +133,8 @@
         /// <returns>The column name for the specified property.</returns>
         public static string GetColumnName([NotNull] this IRepositoryConventions source, [NotNull] PropertyInfo pi)
             => EnsureCallback(
-                Guard.NotNull(source, nameof(source)).ColumnNameCallback,
-                nameof(source.ColumnNameCallback))(Guard.NotNull(pi, nameof(pi)));
+                   Guard.NotNull(source, nameof(source)).ColumnNameCallback,
+                   nameof(source.ColumnNameCallback))(Guard.NotNull(pi, nameof(pi)));
 
         /// <summary>
         /// Gets a column order for the specified property.
@@ -144,8 +144,8 @@
         /// <returns>The column order for the specified property.</returns>
         public static int? GetColumnOrder([NotNull] this IRepositoryConventions source, [NotNull] PropertyInfo pi)
             => EnsureCallback(
-                Guard.NotNull(source, nameof(source)).ColumnOrderCallback,
-               nameof(source.ColumnOrderCallback))(Guard.NotNull(pi, nameof(pi)));
+                   Guard.NotNull(source, nameof(source)).ColumnOrderCallback,
+                   nameof(source.ColumnOrderCallback))(Guard.NotNull(pi, nameof(pi)));
 
         /// <summary>
         /// Gets a column order for the specified property or a default value of <see cref="Int32.MaxValue" />.
@@ -164,8 +164,8 @@
         /// <returns><c>true</c> if column is mapped; otherwise, <c>false</c>.</returns>
         public static bool IsColumnMapped([NotNull] this IRepositoryConventions source, [NotNull] PropertyInfo pi)
             => EnsureCallback(
-                Guard.NotNull(source, nameof(source)).IsColumnMappedCallback,
-                nameof(source.IsColumnMappedCallback))(Guard.NotNull(pi, nameof(pi)));
+                   Guard.NotNull(source, nameof(source)).IsColumnMappedCallback,
+                   nameof(source.IsColumnMappedCallback))(Guard.NotNull(pi, nameof(pi)));
 
         /// <summary>
         /// Determines whether the specified property is defined as identity.
@@ -175,8 +175,8 @@
         /// <returns><c>true</c> if column is defined as identity.; otherwise, <c>false</c>.</returns>
         public static bool IsColumnIdentity([NotNull] this IRepositoryConventions source, [NotNull] PropertyInfo pi)
             => EnsureCallback(
-                Guard.NotNull(source, nameof(source)).IsColumnIdentityCallback,
-                nameof(source.IsColumnIdentityCallback))(Guard.NotNull(pi, nameof(pi)));
+                   Guard.NotNull(source, nameof(source)).IsColumnIdentityCallback,
+                   nameof(source.IsColumnIdentityCallback))(Guard.NotNull(pi, nameof(pi)));
 
         /// <summary>
         /// Throws an exception if the specified key type collection does not match the ones defined for the entity.

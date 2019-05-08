@@ -39,7 +39,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Js
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Xml", "src\DotNetToolkit.Repository.Xml\DotNetToolkit.Repository.Xml.csproj", "{85FECE4B-2092-4C91-A089-963BAF89E502}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetToolkit.Repository.Extensions.Caching.Redis", "src\DotNetToolkit.Repository.Extensions.Caching.Redis\DotNetToolkit.Repository.Extensions.Caching.Redis.csproj", "{4511188D-8846-4F88-9457-078AD1F0D62B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Extensions.Caching.Redis", "src\DotNetToolkit.Repository.Extensions.Caching.Redis\DotNetToolkit.Repository.Extensions.Caching.Redis.csproj", "{4511188D-8846-4F88-9457-078AD1F0D62B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetToolkit.Repository.NHibernate", "src\DotNetToolkit.Repository.NHibernate\DotNetToolkit.Repository.NHibernate.csproj", "{32262A29-A96F-423B-BA97-F7E2F79FAB16}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -106,6 +108,10 @@ Global
 		{4511188D-8846-4F88-9457-078AD1F0D62B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4511188D-8846-4F88-9457-078AD1F0D62B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4511188D-8846-4F88-9457-078AD1F0D62B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32262A29-A96F-423B-BA97-F7E2F79FAB16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32262A29-A96F-423B-BA97-F7E2F79FAB16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32262A29-A96F-423B-BA97-F7E2F79FAB16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32262A29-A96F-423B-BA97-F7E2F79FAB16}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -126,6 +132,7 @@ Global
 		{4CE4219B-92D6-464C-8A0E-5151AD842AF8} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{85FECE4B-2092-4C91-A089-963BAF89E502} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{4511188D-8846-4F88-9457-078AD1F0D62B} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
+		{32262A29-A96F-423B-BA97-F7E2F79FAB16} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96973E0C-81D1-42DE-9F78-7103241B4E07}

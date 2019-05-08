@@ -6,6 +6,7 @@
         Json,
         Xml,
         AdoNet,
+        NHibernate,
         EntityFramework,
         EntityFrameworkCore,
     }

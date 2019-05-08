@@ -12,10 +12,16 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
     using Json;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
+    using NHibernate;
+    using global::NHibernate.Cfg;
+    using global::NHibernate.Driver;
+    using global::NHibernate.Mapping.ByCode;
+    using global::NHibernate.Tool.hbm2ddl;
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Xml;
     using Xunit;
@@ -176,6 +182,37 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                         builder.UseAdoNet(TestDbConnectionHelper.CreateConnection(), ensureDatabaseCreated: true);
                         break;
                     }
+                case ContextProviderType.NHibernate:
+                    {
+                        builder.UseNHibernate(cfg =>
+                        {
+                            var currentFile = TestPathHelper.GetTempFileName();
+                            var connectionString = $"Data Source={currentFile};Persist Security Info=False";
+
+                            cfg.DataBaseIntegration(x =>
+                            {
+                                x.Dialect<TestFixedMsSqlCe40Dialect>();
+                                x.Driver<SqlServerCeDriver>();
+                                x.ConnectionString = connectionString;
+                                x.LogSqlInConsole = true;
+                                x.LogFormattedSql = true;
+                            });
+
+                            var mapper = new ModelMapper();
+
+                            mapper.AddMappings(Assembly.GetExecutingAssembly().GetExportedTypes());
+
+                            var mapping = mapper.CompileMappingForAllExplicitlyAddedEntities();
+
+                            cfg.AddMapping(mapping);
+
+                            var exporter = new SchemaExport(cfg);
+
+                            exporter.Execute(true, true, false);
+                        });
+
+                        break;
+                    }
                 case ContextProviderType.EntityFramework:
                     {
                         builder.UseEntityFramework<TestEfDbContext>(TestDbConnectionHelper.CreateConnection());
@@ -249,6 +286,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             return new[]
             {
                 ContextProviderType.AdoNet,
+                ContextProviderType.NHibernate,
                 ContextProviderType.EntityFramework
             };
         }
@@ -279,6 +317,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             Json,
             Xml,
             AdoNet,
+            NHibernate,
             EntityFramework,
             EntityFrameworkCore,
         }

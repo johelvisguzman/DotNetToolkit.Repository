@@ -713,7 +713,7 @@
         {
             var conventions = RepositoryConventions.Default;
             var ensureDatabaseCreated = true;
-            var connection = TestAdoNetContextFactory.CreateConnection();
+            var connection = TestDbConnectionHelper.CreateConnection();
             var schemaHelper = new SchemaTableConfigurationHelper(conventions, new DbHelper(conventions, connection));
             var options = new RepositoryOptionsBuilder()
                 .UseAdoNet(connection, ensureDatabaseCreated)
@@ -732,7 +732,7 @@
             Assert.Equal(1, classARepo.Count());
 
             //
-            connection = TestAdoNetContextFactory.CreateConnection();
+            connection = TestDbConnectionHelper.CreateConnection();
             schemaHelper = new SchemaTableConfigurationHelper(conventions, new DbHelper(conventions, connection));
             options = new RepositoryOptionsBuilder()
                 .UseAdoNet(connection, ensureDatabaseCreated)
@@ -759,7 +759,7 @@
             Assert.Equal(1, classBRepo.Count());
 
             //
-            connection = TestAdoNetContextFactory.CreateConnection();
+            connection = TestDbConnectionHelper.CreateConnection();
             schemaHelper = new SchemaTableConfigurationHelper(conventions, new DbHelper(conventions, connection));
             options = new RepositoryOptionsBuilder()
                 .UseAdoNet(connection, ensureDatabaseCreated)
@@ -795,7 +795,7 @@
         {
             var conventions = RepositoryConventions.Default;
             var ensureDatabaseCreated = true;
-            var connection = TestAdoNetContextFactory.CreateConnection();
+            var connection = TestDbConnectionHelper.CreateConnection();
             var schemaHelper = new SchemaTableConfigurationHelper(conventions, new DbHelper(conventions, connection));
             var options = new RepositoryOptionsBuilder()
                 .UseAdoNet(connection, ensureDatabaseCreated)
@@ -814,7 +814,7 @@
             Assert.Equal(1, await classARepo.CountAsync());
 
             //
-            connection = TestAdoNetContextFactory.CreateConnection();
+            connection = TestDbConnectionHelper.CreateConnection();
             schemaHelper = new SchemaTableConfigurationHelper(conventions, new DbHelper(conventions, connection));
             options = new RepositoryOptionsBuilder()
                 .UseAdoNet(connection, ensureDatabaseCreated)
@@ -841,7 +841,7 @@
             Assert.Equal(1, await classBRepo.CountAsync());
 
             //
-            connection = TestAdoNetContextFactory.CreateConnection();
+            connection = TestDbConnectionHelper.CreateConnection();
             schemaHelper = new SchemaTableConfigurationHelper(conventions, new DbHelper(conventions, connection));
             options = new RepositoryOptionsBuilder()
                 .UseAdoNet(connection, ensureDatabaseCreated)
