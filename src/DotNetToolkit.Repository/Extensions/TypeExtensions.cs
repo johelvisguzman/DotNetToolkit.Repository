@@ -105,7 +105,7 @@
             }
             else if (type == typeof(int))
             {
-                Result = int.Parse(value, NumberStyles.Integer, CultureInfo.CurrentCulture);
+                Result = Convert.ToInt32(value);
             }
             else if (type == typeof(byte))
             {
@@ -113,18 +113,15 @@
             }
             else if (type == typeof(decimal))
             {
-                Result = decimal.Parse(value, NumberStyles.Any, CultureInfo.CurrentCulture);
+                Result = Convert.ToDecimal(value);
             }
             else if (type == typeof(double))
             {
-                Result = double.Parse(value, NumberStyles.Any, CultureInfo.CurrentCulture);
+                Result = Convert.ToDouble(value);
             }
             else if (type == typeof(bool))
             {
-                if (value.ToLower() == "true" || value.ToLower() == "on" || value == "1")
-                    Result = true;
-                else
-                    Result = false;
+                Result = value.ToBoolean();
             }
             else if (type == typeof(DateTime))
             {
@@ -145,7 +142,7 @@
                 }
                 else
                 {
-                    throw new Exception("Type Conversion not handled in ConvertTo method.");
+                    throw new Exception($"Type conversion not handled in {nameof(ConvertTo)} method.");
                 }
 #else
                 return Convert.ChangeType(value, type);
@@ -155,7 +152,13 @@
             return Result;
         }
 
-        internal static object InvokeConstructor([NotNull] this Type type, [CanBeNull] Dictionary<string, string> keyValues)
+        /// <summary>
+        /// Creates a new instance of the specified type with a constructor that best matches the collection of specified parameters; otherwise, creates an instance of the specified type using that type's default constructor.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="keyValues">The key value parameters.</param>
+        /// <returns>The new instance of the specified type.</returns>
+        public static object InvokeConstructor([NotNull] this Type type, [CanBeNull] Dictionary<string, string> keyValues)
         {
             Guard.NotNull(type, nameof(type));
 

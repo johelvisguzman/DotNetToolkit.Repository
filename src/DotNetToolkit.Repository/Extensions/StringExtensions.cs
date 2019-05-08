@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
     using JetBrains.Annotations;
+    using System;
     using System.Text;
     using Utility;
 
@@ -38,6 +39,30 @@
             }
 
             return sb.ToString();
+        }
+
+        public static bool ToBoolean(this string value)
+        {
+            if (value == null || value.Trim().Length == 0)
+                return false;
+
+            switch (value.ToLower())
+            {
+                case "true":
+                    return true;
+                case "on":
+                    return true;
+                case "1":
+                    return true;
+                case "0":
+                    return false;
+                case "false":
+                    return false;
+                case "off":
+                    return false;
+                default:
+                    throw new InvalidCastException($"Cannot cast '{value}' to boolean.");
+            }
         }
     }
 }
