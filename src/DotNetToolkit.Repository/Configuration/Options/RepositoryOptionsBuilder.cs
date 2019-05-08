@@ -8,7 +8,9 @@
     using JetBrains.Annotations;
     using Logging;
     using Mapper;
+    using Properties;
     using System;
+    using System.IO;
     using System.Linq;
     using Utility;
 
@@ -72,43 +74,36 @@
 
 #if !NETSTANDARD1_3
         /// <summary>
-        /// Configures the repository options with the data from the App.config.
+        /// Configures the repository options with the data from the <paramref name="fileName"/>; otherwise, it will configure using the default App.config.
         /// </summary>
+        /// <param name="fileName">The name of the file to configure from.</param>
         /// <returns>The same builder instance.</returns>
         /// <remarks>Any element that is defined in the config file can be resolved using the <see cref="DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationProvider.SetDefaultFactory"/></remarks>
-        public virtual RepositoryOptionsBuilder UseConfiguration()
+        public virtual RepositoryOptionsBuilder UseConfiguration([CanBeNull] string fileName = null)
         {
-            var config = (DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationSection)
-                System.Configuration.ConfigurationManager.GetSection(DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationSection.SectionName);
+            const string SectionName = DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationSection.SectionName;
 
-            var defaultContextFactory = config.DefaultContextFactory.GetTypedValue();
-            if (defaultContextFactory != null)
+            DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationSection config;
+
+            if (!string.IsNullOrEmpty(fileName))
             {
-                UseInternalContextFactory(defaultContextFactory);
+                var fileMap = new System.Configuration.ExeConfigurationFileMap { ExeConfigFilename = fileName };
+                var exeConfiguration = System.Configuration.ConfigurationManager.OpenMappedExeConfiguration(fileMap, System.Configuration.ConfigurationUserLevel.None);
+
+                if (!exeConfiguration.HasFile)
+                    throw new FileNotFoundException("The file is not found.", fileName);
+
+                config = (DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationSection)exeConfiguration.GetSection(SectionName);
+            }
+            else
+            {
+                config = (DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationSection)System.Configuration.ConfigurationManager.GetSection(SectionName);
             }
 
-            var loggingProvider = config.LoggingProvider.GetTypedValue();
-            if (loggingProvider != null)
-            {
-                UseLoggerProvider(loggingProvider);
-            }
+            if (config == null)
+                throw new InvalidOperationException(string.Format(Resources.UnableToFindConfigurationSection, SectionName));
 
-            var cachingProvider = config.CachingProvider.GetTypedValue();
-            if (cachingProvider != null)
-            {
-                UseCachingProvider(cachingProvider);
-            }
-
-            var mappingProvider = config.MappingProvider.GetTypedValue();
-            if (mappingProvider != null)
-            {
-                UseMapperProvider(mappingProvider);
-            }
-
-            foreach (var item in config.Interceptors.GetTypedValues())
-            {
-                UseInterceptor(item.Key, item.Value);
-            }
+            UseConfiguration(config);
 
             return this;
         }
@@ -120,44 +115,24 @@
         /// <param name="configuration">The configuration.</param>
         /// <returns>The same builder instance.</returns>
         /// <remarks>Any element that is defined in the config file can be resolved using the <see cref="DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationProvider.SetDefaultFactory"/></remarks>
-        public virtual RepositoryOptionsBuilder UseConfiguration([NotNull]  Microsoft.Extensions.Configuration.IConfiguration configuration)
+        public virtual RepositoryOptionsBuilder UseConfiguration([NotNull]  Microsoft.Extensions.Configuration.IConfigurationRoot configuration)
         {
             Guard.NotNull(configuration, nameof(configuration));
 
-            var config = new DotNetToolkit.Repository.Internal.ConfigFile.Json.ConfigurationSection(configuration);
+            const string SectionName = DotNetToolkit.Repository.Internal.ConfigFile.Json.ConfigurationSection.SectionName;
 
-            var defaultContextFactory = config.GetDefaultContextFactory();
-            if (defaultContextFactory != null)
-            {
-                UseInternalContextFactory(defaultContextFactory);
-            }
+            var root = configuration.GetSection(SectionName);
 
-            var loggingProvider = config.GetLoggerProvider();
-            if (loggingProvider != null)
-            {
-                UseLoggerProvider(loggingProvider);
-            }
+            if (root == null || !root.GetChildren().Any())
+                throw new InvalidOperationException(string.Format(Resources.UnableToFindConfigurationSection, SectionName));
 
-            var cachingProvider = config.GetCachingProvider();
-            if (cachingProvider != null)
-            {
-                UseCachingProvider(cachingProvider);
-            }
+            var config = new DotNetToolkit.Repository.Internal.ConfigFile.Json.ConfigurationSection(root);
 
-            var mappingProvider = config.GetMappingProvider();
-            if (mappingProvider != null)
-            {
-                UseMapperProvider(mappingProvider);
-            }
-
-            foreach (var item in config.GetInterceptors())
-            {
-                UseInterceptor(item.Key, item.Value);
-            }
+            UseConfiguration(config);
 
             return this;
         }
-
+        
         /// <summary>
         /// Configures the repository options with an interceptor that intercepts any activity within the repository.
         /// </summary>
@@ -267,6 +242,44 @@
             conventionsAction(conventions);
 
             return UseConventions(conventions);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void UseConfiguration([NotNull] Repository.Internal.ConfigFile.IConfigurationSection config)
+        {
+            Guard.NotNull(config, nameof(config));
+
+            var defaultContextFactory = config.GetDefaultContextFactory();
+            if (defaultContextFactory != null)
+            {
+                UseInternalContextFactory(defaultContextFactory);
+            }
+
+            var loggingProvider = config.GetLoggerProvider();
+            if (loggingProvider != null)
+            {
+                UseLoggerProvider(loggingProvider);
+            }
+
+            var cachingProvider = config.GetCachingProvider();
+            if (cachingProvider != null)
+            {
+                UseCachingProvider(cachingProvider);
+            }
+
+            var mappingProvider = config.GetMappingProvider();
+            if (mappingProvider != null)
+            {
+                UseMapperProvider(mappingProvider);
+            }
+
+            foreach (var item in config.GetInterceptors())
+            {
+                UseInterceptor(item.Key, item.Value);
+            }
         }
 
         #endregion

@@ -5,11 +5,11 @@
 
     public class TestConfigurationHelper
     {
-        public static IConfiguration GetConfiguration()
+        public static IConfigurationRoot GetConfiguration(string fileName = "appsettings.json")
         {
             return new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile(fileName, optional: false, reloadOnChange: true)
                 .Build();
         }
     }

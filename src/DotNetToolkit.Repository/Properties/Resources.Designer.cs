@@ -185,5 +185,14 @@ namespace DotNetToolkit.Repository.Properties {
                 return ResourceManager.GetString("UnableToDetermineCompositePrimaryKeyOrdering", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to find a &apos;{0}&apos; configuration section. For more information on DotNetToolkit.Repository configuration, visit the https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Config-File-Setup..
+        /// </summary>
+        internal static string UnableToFindConfigurationSection {
+            get {
+                return ResourceManager.GetString("UnableToFindConfigurationSection", resourceCulture);
+            }
+        }
     }
 }

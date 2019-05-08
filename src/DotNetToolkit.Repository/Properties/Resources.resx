@@ -159,4 +159,7 @@
   <data name="SpecificationMissingFromQueryOptions" xml:space="preserve">
     <value>The specified query options is missing a specification predicate.</value>
   </data>
+  <data name="UnableToFindConfigurationSection" xml:space="preserve">
+    <value>Unable to find a '{0}' configuration section. For more information on DotNetToolkit.Repository configuration, visit the https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Config-File-Setup.</value>
+  </data>
 </root>

@@ -16,7 +16,7 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
     /// <summary>
     /// Represents a configuration section for configuring repositories from App.config.
     /// </summary>
-    internal class ConfigurationSection : System.Configuration.ConfigurationSection
+    internal class ConfigurationSection : System.Configuration.ConfigurationSection, ConfigFile.IConfigurationSection
     {
         #region Fields
 
@@ -60,6 +60,35 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
         public virtual MappingProviderElement MappingProvider
         {
             get => (MappingProviderElement)this[MappingProviderKey];
+        }
+
+        #endregion
+
+        #region Implementation of IConfigurationSection
+
+        public IRepositoryContextFactory GetDefaultContextFactory()
+        {
+            return DefaultContextFactory.GetTypedValue();
+        }
+
+        public ILoggerProvider GetLoggerProvider()
+        {
+            return LoggingProvider.GetTypedValue();
+        }
+
+        public ICacheProvider GetCachingProvider()
+        {
+            return CachingProvider.GetTypedValue();
+        }
+
+        public IMapperProvider GetMappingProvider()
+        {
+            return MappingProvider.GetTypedValue();
+        }
+
+        public Dictionary<Type, Func<IRepositoryInterceptor>> GetInterceptors()
+        {
+            return Interceptors.GetTypedValues();
         }
 
         #endregion
