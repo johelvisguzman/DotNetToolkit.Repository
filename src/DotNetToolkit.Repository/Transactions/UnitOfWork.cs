@@ -49,6 +49,11 @@
             Initialize(Guard.NotNull(options, nameof(options)));
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UnitOfWork"/> class with the <see cref="RepositoryDependencyResolver"/> using an IOC container to resolve the <see cref="IRepositoryOptions"/>.
+        /// </summary>
+        public UnitOfWork() : this(RepositoryDependencyResolver.Current.Resolve<IRepositoryOptions>()) { }
+
         #endregion
 
         #region Protected Methods
@@ -148,7 +153,9 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity> Create<TEntity>() where TEntity : class
         {
-            return CreateInstance<Repository<TEntity>>();
+            ThrowIfDisposed();
+
+            return new Repository<TEntity>(_options);
         }
 
         /// <summary>
@@ -159,7 +166,9 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey> Create<TEntity, TKey>() where TEntity : class
         {
-            return CreateInstance<Repository<TEntity, TKey>>();
+            ThrowIfDisposed();
+
+            return new Repository<TEntity, TKey>(_options);
         }
 
         /// <summary>
@@ -171,7 +180,9 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey1, TKey2> Create<TEntity, TKey1, TKey2>() where TEntity : class
         {
-            return CreateInstance<Repository<TEntity, TKey1, TKey2>>();
+            ThrowIfDisposed();
+
+            return new Repository<TEntity, TKey1, TKey2>(_options);
         }
 
         /// <summary>
@@ -184,12 +195,15 @@
         /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey1, TKey2, TKey3> Create<TEntity, TKey1, TKey2, TKey3>() where TEntity : class
         {
-            return CreateInstance<Repository<TEntity, TKey1, TKey2, TKey3>>();
+            ThrowIfDisposed();
+
+            return new Repository<TEntity, TKey1, TKey2, TKey3>(_options);
         }
 
         /// <summary>
         /// Creates a new repository for the specified type.
         /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <returns>The new repository.</returns>
         public T CreateInstance<T>() where T : class
         {
@@ -202,16 +216,13 @@
 
         #region Nested Type: RepositoryContextFactory
 
-        class RepositoryContextFactory : IRepositoryContextFactory
+        private class RepositoryContextFactory : IRepositoryContextFactory
         {
             private readonly IRepositoryContext _context;
 
             public RepositoryContextFactory(IRepositoryContext context)
             {
-                if (context == null)
-                    throw new ArgumentNullException(nameof(context));
-
-                _context = context;
+                _context = Guard.NotNull(context, nameof(context));
             }
 
             public IRepositoryContext Create() => _context;

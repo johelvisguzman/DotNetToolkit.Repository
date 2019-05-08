@@ -31,7 +31,7 @@
         private const string TypeKey = "type";
 
         private readonly IConfigurationSection _root;
-        
+
         #endregion
 
         #region Constructors
@@ -183,12 +183,23 @@
             if (type == null)
                 type = ExtractType(section, isRequired: true);
 
-            var defaultFactory = ConfigurationProvider.GetDefaultFactory();
-
-            if (defaultFactory != null)
-                return (T)defaultFactory(type);
-
             var keyValues = ExtractParameters(section);
+
+            if (!keyValues.Any())
+            {
+                try
+                {
+                    return (T)RepositoryDependencyResolver.Current.Resolve(type);
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException(string.Format(
+                            Properties.Resources.UnableToResolveTypeWithDependencyResolver_ConfigFile,
+                            type.FullName,
+                            typeof(RepositoryDependencyResolver).Name),
+                        ex.InnerException);
+                }
+            }
 
             return (T)type.InvokeConstructor(keyValues);
         }

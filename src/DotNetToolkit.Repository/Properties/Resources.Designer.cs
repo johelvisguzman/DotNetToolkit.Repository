@@ -19,7 +19,7 @@ namespace DotNetToolkit.Repository.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -192,6 +192,24 @@ namespace DotNetToolkit.Repository.Properties {
         internal static string UnableToFindConfigurationSection {
             get {
                 return ResourceManager.GetString("UnableToFindConfigurationSection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to resolve an instance for &apos;{0}&apos;. Please consider using the {1} to use an IOC container..
+        /// </summary>
+        internal static string UnableToResolveTypeWithDependencyResolver {
+            get {
+                return ResourceManager.GetString("UnableToResolveTypeWithDependencyResolver", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to resolve an instance for &apos;{0}&apos;. Please consider using the {1} to use an IOC container or provide additional parameters to create an instance for the specified type. For more information on DotNetToolkit.Repository configuration, visit the https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Config-File-Setup..
+        /// </summary>
+        internal static string UnableToResolveTypeWithDependencyResolver_ConfigFile {
+            get {
+                return ResourceManager.GetString("UnableToResolveTypeWithDependencyResolver_ConfigFile", resourceCulture);
             }
         }
     }

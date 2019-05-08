@@ -59,5 +59,19 @@
 
             return source;
         }
+
+        /// <summary>
+        /// Configures the context to use entity framework with the <see cref="RepositoryDependencyResolver"/> using an IOC container to resolve the <see cref="DbContext"/>.
+        /// </summary>
+        /// <param name="source">The repository options builder.</param>
+        /// <returns>The same builder instance.</returns>
+        public static RepositoryOptionsBuilder UseEntityFramework([NotNull] this RepositoryOptionsBuilder source)
+        {
+            Guard.NotNull(source, nameof(source));
+
+            source.UseInternalContextFactory(new EfRepositoryContextFactory());
+
+            return source;
+        }
     }
 }
