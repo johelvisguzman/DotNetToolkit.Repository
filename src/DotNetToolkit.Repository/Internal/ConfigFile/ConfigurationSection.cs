@@ -230,14 +230,25 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
             if (type == null)
                 return default(T);
 
-            var defaultFactory = ConfigurationProvider.GetDefaultFactory();
-
-            if (defaultFactory != null)
-                return (T)defaultFactory(type);
-
             var keyValues = Parameters
                 .Cast<ParameterElement>()
                 .ToDictionary(x => x.Name, x => x.ValueString);
+
+            if (!keyValues.Any())
+            {
+                try
+                {
+                    return (T)RepositoryDependencyResolver.Current.Resolve(type);
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException(string.Format(
+                            Repository.Properties.Resources.UnableToResolveTypeWithDependencyResolver_ConfigFile,
+                            type.FullName,
+                            typeof(RepositoryDependencyResolver).Name),
+                        ex.InnerException);
+                }
+            }
 
             return (T)type.InvokeConstructor(keyValues);
         }

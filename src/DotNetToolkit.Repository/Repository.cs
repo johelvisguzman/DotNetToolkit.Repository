@@ -21,6 +21,11 @@
         /// <param name="options">The repository options.</param>
         public Repository([NotNull] IRepositoryOptions options) : base(options) { }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Repository{TEntity, TKey1, TKey2, TKey3}"/> class with the <see cref="RepositoryDependencyResolver"/> using an IOC container to resolve the <see cref="IRepositoryOptions"/>
+        /// </summary>
+        public Repository() : this(RepositoryDependencyResolver.Current.Resolve<IRepositoryOptions>()) { }
+
         #endregion
     }
 
@@ -41,6 +46,11 @@
         /// <param name="options">The repository options.</param>
         public Repository([NotNull] IRepositoryOptions options) : base(options) { }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Repository{TEntity, TKey1, TKey2}"/> class with the <see cref="RepositoryDependencyResolver"/> using an IOC container to resolve the <see cref="IRepositoryOptions"/>.
+        /// </summary>
+        public Repository() : this(RepositoryDependencyResolver.Current.Resolve<IRepositoryOptions>()) { }
+
         #endregion
     }
 
@@ -60,6 +70,11 @@
         /// <param name="options">The repository options.</param>
         public Repository([NotNull] IRepositoryOptions options) : base(options) { }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Repository{TEntity, TKey}"/> class with the <see cref="RepositoryDependencyResolver"/> using an IOC container to resolve the <see cref="IRepositoryOptions"/>.
+        /// </summary>
+        public Repository() : this(RepositoryDependencyResolver.Current.Resolve<IRepositoryOptions>()) { }
+
         #endregion
     }
 
@@ -77,6 +92,11 @@
         /// </summary>
         /// <param name="options">The repository options.</param>
         public Repository([NotNull] IRepositoryOptions options) : base(options) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Repository{TEntity}"/> class with the <see cref="RepositoryDependencyResolver"/> using an IOC container to resolve the <see cref="IRepositoryOptions"/>.
+        /// </summary>
+        public Repository() : this(RepositoryDependencyResolver.Current.Resolve<IRepositoryOptions>()) { }
 
         #endregion
     }

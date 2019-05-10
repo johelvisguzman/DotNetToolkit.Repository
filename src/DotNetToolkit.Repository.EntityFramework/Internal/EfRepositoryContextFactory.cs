@@ -86,4 +86,24 @@
 
         #endregion
     }
+
+    /// <summary>
+    /// An implementation of <see cref="IRepositoryContextFactory" /> with the <see cref="RepositoryDependencyResolver"/> using an IOC container to resolve the <see cref="DbContext"/>.
+    /// </summary>
+    /// <seealso cref="IRepositoryContextFactory" />
+    internal class EfRepositoryContextFactory : IRepositoryContextFactory
+    {
+        #region Implementation of IRepositoryContextFactory
+
+        /// <summary>
+        /// Create a new repository context.
+        /// </summary>
+        /// <returns>The new repository context.</returns>
+        public IRepositoryContext Create()
+        {
+            return new EfRepositoryContext(RepositoryDependencyResolver.Current.Resolve<DbContext>());
+        }
+
+        #endregion
+    }
 }

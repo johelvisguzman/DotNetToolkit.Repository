@@ -21,6 +21,11 @@
         /// <param name="unitOfWorkFactory">The unit of work factory.</param>
         public Service([NotNull] IUnitOfWorkFactory unitOfWorkFactory) : base(unitOfWorkFactory) { }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Service{TEntity, TKey1, TKey2, TKey3}"/> class with the <see cref="RepositoryDependencyResolver"/> using an IOC container to resolve the <see cref="IUnitOfWorkFactory"/>.
+        /// </summary>
+        public Service() : this(RepositoryDependencyResolver.Current.Resolve<IUnitOfWorkFactory>()) { }
+
         #endregion
     }
 
@@ -41,6 +46,11 @@
         /// <param name="unitOfWorkFactory">The unit of work factory.</param>
         public Service([NotNull] IUnitOfWorkFactory unitOfWorkFactory) : base(unitOfWorkFactory) { }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Service{TEntity, TKey1, TKey2}"/> class with the <see cref="RepositoryDependencyResolver"/> using an IOC container to resolve the <see cref="IUnitOfWorkFactory"/>.
+        /// </summary>
+        public Service() : this(RepositoryDependencyResolver.Current.Resolve<IUnitOfWorkFactory>()) { }
+
         #endregion
     }
 
@@ -60,6 +70,11 @@
         /// <param name="unitOfWorkFactory">The unit of work factory.</param>
         public Service([NotNull] IUnitOfWorkFactory unitOfWorkFactory) : base(unitOfWorkFactory) { }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Service{TEntity, TKey}"/> class with the <see cref="RepositoryDependencyResolver"/> using an IOC container to resolve the <see cref="IUnitOfWorkFactory"/>.
+        /// </summary>
+        public Service() : this(RepositoryDependencyResolver.Current.Resolve<IUnitOfWorkFactory>()) { }
+
         #endregion
     }
 
@@ -77,6 +92,11 @@
         /// </summary>
         /// <param name="unitOfWorkFactory">The unit of work factory.</param>
         public Service([NotNull] IUnitOfWorkFactory unitOfWorkFactory) : base(unitOfWorkFactory) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Service{TEntity}"/> class with the <see cref="RepositoryDependencyResolver"/> using an IOC container to resolve the <see cref="IUnitOfWorkFactory"/>.
+        /// </summary>
+        public Service() : this(RepositoryDependencyResolver.Current.Resolve<IUnitOfWorkFactory>()) { }
 
         #endregion
     }

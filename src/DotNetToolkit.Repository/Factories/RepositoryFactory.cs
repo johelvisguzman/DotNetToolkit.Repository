@@ -40,59 +40,62 @@
         /// <param name="options">The repository options.</param>
         public RepositoryFactory([NotNull] IRepositoryOptions options)
         {
-            Guard.NotNull(options, nameof(options));
-
-            _options = options;
+            _options = Guard.NotNull(options, nameof(options));
         }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryFactory"/> class with the <see cref="RepositoryDependencyResolver"/> using an IOC container to resolve the <see cref="IRepositoryOptions"/>.
+        /// </summary>
+        public RepositoryFactory() : this(RepositoryDependencyResolver.Current.Resolve<IRepositoryOptions>()) { }
 
         #endregion
 
         #region Implementation of IRepositoryFactory
 
         /// <summary>
-        /// Creates a new asynchronous repository for the specified entity type.
+        /// Creates a new repository for the specified entity type.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <returns>The new asynchronous repository.</returns>
+        /// <returns>The new repository.</returns>
         public IRepository<TEntity> Create<TEntity>() where TEntity : class
         {
-            return CreateInstance<Repository<TEntity>>();
+            return new Repository<TEntity>(_options);
         }
 
         /// <summary>
-        /// Creates a new asynchronous repository for the specified entity and primary key type.
+        /// Creates a new repository for the specified entity and primary key type.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <typeparam name="TKey">The type of the key primary key value.</typeparam>
-        /// <returns>The new asynchronous repository.</returns>
+        /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey> Create<TEntity, TKey>() where TEntity : class
         {
-            return CreateInstance<Repository<TEntity, TKey>>();
+            return new Repository<TEntity, TKey>(_options);
         }
 
         /// <summary>
-        /// Creates a new asynchronous repository for the specified entity and a composite primary key type.
+        /// Creates a new repository for the specified entity and a composite primary key type.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <typeparam name="TKey1">The type of the first part of the composite primary key.</typeparam>
         /// <typeparam name="TKey2">The type of the second part of the composite primary key.</typeparam>
-        /// <returns>The new asynchronous repository.</returns>
+        /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey1, TKey2> Create<TEntity, TKey1, TKey2>() where TEntity : class
         {
-            return CreateInstance<Repository<TEntity, TKey1, TKey2>>();
+            return new Repository<TEntity, TKey1, TKey2>(_options);
         }
 
         /// <summary>
-        /// Creates a new asynchronous repository for the specified entity and a composite primary key type.
+        /// Creates a new repository for the specified entity and a composite primary key type.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <typeparam name="TKey1">The type of the first part of the composite primary key.</typeparam>
         /// <typeparam name="TKey2">The type of the second part of the composite primary key.</typeparam>
         /// <typeparam name="TKey3">The type of the third part of the composite primary key.</typeparam>
-        /// <returns>The new asynchronous repository.</returns>
+        /// <returns>The new repository.</returns>
         public IRepository<TEntity, TKey1, TKey2, TKey3> Create<TEntity, TKey1, TKey2, TKey3>() where TEntity : class
         {
-            return CreateInstance<Repository<TEntity, TKey1, TKey2, TKey3>>();
+            return new Repository<TEntity, TKey1, TKey2, TKey3>(_options);
         }
 
         /// <summary>

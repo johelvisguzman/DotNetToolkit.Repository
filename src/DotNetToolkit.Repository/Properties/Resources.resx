@@ -162,4 +162,10 @@
   <data name="UnableToFindConfigurationSection" xml:space="preserve">
     <value>Unable to find a '{0}' configuration section. For more information on DotNetToolkit.Repository configuration, visit the https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Config-File-Setup.</value>
   </data>
+  <data name="UnableToResolveTypeWithDependencyResolver" xml:space="preserve">
+    <value>Unable to resolve an instance for '{0}'. Please consider using the {1} to use an IOC container.</value>
+  </data>
+  <data name="UnableToResolveTypeWithDependencyResolver_ConfigFile" xml:space="preserve">
+    <value>Unable to resolve an instance for '{0}'. Please consider using the {1} to use an IOC container or provide additional parameters to create an instance for the specified type. For more information on DotNetToolkit.Repository configuration, visit the https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Config-File-Setup.</value>
+  </data>
 </root>

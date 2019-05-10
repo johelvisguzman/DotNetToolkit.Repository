@@ -5,7 +5,6 @@
     using Configuration.Options.Internal;
     using Factories;
     using global::Unity;
-    using global::Unity.Injection;
     using JetBrains.Annotations;
     using System;
     using System.Collections.Generic;
@@ -96,10 +95,10 @@
             }
 
             // Register other services
-            container.RegisterType<IRepositoryFactory>(new InjectionFactory((c, t, n) => new RepositoryFactory(c.Resolve<IRepositoryOptions>())));
-            container.RegisterType<IUnitOfWork>(new InjectionFactory((c, t, n) => new UnitOfWork(c.Resolve<IRepositoryOptions>())));
-            container.RegisterType<IUnitOfWorkFactory>(new InjectionFactory((c, t, n) => new UnitOfWorkFactory(c.Resolve<IRepositoryOptions>())));
-            container.RegisterType<IRepositoryOptions>(new InjectionFactory((c, t, n) =>
+            container.RegisterFactory<IRepositoryFactory>(c => new RepositoryFactory());
+            container.RegisterFactory<IUnitOfWork>(c => new UnitOfWork());
+            container.RegisterFactory<IUnitOfWorkFactory>(c => new UnitOfWorkFactory());
+            container.RegisterFactory<IRepositoryOptions>(c =>
             {
                 var options = new RepositoryOptions(optionsBuilder.Options);
 
@@ -109,7 +108,10 @@
                 }
 
                 return options;
-            }));
+            });
+
+            // Register resolver
+            RepositoryDependencyResolver.SetResolver(type => container.Resolve(type));
         }
 
         /// <summary>

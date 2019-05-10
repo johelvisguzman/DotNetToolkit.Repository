@@ -96,9 +96,9 @@
             }
 
             // Register other services
-            services.AddScoped<IRepositoryFactory, RepositoryFactory>(sp => new RepositoryFactory(sp.GetRequiredService<IRepositoryOptions>()));
-            services.AddScoped<IUnitOfWork, UnitOfWork>(sp => new UnitOfWork(sp.GetRequiredService<IRepositoryOptions>()));
-            services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>(sp => new UnitOfWorkFactory(sp.GetRequiredService<IRepositoryOptions>()));
+            services.AddScoped<IRepositoryFactory, RepositoryFactory>(sp => new RepositoryFactory());
+            services.AddScoped<IUnitOfWork, UnitOfWork>(sp => new UnitOfWork());
+            services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>(sp => new UnitOfWorkFactory());
             services.AddScoped<IRepositoryOptions>(sp =>
             {
                 var options = new RepositoryOptions(optionsBuilder.Options);
@@ -109,6 +109,14 @@
                 }
 
                 return options;
+            });
+
+            // Register resolver
+            RepositoryDependencyResolver.SetResolver(type =>
+            {
+                return services
+                    .BuildServiceProvider()
+                    .GetService(type);
             });
 
             return services;

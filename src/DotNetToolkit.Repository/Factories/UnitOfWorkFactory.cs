@@ -44,6 +44,11 @@
             _options = Guard.NotNull(options, nameof(options));
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UnitOfWorkFactory"/> class with the <see cref="RepositoryDependencyResolver"/> using an IOC container to resolve the <see cref="IRepositoryOptions"/>.
+        /// </summary>
+        public UnitOfWorkFactory() : this(RepositoryDependencyResolver.Current.Resolve<IRepositoryOptions>()) { }
+
         #endregion
 
         #region Implementation of IUnitOfWorkFactory
@@ -54,7 +59,7 @@
         /// <returns>The new unit of work.</returns>
         public IUnitOfWork Create()
         {
-            return CreateInstance<UnitOfWork>();
+            return new UnitOfWork(_options);
         }
 
         /// <summary>
