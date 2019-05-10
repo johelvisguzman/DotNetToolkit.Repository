@@ -10,7 +10,6 @@
     using Mapper;
     using Properties;
     using System;
-    using System.IO;
     using System.Linq;
     using Utility;
 
@@ -78,7 +77,7 @@
         /// </summary>
         /// <param name="fileName">The name of the file to configure from.</param>
         /// <returns>The same builder instance.</returns>
-        /// <remarks>Any element that is defined in the config file can be resolved using the <see cref="DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationProvider.SetDefaultFactory"/></remarks>
+        /// <remarks>Any element that is defined in the config file can be resolved using the <see cref="RepositoryDependencyResolver"/>.</remarks>
         public virtual RepositoryOptionsBuilder UseConfiguration([CanBeNull] string fileName = null)
         {
             const string SectionName = DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationSection.SectionName;
@@ -91,7 +90,7 @@
                 var exeConfiguration = System.Configuration.ConfigurationManager.OpenMappedExeConfiguration(fileMap, System.Configuration.ConfigurationUserLevel.None);
 
                 if (!exeConfiguration.HasFile)
-                    throw new FileNotFoundException("The file is not found.", fileName);
+                    throw new System.IO.FileNotFoundException("The file is not found.", fileName);
 
                 config = (DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationSection)exeConfiguration.GetSection(SectionName);
             }
@@ -114,7 +113,7 @@
         /// </summary>
         /// <param name="configuration">The configuration.</param>
         /// <returns>The same builder instance.</returns>
-        /// <remarks>Any element that is defined in the config file can be resolved using the <see cref="DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationProvider.SetDefaultFactory"/></remarks>
+        /// <remarks>Any element that is defined in the config file can be resolved using the <see cref="RepositoryDependencyResolver"/>.</remarks>
         public virtual RepositoryOptionsBuilder UseConfiguration([NotNull]  Microsoft.Extensions.Configuration.IConfigurationRoot configuration)
         {
             Guard.NotNull(configuration, nameof(configuration));
