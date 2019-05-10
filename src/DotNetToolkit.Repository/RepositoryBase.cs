@@ -80,11 +80,7 @@
 
             if (!TryDelete(key1, key2, key3))
             {
-                var ex = new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3));
-
-                Logger.Error(ex);
-
-                throw ex;
+                InterceptError(() => new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3)));
             }
 
             LogExecutedMethod(false);
@@ -2526,7 +2522,7 @@
             }
             catch (Exception ex)
             {
-                Logger.Error(ex);
+                Logger.Error(new RepositoryException(ex));
 
                 throw;
             }
@@ -2546,7 +2542,7 @@
             }
             catch (Exception ex)
             {
-                Logger.Error(ex);
+                Logger.Error(new RepositoryException(ex));
 
                 throw;
             }
@@ -2565,7 +2561,7 @@
             }
             catch (Exception ex)
             {
-                Logger.Error(ex);
+                Logger.Error(new RepositoryException(ex));
 
                 throw;
             }
@@ -2584,7 +2580,7 @@
             }
             catch (Exception ex)
             {
-                Logger.Error(ex);
+                Logger.Error(new RepositoryException(ex));
 
                 throw;
             }

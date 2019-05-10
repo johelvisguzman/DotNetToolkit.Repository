@@ -10,8 +10,8 @@
 
 namespace DotNetToolkit.Repository.Properties {
     using System.Reflection;
-
-
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -147,6 +147,15 @@ namespace DotNetToolkit.Repository.Properties {
         internal static string QueryExecutionNotSupported {
             get {
                 return ResourceManager.GetString("QueryExecutionNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An error has occurred while performing an operation within the repository. Please see inner exception for fault details..
+        /// </summary>
+        internal static string RepositoryExceptionMessage {
+            get {
+                return ResourceManager.GetString("RepositoryExceptionMessage", resourceCulture);
             }
         }
         
