@@ -5,13 +5,17 @@
     using Data;
     using Factories;
     using Queries;
+    using System;
     using System.Threading.Tasks;
     using Xunit;
     using Xunit.Abstractions;
 
-    public class RepositoryCachingTests : TestBase
+    public class RepositoryCachingTests : TestBase, IDisposable
     {
-        public RepositoryCachingTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+        public RepositoryCachingTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+            TestCachingServerSetup.Run();
+        }
 
         [Fact]
         public void CacheEnabled()
@@ -1054,6 +1058,11 @@ WHERE NewCustomers.Id = @p0",
             Assert.NotEmpty((await repo.GroupByAsync(queryOptions, x => x.Id, (key, g) => key)).Result);
 
             Assert.False(repo.CacheUsed);
+        }
+
+        public void Dispose()
+        {
+            TestCachingServerSetup.Cleanup();
         }
     }
 }

@@ -2,6 +2,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 {
     using AdoNet;
     using Caching.InMemory;
+    using Caching.Memcached;
     using Caching.Redis;
     using Configuration.Logging;
     using Configuration.Options;
@@ -256,6 +257,11 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 
                         break;
                     }
+                case CachingProviderType.Memcached:
+                    {
+                        builder.UseCachingProvider(new MemcachedCacheProvider("127.0.0.1", 11211));
+                        break;
+                    }
                 default:
                     throw new ArgumentOutOfRangeException(nameof(cachingProvider));
             }
@@ -307,7 +313,8 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             return new[]
             {
                 CachingProviderType.MicrosoftInMemory,
-                CachingProviderType.Redis
+                CachingProviderType.Redis,
+                CachingProviderType.Memcached
             };
         }
 
@@ -325,7 +332,8 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
         public enum CachingProviderType
         {
             MicrosoftInMemory,
-            Redis
+            Redis,
+            Memcached
         }
     }
 }
