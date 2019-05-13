@@ -5,7 +5,8 @@
     /// <summary>
     /// Represents an interface for caching query data within the repositories.
     /// </summary>
-    public interface ICache
+    /// <seealso cref="IDisposable" />
+    public interface ICache : IDisposable
     {
         /// <summary>
         /// Create or overwrite an entry in the cache.

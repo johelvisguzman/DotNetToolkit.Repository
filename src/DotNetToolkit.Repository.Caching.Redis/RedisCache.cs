@@ -251,5 +251,23 @@
         }
 
         #endregion
+
+        #region Implementation of ICache
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            if (_lazyConnection.IsValueCreated)
+            {
+                var conn = _lazyConnection.Value;
+
+                conn.Close(false);
+                conn.Dispose();
+            }
+        }
+
+        #endregion
     }
 }
