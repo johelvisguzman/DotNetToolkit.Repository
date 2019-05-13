@@ -1,8 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
+    using Caching.InMemory;
     using Configuration.Caching.Internal;
     using Data;
-    using Extensions.Microsoft.Caching.Memory;
     using Factories;
     using Queries;
     using System.Threading.Tasks;

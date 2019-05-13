@@ -60,8 +60,8 @@ after_build:
   - dotnet pack .\src\DotNetToolkit.Repository.Xml\DotNetToolkit.Repository.Xml.csproj --configuration Release
   - dotnet pack .\src\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.csproj --configuration Release
   - dotnet pack .\src\DotNetToolkit.Repository.Extensions.Unity\DotNetToolkit.Repository.Extensions.Unity.csproj --configuration Release
-  - dotnet pack .\src\DotNetToolkit.Repository.Extensions.Microsoft.Caching.Memory\DotNetToolkit.Repository.Extensions.Microsoft.Caching.Memory.csproj --configuration Release
-  - dotnet pack .\src\DotNetToolkit.Repository.Extensions.Caching.Redis\DotNetToolkit.Repository.Extensions.Caching.Redis.csproj --configuration Release
+  - dotnet pack .\src\DotNetToolkit.Repository.Caching.InMemory\DotNetToolkit.Repository.Caching.InMemory.csproj --configuration Release
+  - dotnet pack .\src\DotNetToolkit.Repository.Caching.Redis\DotNetToolkit.Repository.Caching.Redis.csproj --configuration Release
 
 #---------------------------------#
 #      artifacts configuration    #

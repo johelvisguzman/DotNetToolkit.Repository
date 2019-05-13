@@ -5,8 +5,8 @@
   <PropertyGroup>
     <TargetFrameworks>net451;netstandard1.3;netstandard2.0</TargetFrameworks>
     <Description>A caching provider for the Microsoft in-memory cache.</Description>
-    <AssemblyName>DotNetToolkit.Repository.Extensions.Microsoft.Caching.Memory</AssemblyName>
-    <RootNamespace>DotNetToolkit.Repository.Extensions.Microsoft.Caching.Memory</RootNamespace>
+    <AssemblyName>DotNetToolkit.Repository.Caching.InMemory</AssemblyName>
+    <RootNamespace>DotNetToolkit.Repository.Caching.InMemory</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3' Or '$(TargetFramework)' == 'net451'">

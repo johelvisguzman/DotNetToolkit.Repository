@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Extensions.Caching.Redis
+﻿namespace DotNetToolkit.Repository.Caching.Redis
 {
     using Configuration.Caching;
     using JetBrains.Annotations;
