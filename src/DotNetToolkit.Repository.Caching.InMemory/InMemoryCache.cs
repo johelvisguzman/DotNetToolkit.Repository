@@ -120,5 +120,17 @@
         }
 
         #endregion
+
+        #region Implementation of ICache
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            _cache.Dispose();
+        }
+
+        #endregion
     }
 }

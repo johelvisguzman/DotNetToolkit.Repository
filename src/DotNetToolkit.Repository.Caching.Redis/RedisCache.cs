@@ -27,6 +27,14 @@
         public ConnectionMultiplexer Connection { get { return _lazyConnection.Value; } }
 
         /// <summary>
+        /// Gets the redis server.
+        /// </summary>
+        public IServer Server
+        {
+            get { return Connection.GetServer(Connection.GetEndPoints()[0]); }
+        }
+
+        /// <summary>
         /// Gets the redis database.
         /// </summary>
         protected IDatabase Redis { get { return _redis ?? (_redis = Connection.GetDatabase()); } }
@@ -240,6 +248,24 @@
             var value = Redis.StringIncrement(Guard.NotEmpty(key, nameof(key)), incrementValue);
 
             return Convert.ToInt32(value);
+        }
+
+        #endregion
+
+        #region Implementation of ICache
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            if (_lazyConnection.IsValueCreated)
+            {
+                var conn = _lazyConnection.Value;
+
+                conn.Close(false);
+                conn.Dispose();
+            }
         }
 
         #endregion

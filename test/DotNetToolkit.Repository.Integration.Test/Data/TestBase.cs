@@ -248,11 +248,11 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                     }
                 case CachingProviderType.Redis:
                     {
-                        var redis = new RedisCacheProvider(allowAdmin: true, defaultDatabase: 0, expiry: null);
+                        var provider = new RedisCacheProvider(allowAdmin: true, defaultDatabase: 0, expiry: null);
 
-                        redis.Server.FlushAllDatabases();
+                        provider.Cache.Server.FlushAllDatabases();
 
-                        builder.UseCachingProvider(redis);
+                        builder.UseCachingProvider(provider);
 
                         break;
                     }
