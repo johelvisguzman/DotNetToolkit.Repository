@@ -1,22 +1,22 @@
 namespace DotNetToolkit.Repository.Integration.Test.Data
 {
     using AdoNet;
+    using Caching.InMemory;
+    using Caching.Redis;
     using Configuration.Logging;
     using Configuration.Options;
     using EntityFramework;
     using EntityFrameworkCore;
-    using Extensions.Caching.Redis;
-    using Extensions.Microsoft.Caching.Memory;
     using Factories;
+    using global::NHibernate.Cfg;
+    using global::NHibernate.Driver;
+    using global::NHibernate.Mapping.ByCode;
+    using global::NHibernate.Tool.hbm2ddl;
     using InMemory;
     using Json;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
     using NHibernate;
-    using global::NHibernate.Cfg;
-    using global::NHibernate.Driver;
-    using global::NHibernate.Mapping.ByCode;
-    using global::NHibernate.Tool.hbm2ddl;
     using System;
     using System.Collections.Generic;
     using System.IO;

@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Extensions.Caching.Redis
+﻿namespace DotNetToolkit.Repository.Caching.Redis
 {
     using Configuration.Caching;
     using JetBrains.Annotations;
@@ -180,9 +180,9 @@
         /// </summary>
         /// <param name="key">An object identifying the entry.</param>
         /// <param name="value">The value to cache.</param>
-        /// <param name="cacheExpiration">The cache expiration time.</param>
+        /// <param name="expiry">The cache expiration time.</param>
         /// <param name="cacheRemovedCallback">A callback function for a value is removed from the cache.</param>
-        public void Set<T>([NotNull] string key, [CanBeNull] T value, [CanBeNull] TimeSpan? cacheExpiration, [CanBeNull] Action<string> cacheRemovedCallback = null)
+        public void Set<T>([NotNull] string key, [CanBeNull] T value, [CanBeNull] TimeSpan? expiry, [CanBeNull] Action<string> cacheRemovedCallback = null)
         {
             Guard.NotEmpty(key, nameof(key));
 
@@ -203,7 +203,7 @@
                 });
             }
 
-            Redis.StringSet(key, Serialize(value), cacheExpiration);
+            Redis.StringSet(key, Serialize(value), expiry);
         }
 
         /// <summary>

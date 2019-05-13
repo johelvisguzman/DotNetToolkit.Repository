@@ -1,8 +1,8 @@
-﻿namespace DotNetToolkit.Repository.Extensions.Microsoft.Caching.Memory
+﻿namespace DotNetToolkit.Repository.Caching.InMemory
 {
     using Configuration.Caching;
-    using global::Microsoft.Extensions.Caching.Memory;
     using JetBrains.Annotations;
+    using Microsoft.Extensions.Caching.Memory;
     using System;
     using Utility;
 

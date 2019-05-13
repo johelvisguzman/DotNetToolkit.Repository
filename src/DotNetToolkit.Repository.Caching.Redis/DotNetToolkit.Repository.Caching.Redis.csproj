@@ -5,8 +5,8 @@
   <PropertyGroup>
     <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
     <Description>A caching provider for redis.</Description>
-    <AssemblyName>DotNetToolkit.Repository.Extensions.Caching.Redis</AssemblyName>
-    <RootNamespace>DotNetToolkit.Repository.Extensions.Caching.Redis</RootNamespace>
+    <AssemblyName>DotNetToolkit.Repository.Caching.Redis</AssemblyName>
+    <RootNamespace>DotNetToolkit.Repository.Caching.Redis</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
