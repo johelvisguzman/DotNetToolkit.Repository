@@ -7,9 +7,9 @@
     using Utility;
 
     /// <summary>
-    /// An implementation of <see cref="ICacheProvider" />.
+    /// An implementation of <see cref="ICacheProvider{TCache}" />.
     /// </summary>
-    public class InMemoryCacheProvider : ICacheProvider
+    public class InMemoryCacheProvider : ICacheProvider<InMemoryCache>
     {
         #region Constructors
 
@@ -49,11 +49,23 @@
         /// Gets or sets the caching expiration time.
         /// </summary>
         public TimeSpan? Expiry { get; set; }
+        
+        /// <summary>
+        /// Gets the cache.
+        /// </summary>
+        ICache ICacheProvider.Cache
+        {
+            get { return Cache; }
+        }
+
+        #endregion
+
+        #region Implementation of ICacheProvider<TCache>
 
         /// <summary>
         /// Gets the cache.
         /// </summary>
-        public ICache Cache { get; }
+        public InMemoryCache Cache { get; }
 
         #endregion
     }

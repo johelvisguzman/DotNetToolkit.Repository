@@ -17,4 +17,17 @@
         /// </summary>
         ICache Cache { get; }
     }
+
+    /// <summary>
+    /// Represents a caching provider for caching query data within the repositories.
+    /// </summary>
+    /// <typeparam name="TCache">The type of the cache.</typeparam>
+    /// <seealso cref="ICacheProvider" />
+    public interface ICacheProvider<out TCache> : ICacheProvider where TCache : ICache
+    {
+        /// <summary>
+        /// Gets the cache.
+        /// </summary>
+        new TCache Cache { get; }
+    }
 }

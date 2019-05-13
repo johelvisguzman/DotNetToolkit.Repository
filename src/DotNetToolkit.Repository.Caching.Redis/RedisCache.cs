@@ -27,6 +27,14 @@
         public ConnectionMultiplexer Connection { get { return _lazyConnection.Value; } }
 
         /// <summary>
+        /// Gets the redis server.
+        /// </summary>
+        public IServer Server
+        {
+            get { return Connection.GetServer(Connection.GetEndPoints()[0]); }
+        }
+
+        /// <summary>
         /// Gets the redis database.
         /// </summary>
         protected IDatabase Redis { get { return _redis ?? (_redis = Connection.GetDatabase()); } }

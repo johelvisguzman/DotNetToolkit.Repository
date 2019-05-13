@@ -7,36 +7,10 @@
     using Utility;
 
     /// <summary>
-    /// An implementation of <see cref="ICacheProvider" />.
+    /// An implementation of <see cref="ICacheProvider{TCache}" />.
     /// </summary>
-    public class RedisCacheProvider : ICacheProvider
+    public class RedisCacheProvider : ICacheProvider<RedisCache>
     {
-        #region Fields
-
-        private readonly RedisCache _redis;
-
-        #endregion
-
-        #region Properties
-
-        /// <summary>
-        /// Gets the redis connection multiplexer.
-        /// </summary>
-        public ConnectionMultiplexer Connection
-        {
-            get { return _redis.Connection; }
-        }
-
-        /// <summary>
-        /// Gets the redis server.
-        /// </summary>
-        public IServer Server
-        {
-            get { return Connection.GetServer(Connection.GetEndPoints()[0]); }
-        }
-
-        #endregion
-
         #region Constructors
 
         /// <summary>
@@ -52,8 +26,7 @@
         /// <remarks>This will connect to a single server on the local machine using the default redis port (6379).</remarks>
         public RedisCacheProvider([CanBeNull] TimeSpan? expiry)
         {
-            _redis = new RedisCache();
-
+            Cache = new RedisCache();
             Expiry = expiry;
         }
 
@@ -66,8 +39,7 @@
         /// <remarks>This will connect to a single server on the local machine using the default redis port (6379).</remarks>
         public RedisCacheProvider(bool allowAdmin, [CanBeNull] int? defaultDatabase, [CanBeNull] TimeSpan? expiry)
         {
-            _redis = new RedisCache(allowAdmin, defaultDatabase);
-
+            Cache = new RedisCache(allowAdmin, defaultDatabase);
             Expiry = expiry;
         }
 
@@ -78,10 +50,7 @@
         /// <param name="expiry">The the caching expiration time.</param>
         public RedisCacheProvider([NotNull] string configuration, [CanBeNull] TimeSpan? expiry)
         {
-            Guard.NotNull(configuration, nameof(configuration));
-
-            _redis = new RedisCache(configuration);
-
+            Cache = new RedisCache(Guard.NotNull(configuration, nameof(configuration)));
             Expiry = expiry;
         }
 
@@ -92,10 +61,7 @@
         /// <param name="expiry">The the caching expiration time.</param>
         public RedisCacheProvider([NotNull] ConfigurationOptions options, [CanBeNull] TimeSpan? expiry)
         {
-            Guard.NotNull(options, nameof(options));
-
-            _redis = new RedisCache(options);
-
+            Cache = new RedisCache(Guard.NotNull(options, nameof(options)));
             Expiry = expiry;
         }
 
@@ -111,8 +77,7 @@
         {
             Guard.NotEmpty(host, nameof(host));
 
-            _redis = new RedisCache(host, ssl, allowAdmin, defaultDatabase);
-
+            Cache = new RedisCache(host, ssl, allowAdmin, defaultDatabase);
             Expiry = expiry;
         }
 
@@ -131,8 +96,7 @@
             Guard.NotEmpty(host, nameof(host));
             Guard.NotEmpty(password, nameof(password));
 
-            _redis = new RedisCache(host, port, password, ssl, allowAdmin, defaultDatabase);
-
+            Cache = new RedisCache(host, port, password, ssl, allowAdmin, defaultDatabase);
             Expiry = expiry;
         }
 
@@ -148,7 +112,19 @@
         /// <summary>
         /// Gets the cache.
         /// </summary>
-        public ICache Cache { get { return _redis; } }
+        ICache ICacheProvider.Cache
+        {
+            get { return Cache; }
+        }
+
+        #endregion
+
+        #region Implementation of ICacheProvider<TCache>
+
+        /// <summary>
+        /// Gets the cache.
+        /// </summary>
+        public RedisCache Cache { get; }
 
         #endregion
     }
