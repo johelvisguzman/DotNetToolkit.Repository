@@ -52,6 +52,14 @@
                 typeof(IRepository<,>),
                 typeof(IRepository<,,>),
                 typeof(IRepository<,,,>),
+                typeof(IReadOnlyService<>),
+                typeof(IReadOnlyService<,>),
+                typeof(IReadOnlyService<,,>),
+                typeof(IReadOnlyService<,,,>),
+                typeof(IReadOnlyRepository<>),
+                typeof(IReadOnlyRepository<,>),
+                typeof(IReadOnlyRepository<,,>),
+                typeof(IReadOnlyRepository<,,,>),
                 typeof(IRepositoryInterceptor)
             };
 
