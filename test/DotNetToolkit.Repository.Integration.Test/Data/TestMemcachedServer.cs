@@ -6,7 +6,7 @@
 
     public static class TestMemcachedServer
     {
-        private static readonly string _basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tools");
+        private static readonly string _basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tools\\memcached-server");
         private static readonly string _exePath = Path.Combine(_basePath, "memcached.exe");
 
         public static IDisposable Run(int port = 11211, bool verbose = false, int maxMem = 512, bool hidden = true)
