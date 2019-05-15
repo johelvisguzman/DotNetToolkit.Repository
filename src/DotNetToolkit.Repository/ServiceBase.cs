@@ -223,7 +223,7 @@
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
         /// <return>The entity found.</return>
         public virtual TEntity Get([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy)
         {
@@ -815,7 +815,7 @@
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         public virtual async Task<TEntity> GetAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
@@ -1456,7 +1456,7 @@
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
         /// <return>The entity found.</return>
         public virtual TEntity Get([NotNull] TKey1 key1, [NotNull] TKey2 key2, [CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy)
         {
@@ -2043,7 +2043,7 @@
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         public virtual async Task<TEntity> GetAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
@@ -2678,7 +2678,7 @@
         /// Finds an entity with the given primary key value in the repository.
         /// </summary>
         /// <param name="key">The value of the primary key for the entity to be found.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
         /// <return>The entity found.</return>
         public virtual TEntity Get([NotNull] TKey key, [CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy)
         {
@@ -3260,7 +3260,7 @@
         /// Asynchronously finds an entity with the given primary key value in the repository.
         /// </summary>
         /// <param name="key">The value of the primary key for the entity to be found.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         public virtual async Task<TEntity> GetAsync([NotNull] TKey key, [CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
