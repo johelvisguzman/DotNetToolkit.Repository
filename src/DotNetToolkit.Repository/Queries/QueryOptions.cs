@@ -188,7 +188,7 @@
         /// <summary>
         /// Includes the fetch strategy which defines the child objects that should be retrieved when loading the entity and combines it with the current property pahts collection.
         /// </summary>
-        /// <param name="fetchStrategy">The fetch strategy.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
         /// <returns>The current instance.</returns>
         public QueryOptions<T> Include([NotNull] IFetchQueryStrategy<T> fetchStrategy)
         {

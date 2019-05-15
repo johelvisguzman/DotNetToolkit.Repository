@@ -50,7 +50,7 @@
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found in the repository.</returns>
         Task<IQueryResult<TEntity>> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class;
 

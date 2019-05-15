@@ -234,7 +234,7 @@
         /// Finds an entity with the given primary key values in the repository.
         /// </summary>
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <returns>The entity found in the repository.</returns>
         public override IQueryResult<TEntity> Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues)
@@ -387,7 +387,7 @@
         /// </summary>
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
         /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found in the repository.</returns>
         public override async Task<IQueryResult<TEntity>> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues)
