@@ -552,7 +552,7 @@
                 Glue,
                 CacheProviderManager.GlobalCachingPrefixCounter,
                 cacheProvider.GetCachingPrefixCounter<T>(),
-                key.ToSHA256(),
+                key.ToMD5(),
                 CacheProviderManager.CachePrefix);
         }
 
