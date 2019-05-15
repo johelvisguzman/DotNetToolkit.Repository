@@ -83,7 +83,8 @@
             {
                 var serviceType = t.Key;
                 var implementationTypes = t.Where(x => x.IsGenericType == serviceType.IsGenericType &&
-                                                       x.GetGenericArguments().Length == serviceType.GetGenericArguments().Length);
+                                                       x.GetGenericArguments().Length == serviceType.GetGenericArguments().Length &&
+                                                       x.IsVisible && !x.IsAbstract);
 
                 foreach (var implementationType in implementationTypes)
                 {
