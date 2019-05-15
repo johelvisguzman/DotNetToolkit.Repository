@@ -84,9 +84,9 @@
         /// </summary>
         /// <param name="path">A lambda expression representing the path to include.</param>
         /// <returns>A new <see cref="IFetchQueryStrategy{T}" /> with the defined query path.</returns>
-        public IFetchQueryStrategy<T> Fetch(Expression<Func<T, object>> path)
+        public IFetchQueryStrategy<T> Fetch([NotNull] Expression<Func<T, object>> path)
         {
-            return Fetch(path.ToIncludeString());
+            return Fetch(Guard.NotNull(path, nameof(path)).ToIncludeString());
         }
 
         /// <summary>
@@ -94,8 +94,10 @@
         /// </summary>
         /// <param name="path">The dot-separated list of related objects to return in the query results.</param>
         /// <returns>A new <see cref="IFetchQueryStrategy{T}" /> with the defined query path.</returns>
-        public IFetchQueryStrategy<T> Fetch(string path)
+        public IFetchQueryStrategy<T> Fetch([NotNull] string path)
         {
+            Guard.NotEmpty(path, nameof(path));
+
             if (!_properties.Contains(path))
                 _properties.Add(path);
 
