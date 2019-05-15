@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27004.2006
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.352
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}"
 EndProject
@@ -44,6 +44,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Integration.Test", "test\DotNetToolkit.Repository.Integration.Test\DotNetToolkit.Repository.Integration.Test.csproj", "{C895B8F4-5083-4D97-A1E6-D7DF01BDBE9D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Caching.Memcached", "src\DotNetToolkit.Repository.Caching.Memcached\DotNetToolkit.Repository.Caching.Memcached.csproj", "{421F9CC1-9A5F-4F3D-A851-AB72958A4E96}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetToolkit.Repository.Extensions.Ninject", "src\DotNetToolkit.Repository.Extensions.Ninject\DotNetToolkit.Repository.Extensions.Ninject.csproj", "{BC5B405A-725D-47EC-8FE1-D420CFED8939}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -118,6 +120,10 @@ Global
 		{421F9CC1-9A5F-4F3D-A851-AB72958A4E96}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{421F9CC1-9A5F-4F3D-A851-AB72958A4E96}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{421F9CC1-9A5F-4F3D-A851-AB72958A4E96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC5B405A-725D-47EC-8FE1-D420CFED8939}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC5B405A-725D-47EC-8FE1-D420CFED8939}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC5B405A-725D-47EC-8FE1-D420CFED8939}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC5B405A-725D-47EC-8FE1-D420CFED8939}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -140,6 +146,7 @@ Global
 		{445F6C84-FF28-4243-8148-DAB5A4813F93} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{C895B8F4-5083-4D97-A1E6-D7DF01BDBE9D} = {DAB3DD1E-AD99-46C9-AC42-07E2F03D5A06}
 		{421F9CC1-9A5F-4F3D-A851-AB72958A4E96} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
+		{BC5B405A-725D-47EC-8FE1-D420CFED8939} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96973E0C-81D1-42DE-9F78-7103241B4E07}

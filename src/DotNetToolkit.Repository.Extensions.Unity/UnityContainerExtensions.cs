@@ -25,7 +25,7 @@
         /// <param name="optionsAction">A builder action used to create or modify options for the repositories.</param>
         /// <param name="assembliesToScan">The assemblies to scan.</param>
         /// <remarks>
-        /// This method will scan for repositories and interceptors from the specified assemblies collection, and will register them to the service collection.
+        /// This method will scan for repositories and interceptors from the specified assemblies collection, and will register them to the container.
         /// </remarks>
         public static void RegisterRepositories([NotNull] this IUnityContainer container, [NotNull] Action<RepositoryOptionsBuilder> optionsAction, [NotNull] params Assembly[] assembliesToScan)
         {
@@ -129,7 +129,7 @@
         /// <param name="optionsAction">A builder action used to create or modify options for the repositories.</param>
         /// <remarks>
         /// This method will scan for repositories and interceptors from the assemblies that have been loaded into the
-        /// execution context of this application domain, and will register them to the service collection.
+        /// execution context of this application domain, and will register them to the container.
         /// </remarks>
         public static void RegisterRepositories([NotNull] this IUnityContainer container, [NotNull] Action<RepositoryOptionsBuilder> optionsAction)
         {

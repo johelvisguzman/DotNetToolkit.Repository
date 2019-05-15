@@ -1,10 +1,10 @@
-﻿namespace DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection
+﻿namespace DotNetToolkit.Repository.Extensions.Ninject
 {
     using Configuration.Interceptors;
     using Configuration.Options;
     using Configuration.Options.Internal;
     using Factories;
-    using global::Microsoft.Extensions.DependencyInjection;
+    using global::Ninject;
     using JetBrains.Annotations;
     using System;
     using System.Collections.Generic;
@@ -14,23 +14,22 @@
     using Utility;
 
     /// <summary>
-    /// Contains various extension methods for <see cref="IServiceCollection" />
+    /// Contains various extension methods for <see cref="IKernel" />
     /// </summary>
-    public static class ServiceCollectionExtensions
+    public static class KernelExtensions
     {
         /// <summary>
-        /// Adds all the repository services using the specified options builder.
+        /// Binds all the repositories services using the specified options builder.
         /// </summary>
-        /// <param name="services">The service collection.</param>
+        /// <param name="kernel">The kernel.</param>
         /// <param name="optionsAction">A builder action used to create or modify options for the repositories.</param>
         /// <param name="assembliesToScan">The assemblies to scan.</param>
-        /// <returns>The same instance of the service collection which has been configured with the repositories.</returns>
         /// <remarks>
-        /// This method will scan for repositories and interceptors from the specified assemblies collection, and will register them to the container.
+        /// This method will scan for repositories and interceptors from the specified assemblies collection, and will bind them to the container.
         /// </remarks>
-        public static IServiceCollection AddRepositories([NotNull] this IServiceCollection services, [NotNull] Action<RepositoryOptionsBuilder> optionsAction, [NotNull] params Assembly[] assembliesToScan)
+        public static void BindRepositories([NotNull] this IKernel kernel, [NotNull] Action<RepositoryOptionsBuilder> optionsAction, [NotNull] params Assembly[] assembliesToScan)
         {
-            Guard.NotNull(services, nameof(services));
+            Guard.NotNull(kernel, nameof(kernel));
             Guard.NotNull(optionsAction, nameof(optionsAction));
             Guard.NotEmpty(assembliesToScan, nameof(assembliesToScan));
 
@@ -72,7 +71,7 @@
                 .SelectMany(interfaceType => types.Where(t => t.IsClass && !t.IsAbstract && t.ImplementsInterface(interfaceType))
                 .GroupBy(t => interfaceType, t => t));
 
-            // Register the repositories and interceptors that have been scanned
+            // Binds the repositories and interceptors that have been scanned
             var optionsBuilder = new RepositoryOptionsBuilder();
 
             optionsAction(optionsBuilder);
@@ -83,66 +82,59 @@
             {
                 var serviceType = t.Key;
                 var implementationTypes = t.Where(x => x.IsGenericType == serviceType.IsGenericType &&
-                                                       x.GetGenericArguments().Length == serviceType.GetGenericArguments().Length);
+                                                       x.GetGenericArguments().Length == serviceType.GetGenericArguments().Length &&
+                                                       x.IsVisible && !x.IsAbstract);
 
                 foreach (var implementationType in implementationTypes)
                 {
                     if (serviceType == typeof(IRepositoryInterceptor))
                     {
-                        if (services.Any(x => x.ServiceType == implementationType) || optionsBuilder.Options.Interceptors.ContainsKey(implementationType))
+                        if (kernel.GetBindings(implementationType).Any() || optionsBuilder.Options.Interceptors.ContainsKey(implementationType))
                             continue;
 
-                        services.AddScoped(implementationType, implementationType);
-                        services.AddScoped(serviceType, implementationType);
+                        kernel.Bind(implementationType).ToSelf();
+                        kernel.Bind(serviceType).To(implementationType);
                         registeredInterceptorTypes.Add(implementationType);
                     }
                     else
                     {
-                        services.AddScoped(serviceType, implementationType);
+                        kernel.Bind(serviceType).To(implementationType);
                     }
                 }
             }
 
-            // Register other services
-            services.AddScoped<IRepositoryFactory, RepositoryFactory>(sp => new RepositoryFactory());
-            services.AddScoped<IUnitOfWork, UnitOfWork>(sp => new UnitOfWork());
-            services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>(sp => new UnitOfWorkFactory());
-            services.AddScoped<IRepositoryOptions>(sp =>
+            // Binds other services
+            kernel.Bind<IRepositoryFactory>().To<RepositoryFactory>();
+            kernel.Bind<IUnitOfWork>().To<UnitOfWork>();
+            kernel.Bind<IUnitOfWorkFactory>().To<UnitOfWorkFactory>();
+            kernel.Bind<IRepositoryOptions>().ToMethod(c =>
             {
                 var options = new RepositoryOptions(optionsBuilder.Options);
 
                 foreach (var interceptorType in registeredInterceptorTypes)
                 {
-                    options.With(interceptorType, () => (IRepositoryInterceptor)sp.GetService(interceptorType));
+                    options.With(interceptorType, () => (IRepositoryInterceptor)c.Kernel.Get(interceptorType));
                 }
 
                 return options;
             });
 
-            // Register resolver
-            RepositoryDependencyResolver.SetResolver(type =>
-            {
-                return services
-                    .BuildServiceProvider()
-                    .GetService(type);
-            });
-
-            return services;
+            // Binds resolver
+            RepositoryDependencyResolver.SetResolver(type => kernel.Get(type));
         }
 
         /// <summary>
-        /// Adds all the repository services using the specified options builder.
+        /// Binds all the repositories services using the specified options builder.
         /// </summary>
-        /// <param name="services">The service collection.</param>
+        /// <param name="kernel">The kernel.</param>
         /// <param name="optionsAction">A builder action used to create or modify options for the repositories.</param>
-        /// <returns>The same instance of the service collection which has been configured with the repositories.</returns>
         /// <remarks>
         /// This method will scan for repositories and interceptors from the assemblies that have been loaded into the
-        /// execution context of this application domain, and will register them to the container.
+        /// execution context of this application domain, and will bind them to the container.
         /// </remarks>
-        public static IServiceCollection AddRepositories([NotNull] this IServiceCollection services, [NotNull] Action<RepositoryOptionsBuilder> optionsAction)
+        public static void RegisterRepositories([NotNull] this IKernel kernel, [NotNull] Action<RepositoryOptionsBuilder> optionsAction)
         {
-            return AddRepositories(services, optionsAction, AppDomain.CurrentDomain.GetAssemblies());
+            BindRepositories(kernel, optionsAction, AppDomain.CurrentDomain.GetAssemblies());
         }
     }
 }
