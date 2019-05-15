@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Queries.Strategies
 {
+    using JetBrains.Annotations;
     using System;
     using System.Linq;
     using System.Linq.Expressions;
@@ -16,9 +17,9 @@
         /// Initializes a new instance of the <see cref="SpecificationQueryStrategy{T}" /> class.
         /// </summary>
         /// <param name="predicate">A function to test the entity and determine if it satisfies the specified criteria.</param>
-        public SpecificationQueryStrategy(Expression<Func<T, bool>> predicate)
+        public SpecificationQueryStrategy([NotNull] Expression<Func<T, bool>> predicate)
         {
-            Predicate = predicate;
+            Predicate = Guard.NotNull(predicate, nameof(predicate));
         }
 
         #endregion
@@ -28,33 +29,33 @@
         /// <summary>    
         /// Returns a new specificationStrategy which has been combined with the current and the specified specificationStrategy using the logical "and".
         /// </summary>    
-        public ISpecificationQueryStrategy<T> And(SpecificationQueryStrategy<T> specificationStrategy)
+        public ISpecificationQueryStrategy<T> And([NotNull] SpecificationQueryStrategy<T> specificationStrategy)
         {
-            return new SpecificationQueryStrategy<T>(Predicate.And(specificationStrategy.Predicate));
+            return new SpecificationQueryStrategy<T>(Predicate.And(Guard.NotNull(specificationStrategy, nameof(specificationStrategy)).Predicate));
         }
 
         /// <summary>    
         /// Returns a new specificationStrategy which has been combined with the current specified predicate using the logical "and".
         /// </summary>    
-        public ISpecificationQueryStrategy<T> And(Expression<Func<T, bool>> predicate)
+        public ISpecificationQueryStrategy<T> And([NotNull] Expression<Func<T, bool>> predicate)
         {
-            return new SpecificationQueryStrategy<T>(Predicate.And(predicate));
+            return new SpecificationQueryStrategy<T>(Predicate.And(Guard.NotNull(predicate, nameof(predicate))));
         }
 
         /// <summary>    
         /// Returns a new specificationStrategy which has been combined with the current and the specified specificationStrategy using the logical "or".
         /// </summary>    
-        public ISpecificationQueryStrategy<T> Or(SpecificationQueryStrategy<T> specificationStrategy)
+        public ISpecificationQueryStrategy<T> Or([NotNull] SpecificationQueryStrategy<T> specificationStrategy)
         {
-            return new SpecificationQueryStrategy<T>(Predicate.Or(specificationStrategy.Predicate));
+            return new SpecificationQueryStrategy<T>(Predicate.Or(Guard.NotNull(specificationStrategy, nameof(specificationStrategy)).Predicate));
         }
 
         /// <summary>    
         /// Returns a new specificationStrategy which has been combined with the current specified predicate using the logical "or".
         /// </summary>    
-        public ISpecificationQueryStrategy<T> Or(Expression<Func<T, bool>> predicate)
+        public ISpecificationQueryStrategy<T> Or([NotNull] Expression<Func<T, bool>> predicate)
         {
-            return new SpecificationQueryStrategy<T>(Predicate.Or(predicate));
+            return new SpecificationQueryStrategy<T>(Predicate.Or(Guard.NotNull(predicate, nameof(predicate))));
         }
 
         /// <summary>    
@@ -79,9 +80,9 @@
         /// </summary>
         /// <param name="query">The entity query.</param>
         /// <returns>The collection of entities that satisfied the criteria specified by the <see cref="ISpecificationQueryStrategy{T}.Predicate" /> from the query.</returns>
-        public virtual IQueryable<T> SatisfyingEntitiesFrom(IQueryable<T> query)
+        public virtual IQueryable<T> SatisfyingEntitiesFrom([NotNull] IQueryable<T> query)
         {
-            return Predicate == null ? query : query.Where(Predicate);
+            return Guard.NotNull(query, nameof(query)).Where(Predicate);
         }
 
         /// <summary>
@@ -89,9 +90,11 @@
         /// </summary>
         /// <param name="entity">The entity to test.</param>
         /// <returns><c>true</c> if the entity satisfied the criteria specified by the <see cref="ISpecificationQueryStrategy{T}.Predicate" />; otherwise, <c>false</c>.</returns>
-        public bool IsSatisfiedBy(T entity)
+        public bool IsSatisfiedBy([NotNull] T entity)
         {
-            return Predicate == null || new[] { entity }.AsQueryable().Any(Predicate);
+            return new[] { Guard.NotNull(entity, nameof(entity)) }
+                .AsQueryable()
+                .Any(Predicate);
         }
 
         #endregion
