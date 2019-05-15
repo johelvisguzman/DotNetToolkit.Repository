@@ -26,7 +26,7 @@
         /// <param name="assembliesToScan">The assemblies to scan.</param>
         /// <returns>The same instance of the service collection which has been configured with the repositories.</returns>
         /// <remarks>
-        /// This method will scan for repositories and interceptors from the specified assemblies collection, and will register them to the service collection.
+        /// This method will scan for repositories and interceptors from the specified assemblies collection, and will register them to the container.
         /// </remarks>
         public static IServiceCollection AddRepositories([NotNull] this IServiceCollection services, [NotNull] Action<RepositoryOptionsBuilder> optionsAction, [NotNull] params Assembly[] assembliesToScan)
         {
@@ -83,7 +83,8 @@
             {
                 var serviceType = t.Key;
                 var implementationTypes = t.Where(x => x.IsGenericType == serviceType.IsGenericType &&
-                                                       x.GetGenericArguments().Length == serviceType.GetGenericArguments().Length);
+                                                       x.GetGenericArguments().Length == serviceType.GetGenericArguments().Length &&
+                                                       x.IsVisible && !x.IsAbstract);
 
                 foreach (var implementationType in implementationTypes)
                 {
@@ -138,7 +139,7 @@
         /// <returns>The same instance of the service collection which has been configured with the repositories.</returns>
         /// <remarks>
         /// This method will scan for repositories and interceptors from the assemblies that have been loaded into the
-        /// execution context of this application domain, and will register them to the service collection.
+        /// execution context of this application domain, and will register them to the container.
         /// </remarks>
         public static IServiceCollection AddRepositories([NotNull] this IServiceCollection services, [NotNull] Action<RepositoryOptionsBuilder> optionsAction)
         {

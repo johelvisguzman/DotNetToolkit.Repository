@@ -1,10 +1,10 @@
-﻿namespace DotNetToolkit.Repository.Extensions.Unity
+﻿namespace DotNetToolkit.Repository.Extensions.Ninject
 {
     using Configuration.Interceptors;
     using Configuration.Options;
     using Configuration.Options.Internal;
     using Factories;
-    using global::Unity;
+    using global::Ninject;
     using JetBrains.Annotations;
     using System;
     using System.Collections.Generic;
@@ -14,22 +14,22 @@
     using Utility;
 
     /// <summary>
-    /// Contains various extension methods for <see cref="IUnityContainer" />
+    /// Contains various extension methods for <see cref="IKernel" />
     /// </summary>
-    public static class UnityContainerExtensions
+    public static class KernelExtensions
     {
         /// <summary>
-        /// Register all the repositories services using the specified options builder.
+        /// Binds all the repositories services using the specified options builder.
         /// </summary>
-        /// <param name="container">The unity container.</param>
+        /// <param name="kernel">The kernel.</param>
         /// <param name="optionsAction">A builder action used to create or modify options for the repositories.</param>
         /// <param name="assembliesToScan">The assemblies to scan.</param>
         /// <remarks>
-        /// This method will scan for repositories and interceptors from the specified assemblies collection, and will register them to the container.
+        /// This method will scan for repositories and interceptors from the specified assemblies collection, and will bind them to the container.
         /// </remarks>
-        public static void RegisterRepositories([NotNull] this IUnityContainer container, [NotNull] Action<RepositoryOptionsBuilder> optionsAction, [NotNull] params Assembly[] assembliesToScan)
+        public static void BindRepositories([NotNull] this IKernel kernel, [NotNull] Action<RepositoryOptionsBuilder> optionsAction, [NotNull] params Assembly[] assembliesToScan)
         {
-            Guard.NotNull(container, nameof(container));
+            Guard.NotNull(kernel, nameof(kernel));
             Guard.NotNull(optionsAction, nameof(optionsAction));
             Guard.NotEmpty(assembliesToScan, nameof(assembliesToScan));
 
@@ -71,7 +71,7 @@
                 .SelectMany(interfaceType => types.Where(t => t.IsClass && !t.IsAbstract && t.ImplementsInterface(interfaceType))
                 .GroupBy(t => interfaceType, t => t));
 
-            // Register the repositories and interceptors that have been scanned
+            // Binds the repositories and interceptors that have been scanned
             var optionsBuilder = new RepositoryOptionsBuilder();
 
             optionsAction(optionsBuilder);
@@ -89,52 +89,52 @@
                 {
                     if (serviceType == typeof(IRepositoryInterceptor))
                     {
-                        if (container.IsRegistered(implementationType) || optionsBuilder.Options.Interceptors.ContainsKey(implementationType))
+                        if (kernel.GetBindings(implementationType).Any() || optionsBuilder.Options.Interceptors.ContainsKey(implementationType))
                             continue;
 
-                        container.RegisterType(implementationType, implementationType);
-                        container.RegisterType(serviceType, implementationType, implementationType.FullName);
+                        kernel.Bind(implementationType).ToSelf();
+                        kernel.Bind(serviceType).To(implementationType);
                         registeredInterceptorTypes.Add(implementationType);
                     }
                     else
                     {
-                        container.RegisterType(serviceType, implementationType);
+                        kernel.Bind(serviceType).To(implementationType);
                     }
                 }
             }
 
-            // Register other services
-            container.RegisterFactory<IRepositoryFactory>(c => new RepositoryFactory());
-            container.RegisterFactory<IUnitOfWork>(c => new UnitOfWork());
-            container.RegisterFactory<IUnitOfWorkFactory>(c => new UnitOfWorkFactory());
-            container.RegisterFactory<IRepositoryOptions>(c =>
+            // Binds other services
+            kernel.Bind<IRepositoryFactory>().To<RepositoryFactory>();
+            kernel.Bind<IUnitOfWork>().To<UnitOfWork>();
+            kernel.Bind<IUnitOfWorkFactory>().To<UnitOfWorkFactory>();
+            kernel.Bind<IRepositoryOptions>().ToMethod(c =>
             {
                 var options = new RepositoryOptions(optionsBuilder.Options);
 
                 foreach (var interceptorType in registeredInterceptorTypes)
                 {
-                    options.With(interceptorType, () => (IRepositoryInterceptor)c.Resolve(interceptorType));
+                    options.With(interceptorType, () => (IRepositoryInterceptor)c.Kernel.Get(interceptorType));
                 }
 
                 return options;
             });
 
-            // Register resolver
-            RepositoryDependencyResolver.SetResolver(type => container.Resolve(type));
+            // Binds resolver
+            RepositoryDependencyResolver.SetResolver(type => kernel.Get(type));
         }
 
         /// <summary>
-        /// Register all the repositories services using the specified options builder.
+        /// Binds all the repositories services using the specified options builder.
         /// </summary>
-        /// <param name="container">The unity container.</param>
+        /// <param name="kernel">The kernel.</param>
         /// <param name="optionsAction">A builder action used to create or modify options for the repositories.</param>
         /// <remarks>
         /// This method will scan for repositories and interceptors from the assemblies that have been loaded into the
-        /// execution context of this application domain, and will register them to the container.
+        /// execution context of this application domain, and will bind them to the container.
         /// </remarks>
-        public static void RegisterRepositories([NotNull] this IUnityContainer container, [NotNull] Action<RepositoryOptionsBuilder> optionsAction)
+        public static void RegisterRepositories([NotNull] this IKernel kernel, [NotNull] Action<RepositoryOptionsBuilder> optionsAction)
         {
-            RegisterRepositories(container, optionsAction, AppDomain.CurrentDomain.GetAssemblies());
+            BindRepositories(kernel, optionsAction, AppDomain.CurrentDomain.GetAssemblies());
         }
     }
 }
