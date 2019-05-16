@@ -386,7 +386,7 @@
 
             try
             {
-                return _dbHelper.ExecuteDictionary<string, string>(sql, parameters)?.Result;
+                return _dbHelper.ExecuteDictionary<string, string>(sql, parameters);
             }
             catch (Exception ex)
             {

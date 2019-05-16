@@ -95,7 +95,7 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public virtual IQueryResult<IEnumerable<TEntity>> ExecuteSqlQuery<TEntity>([NotNull] string sql, CommandType cmdType, [CanBeNull] Dictionary<string, object> parameters, [NotNull] Func<IDataReader, TEntity> projector) where TEntity : class
+        public virtual IEnumerable<TEntity> ExecuteSqlQuery<TEntity>([NotNull] string sql, CommandType cmdType, [CanBeNull] Dictionary<string, object> parameters, [NotNull] Func<IDataReader, TEntity> projector) where TEntity : class
         {
             throw new NotSupportedException(Resources.QueryExecutionNotSupported);
         }
@@ -107,7 +107,7 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <returns>The number of rows affected.</returns>
-        public virtual IQueryResult<int> ExecuteSqlCommand([NotNull] string sql, CommandType cmdType, [CanBeNull] Dictionary<string, object> parameters)
+        public virtual int ExecuteSqlCommand([NotNull] string sql, CommandType cmdType, [CanBeNull] Dictionary<string, object> parameters)
         {
             throw new NotSupportedException(Resources.QueryExecutionNotSupported);
         }
@@ -160,7 +160,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <returns>The entity found in the repository.</returns>
-        public virtual IQueryResult<TEntity> Find<TEntity>([CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy, [NotNull] params object[] keyValues) where TEntity : class
+        public virtual TEntity Find<TEntity>([CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy, [NotNull] params object[] keyValues) where TEntity : class
         {
             Guard.NotEmpty(keyValues, nameof(keyValues));
 
@@ -176,7 +176,7 @@
                 .ApplySpecificationOptions(options)
                 .FirstOrDefault();
 
-            return new QueryResult<TEntity>(result);
+            return result;
         }
 
         /// <summary>
@@ -187,7 +187,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public virtual IQueryResult<TResult> Find<TEntity, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TResult>> selector) where TEntity : class
+        public virtual TResult Find<TEntity, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TResult>> selector) where TEntity : class
         {
             Guard.NotNull(selector, nameof(selector));
 
@@ -198,7 +198,7 @@
                 .Select(selector)
                 .FirstOrDefault();
 
-            return new QueryResult<TResult>(result);
+            return result;
         }
 
         /// <summary>
@@ -233,7 +233,7 @@
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public virtual IQueryResult<int> Count<TEntity>([CanBeNull] IQueryOptions<TEntity> options) where TEntity : class
+        public virtual int Count<TEntity>([CanBeNull] IQueryOptions<TEntity> options) where TEntity : class
         {
             var result = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
@@ -241,7 +241,7 @@
                 .ApplyPagingOptions(options)
                 .Count();
 
-            return new QueryResult<int>(result);
+            return result;
         }
 
         /// <summary>
@@ -250,7 +250,7 @@
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
-        public virtual IQueryResult<bool> Exists<TEntity>([NotNull] IQueryOptions<TEntity> options) where TEntity : class
+        public virtual bool Exists<TEntity>([NotNull] IQueryOptions<TEntity> options) where TEntity : class
         {
             Guard.NotNull(options, nameof(options));
 
@@ -260,7 +260,7 @@
                 .ApplyPagingOptions(options)
                 .Any();
 
-            return new QueryResult<bool>(result);
+            return result;
         }
 
         /// <summary>

@@ -5,8 +5,6 @@
     using Configuration.Logging;
     using Extensions;
     using Properties;
-    using Queries;
-    using Queries.Internal;
     using System;
     using System.Collections;
     using System.Collections.Concurrent;
@@ -316,7 +314,7 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public override IQueryResult<IEnumerable<TEntity>> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector)
+        public override IEnumerable<TEntity> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector)
         {
             if (!_ignoreSqlQueryWarning)
                 throw new NotSupportedException(Repository.Properties.Resources.QueryExecutionNotSupported);
@@ -324,7 +322,7 @@
             Guard.NotEmpty(sql, nameof(sql));
             Guard.NotNull(projector, nameof(projector));
 
-            return new QueryResult<IEnumerable<TEntity>>(Enumerable.Empty<TEntity>());
+            return Enumerable.Empty<TEntity>();
         }
 
         /// <summary>
@@ -334,14 +332,14 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <returns>The number of rows affected.</returns>
-        public override IQueryResult<int> ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters)
+        public override int ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters)
         {
             if (!_ignoreSqlQueryWarning)
                 throw new NotSupportedException(Repository.Properties.Resources.QueryExecutionNotSupported);
 
             Guard.NotEmpty(sql, nameof(sql));
 
-            return new QueryResult<int>(0);
+            return 0;
         }
 
         #endregion

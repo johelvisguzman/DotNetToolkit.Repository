@@ -60,7 +60,7 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
-        public virtual Task<IQueryResult<IEnumerable<TEntity>>> ExecuteSqlQueryAsync<TEntity>([NotNull] string sql, CommandType cmdType, [CanBeNull] Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public virtual Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync<TEntity>([NotNull] string sql, CommandType cmdType, [CanBeNull] Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             throw new NotSupportedException(Resources.QueryExecutionNotSupported);
         }
@@ -73,7 +73,7 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
-        public virtual Task<IQueryResult<int>> ExecuteSqlCommandAsync([NotNull] string sql, CommandType cmdType, [CanBeNull] Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken())
+        public virtual Task<int> ExecuteSqlCommandAsync([NotNull] string sql, CommandType cmdType, [CanBeNull] Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken())
         {
             throw new NotSupportedException(Resources.QueryExecutionNotSupported);
         }
@@ -93,7 +93,7 @@
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found in the repository.</returns>
-        public virtual async Task<IQueryResult<TEntity>> FindAsync<TEntity>(CancellationToken cancellationToken, [CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy, [NotNull] params object[] keyValues) where TEntity : class
+        public virtual async Task<TEntity> FindAsync<TEntity>(CancellationToken cancellationToken, [CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy, [NotNull] params object[] keyValues) where TEntity : class
         {
             Guard.NotEmpty(keyValues, nameof(keyValues));
 
@@ -107,7 +107,7 @@
 
             var result = await FirstOrDefaultAsync(query.ApplySpecificationOptions(options), cancellationToken);
 
-            return new QueryResult<TEntity>(result);
+            return result;
         }
 
         /// <summary>
@@ -119,7 +119,7 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public virtual async Task<IQueryResult<TResult>> FindAsync<TEntity, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public virtual async Task<TResult> FindAsync<TEntity, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             Guard.NotNull(selector, nameof(selector));
 
@@ -131,7 +131,7 @@
 
             var result = await FirstOrDefaultAsync(query, cancellationToken);
 
-            return new QueryResult<TResult>(result);
+            return result;
         }
 
         /// <summary>
@@ -169,7 +169,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public virtual async Task<IQueryResult<int>> CountAsync<TEntity>([CanBeNull] IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public virtual async Task<int> CountAsync<TEntity>([CanBeNull] IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
                 .ApplySpecificationOptions(options)
@@ -178,7 +178,7 @@
 
             var result = await CountAsync(query, cancellationToken);
 
-            return new QueryResult<int>(result);
+            return result;
         }
 
         /// <summary>
@@ -188,7 +188,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
-        public virtual async Task<IQueryResult<bool>> ExistsAsync<TEntity>([NotNull] IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public virtual async Task<bool> ExistsAsync<TEntity>([NotNull] IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             Guard.NotNull(options, nameof(options));
 
@@ -199,7 +199,7 @@
 
             var result = await AnyAsync(query, cancellationToken);
 
-            return new QueryResult<bool>(result);
+            return result;
         }
 
         /// <summary>

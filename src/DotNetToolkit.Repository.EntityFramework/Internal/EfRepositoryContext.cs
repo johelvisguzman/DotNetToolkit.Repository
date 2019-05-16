@@ -5,7 +5,6 @@
     using Configuration.Logging;
     using Extensions;
     using Queries;
-    using Queries.Internal;
     using Queries.Strategies;
     using System;
     using System.Collections.Generic;
@@ -74,7 +73,7 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public override IQueryResult<IEnumerable<TEntity>> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector)
+        public override IEnumerable<TEntity> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector)
         {
             Guard.NotEmpty(sql, nameof(sql));
             Guard.NotNull(projector, nameof(projector));
@@ -100,7 +99,7 @@
                     list.Add(projector(reader));
                 }
 
-                return new QueryResult<IEnumerable<TEntity>>(list);
+                return list;
             }
         }
 
@@ -111,7 +110,7 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <returns>The number of rows affected.</returns>
-        public override IQueryResult<int> ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters)
+        public override int ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters)
         {
             Guard.NotEmpty(sql, nameof(sql));
 
@@ -130,7 +129,7 @@
                     command.Parameters.Clear();
                     command.AddParameters(parameters);
 
-                    return new QueryResult<int>(command.ExecuteNonQuery());
+                    return command.ExecuteNonQuery();
                 }
             }
             finally
@@ -234,7 +233,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <returns>The entity found in the repository.</returns>
-        public override IQueryResult<TEntity> Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues)
+        public override TEntity Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues)
         {
             Guard.NotEmpty(keyValues, nameof(keyValues));
 
@@ -242,7 +241,7 @@
             {
                 var result = _context.Set<TEntity>().Find(keyValues);
 
-                return new QueryResult<TEntity>(result);
+                return result;
             }
 
             return base.Find(fetchStrategy, keyValues);
@@ -301,7 +300,7 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
-        public override async Task<IQueryResult<IEnumerable<TEntity>>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        public override async Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             Guard.NotEmpty(sql, nameof(sql));
             Guard.NotNull(projector, nameof(projector));
@@ -327,7 +326,7 @@
                     list.Add(projector(reader));
                 }
 
-                return new QueryResult<IEnumerable<TEntity>>(list);
+                return list;
             }
         }
 
@@ -339,7 +338,7 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
-        public override async Task<IQueryResult<int>> ExecuteSqlCommandAsync(string sql, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken())
+        public override async Task<int> ExecuteSqlCommandAsync(string sql, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken())
         {
             Guard.NotEmpty(sql, nameof(sql));
 
@@ -358,7 +357,7 @@
                     command.Parameters.Clear();
                     command.AddParameters(parameters);
 
-                    return new QueryResult<int>(await command.ExecuteNonQueryAsync(cancellationToken));
+                    return await command.ExecuteNonQueryAsync(cancellationToken);
                 }
             }
             finally
@@ -387,7 +386,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <returns>The <see cref="T:System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found in the repository.</returns>
-        public override async Task<IQueryResult<TEntity>> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues)
+        public override async Task<TEntity> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues)
         {
             Guard.NotEmpty(keyValues, nameof(keyValues));
 
@@ -395,7 +394,7 @@
             {
                 var result = await _context.Set<TEntity>().FindAsync(cancellationToken, keyValues);
 
-                return new QueryResult<TEntity>(result);
+                return result;
             }
 
             return await base.FindAsync(cancellationToken, fetchStrategy, keyValues);

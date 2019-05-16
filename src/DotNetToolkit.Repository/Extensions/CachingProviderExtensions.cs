@@ -27,55 +27,61 @@
         /// <summary>
         /// Gets or sets a cached query result that matches the specified key.
         /// </summary>
-        /// <typeparam name="T">The type of the entity.</typeparam>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
         /// <param name="cacheProvider">The caching provider.</param>
         /// <param name="key">The caching key (un-hashed).</param>
         /// <param name="getter">A function for getting a result to cache.</param>
         /// <param name="expiry">The expiration time.</param>
         /// <param name="logger">The logger.</param>
         /// <returns>The cached query result.</returns>
-        public static IQueryResult<T> GetOrSet<T>(
-            [NotNull] this ICacheProvider cacheProvider, 
-            [NotNull] string key, 
-            [NotNull] Func<IQueryResult<T>> getter, 
-            [CanBeNull] TimeSpan? expiry, 
+        public static ICacheQueryResult<TResult> GetOrSet<TEntity, TResult>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [NotNull] string key,
+            [NotNull] Func<TResult> getter,
+            [CanBeNull] TimeSpan? expiry,
             [NotNull] ILogger logger)
         {
             Guard.NotNull(cacheProvider, nameof(cacheProvider));
             Guard.NotEmpty(key, nameof(key));
             Guard.NotNull(logger, nameof(logger));
 
-            var hashedKey = FormatHashedKey<T>(cacheProvider, key);
+            var hashedKey = FormatHashedKey<TEntity>(cacheProvider, key);
+            var cacheUsed = false;
 
-            if (!cacheProvider.TryGetValue<QueryResult<T>>(hashedKey, out var value))
+            if (!cacheProvider.TryGetValue<TResult>(hashedKey, out var value))
             {
-                value = CreateInternalQueryResult<T>(getter(), cachedUsed: false);
+                value = getter();
 
-                cacheProvider.SetValue(hashedKey, key, value, expiry, logger);
+                cacheProvider.SetValue<TResult>(hashedKey, key, value, expiry, logger);
             }
             else
             {
-                value = CreateInternalQueryResult<T>(value, cachedUsed: true);
+                cacheUsed = true;
             }
 
-            return value;
+            return new CacheQueryResult<TResult>(value)
+            {
+                CacheUsed = cacheUsed
+            };
         }
-        
+
         /// <summary>
         /// Gets or sets a cached paged query result that matches the specified key.
         /// </summary>
-        /// <typeparam name="T">The type of the entity.</typeparam>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
         /// <param name="cacheProvider">The caching provider.</param>
         /// <param name="key">The caching key (un-hashed).</param>
         /// <param name="getter">A function for getting a result to cache.</param>
         /// <param name="expiry">The expiration time.</param>
         /// <param name="logger">The logger.</param>
         /// <returns>The cached query result.</returns>
-        public static IPagedQueryResult<T> GetOrSet<T>(
-            [NotNull] this ICacheProvider cacheProvider, 
-            [NotNull] string key, 
-            [NotNull] Func<IPagedQueryResult<T>> getter, 
-            [CanBeNull] TimeSpan? expiry, 
+        public static ICachePagedQueryResult<TResult> GetOrSet<TEntity, TResult>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [NotNull] string key,
+            [NotNull] Func<IPagedQueryResult<TResult>> getter,
+            [CanBeNull] TimeSpan? expiry,
             [NotNull] ILogger logger)
         {
             Guard.NotNull(cacheProvider, nameof(cacheProvider));
@@ -83,113 +89,42 @@
             Guard.NotNull(getter, nameof(getter));
             Guard.NotNull(logger, nameof(logger));
 
-            var hashedKey = FormatHashedKey<T>(cacheProvider, key);
+            var hashedKey = FormatHashedKey<TEntity>(cacheProvider, key);
+            var cacheUsed = false;
 
-            if (!cacheProvider.TryGetValue<PagedQueryResult<T>>(hashedKey, out var value))
+            if (!cacheProvider.TryGetValue<PagedQueryResult<TResult>>(hashedKey, out var value))
             {
-                value = CreateInternalPagedQueryResult<T>(getter(), cachedUsed: false);
+                value = new PagedQueryResult<TResult>(getter());
 
-                cacheProvider.SetValue(hashedKey, key, value, expiry, logger);
+                cacheProvider.SetValue<PagedQueryResult<TResult>>(hashedKey, key, value, expiry, logger);
             }
             else
             {
-                value = CreateInternalPagedQueryResult<T>(value, cachedUsed: true);
+                cacheUsed = true;
             }
 
-            return value;
-        }
-
-        /// <summary>
-        /// Asynchronously gets or sets a cached paged query result that matches the specified key.
-        /// </summary>
-        /// <typeparam name="T">The type of the entity.</typeparam>
-        /// <param name="cacheProvider">The caching provider.</param>
-        /// <param name="key">The caching key (un-hashed).</param>
-        /// <param name="getter">A function for getting a result to cache.</param>
-        /// <param name="expiry">The expiration time.</param>
-        /// <param name="logger">The logger.</param>
-        /// <returns>The cached query result.</returns>
-        public static async Task<IPagedQueryResult<T>> GetOrSetAsync<T>(
-            [NotNull] this ICacheProvider cacheProvider, 
-            [NotNull] string key, 
-            [NotNull] Func<Task<IPagedQueryResult<T>>> getter, 
-            [CanBeNull] TimeSpan? expiry, 
-            [NotNull] ILogger logger)
-        {
-            Guard.NotNull(cacheProvider, nameof(cacheProvider));
-            Guard.NotEmpty(key, nameof(key));
-            Guard.NotNull(getter, nameof(getter));
-            Guard.NotNull(logger, nameof(logger));
-
-            var hashedKey = FormatHashedKey<T>(cacheProvider, key);
-
-            if (!cacheProvider.TryGetValue<PagedQueryResult<T>>(hashedKey, out var value))
+            return new CachePagedQueryResult<TResult>(value)
             {
-                value = CreateInternalPagedQueryResult<T>(await getter(), cachedUsed: false);
-
-                cacheProvider.SetValue(hashedKey, key, value, expiry, logger);
-            }
-            else
-            {
-                value = CreateInternalPagedQueryResult<T>(value, cachedUsed: true);
-            }
-
-            return value;
-        }
-
-        /// <summary>
-        /// Asynchronously gets or sets a cached query result that matches the specified key.
-        /// </summary>
-        /// <typeparam name="T">The type of the entity.</typeparam>
-        /// <param name="cacheProvider">The caching provider.</param>
-        /// <param name="key">The caching key (un-hashed).</param>
-        /// <param name="getter">A function for getting a result to cache.</param>
-        /// <param name="expiry">The expiration time.</param>
-        /// <param name="logger">The logger.</param>
-        /// <returns>The cached query result.</returns>
-        public static async Task<IQueryResult<T>> GetOrSetAsync<T>(
-            [NotNull] this ICacheProvider cacheProvider, 
-            [NotNull] string key, 
-            [NotNull] Func<Task<IQueryResult<T>>> getter, 
-            [CanBeNull] TimeSpan? expiry, 
-            [NotNull] ILogger logger)
-        {
-            Guard.NotNull(cacheProvider, nameof(cacheProvider));
-            Guard.NotEmpty(key, nameof(key));
-            Guard.NotNull(getter, nameof(getter));
-            Guard.NotNull(logger, nameof(logger));
-
-            var hashedKey = FormatHashedKey<T>(cacheProvider, key);
-
-            if (!cacheProvider.TryGetValue<QueryResult<T>>(hashedKey, out var value))
-            {
-                value = CreateInternalQueryResult<T>(await getter(), cachedUsed: false);
-
-                cacheProvider.SetValue(hashedKey, key, value, expiry, logger);
-            }
-            else
-            {
-                value = CreateInternalQueryResult<T>(value, cachedUsed: true);
-            }
-
-            return value;
+                CacheUsed = cacheUsed
+            };
         }
 
         /// <summary>
         /// Gets or sets a cached query result that matches the specified key.
         /// </summary>
-        /// <typeparam name="T">The type of the entity.</typeparam>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
         /// <param name="cacheProvider">The caching provider.</param>
         /// <param name="key">The caching key (un-hashed).</param>
         /// <param name="getter">A function for getting a result to cache.</param>
         /// <param name="logger">The logger.</param>
         /// <returns>The cached query result.</returns>
-        public static IQueryResult<T> GetOrSet<T>(
+        public static ICacheQueryResult<TResult> GetOrSet<TEntity, TResult>(
             [NotNull] this ICacheProvider cacheProvider,
             [NotNull] string key,
-            [NotNull] Func<IQueryResult<T>> getter,
+            [NotNull] Func<TResult> getter,
             [NotNull] ILogger logger)
-            => GetOrSet<T>(
+            => GetOrSet<TEntity, TResult>(
                 cacheProvider,
                 key,
                 getter,
@@ -199,18 +134,19 @@
         /// <summary>
         /// Gets or sets a cached paged query result that matches the specified key.
         /// </summary>
-        /// <typeparam name="T">The type of the entity.</typeparam>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
         /// <param name="cacheProvider">The caching provider.</param>
         /// <param name="key">The caching key (un-hashed).</param>
         /// <param name="getter">A function for getting a result to cache.</param>
         /// <param name="logger">The logger.</param>
         /// <returns>The cached query result.</returns>
-        public static IPagedQueryResult<T> GetOrSet<T>(
+        public static ICachePagedQueryResult<TResult> GetOrSet<TEntity, TResult>(
             [NotNull] this ICacheProvider cacheProvider,
             [NotNull] string key,
-            [NotNull] Func<IPagedQueryResult<T>> getter,
+            [NotNull] Func<IPagedQueryResult<TResult>> getter,
             [NotNull] ILogger logger)
-            => GetOrSet<T>(
+            => GetOrSet<TEntity, TResult>(
                 cacheProvider,
                 key,
                 getter,
@@ -220,18 +156,105 @@
         /// <summary>
         /// Asynchronously gets or sets a cached query result that matches the specified key.
         /// </summary>
-        /// <typeparam name="T">The type of the entity.</typeparam>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="cacheProvider">The caching provider.</param>
+        /// <param name="key">The caching key (un-hashed).</param>
+        /// <param name="getter">A function for getting a result to cache.</param>
+        /// <param name="expiry">The expiration time.</param>
+        /// <param name="logger">The logger.</param>
+        /// <returns>The cached query result.</returns>
+        public static async Task<ICacheQueryResult<TResult>> GetOrSetAsync<TEntity, TResult>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [NotNull] string key,
+            [NotNull] Func<Task<TResult>> getter,
+            [CanBeNull] TimeSpan? expiry,
+            [NotNull] ILogger logger)
+        {
+            Guard.NotNull(cacheProvider, nameof(cacheProvider));
+            Guard.NotEmpty(key, nameof(key));
+            Guard.NotNull(getter, nameof(getter));
+            Guard.NotNull(logger, nameof(logger));
+
+            var hashedKey = FormatHashedKey<TEntity>(cacheProvider, key);
+            var cacheUsed = false;
+
+            if (!cacheProvider.TryGetValue<TResult>(hashedKey, out var value))
+            {
+                value = await getter();
+
+                cacheProvider.SetValue<TResult>(hashedKey, key, value, expiry, logger);
+            }
+            else
+            {
+                cacheUsed = true;
+            }
+
+            return new CacheQueryResult<TResult>(value)
+            {
+                CacheUsed = cacheUsed
+            };
+        }
+
+        /// <summary>
+        /// Asynchronously gets or sets a cached paged query result that matches the specified key.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="cacheProvider">The caching provider.</param>
+        /// <param name="key">The caching key (un-hashed).</param>
+        /// <param name="getter">A function for getting a result to cache.</param>
+        /// <param name="expiry">The expiration time.</param>
+        /// <param name="logger">The logger.</param>
+        /// <returns>The cached query result.</returns>
+        public static async Task<ICachePagedQueryResult<TResult>> GetOrSetAsync<TEntity, TResult>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [NotNull] string key,
+            [NotNull] Func<Task<IPagedQueryResult<TResult>>> getter,
+            [CanBeNull] TimeSpan? expiry,
+            [NotNull] ILogger logger)
+        {
+            Guard.NotNull(cacheProvider, nameof(cacheProvider));
+            Guard.NotEmpty(key, nameof(key));
+            Guard.NotNull(getter, nameof(getter));
+            Guard.NotNull(logger, nameof(logger));
+
+            var hashedKey = FormatHashedKey<TEntity>(cacheProvider, key);
+            var cacheUsed = false;
+
+            if (!cacheProvider.TryGetValue<PagedQueryResult<TResult>>(hashedKey, out var value))
+            {
+                value = new PagedQueryResult<TResult>(await getter());
+
+                cacheProvider.SetValue<PagedQueryResult<TResult>>(hashedKey, key, value, expiry, logger);
+            }
+            else
+            {
+                cacheUsed = true;
+            }
+
+            return new CachePagedQueryResult<TResult>(value)
+            {
+                CacheUsed = cacheUsed
+            };
+        }
+
+        /// <summary>
+        /// Asynchronously gets or sets a cached query result that matches the specified key.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
         /// <param name="cacheProvider">The caching provider.</param>
         /// <param name="key">The caching key (un-hashed).</param>
         /// <param name="getter">A function for getting a result to cache.</param>
         /// <param name="logger">The logger.</param>
         /// <returns>The cached query result.</returns>
-        public static Task<IQueryResult<T>> GetOrSetAsync<T>(
+        public static Task<ICacheQueryResult<TResult>> GetOrSetAsync<TEntity, TResult>(
             [NotNull] this ICacheProvider cacheProvider,
             [NotNull] string key,
-            [NotNull] Func<Task<IQueryResult<T>>> getter,
+            [NotNull] Func<Task<TResult>> getter,
             [NotNull] ILogger logger)
-            => GetOrSetAsync<T>(
+            => GetOrSetAsync<TEntity, TResult>(
                 cacheProvider,
                 key,
                 getter,
@@ -241,217 +264,218 @@
         /// <summary>
         /// Asynchronously gets or sets a cached query result that matches the specified key.
         /// </summary>
-        /// <typeparam name="T">The type of the entity.</typeparam>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
         /// <param name="cacheProvider">The caching provider.</param>
         /// <param name="key">The caching key (un-hashed).</param>
         /// <param name="getter">A function for getting a result to cache.</param>
         /// <param name="logger">The logger.</param>
         /// <returns>The cached query result.</returns>
-        public static Task<IPagedQueryResult<T>> GetOrSetAsync<T>(
+        public static Task<ICachePagedQueryResult<TResult>> GetOrSetAsync<TEntity, TResult>(
             [NotNull] this ICacheProvider cacheProvider,
             [NotNull] string key,
-            [NotNull] Func<Task<IPagedQueryResult<T>>> getter,
+            [NotNull] Func<Task<IPagedQueryResult<TResult>>> getter,
             [NotNull] ILogger logger)
-            => GetOrSetAsync<T>(
+            => GetOrSetAsync<TEntity, TResult>(
                 cacheProvider,
                 key,
                 getter,
                 cacheProvider.Expiry,
                 logger);
 
-        internal static IQueryResult<IEnumerable<T>> GetOrSetExecuteSqlQuery<T>(
-            [NotNull] this ICacheProvider cacheProvider, 
-            [NotNull] string sql, CommandType cmdType, 
-            [CanBeNull] Dictionary<string, object> parameters, 
-            [NotNull] Func<IDataReader, T> projector, 
-            [NotNull] Func<IQueryResult<IEnumerable<T>>> getter, 
+        internal static ICacheQueryResult<IEnumerable<T>> GetOrSetExecuteSqlQuery<T>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [NotNull] string sql, CommandType cmdType,
+            [CanBeNull] Dictionary<string, object> parameters,
+            [NotNull] Func<IDataReader, T> projector,
+            [NotNull] Func<IEnumerable<T>> getter,
             [NotNull] ILogger logger)
-            => GetOrSet<IEnumerable<T>>(
+            => GetOrSet<T, IEnumerable<T>>(
                 cacheProvider,
                 FormatGetOrSetExecuteSqlQueryKey<T>(sql, cmdType, parameters),
                 getter,
                 logger);
 
-        internal static IQueryResult<int> GetOrSetExecuteSqlCommand<T>(
+        internal static ICacheQueryResult<int> GetOrSetExecuteSqlCommand<T>(
             [NotNull] this ICacheProvider cacheProvider,
-            [NotNull] string sql, CommandType cmdType, 
-            [CanBeNull] Dictionary<string, object> parameters, 
-            [NotNull] Func<IQueryResult<int>> getter, 
+            [NotNull] string sql, CommandType cmdType,
+            [CanBeNull] Dictionary<string, object> parameters,
+            [NotNull] Func<int> getter,
             [NotNull] ILogger logger)
-            => GetOrSet<int>(
+            => GetOrSet<T, int>(
                 cacheProvider,
                 FormatGetOrSetExecuteSqlCommandKey<T>(sql, cmdType, parameters),
                 getter,
                 logger);
 
-        internal static IQueryResult<T> GetOrSetFind<T>(
-            [NotNull] this ICacheProvider cacheProvider, 
-            [NotNull] object[] keys, 
-            [CanBeNull] IFetchQueryStrategy<T> fetchStrategy, 
-            [NotNull] Func<IQueryResult<T>> getter, 
+        internal static ICacheQueryResult<T> GetOrSetFind<T>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [NotNull] object[] keys,
+            [CanBeNull] IFetchQueryStrategy<T> fetchStrategy,
+            [NotNull] Func<T> getter,
             [NotNull] ILogger logger)
-            => GetOrSet<T>(
+            => GetOrSet<T, T>(
                 cacheProvider,
                 FormatGetOrSetFindKey<T>(keys, fetchStrategy),
                 getter,
                 logger);
 
-        internal static IQueryResult<TResult> GetOrSetFind<T, TResult>(
-            [NotNull] this ICacheProvider cacheProvider, 
-            [CanBeNull] IQueryOptions<T> options, 
-            [NotNull] Expression<Func<T, TResult>> selector, 
-            [NotNull] Func<IQueryResult<TResult>> getter, 
+        internal static ICacheQueryResult<TResult> GetOrSetFind<T, TResult>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [CanBeNull] IQueryOptions<T> options,
+            [NotNull] Expression<Func<T, TResult>> selector,
+            [NotNull] Func<TResult> getter,
             [NotNull] ILogger logger)
-            => GetOrSet<TResult>(
+            => GetOrSet<T, TResult>(
                 cacheProvider,
                 FormatGetOrSetFindKey<T, TResult>(options, selector),
                 getter,
                 logger);
 
-        internal static IPagedQueryResult<IEnumerable<TResult>> GetOrSetFindAll<T, TResult>(
-            [NotNull] this ICacheProvider cacheProvider, 
-            [CanBeNull] IQueryOptions<T> options, 
-            [NotNull] Expression<Func<T, TResult>> selector, 
-            [NotNull] Func<IPagedQueryResult<IEnumerable<TResult>>> getter, 
+        internal static ICachePagedQueryResult<IEnumerable<TResult>> GetOrSetFindAll<T, TResult>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [CanBeNull] IQueryOptions<T> options,
+            [NotNull] Expression<Func<T, TResult>> selector,
+            [NotNull] Func<IPagedQueryResult<IEnumerable<TResult>>> getter,
             [NotNull] ILogger logger)
-            => GetOrSet<IEnumerable<TResult>>(
+            => GetOrSet<T, IEnumerable<TResult>>(
                 cacheProvider,
                 FormatGetOrSetFindAllKey<T, TResult>(options, selector),
                 getter,
                 logger);
 
-        internal static IQueryResult<int> GetOrSetCount<T>(
-            [NotNull] this ICacheProvider cacheProvider, 
-            [CanBeNull] IQueryOptions<T> options, 
-            [NotNull] Func<IQueryResult<int>> getter, 
+        internal static ICacheQueryResult<int> GetOrSetCount<T>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [CanBeNull] IQueryOptions<T> options,
+            [NotNull] Func<int> getter,
             [NotNull] ILogger logger)
-            => GetOrSet<int>(
+            => GetOrSet<T, int>(
                 cacheProvider,
                 FormatGetOrSetCountKey<T>(options),
                 getter,
                 logger);
 
-        internal static IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> GetOrSetDictionary<T, TDictionaryKey, TElement>(
-            [NotNull] this ICacheProvider cacheProvider, 
-            [CanBeNull] IQueryOptions<T> options, 
-            [NotNull] Expression<Func<T, TDictionaryKey>> keySelector, 
-            [NotNull] Expression<Func<T, TElement>> elementSelector, 
-            [NotNull] Func<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> getter, 
+        internal static ICachePagedQueryResult<Dictionary<TDictionaryKey, TElement>> GetOrSetDictionary<T, TDictionaryKey, TElement>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [CanBeNull] IQueryOptions<T> options,
+            [NotNull] Expression<Func<T, TDictionaryKey>> keySelector,
+            [NotNull] Expression<Func<T, TElement>> elementSelector,
+            [NotNull] Func<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> getter,
             [NotNull] ILogger logger)
-            => GetOrSet<Dictionary<TDictionaryKey, TElement>>(
+            => GetOrSet<T, Dictionary<TDictionaryKey, TElement>>(
                 cacheProvider,
                 FormatGetOrSetDictionaryKey<T, TDictionaryKey, TElement>(options, keySelector, elementSelector),
                 getter,
                 logger);
 
-        internal static IPagedQueryResult<IEnumerable<TResult>> GetOrSetGroup<T, TGroupKey, TResult>(
+        internal static ICachePagedQueryResult<IEnumerable<TResult>> GetOrSetGroup<T, TGroupKey, TResult>(
             [NotNull] this ICacheProvider cacheProvider,
-            [CanBeNull] IQueryOptions<T> options, 
-            [NotNull] Expression<Func<T, TGroupKey>> keySelector, 
-            [NotNull] Expression<Func<TGroupKey, IEnumerable<T>, TResult>> resultSelector, 
-            [NotNull] Func<IPagedQueryResult<IEnumerable<TResult>>> getter, 
+            [CanBeNull] IQueryOptions<T> options,
+            [NotNull] Expression<Func<T, TGroupKey>> keySelector,
+            [NotNull] Expression<Func<TGroupKey, IEnumerable<T>, TResult>> resultSelector,
+            [NotNull] Func<IPagedQueryResult<IEnumerable<TResult>>> getter,
             [NotNull] ILogger logger)
-            => GetOrSet<IEnumerable<TResult>>(
+            => GetOrSet<T, IEnumerable<TResult>>(
                 cacheProvider,
                 FormatGetOrSetGroupKey<T, TGroupKey, TResult>(options, keySelector, resultSelector),
                 getter,
                 logger);
 
-        internal static Task<IQueryResult<IEnumerable<T>>> GetOrSetExecuteSqlQueryAsync<T>(
-            [NotNull] this ICacheProvider cacheProvider, 
-            [NotNull] string sql, 
-            CommandType cmdType, 
-            [CanBeNull] Dictionary<string, object> parameters, 
-            [NotNull] Func<IDataReader, T> projector, 
-            [NotNull] Func<Task<IQueryResult<IEnumerable<T>>>> getter, 
+        internal static Task<ICacheQueryResult<IEnumerable<T>>> GetOrSetExecuteSqlQueryAsync<T>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [NotNull] string sql,
+            CommandType cmdType,
+            [CanBeNull] Dictionary<string, object> parameters,
+            [NotNull] Func<IDataReader, T> projector,
+            [NotNull] Func<Task<IEnumerable<T>>> getter,
             [NotNull] ILogger logger)
-            => GetOrSetAsync<IEnumerable<T>>(
+            => GetOrSetAsync<T, IEnumerable<T>>(
                 cacheProvider,
                 FormatGetOrSetExecuteSqlQueryKey<T>(sql, cmdType, parameters),
                 getter,
                 logger);
 
-        internal static Task<IQueryResult<int>> GetOrSetExecuteSqlCommandAsync<T>(
-            [NotNull] this ICacheProvider cacheProvider, 
-            [NotNull] string sql, 
-            CommandType cmdType, 
-            [CanBeNull] Dictionary<string, object> parameters, 
-            [NotNull] Func<Task<IQueryResult<int>>> getter, 
+        internal static Task<ICacheQueryResult<int>> GetOrSetExecuteSqlCommandAsync<T>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [NotNull] string sql,
+            CommandType cmdType,
+            [CanBeNull] Dictionary<string, object> parameters,
+            [NotNull] Func<Task<int>> getter,
             [NotNull] ILogger logger)
-            => GetOrSetAsync<int>(
+            => GetOrSetAsync<T, int>(
                 cacheProvider,
                 FormatGetOrSetExecuteSqlCommandKey<T>(sql, cmdType, parameters),
                 getter,
                 logger);
 
-        internal static Task<IQueryResult<T>> GetOrSetFindAsync<T>(
-            [NotNull] this ICacheProvider cacheProvider, 
-            [NotNull] object[] keys, 
+        internal static Task<ICacheQueryResult<T>> GetOrSetFindAsync<T>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [NotNull] object[] keys,
             [CanBeNull] IFetchQueryStrategy<T> fetchStrategy,
-            [NotNull] Func<Task<IQueryResult<T>>> getter,
+            [NotNull] Func<Task<T>> getter,
             [NotNull] ILogger logger)
-            => GetOrSetAsync<T>(
+            => GetOrSetAsync<T, T>(
                 cacheProvider,
                 FormatGetOrSetFindKey<T>(keys, fetchStrategy),
                 getter,
                 logger);
 
-        internal static Task<IQueryResult<TResult>> GetOrSetFindAsync<T, TResult>(
-            [NotNull] this ICacheProvider cacheProvider, 
-            [CanBeNull] IQueryOptions<T> options, 
-            [NotNull] Expression<Func<T, TResult>> selector, 
-            [NotNull] Func<Task<IQueryResult<TResult>>> getter, 
+        internal static Task<ICacheQueryResult<TResult>> GetOrSetFindAsync<T, TResult>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [CanBeNull] IQueryOptions<T> options,
+            [NotNull] Expression<Func<T, TResult>> selector,
+            [NotNull] Func<Task<TResult>> getter,
             [NotNull] ILogger logger)
-            => GetOrSetAsync<TResult>(
+            => GetOrSetAsync<T, TResult>(
                 cacheProvider,
                 FormatGetOrSetFindKey<T, TResult>(options, selector),
                 getter,
                 logger);
 
-        internal static Task<IPagedQueryResult<IEnumerable<TResult>>> GetOrSetFindAllAsync<T, TResult>(
-            [NotNull] this ICacheProvider cacheProvider, 
-            [CanBeNull] IQueryOptions<T> options, 
-            [NotNull] Expression<Func<T, TResult>> selector, 
-            [NotNull] Func<Task<IPagedQueryResult<IEnumerable<TResult>>>> getter, 
+        internal static Task<ICachePagedQueryResult<IEnumerable<TResult>>> GetOrSetFindAllAsync<T, TResult>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [CanBeNull] IQueryOptions<T> options,
+            [NotNull] Expression<Func<T, TResult>> selector,
+            [NotNull] Func<Task<IPagedQueryResult<IEnumerable<TResult>>>> getter,
             [NotNull] ILogger logger)
-            => GetOrSetAsync<IEnumerable<TResult>>(
+            => GetOrSetAsync<T, IEnumerable<TResult>>(
                 cacheProvider,
                 FormatGetOrSetFindAllKey<T, TResult>(options, selector),
                 getter,
                 logger);
 
-        internal static Task<IQueryResult<int>> GetOrSetCountAsync<T>(
-            [NotNull] this ICacheProvider cacheProvider, 
-            [CanBeNull] IQueryOptions<T> options, 
-            [NotNull] Func<Task<IQueryResult<int>>> getter, 
+        internal static Task<ICacheQueryResult<int>> GetOrSetCountAsync<T>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [CanBeNull] IQueryOptions<T> options,
+            [NotNull] Func<Task<int>> getter,
             [NotNull] ILogger logger)
-            => GetOrSetAsync<int>(
+            => GetOrSetAsync<T, int>(
                 cacheProvider,
                 FormatGetOrSetCountKey<T>(options),
                 getter,
                 logger);
 
-        internal static Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> GetOrSetDictionaryAsync<T, TDictionaryKey, TElement>(
-            [NotNull] this ICacheProvider cacheProvider, 
-            [CanBeNull] IQueryOptions<T> options, 
-            [NotNull] Expression<Func<T, TDictionaryKey>> keySelector, 
-            [NotNull] Expression<Func<T, TElement>> elementSelector, 
-            [NotNull] Func<Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>>> getter, 
+        internal static Task<ICachePagedQueryResult<Dictionary<TDictionaryKey, TElement>>> GetOrSetDictionaryAsync<T, TDictionaryKey, TElement>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [CanBeNull] IQueryOptions<T> options,
+            [NotNull] Expression<Func<T, TDictionaryKey>> keySelector,
+            [NotNull] Expression<Func<T, TElement>> elementSelector,
+            [NotNull] Func<Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>>> getter,
             [NotNull] ILogger logger)
-            => GetOrSetAsync<Dictionary<TDictionaryKey, TElement>>(
+            => GetOrSetAsync<T, Dictionary<TDictionaryKey, TElement>>(
                 cacheProvider,
                 FormatGetOrSetDictionaryKey<T, TDictionaryKey, TElement>(options, keySelector, elementSelector),
                 getter,
                 logger);
 
-        internal static Task<IPagedQueryResult<IEnumerable<TResult>>> GetOrSetGroupAsync<T, TGroupKey, TResult>(
-            [NotNull] this ICacheProvider cacheProvider, 
-            [CanBeNull] IQueryOptions<T> options, 
-            [NotNull] Expression<Func<T, TGroupKey>> keySelector, 
-            [NotNull] Expression<Func<TGroupKey, IEnumerable<T>, TResult>> resultSelector, 
-            [NotNull] Func<Task<IPagedQueryResult<IEnumerable<TResult>>>> getter, 
+        internal static Task<ICachePagedQueryResult<IEnumerable<TResult>>> GetOrSetGroupAsync<T, TGroupKey, TResult>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [CanBeNull] IQueryOptions<T> options,
+            [NotNull] Expression<Func<T, TGroupKey>> keySelector,
+            [NotNull] Expression<Func<TGroupKey, IEnumerable<T>, TResult>> resultSelector,
+            [NotNull] Func<Task<IPagedQueryResult<IEnumerable<TResult>>>> getter,
             [NotNull] ILogger logger)
-            => GetOrSetAsync<IEnumerable<TResult>>(
+            => GetOrSetAsync<T, IEnumerable<TResult>>(
                 cacheProvider,
                 FormatGetOrSetGroupKey<T, TGroupKey, TResult>(options, keySelector, resultSelector),
                 getter,
@@ -468,32 +492,12 @@
             }
         }
 
-        private static PagedQueryResult<T> CreateInternalPagedQueryResult<T>([NotNull] this IPagedQueryResult<T> oldValue, bool cachedUsed = false)
-        {
-            Guard.NotNull(oldValue, nameof(oldValue));
-
-            return new PagedQueryResult<T>(oldValue.Result, oldValue.Total)
-            {
-                CacheUsed = cachedUsed
-            };
-        }
-
-        private static QueryResult<T> CreateInternalQueryResult<T>([NotNull] this IQueryResult<T> oldValue, bool cachedUsed = false)
-        {
-            Guard.NotNull(oldValue, nameof(oldValue)); 
-
-            return new QueryResult<T>(oldValue.Result)
-            {
-                CacheUsed = cachedUsed
-            };
-        }
-
         private static void SetValue<T>(
-            [NotNull] this ICacheProvider cacheProvider, 
-            [NotNull] string hashedKey, 
-            [NotNull] string key, 
-            [NotNull] IQueryResult<T> value, 
-            [CanBeNull] TimeSpan? expiry, 
+            [NotNull] this ICacheProvider cacheProvider,
+            [NotNull] string hashedKey,
+            [NotNull] string key,
+            [NotNull] T value,
+            [CanBeNull] TimeSpan? expiry,
             [NotNull] ILogger logger)
         {
             Guard.NotNull(cacheProvider, nameof(cacheProvider));
@@ -508,7 +512,7 @@
                         ? $"Setting up cache for '{hashedKey}' expire handling in {expiry.Value.TotalSeconds} seconds"
                         : $"Setting up cache for '{hashedKey}'");
 
-                cacheProvider.Cache.Set<IQueryResult<T>>(
+                cacheProvider.Cache.Set<T>(
                     hashedKey,
                     value,
                     expiry,
@@ -527,14 +531,14 @@
                 return cacheProvider.Cache.TryGetValue<T>(key, out value);
             }
         }
-        
+
         private static int GetCachingPrefixCounter<T>([NotNull] this ICacheProvider cacheProvider)
         {
             Guard.NotNull(cacheProvider, nameof(cacheProvider));
 
             return !cacheProvider.TryGetValue<int>(FormatCachePrefixCounterKey<T>(), out var key) ? 1 : key;
         }
-        
+
         private static string FormatCachePrefixCounterKey<T>()
         {
             return string.Format("{1}{0}{2}",
@@ -547,7 +551,7 @@
         {
             Guard.NotNull(cacheProvider, nameof(cacheProvider));
             Guard.NotEmpty(key, nameof(key));
-            
+
             return string.Format("{1}{0}{2}{0}{3}{0}{4}",
                 Glue,
                 CacheProviderManager.GlobalCachingPrefixCounter,
