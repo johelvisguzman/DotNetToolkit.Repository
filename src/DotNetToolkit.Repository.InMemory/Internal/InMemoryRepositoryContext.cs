@@ -4,8 +4,6 @@
     using Configuration.Conventions;
     using Extensions;
     using Properties;
-    using Queries;
-    using Queries.Internal;
     using Queries.Strategies;
     using System;
     using System.Collections.Concurrent;
@@ -270,7 +268,7 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public override IQueryResult<IEnumerable<TEntity>> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector)
+        public override IEnumerable<TEntity> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector)
         {
             if (!_ignoreSqlQueryWarning)
                 throw new NotSupportedException(Repository.Properties.Resources.QueryExecutionNotSupported);
@@ -278,7 +276,7 @@
             Guard.NotEmpty(sql, nameof(sql));
             Guard.NotNull(projector, nameof(projector));
 
-            return new QueryResult<IEnumerable<TEntity>>(Enumerable.Empty<TEntity>());
+            return Enumerable.Empty<TEntity>();
         }
 
         /// <summary>
@@ -288,14 +286,14 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <returns>The number of rows affected.</returns>
-        public override IQueryResult<int> ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters)
+        public override int ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters)
         {
             if (!_ignoreSqlQueryWarning)
                 throw new NotSupportedException(Repository.Properties.Resources.QueryExecutionNotSupported);
 
             Guard.NotEmpty(sql, nameof(sql));
 
-            return new QueryResult<int>(0);
+            return 0;
         }
 
         /// <summary>
@@ -305,7 +303,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <returns>The entity found in the repository.</returns>
-        public override IQueryResult<TEntity> Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues)
+        public override TEntity Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues)
         {
             Guard.NotEmpty(keyValues, nameof(keyValues));
 
@@ -315,7 +313,7 @@
                 var store = InMemoryCache.Instance.GetDatabaseStore(DatabaseName);
 
                 if (!store.ContainsKey(entityType))
-                    return new QueryResult<TEntity>(default(TEntity));
+                    return default(TEntity);
 
                 var key = Combine(keyValues);
 
@@ -323,7 +321,7 @@
 
                 var result = (TEntity)Convert.ChangeType(entity, entityType);
 
-                return new QueryResult<TEntity>(result);
+                return result;
             }
 
             return base.Find(fetchStrategy, keyValues);

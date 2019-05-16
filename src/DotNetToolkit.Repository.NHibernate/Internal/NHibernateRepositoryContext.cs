@@ -7,7 +7,6 @@
     using global::NHibernate;
     using global::NHibernate.Linq;
     using Queries;
-    using Queries.Internal;
     using System;
     using System.Collections.Generic;
     using System.Data;
@@ -118,7 +117,7 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public override IQueryResult<IEnumerable<TEntity>> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector)
+        public override IEnumerable<TEntity> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector)
         {
             Guard.NotEmpty(sql, nameof(sql));
             Guard.NotNull(projector, nameof(projector));
@@ -144,7 +143,7 @@
                     list.Add(projector(reader));
                 }
 
-                return new QueryResult<IEnumerable<TEntity>>(list);
+                return list;
             }
         }
 
@@ -155,7 +154,7 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <returns>The number of rows affected.</returns>
-        public override IQueryResult<int> ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters)
+        public override int ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters)
         {
             Guard.NotEmpty(sql, nameof(sql));
 
@@ -174,7 +173,7 @@
                     command.Parameters.Clear();
                     command.AddParameters(parameters);
 
-                    return new QueryResult<int>(command.ExecuteNonQuery());
+                    return command.ExecuteNonQuery();
                 }
             }
             finally
@@ -290,7 +289,7 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
-        public override async Task<IQueryResult<IEnumerable<TEntity>>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        public override async Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             Guard.NotEmpty(sql, nameof(sql));
             Guard.NotNull(projector, nameof(projector));
@@ -316,7 +315,7 @@
                     list.Add(projector(reader));
                 }
 
-                return new QueryResult<IEnumerable<TEntity>>(list);
+                return list;
             }
         }
 
@@ -328,7 +327,7 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
-        public override async Task<IQueryResult<int>> ExecuteSqlCommandAsync(string sql, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken())
+        public override async Task<int> ExecuteSqlCommandAsync(string sql, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken())
         {
             Guard.NotEmpty(sql, nameof(sql));
 
@@ -347,7 +346,7 @@
                     command.Parameters.Clear();
                     command.AddParameters(parameters);
 
-                    return new QueryResult<int>(await command.ExecuteNonQueryAsync(cancellationToken));
+                    return await command.ExecuteNonQueryAsync(cancellationToken);
                 }
             }
             finally

@@ -231,9 +231,25 @@
         /// <returns>c<c>true</c> if the an object was found with the specified key; otherwise, <c>false</c>.</returns>
         public bool TryGetValue<T>([NotNull] string key, out T value)
         {
-            value = Deserialize<T>(Redis.StringGet(Guard.NotEmpty(key, nameof(key))));
+            try
+            {
+                value = Deserialize<T>(Redis.StringGet(Guard.NotEmpty(key, nameof(key))));
 
-            return value != null;
+                if (Equals(value, default(T)))
+                {
+                    value = default(T);
+
+                    return false;
+                }
+            }
+            catch
+            {
+                value = default(T);
+
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>

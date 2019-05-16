@@ -150,9 +150,6 @@
   <data name="EntityNotFoundInStore" xml:space="preserve">
     <value>Attempted to update or delete an entity that does not exist in the store.</value>
   </data>
-  <data name="NullQueryResultOnContext" xml:space="preserve">
-    <value>The repository context cannot returned a null query result for this operation.</value>
-  </data>
   <data name="UnableToCreateMappingForType" xml:space="preserve">
     <value>The mapping provider is unable to create a mapper for '{0}'.</value>
   </data>

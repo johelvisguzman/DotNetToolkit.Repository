@@ -259,7 +259,12 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                     }
                 case CachingProviderType.Memcached:
                     {
-                        builder.UseCachingProvider(new MemcachedCacheProvider("127.0.0.1", 11211));
+                        var provider = new MemcachedCacheProvider("127.0.0.1", 11211);
+
+                        provider.Cache.Client.FlushAll();
+
+                        builder.UseCachingProvider(provider);
+
                         break;
                     }
                 default:

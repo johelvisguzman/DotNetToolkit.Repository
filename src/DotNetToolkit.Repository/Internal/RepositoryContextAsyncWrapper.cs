@@ -65,7 +65,7 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public IQueryResult<IEnumerable<TEntity>> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector) where TEntity : class
+        public IEnumerable<TEntity> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector) where TEntity : class
         {
             return _context.ExecuteSqlQuery(sql, cmdType, parameters, projector);
         }
@@ -77,7 +77,7 @@
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <returns>The number of rows affected.</returns>
-        public IQueryResult<int> ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters)
+        public int ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters)
         {
             return _context.ExecuteSqlCommand(sql, cmdType, parameters);
         }
@@ -160,7 +160,7 @@
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <returns>The entity found in the repository.</returns>
-        public IQueryResult<TEntity> Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
+        public TEntity Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
             return _context.Find<TEntity>(fetchStrategy, keyValues);
         }
@@ -173,7 +173,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public IQueryResult<TResult> Find<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
+        public TResult Find<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
         {
             return _context.Find<TEntity, TResult>(options, selector);
         }
@@ -197,7 +197,7 @@
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public IQueryResult<int> Count<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
+        public int Count<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
         {
             return _context.Count<TEntity>(options);
         }
@@ -208,7 +208,7 @@
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
-        public IQueryResult<bool> Exists<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
+        public bool Exists<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
         {
             return _context.Exists<TEntity>(options);
         }
@@ -256,14 +256,14 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
-        public Task<IQueryResult<IEnumerable<TEntity>>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             if (_context is IRepositoryContextAsync contextAsync)
             {
                 return contextAsync.ExecuteSqlQueryAsync(sql, cmdType, parameters, projector, cancellationToken);
             }
 
-            return RunAsync<IQueryResult<IEnumerable<TEntity>>>(() => ExecuteSqlQuery(sql, cmdType, parameters, projector), cancellationToken);
+            return RunAsync<IEnumerable<TEntity>>(() => ExecuteSqlQuery(sql, cmdType, parameters, projector), cancellationToken);
         }
 
         /// <summary>
@@ -274,14 +274,14 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
-        public Task<IQueryResult<int>> ExecuteSqlCommandAsync(string sql, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken())
+        public Task<int> ExecuteSqlCommandAsync(string sql, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken())
         {
             if (_context is IRepositoryContextAsync contextAsync)
             {
                 return contextAsync.ExecuteSqlCommandAsync(sql, cmdType, parameters, cancellationToken);
             }
 
-            return RunAsync<IQueryResult<int>>(() => ExecuteSqlCommand(sql, cmdType, parameters), cancellationToken);
+            return RunAsync<int>(() => ExecuteSqlCommand(sql, cmdType, parameters), cancellationToken);
         }
 
         /// <summary>
@@ -307,14 +307,14 @@
         /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found in the repository.</returns>
-        public Task<IQueryResult<TEntity>> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
+        public Task<TEntity> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
             if (_context is IRepositoryContextAsync contextAsync)
             {
                 return contextAsync.FindAsync(cancellationToken, fetchStrategy, keyValues);
             }
 
-            return RunAsync<IQueryResult<TEntity>>(() => Find(fetchStrategy, keyValues), cancellationToken);
+            return RunAsync<TEntity>(() => Find(fetchStrategy, keyValues), cancellationToken);
         }
 
         /// <summary>
@@ -326,14 +326,14 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
-        public Task<IQueryResult<TResult>> FindAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public Task<TResult> FindAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             if (_context is IRepositoryContextAsync contextAsync)
             {
                 return contextAsync.FindAsync<TEntity, TResult>(options, selector, cancellationToken);
             }
 
-            return RunAsync<IQueryResult<TResult>>(() => Find<TEntity, TResult>(options, selector), cancellationToken);
+            return RunAsync<TResult>(() => Find<TEntity, TResult>(options, selector), cancellationToken);
         }
 
         /// <summary>
@@ -362,14 +362,14 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public Task<IQueryResult<int>> CountAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public Task<int> CountAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             if (_context is IRepositoryContextAsync contextAsync)
             {
                 return contextAsync.CountAsync<TEntity>(options, cancellationToken);
             }
 
-            return RunAsync<IQueryResult<int>>(() => Count<TEntity>(options), cancellationToken);
+            return RunAsync<int>(() => Count<TEntity>(options), cancellationToken);
         }
 
         /// <summary>
@@ -379,14 +379,14 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
-        public Task<IQueryResult<bool>> ExistsAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public Task<bool> ExistsAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             if (_context is IRepositoryContextAsync contextAsync)
             {
                 return contextAsync.ExistsAsync<TEntity>(options, cancellationToken);
             }
 
-            return RunAsync<IQueryResult<bool>>(() => Exists<TEntity>(options), cancellationToken);
+            return RunAsync<bool>(() => Exists<TEntity>(options), cancellationToken);
         }
 
         /// <summary>

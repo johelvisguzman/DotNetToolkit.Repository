@@ -384,7 +384,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <param name="parameters">The command parameters.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>An entity which has been projected into a new form.</returns>
-        public QueryResult<T> ExecuteObject<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
+        public T ExecuteObject<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
         {
             using (var reader = ExecuteReader(cmdText, cmdType, parameters))
             {
@@ -397,7 +397,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
 
                 var result = list.FirstOrDefault();
 
-                return new QueryResult<T>(result);
+                return result;
             }
         }
 
@@ -409,7 +409,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <param name="parameters">The command parameters.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>An entity which has been projected into a new form.</returns>
-        public QueryResult<T> ExecuteObject<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
+        public T ExecuteObject<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
         {
             return ExecuteObject<T>(cmdText, CommandType.Text, parameters, projector);
         }
@@ -508,7 +508,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <param name="keyProjector">A function to extract a key from each entity.</param>
         /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public QueryResult<Dictionary<TDictionaryKey, TElement>> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector)
+        public Dictionary<TDictionaryKey, TElement> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector)
         {
             using (var reader = ExecuteReader(cmdText, cmdType, parameters))
             {
@@ -519,7 +519,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
                     dict.Add(keyProjector(reader.GetValue(0)), elementProjector(reader.GetValue(1)));
                 }
 
-                return new QueryResult<Dictionary<TDictionaryKey, TElement>>(dict);
+                return new Dictionary<TDictionaryKey, TElement>(dict);
             }
         }
 
@@ -532,7 +532,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <param name="cmdType">The command type.</param>
         /// <param name="parameters">The command parameters.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public QueryResult<Dictionary<TDictionaryKey, TElement>> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
+        public Dictionary<TDictionaryKey, TElement> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
         {
             return ExecuteDictionary<TDictionaryKey, TElement>(cmdText, cmdType, parameters, ConvertType<TDictionaryKey>(), ConvertType<TElement>());
         }
@@ -545,7 +545,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <param name="cmdText">The command text.</param>
         /// <param name="parameters">The command parameters.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public QueryResult<Dictionary<TDictionaryKey, TElement>> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, Dictionary<string, object> parameters = null)
+        public Dictionary<TDictionaryKey, TElement> ExecuteDictionary<TDictionaryKey, TElement>(string cmdText, Dictionary<string, object> parameters = null)
         {
             return ExecuteDictionary<TDictionaryKey, TElement>(cmdText, CommandType.Text, parameters);
         }
@@ -731,7 +731,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing an entity which has been projected into a new form.</returns>
-        public async Task<QueryResult<T>> ExecuteObjectAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<T> ExecuteObjectAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var reader = await ExecuteReaderAsync(cmdText, cmdType, parameters, cancellationToken))
             {
@@ -744,7 +744,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
 
                 var result = list.FirstOrDefault();
 
-                return new QueryResult<T>(result);
+                return result;
             }
         }
 
@@ -757,7 +757,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing an entity which has been projected into a new form.</returns>
-        public Task<QueryResult<T>> ExecuteObjectAsync<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<T> ExecuteObjectAsync<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteObjectAsync<T>(cmdText, CommandType.Text, parameters, projector, cancellationToken);
         }
@@ -847,7 +847,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <param name="elementProjector">A transform function to produce a result element value from each element.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
-        public async Task<QueryResult<Dictionary<TDictionaryKey, TElement>>> ExecuteDictionaryAsync<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<Dictionary<TDictionaryKey, TElement>> ExecuteDictionaryAsync<TDictionaryKey, TElement>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<object, TDictionaryKey> keyProjector, Func<object, TElement> elementProjector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var reader = await ExecuteReaderAsync(cmdText, cmdType, parameters, cancellationToken))
             {
@@ -858,7 +858,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
                     dict.Add(keyProjector(reader.GetValue(0)), elementProjector(reader.GetValue(1)));
                 }
 
-                return new QueryResult<Dictionary<TDictionaryKey, TElement>>(dict);
+                return new Dictionary<TDictionaryKey, TElement>(dict);
             }
         }
 
