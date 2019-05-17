@@ -8,6 +8,11 @@
     public interface ICacheProvider
     {
         /// <summary>
+        /// Gets the cache key transformer.
+        /// </summary>
+        ICacheKeyTransformer KeyTransformer { get; }
+
+        /// <summary>
         /// Gets or sets the caching expiration time.
         /// </summary>
         TimeSpan? Expiry { get; set; }

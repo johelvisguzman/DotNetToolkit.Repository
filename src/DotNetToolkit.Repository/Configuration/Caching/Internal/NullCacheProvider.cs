@@ -14,6 +14,8 @@
             Cache = NullCache.Instance;
         }
 
+        public ICacheKeyTransformer KeyTransformer { get; }
+
         public TimeSpan? Expiry { get; set; }
 
         ICache ICacheProvider.Cache
