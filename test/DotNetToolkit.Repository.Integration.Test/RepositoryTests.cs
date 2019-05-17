@@ -25,18 +25,6 @@
         }
 
         [Fact]
-        public void ThrowsIfModelHasNoId()
-        {
-            ForAllRepositoryFactories(TestThrowsIfModelHasNoId);
-        }
-
-        [Fact]
-        public void ThrowsIfEntityPrimaryKeyTypesMismatch()
-        {
-            ForAllRepositoryFactories(TestThrowsIfEntityPrimaryKeyTypesMismatch);
-        }
-
-        [Fact]
         public void ThrowsIfSpecificationMissingFromQueryOptions()
         {
             ForAllRepositoryFactories(TestThrowsIfSpecificationMissingFromQueryOptions);
@@ -46,13 +34,6 @@
         public void ThrowsIfSpecificationMissingFromQueryOptionsAsync()
         {
             ForAllRepositoryFactoriesAsync(TestThrowsIfSpecificationMissingFromQueryOptionsAsync);
-        }
-
-        [Fact]
-        public void ThrowsIfEntityCompositePrimaryKeyMissingOrdering()
-        {
-            // not needed for hibernate
-            ForAllRepositoryFactories(TestThrowsIfEntityCompositePrimaryKeyMissingOrdering, ContextProviderType.NHibernate);
         }
 
         private static void TestFactoryCreate(IRepositoryFactory repoFactory)
@@ -87,13 +68,6 @@
             Assert.Equal(readOnlyRepo4, repo4.AsReadOnly());
         }
 
-        private static void TestThrowsIfModelHasNoId(IRepositoryFactory repoFactory)
-        {
-            var ex = Assert.Throws<InvalidOperationException>(() => repoFactory.Create<CustomerWithNoId>());
-
-            Assert.Equal($"The instance of entity type '{typeof(CustomerWithNoId).FullName}' requires a primary key to be defined.", ex.Message);
-        }
-
         private static void TestThrowsIfSpecificationMissingFromQueryOptions(IRepositoryFactory repoFactory)
         {
             var repo = repoFactory.Create<Customer>();
@@ -116,30 +90,6 @@
 
             ex = await Assert.ThrowsAsync<InvalidOperationException>(() => repo.DeleteAsync(emptyQueryOptions));
             Assert.Equal("The specified query options is missing a specification predicate.", ex.Message);
-        }
-
-        private static void TestThrowsIfEntityPrimaryKeyTypesMismatch(IRepositoryFactory repoFactory)
-        {
-            var ex = Assert.Throws<InvalidOperationException>(() => repoFactory.Create<Customer, string>());
-            Assert.Equal("The repository primary key type(s) constraint must match the number of primary key type(s) and ordering defined on the entity.", ex.Message);
-
-            ex = Assert.Throws<InvalidOperationException>(() => repoFactory.Create<CustomerWithThreeCompositePrimaryKey, string>());
-            Assert.Equal("The repository primary key type(s) constraint must match the number of primary key type(s) and ordering defined on the entity.", ex.Message);
-
-            ex = Assert.Throws<InvalidOperationException>(() => repoFactory.Create<CustomerWithThreeCompositePrimaryKey, string, string>());
-            Assert.Equal("The repository primary key type(s) constraint must match the number of primary key type(s) and ordering defined on the entity.", ex.Message);
-
-            ex = Assert.Throws<InvalidOperationException>(() => repoFactory.Create<CustomerWithThreeCompositePrimaryKey, int, string>());
-            Assert.Equal("The repository primary key type(s) constraint must match the number of primary key type(s) and ordering defined on the entity.", ex.Message);
-
-            ex = Assert.Throws<InvalidOperationException>(() => repoFactory.Create<CustomerWithThreeCompositePrimaryKey, string, int>());
-            Assert.Equal("The repository primary key type(s) constraint must match the number of primary key type(s) and ordering defined on the entity.", ex.Message);
-        }
-
-        private static void TestThrowsIfEntityCompositePrimaryKeyMissingOrdering(IRepositoryFactory repoFactory)
-        {
-            var ex = Assert.Throws<InvalidOperationException>(() => repoFactory.Create<CustomerWithThreeCompositePrimaryKeyAndNoOrder, int, string, int>());
-            Assert.Equal($"Unable to determine composite primary key ordering for type '{typeof(CustomerWithThreeCompositePrimaryKeyAndNoOrder).FullName}'. Use the ColumnAttribute to specify an order for composite primary keys.", ex.Message);
         }
     }
 }

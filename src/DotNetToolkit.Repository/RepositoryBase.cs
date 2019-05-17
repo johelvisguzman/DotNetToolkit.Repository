@@ -50,10 +50,7 @@
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2, TKey3}"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        protected RepositoryBase([NotNull] IRepositoryOptions options) : base(options)
-        {
-            Conventions.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>(typeof(TKey1), typeof(TKey2), typeof(TKey3));
-        }
+        protected RepositoryBase([NotNull] IRepositoryOptions options) : base(options) { }
 
         #endregion
 
@@ -329,10 +326,7 @@
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey1, TKey2}"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        protected RepositoryBase([NotNull] IRepositoryOptions options) : base(options)
-        {
-            Conventions.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>(typeof(TKey1), typeof(TKey2));
-        }
+        protected RepositoryBase([NotNull] IRepositoryOptions options) : base(options) { }
 
         #endregion
 
@@ -595,10 +589,7 @@
         /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}"/> class.
         /// </summary>
         /// <param name="options">The repository options.</param>
-        protected RepositoryBase([NotNull] IRepositoryOptions options) : base(options)
-        {
-            Conventions.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>(typeof(TKey));
-        }
+        protected RepositoryBase([NotNull] IRepositoryOptions options) : base(options) { }
 
         #endregion
 
@@ -876,23 +867,6 @@
         /// </summary>
         protected internal IMapperProvider MapperProvider { get; }
 
-        /// <summary>
-        /// Gets the configurable conventions.
-        /// </summary>
-        protected internal IRepositoryConventions Conventions
-        {
-            get
-            {
-                if (_conventions == null)
-                {
-                    // gets the conventions from the context (since it is context specific)
-                    UseContext(context => { _conventions = context.Conventions; });
-                }
-
-                return _conventions;
-            }
-        }
-
         #endregion
 
         #region Constructors
@@ -937,6 +911,74 @@
         {
             if (CacheEnabled)
                 InterceptError(() => CacheProvider.IncrementCounter<TEntity>());
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        public IEnumerable<TEntity> ExecuteSqlQuery([NotNull] string sql, CommandType cmdType, [CanBeNull] object[] parameters, [NotNull] Func<IDataReader, IRepositoryConventions, TEntity> projector)
+        {
+            LogExecutingMethod();
+
+            InterceptError(() =>
+            {
+                Guard.NotEmpty(sql, nameof(sql));
+                Guard.NotNull(projector, nameof(projector));
+            });
+
+            var parametersDict = ConvertToParametersDictionary(parameters);
+
+            IEnumerable<TEntity> Getter() =>
+                UseContext<IEnumerable<TEntity>>(
+                    context => context.ExecuteSqlQuery(sql, cmdType, parametersDict, projector));
+
+            IEnumerable<TEntity> result;
+
+            if (CacheEnabled)
+            {
+                var cacheResult = InterceptError<ICacheQueryResult<IEnumerable<TEntity>>>(
+                    () => CacheProvider.GetOrSetExecuteSqlQuery<TEntity>(sql, cmdType, parametersDict, projector, Getter, Logger));
+
+                result = cacheResult.Result;
+                CacheUsed = cacheResult.CacheUsed;
+            }
+            else
+            {
+                result = Getter();
+                CacheUsed = false;
+            }
+
+            LogExecutedMethod();
+
+            return result;
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        public IEnumerable<TEntity> ExecuteSqlQuery([NotNull] string sql, [CanBeNull] object[] parameters, [NotNull] Func<IDataReader, IRepositoryConventions, TEntity> projector)
+        {
+            return ExecuteSqlQuery(sql, CommandType.Text, parameters, projector);
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        public IEnumerable<TEntity> ExecuteSqlQuery([NotNull] string sql, [NotNull] Func<IDataReader, IRepositoryConventions, TEntity> projector)
+        {
+            return ExecuteSqlQuery(sql, (object[])null, projector);
         }
 
         /// <summary>
@@ -1020,7 +1062,7 @@
                 MapperProvider.Create<TEntity>(),
                 string.Format(Resources.UnableToCreateMappingForType, typeof(TEntity).FullName)));
 
-            return ExecuteSqlQuery(sql, CommandType.Text, parameters, r => mapper.Map(r, Conventions));
+            return ExecuteSqlQuery(sql, CommandType.Text, parameters, (r, c) => mapper.Map(r, c));
         }
 
         /// <summary>
@@ -1079,6 +1121,8 @@
                 CacheUsed = false;
             }
 
+            ClearCache(sql);
+
             LogExecutedMethod();
 
             return result;
@@ -1103,6 +1147,77 @@
         public int ExecuteSqlCommand([NotNull] string sql)
         {
             return ExecuteSqlCommand(sql, (object[])null);
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
+        public async Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync([NotNull] string sql, CommandType cmdType, [CanBeNull] object[] parameters, [NotNull] Func<IDataReader, IRepositoryConventions, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            LogExecutingMethod();
+
+            InterceptError(() =>
+            {
+                Guard.NotEmpty(sql, nameof(sql));
+                Guard.NotNull(projector, nameof(projector));
+            });
+
+            var parametersDict = ConvertToParametersDictionary(parameters);
+
+            Task<IEnumerable<TEntity>> Getter() =>
+                UseContextAsync<IEnumerable<TEntity>>(
+                    context => context.ExecuteSqlQueryAsync(sql, cmdType, parametersDict, projector, cancellationToken));
+
+            IEnumerable<TEntity> result;
+
+            if (CacheEnabled)
+            {
+                var cacheResult = await InterceptErrorAsync<ICacheQueryResult<IEnumerable<TEntity>>>(
+                    () => CacheProvider.GetOrSetExecuteSqlQueryAsync<TEntity>(sql, cmdType, parametersDict, projector, Getter, Logger));
+
+                result = cacheResult.Result;
+                CacheUsed = cacheResult.CacheUsed;
+            }
+            else
+            {
+                result = await Getter();
+                CacheUsed = false;
+            }
+
+            LogExecutedMethod();
+
+            return result;
+        }
+
+        /// <summary>
+        /// Asynchronously creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync([NotNull] string sql, [CanBeNull] object[] parameters, [NotNull] Func<IDataReader, IRepositoryConventions, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteSqlQueryAsync(sql, CommandType.Text, parameters, projector, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync([NotNull] string sql, [NotNull] Func<IDataReader, IRepositoryConventions, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteSqlQueryAsync(sql, (object[])null, projector, cancellationToken);
         }
 
         /// <summary>
@@ -1190,7 +1305,7 @@
                 MapperProvider.Create<TEntity>(),
                 string.Format(Resources.UnableToCreateMappingForType, typeof(TEntity).FullName)));
 
-            return ExecuteSqlQueryAsync(sql, CommandType.Text, parameters, r => mapper.Map(r, Conventions), cancellationToken);
+            return ExecuteSqlQueryAsync(sql, CommandType.Text, parameters, (r, c) => mapper.Map(r, c), cancellationToken);
         }
 
         /// <summary>
@@ -1251,6 +1366,8 @@
                 result = await Getter();
                 CacheUsed = false;
             }
+
+            ClearCache(sql);
 
             LogExecutedMethod();
 

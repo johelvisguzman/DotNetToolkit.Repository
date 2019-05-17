@@ -71,11 +71,6 @@
                 .UseConventions(conventions);
 
             Assert.NotNull(optionsBuilder.Options.Conventions);
-
-            // will fail since it cannot find a primary key due to the conventions returning null
-            var ex = Assert.Throws<InvalidOperationException>(() => new Repository<Customer>(optionsBuilder.Options));
-
-            Assert.Equal($"The instance of entity type '{typeof(Customer).FullName}' requires a primary key to be defined.", ex.Message);
         }
 
         [Fact]
