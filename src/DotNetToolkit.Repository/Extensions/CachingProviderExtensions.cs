@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
     using Configuration.Caching;
+    using Configuration.Conventions;
     using Configuration.Logging;
     using JetBrains.Annotations;
     using Queries;
@@ -287,6 +288,19 @@
             [NotNull] this ICacheProvider cacheProvider,
             [NotNull] string sql, CommandType cmdType,
             [CanBeNull] Dictionary<string, object> parameters,
+            [NotNull] Func<IDataReader, IRepositoryConventions, T> projector,
+            [NotNull] Func<IEnumerable<T>> getter,
+            [NotNull] ILogger logger)
+            => GetOrSet<T, IEnumerable<T>>(
+                cacheProvider,
+                FormatGetOrSetExecuteSqlQueryKey<T>(sql, cmdType, parameters),
+                getter,
+                logger);
+
+        internal static ICacheQueryResult<IEnumerable<T>> GetOrSetExecuteSqlQuery<T>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [NotNull] string sql, CommandType cmdType,
+            [CanBeNull] Dictionary<string, object> parameters,
             [NotNull] Func<IDataReader, T> projector,
             [NotNull] Func<IEnumerable<T>> getter,
             [NotNull] ILogger logger)
@@ -378,6 +392,20 @@
             => GetOrSet<T, IEnumerable<TResult>>(
                 cacheProvider,
                 FormatGetOrSetGroupKey<T, TGroupKey, TResult>(options, keySelector, resultSelector),
+                getter,
+                logger);
+
+        internal static Task<ICacheQueryResult<IEnumerable<T>>> GetOrSetExecuteSqlQueryAsync<T>(
+            [NotNull] this ICacheProvider cacheProvider,
+            [NotNull] string sql,
+            CommandType cmdType,
+            [CanBeNull] Dictionary<string, object> parameters,
+            [NotNull] Func<IDataReader, IRepositoryConventions, T> projector,
+            [NotNull] Func<Task<IEnumerable<T>>> getter,
+            [NotNull] ILogger logger)
+            => GetOrSetAsync<T, IEnumerable<T>>(
+                cacheProvider,
+                FormatGetOrSetExecuteSqlQueryKey<T>(sql, cmdType, parameters),
                 getter,
                 logger);
 

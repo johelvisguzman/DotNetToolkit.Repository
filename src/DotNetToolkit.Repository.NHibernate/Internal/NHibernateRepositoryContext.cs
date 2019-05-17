@@ -117,6 +117,44 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
+        public override IEnumerable<TEntity> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, IRepositoryConventions, TEntity> projector)
+        {
+            Guard.NotEmpty(sql, nameof(sql));
+            Guard.NotNull(projector, nameof(projector));
+
+            var connection = Session.Connection;
+            var command = connection.CreateCommand();
+            var shouldOpenConnection = connection.State != ConnectionState.Open;
+
+            if (shouldOpenConnection)
+                connection.Open();
+
+            command.CommandText = sql;
+            command.CommandType = cmdType;
+            command.Parameters.Clear();
+            command.AddParameters(parameters);
+
+            using (var reader = command.ExecuteReader(shouldOpenConnection ? CommandBehavior.CloseConnection : CommandBehavior.Default))
+            {
+                var list = new List<TEntity>();
+
+                while (reader.Read())
+                {
+                    list.Add(projector(reader, Conventions));
+                }
+
+                return list;
+            }
+        }
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
         public override IEnumerable<TEntity> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector)
         {
             Guard.NotEmpty(sql, nameof(sql));
@@ -278,6 +316,45 @@
         protected override Task<Dictionary<TKey, TElement>> ToDictionaryAsync<TSource, TKey, TElement>(IQueryable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, CancellationToken cancellationToken)
         {
             return Task.FromResult<Dictionary<TKey, TElement>>(source.ToDictionary<TSource, TKey, TElement>(keySelector, elementSelector));
+        }
+
+        /// <summary>
+        /// Asynchronously creates raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
+        public override async Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, IRepositoryConventions, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            Guard.NotEmpty(sql, nameof(sql));
+            Guard.NotNull(projector, nameof(projector));
+
+            var connection = Session.Connection;
+            var command = connection.CreateCommand();
+            var shouldOpenConnection = connection.State != ConnectionState.Open;
+
+            if (shouldOpenConnection)
+                await connection.OpenAsync(cancellationToken);
+
+            command.CommandText = sql;
+            command.CommandType = cmdType;
+            command.Parameters.Clear();
+            command.AddParameters(parameters);
+
+            using (var reader = await command.ExecuteReaderAsync(shouldOpenConnection ? CommandBehavior.CloseConnection : CommandBehavior.Default, cancellationToken))
+            {
+                var list = new List<TEntity>();
+
+                while (await reader.ReadAsync(cancellationToken))
+                {
+                    list.Add(projector(reader, Conventions));
+                }
+
+                return list;
+            }
         }
 
         /// <summary>
