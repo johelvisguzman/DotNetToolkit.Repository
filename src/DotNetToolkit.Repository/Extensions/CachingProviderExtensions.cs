@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
     using Configuration.Caching;
+    using Configuration.Caching.Internal;
     using Configuration.Conventions;
     using Configuration.Logging;
     using JetBrains.Annotations;
@@ -580,11 +581,13 @@
             Guard.NotNull(cacheProvider, nameof(cacheProvider));
             Guard.NotEmpty(key, nameof(key));
 
+            var cacheKeyTransformer = cacheProvider.KeyTransformer ?? new DefaultCacheKeyTransformer();
+
             return string.Format("{1}{0}{2}{0}{3}{0}{4}",
                 Glue,
                 CacheProviderManager.GlobalCachingPrefixCounter,
                 cacheProvider.GetCachingPrefixCounter<T>(),
-                Hasher.ComputeMD5(key),
+                cacheKeyTransformer.Transform(key),
                 CacheProviderManager.CachePrefix);
         }
 

@@ -154,6 +154,11 @@
         #region Implementation of ICacheProvider
 
         /// <summary>
+        /// Gets the cache key transformer.
+        /// </summary>
+        public ICacheKeyTransformer KeyTransformer { get; }
+
+        /// <summary>
         /// Gets or sets the caching expiration time.
         /// </summary>
         public TimeSpan? Expiry { get; set; }
