@@ -165,9 +165,10 @@
             if (keyValues == null || keyValues.Count == 0)
                 return Activator.CreateInstance(type);
 
+            var kvs = keyValues.ToDictionary(x => x.Key, x => x.Value);
             var ctors = type.GetConstructors();
             var ctorsParams = ctors.ToDictionary(x => x, x => x.GetParameters());
-            var keys = keyValues.Keys;
+            var keys = kvs.Keys;
 
             // try to find an exact match
             var matchedCtorParams = ctorsParams
@@ -206,6 +207,8 @@
                 }
             }
 
+            object obj;
+
             if (matchedCtorParams.Key != null)
             {
                 // Try to get all the values for the parameters we already have,
@@ -213,16 +216,45 @@
                 var args = new List<object>();
 
                 args.AddRange(matchedCtorParams.Value.Select(pi =>
-                    keyValues.ContainsKey(pi.Name)
-                        ? pi.ParameterType.ConvertTo(keyValues[pi.Name])
-                        : pi.ParameterType.GetDefault()));
+                {
+                    // If we find a matching parameter, then delete it from the collection,
+                    // that way we don't try to initialize a property that has the same name
+                    if (kvs.ContainsKey(pi.Name))
+                    {
+                        kvs.TryGetValue(pi.Name, out var value);
+                        kvs.Remove(pi.Name);
 
-                // Create instance
-                return matchedCtorParams.Key.Invoke(args.ToArray());
+                        return pi.ParameterType.ConvertTo(value);
+                    }
+
+                    return pi.ParameterType.GetDefault();
+                }));
+
+                obj = matchedCtorParams.Key.Invoke(args.ToArray());
+            }
+            else
+            {
+                obj = Activator.CreateInstance(type);
             }
 
-            // Try to invoke the default constructor
-            return Activator.CreateInstance(type);
+            if (kvs.Any())
+            {
+                // Try to initialize properties that match
+                type.GetRuntimeProperties()
+                    .Where(x => x.CanWrite && x.GetSetMethod(nonPublic: true).IsPublic)
+                    .Join(kvs,
+                        pi => pi.Name,
+                        kv => kv.Key,
+                        (pi, kv) => new
+                        {
+                            PropertyInfo = pi,
+                            Value = pi.PropertyType.ConvertTo(kv.Value)
+                        })
+                    .ToList()
+                    .ForEach(q => q.PropertyInfo.SetValue(obj, q.Value));
+            }
+
+            return obj;
         }
     }
 }
