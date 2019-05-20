@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Internal
 {
+    using JetBrains.Annotations;
     using Queries;
     using Queries.Strategies;
     using System;
@@ -8,6 +9,7 @@
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="IReadOnlyService{TEntity, TKey1, TKey2, TKey3}" />.
@@ -23,12 +25,9 @@
 
         #region Constructors
 
-        public ReadOnlyServiceWrapper(IService<TEntity, TKey1, TKey2, TKey3> service)
+        public ReadOnlyServiceWrapper([NotNull] IService<TEntity, TKey1, TKey2, TKey3> service)
         {
-            if (service == null)
-                throw new ArgumentNullException(nameof(service));
-
-            _underlyingService = service;
+            _underlyingService = Guard.NotNull(service, nameof(service));
         }
 
         #endregion
@@ -292,12 +291,9 @@
 
         #region Constructors
 
-        public ReadOnlyServiceWrapper(IService<TEntity, TKey1, TKey2> service)
+        public ReadOnlyServiceWrapper([NotNull] IService<TEntity, TKey1, TKey2> service)
         {
-            if (service == null)
-                throw new ArgumentNullException(nameof(service));
-
-            _underlyingService = service;
+            _underlyingService = Guard.NotNull(service, nameof(service));
         }
 
         #endregion
@@ -561,12 +557,9 @@
 
         #region Constructors
 
-        public ReadOnlyServiceWrapper(IService<TEntity, TKey> service)
+        public ReadOnlyServiceWrapper([NotNull] IService<TEntity, TKey> service)
         {
-            if (service == null)
-                throw new ArgumentNullException(nameof(service));
-
-            _underlyingService = service;
+            _underlyingService = Guard.NotNull(service, nameof(service));
         }
 
         #endregion

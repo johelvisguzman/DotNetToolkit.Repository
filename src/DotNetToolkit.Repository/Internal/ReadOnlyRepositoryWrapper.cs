@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Internal
 {
     using Configuration.Conventions;
+    using JetBrains.Annotations;
     using Queries;
     using Queries.Strategies;
     using System;
@@ -10,6 +11,7 @@
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="IReadOnlyRepository{TEntity, TKey1, TKey2, TKey3}" />.
@@ -25,12 +27,9 @@
 
         #region Constructors
 
-        public ReadOnlyRepositoryWrapper(IRepository<TEntity, TKey1, TKey2, TKey3> repo)
+        public ReadOnlyRepositoryWrapper([NotNull] IRepository<TEntity, TKey1, TKey2, TKey3> repo)
         {
-            if (repo == null)
-                throw new ArgumentNullException(nameof(repo));
-
-            _underlyingRepo = repo;
+            _underlyingRepo = Guard.NotNull(repo, nameof(repo));
         }
 
         #endregion
@@ -395,12 +394,9 @@
 
         #region Constructors
 
-        public ReadOnlyRepositoryWrapper(IRepository<TEntity, TKey1, TKey2> repo)
+        public ReadOnlyRepositoryWrapper([NotNull] IRepository<TEntity, TKey1, TKey2> repo)
         {
-            if (repo == null)
-                throw new ArgumentNullException(nameof(repo));
-
-            _underlyingRepo = repo;
+            _underlyingRepo = Guard.NotNull(repo, nameof(repo));
         }
 
         #endregion
@@ -765,12 +761,9 @@
 
         #region Constructors
 
-        public ReadOnlyRepositoryWrapper(IRepository<TEntity, TKey> repo)
+        public ReadOnlyRepositoryWrapper([NotNull] IRepository<TEntity, TKey> repo)
         {
-            if (repo == null)
-                throw new ArgumentNullException(nameof(repo));
-
-            _underlyingRepo = repo;
+            _underlyingRepo = Guard.NotNull(repo, nameof(repo));
         }
 
         #endregion
