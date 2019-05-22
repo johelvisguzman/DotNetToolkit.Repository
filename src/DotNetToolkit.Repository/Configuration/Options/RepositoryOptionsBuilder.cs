@@ -37,6 +37,7 @@
                        Options.LoggerProvider != null ||
                        Options.CachingProvider != null ||
                        Options.MapperProvider != null ||
+                       Options.Conventions != null ||
                        Options.Interceptors.Any();
             }
         }

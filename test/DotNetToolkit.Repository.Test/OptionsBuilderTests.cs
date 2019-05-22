@@ -1,6 +1,9 @@
 ﻿namespace DotNetToolkit.Repository.Test
 {
+    using Caching.InMemory;
     using Configuration.Conventions;
+    using Configuration.Logging;
+    using Configuration.Mapper;
     using Configuration.Options;
     using Data;
     using InMemory;
@@ -15,8 +18,13 @@
         [Fact]
         public void ConfigureInterceptor()
         {
-            var optionsBuilder = new RepositoryOptionsBuilder()
-                .UseInterceptor(new TestRepositoryInterceptor("Random Param", false));
+            var optionsBuilder = new RepositoryOptionsBuilder();
+
+            Assert.False(optionsBuilder.IsConfigured);
+
+            optionsBuilder.UseInterceptor(new TestRepositoryInterceptor("Random Param", false));
+
+            Assert.True(optionsBuilder.IsConfigured);
 
             Assert.Single(optionsBuilder.Options.Interceptors);
 
@@ -26,9 +34,15 @@
         [Fact]
         public void ConfigureInterceptorOncePerType()
         {
-            var optionsBuilder = new RepositoryOptionsBuilder()
+            var optionsBuilder = new RepositoryOptionsBuilder();
+
+            Assert.False(optionsBuilder.IsConfigured);
+
+            optionsBuilder
                 .UseInterceptor(new TestRepositoryInterceptor("Random Param", false))
                 .UseInterceptor(new TestRepositoryInterceptor("Another Random Param", true));
+
+            Assert.True(optionsBuilder.IsConfigured);
 
             Assert.Single(optionsBuilder.Options.Interceptors);
 
@@ -39,9 +53,15 @@
         [Fact]
         public void ConfigureMultipleInterceptorsOfDifferentType()
         {
-            var optionsBuilder = new RepositoryOptionsBuilder()
+            var optionsBuilder = new RepositoryOptionsBuilder();
+
+            Assert.False(optionsBuilder.IsConfigured);
+
+            optionsBuilder
                 .UseInterceptor(new TestRepositoryInterceptor("Random Param", false))
                 .UseInterceptor(new TestRepositoryInterceptor2());
+
+            Assert.True(optionsBuilder.IsConfigured);
 
             Assert.Equal(2, optionsBuilder.Options.Interceptors.Count());
 
@@ -52,8 +72,13 @@
         [Fact]
         public void ConfigureInternalContextFactory()
         {
-            var optionsBuilder = new RepositoryOptionsBuilder()
-                .UseInMemoryDatabase();
+            var optionsBuilder = new RepositoryOptionsBuilder();
+
+            Assert.False(optionsBuilder.IsConfigured);
+
+            optionsBuilder.UseInMemoryDatabase();
+
+            Assert.True(optionsBuilder.IsConfigured);
 
             Assert.NotNull(optionsBuilder.Options.ContextFactory);
         }
@@ -61,32 +86,83 @@
         [Fact]
         public void ConfigureConventions()
         {
-            var conventions = new RepositoryConventions
-            {
-                PrimaryKeysCallback = (type) => null
-            };
+            var optionsBuilder = new RepositoryOptionsBuilder();
 
-            var optionsBuilder = new RepositoryOptionsBuilder()
-                .UseInMemoryDatabase()
-                .UseConventions(conventions);
+            Assert.False(optionsBuilder.IsConfigured);
+
+            optionsBuilder.UseConventions(new RepositoryConventions());
+
+            Assert.True(optionsBuilder.IsConfigured);
 
             Assert.NotNull(optionsBuilder.Options.Conventions);
         }
 
         [Fact]
+        public void ConfigureMappingProvider()
+        {
+            var optionsBuilder = new RepositoryOptionsBuilder();
+
+            Assert.False(optionsBuilder.IsConfigured);
+
+            optionsBuilder.UseMapperProvider(new MapperProvider());
+
+            Assert.True(optionsBuilder.IsConfigured);
+
+            Assert.NotNull(optionsBuilder.Options.MapperProvider);
+        }
+
+        [Fact]
+        public void ConfigureLoggingProvider()
+        {
+            var optionsBuilder = new RepositoryOptionsBuilder();
+
+            Assert.False(optionsBuilder.IsConfigured);
+
+            optionsBuilder.UseLoggerProvider(new ConsoleLoggerProvider(LogLevel.Debug));
+
+            Assert.True(optionsBuilder.IsConfigured);
+
+            Assert.NotNull(optionsBuilder.Options.LoggerProvider);
+        }
+
+        [Fact]
+        public void ConfigureCachingProvider()
+        {
+            var optionsBuilder = new RepositoryOptionsBuilder();
+
+            Assert.False(optionsBuilder.IsConfigured);
+
+            optionsBuilder.UseCachingProvider(new InMemoryCacheProvider());
+
+            Assert.True(optionsBuilder.IsConfigured);
+
+            Assert.NotNull(optionsBuilder.Options.CachingProvider);
+        }
+
+        [Fact]
         public void ConfigureFromAppConfig()
         {
-            var optionsBuilder = new RepositoryOptionsBuilder()
-                .UseConfiguration();
+            var optionsBuilder = new RepositoryOptionsBuilder();
+
+            Assert.False(optionsBuilder.IsConfigured);
+
+            optionsBuilder.UseConfiguration();
+
+            Assert.True(optionsBuilder.IsConfigured);
 
             TestConfiguration(optionsBuilder);
         }
-        
+
         [Fact]
         public void ConfigureFromRepositoryConfig()
         {
-            var optionsBuilder = new RepositoryOptionsBuilder()
-                .UseConfiguration("repository.config");
+            var optionsBuilder = new RepositoryOptionsBuilder();
+
+            Assert.False(optionsBuilder.IsConfigured);
+
+            optionsBuilder.UseConfiguration("repository.config");
+
+            Assert.True(optionsBuilder.IsConfigured);
 
             TestConfiguration(optionsBuilder);
         }
@@ -94,8 +170,13 @@
         [Fact]
         public void ConfigureFromAppSetting()
         {
-            var optionsBuilder = new RepositoryOptionsBuilder()
-                .UseConfiguration(TestConfigurationHelper.GetConfiguration());
+            var optionsBuilder = new RepositoryOptionsBuilder();
+
+            Assert.False(optionsBuilder.IsConfigured);
+
+            optionsBuilder.UseConfiguration(TestConfigurationHelper.GetConfiguration());
+
+            Assert.True(optionsBuilder.IsConfigured);
 
             TestConfiguration(optionsBuilder);
         }
@@ -130,6 +211,8 @@
 
         private static void TestConfiguration(RepositoryOptionsBuilder optionsBuilder)
         {
+            Assert.True(optionsBuilder.IsConfigured);
+
             Assert.NotNull(optionsBuilder.Options.ContextFactory);
             Assert.NotNull(optionsBuilder.Options.LoggerProvider);
             Assert.NotNull(optionsBuilder.Options.CachingProvider);
