@@ -38,3 +38,7 @@ The DotNetToolkit.Repository includes basic repository objects for handling the 
 ## Project Wiki
 
 If you want more details about the project, please checkout the [project wiki](https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Home).
+
+## Performance
+
+Checkout the most current [benchmark results](https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Performance)!
