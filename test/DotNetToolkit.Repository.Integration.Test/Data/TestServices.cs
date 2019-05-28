@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Data
 {
     using Factories;
+    using Services;
 
     public interface ITestCustomerService : IService<Customer> { }
 
