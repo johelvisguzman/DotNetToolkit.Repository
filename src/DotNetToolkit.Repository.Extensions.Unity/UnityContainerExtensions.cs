@@ -114,7 +114,7 @@
 
                 foreach (var interceptorType in registeredInterceptorTypes)
                 {
-                    options.With(interceptorType, () => (IRepositoryInterceptor)c.Resolve(interceptorType));
+                    options = options.With(interceptorType, () => (IRepositoryInterceptor)c.Resolve(interceptorType));
                 }
 
                 return options;

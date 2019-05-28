@@ -73,7 +73,7 @@
         /// Initializes a new instance of the <see cref="RepositoryOptions" /> class.
         /// </summary>
         /// <param name="options">The repository options to clone.</param>
-        public RepositoryOptions(IRepositoryOptions options)
+        public RepositoryOptions([NotNull] IRepositoryOptions options)
         {
             Guard.NotNull(options, nameof(options));
 
@@ -93,10 +93,7 @@
         /// Clones the current configured options to a new instance.
         /// </summary>
         /// <returns>The new clone instance.</returns>
-        public RepositoryOptions Clone()
-        {
-            return new RepositoryOptions(this);
-        }
+        public RepositoryOptions Clone() => new RepositoryOptions(this);
 
         /// <summary>
         /// Returns the option instance with a configured interceptor.
@@ -109,14 +106,16 @@
             Guard.NotNull(underlyingType, nameof(underlyingType));
             Guard.NotNull(interceptorFactory, nameof(interceptorFactory));
 
+            var clone = Clone();
+
             var lazy = new Lazy<IRepositoryInterceptor>(interceptorFactory);
 
-            if (_interceptors.ContainsKey(underlyingType))
-                _interceptors[underlyingType] = lazy;
+            if (clone._interceptors.ContainsKey(underlyingType))
+                clone._interceptors[underlyingType] = lazy;
             else
-                _interceptors.Add(underlyingType, lazy);
+                clone._interceptors.Add(underlyingType, lazy);
 
-            return this;
+            return clone;
         }
 
         /// <summary>
@@ -126,9 +125,11 @@
         /// <returns>The same option instance.</returns>
         public RepositoryOptions With([NotNull] IRepositoryContextFactory contextFactory)
         {
-            _contextFactory = Guard.NotNull(contextFactory, nameof(contextFactory));
+            var clone = Clone();
 
-            return this;
+            clone._contextFactory = Guard.NotNull(contextFactory, nameof(contextFactory));
+
+            return clone;
         }
 
         /// <summary>
@@ -138,9 +139,11 @@
         /// <returns>The same option instance.</returns>
         public RepositoryOptions With([NotNull] ILoggerProvider loggerProvider)
         {
-            _loggerProvider = Guard.NotNull(loggerProvider, nameof(loggerProvider));
+            var clone = Clone();
 
-            return this;
+            clone._loggerProvider = Guard.NotNull(loggerProvider, nameof(loggerProvider));
+
+            return clone;
         }
 
         /// <summary>
@@ -150,9 +153,11 @@
         /// <returns>The same option instance.</returns>
         public RepositoryOptions With([NotNull] ICacheProvider cacheProvider)
         {
-            _cachingProvider = Guard.NotNull(cacheProvider, nameof(cacheProvider));
+            var clone = Clone();
 
-            return this;
+            clone._cachingProvider = Guard.NotNull(cacheProvider, nameof(cacheProvider));
+
+            return clone;
         }
 
         /// <summary>
@@ -162,9 +167,11 @@
         /// <returns>The same option instance.</returns>
         public RepositoryOptions With([NotNull] IMapperProvider mapperProvider)
         {
-            _mapperProvider = Guard.NotNull(mapperProvider, nameof(mapperProvider));
+            var clone = Clone();
 
-            return this;
+            clone._mapperProvider = Guard.NotNull(mapperProvider, nameof(mapperProvider));
+
+            return clone;
         }
 
         /// <summary>
@@ -174,9 +181,11 @@
         /// <returns>The same option instance.</returns>
         public RepositoryOptions With([NotNull] IRepositoryConventions conventions)
         {
-            _conventions = Guard.NotNull(conventions, nameof(conventions));
+            var clone = Clone();
 
-            return this;
+            clone._conventions = Guard.NotNull(conventions, nameof(conventions));
+
+            return clone;
         }
 
         #endregion

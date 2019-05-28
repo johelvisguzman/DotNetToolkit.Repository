@@ -114,7 +114,7 @@
 
                 foreach (var interceptorType in registeredInterceptorTypes)
                 {
-                    options.With(interceptorType, () => (IRepositoryInterceptor)c.Kernel.Get(interceptorType));
+                    options = options.With(interceptorType, () => (IRepositoryInterceptor)c.Kernel.Get(interceptorType));
                 }
 
                 return options;
