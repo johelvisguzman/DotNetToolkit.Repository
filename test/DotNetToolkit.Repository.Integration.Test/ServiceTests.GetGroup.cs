@@ -3,11 +3,11 @@
     using Data;
     using Factories;
     using Queries;
+    using Services;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Xunit;
-
     public partial class ServiceTests : TestBase
     {
         [Fact]

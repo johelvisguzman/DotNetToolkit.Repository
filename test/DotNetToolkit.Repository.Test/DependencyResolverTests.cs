@@ -4,6 +4,7 @@
     using Data;
     using Factories;
     using Repository;
+    using Services;
     using System;
     using Transactions;
     using Xunit;

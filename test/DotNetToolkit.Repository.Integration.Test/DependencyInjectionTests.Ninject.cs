@@ -7,6 +7,7 @@
     using Factories;
     using InMemory;
     using Ninject;
+    using Services;
     using System;
     using System.Collections.Generic;
     using System.Linq;

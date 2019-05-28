@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository
+﻿namespace DotNetToolkit.Repository.Services
 {
     using Queries;
     using Queries.Strategies;
