@@ -20,7 +20,7 @@
     {
         #region Fields
 
-        private readonly RepositoryOptions _options;
+        private RepositoryOptions _options;
 
         #endregion
 
@@ -141,7 +141,7 @@
         /// <returns>The same builder instance.</returns>
         public virtual RepositoryOptionsBuilder UseInterceptor([NotNull] Type underlyingType, [NotNull] Func<IRepositoryInterceptor> interceptorFactory)
         {
-            _options.With(Guard.NotNull(underlyingType, nameof(underlyingType)), Guard.NotNull(interceptorFactory, nameof(interceptorFactory)));
+            _options = _options.With(Guard.NotNull(underlyingType, nameof(underlyingType)), Guard.NotNull(interceptorFactory, nameof(interceptorFactory)));
 
             return this;
         }
@@ -175,7 +175,7 @@
         /// <returns>The same builder instance.</returns>
         public virtual RepositoryOptionsBuilder UseLoggerProvider([NotNull] ILoggerProvider loggerProvider)
         {
-            _options.With(Guard.NotNull(loggerProvider, nameof(loggerProvider)));
+            _options = _options.With(Guard.NotNull(loggerProvider, nameof(loggerProvider)));
 
             return this;
         }
@@ -187,7 +187,7 @@
         /// <returns>The same builder instance.</returns>
         public virtual RepositoryOptionsBuilder UseCachingProvider([NotNull] ICacheProvider cacheProvider)
         {
-            _options.With(Guard.NotNull(cacheProvider, nameof(cacheProvider)));
+            _options = _options.With(Guard.NotNull(cacheProvider, nameof(cacheProvider)));
 
             return this;
         }
@@ -199,7 +199,7 @@
         /// <returns>The same builder instance.</returns>
         public virtual RepositoryOptionsBuilder UseMapperProvider([NotNull] IMapperProvider mapperProvider)
         {
-            _options.With(Guard.NotNull(mapperProvider, nameof(mapperProvider)));
+            _options = _options.With(Guard.NotNull(mapperProvider, nameof(mapperProvider)));
 
             return this;
         }
@@ -211,7 +211,7 @@
         /// <returns>The same builder instance.</returns>
         public virtual RepositoryOptionsBuilder UseInternalContextFactory([NotNull] IRepositoryContextFactory contextFactory)
         {
-            _options.With(Guard.NotNull(contextFactory, nameof(contextFactory)));
+            _options = _options.With(Guard.NotNull(contextFactory, nameof(contextFactory)));
 
             return this;
         }
@@ -223,7 +223,7 @@
         /// <returns>The same builder instance.</returns>
         public virtual RepositoryOptionsBuilder UseConventions([NotNull] IRepositoryConventions conventions)
         {
-            _options.With(Guard.NotNull(conventions, nameof(conventions)));
+            _options = _options.With(Guard.NotNull(conventions, nameof(conventions)));
 
             return this;
         }
