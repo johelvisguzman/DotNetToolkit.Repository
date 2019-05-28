@@ -5,6 +5,7 @@
     using Configuration.Logging;
     using Configuration.Logging.Internal;
     using Extensions;
+    using Extensions.Internal;
     using Properties;
     using Queries;
     using Queries.Internal;

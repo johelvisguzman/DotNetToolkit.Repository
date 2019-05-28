@@ -2,6 +2,7 @@
 {
     using Configuration.Conventions;
     using Extensions;
+    using Extensions.Internal;
     using Queries;
     using System;
     using System.Collections.Generic;
@@ -303,7 +304,7 @@
                         var joinTableAlias = GenerateTableAlias(joinTableType);
                         var joinTableColumnNames = string.Join($",{Environment.NewLine}\t",
                             joinTableProperties
-                                .Where(Extensions.PropertyInfoExtensions.IsPrimitive)
+                                .Where(DotNetToolkit.Repository.Extensions.Internal.PropertyInfoExtensions.IsPrimitive)
                                 .Select(x =>
                                 {
                                     var colAlias = GenerateColumnAlias(x);

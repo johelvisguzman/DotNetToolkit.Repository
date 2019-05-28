@@ -2,6 +2,7 @@
 {
     using Configuration.Conventions;
     using Extensions;
+    using Extensions.Internal;
     using System.Data;
     using System.Data.Common;
     using System.Linq;

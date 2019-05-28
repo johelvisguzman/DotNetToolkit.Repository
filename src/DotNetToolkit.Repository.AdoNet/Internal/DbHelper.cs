@@ -3,7 +3,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
     using Configuration.Conventions;
     using Configuration.Logging;
     using Configuration.Logging.Internal;
-    using Extensions;
+    using Extensions.Internal;
     using Queries.Internal;
     using System;
     using System.Collections.Generic;

@@ -10,6 +10,7 @@
     using Configuration.Mapper;
     using Configuration.Options;
     using Extensions;
+    using Extensions.Internal;
     using Factories;
     using Internal;
     using JetBrains.Annotations;

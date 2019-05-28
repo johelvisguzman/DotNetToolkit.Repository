@@ -1,8 +1,8 @@
-﻿namespace DotNetToolkit.Repository.Extensions
+﻿namespace DotNetToolkit.Repository.Extensions.Internal
 {
     using Configuration;
-    using Internal;
     using JetBrains.Annotations;
+    using Repository.Internal;
     using Utility;
 
     internal static class RepositoryContextExtensions

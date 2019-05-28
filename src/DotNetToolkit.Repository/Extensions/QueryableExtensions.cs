@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
     using Configuration.Conventions;
+    using Extensions.Internal;
     using JetBrains.Annotations;
     using Queries;
     using System;

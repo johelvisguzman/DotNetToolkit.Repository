@@ -1,10 +1,8 @@
-﻿namespace DotNetToolkit.Repository.Extensions
+﻿namespace DotNetToolkit.Repository.Extensions.Internal
 {
     using JetBrains.Annotations;
     using System;
-    using System.Linq;
     using System.Text;
-    using Utility;
 
     internal static class StringExtensions
     {

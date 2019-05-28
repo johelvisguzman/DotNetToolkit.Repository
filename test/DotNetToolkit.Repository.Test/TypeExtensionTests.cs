@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Test
 {
-    using Extensions;
+    using Extensions.Internal;
     using System;
     using System.Collections.Generic;
     using System.Linq.Expressions;

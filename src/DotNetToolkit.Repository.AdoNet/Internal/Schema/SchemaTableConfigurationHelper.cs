@@ -3,6 +3,7 @@
     using Configuration.Conventions;
     using Configuration.Logging;
     using Extensions;
+    using Extensions.Internal;
     using Properties;
     using System;
     using System.Collections.Concurrent;

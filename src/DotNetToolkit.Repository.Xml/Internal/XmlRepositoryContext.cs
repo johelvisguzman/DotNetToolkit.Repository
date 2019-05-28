@@ -2,7 +2,7 @@
 {
     using Configuration;
     using Configuration.Logging;
-    using Extensions;
+    using Extensions.Internal;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
