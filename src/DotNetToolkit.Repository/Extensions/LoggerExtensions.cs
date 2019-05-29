@@ -1,5 +1,6 @@
-﻿namespace DotNetToolkit.Repository.Configuration.Logging
+﻿namespace DotNetToolkit.Repository.Extensions
 {
+    using Configuration.Logging;
     using JetBrains.Annotations;
     using System;
     using Utility;
@@ -10,7 +11,7 @@
     public static class LoggerExtensions
     {
         /// <summary>
-        /// Logs a message with a <see cref="LogLevel.Debug" /> severity.
+        /// Logs a message with a <see cref="Configuration.Logging.LogLevel.Debug" /> severity.
         /// </summary>
         /// <param name="source">The logger.</param>
         /// <param name="message">The message to log.</param>
@@ -23,7 +24,7 @@
         }
 
         /// <summary>
-        /// Logs a composite format message with a <see cref="LogLevel.Debug" /> severity.
+        /// Logs a composite format message with a <see cref="Configuration.Logging.LogLevel.Debug" /> severity.
         /// </summary>
         /// <param name="source">The logger.</param>
         /// <param name="message">The message to log.</param>
@@ -37,7 +38,7 @@
         }
 
         /// <summary>
-        /// Logs a message with a <see cref="LogLevel.Info" /> severity.
+        /// Logs a message with a <see cref="Configuration.Logging.LogLevel.Info" /> severity.
         /// </summary>
         /// <param name="source">The logger.</param>
         /// <param name="message">The message to log.</param>
@@ -50,7 +51,7 @@
         }
 
         /// <summary>
-        /// Logs a composite format message with a <see cref="LogLevel.Info" /> severity.
+        /// Logs a composite format message with a <see cref="Configuration.Logging.LogLevel.Info" /> severity.
         /// </summary>
         /// <param name="source">The logger.</param>
         /// <param name="message">The message to log.</param>
@@ -64,7 +65,7 @@
         }
 
         /// <summary>
-        /// Logs a message with a <see cref="LogLevel.Warning" /> severity.
+        /// Logs a message with a <see cref="Configuration.Logging.LogLevel.Warning" /> severity.
         /// </summary>
         /// <param name="source">The logger.</param>
         /// <param name="message">The message to log.</param>
@@ -77,7 +78,7 @@
         }
 
         /// <summary>
-        /// Logs a composite format message with a <see cref="LogLevel.Warning" /> severity.
+        /// Logs a composite format message with a <see cref="Configuration.Logging.LogLevel.Warning" /> severity.
         /// </summary>
         /// <param name="source">The logger.</param>
         /// <param name="message">The message to log.</param>
@@ -91,7 +92,7 @@
         }
 
         /// <summary>
-        /// Logs a message with a <see cref="LogLevel.Error" /> severity.
+        /// Logs a message with a <see cref="Configuration.Logging.LogLevel.Error" /> severity.
         /// </summary>
         /// <param name="source">The logger.</param>
         /// <param name="message">The message to log.</param>
@@ -104,7 +105,7 @@
         }
 
         /// <summary>
-        /// Logs a composite format message with a <see cref="LogLevel.Error" /> severity.
+        /// Logs a composite format message with a <see cref="Configuration.Logging.LogLevel.Error" /> severity.
         /// </summary>
         /// <param name="source">The logger.</param>
         /// <param name="message">The message to log.</param>
@@ -118,7 +119,7 @@
         }
 
         /// <summary>
-        /// Logs a message associated with an exception with a <see cref="LogLevel.Error" /> severity.
+        /// Logs a message associated with an exception with a <see cref="Configuration.Logging.LogLevel.Error" /> severity.
         /// </summary>
         /// <param name="source">The logger.</param>
         /// <param name="exception">The associated exception to log.</param>
@@ -133,13 +134,14 @@
         }
 
         /// <summary>
-        /// Logs an exception with a <see cref="LogLevel.Error" /> severity.
+        /// Logs an exception with a <see cref="Configuration.Logging.LogLevel.Error" /> severity.
         /// </summary>
         /// <param name="source">The logger.</param>
         /// <param name="exception">The associated exception to log.</param>
         public static void Error([NotNull] this ILogger source, [NotNull] Exception exception)
         {
             Guard.NotNull(source, nameof(source));
+            Guard.NotNull(exception, nameof(exception));
 
             Error(source, exception.ToString());
         }

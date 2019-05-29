@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
     using Configuration.Logging;
+    using Extensions;
     using System.Data.Common;
     using Transactions;
     using Utility;

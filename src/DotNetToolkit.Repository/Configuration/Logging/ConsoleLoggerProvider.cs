@@ -1,5 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Logging
 {
+    using JetBrains.Annotations;
+    using Utility;
+
     /// <summary>
     /// An implementation of <see cref="ILoggerProvider" />.
     /// </summary>
@@ -21,9 +24,9 @@
         /// </summary>
         /// <param name="categoryName">The category name for messages produced by the logger.</param>
         /// <returns>The <see cref="ILogger"/>.</returns>
-        public ILogger Create(string categoryName)
+        public ILogger Create([NotNull] string categoryName)
         {
-            return new ConsoleLogger(_minLogLevel, categoryName);
+            return new ConsoleLogger(_minLogLevel, Guard.NotNull(categoryName, nameof(categoryName)));
         }
     }
 }
