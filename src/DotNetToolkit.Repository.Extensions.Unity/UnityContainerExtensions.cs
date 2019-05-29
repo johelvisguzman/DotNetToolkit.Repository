@@ -123,6 +123,8 @@
 
             // Register resolver
             RepositoryDependencyResolver.SetResolver(type => container.Resolve(type));
+
+            container.RegisterFactory<IRepositoryDependencyResolver>(c => RepositoryDependencyResolver.Current);
         }
 
         /// <summary>

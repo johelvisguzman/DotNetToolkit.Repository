@@ -123,6 +123,8 @@
 
             // Binds resolver
             RepositoryDependencyResolver.SetResolver(type => kernel.Get(type));
+
+            kernel.Bind<IRepositoryDependencyResolver>().ToMethod(c => RepositoryDependencyResolver.Current);
         }
 
         /// <summary>

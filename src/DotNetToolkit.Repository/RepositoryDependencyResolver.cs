@@ -33,7 +33,7 @@
 
         /// <summary>
         /// Gets the current dependency resolver.
-        /// If a dependency resolver has not been set with the <see cref="SetResolver"/> method, then a default dependency resolver will be used instead.
+        /// If a dependency resolver has not been set with the <see cref="RepositoryDependencyResolver.SetResolver(IRepositoryDependencyResolver)"/> method, then a default dependency resolver will be used instead.
         /// </summary>
         public static IRepositoryDependencyResolver Current
         {
@@ -42,7 +42,7 @@
 
         #endregion
 
-        #region public Methods
+        #region Public Methods
 
         /// <summary>
         /// Sets the current dependency resolver.
