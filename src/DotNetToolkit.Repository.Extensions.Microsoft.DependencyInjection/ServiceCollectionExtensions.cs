@@ -130,6 +130,8 @@
                     .GetService(type);
             });
 
+            services.AddScoped<IRepositoryDependencyResolver>(sp => RepositoryDependencyResolver.Current);
+
             return services;
         }
 
