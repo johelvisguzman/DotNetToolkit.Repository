@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Xml.Internal
 {
     using Configuration;
-    using Configuration.Logging;
+    using Extensions;
     using Extensions.Internal;
     using System.Collections.Generic;
     using System.IO;

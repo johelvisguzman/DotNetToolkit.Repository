@@ -2,7 +2,7 @@
 {
     using Configuration;
     using Configuration.Conventions;
-    using Configuration.Logging;
+    using Extensions;
     using Extensions.Internal;
     using global::NHibernate;
     using global::NHibernate.Linq;
