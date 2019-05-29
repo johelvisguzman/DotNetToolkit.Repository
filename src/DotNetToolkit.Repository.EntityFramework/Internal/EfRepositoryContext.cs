@@ -4,6 +4,7 @@
     using Configuration.Conventions;
     using Configuration.Logging;
     using Extensions;
+    using Extensions.Internal;
     using Queries;
     using Queries.Strategies;
     using System;
@@ -159,7 +160,7 @@
             {
                 using (var command = connection.CreateCommand())
                 {
-                    if (connection.State != ConnectionState.Open)
+                    if (shouldOpenConnection)
                         connection.Open();
 
                     command.CommandText = sql;
@@ -426,7 +427,7 @@
             {
                 using (var command = connection.CreateCommand())
                 {
-                    if (connection.State != ConnectionState.Open)
+                    if (shouldOpenConnection)
                         await connection.OpenAsync(cancellationToken);
 
                     command.CommandText = sql;

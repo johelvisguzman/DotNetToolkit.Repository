@@ -4,6 +4,7 @@
     using Configuration.Caching.Internal;
     using Configuration.Conventions;
     using Configuration.Logging;
+    using Extensions.Internal;
     using JetBrains.Annotations;
     using Queries;
     using Queries.Internal;

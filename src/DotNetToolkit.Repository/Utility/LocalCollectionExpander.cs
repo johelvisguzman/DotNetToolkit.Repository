@@ -1,12 +1,12 @@
 ﻿namespace DotNetToolkit.Repository.Utility
 {
+    using Extensions.Internal;
     using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
-    using Extensions;
 
     /// <summary>
     /// Enables cache key support for local collection values.

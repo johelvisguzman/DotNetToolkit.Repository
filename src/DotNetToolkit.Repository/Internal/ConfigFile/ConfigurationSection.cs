@@ -6,7 +6,7 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
     using Configuration.Interceptors;
     using Configuration.Logging;
     using Configuration.Mapper;
-    using Extensions;
+    using Extensions.Internal;
     using Factories;
     using System;
     using System.Collections.Generic;

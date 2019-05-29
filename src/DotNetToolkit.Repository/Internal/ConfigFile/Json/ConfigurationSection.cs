@@ -4,7 +4,7 @@
     using Configuration.Interceptors;
     using Configuration.Logging;
     using Configuration.Mapper;
-    using Extensions;
+    using Extensions.Internal;
     using Factories;
     using JetBrains.Annotations;
     using Microsoft.Extensions.Configuration;

@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.InMemory.Internal
 {
-    using Extensions;
+    using Extensions.Internal;
     using System;
     using System.Linq;
     using System.Reflection;

@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Extensions
+﻿namespace DotNetToolkit.Repository.Extensions.Internal
 {
     using JetBrains.Annotations;
     using System.Collections.Generic;

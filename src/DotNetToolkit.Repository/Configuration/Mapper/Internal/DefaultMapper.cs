@@ -2,6 +2,7 @@
 {
     using Conventions;
     using Extensions;
+    using Extensions.Internal;
     using JetBrains.Annotations;
     using System;
     using System.Collections.Generic;

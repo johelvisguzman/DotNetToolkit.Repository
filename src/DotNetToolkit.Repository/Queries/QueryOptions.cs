@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Queries
 {
-    using Extensions;
+    using Extensions.Internal;
     using JetBrains.Annotations;
     using Strategies;
     using System;
