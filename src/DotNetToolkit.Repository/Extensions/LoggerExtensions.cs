@@ -141,6 +141,7 @@
         public static void Error([NotNull] this ILogger source, [NotNull] Exception exception)
         {
             Guard.NotNull(source, nameof(source));
+            Guard.NotNull(exception, nameof(exception));
 
             Error(source, exception.ToString());
         }
