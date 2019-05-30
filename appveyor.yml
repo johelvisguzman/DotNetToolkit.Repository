@@ -83,9 +83,9 @@ deploy:
 
 # Deploying to NuGet feed
 - provider: NuGet
-  server: https://www.myget.org/F/dotnettoolkitrepositorydev/api/v2/package
+  server: https://www.myget.org/F/dotnettoolkitrepository-dev/api/v2/package
   api_key:
-    secure: cFsMUNC2a8k548E/iKlw/zglFoowEyPd2uPtCoY8pCc9mW2Hh8drjw6raWNDl/JX
+    secure: SR7XeaMyomlDy1JekkpUVvPhQ9RnaRmvDZ68gR1S/xFEe1QfYFbsss9GDq0Q/8Rq
   skip_symbols: true
   on:
     branch: master                    # release from master branch only
