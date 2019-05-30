@@ -29,133 +29,133 @@
             _repo.Add(_customer);
         }
 
-        [BenchmarkCategory("Find"), Benchmark]
+        [BenchmarkCategory("FindWithId"), Benchmark]
         public void FindWithId()
         {
             _repo.Find(_customer.Id);
         }
 
-        [BenchmarkCategory("Find"), Benchmark]
+        [BenchmarkCategory("FindWithPredicate"), Benchmark]
         public void FindWithPredicate()
         {
             _repo.Find(x => x.Name.Equals("Random Name"));
         }
 
-        [BenchmarkCategory("Find"), Benchmark]
-        public void FindWithDefaultOptions()
+        [BenchmarkCategory("FindWithPredicateOptions"), Benchmark]
+        public void FindWithPredicateOptions()
         {
             _repo.Find(_defaultOptions);
         }
 
-        [BenchmarkCategory("Find"), Benchmark]
+        [BenchmarkCategory("FindWithPagingOptions"), Benchmark]
         public void FindWithPagingOptions()
         {
             _repo.Find(_pagingOptions);
         }
 
-        [BenchmarkCategory("FindAll"), Benchmark]
+        [BenchmarkCategory("FindAllWithPredicate"), Benchmark]
         public void FindAllWithPredicate()
         {
             _repo.FindAll(x => x.Name.Equals("Random Name"));
         }
 
-        [BenchmarkCategory("FindAll"), Benchmark]
-        public void FindAllWithDefaultOptions()
+        [BenchmarkCategory("FindAllWithPredicateOptions"), Benchmark]
+        public void FindAllWithPredicateOptions()
         {
             _repo.FindAll(_defaultOptions);
         }
 
-        [BenchmarkCategory("FindAll"), Benchmark]
+        [BenchmarkCategory("FindAllWithPagingOptions"), Benchmark]
         public void FindAllWithPagingOptions()
         {
             _repo.FindAll(_pagingOptions);
         }
 
-        [BenchmarkCategory("ToDictionary"), Benchmark]
-        public void ToDictionaryWithDefaultOptions()
+        [BenchmarkCategory("ToDictionaryWithPredicateOptions"), Benchmark]
+        public void ToDictionaryWithPredicateOptions()
         {
             _repo.ToDictionary(_defaultOptions, x => x.Id);
         }
 
-        [BenchmarkCategory("ToDictionary"), Benchmark]
+        [BenchmarkCategory("ToDictionaryWithPagingOptions"), Benchmark]
         public void ToDictionaryWithPagingOptions()
         {
             _repo.ToDictionary(_pagingOptions, x => x.Id);
         }
 
-        [BenchmarkCategory("GroupBy"), Benchmark]
-        public void GroupByWithDefaultOptions()
+        [BenchmarkCategory("GroupByWithPredicateOptions"), Benchmark]
+        public void GroupByWithPredicateOptions()
         {
             _repo.GroupBy(_defaultOptions, y => y.Id, (key, g) => key);
         }
 
-        [BenchmarkCategory("GroupBy"), Benchmark]
+        [BenchmarkCategory("GroupByWithPagingOptions"), Benchmark]
         public void GroupByWithPagingOptions()
         {
             _repo.GroupBy(_pagingOptions, y => y.Id, (key, g) => key);
         }
 
-        [BenchmarkCategory("FindAsync"), Benchmark]
+        [BenchmarkCategory("FindWithIdAsync"), Benchmark]
         public async Task Async_FindWithId()
         {
             await _repo.FindAsync(_customer.Id);
         }
 
-        [BenchmarkCategory("FindAsync"), Benchmark]
+        [BenchmarkCategory("FindWithPredicateAsync"), Benchmark]
         public async Task Async_FindWithPredicate()
         {
             await _repo.FindAsync(x => x.Name.Equals("Random Name"));
         }
 
-        [BenchmarkCategory("FindAsync"), Benchmark]
-        public async Task Async_FindWithDefaultOptions()
+        [BenchmarkCategory("FindWithPreicateOptionsAsync"), Benchmark]
+        public async Task Async_FindWithPreicateOptions()
         {
             await _repo.FindAsync(_defaultOptions);
         }
 
-        [BenchmarkCategory("FindAsync"), Benchmark]
+        [BenchmarkCategory("FindWithPagingOptionsAsync"), Benchmark]
         public async Task Async_FindWithPagingOptions()
         {
             await _repo.FindAsync(_pagingOptions);
         }
 
-        [BenchmarkCategory("FindAllAsync"), Benchmark]
+        [BenchmarkCategory("FindAllWithPredicateAsync"), Benchmark]
         public async Task Async_FindAllWithPredicate()
         {
             await _repo.FindAllAsync(x => x.Name.Equals("Random Name"));
         }
 
-        [BenchmarkCategory("FindAllAsync"), Benchmark]
-        public async Task Async_FindAllWithDefaultOptions()
+        [BenchmarkCategory("FindAllWithPredicateOptionsAsync"), Benchmark]
+        public async Task Async_FindAllWithPredicateOptions()
         {
             await _repo.FindAllAsync(_defaultOptions);
         }
 
-        [BenchmarkCategory("FindAllAsync"), Benchmark]
+        [BenchmarkCategory("FindAllWithPagingOptionsAsync"), Benchmark]
         public async Task Async_FindAllWithPagingOptions()
         {
             await _repo.FindAllAsync(_pagingOptions);
         }
 
-        [BenchmarkCategory("GroupByAsync"), Benchmark]
-        public async Task Async_GroupByWithDefaultOptions()
+        [BenchmarkCategory("GroupByWithPredicateOptionsAsync"), Benchmark]
+        public async Task Async_GroupByWithPredicateOptions()
         {
             await _repo.GroupByAsync(_defaultOptions, y => y.Id, (key, g) => key);
         }
 
-        [BenchmarkCategory("GroupByAsync"), Benchmark]
+        [BenchmarkCategory("GroupByWithPagingOptionsAsync"), Benchmark]
         public async Task Async_GroupByWithPagingOptions()
         {
             await _repo.GroupByAsync(_pagingOptions, y => y.Id, (key, g) => key);
         }
 
-        [BenchmarkCategory("ToDictionaryAsync"), Benchmark]
-        public async Task Async_ToDictionaryWithDefaultOptions()
+        [BenchmarkCategory("ToDictionaryWithPredicateOptionsAsync"), Benchmark]
+        public async Task Async_ToDictionaryWithPredicateOptions()
         {
             await _repo.ToDictionaryAsync(_defaultOptions, x => x.Id);
         }
 
-        [BenchmarkCategory("ToDictionaryAsync"), Benchmark]
+        [BenchmarkCategory("ToDictionaryWithPagingOptionsAsync"), Benchmark]
         public async Task Async_ToDictionaryWithPagingOptions()
         {
             await _repo.ToDictionaryAsync(_pagingOptions, x => x.Id);

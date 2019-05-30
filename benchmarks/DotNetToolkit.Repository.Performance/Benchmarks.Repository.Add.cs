@@ -32,7 +32,7 @@
             _repo.Add(_customer);
         }
 
-        [BenchmarkCategory("Add"), Benchmark]
+        [BenchmarkCategory("AddRange"), Benchmark]
         public void AddRange()
         {
             _repo.Add(new[] { _customer });
@@ -44,7 +44,7 @@
             await _repo.AddAsync(_customer);
         }
 
-        [BenchmarkCategory("AddAsync"), Benchmark]
+        [BenchmarkCategory("AddRangeAsync"), Benchmark]
         public async Task Async_AddRange()
         {
             await _repo.AddAsync(new[] { _customer });

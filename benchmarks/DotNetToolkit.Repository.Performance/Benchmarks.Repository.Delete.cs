@@ -33,19 +33,19 @@
             _repo.Delete(_customer);
         }
 
-        [BenchmarkCategory("Delete"), Benchmark]
+        [BenchmarkCategory("DeleteRange"), Benchmark]
         public void DeleteRange()
         {
             _repo.Delete(new[] { _customer });
         }
 
-        [BenchmarkCategory("Delete"), Benchmark]
+        [BenchmarkCategory("DeleteWithId"), Benchmark]
         public void DeleteWithId()
         {
             _repo.Delete(_customer.Id);
         }
 
-        [BenchmarkCategory("Delete"), Benchmark]
+        [BenchmarkCategory("DeleteWithPredicate"), Benchmark]
         public void DeleteWithPredicate()
         {
             _repo.Delete(x => x.Id == _customer.Id);
@@ -57,19 +57,19 @@
             await _repo.DeleteAsync(_customer);
         }
 
-        [BenchmarkCategory("DeleteAsync"), Benchmark]
+        [BenchmarkCategory("DeleteRangeAsync"), Benchmark]
         public async Task Async_DeleteRange()
         {
             await _repo.DeleteAsync(new[] { _customer });
         }
 
-        [BenchmarkCategory("DeleteAsync"), Benchmark]
+        [BenchmarkCategory("DeleteWithIdAsync"), Benchmark]
         public async Task Async_DeleteWithId()
         {
             await _repo.DeleteAsync(_customer.Id);
         }
 
-        [BenchmarkCategory("DeleteAsync"), Benchmark]
+        [BenchmarkCategory("DeleteWithPredicateAsync"), Benchmark]
         public async Task Async_DeleteWithPredicate()
         {
             await _repo.DeleteAsync(x => x.Id == _customer.Id);

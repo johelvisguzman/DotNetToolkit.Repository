@@ -16,22 +16,16 @@
         public Config()
         {
             Add(ConsoleLogger.Default);
-
             Add(CsvExporter.Default);
             Add(MarkdownExporter.GitHub);
             Add(HtmlExporter.Default);
-
-            var md = new MemoryDiagnoser();
-
-            Add(md);
+            Add(new MemoryDiagnoser());
             Add(new ProviderColumn());
             Add(TargetMethodColumn.Method);
             Add(StatisticColumn.Mean);
             Add(BaselineRatioColumn.RatioMean);
             Add(RankColumn.Arabic);
-
             Add(BenchmarkLogicalGroupRule.ByCategory);
-
             Add(Job.Dry
                 .WithLaunchCount(1)
                 .WithWarmupCount(1)

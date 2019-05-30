@@ -33,7 +33,7 @@
             _repo.Update(_customer);
         }
 
-        [BenchmarkCategory("Update"), Benchmark]
+        [BenchmarkCategory("UpdateRange"), Benchmark]
         public void UpdateRange()
         {
             _repo.Update(new[] { _customer });
@@ -45,7 +45,7 @@
             await _repo.UpdateAsync(_customer);
         }
 
-        [BenchmarkCategory("UpdateAsync"), Benchmark]
+        [BenchmarkCategory("UpdateRangeAsync"), Benchmark]
         public async Task Async_UpdateRange()
         {
             await _repo.UpdateAsync(new[] { _customer });
