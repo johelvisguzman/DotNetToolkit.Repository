@@ -101,19 +101,6 @@
         }
 
         /// <summary>
-        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
-        /// </summary>
-        /// <param name="sql">The SQL query string.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
-        /// <param name="projector">A function to project each entity into a new form.</param>
-        /// <returns>A list which each entity has been projected into a new form.</returns>
-        public virtual IEnumerable<TEntity> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector) where TEntity : class
-        {
-            throw new NotSupportedException(Resources.QueryExecutionNotSupported);
-        }
-
-        /// <summary>
         /// Creates a raw SQL query that is executed directly in the database.
         /// </summary>
         /// <param name="sql">The SQL query string.</param>

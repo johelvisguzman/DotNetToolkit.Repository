@@ -105,44 +105,6 @@
         }
 
         /// <summary>
-        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
-        /// </summary>
-        /// <param name="sql">The SQL query string.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
-        /// <param name="projector">A function to project each entity into a new form.</param>
-        /// <returns>A list which each entity has been projected into a new form.</returns>
-        public override IEnumerable<TEntity> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector)
-        {
-            Guard.NotEmpty(sql, nameof(sql));
-            Guard.NotNull(projector, nameof(projector));
-
-            var connection = _context.Database.GetDbConnection();
-            var command = connection.CreateCommand();
-            var shouldOpenConnection = connection.State != ConnectionState.Open;
-
-            if (shouldOpenConnection)
-                connection.Open();
-
-            command.CommandText = sql;
-            command.CommandType = cmdType;
-            command.Parameters.Clear();
-            command.AddParameters(parameters);
-
-            using (var reader = command.ExecuteReader(shouldOpenConnection ? CommandBehavior.CloseConnection : CommandBehavior.Default))
-            {
-                var list = new List<TEntity>();
-
-                while (reader.Read())
-                {
-                    list.Add(projector(reader));
-                }
-
-                return list;
-            }
-        }
-
-        /// <summary>
         /// Creates a raw SQL query that is executed directly in the database.
         /// </summary>
         /// <param name="sql">The SQL query string.</param>
@@ -366,45 +328,6 @@
                 while (await reader.ReadAsync(cancellationToken))
                 {
                     list.Add(projector(reader, Conventions));
-                }
-
-                return list;
-            }
-        }
-
-        /// <summary>
-        /// Asynchronously creates raw SQL query that is executed directly in the database and returns a collection of entities.
-        /// </summary>
-        /// <param name="sql">The SQL query string.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
-        /// <param name="projector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
-        public override async Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            Guard.NotEmpty(sql, nameof(sql));
-            Guard.NotNull(projector, nameof(projector));
-
-            var connection = _context.Database.GetDbConnection();
-            var command = connection.CreateCommand();
-            var shouldOpenConnection = connection.State != ConnectionState.Open;
-
-            if (shouldOpenConnection)
-                await connection.OpenAsync(cancellationToken);
-
-            command.CommandText = sql;
-            command.CommandType = cmdType;
-            command.Parameters.Clear();
-            command.AddParameters(parameters);
-
-            using (var reader = await command.ExecuteReaderAsync(shouldOpenConnection ? CommandBehavior.CloseConnection : CommandBehavior.Default, cancellationToken))
-            {
-                var list = new List<TEntity>();
-
-                while (await reader.ReadAsync(cancellationToken))
-                {
-                    list.Add(projector(reader));
                 }
 
                 return list;
