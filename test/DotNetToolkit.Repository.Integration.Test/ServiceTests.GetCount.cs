@@ -3,7 +3,6 @@
     using Data;
     using Factories;
     using Queries;
-    using Services;
     using System.Threading.Tasks;
     using Xunit;
 
@@ -12,18 +11,18 @@
         [Fact]
         public void GetCount()
         {
-            ForAllUnitOfWorkFactories(TestGetCount);
+            ForAllServiceFactories(TestGetCount);
         }
 
         [Fact]
         public void GetCountAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetCountAsync);
+            ForAllServiceFactoriesAsync(TestGetCountAsync);
         }
 
-        private static void TestGetCount(IUnitOfWorkFactory uowFactory)
+        private static void TestGetCount(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string name = "Random Name";
 
@@ -41,9 +40,9 @@
             Assert.Equal(1, service.GetCount(options));
         }
 
-        private static async Task TestGetCountAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetCountAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string name = "Random Name";
 

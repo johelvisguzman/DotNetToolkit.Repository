@@ -2,7 +2,6 @@
 {
     using Data;
     using Factories;
-    using Services;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Xunit;
@@ -12,55 +11,55 @@
         [Fact]
         public void Create()
         {
-            ForAllUnitOfWorkFactories(TestCreate);
+            ForAllServiceFactories(TestCreate);
         }
 
         [Fact]
         public void CreateWithSeededIdForIdentity()
         {
-            ForAllUnitOfWorkFactories(TestCreateWithSeededIdForIdentity);
+            ForAllServiceFactories(TestCreateWithSeededIdForIdentity);
         }
 
         [Fact]
         public void CreateWithSeededIdForNoneIdentity()
         {
-            ForAllUnitOfWorkFactories(TestCreateWithSeededIdForNoneIdentity);
+            ForAllServiceFactories(TestCreateWithSeededIdForNoneIdentity);
         }
 
         [Fact]
         public void CreateRange()
         {
-            ForAllUnitOfWorkFactories(TestCreateRange);
+            ForAllServiceFactories(TestCreateRange);
         }
 
         [Fact]
         public void CreateAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestCreateAsync);
+            ForAllServiceFactoriesAsync(TestCreateAsync);
         }
 
         [Fact]
         public void CreateWithSeededIdForIdentityAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestCreateWithSeededIdForIdentityAsync);
+            ForAllServiceFactoriesAsync(TestCreateWithSeededIdForIdentityAsync);
         }
 
         [Fact]
         public void CreateWithSeededIdForNoneIdentityAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestCreateWithSeededIdForNoneIdentityAsync);
+            ForAllServiceFactoriesAsync(TestCreateWithSeededIdForNoneIdentityAsync);
         }
 
         [Fact]
         public void CreateRangeAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestCreateRangeAsync);
+            ForAllServiceFactoriesAsync(TestCreateRangeAsync);
         }
 
 
-        private static void TestCreate(IUnitOfWorkFactory uowFactory)
+        private static void TestCreate(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string name = "Random Name";
 
@@ -73,9 +72,9 @@
             Assert.True(service.GetExists(x => x.Name.Equals(name)));
         }
 
-        private static void TestCreateWithSeededIdForIdentity(IUnitOfWorkFactory uowFactory)
+        private static void TestCreateWithSeededIdForIdentity(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const int key = 9;
 
@@ -89,9 +88,9 @@
             Assert.Equal(1, entity.Id);
         }
 
-        private static void TestCreateWithSeededIdForNoneIdentity(IUnitOfWorkFactory uowFactory)
+        private static void TestCreateWithSeededIdForNoneIdentity(IServiceFactory serviceFactory)
         {
-            var service = new Service<CustomerWithNoIdentity>(uowFactory);
+            var service = serviceFactory.Create<CustomerWithNoIdentity>();
 
             const int key = 9;
 
@@ -105,9 +104,9 @@
             Assert.True(service.GetExists(key));
         }
 
-        private static void TestCreateRange(IUnitOfWorkFactory uowFactory)
+        private static void TestCreateRange(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string name = "Random Name";
 
@@ -124,9 +123,9 @@
             Assert.Equal(2, service.GetCount());
         }
 
-        private static async Task TestCreateAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestCreateAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string name = "Random Name";
 
@@ -139,9 +138,9 @@
             Assert.True(await service.GetExistsAsync(x => x.Name.Equals(name)));
         }
 
-        private static async Task TestCreateWithSeededIdForIdentityAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestCreateWithSeededIdForIdentityAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const int key = 9;
 
@@ -155,9 +154,9 @@
             Assert.Equal(1, entity.Id);
         }
 
-        private static async Task TestCreateWithSeededIdForNoneIdentityAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestCreateWithSeededIdForNoneIdentityAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<CustomerWithNoIdentity>(uowFactory);
+            var service = serviceFactory.Create<CustomerWithNoIdentity>();
 
             const int key = 9;
 
@@ -171,9 +170,9 @@
             Assert.True(await service.GetExistsAsync(key));
         }
 
-        private static async Task TestCreateRangeAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestCreateRangeAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string name = "Random Name";
 

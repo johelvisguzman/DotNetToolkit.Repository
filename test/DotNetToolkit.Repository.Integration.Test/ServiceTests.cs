@@ -11,29 +11,44 @@
         public ServiceTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
 
         [Fact]
-        public void AsReadOnly()
+        public void FactoryCreate()
         {
-            ForAllUnitOfWorkFactories(TestAsReadOnly);
+            ForAllServiceFactories(TestFactoryCreate);
         }
 
-        private static void TestAsReadOnly(IUnitOfWorkFactory uowFactory)
+        [Fact]
+        public void AsReadOnly()
         {
-            var service1 = new Service<Customer>(uowFactory);
+            ForAllServiceFactories(TestAsReadOnly);
+        }               
+
+        private static void TestFactoryCreate(IServiceFactory serviceFactory)
+        {
+            Assert.NotNull(serviceFactory.Create<Customer>());
+            Assert.NotNull(serviceFactory.Create<Customer, int>());
+            Assert.NotNull(serviceFactory.Create<CustomerWithTwoCompositePrimaryKey, int, string>());
+            Assert.NotNull(serviceFactory.Create<CustomerWithThreeCompositePrimaryKey, int, string, int>());
+            Assert.NotNull(serviceFactory.CreateInstance<Service<Customer>>());
+        }
+
+        private static void TestAsReadOnly(IServiceFactory serviceFactory)
+        {
+            var service1 = serviceFactory.Create<Customer>();
             var readOnlyRepo1 = service1.AsReadOnly();
 
             Assert.Equal(readOnlyRepo1, service1.AsReadOnly());
 
-            var service2 = new Service<Customer, int>(uowFactory);
+            var service2 = serviceFactory.Create<Customer, int>();
             var readOnlyRepo2 = service2.AsReadOnly();
 
             Assert.Equal(readOnlyRepo2, service2.AsReadOnly());
 
-            var service3 = new Service<CustomerWithTwoCompositePrimaryKey, int, string>(uowFactory);
+            var service3 = serviceFactory.Create<CustomerWithTwoCompositePrimaryKey, int, string>();
             var readOnlyRepo3 = service3.AsReadOnly();
 
             Assert.Equal(readOnlyRepo3, service3.AsReadOnly());
 
-            var service4 = new Service<CustomerWithThreeCompositePrimaryKey, int, string, int>(uowFactory);
+            var service4 = serviceFactory.Create<CustomerWithThreeCompositePrimaryKey, int, string, int>();
             var readOnlyRepo4 = service4.AsReadOnly();
 
             Assert.Equal(readOnlyRepo4, service4.AsReadOnly());

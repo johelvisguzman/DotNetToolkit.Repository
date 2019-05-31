@@ -113,6 +113,43 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
         protected void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactory, Task> action, params ContextProviderType[] exclude)
             => ForAllRepositoryFactoriesAsync((factory, type) => action(factory), exclude);
 
+        protected void ForAllServiceFactories(Action<IServiceFactory, ContextProviderType> action, params ContextProviderType[] exclude)
+        {
+            ContextProviders().Where(SupportsTransactions).ToList().ForEach(x =>
+            {
+                if (exclude != null && exclude.Contains(x))
+                    return;
+
+                action(new ServiceFactory(new UnitOfWorkFactory(BuildOptions(x))), x);
+            });
+        }
+
+        protected void ForAllServiceFactories(Action<IServiceFactory> action, params ContextProviderType[] exclude)
+            => ForAllServiceFactories((factory, type) => action(factory), exclude);
+
+        protected void ForAllServiceFactoriesAsync(Func<IServiceFactory, ContextProviderType, Task> action, params ContextProviderType[] exclude)
+        {
+            ContextProviders().Where(SupportsTransactions).ToList().ForEach(async x =>
+            {
+                if (exclude != null && exclude.Contains(x))
+                    return;
+
+                // Perform test
+                var task = Record.ExceptionAsync(() => action(new ServiceFactory(new UnitOfWorkFactory(BuildOptions(x))), x));
+
+                // Checks to see if we have any un-handled exception
+                if (task != null)
+                {
+                    var ex = await task;
+
+                    Assert.Null(ex);
+                }
+            });
+        }
+
+        protected void ForAllServiceFactoriesAsync(Func<IServiceFactory, Task> action, params ContextProviderType[] exclude)
+            => ForAllServiceFactoriesAsync((factory, type) => action(factory), exclude);
+
         protected void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory, ContextProviderType> action)
         {
             ContextProviders().Where(SupportsTransactions).ToList().ForEach(x =>

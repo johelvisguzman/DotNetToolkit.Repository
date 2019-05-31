@@ -2,7 +2,6 @@
 {
     using Data;
     using Factories;
-    using Services;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Xunit;
@@ -12,30 +11,30 @@
         [Fact]
         public void Update()
         {
-            ForAllUnitOfWorkFactories(TestUpdate);
+            ForAllServiceFactories(TestUpdate);
         }
 
         [Fact]
         public void UpdateRange()
         {
-            ForAllUnitOfWorkFactories(TestUpdateRange);
+            ForAllServiceFactories(TestUpdateRange);
         }
 
         [Fact]
         public void UpdateAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestUpdateAsync);
+            ForAllServiceFactoriesAsync(TestUpdateAsync);
         }
 
         [Fact]
         public void UpdateRangeAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestUpdateRangeAsync);
+            ForAllServiceFactoriesAsync(TestUpdateRangeAsync);
         }
 
-        private static void TestUpdate(IUnitOfWorkFactory uowFactory)
+        private static void TestUpdate(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string expectedName = "New Random Name";
             const string name = "Random Name";
@@ -53,9 +52,9 @@
             Assert.True(service.GetExists(x => x.Name.Equals(expectedName)));
         }
 
-        private static void TestUpdateRange(IUnitOfWorkFactory uowFactory)
+        private static void TestUpdateRange(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string expectedName = "New Random Name";
             const string name = "Random Name";
@@ -80,9 +79,9 @@
             Assert.Equal(2, service.GetCount(x => x.Name.Equals(expectedName)));
         }
 
-        private static async Task TestUpdateAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestUpdateAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string expectedName = "New Random Name";
             const string name = "Random Name";
@@ -100,9 +99,9 @@
             Assert.True(await service.GetExistsAsync(x => x.Name.Equals(expectedName)));
         }
 
-        private static async Task TestUpdateRangeAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestUpdateRangeAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string expectedName = "New Random Name";
             const string name = "Random Name";
