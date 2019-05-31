@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Factories
+﻿namespace DotNetToolkit.Repository
 {
     using Configuration.Options;
     using JetBrains.Annotations;
@@ -8,7 +8,7 @@
     /// <summary>
     /// An implementation of <see cref="IRepositoryFactory" />.
     /// </summary>
-    /// <seealso cref="DotNetToolkit.Repository.Factories.IRepositoryFactory" />
+    /// <seealso cref="DotNetToolkit.Repository.IRepositoryFactory" />
     public class RepositoryFactory : IRepositoryFactory
     {
         #region Fields

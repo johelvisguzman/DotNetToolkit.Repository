@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
     using Data;
-    using Factories;
     using Queries;
     using Queries.Strategies;
     using System.Collections.Generic;

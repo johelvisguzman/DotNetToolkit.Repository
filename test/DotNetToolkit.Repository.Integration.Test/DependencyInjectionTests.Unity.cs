@@ -5,7 +5,6 @@
     using Configuration.Options.Internal;
     using Data;
     using Extensions.Unity;
-    using Factories;
     using InMemory;
     using Services;
     using System;

@@ -8,7 +8,6 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
     using Configuration.Options;
     using EntityFramework;
     using EntityFrameworkCore;
-    using Factories;
     using global::NHibernate.Cfg;
     using global::NHibernate.Driver;
     using global::NHibernate.Mapping.ByCode;
@@ -18,12 +17,14 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
     using NHibernate;
+    using Services;
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
+    using Transactions;
     using Xml;
     using Xunit;
     using Xunit.Abstractions;

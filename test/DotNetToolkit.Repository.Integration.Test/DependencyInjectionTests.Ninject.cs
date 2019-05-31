@@ -4,7 +4,6 @@
     using Configuration.Options;
     using Data;
     using Extensions.Ninject;
-    using Factories;
     using InMemory;
     using Ninject;
     using Services;

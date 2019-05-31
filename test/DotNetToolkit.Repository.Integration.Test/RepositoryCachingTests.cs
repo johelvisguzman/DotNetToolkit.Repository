@@ -3,7 +3,6 @@
     using Caching.InMemory;
     using Configuration.Caching.Internal;
     using Data;
-    using Factories;
     using Queries;
     using System;
     using System.Threading.Tasks;

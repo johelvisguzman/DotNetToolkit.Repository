@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Services
 {
-    using Factories;
     using Internal;
     using JetBrains.Annotations;
     using Queries;
@@ -10,6 +9,7 @@
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
+    using Transactions;
     using Utility;
 
     /// <summary>

@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Xml.Internal
 {
     using Configuration;
-    using Factories;
     using Utility;
 
     /// <summary>

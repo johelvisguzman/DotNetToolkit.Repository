@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.InMemory.Internal
 {
     using Configuration;
-    using Factories;
     using Utility;
 
     /// <summary>

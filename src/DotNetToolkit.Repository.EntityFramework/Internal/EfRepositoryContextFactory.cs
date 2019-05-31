@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.EntityFramework.Internal
 {
     using Configuration;
-    using Factories;
     using System;
     using System.Collections.Generic;
     using System.Data.Common;

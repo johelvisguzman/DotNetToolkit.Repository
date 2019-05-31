@@ -1,9 +1,9 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
     using Data;
-    using Factories;
     using Queries;
     using Queries.Strategies;
+    using Services;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;

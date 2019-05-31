@@ -2,7 +2,6 @@
 {
     using Configuration.Options;
     using Data;
-    using Factories;
     using Repository;
     using Services;
     using System;

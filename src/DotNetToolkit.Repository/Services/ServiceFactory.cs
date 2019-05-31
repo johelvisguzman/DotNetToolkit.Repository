@@ -1,9 +1,9 @@
-﻿namespace DotNetToolkit.Repository.Factories
+﻿namespace DotNetToolkit.Repository.Services
 {
     using Configuration.Options;
     using JetBrains.Annotations;
-    using Services;
     using System;
+    using Transactions;
     using Utility;
 
     /// <summary>

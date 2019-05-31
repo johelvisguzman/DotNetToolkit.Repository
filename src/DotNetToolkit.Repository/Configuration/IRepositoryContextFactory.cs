@@ -1,7 +1,5 @@
-﻿namespace DotNetToolkit.Repository.Factories
+﻿namespace DotNetToolkit.Repository.Configuration
 {
-    using Configuration;
-
     /// <summary>
     /// Represents a repository context configuration.
     /// </summary>

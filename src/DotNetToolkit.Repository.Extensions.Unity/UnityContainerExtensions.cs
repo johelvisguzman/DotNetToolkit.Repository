@@ -4,7 +4,6 @@
     using Configuration.Options;
     using Configuration.Options.Internal;
     using Extensions.Internal;
-    using Factories;
     using global::Unity;
     using JetBrains.Annotations;
     using Services;

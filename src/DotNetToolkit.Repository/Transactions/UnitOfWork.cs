@@ -3,7 +3,6 @@
     using Configuration;
     using Configuration.Options;
     using Configuration.Options.Internal;
-    using Factories;
     using JetBrains.Annotations;
     using System;
     using Utility;

@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
     using Configuration;
-    using Factories;
     using System.Data.Common;
     using Utility;
 
