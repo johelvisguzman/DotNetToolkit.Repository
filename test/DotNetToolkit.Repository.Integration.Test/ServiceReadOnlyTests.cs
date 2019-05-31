@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
     using Data;
-    using Factories;
     using Internal;
     using Moq;
     using Queries;
@@ -10,6 +9,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq.Expressions;
+    using Transactions;
     using Xunit;
     using Xunit.Abstractions;
 

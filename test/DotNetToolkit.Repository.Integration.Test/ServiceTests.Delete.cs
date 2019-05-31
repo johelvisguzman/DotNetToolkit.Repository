@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
     using Data;
-    using Factories;
     using Services;
     using System;
     using System.Collections.Generic;
@@ -13,78 +12,78 @@
         [Fact]
         public void Delete()
         {
-            ForAllUnitOfWorkFactories(TestDelete);
+            ForAllServiceFactories(TestDelete);
         }
 
         [Fact]
         public void DeleteWithId()
         {
-            ForAllUnitOfWorkFactories(TestDeleteWithId);
+            ForAllServiceFactories(TestDeleteWithId);
         }
 
         [Fact]
         public void TryDelete()
         {
-            ForAllUnitOfWorkFactories(TestTryDelete);
+            ForAllServiceFactories(TestTryDelete);
         }
 
         [Fact]
         public void DeleteRange()
         {
-            ForAllUnitOfWorkFactories(TestDeleteRange);
+            ForAllServiceFactories(TestDeleteRange);
         }
 
         [Fact]
         public void DeleteWithTwoCompositePrimaryKey()
         {
-            ForAllUnitOfWorkFactories(TestDeleteWithTwoCompositePrimaryKey);
+            ForAllServiceFactories(TestDeleteWithTwoCompositePrimaryKey);
         }
 
         [Fact]
         public void DeleteWithThreeCompositePrimaryKey()
         {
-            ForAllUnitOfWorkFactories(TestDeleteWithThreeCompositePrimaryKey);
+            ForAllServiceFactories(TestDeleteWithThreeCompositePrimaryKey);
         }
 
         [Fact]
         public void DeleteAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestDeleteAsync);
+            ForAllServiceFactoriesAsync(TestDeleteAsync);
         }
 
         [Fact]
         public void DeleteWithIdAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestDeleteWithIdAsync);
+            ForAllServiceFactoriesAsync(TestDeleteWithIdAsync);
         }
 
         [Fact]
         public void TryDeleteAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestTryDeleteAsync);
+            ForAllServiceFactoriesAsync(TestTryDeleteAsync);
         }
 
         [Fact]
         public void DeleteRangeAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestDeleteRangeAsync);
+            ForAllServiceFactoriesAsync(TestDeleteRangeAsync);
         }
 
         [Fact]
         public void DeleteWithTwoCompositePrimaryKeyAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestDeleteWithTwoCompositePrimaryKeyAsync);
+            ForAllServiceFactoriesAsync(TestDeleteWithTwoCompositePrimaryKeyAsync);
         }
 
         [Fact]
         public void DeleteWithThreeCompositePrimaryKeyAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestDeleteWithThreeCompositePrimaryKeyAsync);
+            ForAllServiceFactoriesAsync(TestDeleteWithThreeCompositePrimaryKeyAsync);
         }
 
-        private static void TestDelete(IUnitOfWorkFactory uowFactory)
+        private static void TestDelete(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string name = "Random Name";
 
@@ -101,9 +100,9 @@
             Assert.False(service.GetExists(x => x.Name.Equals(name)));
         }
 
-        private static void TestDeleteWithId(IUnitOfWorkFactory uowFactory)
+        private static void TestDeleteWithId(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const int id = 1;
 
@@ -123,9 +122,9 @@
             Assert.False(service.GetExists(id));
         }
 
-        private static void TestTryDelete(IUnitOfWorkFactory uowFactory)
+        private static void TestTryDelete(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const int id = 1;
 
@@ -138,9 +137,9 @@
             Assert.True(service.TryDelete(id));
         }
 
-        private static void TestDeleteRange(IUnitOfWorkFactory uowFactory)
+        private static void TestDeleteRange(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string name = "Random Name";
 
@@ -161,9 +160,9 @@
             Assert.Equal(0, service.GetCount());
         }
 
-        private static void TestDeleteWithTwoCompositePrimaryKey(IUnitOfWorkFactory uowFactory)
+        private static void TestDeleteWithTwoCompositePrimaryKey(IServiceFactory serviceFactory)
         {
-            var repo = new Service<CustomerWithTwoCompositePrimaryKey, int, string>(uowFactory);
+            var repo = serviceFactory.Create<CustomerWithTwoCompositePrimaryKey, int, string>();
 
             var key1 = 1;
             var key2 = "2";
@@ -181,9 +180,9 @@
             Assert.False(repo.GetExists(key1, key2));
         }
 
-        private static void TestDeleteWithThreeCompositePrimaryKey(IUnitOfWorkFactory uowFactory)
+        private static void TestDeleteWithThreeCompositePrimaryKey(IServiceFactory serviceFactory)
         {
-            var repo = new Service<CustomerWithThreeCompositePrimaryKey, int, string, int>(uowFactory);
+            var repo = serviceFactory.Create<CustomerWithThreeCompositePrimaryKey, int, string, int>();
 
             var key1 = 1;
             var key2 = "2";
@@ -202,9 +201,9 @@
             Assert.False(repo.GetExists(key1, key2, key3));
         }
 
-        private static async Task TestDeleteAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestDeleteAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string name = "Random Name";
 
@@ -221,9 +220,9 @@
             Assert.False(await service.GetExistsAsync(x => x.Name.Equals(name)));
         }
 
-        private static async Task TestDeleteWithIdAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestDeleteWithIdAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const int id = 1;
 
@@ -243,9 +242,9 @@
             Assert.False(await service.GetExistsAsync(id));
         }
 
-        private static async Task TestTryDeleteAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestTryDeleteAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const int id = 1;
 
@@ -258,9 +257,9 @@
             Assert.True(await service.TryDeleteAsync(id));
         }
 
-        private static async Task TestDeleteRangeAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestDeleteRangeAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string name = "Random Name";
 
@@ -281,9 +280,9 @@
             Assert.Equal(0, await service.GetCountAsync());
         }
 
-        private static async Task TestDeleteWithTwoCompositePrimaryKeyAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestDeleteWithTwoCompositePrimaryKeyAsync(IServiceFactory serviceFactory)
         {
-            var repo = new Service<CustomerWithTwoCompositePrimaryKey, int, string>(uowFactory);
+            var repo = serviceFactory.Create<CustomerWithTwoCompositePrimaryKey, int, string>();
 
             var key1 = 1;
             var key2 = "2";
@@ -301,9 +300,9 @@
             Assert.False(await repo.GetExistsAsync(key1, key2));
         }
 
-        private static async Task TestDeleteWithThreeCompositePrimaryKeyAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestDeleteWithThreeCompositePrimaryKeyAsync(IServiceFactory serviceFactory)
         {
-            var repo = new Service<CustomerWithThreeCompositePrimaryKey, int, string, int>(uowFactory);
+            var repo = serviceFactory.Create<CustomerWithThreeCompositePrimaryKey, int, string, int>();
 
             var key1 = 1;
             var key2 = "2";

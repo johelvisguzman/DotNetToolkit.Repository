@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Json.Internal
 {
     using Configuration;
-    using Factories;
     using Utility;
 
     /// <summary>

@@ -2,7 +2,6 @@
 {
     using Configuration.Mapper;
     using Data;
-    using Factories;
     using System.Linq;
     using System.Threading.Tasks;
     using Xunit;

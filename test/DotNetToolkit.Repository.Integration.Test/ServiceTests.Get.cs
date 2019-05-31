@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
     using Data;
-    using Factories;
     using Queries;
     using Queries.Strategies;
     using Services;
@@ -15,138 +14,138 @@
         [Fact]
         public void Get()
         {
-            ForAllUnitOfWorkFactories(TestGet);
+            ForAllServiceFactories(TestGet);
         }
 
         [Fact]
         public void GetWithId()
         {
-            ForAllUnitOfWorkFactories(TestGetWithId);
+            ForAllServiceFactories(TestGetWithId);
         }
 
         [Fact]
         public void GetWithSortingOptionsAscending()
         {
-            ForAllUnitOfWorkFactories(TestGetWithSortingOptionsAscending);
+            ForAllServiceFactories(TestGetWithSortingOptionsAscending);
         }
 
         [Fact]
         public void GetWithSortingOptionsDescending()
         {
-            ForAllUnitOfWorkFactories(TestGetWithSortingOptionsDescending);
+            ForAllServiceFactories(TestGetWithSortingOptionsDescending);
         }
 
         [Fact]
         public void GetAll()
         {
-            ForAllUnitOfWorkFactories(TestGetAll);
+            ForAllServiceFactories(TestGetAll);
         }
 
         [Fact]
         public void GetAllWithSortingOptionsAscending()
         {
-            ForAllUnitOfWorkFactories(TestGetAllWithSortingOptionsAscending);
+            ForAllServiceFactories(TestGetAllWithSortingOptionsAscending);
         }
 
         [Fact]
         public void GetAllWithSortingOptionsDescending()
         {
-            ForAllUnitOfWorkFactories(TestGetAllWithSortingOptionsDescending);
+            ForAllServiceFactories(TestGetAllWithSortingOptionsDescending);
         }
 
         [Fact]
         public void GetAllWithPagingOptionsSortAscending()
         {
-            ForAllUnitOfWorkFactories(TestGetAllWithPagingOptionsSortAscending);
+            ForAllServiceFactories(TestGetAllWithPagingOptionsSortAscending);
         }
 
         [Fact]
         public void GetAllWithPagingOptionsSortDescending()
         {
-            ForAllUnitOfWorkFactories(TestGetAllWithPagingOptionsSortDescending);
+            ForAllServiceFactories(TestGetAllWithPagingOptionsSortDescending);
         }
 
         [Fact]
         public void GetWithTwoCompositePrimaryKey()
         {
-            ForAllUnitOfWorkFactories(TestGetWithTwoCompositePrimaryKey);
+            ForAllServiceFactories(TestGetWithTwoCompositePrimaryKey);
         }
 
         [Fact]
         public void GetWithThreeCompositePrimaryKey()
         {
-            ForAllUnitOfWorkFactories(TestGetWithThreeCompositePrimaryKey);
+            ForAllServiceFactories(TestGetWithThreeCompositePrimaryKey);
         }
 
         [Fact]
         public void GetAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetAsync);
+            ForAllServiceFactoriesAsync(TestGetAsync);
         }
 
         [Fact]
         public void GetWithIdAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetWithIdAsync);
+            ForAllServiceFactoriesAsync(TestGetWithIdAsync);
         }
 
         [Fact]
         public void GetWithSortingOptionsAscendingAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetWithSortingOptionsAscendingAsync);
+            ForAllServiceFactoriesAsync(TestGetWithSortingOptionsAscendingAsync);
         }
 
         [Fact]
         public void GetWithSortingOptionsDescendingAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetWithSortingOptionsDescendingAsync);
+            ForAllServiceFactoriesAsync(TestGetWithSortingOptionsDescendingAsync);
         }
 
         [Fact]
         public void GetAllAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetAllAsync);
+            ForAllServiceFactoriesAsync(TestGetAllAsync);
         }
 
         [Fact]
         public void GetAllWithSortingOptionsAscendingAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetAllWithSortingOptionsAscendingAsync);
+            ForAllServiceFactoriesAsync(TestGetAllWithSortingOptionsAscendingAsync);
         }
 
         [Fact]
         public void GetAllWithSortingOptionsDescendingAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetAllWithSortingOptionsDescendingAsync);
+            ForAllServiceFactoriesAsync(TestGetAllWithSortingOptionsDescendingAsync);
         }
 
         [Fact]
         public void GetAllWithPagingOptionsSortAscendingAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetAllWithPagingOptionsSortAscendingAsync);
+            ForAllServiceFactoriesAsync(TestGetAllWithPagingOptionsSortAscendingAsync);
         }
 
         [Fact]
         public void GetAllWithPagingOptionsSortDescendingAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetAllWithPagingOptionsSortDescendingAsync);
+            ForAllServiceFactoriesAsync(TestGetAllWithPagingOptionsSortDescendingAsync);
         }
 
         [Fact]
         public void GetWithTwoCompositePrimaryKeyAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetWithTwoCompositePrimaryKeyAsync);
+            ForAllServiceFactoriesAsync(TestGetWithTwoCompositePrimaryKeyAsync);
         }
 
         [Fact]
         public void GetWithThreeCompositePrimaryKeyAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetWithThreeCompositePrimaryKeyAsync);
+            ForAllServiceFactoriesAsync(TestGetWithThreeCompositePrimaryKeyAsync);
         }
 
-        private static void TestGet(IUnitOfWorkFactory uowFactory)
+        private static void TestGet(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string name = "Random Name";
 
@@ -166,9 +165,9 @@
             Assert.Equal(name, service.Get<string>(options, x => x.Name));
         }
 
-        private static void TestGetWithSortingOptionsDescending(IUnitOfWorkFactory uowFactory)
+        private static void TestGetWithSortingOptionsDescending(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>
             {
@@ -191,9 +190,9 @@
             Assert.Equal("Random Name 2", service.Get<string>(options, x => x.Name));
         }
 
-        private static void TestGetWithSortingOptionsAscending(IUnitOfWorkFactory uowFactory)
+        private static void TestGetWithSortingOptionsAscending(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>
             {
@@ -216,9 +215,9 @@
             Assert.Equal("Random Name 1", service.Get<string>(options, x => x.Name));
         }
 
-        private static void TestGetAll(IUnitOfWorkFactory uowFactory)
+        private static void TestGetAll(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string name = "Random Name";
 
@@ -242,9 +241,9 @@
             Assert.Single(service.GetAll<string>(options, x => x.Name).Result);
         }
 
-        private static void TestGetAllWithSortingOptionsDescending(IUnitOfWorkFactory uowFactory)
+        private static void TestGetAllWithSortingOptionsDescending(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>
             {
@@ -285,9 +284,9 @@
             Assert.Equal(3, service.GetAll<int>(options, x => x.Id).Result.First());
         }
 
-        private static void TestGetAllWithSortingOptionsAscending(IUnitOfWorkFactory uowFactory)
+        private static void TestGetAllWithSortingOptionsAscending(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>
             {
@@ -317,9 +316,9 @@
             Assert.Equal("Random Name 1", service.GetAll<string>(options, x => x.Name).Result.First());
         }
 
-        private static void TestGetAllWithPagingOptionsSortAscending(IUnitOfWorkFactory uowFactory)
+        private static void TestGetAllWithPagingOptionsSortAscending(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>();
 
@@ -385,9 +384,9 @@
             Assert.Equal("Random Name 20", entitiesInDb.ElementAt(0).Name);
         }
 
-        private static void TestGetAllWithPagingOptionsSortDescending(IUnitOfWorkFactory uowFactory)
+        private static void TestGetAllWithPagingOptionsSortDescending(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>();
 
@@ -453,9 +452,9 @@
             Assert.Equal("Random Name 0", entitiesInDb.ElementAt(0).Name);
         }
 
-        private static void TestGetWithId(IUnitOfWorkFactory uowFactory)
+        private static void TestGetWithId(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             int key = 1;
             const string name = "Random Name";
@@ -474,9 +473,9 @@
             Assert.NotNull(service.Get(key, fetchStrategy));
         }
 
-        private static void TestGetWithTwoCompositePrimaryKey(IUnitOfWorkFactory uowFactory)
+        private static void TestGetWithTwoCompositePrimaryKey(IServiceFactory serviceFactory)
         {
-            var repo = new Service<CustomerWithTwoCompositePrimaryKey, int, string>(uowFactory);
+            var repo = serviceFactory.Create<CustomerWithTwoCompositePrimaryKey, int, string>();
 
             var key1 = 1;
             var key2 = "2";
@@ -497,9 +496,9 @@
             Assert.NotNull(repo.Get(key1, key2, fetchStrategy));
         }
 
-        private static void TestGetWithThreeCompositePrimaryKey(IUnitOfWorkFactory uowFactory)
+        private static void TestGetWithThreeCompositePrimaryKey(IServiceFactory serviceFactory)
         {
-            var repo = new Service<CustomerWithThreeCompositePrimaryKey, int, string, int>(uowFactory);
+            var repo = serviceFactory.Create<CustomerWithThreeCompositePrimaryKey, int, string, int>();
 
             var key1 = 1;
             var key2 = "2";
@@ -521,9 +520,9 @@
             Assert.NotNull(repo.Get(key1, key2, key3, fetchStrategy));
         }
 
-        private static async Task TestGetAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string name = "Random Name";
 
@@ -543,9 +542,9 @@
             Assert.Equal(name, await service.GetAsync<string>(options, x => x.Name));
         }
 
-        private static async Task TestGetWithSortingOptionsDescendingAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetWithSortingOptionsDescendingAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>
             {
@@ -569,9 +568,9 @@
             Assert.Equal("Random Name 2", await service.GetAsync<string>(options, x => x.Name));
         }
 
-        private static async Task TestGetWithSortingOptionsAscendingAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetWithSortingOptionsAscendingAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>
             {
@@ -595,9 +594,9 @@
             Assert.Equal("Random Name 1", await service.GetAsync<string>(options, x => x.Name));
         }
 
-        private static async Task TestGetAllAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetAllAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string name = "Random Name";
 
@@ -621,9 +620,9 @@
             Assert.Single((await service.GetAllAsync<string>(options, x => x.Name)).Result);
         }
 
-        private static async Task TestGetAllWithSortingOptionsDescendingAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetAllWithSortingOptionsDescendingAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>
             {
@@ -664,9 +663,9 @@
             Assert.Equal(3, (await service.GetAllAsync<int>(options, x => x.Id)).Result.First());
         }
 
-        private static async Task TestGetAllWithSortingOptionsAscendingAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetAllWithSortingOptionsAscendingAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>
             {
@@ -696,9 +695,9 @@
             Assert.Equal("Random Name 1", (await service.GetAllAsync<string>(options, x => x.Name)).Result.First());
         }
 
-        private static async Task TestGetAllWithPagingOptionsSortAscendingAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetAllWithPagingOptionsSortAscendingAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>();
 
@@ -764,9 +763,9 @@
             Assert.Equal("Random Name 20", entitiesInDb.ElementAt(0).Name);
         }
 
-        private static async Task TestGetAllWithPagingOptionsSortDescendingAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetAllWithPagingOptionsSortDescendingAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>();
 
@@ -832,9 +831,9 @@
             Assert.Equal("Random Name 0", entitiesInDb.ElementAt(0).Name);
         }
 
-        private static async Task TestGetWithIdAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetWithIdAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             int key = 1;
             const string name = "Random Name";
@@ -853,9 +852,9 @@
             Assert.NotNull(await service.GetAsync(key, fetchStrategy));
         }
 
-        private static async Task TestGetWithTwoCompositePrimaryKeyAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetWithTwoCompositePrimaryKeyAsync(IServiceFactory serviceFactory)
         {
-            var repo = new Service<CustomerWithTwoCompositePrimaryKey, int, string>(uowFactory);
+            var repo = serviceFactory.Create<CustomerWithTwoCompositePrimaryKey, int, string>();
 
             var key1 = 1;
             var key2 = "2";
@@ -876,9 +875,9 @@
             Assert.NotNull(await repo.GetAsync(key1, key2, fetchStrategy));
         }
 
-        private static async Task TestGetWithThreeCompositePrimaryKeyAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetWithThreeCompositePrimaryKeyAsync(IServiceFactory serviceFactory)
         {
-            var repo = new Service<CustomerWithThreeCompositePrimaryKey, int, string, int>(uowFactory);
+            var repo = serviceFactory.Create<CustomerWithThreeCompositePrimaryKey, int, string, int>();
 
             var key1 = 1;
             var key2 = "2";

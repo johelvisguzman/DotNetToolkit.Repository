@@ -2,12 +2,12 @@
 
 namespace DotNetToolkit.Repository.Internal.ConfigFile
 {
+    using Configuration;
     using Configuration.Caching;
     using Configuration.Interceptors;
     using Configuration.Logging;
     using Configuration.Mapper;
     using Extensions.Internal;
-    using Factories;
     using System;
     using System.Collections.Generic;
     using System.Configuration;

@@ -1,7 +1,5 @@
-﻿namespace DotNetToolkit.Repository.Factories
+﻿namespace DotNetToolkit.Repository.Transactions
 {
-    using Transactions;
-
     /// <summary>
     /// Represents a unit of work factory.
     /// </summary>

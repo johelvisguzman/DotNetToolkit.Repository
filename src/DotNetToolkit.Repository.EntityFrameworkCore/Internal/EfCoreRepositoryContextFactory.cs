@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.EntityFrameworkCore.Internal
 {
     using Configuration;
-    using Factories;
     using Microsoft.EntityFrameworkCore;
     using System;
     using Utility;

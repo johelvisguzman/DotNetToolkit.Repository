@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Services
 {
-    using Factories;
     using JetBrains.Annotations;
+    using Transactions;
 
     /// <summary>
     /// An implementation of <see cref="IService{TEntity, TKey1, TKey2, TKey3}" />.

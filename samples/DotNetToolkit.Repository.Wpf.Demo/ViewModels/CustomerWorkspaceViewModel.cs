@@ -3,7 +3,6 @@
     using DotNetToolkit.Wpf.Commands;
     using DotNetToolkit.Wpf.Metro.Dialogs;
     using DotNetToolkit.Wpf.Mvvm;
-    using Factories;
     using Infrastructure;
     using Models;
     using Services;

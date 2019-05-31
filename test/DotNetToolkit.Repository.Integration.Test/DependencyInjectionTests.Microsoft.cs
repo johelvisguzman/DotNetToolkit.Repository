@@ -4,7 +4,6 @@
     using Configuration.Options;
     using Data;
     using Extensions.Microsoft.DependencyInjection;
-    using Factories;
     using InMemory;
     using Microsoft.Extensions.DependencyInjection;
     using Services;
@@ -60,6 +59,7 @@
             Assert.NotNull(provider.GetService<IRepositoryOptions>());
             Assert.NotNull(provider.GetService<IUnitOfWork>());
             Assert.NotNull(provider.GetService<IUnitOfWorkFactory>());
+            Assert.NotNull(provider.GetService<IServiceFactory>());
             Assert.NotNull(provider.GetService<IRepositoryDependencyResolver>());
         }
 

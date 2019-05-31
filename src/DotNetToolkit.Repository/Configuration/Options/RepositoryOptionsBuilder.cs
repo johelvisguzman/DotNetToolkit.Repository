@@ -2,7 +2,6 @@
 {
     using Caching;
     using Conventions;
-    using Factories;
     using Interceptors;
     using Internal;
     using JetBrains.Annotations;

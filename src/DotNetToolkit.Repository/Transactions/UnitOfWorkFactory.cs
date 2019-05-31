@@ -1,15 +1,14 @@
-﻿namespace DotNetToolkit.Repository.Factories
+﻿namespace DotNetToolkit.Repository.Transactions
 {
     using Configuration.Options;
     using JetBrains.Annotations;
     using System;
-    using Transactions;
     using Utility;
 
     /// <summary>
     /// An implementation of <see cref="IUnitOfWorkFactory" />.
     /// </summary>
-    /// <seealso cref="DotNetToolkit.Repository.Factories.IUnitOfWorkFactory" />
+    /// <seealso cref="DotNetToolkit.Repository.Transactions.IUnitOfWorkFactory" />
     public class UnitOfWorkFactory : IUnitOfWorkFactory
     {
         #region Fields
@@ -43,11 +42,6 @@
         {
             _options = Guard.NotNull(options, nameof(options));
         }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UnitOfWorkFactory"/> class with the <see cref="RepositoryDependencyResolver"/> using an IOC container to resolve the <see cref="IRepositoryOptions"/>.
-        /// </summary>
-        public UnitOfWorkFactory() : this(RepositoryDependencyResolver.Current.Resolve<IRepositoryOptions>()) { }
 
         #endregion
 

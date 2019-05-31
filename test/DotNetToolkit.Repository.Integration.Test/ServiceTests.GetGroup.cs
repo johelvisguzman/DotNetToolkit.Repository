@@ -1,78 +1,78 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
     using Data;
-    using Factories;
     using Queries;
     using Services;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Xunit;
+
     public partial class ServiceTests : TestBase
     {
         [Fact]
         public void GetGroupBy()
         {
-            ForAllUnitOfWorkFactories(TestGetGroupBy);
+            ForAllServiceFactories(TestGetGroupBy);
         }
 
         [Fact]
         public void GetGroupByWithSortingOptionsAscending()
         {
-            ForAllUnitOfWorkFactories(TestGetGroupByWithSortingOptionsAscending);
+            ForAllServiceFactories(TestGetGroupByWithSortingOptionsAscending);
         }
 
         [Fact]
         public void GetGroupByWithSortingOptionsDescending()
         {
-            ForAllUnitOfWorkFactories(TestGetGroupByWithSortingOptionsDescending);
+            ForAllServiceFactories(TestGetGroupByWithSortingOptionsDescending);
         }
 
         [Fact]
         public void GetGroupByWithPagingOptionsSortAscending()
         {
-            ForAllUnitOfWorkFactories(TestGetGroupByWithPagingOptionsSortAscending);
+            ForAllServiceFactories(TestGetGroupByWithPagingOptionsSortAscending);
         }
 
         [Fact]
         public void GetGroupByWithPagingOptionsSortDescending()
         {
-            ForAllUnitOfWorkFactories(TestGetGroupByWithPagingOptionsSortDescending);
+            ForAllServiceFactories(TestGetGroupByWithPagingOptionsSortDescending);
         }
 
         [Fact]
         public void GetGroupByAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetGroupByAsync);
+            ForAllServiceFactoriesAsync(TestGetGroupByAsync);
         }
 
         [Fact]
         public void GetGroupByWithSortingOptionsAscendingAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetGroupByWithSortingOptionsAscendingAsync);
+            ForAllServiceFactoriesAsync(TestGetGroupByWithSortingOptionsAscendingAsync);
         }
 
         [Fact]
         public void GetGroupByWithSortingOptionsDescendingAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetGroupByWithSortingOptionsDescendingAsync);
+            ForAllServiceFactoriesAsync(TestGetGroupByWithSortingOptionsDescendingAsync);
         }
 
         [Fact]
         public void GetGroupByWithPagingOptionsSortAscendingAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetGroupByWithPagingOptionsSortAscendingAsync);
+            ForAllServiceFactoriesAsync(TestGetGroupByWithPagingOptionsSortAscendingAsync);
         }
 
         [Fact]
         public void GetGroupByWithPagingOptionsSortDescendingAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetGroupByWithPagingOptionsSortDescendingAsync);
+            ForAllServiceFactoriesAsync(TestGetGroupByWithPagingOptionsSortDescendingAsync);
         }
 
-        private static void TestGetGroupBy(IUnitOfWorkFactory uowFactory)
+        private static void TestGetGroupBy(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string name = "Random Name";
 
@@ -97,9 +97,9 @@
                 service.GetGroupBy(options, y => y.Id, (key, g) => key).Result.Contains(x.Key)));
         }
 
-        private static void TestGetGroupByWithSortingOptionsAscending(IUnitOfWorkFactory uowFactory)
+        private static void TestGetGroupByWithSortingOptionsAscending(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>
             {
@@ -115,9 +115,9 @@
             Assert.Equal("Random Name 2", service.GetGroupBy(y => y.Name, (key, g) => key).First());
         }
 
-        private static void TestGetGroupByWithSortingOptionsDescending(IUnitOfWorkFactory uowFactory)
+        private static void TestGetGroupByWithSortingOptionsDescending(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>
             {
@@ -133,9 +133,9 @@
             Assert.Equal("Random Name 1", service.GetGroupBy(options, y => y.Name, (key, g) => key).Result.First());
         }
 
-        private static void TestGetGroupByWithPagingOptionsSortAscending(IUnitOfWorkFactory uowFactory)
+        private static void TestGetGroupByWithPagingOptionsSortAscending(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>();
 
@@ -218,9 +218,9 @@
             Assert.Equal("Random Name 20", entitiesInDb.ElementAt(0));
         }
 
-        private static void TestGetGroupByWithPagingOptionsSortDescending(IUnitOfWorkFactory uowFactory)
+        private static void TestGetGroupByWithPagingOptionsSortDescending(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>();
 
@@ -303,9 +303,9 @@
             Assert.Equal("Random Name 0", entitiesInDb.ElementAt(0));
         }
 
-        private static async Task TestGetGroupByAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetGroupByAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string name = "Random Name";
 
@@ -330,9 +330,9 @@
                 service.GetGroupByAsync(options, y => y.Id, (key, g) => key).Result.Result.Contains(x.Key)));
         }
 
-        private static async Task TestGetGroupByWithSortingOptionsAscendingAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetGroupByWithSortingOptionsAscendingAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>
             {
@@ -349,9 +349,9 @@
             Assert.Equal("Random Name 2", (await service.GetGroupByAsync(y => y.Name, (key, g) => key)).First());
         }
 
-        private static async Task TestGetGroupByWithSortingOptionsDescendingAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetGroupByWithSortingOptionsDescendingAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>
             {
@@ -368,9 +368,9 @@
                 (await service.GetGroupByAsync(options, y => y.Name, (key, g) => key)).Result.First());
         }
 
-        private static async Task TestGetGroupByWithPagingOptionsSortAscendingAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetGroupByWithPagingOptionsSortAscendingAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>();
 
@@ -453,9 +453,9 @@
             Assert.Equal("Random Name 20", entitiesInDb.ElementAt(0));
         }
 
-        private static async Task TestGetGroupByWithPagingOptionsSortDescendingAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetGroupByWithPagingOptionsSortDescendingAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>();
 

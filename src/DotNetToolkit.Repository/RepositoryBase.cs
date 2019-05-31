@@ -11,7 +11,6 @@
     using Configuration.Options;
     using Extensions;
     using Extensions.Internal;
-    using Factories;
     using Internal;
     using JetBrains.Annotations;
     using Properties;

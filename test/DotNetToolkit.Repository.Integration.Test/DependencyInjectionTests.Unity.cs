@@ -5,7 +5,6 @@
     using Configuration.Options.Internal;
     using Data;
     using Extensions.Unity;
-    using Factories;
     using InMemory;
     using Services;
     using System;
@@ -59,6 +58,7 @@
             Assert.NotNull(container.Resolve<IRepositoryOptions>());
             Assert.NotNull(container.Resolve<IUnitOfWork>());
             Assert.NotNull(container.Resolve<IUnitOfWorkFactory>());
+            Assert.NotNull(container.Resolve<IServiceFactory>());
             Assert.NotNull(container.Resolve<IRepositoryDependencyResolver>());
         }
 

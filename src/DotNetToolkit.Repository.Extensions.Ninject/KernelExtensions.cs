@@ -4,7 +4,6 @@
     using Configuration.Options;
     using Configuration.Options.Internal;
     using Extensions.Internal;
-    using Factories;
     using global::Ninject;
     using JetBrains.Annotations;
     using Services;
@@ -106,9 +105,10 @@
             }
 
             // Binds other services
-            kernel.Bind<IRepositoryFactory>().To<RepositoryFactory>();
-            kernel.Bind<IUnitOfWork>().To<UnitOfWork>();
-            kernel.Bind<IUnitOfWorkFactory>().To<UnitOfWorkFactory>();
+            kernel.Bind<IRepositoryFactory>().ToMethod(c => new RepositoryFactory(c.Kernel.Get<IRepositoryOptions>()));
+            kernel.Bind<IUnitOfWork>().ToMethod(c => new UnitOfWork(c.Kernel.Get<IRepositoryOptions>()));
+            kernel.Bind<IUnitOfWorkFactory>().ToMethod(c => new UnitOfWorkFactory(c.Kernel.Get<IRepositoryOptions>()));
+            kernel.Bind<IServiceFactory>().ToMethod(c => new ServiceFactory(c.Kernel.Get<IUnitOfWorkFactory>()));
             kernel.Bind<IRepositoryOptions>().ToMethod(c =>
             {
                 var options = new RepositoryOptions(optionsBuilder.Options);

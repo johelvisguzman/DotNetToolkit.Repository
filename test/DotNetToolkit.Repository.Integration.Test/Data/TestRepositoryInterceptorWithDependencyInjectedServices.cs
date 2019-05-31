@@ -2,7 +2,6 @@
 {
     using Configuration.Interceptors;
     using Configuration.Options;
-    using Factories;
     using System;
     using Transactions;
 

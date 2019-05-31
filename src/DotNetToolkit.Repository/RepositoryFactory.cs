@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Factories
+﻿namespace DotNetToolkit.Repository
 {
     using Configuration.Options;
     using JetBrains.Annotations;
@@ -8,7 +8,7 @@
     /// <summary>
     /// An implementation of <see cref="IRepositoryFactory" />.
     /// </summary>
-    /// <seealso cref="DotNetToolkit.Repository.Factories.IRepositoryFactory" />
+    /// <seealso cref="DotNetToolkit.Repository.IRepositoryFactory" />
     public class RepositoryFactory : IRepositoryFactory
     {
         #region Fields
@@ -42,11 +42,6 @@
         {
             _options = Guard.NotNull(options, nameof(options));
         }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RepositoryFactory"/> class with the <see cref="RepositoryDependencyResolver"/> using an IOC container to resolve the <see cref="IRepositoryOptions"/>.
-        /// </summary>
-        public RepositoryFactory() : this(RepositoryDependencyResolver.Current.Resolve<IRepositoryOptions>()) { }
 
         #endregion
 

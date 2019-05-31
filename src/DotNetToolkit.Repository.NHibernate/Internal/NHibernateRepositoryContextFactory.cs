@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.NHibernate.Internal
 {
     using Configuration;
-    using Factories;
     using global::NHibernate;
     using global::NHibernate.Cfg;
     using Utility;

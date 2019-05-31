@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
     using Data;
-    using Factories;
     using Queries;
     using Services;
     using System.Collections.Generic;
@@ -14,42 +13,42 @@
         [Fact]
         public void GetDictionary()
         {
-            ForAllUnitOfWorkFactories(TestGetDictionary);
+            ForAllServiceFactories(TestGetDictionary);
         }
 
         [Fact]
         public void GetDictionaryWithPagingOptionsSortAscending()
         {
-            ForAllUnitOfWorkFactories(TestGetDictionaryWithPagingOptionsSortAscending);
+            ForAllServiceFactories(TestGetDictionaryWithPagingOptionsSortAscending);
         }
 
         [Fact]
         public void GetDictionaryWithPagingOptionsSortDescending()
         {
-            ForAllUnitOfWorkFactories(TestGetDictionaryWithPagingOptionsSortDescending);
+            ForAllServiceFactories(TestGetDictionaryWithPagingOptionsSortDescending);
         }
 
         [Fact]
         public void GetDictionaryAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetDictionaryAsync);
+            ForAllServiceFactoriesAsync(TestGetDictionaryAsync);
         }
 
         [Fact]
         public void GetDictionaryWithPagingOptionsSortAscendingAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetDictionaryWithPagingOptionsSortAscendingAsync);
+            ForAllServiceFactoriesAsync(TestGetDictionaryWithPagingOptionsSortAscendingAsync);
         }
 
         [Fact]
         public void GetDictionaryWithPagingOptionsSortDescendingAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetDictionaryWithPagingOptionsSortDescendingAsync);
+            ForAllServiceFactoriesAsync(TestGetDictionaryWithPagingOptionsSortDescendingAsync);
         }
 
-        private static void TestGetDictionary(IUnitOfWorkFactory uowFactory)
+        private static void TestGetDictionary(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string name = "Random Name";
 
@@ -80,9 +79,9 @@
                 service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
         }
 
-        private static void TestGetDictionaryWithPagingOptionsSortAscending(IUnitOfWorkFactory uowFactory)
+        private static void TestGetDictionaryWithPagingOptionsSortAscending(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>();
 
@@ -277,9 +276,9 @@
                 service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
         }
 
-        private static void TestGetDictionaryWithPagingOptionsSortDescending(IUnitOfWorkFactory uowFactory)
+        private static void TestGetDictionaryWithPagingOptionsSortDescending(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>();
 
@@ -475,9 +474,9 @@
                 service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
         }
 
-        private static async Task TestGetDictionaryAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetDictionaryAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string name = "Random Name";
 
@@ -508,9 +507,9 @@
                 service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
         }
 
-        private static async Task TestGetDictionaryWithPagingOptionsSortAscendingAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetDictionaryWithPagingOptionsSortAscendingAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>();
 
@@ -705,9 +704,9 @@
                 service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
         }
 
-        private static async Task TestGetDictionaryWithPagingOptionsSortDescendingAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetDictionaryWithPagingOptionsSortDescendingAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             var entities = new List<Customer>();
 

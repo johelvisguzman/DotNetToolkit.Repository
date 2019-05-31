@@ -1,11 +1,11 @@
 ﻿namespace DotNetToolkit.Repository.Internal.ConfigFile.Json
 {
+    using Configuration;
     using Configuration.Caching;
     using Configuration.Interceptors;
     using Configuration.Logging;
     using Configuration.Mapper;
     using Extensions.Internal;
-    using Factories;
     using JetBrains.Annotations;
     using Microsoft.Extensions.Configuration;
     using System;

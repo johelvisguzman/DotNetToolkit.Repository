@@ -6,7 +6,6 @@
     using Configuration.Conventions;
     using Configuration.Options;
     using Data;
-    using Factories;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;

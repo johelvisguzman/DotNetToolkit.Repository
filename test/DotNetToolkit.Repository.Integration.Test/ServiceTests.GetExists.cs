@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
     using Data;
-    using Factories;
     using Queries;
     using Services;
     using System.Threading.Tasks;
@@ -12,30 +11,30 @@
         [Fact]
         public void GetExists()
         {
-            ForAllUnitOfWorkFactories(TestGetExists);
+            ForAllServiceFactories(TestGetExists);
         }
 
         [Fact]
         public void GetExistsWithId()
         {
-            ForAllUnitOfWorkFactories(TestGetExistsWithId);
+            ForAllServiceFactories(TestGetExistsWithId);
         }
 
         [Fact]
         public void GetExistsAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetExistsAsync);
+            ForAllServiceFactoriesAsync(TestGetExistsAsync);
         }
 
         [Fact]
         public void GetExistsWithIdAsync()
         {
-            ForAllUnitOfWorkFactoriesAsync(TestGetExistsWithIdAsync);
+            ForAllServiceFactoriesAsync(TestGetExistsWithIdAsync);
         }
 
-        private static void TestGetExists(IUnitOfWorkFactory uowFactory)
+        private static void TestGetExists(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string name = "Random Name";
 
@@ -51,9 +50,9 @@
             Assert.True(service.GetExists(options));
         }
 
-        private static void TestGetExistsWithId(IUnitOfWorkFactory uowFactory)
+        private static void TestGetExistsWithId(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const int id = 1;
 
@@ -66,9 +65,9 @@
             Assert.True(service.GetExists(id));
         }
 
-        private static async Task TestGetExistsAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetExistsAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const string name = "Random Name";
 
@@ -84,9 +83,9 @@
             Assert.True(await service.GetExistsAsync(options));
         }
 
-        private static async Task TestGetExistsWithIdAsync(IUnitOfWorkFactory uowFactory)
+        private static async Task TestGetExistsWithIdAsync(IServiceFactory serviceFactory)
         {
-            var service = new Service<Customer>(uowFactory);
+            var service = serviceFactory.Create<Customer>();
 
             const int id = 1;
 

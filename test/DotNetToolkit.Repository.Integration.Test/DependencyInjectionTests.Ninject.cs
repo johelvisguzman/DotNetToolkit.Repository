@@ -4,7 +4,6 @@
     using Configuration.Options;
     using Data;
     using Extensions.Ninject;
-    using Factories;
     using InMemory;
     using Ninject;
     using Services;
@@ -59,6 +58,7 @@
             Assert.NotNull(kernel.Get<IRepositoryOptions>());
             Assert.NotNull(kernel.Get<IUnitOfWork>());
             Assert.NotNull(kernel.Get<IUnitOfWorkFactory>());
+            Assert.NotNull(kernel.Get<IServiceFactory>());
             Assert.NotNull(kernel.Get<IRepositoryDependencyResolver>());
         }
 
