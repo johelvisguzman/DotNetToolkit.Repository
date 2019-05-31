@@ -28,31 +28,11 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="UnitOfWork" /> class.
         /// </summary>
-        /// <param name="optionsAction">A builder action used to create or modify options for this unit of work.</param>
-        public UnitOfWork([NotNull] Action<RepositoryOptionsBuilder> optionsAction)
-        {
-            Guard.NotNull(optionsAction, nameof(optionsAction));
-
-            var optionsBuilder = new RepositoryOptionsBuilder();
-
-            optionsAction(optionsBuilder);
-
-            Initialize(optionsBuilder.Options);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UnitOfWork" /> class.
-        /// </summary>
         /// <param name="options">The repository options.</param>
         public UnitOfWork([NotNull] IRepositoryOptions options)
         {
             Initialize(Guard.NotNull(options, nameof(options)));
         }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UnitOfWork"/> class with the <see cref="RepositoryDependencyResolver"/> using an IOC container to resolve the <see cref="IRepositoryOptions"/>.
-        /// </summary>
-        public UnitOfWork() : this(RepositoryDependencyResolver.Current.Resolve<IRepositoryOptions>()) { }
 
         #endregion
 

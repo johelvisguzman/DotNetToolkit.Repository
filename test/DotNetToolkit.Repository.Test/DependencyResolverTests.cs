@@ -56,33 +56,6 @@
         }
 
         [Fact]
-        public void ThrowsIfRepositoryFactoryCreateWithDefaultDependencyResolverForResolvingOptions()
-        {
-            RepositoryDependencyResolver.SetResolver(new RepositoryDependencyResolver.DefaultDependencyResolver());
-
-            var ex = Assert.Throws<InvalidOperationException>(() => new RepositoryFactory());
-            Assert.Equal($"Unable to resolve an instance for '{typeof(IRepositoryOptions).FullName}'. Please consider using the RepositoryDependencyResolver to use an IOC container.", ex.Message);
-        }
-
-        [Fact]
-        public void ThrowsIfUnitOfWorkFactoryCreateWithDefaultDependencyResolverForResolvingOptions()
-        {
-            RepositoryDependencyResolver.SetResolver(new RepositoryDependencyResolver.DefaultDependencyResolver());
-
-            var ex = Assert.Throws<InvalidOperationException>(() => new UnitOfWorkFactory());
-            Assert.Equal($"Unable to resolve an instance for '{typeof(IRepositoryOptions).FullName}'. Please consider using the RepositoryDependencyResolver to use an IOC container.", ex.Message);
-        }
-
-        [Fact]
-        public void ThrowsIfUnitOfWorkCreateWithDefaultDependencyResolverForResolvingOptions()
-        {
-            RepositoryDependencyResolver.SetResolver(new RepositoryDependencyResolver.DefaultDependencyResolver());
-
-            var ex = Assert.Throws<InvalidOperationException>(() => new UnitOfWork());
-            Assert.Equal($"Unable to resolve an instance for '{typeof(IRepositoryOptions).FullName}'. Please consider using the RepositoryDependencyResolver to use an IOC container.", ex.Message);
-        }
-
-        [Fact]
         public void ThrowsIfRepositoryCreateWithDefaultDependencyResolverForResolvingOptions()
         {
             RepositoryDependencyResolver.SetResolver(new RepositoryDependencyResolver.DefaultDependencyResolver());

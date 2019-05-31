@@ -106,9 +106,9 @@
             }
 
             // Register other services
-            container.RegisterFactory<IRepositoryFactory>(c => new RepositoryFactory());
-            container.RegisterFactory<IUnitOfWork>(c => new UnitOfWork());
-            container.RegisterFactory<IUnitOfWorkFactory>(c => new UnitOfWorkFactory());
+            container.RegisterFactory<IRepositoryFactory>(c => new RepositoryFactory(c.Resolve<IRepositoryOptions>()));
+            container.RegisterFactory<IUnitOfWork>(c => new UnitOfWork(c.Resolve<IRepositoryOptions>()));
+            container.RegisterFactory<IUnitOfWorkFactory>(c => new UnitOfWorkFactory(c.Resolve<IRepositoryOptions>()));
             container.RegisterFactory<IRepositoryOptions>(c =>
             {
                 var options = new RepositoryOptions(optionsBuilder.Options);
