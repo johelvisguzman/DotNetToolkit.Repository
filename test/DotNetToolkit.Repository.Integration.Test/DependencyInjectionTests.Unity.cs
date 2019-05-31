@@ -59,6 +59,7 @@
             Assert.NotNull(container.Resolve<IRepositoryOptions>());
             Assert.NotNull(container.Resolve<IUnitOfWork>());
             Assert.NotNull(container.Resolve<IUnitOfWorkFactory>());
+            Assert.NotNull(container.Resolve<IServiceFactory>());
             Assert.NotNull(container.Resolve<IRepositoryDependencyResolver>());
         }
 

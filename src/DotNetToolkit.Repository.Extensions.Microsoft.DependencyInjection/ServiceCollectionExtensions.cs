@@ -110,6 +110,7 @@
             services.AddScoped<IRepositoryFactory, RepositoryFactory>(sp => new RepositoryFactory(sp.GetService<IRepositoryOptions>()));
             services.AddScoped<IUnitOfWork, UnitOfWork>(sp => new UnitOfWork(sp.GetService<IRepositoryOptions>()));
             services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>(sp => new UnitOfWorkFactory(sp.GetService<IRepositoryOptions>()));
+            services.AddScoped<IServiceFactory, ServiceFactory>(sp => new ServiceFactory(sp.GetService<IUnitOfWorkFactory>()));
             services.AddScoped<IRepositoryOptions>(sp =>
             {
                 var options = new RepositoryOptions(optionsBuilder.Options);

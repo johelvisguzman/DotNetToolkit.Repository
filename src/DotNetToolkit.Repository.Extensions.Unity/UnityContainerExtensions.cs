@@ -109,6 +109,7 @@
             container.RegisterFactory<IRepositoryFactory>(c => new RepositoryFactory(c.Resolve<IRepositoryOptions>()));
             container.RegisterFactory<IUnitOfWork>(c => new UnitOfWork(c.Resolve<IRepositoryOptions>()));
             container.RegisterFactory<IUnitOfWorkFactory>(c => new UnitOfWorkFactory(c.Resolve<IRepositoryOptions>()));
+            container.RegisterFactory<IServiceFactory>(c => new ServiceFactory(c.Resolve<IUnitOfWorkFactory>()));
             container.RegisterFactory<IRepositoryOptions>(c =>
             {
                 var options = new RepositoryOptions(optionsBuilder.Options);
