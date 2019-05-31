@@ -1003,7 +1003,7 @@
 
             IEnumerable<TEntity> Getter() =>
                 UseContext<IEnumerable<TEntity>>(
-                    context => context.ExecuteSqlQuery(sql, cmdType, parametersDict, projector));
+                    context => context.ExecuteSqlQuery(sql, cmdType, parametersDict, (r, c) => projector(r)));
 
             IEnumerable<TEntity> result;
 
@@ -1243,7 +1243,7 @@
 
             Task<IEnumerable<TEntity>> Getter() =>
                 UseContextAsync<IEnumerable<TEntity>>(
-                    context => context.ExecuteSqlQueryAsync(sql, cmdType, parametersDict, projector, cancellationToken));
+                    context => context.ExecuteSqlQueryAsync(sql, cmdType, parametersDict, (r, c) => projector(r), cancellationToken));
 
             IEnumerable<TEntity> result;
 

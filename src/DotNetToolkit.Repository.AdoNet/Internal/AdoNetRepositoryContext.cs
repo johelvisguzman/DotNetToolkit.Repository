@@ -70,11 +70,11 @@
         /// Initializes a new instance of the <see cref="AdoNetRepositoryContext" /> class.
         /// </summary>
         /// <param name="nameOrConnectionString">Either the database name or a connection string.</param>
-		/// <param name="ensureDatabaseCreated">
-		/// Ensures that the database for the context exists. If it exists, no action is taken.
-		/// If it does not exist then the database and all its schema are created.
+        /// <param name="ensureDatabaseCreated">
+        /// Ensures that the database for the context exists. If it exists, no action is taken.
+        /// If it does not exist then the database and all its schema are created.
         /// If the database exists, then no effort is made to ensure it is compatible with the model for this context.
-		/// </param>
+        /// </param>
         public AdoNetRepositoryContext(string nameOrConnectionString, bool ensureDatabaseCreated = false)
         {
             Guard.NotEmpty(nameOrConnectionString, nameof(nameOrConnectionString));
@@ -92,10 +92,10 @@
         /// <param name="providerName">The name of the provider.</param>
         /// <param name="connectionString">The connection string.</param>
         /// <param name="ensureDatabaseCreated">
-		/// Ensures that the database for the context exists. If it exists, no action is taken.
-		/// If it does not exist then the database and all its schema are created.
+        /// Ensures that the database for the context exists. If it exists, no action is taken.
+        /// If it does not exist then the database and all its schema are created.
         /// If the database exists, then no effort is made to ensure it is compatible with the model for this context.
-		/// </param>
+        /// </param>
         public AdoNetRepositoryContext(string providerName, string connectionString, bool ensureDatabaseCreated = false)
         {
             Guard.NotEmpty(providerName, nameof(providerName));
@@ -113,10 +113,10 @@
         /// </summary>
         /// <param name="existingConnection">The existing connection.</param>
         /// <param name="ensureDatabaseCreated">
-		/// Ensures that the database for the context exists. If it exists, no action is taken.
-		/// If it does not exist then the database and all its schema are created.
+        /// Ensures that the database for the context exists. If it exists, no action is taken.
+        /// If it does not exist then the database and all its schema are created.
         /// If the database exists, then no effort is made to ensure it is compatible with the model for this context.
-		/// </param>
+        /// </param>
         public AdoNetRepositoryContext(DbConnection existingConnection, bool ensureDatabaseCreated = false)
         {
             Guard.NotNull(existingConnection, nameof(existingConnection));
@@ -215,32 +215,6 @@
                 while (reader.Read())
                 {
                     list.Add(projector(reader, Conventions));
-                }
-
-                return list;
-            }
-        }
-
-        /// <summary>
-        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
-        /// </summary>
-        /// <param name="sql">The SQL query string.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
-        /// <param name="projector">A function to project each entity into a new form.</param>
-        /// <returns>A list which each entity has been projected into a new form.</returns>
-        public IEnumerable<TEntity> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector) where TEntity : class
-        {
-            Guard.NotEmpty(sql, nameof(sql));
-            Guard.NotNull(projector, nameof(projector));
-
-            using (var reader = _dbHelper.ExecuteReader(sql, cmdType, parameters))
-            {
-                var list = new List<TEntity>();
-
-                while (reader.Read())
-                {
-                    list.Add(projector(reader));
                 }
 
                 return list;
@@ -448,7 +422,7 @@
             var selectorFunc = selector.Compile();
 
             QueryBuilder.CreateSelectStatement<TEntity>(
-                Conventions, 
+                Conventions,
                 options,
                 out var sql,
                 out var parameters,
@@ -477,7 +451,7 @@
             var selectorFunc = selector.Compile();
 
             QueryBuilder.CreateSelectStatement<TEntity>(
-                Conventions, 
+                Conventions,
                 options,
                 out var sql,
                 out var parameters,
@@ -556,7 +530,7 @@
             var elementSelectorFunc = elementSelector.Compile();
 
             QueryBuilder.CreateSelectStatement<TEntity>(
-                Conventions, 
+                Conventions,
                 options,
                 out var sql,
                 out var parameters,
@@ -651,33 +625,6 @@
                 while (await reader.ReadAsync(cancellationToken))
                 {
                     list.Add(projector(reader, Conventions));
-                }
-
-                return list;
-            }
-        }
-
-        /// <summary>
-        /// Asynchronously creates raw SQL query that is executed directly in the database and returns a collection of entities.
-        /// </summary>
-        /// <param name="sql">The SQL query string.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
-        /// <param name="projector">A function to project each entity into a new form.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
-        public async Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
-        {
-            Guard.NotEmpty(sql, nameof(sql));
-            Guard.NotNull(projector, nameof(projector));
-
-            using (var reader = await _dbHelper.ExecuteReaderAsync(sql, cmdType, parameters, cancellationToken))
-            {
-                var list = new List<TEntity>();
-
-                while (await reader.ReadAsync(cancellationToken))
-                {
-                    list.Add(projector(reader));
                 }
 
                 return list;
@@ -809,7 +756,7 @@
             var selectorFunc = IdentityFunction<TEntity>.Instance;
 
             QueryBuilder.CreateSelectStatement<TEntity>(
-                Conventions, 
+                Conventions,
                 options,
                 fetchStrategy != null,
                 out var sql,
@@ -840,7 +787,7 @@
             var selectorFunc = selector.Compile();
 
             QueryBuilder.CreateSelectStatement<TEntity>(
-                Conventions, 
+                Conventions,
                 options,
                 out var sql,
                 out var parameters,
@@ -870,7 +817,7 @@
             var selectorFunc = selector.Compile();
 
             QueryBuilder.CreateSelectStatement<TEntity>(
-                Conventions, 
+                Conventions,
                 options,
                 out var sql,
                 out var parameters,
@@ -952,7 +899,7 @@
             var elementSelectorFunc = elementSelector.Compile();
 
             QueryBuilder.CreateSelectStatement<TEntity>(
-                Conventions, 
+                Conventions,
                 options,
                 out var sql,
                 out var parameters,
