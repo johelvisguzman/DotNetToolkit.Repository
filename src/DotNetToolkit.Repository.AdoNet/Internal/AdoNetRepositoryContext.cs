@@ -477,9 +477,7 @@
 
             ExecuteSchemaValidate(typeof(TEntity));
 
-            var result = _dbHelper.ExecuteScalar<int>(sql, parameters);
-
-            return result;
+            return _dbHelper.ExecuteScalar<int>(sql, parameters);
         }
 
         /// <summary>
@@ -842,11 +840,9 @@
         {
             QueryBuilder.CreateSelectStatement<TEntity>(Conventions, options, "COUNT(*)", out var sql, out var parameters);
 
-            ExecuteSchemaValidate(typeof(TEntity));
+            await ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 
-            var result = await _dbHelper.ExecuteScalarAsync<int>(sql, parameters, cancellationToken);
-
-            return result;
+            return await _dbHelper.ExecuteScalarAsync<int>(sql, parameters, cancellationToken);
         }
 
         /// <summary>
@@ -982,6 +978,40 @@
             _dbHelper.Dispose();
 
             GC.SuppressFinalize(this);
+        }
+
+        #endregion
+
+        #region Nested Type: EntitySet
+
+        /// <summary>
+        /// Represents an internal entity set, which holds the entity and it's state representing the operation that was performed at the time.
+        /// </summary>
+        class EntitySet
+        {
+            public EntitySet(object entity, EntityState state)
+            {
+                Entity = entity;
+                State = state;
+            }
+
+            public object Entity { get; }
+
+            public EntityState State { get; }
+        }
+
+        #endregion
+
+        #region Nested Type: EntityState
+
+        /// <summary>
+        /// Represents an internal state for an entity.
+        /// </summary>
+        enum EntityState
+        {
+            Added,
+            Removed,
+            Modified
         }
 
         #endregion

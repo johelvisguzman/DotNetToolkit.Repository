@@ -1062,7 +1062,7 @@
                 MapperProvider.Create<TEntity>(),
                 string.Format(Resources.UnableToCreateMappingForType, typeof(TEntity).FullName)));
 
-            return ExecuteSqlQuery(sql, CommandType.Text, parameters, (r, c) => mapper.Map(r, c));
+            return ExecuteSqlQuery(sql, cmdType, parameters, (r, c) => mapper.Map(r, c));
         }
 
         /// <summary>
@@ -1305,7 +1305,7 @@
                 MapperProvider.Create<TEntity>(),
                 string.Format(Resources.UnableToCreateMappingForType, typeof(TEntity).FullName)));
 
-            return ExecuteSqlQueryAsync(sql, CommandType.Text, parameters, (r, c) => mapper.Map(r, c), cancellationToken);
+            return ExecuteSqlQueryAsync(sql, cmdType, parameters, (r, c) => mapper.Map(r, c), cancellationToken);
         }
 
         /// <summary>
