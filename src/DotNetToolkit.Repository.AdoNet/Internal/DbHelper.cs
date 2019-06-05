@@ -1057,7 +1057,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
 
         #endregion
 
-        #region IDisposable
+        #region Implementation of IDisposable
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.

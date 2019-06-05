@@ -2,7 +2,6 @@
 {
     using Configuration;
     using Configuration.Conventions;
-    using Configuration.Logging;
     using Extensions;
     using Properties;
     using System;
@@ -351,34 +350,15 @@
         /// </summary>
         class EntitySet
         {
-            #region Constructors
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="EntitySet" /> class.
-            /// </summary>
-            /// <param name="entity">The entity.</param>
-            /// <param name="state">The state.</param>
             public EntitySet(object entity, EntityState state)
             {
                 Entity = entity;
                 State = state;
             }
 
-            #endregion
-
-            #region Properties
-
-            /// <summary>
-            /// Gets the entity.
-            /// </summary>
             public object Entity { get; }
 
-            /// <summary>
-            /// Gets the state.
-            /// </summary>
             public EntityState State { get; }
-
-            #endregion
         }
 
         #endregion

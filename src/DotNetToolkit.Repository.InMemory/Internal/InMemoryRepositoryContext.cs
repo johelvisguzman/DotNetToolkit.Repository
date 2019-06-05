@@ -329,7 +329,7 @@
 
         #endregion
 
-        #region IDisposable
+        #region Implementation of IDisposable
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
@@ -343,6 +343,40 @@
             }
 
             base.Dispose();
+        }
+
+        #endregion
+
+        #region Nested Type: EntitySet
+
+        /// <summary>
+        /// Represents an internal entity set, which holds the entity and it's state representing the operation that was performed at the time.
+        /// </summary>
+        class EntitySet
+        {
+            public EntitySet(object entity, EntityState state)
+            {
+                Entity = entity;
+                State = state;
+            }
+
+            public object Entity { get; }
+
+            public EntityState State { get; }
+        }
+
+        #endregion
+
+        #region Nested Type: EntityState
+
+        /// <summary>
+        /// Represents an internal state for an entity.
+        /// </summary>
+        enum EntityState
+        {
+            Added,
+            Removed,
+            Modified
         }
 
         #endregion

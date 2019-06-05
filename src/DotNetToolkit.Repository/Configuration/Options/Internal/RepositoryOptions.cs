@@ -57,7 +57,7 @@
         /// <summary>
         /// Gets the configured conventions.
         /// </summary>
-        public IRepositoryConventions Conventions => _conventions;
+        public IRepositoryConventions Conventions { get { return _conventions; } }
 
         #endregion
 
