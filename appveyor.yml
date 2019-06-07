@@ -60,6 +60,7 @@ after_build:
   - dotnet pack .\src\DotNetToolkit.Repository.Caching.InMemory\DotNetToolkit.Repository.Caching.InMemory.csproj --configuration Release
   - dotnet pack .\src\DotNetToolkit.Repository.Caching.Redis\DotNetToolkit.Repository.Caching.Redis.csproj --configuration Release
   - dotnet pack .\src\DotNetToolkit.Repository.Caching.Memcached\DotNetToolkit.Repository.Caching.Memcached.csproj --configuration Release
+  - dotnet pack .\src\DotNetToolkit.Repository.Caching.Couchbase\DotNetToolkit.Repository.Caching.Couchbase.csproj --configuration Release
 
 #---------------------------------#
 #      artifacts configuration    #

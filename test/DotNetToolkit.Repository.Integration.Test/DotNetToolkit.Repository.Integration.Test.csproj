@@ -17,6 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CouchbaseNetClient" Version="2.7.8" />
     <PackageReference Include="EntityFramework.SqlServerCompact" Version="6.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.2.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
@@ -29,6 +30,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.AdoNet\DotNetToolkit.Repository.AdoNet.csproj" />
+    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Caching.Couchbase\DotNetToolkit.Repository.Caching.Couchbase.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Caching.InMemory\DotNetToolkit.Repository.Caching.InMemory.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Caching.Memcached\DotNetToolkit.Repository.Caching.Memcached.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Caching.Redis\DotNetToolkit.Repository.Caching.Redis.csproj" />
