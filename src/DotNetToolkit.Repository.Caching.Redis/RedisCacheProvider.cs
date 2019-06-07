@@ -59,12 +59,6 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheProvider" /> class.
         /// </summary>
-        /// <param name="options">The configuration options to use for the redis multiplexer.</param>
-        public RedisCacheProvider([NotNull] ConfigurationOptions options) : this(options, (TimeSpan?)null) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RedisCacheProvider" /> class.
-        /// </summary>
         /// <param name="host">The host name.</param>
         /// <param name="ssl">Specifies that SSL encryption should be used.</param>
         /// <param name="allowAdmin">Indicates whether admin operations should be allowed.</param>
@@ -107,6 +101,25 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheProvider" /> class.
         /// </summary>
+        /// <param name="optionsAction">The configuration options action.</param>
+        public RedisCacheProvider([NotNull] Action<ConfigurationOptions> optionsAction) : this(optionsAction, (TimeSpan?)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RedisCacheProvider" /> class.
+        /// </summary>
+        /// <param name="optionsAction">The configuration options action.</param>
+        /// <param name="expiry">The caching expiration time.</param>
+        public RedisCacheProvider([NotNull] Action<ConfigurationOptions> optionsAction, [CanBeNull] TimeSpan? expiry) : this(GetConfigurationOptions(optionsAction), expiry) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RedisCacheProvider" /> class.
+        /// </summary>
+        /// <param name="options">The configuration options to use for the redis multiplexer.</param>
+        public RedisCacheProvider([NotNull] ConfigurationOptions options) : this(options, (TimeSpan?)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RedisCacheProvider" /> class.
+        /// </summary>
         /// <param name="options">The configuration options to use for the redis multiplexer.</param>
         /// <param name="expiry">The caching expiration time.</param>
         public RedisCacheProvider([NotNull] ConfigurationOptions options, [CanBeNull] TimeSpan? expiry)
@@ -118,6 +131,17 @@
         #endregion
 
         #region Private Methods
+
+        private static ConfigurationOptions GetConfigurationOptions(Action<ConfigurationOptions> optionsAction)
+        {
+            Guard.NotNull(optionsAction, nameof(optionsAction));
+
+            var options = new ConfigurationOptions();
+
+            optionsAction(options);
+
+            return options;
+        }
 
         private static ConfigurationOptions GetConfigurationOptions(string host, bool ssl, bool allowAdmin, int? defaultDatabase)
         {
@@ -140,7 +164,7 @@
             Guard.NotEmpty(host, nameof(host));
             Guard.NotEmpty(password, nameof(password));
 
-            var options = new ConfigurationOptions
+            return new ConfigurationOptions
             {
                 EndPoints =
                 {
@@ -151,7 +175,6 @@
                 AllowAdmin = allowAdmin,
                 DefaultDatabase = defaultDatabase
             };
-            return options;
         }
 
         #endregion

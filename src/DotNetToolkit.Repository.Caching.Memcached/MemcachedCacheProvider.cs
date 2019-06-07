@@ -27,12 +27,6 @@
         public MemcachedCacheProvider([CanBeNull] TimeSpan? expiry) : this(new MemcachedClient(), expiry) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MemcachedCacheProvider" /> class using the specified client.
-        /// </summary>
-        /// <param name="client">The memcached client.</param>
-        public MemcachedCacheProvider([NotNull] IMemcachedClient client) : this(client, (TimeSpan?)null) { }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="MemcachedCacheProvider" /> class using the specified configuration section.
         /// </summary>
         /// <param name="sectionName">The name of the configuration section to be used for configuring the behavior of the client.</param>
@@ -120,6 +114,25 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="MemcachedCacheProvider" /> class using the specified client.
         /// </summary>
+        /// <param name="configActions">The configuration actions.</param>
+        public MemcachedCacheProvider([NotNull] Action<MemcachedClientConfiguration> configActions) : this(configActions, (TimeSpan?)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MemcachedCacheProvider" /> class using the specified client.
+        /// </summary>
+        /// <param name="configActions">The configuration actions.</param>
+        /// <param name="expiry">The caching expiration time.</param>
+        public MemcachedCacheProvider([NotNull] Action<MemcachedClientConfiguration> configActions, [CanBeNull] TimeSpan? expiry) : this(GetConfiguredClient(configActions), expiry) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MemcachedCacheProvider" /> class using the specified client.
+        /// </summary>
+        /// <param name="client">The memcached client.</param>
+        public MemcachedCacheProvider([NotNull] IMemcachedClient client) : this(client, (TimeSpan?)null) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MemcachedCacheProvider" /> class using the specified client.
+        /// </summary>
         /// <param name="client">The memcached client.</param>
         /// <param name="expiry">The caching expiration time.</param>
         public MemcachedCacheProvider([NotNull] IMemcachedClient client, [CanBeNull] TimeSpan? expiry)
@@ -131,6 +144,17 @@
         #endregion
 
         #region Private Methods
+
+        private static IMemcachedClient GetConfiguredClient(Action<MemcachedClientConfiguration> configActions)
+        {
+            Guard.NotNull(configActions, nameof(configActions));
+
+            var config = new MemcachedClientConfiguration();
+
+            configActions(config);
+
+            return new MemcachedClient(config);
+        }
 
         private static IMemcachedClient GetConfiguredClient(string host, int port, MemcachedProtocol protocol)
         {
