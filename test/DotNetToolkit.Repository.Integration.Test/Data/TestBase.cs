@@ -61,16 +61,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 
                 ApplyCachingProvider(cachingProvider, builder);
 
-                // Perform test
-                var task = Record.ExceptionAsync(() => action(new RepositoryFactory(builder.Options), cachingProvider));
-
-                // Checks to see if we have any un-handled exception
-                if (task != null)
-                {
-                    var ex = await task;
-
-                    Assert.Null(ex);
-                }
+                await HandleExceptionAsync(() => action(new RepositoryFactory(builder.Options), cachingProvider));
             });
         }
 
@@ -98,16 +89,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                 if (exclude != null && exclude.Contains(x))
                     return;
 
-                // Perform test
-                var task = Record.ExceptionAsync(() => action(new RepositoryFactory(BuildOptions(x)), x));
-
-                // Checks to see if we have any un-handled exception
-                if (task != null)
-                {
-                    var ex = await task;
-
-                    Assert.Null(ex);
-                }
+                await HandleExceptionAsync(() => action(new RepositoryFactory(BuildOptions(x)), x));
             });
         }
 
@@ -135,16 +117,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                 if (exclude != null && exclude.Contains(x))
                     return;
 
-                // Perform test
-                var task = Record.ExceptionAsync(() => action(new ServiceFactory(new UnitOfWorkFactory(BuildOptions(x))), x));
-
-                // Checks to see if we have any un-handled exception
-                if (task != null)
-                {
-                    var ex = await task;
-
-                    Assert.Null(ex);
-                }
+                await HandleExceptionAsync(() => action(new ServiceFactory(new UnitOfWorkFactory(BuildOptions(x))), x));
             });
         }
 
@@ -166,16 +139,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
         {
             ContextProviders().Where(SupportsTransactions).ToList().ForEach(async x =>
             {
-                // Perform test
-                var task = Record.ExceptionAsync(() => action(new UnitOfWorkFactory(BuildOptions(x)), x));
-
-                // Checks to see if we have any un-handled exception
-                if (task != null)
-                {
-                    var ex = await task;
-
-                    Assert.Null(ex);
-                }
+                await HandleExceptionAsync(() => action(new UnitOfWorkFactory(BuildOptions(x)), x));
             });
         }
 
@@ -193,6 +157,20 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
         private static bool SupportsTransactions(ContextProviderType x)
         {
             return SqlServerContextProviders().Contains(x);
+        }
+
+        private static async Task HandleExceptionAsync(Func<Task> testCode)
+        {
+            // Perform test
+            var task = Record.ExceptionAsync(() => testCode());
+
+            // Checks to see if we have any un-handled exception
+            if (task != null)
+            {
+                var ex = await task;
+
+                Assert.Null(ex);
+            }
         }
 
         protected RepositoryOptionsBuilder GetRepositoryOptionsBuilder(ContextProviderType provider)

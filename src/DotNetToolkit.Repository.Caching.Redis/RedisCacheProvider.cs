@@ -9,7 +9,7 @@
     /// <summary>
     /// An implementation of <see cref="ICacheProvider{TCache}" />.
     /// </summary>
-    public class RedisCacheProvider : ICacheProvider<RedisCache>
+    public class RedisCacheProvider : CacheProviderBase<RedisCache>
     {
         #region Constructors
 
@@ -22,13 +22,9 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheProvider" /> class. 
         /// </summary>
-        /// <param name="expiry">The the caching expiration time.</param>
+        /// <param name="expiry">The caching expiration time.</param>
         /// <remarks>This will connect to a single server on the local machine using the default redis port (6379).</remarks>
-        public RedisCacheProvider([CanBeNull] TimeSpan? expiry)
-        {
-            Cache = new RedisCache();
-            Expiry = expiry;
-        }
+        public RedisCacheProvider([CanBeNull] TimeSpan? expiry) : this(false, null, expiry) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheProvider" /> class. 
@@ -43,13 +39,9 @@
         /// </summary>
         /// <param name="allowAdmin">Indicates whether admin operations should be allowed.</param>
         /// <param name="defaultDatabase">Specifies the default database to be used when calling ConnectionMultiplexer.GetDatabase() without any parameters.</param>
-        /// <param name="expiry">The the caching expiration time.</param>
+        /// <param name="expiry">The caching expiration time.</param>
         /// <remarks>This will connect to a single server on the local machine using the default redis port (6379).</remarks>
-        public RedisCacheProvider(bool allowAdmin, [CanBeNull] int? defaultDatabase, [CanBeNull] TimeSpan? expiry)
-        {
-            Cache = new RedisCache(allowAdmin, defaultDatabase);
-            Expiry = expiry;
-        }
+        public RedisCacheProvider(bool allowAdmin, [CanBeNull] int? defaultDatabase, [CanBeNull] TimeSpan? expiry) : this("localhost", false, allowAdmin, defaultDatabase, expiry) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheProvider" /> class.
@@ -61,29 +53,14 @@
         /// Initializes a new instance of the <see cref="RedisCacheProvider" /> class.
         /// </summary>
         /// <param name="configuration">The string configuration to use for the redis multiplexer.</param>
-        /// <param name="expiry">The the caching expiration time.</param>
-        public RedisCacheProvider([NotNull] string configuration, [CanBeNull] TimeSpan? expiry)
-        {
-            Cache = new RedisCache(Guard.NotNull(configuration, nameof(configuration)));
-            Expiry = expiry;
-        }
+        /// <param name="expiry">The caching expiration time.</param>
+        public RedisCacheProvider([NotNull] string configuration, [CanBeNull] TimeSpan? expiry) : this(ConfigurationOptions.Parse(Guard.NotNull(configuration, nameof(configuration))), expiry) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheProvider" /> class.
         /// </summary>
         /// <param name="options">The configuration options to use for the redis multiplexer.</param>
         public RedisCacheProvider([NotNull] ConfigurationOptions options) : this(options, (TimeSpan?)null) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RedisCacheProvider" /> class.
-        /// </summary>
-        /// <param name="options">The configuration options to use for the redis multiplexer.</param>
-        /// <param name="expiry">The the caching expiration time.</param>
-        public RedisCacheProvider([NotNull] ConfigurationOptions options, [CanBeNull] TimeSpan? expiry)
-        {
-            Cache = new RedisCache(Guard.NotNull(options, nameof(options)));
-            Expiry = expiry;
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheProvider" /> class.
@@ -101,14 +78,8 @@
         /// <param name="ssl">Specifies that SSL encryption should be used.</param>
         /// <param name="allowAdmin">Indicates whether admin operations should be allowed.</param>
         /// <param name="defaultDatabase">Specifies the default database to be used when calling ConnectionMultiplexer.GetDatabase() without any parameters.</param>
-        /// <param name="expiry">The the caching expiration time.</param>
-        public RedisCacheProvider([NotNull] string host, bool ssl, bool allowAdmin, [CanBeNull] int? defaultDatabase, [CanBeNull] TimeSpan? expiry)
-        {
-            Guard.NotEmpty(host, nameof(host));
-
-            Cache = new RedisCache(host, ssl, allowAdmin, defaultDatabase);
-            Expiry = expiry;
-        }
+        /// <param name="expiry">The caching expiration time.</param>
+        public RedisCacheProvider([NotNull] string host, bool ssl, bool allowAdmin, [CanBeNull] int? defaultDatabase, [CanBeNull] TimeSpan? expiry) : this(GetConfigurationOptions(host, ssl, allowAdmin, defaultDatabase), expiry) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RedisCacheProvider" /> class.
@@ -130,46 +101,58 @@
         /// <param name="ssl">Specifies that SSL encryption should be used.</param>
         /// <param name="allowAdmin">Indicates whether admin operations should be allowed.</param>
         /// <param name="defaultDatabase">Specifies the default database to be used when calling ConnectionMultiplexer.GetDatabase() without any parameters.</param>
-        /// <param name="expiry">The the caching expiration time.</param>
-        public RedisCacheProvider([NotNull] string host, int port, [NotNull] string password, bool ssl, bool allowAdmin, [CanBeNull] int? defaultDatabase, [CanBeNull] TimeSpan? expiry)
-        {
-            Guard.NotEmpty(host, nameof(host));
-            Guard.NotEmpty(password, nameof(password));
+        /// <param name="expiry">The caching expiration time.</param>
+        public RedisCacheProvider([NotNull] string host, int port, [NotNull] string password, bool ssl, bool allowAdmin, [CanBeNull] int? defaultDatabase, [CanBeNull] TimeSpan? expiry) : this(GetConfigurationOptions(host, port, password, ssl, allowAdmin, defaultDatabase), expiry) { }
 
-            Cache = new RedisCache(host, port, password, ssl, allowAdmin, defaultDatabase);
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RedisCacheProvider" /> class.
+        /// </summary>
+        /// <param name="options">The configuration options to use for the redis multiplexer.</param>
+        /// <param name="expiry">The caching expiration time.</param>
+        public RedisCacheProvider([NotNull] ConfigurationOptions options, [CanBeNull] TimeSpan? expiry)
+        {
+            Cache = new RedisCache(Guard.NotNull(options, nameof(options)));
             Expiry = expiry;
         }
 
         #endregion
 
-        #region Implementation of ICacheProvider
+        #region Private Methods
 
-        /// <summary>
-        /// Gets the cache key transformer.
-        /// </summary>
-        public ICacheKeyTransformer KeyTransformer { get; }
-
-        /// <summary>
-        /// Gets or sets the caching expiration time.
-        /// </summary>
-        public TimeSpan? Expiry { get; set; }
-
-        /// <summary>
-        /// Gets the cache.
-        /// </summary>
-        ICache ICacheProvider.Cache
+        private static ConfigurationOptions GetConfigurationOptions(string host, bool ssl, bool allowAdmin, int? defaultDatabase)
         {
-            get { return Cache; }
+            Guard.NotEmpty(host, nameof(host));
+
+            return new ConfigurationOptions
+            {
+                EndPoints =
+                {
+                    { host }
+                },
+                Ssl = ssl,
+                AllowAdmin = allowAdmin,
+                DefaultDatabase = defaultDatabase
+            };
         }
 
-        #endregion
+        private static ConfigurationOptions GetConfigurationOptions(string host, int port, string password, bool ssl, bool allowAdmin, int? defaultDatabase)
+        {
+            Guard.NotEmpty(host, nameof(host));
+            Guard.NotEmpty(password, nameof(password));
 
-        #region Implementation of ICacheProvider<TCache>
-
-        /// <summary>
-        /// Gets the cache.
-        /// </summary>
-        public RedisCache Cache { get; }
+            var options = new ConfigurationOptions
+            {
+                EndPoints =
+                {
+                    { host, port }
+                },
+                Password = password,
+                Ssl = ssl,
+                AllowAdmin = allowAdmin,
+                DefaultDatabase = defaultDatabase
+            };
+            return options;
+        }
 
         #endregion
     }

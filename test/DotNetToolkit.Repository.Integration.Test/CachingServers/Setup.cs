@@ -1,10 +1,12 @@
-﻿namespace DotNetToolkit.Repository.Integration.Test.Data
+﻿namespace DotNetToolkit.Repository.Integration.Test.CachingServers
 {
+    using Memcached;
+    using Redis;
     using System;
     using System.Collections.Generic;
     using System.Threading;
 
-    public static class TestCachingServerSetup
+    public static class Setup
     {
         private static readonly object _syncRoot = new Object();
         private static int _count;
@@ -18,7 +20,8 @@
                 {
                     _servers = new List<IDisposable>
                     {
-                        TestMemcachedServer.Run(11211)
+                        ServerProcess.Run<MemcachedServerProcessConfig>(),
+                        ServerProcess.Run<RedisServerProcessConfig>(),
                     };
                 }
 

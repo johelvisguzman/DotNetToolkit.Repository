@@ -2,7 +2,6 @@
 {
     using Configuration.Caching;
     using Enyim.Caching;
-    using Enyim.Caching.Configuration;
     using Enyim.Caching.Memcached;
     using JetBrains.Annotations;
     using Newtonsoft.Json;
@@ -26,81 +25,12 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MemcachedCache" /> class using the default configuration section (enyim/memcached).
-        /// </summary>
-        public MemcachedCache()
-        {
-            Client = new MemcachedClient();
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MemcachedCache" /> class using the specified configuration section.
-        /// </summary>
-        /// <param name="sectionName">The name of the configuration section to be used for configuring the behavior of the client.</param>
-        public MemcachedCache([NotNull] string sectionName)
-        {
-            Client = new MemcachedClient(Guard.NotEmpty(sectionName, nameof(sectionName)));
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="MemcachedCache" /> class using the specified client.
         /// </summary>
         /// <param name="client">The memcached client.</param>
         public MemcachedCache([NotNull] IMemcachedClient client)
         {
             Client = Guard.NotNull(client, nameof(client));
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MemcachedCache" /> class.
-        /// </summary>
-        /// <param name="configuration">The configuration to use for the memcached client.</param>
-        public MemcachedCache([NotNull] IMemcachedClientConfiguration configuration)
-        {
-            Client = new MemcachedClient(Guard.NotNull(configuration, nameof(configuration)));
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MemcachedCache" /> class.
-        /// </summary>
-        /// <param name="host">The host name.</param>
-        /// <param name="port">The port.</param>
-        /// <param name="protocol">The type of the communication between client and server.</param>
-        public MemcachedCache([NotNull] string host, int port, MemcachedProtocol protocol)
-        {
-            Guard.NotEmpty(host, nameof(host));
-
-            var config = new MemcachedClientConfiguration();
-
-            config.AddServer(host, port);
-            config.Protocol = protocol;
-
-            Client = new MemcachedClient(config);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MemcachedCache" /> class.
-        /// </summary>
-        /// <param name="host">The host name.</param>
-        /// <param name="port">The port.</param>
-        /// <param name="username">The username to use to authenticate with the server.</param>
-        /// <param name="password">The password to use to authenticate with the server.</param>
-        /// <param name="protocol">The type of the communication between client and server.</param>
-        public MemcachedCache([NotNull] string host, int port, [NotNull] string username, [NotNull] string password, MemcachedProtocol protocol)
-        {
-            Guard.NotEmpty(host, nameof(host));
-            Guard.NotEmpty(username, nameof(username));
-            Guard.NotEmpty(password, nameof(password));
-
-            var config = new MemcachedClientConfiguration();
-
-            config.AddServer(host, port);
-            config.Protocol = protocol;
-            config.Authentication.Type = typeof(PlainTextAuthenticator);
-            config.Authentication.Parameters["userName"] = username;
-            config.Authentication.Parameters["password"] = password;
-
-            Client = new MemcachedClient(config);
         }
 
         #endregion
