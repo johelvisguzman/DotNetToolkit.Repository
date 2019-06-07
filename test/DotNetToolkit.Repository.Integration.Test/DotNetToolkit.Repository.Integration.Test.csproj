@@ -44,19 +44,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="tools\memcached-server\default_engine.so">
+    <None Update="CachingServers\Memcached\tools\memcached-server\default_engine.so">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="tools\memcached-server\libevent-2-0-5.dll">
+    <None Update="CachingServers\Memcached\tools\memcached-server\libevent-2-0-5.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="tools\memcached-server\libgcc_s_dw2-1.dll">
+    <None Update="CachingServers\Memcached\tools\memcached-server\libgcc_s_dw2-1.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="tools\memcached-server\memcached.exe">
+    <None Update="CachingServers\Memcached\tools\memcached-server\memcached.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="tools\memcached-server\pthreadGC2.dll">
+    <None Update="CachingServers\Memcached\tools\memcached-server\pthreadGC2.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

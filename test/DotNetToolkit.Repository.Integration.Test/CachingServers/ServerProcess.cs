@@ -1,25 +1,24 @@
-﻿namespace DotNetToolkit.Repository.Integration.Test.Data
+﻿namespace DotNetToolkit.Repository.Integration.Test.CachingServers
 {
     using System;
     using System.Diagnostics;
     using System.IO;
 
-    public static class TestMemcachedServer
+    public class ServerProcess
     {
-        private static readonly string _basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tools\\memcached-server");
-        private static readonly string _exePath = Path.Combine(_basePath, "memcached.exe");
-
-        public static IDisposable Run(int port = 11211, bool verbose = false, int maxMem = 512, bool hidden = true)
+        public static IDisposable Run<TConfig>() where TConfig : IServerProcessConfig, new()
         {
-            var args = $"-E default_engine.so -p {port} -m {maxMem}";
-            if (verbose) args += " -vv";
+            return Run(new TConfig());
+        }
 
+        public static IDisposable Run(IServerProcessConfig config)
+        {
             var process = Process.Start(new ProcessStartInfo
             {
-                Arguments = args,
-                FileName = _exePath,
-                WorkingDirectory = _basePath,
-                WindowStyle = hidden ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal
+                Arguments = config.Args,
+                FileName = Path.Combine(config.BasePath, config.Exe),
+                WorkingDirectory = config.BasePath,
+                WindowStyle = config.IsHidden ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal
             });
 
             return new KillProcess(process);
