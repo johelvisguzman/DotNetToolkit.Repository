@@ -40,10 +40,6 @@ os: Visual Studio 2017
 before_build:
   - dotnet --info
   - dotnet restore
-  # start redis server
-  - choco install redis-64
-  - redis-server --service-install
-  - redis-server --service-start
 
 build:
   parallel: true                                    # enable MSBuild parallel builds

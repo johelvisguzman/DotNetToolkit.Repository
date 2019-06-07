@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.CachingServers
 {
     using Memcached;
+    using Redis;
     using System;
     using System.Collections.Generic;
     using System.Threading;
@@ -19,7 +20,8 @@
                 {
                     _servers = new List<IDisposable>
                     {
-                        ServerProcess.Run<MemcachedServerProcessConfig>()
+                        ServerProcess.Run<MemcachedServerProcessConfig>(),
+                        ServerProcess.Run<RedisServerProcessConfig>(),
                     };
                 }
 
