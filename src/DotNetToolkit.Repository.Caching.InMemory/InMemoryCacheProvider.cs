@@ -9,7 +9,7 @@
     /// <summary>
     /// An implementation of <see cref="ICacheProvider{TCache}" />.
     /// </summary>
-    public class InMemoryCacheProvider : ICacheProvider<InMemoryCache>
+    public class InMemoryCacheProvider : CacheProviderBase<InMemoryCache>
     {
         #region Constructors
 
@@ -40,37 +40,6 @@
             Cache = new InMemoryCache(Guard.NotNull(cache, nameof(cache)));
             Expiry = expiry;
         }
-
-        #endregion
-
-        #region Implementation of ICacheProvider
-
-        /// <summary>
-        /// Gets the cache key transformer.
-        /// </summary>
-        public ICacheKeyTransformer KeyTransformer { get; }
-
-        /// <summary>
-        /// Gets or sets the caching expiration time.
-        /// </summary>
-        public TimeSpan? Expiry { get; set; }
-        
-        /// <summary>
-        /// Gets the cache.
-        /// </summary>
-        ICache ICacheProvider.Cache
-        {
-            get { return Cache; }
-        }
-
-        #endregion
-
-        #region Implementation of ICacheProvider<TCache>
-
-        /// <summary>
-        /// Gets the cache.
-        /// </summary>
-        public InMemoryCache Cache { get; }
 
         #endregion
     }

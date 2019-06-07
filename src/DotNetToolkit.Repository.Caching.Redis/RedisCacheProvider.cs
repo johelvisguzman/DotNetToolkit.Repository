@@ -9,7 +9,7 @@
     /// <summary>
     /// An implementation of <see cref="ICacheProvider{TCache}" />.
     /// </summary>
-    public class RedisCacheProvider : ICacheProvider<RedisCache>
+    public class RedisCacheProvider : CacheProviderBase<RedisCache>
     {
         #region Constructors
 
@@ -139,37 +139,6 @@
             Cache = new RedisCache(host, port, password, ssl, allowAdmin, defaultDatabase);
             Expiry = expiry;
         }
-
-        #endregion
-
-        #region Implementation of ICacheProvider
-
-        /// <summary>
-        /// Gets the cache key transformer.
-        /// </summary>
-        public ICacheKeyTransformer KeyTransformer { get; }
-
-        /// <summary>
-        /// Gets or sets the caching expiration time.
-        /// </summary>
-        public TimeSpan? Expiry { get; set; }
-
-        /// <summary>
-        /// Gets the cache.
-        /// </summary>
-        ICache ICacheProvider.Cache
-        {
-            get { return Cache; }
-        }
-
-        #endregion
-
-        #region Implementation of ICacheProvider<TCache>
-
-        /// <summary>
-        /// Gets the cache.
-        /// </summary>
-        public RedisCache Cache { get; }
 
         #endregion
     }
