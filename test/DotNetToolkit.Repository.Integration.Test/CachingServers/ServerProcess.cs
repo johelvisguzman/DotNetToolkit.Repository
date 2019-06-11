@@ -3,6 +3,7 @@
     using System;
     using System.Diagnostics;
     using System.IO;
+    using Utility;
 
     public class ServerProcess
     {
@@ -13,12 +14,17 @@
 
         public static IDisposable Run(IServerProcessConfig config)
         {
+            Guard.NotNull(config, nameof(config));
+
+            var workingDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, config.BasePath);
+            var fileName = Path.Combine(workingDirectory, config.Exe);
+
             var process = Process.Start(new ProcessStartInfo
             {
                 Arguments = config.Args,
-                FileName = Path.Combine(config.BasePath, config.Exe),
-                WorkingDirectory = config.BasePath,
-                WindowStyle = config.IsHidden ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal
+                FileName = fileName,
+                WorkingDirectory = workingDirectory,
+                WindowStyle = ProcessWindowStyle.Hidden
             });
 
             return new KillProcess(process);
@@ -26,11 +32,11 @@
 
         private class KillProcess : IDisposable
         {
-            private Process process;
+            private Process _process;
 
             public KillProcess(Process process)
             {
-                this.process = process;
+                _process = Guard.NotNull(process, nameof(process));
 
                 AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
                 AppDomain.CurrentDomain.DomainUnload += CurrentDomain_ProcessExit;
@@ -52,12 +58,11 @@
             {
                 GC.SuppressFinalize(this);
 
-                if (process != null)
+                if (_process != null)
                 {
-                    using (process)
-                        process.Kill();
-
-                    process = null;
+                    _process.Kill();
+                    _process.Dispose();
+                    _process = null;
                 }
             }
         }
