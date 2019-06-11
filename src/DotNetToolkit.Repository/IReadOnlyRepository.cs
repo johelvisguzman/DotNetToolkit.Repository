@@ -209,6 +209,26 @@
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="paths">The dot-separated list of related objects to return in the query results.</param>
+        /// <return>The entity found.</return>
+        TEntity Find(TKey1 key1, TKey2 key2, TKey3 key3, string[] paths);
+
+        /// <summary>
+        /// Finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="paths">A collection of lambda expressions representing the paths to include.</param>
+        /// <return>The entity found.</return>
+        TEntity Find(TKey1 key1, TKey2 key2, TKey3 key3, Expression<Func<TEntity, object>>[] paths);
+
+        /// <summary>
+        /// Finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
         /// <return>The entity found.</return>
         TEntity Find(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy);
@@ -404,9 +424,31 @@
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        /// <param name="paths">The dot-separated list of related objects to return in the query results.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, string[] paths, CancellationToken cancellationToken = new CancellationToken());
+
+        /// <summary>
+        /// Asynchronously finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="paths">A collection of lambda expressions representing the paths to include.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken = new CancellationToken());
+
+        /// <summary>
+        /// Asynchronously finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken());
 
         /// <summary>
@@ -803,6 +845,24 @@
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="paths">The dot-separated list of related objects to return in the query results.</param>
+        /// <return>The entity found.</return>
+        TEntity Find(TKey1 key1, TKey2 key2, string[] paths);
+
+        /// <summary>
+        /// Finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="paths">A collection of lambda expressions representing the paths to include.</param>
+        /// <return>The entity found.</return>
+        TEntity Find(TKey1 key1, TKey2 key2, Expression<Func<TEntity, object>>[] paths);
+
+        /// <summary>
+        /// Finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
         /// <return>The entity found.</return>
         TEntity Find(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy);
@@ -995,9 +1055,29 @@
         /// </summary>
         /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        /// <param name="paths">The dot-separated list of related objects to return in the query results.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, string[] paths, CancellationToken cancellationToken = new CancellationToken());
+
+        /// <summary>
+        /// Asynchronously finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="paths">A collection of lambda expressions representing the paths to include.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken = new CancellationToken());
+
+        /// <summary>
+        /// Asynchronously finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key1">The value of the first part of the composite primary key used to match entities against.</param>
+        /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
+        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken());
 
         /// <summary>
@@ -1387,6 +1467,22 @@
         TEntity Find(TKey key);
 
         /// <summary>
+        /// Finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <param name="paths">The dot-separated list of related objects to return in the query results.</param>
+        /// <return>The entity found.</return>
+        TEntity Find(TKey key, string[] paths);
+
+        /// <summary>
+        /// Finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <param name="paths">A collection of lambda expressions representing the paths to include.</param>
+        /// <return>The entity found.</return>
+        TEntity Find(TKey key, Expression<Func<TEntity, object>>[] paths);
+
+        /// <summary>
         /// Finds an entity with the given primary key value in the repository.
         /// </summary>
         /// <param name="key">The value of the primary key for the entity to be found.</param>
@@ -1576,12 +1672,30 @@
         Task<TEntity> FindAsync(TKey key, CancellationToken cancellationToken = new CancellationToken());
 
         /// <summary>
+        /// Asynchronously finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <param name="paths">The dot-separated list of related objects to return in the query results.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        Task<TEntity> FindAsync(TKey key, string[] paths, CancellationToken cancellationToken = new CancellationToken());
+
+        /// <summary>
+        /// Asynchronously finds an entity with the given composite primary key values in the repository.
+        /// </summary>
+        /// <param name="key">The value of the primary key for the entity to be found.</param>
+        /// <param name="paths">A collection of lambda expressions representing the paths to include.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
+        Task<TEntity> FindAsync(TKey key, Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken = new CancellationToken());
+
+        /// <summary>
         /// Asynchronously finds an entity with the given primary key value in the repository.
         /// </summary>
         /// <param name="key">The value of the primary key for the entity to be found.</param>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         Task<TEntity> FindAsync(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken());
 
         /// <summary>

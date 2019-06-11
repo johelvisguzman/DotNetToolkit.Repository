@@ -50,22 +50,11 @@
             // Assumes we want to perform a join when the navigation property from the primary table has also a navigation property of
             // the same type as the primary table
             // Only do a join when the primary table has a foreign key property for the join table
-            var paths = mainTableProperties
+            return mainTableProperties
                 .Where(x => x.IsComplex() && conventions.GetPrimaryKeyPropertyInfos(x.PropertyType).Any())
                 .Select(x => x.Name)
-                .ToList();
-
-            var fetchStrategy = new FetchQueryStrategy<T>();
-
-            if (paths.Count > 0)
-            {
-                foreach (var path in paths)
-                {
-                    fetchStrategy.Fetch(path);
-                }
-            }
-
-            return fetchStrategy;
+                .ToArray()
+                .ToFetchQueryStrategy<T>();
         }
 
         #endregion

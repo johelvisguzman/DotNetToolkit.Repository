@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Extensions.Internal
 {
     using JetBrains.Annotations;
+    using Queries.Strategies;
     using System;
     using System.Collections.Generic;
     using System.Linq.Expressions;
@@ -37,6 +38,52 @@
 
             // return concatenated string
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Converts the specified paths to <see cref="IFetchQueryStrategy{T}" />.
+        /// </summary>
+        /// <typeparam name="T">The type of the entity.</typeparam>
+        /// <param name="paths">A collection of lambda expressions representing the paths to include.</param>
+        /// <returns>The new fetch strategy options instance.</returns>
+        public static IFetchQueryStrategy<T> ToFetchQueryStrategy<T>([NotNull] this string[] paths)
+        {
+            Guard.NotNull(paths, nameof(paths));
+
+            var fetchStrategy = new FetchQueryStrategy<T>();
+
+            if (paths.Length > 0)
+            {
+                foreach (var path in paths)
+                {
+                    fetchStrategy.Fetch(path);
+                }
+            }
+
+            return fetchStrategy;
+        }
+
+        /// <summary>
+        /// Converts the specified paths to <see cref="IFetchQueryStrategy{T}" />.
+        /// </summary>
+        /// <typeparam name="T">The type of the entity.</typeparam>
+        /// <param name="paths">A collection of lambda expressions representing the paths to include.</param>
+        /// <returns>The new fetch strategy options instance.</returns>
+        public static IFetchQueryStrategy<T> ToFetchQueryStrategy<T>([NotNull] this Expression<Func<T, object>>[] paths)
+        {
+            Guard.NotNull(paths, nameof(paths));
+
+            var fetchStrategy = new FetchQueryStrategy<T>();
+
+            if (paths.Length > 0)
+            {
+                foreach (var path in paths)
+                {
+                    fetchStrategy.Fetch(path);
+                }
+            }
+
+            return fetchStrategy;
         }
     }
 }
