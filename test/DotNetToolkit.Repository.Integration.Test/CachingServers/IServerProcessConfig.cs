@@ -5,6 +5,5 @@
         string Args { get; }
         string BasePath { get; }
         string Exe { get; }
-        bool IsHidden { get; }
     }
 }
