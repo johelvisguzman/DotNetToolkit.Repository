@@ -1,6 +1,7 @@
 namespace DotNetToolkit.Repository.Integration.Test.Data
 {
     using AdoNet;
+    using Caching.Couchbase;
     using Caching.InMemory;
     using Caching.Memcached;
     using Caching.Redis;
@@ -283,6 +284,19 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 
                         break;
                     }
+                case CachingProviderType.Couchbase:
+                    {
+                        var provider = new CouchbaseCacheProvider("http://localhost:8091", "default", "password");
+
+                        using (var bucket = provider.Cache.Cluster.OpenBucket())
+                        {
+                            bucket.CreateManager("default", "password").Flush();
+                        }
+
+                        builder.UseCachingProvider(provider);
+
+                        break;
+                    }
                 default:
                     throw new ArgumentOutOfRangeException(nameof(cachingProvider));
             }
@@ -335,7 +349,11 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             {
                 CachingProviderType.MicrosoftInMemory,
                 CachingProviderType.Redis,
-                CachingProviderType.Memcached
+                CachingProviderType.Memcached,
+                //TODO: Cannot test when Appveyor is running tests.
+                //I am not able to find the pre-built binaries so that I can manually run
+                //the server (similar to redis and memcached). I am going to comment out testing couchbase for now
+                //CachingProviderType.Couchbase,
             };
         }
 
@@ -354,7 +372,8 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
         {
             MicrosoftInMemory,
             Redis,
-            Memcached
+            Memcached,
+            Couchbase,
         }
     }
 }
