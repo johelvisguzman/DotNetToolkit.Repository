@@ -14,11 +14,13 @@
         {
             TestInvokeConstructor<TestClassOne, string>(x => x.PString, "hello world", "hello world", expToParameter: true);
             TestInvokeConstructor<TestClassOne, bool>(x => x.PBool, "true", true, expToParameter: true);
+            TestInvokeConstructor<TestClassOne, bool>(x => x.PBool, "yes", true, expToParameter: true);
             TestInvokeConstructor<TestClassOne, bool>(x => x.PBool, "false", false, expToParameter: true);
             TestInvokeConstructor<TestClassOne, bool>(x => x.PBool, "1", true, expToParameter: true);
             TestInvokeConstructor<TestClassOne, bool>(x => x.PBool, "0", false, expToParameter: true);
             TestInvokeConstructor<TestClassOne, bool>(x => x.PBool, "on", true, expToParameter: true);
             TestInvokeConstructor<TestClassOne, bool>(x => x.PBool, "off", false, expToParameter: true);
+            TestInvokeConstructor<TestClassOne, bool>(x => x.PBool, "no", false, expToParameter: true);
             TestInvokeConstructor<TestClassOne, TimeSpan>(x => x.PTimeSpan, "00:00:30", TimeSpan.FromSeconds(30), expToParameter: true);
             TestInvokeConstructor<TestClassOne, DateTime>(x => x.PDateTime, "2005-05-05", DateTime.Parse("2005-05-05"), expToParameter: true);
             TestInvokeConstructor<TestClassOne, int>(x => x.PInt, "1", 1, expToParameter: true);
@@ -43,6 +45,22 @@
             TestInvokeConstructor<TestClassOne, double?>(x => x.PNullableDouble, "", (double?)null, expToParameter: true);
             TestInvokeConstructor<TestClassOne, decimal?>(x => x.PNullableDecimal, "", (decimal?)null, expToParameter: true);
             TestInvokeConstructor<TestClassOne, MyEnum?>(x => x.PNullableMyEnum, "", (MyEnum?)null, expToParameter: true);
+
+            TestInvokeConstructor<TestClassOne, string>(x => x.PString, "hello world", "hello world", expToParameter: true);
+            TestInvokeConstructor<TestClassOne, bool?>(x => x.PNullableBool, "true", true, expToParameter: true);
+            TestInvokeConstructor<TestClassOne, bool?>(x => x.PNullableBool, "yes", true, expToParameter: true);
+            TestInvokeConstructor<TestClassOne, bool?>(x => x.PNullableBool, "false", false, expToParameter: true);
+            TestInvokeConstructor<TestClassOne, bool?>(x => x.PNullableBool, "1", true, expToParameter: true);
+            TestInvokeConstructor<TestClassOne, bool?>(x => x.PNullableBool, "0", false, expToParameter: true);
+            TestInvokeConstructor<TestClassOne, bool?>(x => x.PNullableBool, "on", true, expToParameter: true);
+            TestInvokeConstructor<TestClassOne, bool?>(x => x.PNullableBool, "off", false, expToParameter: true);
+            TestInvokeConstructor<TestClassOne, bool?>(x => x.PNullableBool, "no", false, expToParameter: true);
+            TestInvokeConstructor<TestClassOne, TimeSpan?>(x => x.PNullableTimeSpan, "00:00:30", TimeSpan.FromSeconds(30), expToParameter: true);
+            TestInvokeConstructor<TestClassOne, DateTime?>(x => x.PNullableDateTime, "2005-05-05", DateTime.Parse("2005-05-05"), expToParameter: true);
+            TestInvokeConstructor<TestClassOne, int?>(x => x.PNullableInt, "1", 1, expToParameter: true);
+            TestInvokeConstructor<TestClassOne, double?>(x => x.PNullableDouble, "1", 1.00, expToParameter: true);
+            TestInvokeConstructor<TestClassOne, decimal?>(x => x.PNullableDecimal, "1.00", 1, expToParameter: true);
+            TestInvokeConstructor<TestClassOne, MyEnum?>(x => x.PNullableMyEnum, "One", MyEnum.One, expToParameter: true);
         }
 
         [Fact]
@@ -58,11 +76,13 @@
         {
             TestInvokeConstructor<TestClassTwo, string>(x => x.PString, "hello world", "hello world", expToParameter: false);
             TestInvokeConstructor<TestClassTwo, bool>(x => x.PBool, "true", true, expToParameter: false);
+            TestInvokeConstructor<TestClassTwo, bool>(x => x.PBool, "yes", true, expToParameter: false);
             TestInvokeConstructor<TestClassTwo, bool>(x => x.PBool, "false", false, expToParameter: false);
             TestInvokeConstructor<TestClassTwo, bool>(x => x.PBool, "1", true, expToParameter: false);
             TestInvokeConstructor<TestClassTwo, bool>(x => x.PBool, "0", false, expToParameter: false);
             TestInvokeConstructor<TestClassTwo, bool>(x => x.PBool, "on", true, expToParameter: false);
             TestInvokeConstructor<TestClassTwo, bool>(x => x.PBool, "off", false, expToParameter: false);
+            TestInvokeConstructor<TestClassTwo, bool>(x => x.PBool, "no", false, expToParameter: false);
             TestInvokeConstructor<TestClassTwo, TimeSpan>(x => x.PTimeSpan, "00:00:30", TimeSpan.FromSeconds(30), expToParameter: false);
             TestInvokeConstructor<TestClassTwo, DateTime>(x => x.PDateTime, "2005-05-05", DateTime.Parse("2005-05-05"), expToParameter: false);
             TestInvokeConstructor<TestClassTwo, int>(x => x.PInt, "1", 1, expToParameter: false);
