@@ -99,6 +99,13 @@
 
             object Result = null;
 
+            if (type.IsNullableType() && (value == null || value.Trim().Length == 0))
+            {
+                return null;
+            }
+
+            type = Nullable.GetUnderlyingType(type) ?? type;
+
             if (type == typeof(string))
             {
                 Result = value;
@@ -142,7 +149,7 @@
                 }
                 else
                 {
-                    throw new Exception($"Type conversion not handled in {nameof(ConvertTo)} method.");
+                    throw new Exception("Type conversion not handled.");
                 }
 #else
                 return Convert.ChangeType(value, type);

@@ -32,16 +32,14 @@
             switch (value.ToLower())
             {
                 case "true":
-                    return true;
+                case "yes":
                 case "on":
-                    return true;
                 case "1":
                     return true;
-                case "0":
-                    return false;
                 case "false":
-                    return false;
+                case "no":
                 case "off":
+                case "0":
                     return false;
                 default:
                     throw new InvalidCastException($"Cannot cast '{value}' to boolean.");
