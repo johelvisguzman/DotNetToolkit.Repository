@@ -2,9 +2,8 @@
 {
     using BenchmarkDotNet.Attributes;
     using Data;
-    using System.Threading.Tasks;
 
-    [BenchmarkCategory("RepositoryTraits")]
+    [BenchmarkCategory("Update")]
     public class Repository_Update_Benchmarks : BenchmarkBase
     {
         private IRepository<Customer> _repo;
@@ -27,28 +26,16 @@
             _repo.Delete(x => x.Id != 0);
         }
 
-        [BenchmarkCategory("Update"), Benchmark]
+        [Benchmark]
         public void Update()
         {
             _repo.Update(_customer);
         }
 
-        [BenchmarkCategory("UpdateRange"), Benchmark]
+        [Benchmark]
         public void UpdateRange()
         {
             _repo.Update(new[] { _customer });
-        }
-
-        [BenchmarkCategory("UpdateAsync"), Benchmark]
-        public async Task Async_Update()
-        {
-            await _repo.UpdateAsync(_customer);
-        }
-
-        [BenchmarkCategory("UpdateRangeAsync"), Benchmark]
-        public async Task Async_UpdateRange()
-        {
-            await _repo.UpdateAsync(new[] { _customer });
         }
     }
 }

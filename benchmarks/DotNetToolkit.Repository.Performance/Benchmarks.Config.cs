@@ -19,7 +19,7 @@
             Add(CsvExporter.Default);
             Add(MarkdownExporter.GitHub);
             Add(HtmlExporter.Default);
-            Add(new MemoryDiagnoser());
+            Add(MemoryDiagnoser.Default);
             Add(new ProviderColumn());
             Add(TargetMethodColumn.Method);
             Add(StatisticColumn.Mean);
@@ -34,9 +34,8 @@
                 .With(InProcessToolchain.Instance)
             );
 
-            Set(new DefaultOrderer(SummaryOrderPolicy.FastestToSlowest));
-
-            SummaryPerType = false;
+            Orderer = new DefaultOrderer(SummaryOrderPolicy.FastestToSlowest);
+            Options = ConfigOptions.JoinSummary;
         }
     }
 }
