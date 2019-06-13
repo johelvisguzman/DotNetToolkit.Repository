@@ -14,23 +14,101 @@ If you want to use DotNetToolkit.Repository for the first time, the [Getting Sta
 
 ## Packages
 
-| Package | NuGet Stable  | Downloads | MyGet |
-| ------- | ------------- | --------- | ----- |
-[DotNetToolkit.Repository](https://www.nuget.org/packages/DotNetToolkit.Repository/) | [![DotNetToolkit.Repository](https://img.shields.io/nuget/v/DotNetToolkit.Repository.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository/) | [![DotNetToolkit.Repository](https://img.shields.io/nuget/dt/DotNetToolkit.Repository.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository/) | [![MyGet (dev)](https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.svg?label=myget)](https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository) |
-[DotNetToolkit.Repository.EntityFramework](https://www.nuget.org/packages/DotNetToolkit.Repository.EntityFramework/) | [![DotNetToolkit.Repository.EntityFramework](https://img.shields.io/nuget/v/DotNetToolkit.Repository.EntityFramework.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.EntityFramework/) | [![DotNetToolkit.Repository.EntityFramework](https://img.shields.io/nuget/dt/DotNetToolkit.Repository.EntityFramework.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.EntityFramework/) | [![MyGet (dev)](https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.EntityFramework.svg?label=myget)](https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.EntityFramework) |
-[DotNetToolkit.Repository.EntityFrameworkCore](https://www.nuget.org/packages/DotNetToolkit.Repository.EntityFrameworkCore/) | [![DotNetToolkit.Repository.EntityFrameworkCore](https://img.shields.io/nuget/v/DotNetToolkit.Repository.EntityFrameworkCore.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.EntityFrameworkCore/) | [![DotNetToolkit.Repository.EntityFrameworkCore](https://img.shields.io/nuget/dt/DotNetToolkit.Repository.EntityFrameworkCore.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.EntityFrameworkCore/) | [![MyGet (dev)](https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.EntityFrameworkCore.svg?label=myget)](https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.EntityFrameworkCore) |
-[DotNetToolkit.Repository.AdoNet](https://www.nuget.org/packages/DotNetToolkit.Repository.AdoNet/) | [![DotNetToolkit.Repository.AdoNet](https://img.shields.io/nuget/v/DotNetToolkit.Repository.AdoNet.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.AdoNet/) | [![DotNetToolkit.Repository.AdoNet](https://img.shields.io/nuget/dt/DotNetToolkit.Repository.AdoNet.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.AdoNet/) | [![MyGet (dev)](https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.AdoNet.svg?label=myget)](https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.AdoNet) |
-[DotNetToolkit.Repository.NHibernate](https://www.nuget.org/packages/DotNetToolkit.Repository.NHibernate/) | [![DotNetToolkit.Repository.NHibernate](https://img.shields.io/nuget/v/DotNetToolkit.Repository.NHibernate.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.NHibernate/) | [![DotNetToolkit.Repository.NHibernate](https://img.shields.io/nuget/dt/DotNetToolkit.Repository.NHibernate.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.NHibernate/) | [![MyGet (dev)](https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.NHibernate.svg?label=myget)](https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.NHibernate) |
-[DotNetToolkit.Repository.InMemory](https://www.nuget.org/packages/DotNetToolkit.Repository.InMemory/) | [![DotNetToolkit.Repository.InMemory](https://img.shields.io/nuget/v/DotNetToolkit.Repository.InMemory.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.InMemory/) | [![DotNetToolkit.Repository.InMemory](https://img.shields.io/nuget/dt/DotNetToolkit.Repository.InMemory.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.InMemory/) | [![MyGet (dev)](https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.InMemory.svg?label=myget)](https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.InMemory) |
-[DotNetToolkit.Repository.Json](https://www.nuget.org/packages/DotNetToolkit.Repository.Json/) | [![DotNetToolkit.Repository.Json](https://img.shields.io/nuget/v/DotNetToolkit.Repository.Json.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.Json/) | [![DotNetToolkit.Repository.Json](https://img.shields.io/nuget/dt/DotNetToolkit.Repository.Json.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.Json/) | [![MyGet (dev)](https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.Json.svg?label=myget)](https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.Json) |
-[DotNetToolkit.Repository.Xml](https://www.nuget.org/packages/DotNetToolkit.Repository.Xml/) | [![DotNetToolkit.Repository.Xml](https://img.shields.io/nuget/v/DotNetToolkit.Repository.Xml.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.Xml/) | [![DotNetToolkit.Repository.Xml](https://img.shields.io/nuget/dt/DotNetToolkit.Repository.Xml.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.Xml/) | [![MyGet (dev)](https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.Xml.svg?label=myget)](https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.Xml) |
-[DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection](https://www.nuget.org/packages/DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection/) | [![DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection](https://img.shields.io/nuget/v/DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection/) | [![DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection](https://img.shields.io/nuget/dt/DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection/) | [![MyGet (dev)](https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.svg?label=myget)](https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection) |
-[DotNetToolkit.Repository.Extensions.Unity](https://www.nuget.org/packages/DotNetToolkit.Repository.Extensions.Unity/) | [![DotNetToolkit.Repository.Extensions.Unity](https://img.shields.io/nuget/v/DotNetToolkit.Repository.Extensions.Unity.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.Extensions.Unity/) | [![DotNetToolkit.Repository.Extensions.Unity](https://img.shields.io/nuget/dt/DotNetToolkit.Repository.Extensions.Unity.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.Extensions.Unity/) | [![MyGet (dev)](https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.Extensions.Unity.svg?label=myget)](https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.Extensions.Unity) |
-[DotNetToolkit.Repository.Extensions.Ninject](https://www.nuget.org/packages/DotNetToolkit.Repository.Extensions.Ninject/) | [![DotNetToolkit.Repository.Extensions.Ninject](https://img.shields.io/nuget/v/DotNetToolkit.Repository.Extensions.Ninject.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.Extensions.Ninject/) | [![DotNetToolkit.Repository.Extensions.Ninject](https://img.shields.io/nuget/dt/DotNetToolkit.Repository.Extensions.Ninject.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.Extensions.Ninject/) | [![MyGet (dev)](https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.Extensions.Ninject.svg?label=myget)](https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.Extensions.Ninject) |
-[DotNetToolkit.Repository.Caching.InMemory](https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.InMemory/) | [![DotNetToolkit.Repository.Caching.InMemory](https://img.shields.io/nuget/v/DotNetToolkit.Repository.Caching.InMemory.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.InMemory/) | [![DotNetToolkit.Repository.Caching.InMemory](https://img.shields.io/nuget/dt/DotNetToolkit.Repository.Caching.InMemory.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.InMemory/) | [![MyGet (dev)](https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.Caching.InMemory.svg?label=myget)](https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.Caching.InMemory) |
-[DotNetToolkit.Repository.Caching.Redis](https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.Redis/) | [![DotNetToolkit.Repository.Caching.Redis](https://img.shields.io/nuget/v/DotNetToolkit.Repository.Caching.Redis.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.Redis/) | [![DotNetToolkit.Repository.Caching.Redis](https://img.shields.io/nuget/dt/DotNetToolkit.Repository.Caching.Redis.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.Redis/) | [![MyGet (dev)](https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.Caching.Redis.svg?label=myget)](https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.Caching.Redis) |
-[DotNetToolkit.Repository.Caching.Memcached](https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.Memcached/) | [![DotNetToolkit.Repository.Caching.Memcached](https://img.shields.io/nuget/v/DotNetToolkit.Repository.Caching.Memcached.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.Memcached/) | [![DotNetToolkit.Repository.Caching.Memcached](https://img.shields.io/nuget/dt/DotNetToolkit.Repository.Caching.Memcached.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.Memcached/) | [![MyGet (dev)](https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.Caching.Memcached.svg?label=myget)](https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.Caching.Memcached) |
-[DotNetToolkit.Repository.Caching.Couchbase](https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.Couchbase/) | [![DotNetToolkit.Repository.Caching.Couchbase](https://img.shields.io/nuget/v/DotNetToolkit.Repository.Caching.Couchbase.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.Couchbase/) | [![DotNetToolkit.Repository.Caching.Couchbase](https://img.shields.io/nuget/dt/DotNetToolkit.Repository.Caching.Couchbase.svg)](https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.Couchbase/) | [![MyGet (dev)](https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.Caching.Couchbase.svg?label=myget)](https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.Caching.Couchbase) |
+<table>
+    <tr>
+      <th>Package</th>
+      <th>Nuget Stable</th>
+      <th>Downloads</th>
+	  <th>MyGet</th>
+    </tr>
+    <tr>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository/">DotNetToolkit.Repository</a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.svg" alt="DotNetToolkit.Repository"></a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.svg" alt="DotNetToolkit.Repository"></a></td>
+	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.svg?label=myget" alt="MyGet (dev)"></a></td>
+    </tr>
+	<tr>
+		<th colspan="4">ORM Providers</th>
+	</tr>
+	<tr>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.AdoNet/">DotNetToolkit.Repository.AdoNet</a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.AdoNet/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.AdoNet.svg" alt="DotNetToolkit.Repository.AdoNet"></a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.AdoNet/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.AdoNet.svg" alt="DotNetToolkit.Repository.AdoNet"></a></td>
+	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.AdoNet"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.AdoNet.svg?label=myget" alt="MyGet (dev)"></a></td>
+    </tr>
+	<tr>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.InMemory/">DotNetToolkit.Repository.InMemory</a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.InMemory/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.InMemory.svg" alt="DotNetToolkit.Repository.InMemory"></a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.InMemory/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.InMemory.svg" alt="DotNetToolkit.Repository.InMemory"></a></td>
+	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.InMemory"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.InMemory.svg?label=myget" alt="MyGet (dev)"></a></td>
+    </tr>
+	<tr>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.NHibernate/">DotNetToolkit.Repository.NHibernate</a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.NHibernate/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.NHibernate.svg" alt="DotNetToolkit.Repository.NHibernate"></a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.NHibernate/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.NHibernate.svg" alt="DotNetToolkit.Repository.NHibernate"></a></td>
+	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.NHibernate"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.NHibernate.svg?label=myget" alt="MyGet (dev)"></a></td>
+    </tr>
+	<tr>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.EntityFramework/">DotNetToolkit.Repository.EntityFramework</a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.EntityFramework/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.EntityFramework.svg" alt="DotNetToolkit.Repository.EntityFramework"></a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.EntityFramework/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.EntityFramework.svg" alt="DotNetToolkit.Repository.EntityFramework"></a></td>
+	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.EntityFramework"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.EntityFramework.svg?label=myget" alt="MyGet (dev)"></a></td>
+    </tr>
+	<tr>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.EntityFrameworkCore/">DotNetToolkit.Repository.EntityFrameworkCore</a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.EntityFrameworkCore/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.EntityFrameworkCore.svg" alt="DotNetToolkit.Repository.EntityFrameworkCore"></a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.EntityFrameworkCore/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.EntityFrameworkCore.svg" alt="DotNetToolkit.Repository.EntityFrameworkCore"></a></td>
+	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.EntityFrameworkCore"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.EntityFrameworkCore.svg?label=myget" alt="MyGet (dev)"></a></td>
+    </tr>
+	<tr>
+		<th colspan="4">Caching Providers</th>
+	</tr>
+	<tr>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.InMemory/">DotNetToolkit.Repository.Caching.InMemory</a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.InMemory/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.Caching.InMemory.svg" alt="DotNetToolkit.Repository.Caching.InMemory"></a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.InMemory/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.Caching.InMemory.svg" alt="DotNetToolkit.Repository.Caching.InMemory"></a></td>
+	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.Caching.InMemory"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.Caching.InMemory.svg?label=myget" alt="MyGet (dev)"></a></td>
+    </tr>
+	<tr>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.Redis/">DotNetToolkit.Repository.Caching.Redis</a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.Redis/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.Caching.Redis.svg" alt="DotNetToolkit.Repository.Caching.Redis"></a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.Redis/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.Caching.Redis.svg" alt="DotNetToolkit.Repository.Caching.Redis"></a></td>
+	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.Caching.Redis"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.Caching.Redis.svg?label=myget" alt="MyGet (dev)"></a></td>
+    </tr>
+	<tr>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.Memcached/">DotNetToolkit.Repository.Caching.Memcached</a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.Memcached/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.Caching.Memcached.svg" alt="DotNetToolkit.Repository.Caching.Memcached"></a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.Memcached/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.Caching.Memcached.svg" alt="DotNetToolkit.Repository.Caching.Memcached"></a></td>
+	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.Caching.Memcached"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.Caching.Memcached.svg?label=myget" alt="MyGet (dev)"></a></td>
+    </tr>
+	<tr>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.Couchbase/">DotNetToolkit.Repository.Caching.Couchbase</a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.Couchbase/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.Caching.Couchbase.svg" alt="DotNetToolkit.Repository.Caching.Couchbase"></a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Caching.Couchbase/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.Caching.Couchbase.svg" alt="DotNetToolkit.Repository.Caching.Couchbase"></a></td>
+	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.Caching.Couchbase"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.Caching.Couchbase.svg?label=myget" alt="MyGet (dev)"></a></td>
+    </tr>
+		<tr>
+		<th colspan="4">IoC Container Extensions</th>
+	</tr>
+	<tr>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection/">DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection</a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.svg" alt="DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection"></a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.svg" alt="DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection"></a></td>
+	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.svg?label=myget" alt="MyGet (dev)"></a></td>
+    </tr>
+	<tr>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Extensions.Unity/">DotNetToolkit.Repository.Extensions.Unity</a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Extensions.Unity/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.Extensions.Unity.svg" alt="DotNetToolkit.Repository.Extensions.Unity"></a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Extensions.Unity/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.Extensions.Unity.svg" alt="DotNetToolkit.Repository.Extensions.Unity"></a></td>
+	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.Extensions.Unity"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.Extensions.Unity.svg?label=myget" alt="MyGet (dev)"></a></td>
+    </tr>
+	<tr>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Extensions.Ninject/">DotNetToolkit.Repository.Extensions.Ninject</a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Extensions.Ninject/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.Extensions.Ninject.svg" alt="DotNetToolkit.Repository.Extensions.Ninject"></a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Extensions.Ninject/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.Extensions.Ninject.svg" alt="DotNetToolkit.Repository.Extensions.Ninject"></a></td>
+	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.Extensions.Ninject"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.Extensions.Ninject.svg?label=myget" alt="MyGet (dev)"></a></td>
+    </tr>
+</table>
 
 ## Features
 
