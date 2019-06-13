@@ -37,6 +37,18 @@ If you want to use DotNetToolkit.Repository for the first time, the [Getting Sta
 	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.AdoNet"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.AdoNet.svg?label=myget" alt="MyGet (dev)"></a></td>
     </tr>
 	<tr>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Json/">DotNetToolkit.Repository.Json</a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Json/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.Json.svg" alt="DotNetToolkit.Repository.Json"></a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Json/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.Json.svg" alt="DotNetToolkit.Repository.Json"></a></td>
+	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.Json"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.Json.svg?label=myget" alt="MyGet (dev)"></a></td>
+    </tr>
+	<tr>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Xml/">DotNetToolkit.Repository.Xml</a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Xml/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.Xml.svg" alt="DotNetToolkit.Repository.Xml"></a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Xml/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.Xml.svg" alt="DotNetToolkit.Repository.Xml"></a></td>
+	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.Xml"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.Xml.svg?label=myget" alt="MyGet (dev)"></a></td>
+    </tr>
+	<tr>
       <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.InMemory/">DotNetToolkit.Repository.InMemory</a></td>
       <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.InMemory/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.InMemory.svg" alt="DotNetToolkit.Repository.InMemory"></a></td>
       <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.InMemory/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.InMemory.svg" alt="DotNetToolkit.Repository.InMemory"></a></td>
