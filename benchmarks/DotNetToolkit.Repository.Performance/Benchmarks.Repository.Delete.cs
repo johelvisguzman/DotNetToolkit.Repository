@@ -2,9 +2,8 @@
 {
     using BenchmarkDotNet.Attributes;
     using Data;
-    using System.Threading.Tasks;
 
-    [BenchmarkCategory("RepositoryTraits")]
+    [BenchmarkCategory("Delete")]
     public class Repository_Delete_Benchmarks : BenchmarkBase
     {
         private IRepository<Customer> _repo;
@@ -27,52 +26,28 @@
             _repo.Delete(x => x.Id != 0);
         }
 
-        [BenchmarkCategory("Delete"), Benchmark]
+        [Benchmark]
         public void Delete()
         {
             _repo.Delete(_customer);
         }
 
-        [BenchmarkCategory("DeleteRange"), Benchmark]
+        [Benchmark]
         public void DeleteRange()
         {
             _repo.Delete(new[] { _customer });
         }
 
-        [BenchmarkCategory("DeleteWithId"), Benchmark]
+        [Benchmark]
         public void DeleteWithId()
         {
             _repo.Delete(_customer.Id);
         }
 
-        [BenchmarkCategory("DeleteWithPredicate"), Benchmark]
+        [Benchmark]
         public void DeleteWithPredicate()
         {
             _repo.Delete(x => x.Id == _customer.Id);
-        }
-
-        [BenchmarkCategory("DeleteAsync"), Benchmark]
-        public async Task Async_Delete()
-        {
-            await _repo.DeleteAsync(_customer);
-        }
-
-        [BenchmarkCategory("DeleteRangeAsync"), Benchmark]
-        public async Task Async_DeleteRange()
-        {
-            await _repo.DeleteAsync(new[] { _customer });
-        }
-
-        [BenchmarkCategory("DeleteWithIdAsync"), Benchmark]
-        public async Task Async_DeleteWithId()
-        {
-            await _repo.DeleteAsync(_customer.Id);
-        }
-
-        [BenchmarkCategory("DeleteWithPredicateAsync"), Benchmark]
-        public async Task Async_DeleteWithPredicate()
-        {
-            await _repo.DeleteAsync(x => x.Id == _customer.Id);
         }
     }
 }

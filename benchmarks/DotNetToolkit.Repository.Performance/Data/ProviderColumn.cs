@@ -1,7 +1,6 @@
-﻿using BenchmarkDotNet.Columns;
-
-namespace DotNetToolkit.Repository.Performance.Data
+﻿namespace DotNetToolkit.Repository.Performance.Data
 {
+    using BenchmarkDotNet.Columns;
     using BenchmarkDotNet.Reports;
     using BenchmarkDotNet.Running;
     using System.Linq;
@@ -15,7 +14,7 @@ namespace DotNetToolkit.Repository.Performance.Data
                        ?.ToDisplayText() ?? "?";
         }
 
-        public string GetValue(Summary summary, BenchmarkCase benchmarkCase, ISummaryStyle style)
+        public string GetValue(Summary summary, BenchmarkCase benchmarkCase, SummaryStyle style)
         {
             return GetValue(summary, benchmarkCase);
         }

@@ -2,9 +2,8 @@
 {
     using BenchmarkDotNet.Attributes;
     using Data;
-    using System.Threading.Tasks;
 
-    [BenchmarkCategory("RepositoryTraits")]
+    [BenchmarkCategory("Add")]
     public class Repository_Add_Benchmarks : BenchmarkBase
     {
         private IRepository<Customer> _repo;
@@ -26,28 +25,16 @@
             _repo.Delete(x => x.Id != 0);
         }
 
-        [BenchmarkCategory("Add"), Benchmark]
+        [Benchmark]
         public void Add()
         {
             _repo.Add(_customer);
         }
 
-        [BenchmarkCategory("AddRange"), Benchmark]
+        [Benchmark]
         public void AddRange()
         {
             _repo.Add(new[] { _customer });
-        }
-
-        [BenchmarkCategory("AddAsync"), Benchmark]
-        public async Task Async_Add()
-        {
-            await _repo.AddAsync(_customer);
-        }
-
-        [BenchmarkCategory("AddRangeAsync"), Benchmark]
-        public async Task Async_AddRange()
-        {
-            await _repo.AddAsync(new[] { _customer });
         }
     }
 }
