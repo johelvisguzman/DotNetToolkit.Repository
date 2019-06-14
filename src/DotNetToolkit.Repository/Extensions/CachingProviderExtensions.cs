@@ -63,7 +63,7 @@
                 cacheUsed = true;
             }
 
-            return new CacheQueryResult<TResult>(value)
+            return new CacheQueryResult<TResult>(hashedKey, value)
             {
                 CacheUsed = cacheUsed
             };
@@ -106,7 +106,7 @@
                 cacheUsed = true;
             }
 
-            return new CachePagedQueryResult<TResult>(value)
+            return new CachePagedQueryResult<TResult>(hashedKey, value)
             {
                 CacheUsed = cacheUsed
             };
@@ -149,7 +149,7 @@
                 cacheUsed = true;
             }
 
-            return new CacheQueryResult<TResult>(value)
+            return new CacheQueryResult<TResult>(hashedKey, value)
             {
                 CacheUsed = cacheUsed
             };
@@ -192,7 +192,7 @@
                 cacheUsed = true;
             }
 
-            return new CachePagedQueryResult<TResult>(value)
+            return new CachePagedQueryResult<TResult>(hashedKey, value)
             {
                 CacheUsed = cacheUsed
             };

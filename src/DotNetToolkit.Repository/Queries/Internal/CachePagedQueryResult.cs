@@ -11,7 +11,8 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="CachePagedQueryResult{TResult}"/> class.
         /// </summary>
+        /// <param name="hashedKey">The hashed key.</param>
         /// <param name="result">The result.</param>
-        public CachePagedQueryResult([CanBeNull] IPagedQueryResult<TResult> result) : base(result) { }
+        public CachePagedQueryResult([NotNull] string hashedKey, [CanBeNull] IPagedQueryResult<TResult> result) : base(hashedKey, result) { }
     }
 }

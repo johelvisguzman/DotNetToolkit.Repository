@@ -7,6 +7,11 @@
     public interface ICacheQueryResult<out TResult>
     {
         /// <summary>
+        /// Gets the hashed key associated to this cached result.
+        /// </summary>
+        string HashedKey { get; }
+
+        /// <summary>
         /// Gets the result.
         /// </summary>
         TResult Result { get; }
