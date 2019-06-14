@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Queries.Internal
 {
     using JetBrains.Annotations;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="ICacheQueryResult{TResult}" />.
@@ -8,6 +9,11 @@
     /// <typeparam name="TResult">The type of the result.</typeparam>
     internal class CacheQueryResult<TResult> : ICacheQueryResult<TResult>
     {
+        /// <summary>
+        /// Gets the hashed key associated to this cached result.
+        /// </summary>
+        public string HashedKey { get; }
+
         /// <summary>
         /// Gets the result.
         /// </summary>
@@ -21,9 +27,11 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheQueryResult{TResult}"/> class.
         /// </summary>
+        /// <param name="hashedKey">The hashed key.</param>
         /// <param name="result">The result.</param>
-        public CacheQueryResult([CanBeNull] TResult result)
+        public CacheQueryResult([NotNull] string hashedKey, [CanBeNull] TResult result)
         {
+            HashedKey = Guard.NotEmpty(hashedKey, nameof(hashedKey));
             Result = result;
         }
     }
