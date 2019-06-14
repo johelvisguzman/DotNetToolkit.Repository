@@ -4,6 +4,8 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/v02h9efjwev30sof?svg=true)](https://ci.appveyor.com/project/johelvisguzman/dotnettoolkit-repository)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
+[![Overview](https://img.shields.io/badge/docs-Overview-green.svg?style=flat)](https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/getting-started)
+[![ChangeLog](https://img.shields.io/badge/docs-ChangeLog-green.svg?style=flat)](https://github.com/johelvisguzman/DotNetToolkit.Repository/releases)
 
 ## What is the Repository Pattern?
 
