@@ -90,11 +90,15 @@
 
             Assert.False(optionsBuilder.IsConfigured);
 
-            optionsBuilder.UseConventions(new RepositoryConventions());
+            optionsBuilder.UseConventions(c =>
+            {
+                c.TableNameCallback = (type) => type.Name;
+            });
 
             Assert.True(optionsBuilder.IsConfigured);
 
             Assert.NotNull(optionsBuilder.Options.Conventions);
+            Assert.NotNull(optionsBuilder.Options.Conventions.TableNameCallback);
         }
 
         [Fact]

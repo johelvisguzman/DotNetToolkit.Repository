@@ -70,7 +70,7 @@
         {
             var helper = new NHibernateConventionsHelper(Guard.NotNull(sessionFactory, nameof(sessionFactory)));
 
-            Conventions = new RepositoryConventions
+            Conventions = new RepositoryConventions(GetType())
             {
                 PrimaryKeysCallback = type => helper.GetPrimaryKeyPropertyInfos(type),
                 ColumnNameCallback = pi => helper.GetColumnName(pi),

@@ -72,7 +72,6 @@
         public IRepositoryConventions Conventions
         {
             get { return _underlyingContext.Conventions; }
-            set { _underlyingContext.Conventions = value; }
         }
 
         public ILogger Logger

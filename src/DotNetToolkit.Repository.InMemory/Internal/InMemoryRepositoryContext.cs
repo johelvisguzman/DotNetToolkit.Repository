@@ -58,7 +58,7 @@
         public InMemoryRepositoryContext(string databaseName, bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false)
         {
             DatabaseName = string.IsNullOrEmpty(databaseName) ? DefaultDatabaseName : databaseName;
-            Conventions = RepositoryConventions.Default;
+            Conventions = RepositoryConventions.Default(GetType());
 
             _ignoreTransactionWarning = ignoreTransactionWarning;
             _ignoreSqlQueryWarning = ignoreSqlQueryWarning;

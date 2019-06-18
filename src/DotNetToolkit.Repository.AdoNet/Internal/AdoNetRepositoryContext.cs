@@ -43,9 +43,9 @@
         #region Properties
 
         /// <summary>
-        /// Gets or sets the configurable conventions.
+        /// Gets the configurable conventions.
         /// </summary>
-        public IRepositoryConventions Conventions { get; set; }
+        public IRepositoryConventions Conventions { get; internal set; }
 
         /// <summary>
         /// Gets or sets the repository context logger.
@@ -79,10 +79,10 @@
         {
             Guard.NotEmpty(nameOrConnectionString, nameof(nameOrConnectionString));
 
-            Conventions = RepositoryConventions.Default;
+            Conventions = RepositoryConventions.Default(GetType());
 
             _dbHelper = new DbHelper(Conventions, nameOrConnectionString);
-            _schemaConfigHelper = new SchemaTableConfigurationHelper(Conventions, _dbHelper);
+            _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
             _ensureDatabaseCreated = ensureDatabaseCreated;
         }
 
@@ -101,10 +101,10 @@
             Guard.NotEmpty(providerName, nameof(providerName));
             Guard.NotEmpty(connectionString, nameof(connectionString));
 
-            Conventions = RepositoryConventions.Default;
+            Conventions = RepositoryConventions.Default(GetType());
 
             _dbHelper = new DbHelper(Conventions, providerName, connectionString);
-            _schemaConfigHelper = new SchemaTableConfigurationHelper(Conventions, _dbHelper);
+            _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
             _ensureDatabaseCreated = ensureDatabaseCreated;
         }
 
@@ -121,10 +121,10 @@
         {
             Guard.NotNull(existingConnection, nameof(existingConnection));
 
-            Conventions = RepositoryConventions.Default;
+            Conventions = RepositoryConventions.Default(GetType());
 
             _dbHelper = new DbHelper(Conventions, existingConnection);
-            _schemaConfigHelper = new SchemaTableConfigurationHelper(Conventions, _dbHelper);
+            _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
             _ensureDatabaseCreated = ensureDatabaseCreated;
         }
 
