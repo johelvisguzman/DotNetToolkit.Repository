@@ -79,7 +79,7 @@
         {
             Guard.NotEmpty(nameOrConnectionString, nameof(nameOrConnectionString));
 
-            Conventions = RepositoryConventions.Default(GetType());
+            Conventions = RepositoryConventions.Default<AdoNetRepositoryContext>();
 
             _dbHelper = new DbHelper(Conventions, nameOrConnectionString);
             _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
@@ -101,7 +101,7 @@
             Guard.NotEmpty(providerName, nameof(providerName));
             Guard.NotEmpty(connectionString, nameof(connectionString));
 
-            Conventions = RepositoryConventions.Default(GetType());
+            Conventions = RepositoryConventions.Default<AdoNetRepositoryContext>();
 
             _dbHelper = new DbHelper(Conventions, providerName, connectionString);
             _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
@@ -121,7 +121,7 @@
         {
             Guard.NotNull(existingConnection, nameof(existingConnection));
 
-            Conventions = RepositoryConventions.Default(GetType());
+            Conventions = RepositoryConventions.Default<AdoNetRepositoryContext>();
 
             _dbHelper = new DbHelper(Conventions, existingConnection);
             _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);

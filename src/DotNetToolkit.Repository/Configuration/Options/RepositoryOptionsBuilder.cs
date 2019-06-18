@@ -228,7 +228,7 @@
 
             conventionsAction(conventions);
 
-            _options = _options.With(Guard.NotNull(conventions, nameof(conventions)));
+            _options = _options.With(conventions);
 
             return this;
         }

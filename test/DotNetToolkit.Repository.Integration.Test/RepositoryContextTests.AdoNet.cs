@@ -711,7 +711,7 @@
         [Fact]
         public void CreateTableOnSaveChanges()
         {
-            var conventions = RepositoryConventions.Default(GetType());
+            var conventions = RepositoryConventions.Default<AdoNetRepositoryContext>();
             var ensureDatabaseCreated = true;
             var connection = TestDbConnectionHelper.CreateConnection();
             var schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(conventions, connection));
@@ -796,7 +796,7 @@
         [Fact]
         public async Task CreateTableOnSaveChangesAsync()
         {
-            var conventions = RepositoryConventions.Default(GetType());
+            var conventions = RepositoryConventions.Default<AdoNetRepositoryContext>();
             var ensureDatabaseCreated = true;
             var connection = TestDbConnectionHelper.CreateConnection();
             var schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(conventions, connection));
