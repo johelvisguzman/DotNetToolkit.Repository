@@ -58,7 +58,7 @@
             if (!path.EndsWith(@"\"))
                 path += @"\";
 
-            Conventions = RepositoryConventions.Default(GetType());
+            Conventions = RepositoryConventions.Default<XmlRepositoryContext>();
 
             _items = new BlockingCollection<EntitySet>();
             _ignoreTransactionWarning = ignoreTransactionWarning;

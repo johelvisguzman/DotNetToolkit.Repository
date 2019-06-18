@@ -68,10 +68,10 @@
         /// <summary>
         /// Gets the default conventions.
         /// </summary>
-        /// <param name="owner">type that owns this conventions</param>
-        public static IRepositoryConventions Default([NotNull] Type owner)
+        /// <typeparam name="TOwner">The type that owns this conventions.</typeparam>
+        public static IRepositoryConventions Default<TOwner>() where TOwner : IRepositoryContext
         {
-            var conventions = new RepositoryConventions(Guard.NotNull(owner, nameof(owner)));
+            var conventions = new RepositoryConventions(typeof(TOwner));
 
             conventions.PrimaryKeysCallback = pi => PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(conventions, pi);
             conventions.ForeignKeysCallback = (sourceType, foreignType) => ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(conventions, sourceType, foreignType);

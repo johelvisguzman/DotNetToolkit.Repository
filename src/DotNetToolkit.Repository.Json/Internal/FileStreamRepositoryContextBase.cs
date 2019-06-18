@@ -58,7 +58,7 @@
             if (!path.EndsWith(@"\"))
                 path += @"\";
 
-            Conventions = RepositoryConventions.Default(GetType());
+            Conventions = RepositoryConventions.Default<JsonRepositoryContext>();
 
             _items = new BlockingCollection<EntitySet>();
             _ignoreTransactionWarning = ignoreTransactionWarning;

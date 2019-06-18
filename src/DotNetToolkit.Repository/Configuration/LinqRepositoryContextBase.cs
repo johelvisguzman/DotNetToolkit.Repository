@@ -44,7 +44,7 @@
         /// </summary>
         protected LinqRepositoryContextBase()
         {
-            Conventions = RepositoryConventions.Default(GetType());
+            Conventions = RepositoryConventions.Default<LinqRepositoryContextBase>();
         }
 
         #endregion

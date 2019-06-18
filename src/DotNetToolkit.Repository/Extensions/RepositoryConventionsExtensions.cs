@@ -2,6 +2,7 @@
 {
     using Configuration;
     using Configuration.Conventions;
+    using Extensions.Internal;
     using JetBrains.Annotations;
     using Properties;
     using Queries.Strategies;
@@ -365,9 +366,19 @@
         }
 
         private static Type EnsureOwner([NotNull] IRepositoryConventions source)
-            => Guard.EnsureNotNull(
-                Guard.NotNull(source, nameof(source)).Owner,
+        {
+            Guard.NotNull(source, nameof(source));
+
+            var owner = Guard.EnsureNotNull(
+                source.Owner,
                 string.Format("The conventions '{0}' cannot be null.", nameof(source.Owner)));
+
+            if (!owner.ImplementsInterface(typeof(IRepositoryContext)))
+                throw new InvalidOperationException(string.Format(
+                    "The conventions '{0}' is not an instance of type '{1}'.", nameof(source.Owner), typeof(IRepositoryContext).FullName));
+
+            return owner;
+        }
 
         private static T EnsureCallback<T>([NotNull] T value, [InvokerParameterName] string parameterName) where T : class
             => Guard.EnsureNotNull(
