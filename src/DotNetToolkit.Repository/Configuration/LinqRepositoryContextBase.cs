@@ -26,9 +26,9 @@
         #region Properties
 
         /// <summary>
-        /// Gets or sets the configurable conventions.
+        /// Gets the configurable conventions.
         /// </summary>
-        public IRepositoryConventions Conventions { get; set; }
+        public IRepositoryConventions Conventions { get; internal set; }
 
         /// <summary>
         /// Gets or sets the repository context logger.
@@ -44,7 +44,7 @@
         /// </summary>
         protected LinqRepositoryContextBase()
         {
-            Conventions = RepositoryConventions.Default;
+            Conventions = RepositoryConventions.Default(GetType());
         }
 
         #endregion

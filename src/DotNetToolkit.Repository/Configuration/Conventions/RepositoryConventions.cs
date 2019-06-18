@@ -1,8 +1,10 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Conventions
 {
     using Internal;
+    using JetBrains.Annotations;
     using System;
     using System.Reflection;
+    using Utility;
 
     /// <summary>
     /// An implementation of <see cref="IRepositoryConventions" />.
@@ -45,24 +47,41 @@
         public Func<PropertyInfo, bool> IsColumnMappedCallback { get; set; }
 
         /// <summary>
+        /// Gets the type that owns this conventions.
+        /// </summary>
+        public Type Owner { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryConventions"/> class.
+        /// </summary>
+        internal RepositoryConventions() { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RepositoryConventions"/> class.
+        /// </summary>
+        /// <param name="owner">The type that owns this conventions.</param>
+        public RepositoryConventions([NotNull] Type owner)
+        {
+            Owner = Guard.NotNull(owner, nameof(owner));
+        }
+
+        /// <summary>
         /// Gets the default conventions.
         /// </summary>
-        public static IRepositoryConventions Default
+        /// <param name="owner">type that owns this conventions</param>
+        public static IRepositoryConventions Default([NotNull] Type owner)
         {
-            get
-            {
-                var conventions = new RepositoryConventions();
+            var conventions = new RepositoryConventions(Guard.NotNull(owner, nameof(owner)));
 
-                conventions.PrimaryKeysCallback = pi => PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(conventions, pi);
-                conventions.ForeignKeysCallback = (sourceType, foreignType) => ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(conventions, sourceType, foreignType);
-                conventions.TableNameCallback = type => ModelConventionHelper.GetTableName(type);
-                conventions.ColumnNameCallback = pi => ModelConventionHelper.GetColumnName(pi);
-                conventions.ColumnOrderCallback = pi => ModelConventionHelper.GetColumnOrder(conventions, pi);
-                conventions.IsColumnIdentityCallback = pi => ModelConventionHelper.IsColumnIdentity(conventions, pi);
-                conventions.IsColumnMappedCallback = pi => ModelConventionHelper.IsColumnMapped(pi);
+            conventions.PrimaryKeysCallback = pi => PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(conventions, pi);
+            conventions.ForeignKeysCallback = (sourceType, foreignType) => ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(conventions, sourceType, foreignType);
+            conventions.TableNameCallback = type => ModelConventionHelper.GetTableName(type);
+            conventions.ColumnNameCallback = pi => ModelConventionHelper.GetColumnName(pi);
+            conventions.ColumnOrderCallback = pi => ModelConventionHelper.GetColumnOrder(conventions, pi);
+            conventions.IsColumnIdentityCallback = pi => ModelConventionHelper.IsColumnIdentity(conventions, pi);
+            conventions.IsColumnMappedCallback = pi => ModelConventionHelper.IsColumnMapped(pi);
 
-                return conventions;
-            }
+            return conventions;
         }
     }
 }

@@ -4,6 +4,7 @@
     using AdoNet.Internal;
     using AdoNet.Internal.Schema;
     using Configuration.Conventions;
+    using Configuration.Conventions.Internal;
     using Configuration.Options;
     using Data;
     using System;
@@ -710,12 +711,13 @@
         [Fact]
         public void CreateTableOnSaveChanges()
         {
-            var conventions = RepositoryConventions.Default;
+            var conventions = RepositoryConventions.Default(GetType());
             var ensureDatabaseCreated = true;
             var connection = TestDbConnectionHelper.CreateConnection();
-            var schemaHelper = new SchemaTableConfigurationHelper(conventions, new DbHelper(conventions, connection));
+            var schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(conventions, connection));
             var options = new RepositoryOptionsBuilder()
                 .UseAdoNet(connection, ensureDatabaseCreated)
+                .UseConventions(c => c = conventions)
                 .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
             var classARepo = new Repository<ClassA>(options);
@@ -732,9 +734,10 @@
 
             //
             connection = TestDbConnectionHelper.CreateConnection();
-            schemaHelper = new SchemaTableConfigurationHelper(conventions, new DbHelper(conventions, connection));
+            schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(conventions, connection));
             options = new RepositoryOptionsBuilder()
                 .UseAdoNet(connection, ensureDatabaseCreated)
+                .UseConventions(c => c = conventions)
                 .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
@@ -759,9 +762,10 @@
 
             //
             connection = TestDbConnectionHelper.CreateConnection();
-            schemaHelper = new SchemaTableConfigurationHelper(conventions, new DbHelper(conventions, connection));
+            schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(conventions, connection));
             options = new RepositoryOptionsBuilder()
                 .UseAdoNet(connection, ensureDatabaseCreated)
+                .UseConventions(c => c = conventions)
                 .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
@@ -792,12 +796,13 @@
         [Fact]
         public async Task CreateTableOnSaveChangesAsync()
         {
-            var conventions = RepositoryConventions.Default;
+            var conventions = RepositoryConventions.Default(GetType());
             var ensureDatabaseCreated = true;
             var connection = TestDbConnectionHelper.CreateConnection();
-            var schemaHelper = new SchemaTableConfigurationHelper(conventions, new DbHelper(conventions, connection));
+            var schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(conventions, connection));
             var options = new RepositoryOptionsBuilder()
                 .UseAdoNet(connection, ensureDatabaseCreated)
+                .UseConventions(c => c = conventions)
                 .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
             var classARepo = new Repository<ClassA>(options);
@@ -814,9 +819,10 @@
 
             //
             connection = TestDbConnectionHelper.CreateConnection();
-            schemaHelper = new SchemaTableConfigurationHelper(conventions, new DbHelper(conventions, connection));
+            schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(conventions, connection));
             options = new RepositoryOptionsBuilder()
                 .UseAdoNet(connection, ensureDatabaseCreated)
+                .UseConventions(c => c = conventions)
                 .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 
@@ -841,9 +847,10 @@
 
             //
             connection = TestDbConnectionHelper.CreateConnection();
-            schemaHelper = new SchemaTableConfigurationHelper(conventions, new DbHelper(conventions, connection));
+            schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(conventions, connection));
             options = new RepositoryOptionsBuilder()
                 .UseAdoNet(connection, ensureDatabaseCreated)
+                .UseConventions(c => c = conventions)
                 .UseLoggerProvider(TestXUnitLoggerProvider)
                 .Options;
 

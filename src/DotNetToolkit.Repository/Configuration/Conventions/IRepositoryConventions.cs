@@ -42,5 +42,10 @@
         /// Gets or sets a callback function for determining whether the specified property is mapped.
         /// </summary>
         Func<PropertyInfo, bool> IsColumnMappedCallback { get; set; }
+
+        /// <summary>
+        /// Gets the type that owns this conventions.
+        /// </summary>
+        Type Owner { get; }
     }
 }

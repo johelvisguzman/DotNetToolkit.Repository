@@ -67,6 +67,11 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// </summary>
         public ILogger Logger { get; private set; } = NullLogger.Instance;
 
+        /// <summary>
+        /// Gets the repository conventions.
+        /// </summary>
+        public IRepositoryConventions Conventions { get { return _conventions; } }
+
         #endregion
 
         #region Constructors

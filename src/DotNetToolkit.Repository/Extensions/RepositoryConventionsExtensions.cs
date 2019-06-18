@@ -1,10 +1,12 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
+    using Configuration;
     using Configuration.Conventions;
     using JetBrains.Annotations;
     using Properties;
     using Queries.Strategies;
     using System;
+    using System.Collections.Concurrent;
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
@@ -16,6 +18,23 @@
     /// </summary>
     public static class RepositoryConventionsExtensions
     {
+        private readonly static ConcurrentDictionary<Type, ConcurrentDictionary<Type, PropertyInfo[]>> _primaryKeyPropertyInfosCache
+            = new ConcurrentDictionary<Type, ConcurrentDictionary<Type, PropertyInfo[]>>();
+        private readonly static ConcurrentDictionary<Type, ConcurrentDictionary<Tuple<Type, string>, Tuple<BinaryExpression, ParameterExpression>>> _primaryKeySpecificationsCache
+            = new ConcurrentDictionary<Type, ConcurrentDictionary<Tuple<Type, string>, Tuple<BinaryExpression, ParameterExpression>>>();
+        private readonly static ConcurrentDictionary<Type, ConcurrentDictionary<Tuple<Type, Type>, PropertyInfo[]>> _foreignKeyPropertyInfosCache
+            = new ConcurrentDictionary<Type, ConcurrentDictionary<Tuple<Type, Type>, PropertyInfo[]>>();
+        private readonly static ConcurrentDictionary<Type, ConcurrentDictionary<Type, string>> _tableNameCache
+            = new ConcurrentDictionary<Type, ConcurrentDictionary<Type, string>>();
+        private readonly static ConcurrentDictionary<Type, ConcurrentDictionary<PropertyInfo, string>> _columnNameCache
+            = new ConcurrentDictionary<Type, ConcurrentDictionary<PropertyInfo, string>>();
+        private readonly static ConcurrentDictionary<Type, ConcurrentDictionary<PropertyInfo, int?>> _columnOrderCache
+            = new ConcurrentDictionary<Type, ConcurrentDictionary<PropertyInfo, int?>>();
+        private readonly static ConcurrentDictionary<Type, ConcurrentDictionary<PropertyInfo, bool>> _isColumnMappedCache
+            = new ConcurrentDictionary<Type, ConcurrentDictionary<PropertyInfo, bool>>();
+        private readonly static ConcurrentDictionary<Type, ConcurrentDictionary<PropertyInfo, bool>> _isColumnIdentityCallback
+            = new ConcurrentDictionary<Type, ConcurrentDictionary<PropertyInfo, bool>>();
+
         /// <summary>
         /// Gets a collection of primary keys for the specified type.
         /// </summary>
@@ -23,9 +42,21 @@
         /// <param name="type">The type.</param>
         /// <returns>The collection of primary keys for the specified type.</returns>
         public static PropertyInfo[] GetPrimaryKeyPropertyInfos([NotNull] this IRepositoryConventions source, [NotNull] Type type)
-            => EnsureCallback(
-                   Guard.NotNull(source, nameof(source)).PrimaryKeysCallback,
-                   nameof(source.PrimaryKeysCallback))(Guard.NotNull(type, nameof(type))) ?? new PropertyInfo[0];
+        {
+            EnsureOwner(source);
+            Guard.NotNull(type, nameof(type));
+
+            var store = _primaryKeyPropertyInfosCache.GetOrAdd(source.Owner, new ConcurrentDictionary<Type, PropertyInfo[]>());
+
+            if (!store.TryGetValue(type, out var result))
+            {
+                store[type] = result = EnsureCallback(
+                    source.PrimaryKeysCallback,
+                    nameof(source.PrimaryKeysCallback))(type) ?? new PropertyInfo[0];
+            }
+
+            return result;
+        }
 
         /// <summary>
         /// Gets a collection of primary keys for the specified type.
@@ -63,33 +94,42 @@
         /// <returns>The new specification.</returns>
         public static ISpecificationQueryStrategy<T> GetByPrimaryKeySpecification<T>([NotNull] this IRepositoryConventions source, [NotNull] params object[] keyValues) where T : class
         {
-            Guard.NotNull(source, nameof(source));
+            EnsureOwner(source);
             Guard.NotEmpty(keyValues, nameof(keyValues));
 
-            var propInfos = source.GetPrimaryKeyPropertyInfos<T>();
+            var type = typeof(T);
+            var store = _primaryKeySpecificationsCache.GetOrAdd(source.Owner, new ConcurrentDictionary<Tuple<Type, string>, Tuple<BinaryExpression, ParameterExpression>>());
+            var key = Tuple.Create(type, string.Join(":", keyValues));
 
-            if (keyValues.Length != propInfos.Length)
-                throw new ArgumentException(Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
-
-            var parameter = Expression.Parameter(typeof(T), "x");
-
-            BinaryExpression exp = null;
-
-            for (var i = 0; i < propInfos.Length; i++)
+            if (!store.TryGetValue(key, out var result))
             {
-                var propInfo = propInfos[i];
-                var keyValue = keyValues[i];
+                var propInfos = source.GetPrimaryKeyPropertyInfos(type);
 
-                var x = Expression.Equal(
-                    Expression.PropertyOrField(parameter, propInfo.Name),
-                    Expression.Constant(keyValue));
+                if (keyValues.Length != propInfos.Length)
+                    throw new ArgumentException(Resources.EntityPrimaryKeyValuesLengthMismatch, nameof(keyValues));
 
-                exp = exp == null ? x : Expression.AndAlso(x, exp);
+                var parameter = Expression.Parameter(type, "x");
+
+                BinaryExpression exp = null;
+
+                for (var i = 0; i < propInfos.Length; i++)
+                {
+                    var propInfo = propInfos[i];
+                    var keyValue = keyValues[i];
+
+                    var x = Expression.Equal(
+                        Expression.PropertyOrField(parameter, propInfo.Name),
+                        Expression.Constant(keyValue));
+
+                    exp = exp == null ? x : Expression.AndAlso(x, exp);
+                }
+
+                Guard.EnsureNotNull(exp, "The expression cannot be null.");
+
+                store[key] = result = Tuple.Create(exp, parameter);
             }
 
-            Guard.EnsureNotNull(exp, "The expression cannot be null.");
-
-            var lambda = Expression.Lambda<Func<T, bool>>(exp, parameter);
+            var lambda = Expression.Lambda<Func<T, bool>>(result.Item1, result.Item2);
 
             return new SpecificationQueryStrategy<T>(lambda);
         }
@@ -102,9 +142,23 @@
         /// <param name="foreignType">The foreign type to match.</param>
         /// <returns>The collection of foreign key properties that matches the specified foreign type.</returns>
         public static PropertyInfo[] GetForeignKeyPropertyInfos([NotNull] this IRepositoryConventions source, [NotNull] Type sourceType, [NotNull] Type foreignType)
-            => EnsureCallback(
-                   Guard.NotNull(source, nameof(source)).ForeignKeysCallback,
-                   nameof(source.ForeignKeysCallback))(Guard.NotNull(sourceType, nameof(sourceType)), Guard.NotNull(foreignType, nameof(foreignType))) ?? new PropertyInfo[0];
+        {
+            EnsureOwner(source);
+            Guard.NotNull(sourceType, nameof(sourceType));
+            Guard.NotNull(foreignType, nameof(foreignType));
+
+            var store = _foreignKeyPropertyInfosCache.GetOrAdd(source.Owner, new ConcurrentDictionary<Tuple<Type, Type>, PropertyInfo[]>());
+            var key = Tuple.Create(sourceType, foreignType);
+
+            if (!store.TryGetValue(key, out var result))
+            {
+                store[key] = result = EnsureCallback(
+                    source.ForeignKeysCallback,
+                    nameof(source.ForeignKeysCallback))(sourceType, foreignType) ?? new PropertyInfo[0];
+            }
+
+            return result;
+        }
 
         /// <summary>
         /// Gets a table name for the specified type.
@@ -113,9 +167,21 @@
         /// <param name="type">The type.</param>
         /// <returns>The table name for the specified type.</returns>
         public static string GetTableName([NotNull] this IRepositoryConventions source, [NotNull] Type type)
-            => EnsureCallback(
-                   Guard.NotNull(source, nameof(source)).TableNameCallback,
-                   nameof(source.TableNameCallback))(Guard.NotNull(type, nameof(type)));
+        {
+            EnsureOwner(source);
+            Guard.NotNull(type, nameof(type));
+
+            var store = _tableNameCache.GetOrAdd(source.Owner, new ConcurrentDictionary<Type, string>());
+
+            if (!store.TryGetValue(type, out var result))
+            {
+                store[type] = result = EnsureCallback(
+                   source.TableNameCallback,
+                   nameof(source.TableNameCallback))(type);
+            }
+
+            return result;
+        }
 
         /// <summary>
         /// Gets a table name for the specified type.
@@ -132,9 +198,21 @@
         /// <param name="pi">The property.</param>
         /// <returns>The column name for the specified property.</returns>
         public static string GetColumnName([NotNull] this IRepositoryConventions source, [NotNull] PropertyInfo pi)
-            => EnsureCallback(
-                   Guard.NotNull(source, nameof(source)).ColumnNameCallback,
-                   nameof(source.ColumnNameCallback))(Guard.NotNull(pi, nameof(pi)));
+        {
+            EnsureOwner(source);
+            Guard.NotNull(pi, nameof(pi));
+
+            var store = _columnNameCache.GetOrAdd(source.Owner, new ConcurrentDictionary<PropertyInfo, string>());
+
+            if (!store.TryGetValue(pi, out var result))
+            {
+                store[pi] = result = EnsureCallback(
+                   source.ColumnNameCallback,
+                   nameof(source.ColumnNameCallback))(pi);
+            }
+
+            return result;
+        }
 
         /// <summary>
         /// Gets a column order for the specified property.
@@ -143,9 +221,21 @@
         /// <param name="pi">The property.</param>
         /// <returns>The column order for the specified property.</returns>
         public static int? GetColumnOrder([NotNull] this IRepositoryConventions source, [NotNull] PropertyInfo pi)
-            => EnsureCallback(
-                   Guard.NotNull(source, nameof(source)).ColumnOrderCallback,
-                   nameof(source.ColumnOrderCallback))(Guard.NotNull(pi, nameof(pi)));
+        {
+            EnsureOwner(source);
+            Guard.NotNull(pi, nameof(pi));
+
+            var store = _columnOrderCache.GetOrAdd(source.Owner, new ConcurrentDictionary<PropertyInfo, int?>());
+
+            if (!store.TryGetValue(pi, out var result))
+            {
+                store[pi] = result = EnsureCallback(
+                   source.ColumnOrderCallback,
+                   nameof(source.ColumnOrderCallback))(pi);
+            }
+
+            return result;
+        }
 
         /// <summary>
         /// Gets a column order for the specified property or a default value of <see cref="Int32.MaxValue" />.
@@ -163,9 +253,21 @@
         /// <param name="pi">The property.</param>
         /// <returns><c>true</c> if column is mapped; otherwise, <c>false</c>.</returns>
         public static bool IsColumnMapped([NotNull] this IRepositoryConventions source, [NotNull] PropertyInfo pi)
-            => EnsureCallback(
-                   Guard.NotNull(source, nameof(source)).IsColumnMappedCallback,
-                   nameof(source.IsColumnMappedCallback))(Guard.NotNull(pi, nameof(pi)));
+        {
+            EnsureOwner(source);
+            Guard.NotNull(pi, nameof(pi));
+
+            var store = _isColumnMappedCache.GetOrAdd(source.Owner, new ConcurrentDictionary<PropertyInfo, bool>());
+
+            if (!store.TryGetValue(pi, out var result))
+            {
+                store[pi] = result = EnsureCallback(
+                   source.IsColumnMappedCallback,
+                   nameof(source.IsColumnMappedCallback))(pi);
+            }
+
+            return result;
+        }
 
         /// <summary>
         /// Determines whether the specified property is defined as identity.
@@ -174,9 +276,21 @@
         /// <param name="pi">The property.</param>
         /// <returns><c>true</c> if column is defined as identity.; otherwise, <c>false</c>.</returns>
         public static bool IsColumnIdentity([NotNull] this IRepositoryConventions source, [NotNull] PropertyInfo pi)
-            => EnsureCallback(
-                   Guard.NotNull(source, nameof(source)).IsColumnIdentityCallback,
-                   nameof(source.IsColumnIdentityCallback))(Guard.NotNull(pi, nameof(pi)));
+        {
+            EnsureOwner(source);
+            Guard.NotNull(pi, nameof(pi));
+
+            var store = _isColumnIdentityCallback.GetOrAdd(source.Owner, new ConcurrentDictionary<PropertyInfo, bool>());
+
+            if (!store.TryGetValue(pi, out var result))
+            {
+                store[pi] = result = EnsureCallback(
+                   source.IsColumnIdentityCallback,
+                   nameof(source.IsColumnIdentityCallback))(pi);
+            }
+
+            return result;
+        }
 
         /// <summary>
         /// Throws an exception if the specified key type collection does not match the ones defined for the entity.
@@ -185,10 +299,10 @@
         /// <param name="keyTypes">The key type collection to check against.</param>
         public static void ThrowsIfInvalidPrimaryKeyDefinition<T>([NotNull] this IRepositoryConventions source, [NotNull] params Type[] keyTypes) where T : class
         {
-            Guard.NotNull(source, nameof(source));
+            EnsureOwner(source);
             Guard.NotEmpty(keyTypes, nameof(keyTypes));
 
-            var definedKeyInfos = source.GetPrimaryKeyPropertyInfos<T>().ToList();
+            var definedKeyInfos = source.GetPrimaryKeyPropertyInfos<T>();
 
             if (!definedKeyInfos.Any())
             {
@@ -197,7 +311,7 @@
                     typeof(T).FullName));
             }
 
-            if (definedKeyInfos.Count > 1)
+            if (definedKeyInfos.Length > 1)
             {
                 var hasNoKeyOrdering = definedKeyInfos.Any(x =>
                 {
@@ -250,11 +364,14 @@
             }
         }
 
-        private static T EnsureCallback<T>([ValidatedNotNull] [NoEnumeration]T value, [InvokerParameterName] string parameterName) where T : class
+        private static Type EnsureOwner([NotNull] IRepositoryConventions source)
+            => Guard.EnsureNotNull(
+                Guard.NotNull(source, nameof(source)).Owner,
+                string.Format("The conventions '{0}' cannot be null.", nameof(source.Owner)));
+
+        private static T EnsureCallback<T>([NotNull] T value, [InvokerParameterName] string parameterName) where T : class
             => Guard.EnsureNotNull(
                 value,
-                "The conventions callback function '{0}.{1}' cannot be null.",
-                typeof(IRepositoryConventions).Name,
-                parameterName);
+                string.Format("The conventions callback function '{0}' cannot be null.", parameterName));
     }
 }

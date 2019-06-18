@@ -2,7 +2,6 @@
 {
     using Configuration;
     using Configuration.Conventions;
-    using Configuration.Logging;
     using Extensions;
     using Extensions.Internal;
     using Microsoft.EntityFrameworkCore;
@@ -37,7 +36,7 @@
         /// <param name="context">The context.</param>
         public EfCoreRepositoryContext(DbContext context)
         {
-            Conventions = RepositoryConventions.Default;
+            Conventions = RepositoryConventions.Default(GetType());
 
             _context = Guard.NotNull(context, nameof(context));
             _context.ConfigureLogging(s => Logger.Debug(s.TrimEnd(Environment.NewLine.ToCharArray())));

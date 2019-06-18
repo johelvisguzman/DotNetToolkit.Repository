@@ -47,9 +47,9 @@
         ITransactionManager CurrentTransaction { get; }
 
         /// <summary>
-        /// Gets or sets the configurable conventions.
+        /// Gets the configurable conventions.
         /// </summary>
-        IRepositoryConventions Conventions { get; set; }
+        IRepositoryConventions Conventions { get; }
 
         /// <summary>
         /// Gets or sets the repository context logger.
