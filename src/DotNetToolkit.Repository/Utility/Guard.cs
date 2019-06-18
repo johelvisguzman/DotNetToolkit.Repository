@@ -5,7 +5,6 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Globalization;
 
     /// <summary>
     /// Utility class to do <c>null</c> and other checks.
@@ -73,14 +72,14 @@
 
         [NotNull]
         [ContractAnnotation("value:null => halt")]
-        public static T EnsureNotNull<T>([ValidatedNotNull] [NoEnumeration] T value, string message, params object[] args) where T : class
+        public static T EnsureNotNull<T>([ValidatedNotNull] [NoEnumeration] T value, string message) where T : class
         {
 #if NETSTANDARD2_0
             if (typeof(T).IsNullableType() && value == null)
 #else
             if (ReferenceEquals(value, null))
 #endif
-                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, message, args));
+                throw new InvalidOperationException(message);
 
             return value;
         }
