@@ -220,9 +220,7 @@
             {
                 // Try to get all the values for the parameters we already have,
                 // and set the rest to their default value
-                var args = new List<object>();
-
-                args.AddRange(matchedCtorParams.Value.Select(pi =>
+                var args  = matchedCtorParams.Value.Select(pi =>
                 {
                     // If we find a matching parameter, then delete it from the collection,
                     // that way we don't try to initialize a property that has the same name
@@ -235,9 +233,9 @@
                     }
 
                     return pi.ParameterType.GetDefault();
-                }));
+                }).ToArray();
 
-                obj = matchedCtorParams.Key.Invoke(args.ToArray());
+                obj = matchedCtorParams.Key.Invoke(args);
             }
             else
             {
@@ -247,7 +245,8 @@
             if (kvs.Any())
             {
                 // Try to initialize properties that match
-                type.GetRuntimeProperties()
+                var query = type
+                    .GetRuntimeProperties()
                     .Where(x => x.CanWrite && x.GetSetMethod(nonPublic: true).IsPublic)
                     .Join(kvs,
                         pi => pi.Name,
@@ -255,10 +254,16 @@
                         (pi, kv) => new
                         {
                             PropertyInfo = pi,
-                            Value = pi.PropertyType.ConvertTo(kv.Value)
-                        })
-                    .ToList()
-                    .ForEach(q => q.PropertyInfo.SetValue(obj, q.Value));
+                            kv.Value
+                        });
+
+                foreach (var q in query)
+                {
+                    var pi = q.PropertyInfo;
+                    var value = pi.PropertyType.ConvertTo(q.Value);
+
+                    pi.SetValue(obj, value);
+                }
             }
 
             return obj;
