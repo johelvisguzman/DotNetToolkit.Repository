@@ -1,14 +1,16 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
+#if NETSTANDARD
     using Microsoft.DotNet.PlatformAbstractions;
     using Microsoft.Extensions.DependencyModel;
     using System;
     using System.Collections.Generic;
-    using System.Data.Common;
     using System.Data.SqlClient;
     using System.IO;
     using System.Linq;
     using System.Reflection;
+#endif
+    using System.Data.Common;
 
     /// <summary>
     /// Represents a set of static methods for creating one or more instances of System.Data.Common.DbProviderFactory classes.
@@ -41,7 +43,7 @@
                     return GetFactory(DataAccessProviderType.PostgreSql);
                 default:
                     throw new NotSupportedException($"Unsupported Provider Factory specified: {providerName}");
-            } 
+            }
 #endif
         }
 
@@ -49,6 +51,7 @@
 
         #region Private Methods
 
+#if NETSTANDARD
         private static Type GetTypeFromName(string typeName)
         {
             return GetTypeFromName(typeName, null);
@@ -157,7 +160,9 @@
 
             return instance as DbProviderFactory;
         }
+#endif
 
+#if NETSTANDARD
         private static DbProviderFactory GetFactory(DataAccessProviderType type)
         {
             if (type == DataAccessProviderType.SqlServer)
@@ -171,61 +176,25 @@
                 return GetFactory("Microsoft.Data.Sqlite.SqliteFactory", "Microsoft.Data.Sqlite");
 #endif
             }
+
             if (type == DataAccessProviderType.MySql)
                 return GetFactory("MySql.Data.MySqlClient.MySqlClientFactory", "MySql.Data");
+
             if (type == DataAccessProviderType.PostgreSql)
                 return GetFactory("Npgsql.NpgsqlFactory", "Npgsql");
 #if NETFULL
+            
             if (type == DataAccessProviderType.OleDb)
                 return System.Data.OleDb.OleDbFactory.Instance;
+            
             if (type == DataAccessProviderType.SqlServerCompact)
                 return System.Data.Common.DbProviderFactories.GetFactory("System.Data.SqlServerCe.4.0");
 #endif
 
             throw new NotSupportedException($"Unsupported Provider Factory specified: {type}");
         }
+#endif
 
         #endregion
-    }
-
-    internal enum DataAccessProviderType
-    {
-        SqlServer,
-        SqLite,
-        MySql,
-        PostgreSql,
-
-#if NETFULL
-        OleDb,
-        SqlServerCompact
-#endif
-    }
-
-    internal static class DataAccessProvider
-    {
-        public static DataAccessProviderType GetProviderType(string providerName)
-        {
-            switch (providerName.ToLower())
-            {
-#if NETFULL
-                case "system.data.sqlserverce.4.0":
-                    return DataAccessProviderType.SqlServerCompact;
-                case "microsoft.jet.oledb.4.0":
-                    return DataAccessProviderType.OleDb;
-#endif
-                case "system.data.sqlclient":
-                    return DataAccessProviderType.SqlServer;
-                case "system.data.sqlite":
-                case "microsoft.data.sqlite":
-                    return DataAccessProviderType.SqLite;
-                case "mysql.data.mysqlclient":
-                case "mysql.data":
-                    return DataAccessProviderType.MySql;
-                case "npgsql":
-                    return DataAccessProviderType.PostgreSql;
-                default:
-                    throw new NotSupportedException($"Unsupported Provider Factory specified: {providerName}");
-            }
-        }
     }
 }
