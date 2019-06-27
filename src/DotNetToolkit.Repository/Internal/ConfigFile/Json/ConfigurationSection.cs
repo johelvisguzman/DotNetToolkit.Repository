@@ -1,4 +1,6 @@
-﻿namespace DotNetToolkit.Repository.Internal.ConfigFile.Json
+﻿#if NETSTANDARD
+
+namespace DotNetToolkit.Repository.Internal.ConfigFile.Json
 {
     using Configuration;
     using Configuration.Caching;
@@ -207,3 +209,5 @@
         #endregion
     }
 }
+
+#endif
