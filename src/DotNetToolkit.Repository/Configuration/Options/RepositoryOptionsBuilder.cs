@@ -108,6 +108,7 @@
         }
 #endif
 
+#if NETSTANDARD
         /// <summary>
         /// Configures the repository options using the specified configuration.
         /// </summary>
@@ -130,8 +131,9 @@
             UseConfiguration(config);
 
             return this;
-        }
-        
+        } 
+#endif
+
         /// <summary>
         /// Configures the repository options with an interceptor that intercepts any activity within the repository.
         /// </summary>

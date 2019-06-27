@@ -171,6 +171,7 @@
             TestConfiguration(optionsBuilder);
         }
 
+#if NETSTANDARD
         [Fact]
         public void ConfigureFromAppSetting()
         {
@@ -183,7 +184,8 @@
             Assert.True(optionsBuilder.IsConfigured);
 
             TestConfiguration(optionsBuilder);
-        }
+        } 
+#endif
 
 
         [Fact]
@@ -206,11 +208,13 @@
 
             Assert.Equal("Unable to find a 'repository' configuration section. For more information on DotNetToolkit.Repository configuration, visit the https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Config-File-Setup.", ex.Message);
 
+#if NETSTANDARD
             ex = Assert.Throws<InvalidOperationException>(
-                () => new RepositoryOptionsBuilder()
-                    .UseConfiguration(TestConfigurationHelper.GetConfiguration("empty_repository.json")));
+                    () => new RepositoryOptionsBuilder()
+                        .UseConfiguration(TestConfigurationHelper.GetConfiguration("empty_repository.json")));
 
-            Assert.Equal("Unable to find a 'repository' configuration section. For more information on DotNetToolkit.Repository configuration, visit the https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Config-File-Setup.", ex.Message);
+            Assert.Equal("Unable to find a 'repository' configuration section. For more information on DotNetToolkit.Repository configuration, visit the https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Config-File-Setup.", ex.Message); 
+#endif
         }
 
         private static void TestConfiguration(RepositoryOptionsBuilder optionsBuilder)
