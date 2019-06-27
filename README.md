@@ -1,4 +1,4 @@
-![alt text](https://raw.githubusercontent.com/johelvisguzman/DotNetToolkit.Repository/master/Toolkit.png)
+![Logo](https://raw.githubusercontent.com/johelvisguzman/DotNetToolkit.Repository/master/Toolkit.png)
 
 # DotNetToolkit.Repository
 
@@ -6,6 +6,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
 [![Overview](https://img.shields.io/badge/docs-Overview-green.svg?style=flat)](https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/getting-started)
 [![ChangeLog](https://img.shields.io/badge/docs-ChangeLog-green.svg?style=flat)](https://github.com/johelvisguzman/DotNetToolkit.Repository/releases)
+[![Join the chat at https://gitter.im/johelvisguzman/DotNetToolkit.Repository](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dwyl/?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## What is the Repository Pattern?
 
