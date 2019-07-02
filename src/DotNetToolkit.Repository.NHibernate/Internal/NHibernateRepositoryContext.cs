@@ -17,27 +17,15 @@
     using Utility;
 
     /// <summary>
-    /// Represents an internal nhibernate repository context.
+    /// An implementation of <see cref="INHibernateRepositoryContext" />.
     /// </summary>
-    /// <seealso cref="IRepositoryContextAsync" />
-    internal class NHibernateRepositoryContext : LinqRepositoryContextBaseAsync
+    /// <seealso cref="INHibernateRepositoryContext" />
+    internal class NHibernateRepositoryContext : LinqRepositoryContextBaseAsync, INHibernateRepositoryContext
     {
         #region Fields
 
         private readonly ISessionFactory _sessionFactory;
         private ISession _session;
-
-        #endregion
-
-        #region Properties
-
-        /// <summary>
-        /// Gets the current session.
-        /// </summary>
-        public ISession Session
-        {
-            get { return _session ?? (_session = GetNewSession()); }
-        }
 
         #endregion
 
@@ -81,6 +69,18 @@
 
         #endregion
 
+        #region Implementation of INHibernateRepositoryContext
+
+        /// <summary>
+        /// Gets the current session.
+        /// </summary>
+        public virtual ISession Session
+        {
+            get { return _session ?? (_session = GetNewSession()); }
+        }
+
+        #endregion
+
         #region Overrides of LinqRepositoryContextBase
 
         /// <summary>
@@ -102,7 +102,7 @@
             // TODO: WILL NEED TO COME BACK TO THIS
             // NHibernate seems to auto load entities whenever it wants based on mappings...
             // so maybe we should just let nhibernate do its thing??
-            
+
             if (options?.FetchStrategy?.PropertyPaths?.Any() == true)
                 Logger.Debug("The nhibernate context does not support fetching strategy. Please consider using the nhibernate relationship mappings instead.");
 

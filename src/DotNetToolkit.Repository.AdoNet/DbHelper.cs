@@ -1,10 +1,12 @@
-namespace DotNetToolkit.Repository.AdoNet.Internal
+namespace DotNetToolkit.Repository.AdoNet
 {
     using Configuration.Conventions;
     using Configuration.Logging;
     using Configuration.Logging.Internal;
     using Extensions;
     using Extensions.Internal;
+    using Internal;
+    using Queries;
     using Queries.Internal;
     using System;
     using System.Collections.Generic;
@@ -19,9 +21,9 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
     using Utility;
 
     /// <summary>
-    /// Represents a database helper which contains various methods for retrieving nad manipulating data in a database.
+    /// Represents a database helper which contains various methods for retrieving and manipulating data in a database.
     /// </summary>
-    internal class DbHelper : IDisposable
+    public class DbHelper : IDisposable
     {
         #region Fields
 
@@ -30,7 +32,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         private readonly string _connectionString;
         private DbConnection _connection;
         private readonly bool _ownsConnection;
-        private readonly DataAccessProviderType _providerType;
+        private readonly Internal.DataAccessProviderType _providerType;
         private readonly IRepositoryConventions _conventions;
 
         #endregion
@@ -40,7 +42,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <summary>
         /// Gets the provider type.
         /// </summary>
-        public DataAccessProviderType ProviderType { get { return _providerType; } }
+        internal Internal.DataAccessProviderType ProviderType { get { return _providerType; } }
 
         /// <summary>
         /// Gets the provider factory.
@@ -89,10 +91,10 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
             var css = GetConnectionStringSettings(nameOrConnectionString);
 
             _conventions = conventions;
-            _factory = DbProviderFactories.GetFactory(css.ProviderName);
+            _factory = Internal.DbProviderFactories.GetFactory(css.ProviderName);
             _connectionString = css.ConnectionString;
             _ownsConnection = true;
-            _providerType = DataAccessProvider.GetProviderType(css.ProviderName);
+            _providerType = Internal.DataAccessProvider.GetProviderType(css.ProviderName);
         }
 
         /// <summary>
@@ -108,10 +110,10 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
             Guard.NotEmpty(connectionString, nameof(connectionString));
 
             _conventions = conventions;
-            _factory = DbProviderFactories.GetFactory(providerName);
+            _factory = Internal.DbProviderFactories.GetFactory(providerName);
             _connectionString = connectionString;
             _ownsConnection = true;
-            _providerType = DataAccessProvider.GetProviderType(providerName);
+            _providerType = Internal.DataAccessProvider.GetProviderType(providerName);
         }
 
         /// <summary>
@@ -133,7 +135,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
 
             var css = GetConnectionStringSettings(existingConnection.ConnectionString);
 
-            _providerType = DataAccessProvider.GetProviderType(css.ProviderName);
+            _providerType = Internal.DataAccessProvider.GetProviderType(css.ProviderName);
         }
 
         #endregion
@@ -429,7 +431,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <param name="parameters">The command parameters.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public PagedQueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, IRepositoryConventions, T> projector)
+        public IPagedQueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, IRepositoryConventions, T> projector)
         {
             using (var reader = ExecuteReader(cmdText, cmdType, parameters))
             {
@@ -471,7 +473,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <param name="parameters">The command parameters.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public PagedQueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, IRepositoryConventions, T> projector)
+        public IPagedQueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, IRepositoryConventions, T> projector)
         {
             return ExecuteList<T>(cmdText, CommandType.Text, parameters, projector);
         }
@@ -483,7 +485,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <param name="cmdText">The command text.</param>
         /// <param name="parameters">The command parameters.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public PagedQueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, Dictionary<string, object> parameters) where T : class
+        public IPagedQueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, Dictionary<string, object> parameters) where T : class
         {
             var mapper = new Mapper<T>(_conventions);
 
@@ -498,7 +500,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <param name="cmdType">The command type.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public PagedQueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, CommandType cmdType, Func<DbDataReader, IRepositoryConventions, T> projector)
+        public IPagedQueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, CommandType cmdType, Func<DbDataReader, IRepositoryConventions, T> projector)
         {
             return ExecuteList<T>(cmdText, cmdType, null, projector);
         }
@@ -778,7 +780,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
-        public async Task<PagedQueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, IRepositoryConventions, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<IPagedQueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, IRepositoryConventions, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var reader = await ExecuteReaderAsync(cmdText, cmdType, parameters, cancellationToken))
             {
@@ -821,7 +823,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
-        public Task<PagedQueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, IRepositoryConventions, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<IPagedQueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, IRepositoryConventions, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteListAsync<T>(cmdText, CommandType.Text, parameters, projector, cancellationToken);
         }
@@ -834,7 +836,7 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
         /// <param name="parameters">The command parameters.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
-        public Task<PagedQueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken()) where T : class
+        public Task<IPagedQueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken()) where T : class
         {
             var mapper = new Mapper<T>(_conventions);
 
@@ -868,11 +870,17 @@ namespace DotNetToolkit.Repository.AdoNet.Internal
             }
         }
 
+        /// <summary>
+        /// Maps the specified string sql data type value to <see cref="System.Type" />.
+        /// </summary>
         public static Type MapToType(string sqlDataType)
         {
             return MapToType(MapToSqlDbType(sqlDataType));
         }
 
+        /// <summary>
+        /// Maps the specified type to <see cref="System.Data.SqlDbType" />.
+        /// </summary>
         public static SqlDbType MapToSqlDbType(Type type)
         {
             var typeMap = new Dictionary<Type, SqlDbType>

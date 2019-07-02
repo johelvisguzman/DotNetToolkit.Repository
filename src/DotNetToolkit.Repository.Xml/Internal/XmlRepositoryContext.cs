@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Xml.Internal
 {
-    using Configuration;
     using Extensions;
     using Extensions.Internal;
     using System.Collections.Generic;
@@ -11,15 +10,15 @@
     using System.Xml.Serialization;
 
     /// <summary>
-    /// Represents an internal XML repository context.
+    /// An implementation of <see cref="IXmlRepositoryContext" />.
     /// </summary>
-    /// <seealso cref="IRepositoryContext" />
-    internal class XmlRepositoryContext : FileStreamRepositoryContextBase
+    /// <seealso cref="IXmlRepositoryContext" />
+    internal class XmlRepositoryContext : FileStreamRepositoryContextBase, IXmlRepositoryContext
     {
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FileStreamRepositoryContextBase" /> class.
+        /// Initializes a new instance of the <see cref="XmlRepositoryContext" /> class.
         /// </summary>
         /// <param name="path">The database directory to create.</param>
         /// <param name="ignoreTransactionWarning">If a transaction operation is requested, ignore any warnings since the context provider does not support transactions.</param>

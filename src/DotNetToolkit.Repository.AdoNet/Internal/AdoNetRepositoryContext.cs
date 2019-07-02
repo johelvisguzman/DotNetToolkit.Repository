@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
-    using Configuration;
     using Configuration.Conventions;
     using Configuration.Logging;
     using Configuration.Logging.Internal;
@@ -25,10 +24,10 @@
     using Utility;
 
     /// <summary>
-    /// Represents an internal ado.net repository context.
+    /// An implementation of <see cref="IAdoNetRepositoryContext" />.
     /// </summary>
-    /// <seealso cref="IRepositoryContextAsync" />
-    internal class AdoNetRepositoryContext : IRepositoryContextAsync
+    /// <seealso cref="IAdoNetRepositoryContext" />
+    internal class AdoNetRepositoryContext : IAdoNetRepositoryContext
     {
         #region Fields
 
@@ -127,6 +126,15 @@
             _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
             _ensureDatabaseCreated = ensureDatabaseCreated;
         }
+
+        #endregion
+
+        #region Implementation of IAdoNetRepositoryContext
+
+        /// <summary>
+        /// Gets the database helper which contains various methods for retrieving and manipulating data in a database.
+        /// </summary>
+        public DbHelper DbHelper { get { return _dbHelper; } }
 
         #endregion
 

@@ -17,10 +17,10 @@
     using Utility;
 
     /// <summary>
-    /// Represents an internal entity framework core repository context.
+    /// An implementation of <see cref="IEfCoreRepositoryContext" />.
     /// </summary>
-    /// <seealso cref="IRepositoryContextAsync" />
-    internal class EfCoreRepositoryContext : LinqRepositoryContextBaseAsync
+    /// <seealso cref="IEfCoreRepositoryContext" />
+    internal class EfCoreRepositoryContext : LinqRepositoryContextBaseAsync, IEfCoreRepositoryContext
     {
         #region Fields
 
@@ -41,6 +41,15 @@
             _context = Guard.NotNull(context, nameof(context));
             _context.ConfigureLogging(s => Logger.Debug(s.TrimEnd(Environment.NewLine.ToCharArray())));
         }
+
+        #endregion
+
+        #region Implementation of IEfCoreRepositoryContext
+
+        /// <summary>
+        /// Gets the underlying context.
+        /// </summary>
+        public DbContext UnderlyingContext { get { return _context; } }
 
         #endregion
 
