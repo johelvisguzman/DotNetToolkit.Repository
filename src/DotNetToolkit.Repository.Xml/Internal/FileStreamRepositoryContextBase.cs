@@ -58,7 +58,7 @@
             if (!path.EndsWith(@"\"))
                 path += @"\";
 
-            Conventions = RepositoryConventions.Default<XmlRepositoryContext>();
+            Conventions = RepositoryConventions.Default<FileStreamRepositoryContextBase>();
 
             _items = new BlockingCollection<EntitySet>();
             _ignoreTransactionWarning = ignoreTransactionWarning;
@@ -83,12 +83,21 @@
 
         #endregion
 
-        #region Private Methods
+        #region Public Methods
 
-        private string GetFileName(Type type)
+        /// <summary>
+        /// Gets the file name for the specified type.
+        /// </summary>
+        /// <param name="type">The type to get the file name from.</param>
+        /// <returns>The file name for the specified type.</returns>
+        public virtual string GetFileName(Type type)
         {
             return $"{_path}{Conventions.GetTableName(type)}{_extension}";
         }
+
+        #endregion
+
+        #region Private Methods
 
         private IEnumerable LoadFile(Type type)
         {

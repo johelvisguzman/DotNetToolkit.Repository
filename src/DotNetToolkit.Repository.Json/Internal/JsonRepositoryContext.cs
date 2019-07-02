@@ -1,20 +1,19 @@
 ﻿namespace DotNetToolkit.Repository.Json.Internal
 {
-    using Configuration;
     using Newtonsoft.Json;
     using System.Collections.Generic;
     using System.IO;
 
     /// <summary>
-    /// Represents an internal JSON repository context.
+    /// An implementation of <see cref="IJsonRepositoryContext" />.
     /// </summary>
-    /// <seealso cref="IRepositoryContext" />
-    internal class JsonRepositoryContext : FileStreamRepositoryContextBase
+    /// <seealso cref="IJsonRepositoryContext" />
+    internal class JsonRepositoryContext : FileStreamRepositoryContextBase, IJsonRepositoryContext
     {
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FileStreamRepositoryContextBase" /> class.
+        /// Initializes a new instance of the <see cref="JsonRepositoryContext" /> class.
         /// </summary>
         /// <param name="path">The database directory to create.</param>
         /// <param name="ignoreTransactionWarning">If a transaction operation is requested, ignore any warnings since the context provider does not support transactions.</param>

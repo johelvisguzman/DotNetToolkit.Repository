@@ -2972,6 +2972,29 @@
         #region Protected Methods
 
         /// <summary>
+        /// Gets the repository context.
+        /// </summary>
+        /// <returns>The repository context.</returns>
+        protected virtual IRepositoryContext GetContext()
+        {
+            var context = _contextFactory.Create();
+
+            Guard.EnsureNotNull(context.Conventions, "No conventions have been configured for this context.");
+
+            if (_options.Conventions != null)
+            {
+                context.Conventions.Apply(_options.Conventions);
+            }
+
+            if (context.Logger == null || context.Logger is NullLogger)
+            {
+                context.Logger = LoggerProvider.Create(context.GetType().FullName);
+            }
+
+            return context;
+        }
+
+        /// <summary>
         /// Override this method to configure the repository.
         /// </summary>
         /// <param name="optionsBuilder">A builder used to create or modify options for this repository.</param>
@@ -3203,25 +3226,6 @@
             }
 
             return _interceptors;
-        }
-
-        private IRepositoryContext GetContext()
-        {
-            var context = _contextFactory.Create();
-
-            Guard.EnsureNotNull(context.Conventions, "No conventions have been configured for this context.");
-
-            if (_options.Conventions != null)
-            {
-                context.Conventions.Apply(_options.Conventions);
-            }
-
-            if (context.Logger == null || context.Logger is NullLogger)
-            {
-                context.Logger = LoggerProvider.Create(context.GetType().FullName);
-            }
-
-            return context;
         }
 
         private static void DisposeContext([CanBeNull] IRepositoryContext context)

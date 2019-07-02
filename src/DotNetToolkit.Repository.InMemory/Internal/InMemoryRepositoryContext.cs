@@ -16,10 +16,10 @@
     using Utility;
 
     /// <summary>
-    /// Represents an internal repository context for in-memory operations (for testing purposes).
+    /// An implementation of <see cref="IInMemoryRepositoryContext" />.
     /// </summary>
-    /// <seealso cref="IRepositoryContext" />
-    internal class InMemoryRepositoryContext : LinqRepositoryContextBase
+    /// <seealso cref="IInMemoryRepositoryContext" />
+    internal class InMemoryRepositoryContext : LinqRepositoryContextBase, IInMemoryRepositoryContext
     {
         #region Fields
 
@@ -28,15 +28,6 @@
         private readonly bool _ignoreTransactionWarning;
         private readonly bool _ignoreSqlQueryWarning;
         private readonly BlockingCollection<EntitySet> _items = new BlockingCollection<EntitySet>();
-
-        #endregion
-
-        #region Properties
-
-        /// <summary>
-        /// Gets or sets the name of the database.
-        /// </summary>
-        public string DatabaseName { get; internal set; }
 
         #endregion
 
@@ -62,24 +53,6 @@
 
             _ignoreTransactionWarning = ignoreTransactionWarning;
             _ignoreSqlQueryWarning = ignoreSqlQueryWarning;
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// Ensures the in-memory store is completely deleted.
-        /// </summary>
-        public void EnsureDeleted()
-        {
-            // Clears the collection
-            while (_items.Count > 0)
-            {
-                _items.TryTake(out _);
-            }
-
-            InMemoryCache.Instance.GetDatabaseStore(DatabaseName).Clear();
         }
 
         #endregion
@@ -122,6 +95,29 @@
             Guard.NotEmpty(keyValues, nameof(keyValues));
 
             return keyValues.Length == 1 ? keyValues[0] : string.Join(":", keyValues);
+        }
+
+        #endregion
+
+        #region Implementation of IInMemoryRepositoryContext
+
+        /// <summary>
+        /// Gets or sets the name of the database.
+        /// </summary>
+        public string DatabaseName { get; set; }
+
+        /// <summary>
+        /// Ensures the in-memory store is completely deleted.
+        /// </summary>
+        public void EnsureDeleted()
+        {
+            // Clears the collection
+            while (_items.Count > 0)
+            {
+                _items.TryTake(out _);
+            }
+
+            InMemoryCache.Instance.GetDatabaseStore(DatabaseName).Clear();
         }
 
         #endregion
