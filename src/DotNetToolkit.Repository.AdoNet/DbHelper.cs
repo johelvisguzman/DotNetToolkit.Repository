@@ -693,6 +693,64 @@ namespace DotNetToolkit.Repository.AdoNet
         }
 
         /// <summary>
+        /// Sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataSet" />.
+        /// </summary>
+        /// <param name="command">The command.</param>
+        /// <returns>A <see cref="System.Data.DataSet" /> object.</returns>
+        public DataSet ExecuteDataSet(DbCommand command)
+        {
+            Guard.NotNull(command, nameof(command));
+
+            var connection = command.Connection;
+            var ownsConnection = _ownsConnection && command.Transaction == null;
+            var canCloseConnection = false;
+
+            if (connection.State == ConnectionState.Closed)
+            {
+                connection.Open();
+                canCloseConnection = true;
+            }
+
+            LogExecutingCommandQuery(command);
+
+            var adapter = _factory.CreateDataAdapter();
+
+            adapter.SelectCommand = command;
+
+            var ds = new DataSet();
+
+            adapter.Fill(ds);
+
+            if (canCloseConnection && ownsConnection)
+                connection.Dispose();
+
+            return ds;
+        }
+
+        /// <summary>
+        /// Sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataSet" />.
+        /// </summary>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The command parameters.</param>
+        /// <returns>A <see cref="System.Data.DataSet" /> object.</returns>
+        public DataSet ExecuteDataSet(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
+        {
+            return ExecuteDataSet(CreateCommand(cmdText, cmdType, parameters));
+        }
+
+        /// <summary>
+        /// Sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataSet" />.
+        /// </summary>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="parameters">The command parameters.</param>
+        /// <returns>A <see cref="System.Data.DataSet" /> object.</returns>
+        public DataSet ExecuteDataSet(string cmdText, Dictionary<string, object> parameters = null)
+        {
+            return ExecuteDataSet(cmdText, CommandType.Text, parameters);
+        }
+
+        /// <summary>
         /// Asynchronously executes a SQL statement against a connection.
         /// </summary>
         /// <param name="command">The command.</param>
@@ -1135,6 +1193,67 @@ namespace DotNetToolkit.Repository.AdoNet
         public Task<DataTable> ExecuteDataTableAsync(string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteDataTableAsync(cmdText, CommandType.Text, parameters, -1, -1, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataSet" />.
+        /// </summary>
+        /// <param name="command">The command.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a <see cref="System.Data.DataSet" /> object.</returns>
+        public async Task<DataSet> ExecuteDataSetAsync(DbCommand command, CancellationToken cancellationToken = new CancellationToken())
+        {
+            Guard.NotNull(command, nameof(command));
+
+            var connection = command.Connection;
+            var ownsConnection = _ownsConnection && command.Transaction == null;
+            var canCloseConnection = false;
+
+            if (connection.State == ConnectionState.Closed)
+            {
+                await connection.OpenAsync(cancellationToken);
+                canCloseConnection = true;
+            }
+
+            LogExecutingCommandQuery(command);
+
+            var adapter = _factory.CreateDataAdapter();
+
+            adapter.SelectCommand = command;
+
+            var ds = new DataSet();
+
+            adapter.Fill(ds);
+
+            if (canCloseConnection && ownsConnection)
+                connection.Dispose();
+
+            return ds;
+        }
+
+        /// <summary>
+        /// Asynchronously sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataSet" />.
+        /// </summary>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The command parameters.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a <see cref="System.Data.DataSet" /> object.</returns>
+        public Task<DataSet> ExecuteDataSetAsync(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteDataSetAsync(CreateCommand(cmdText, cmdType, parameters), cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataSet" />.
+        /// </summary>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="parameters">The command parameters.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a <see cref="System.Data.DataSet" /> object.</returns>
+        public Task<DataSet> ExecuteDataSetAsync(string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteDataSetAsync(cmdText, CommandType.Text, parameters, cancellationToken);
         }
 
         /// <summary>
