@@ -568,6 +568,131 @@ namespace DotNetToolkit.Repository.AdoNet
         }
 
         /// <summary>
+        /// Sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataTable" />.
+        /// </summary>
+        /// <param name="command">The command.</param>
+        /// <param name="startRecord">The zero-based record number to start with.</param>
+        /// <param name="maxRecords">The maximum number of records to retrieve.</param>
+        /// <returns>A <see cref="System.Data.DataTable" /> object.</returns>
+        public DataTable ExecuteDataTable(DbCommand command, int startRecord, int maxRecords)
+        {
+            Guard.NotNull(command, nameof(command));
+
+            var connection = command.Connection;
+            var ownsConnection = _ownsConnection && command.Transaction == null;
+            var canCloseConnection = false;
+
+            if (connection.State == ConnectionState.Closed)
+            {
+                connection.Open();
+                canCloseConnection = true;
+            }
+
+            LogExecutingCommandQuery(command);
+
+            var adapter = _factory.CreateDataAdapter();
+
+            adapter.SelectCommand = command;
+
+            var dt = new DataTable();
+
+            if (startRecord >= 0 || maxRecords >= 0)
+                adapter.Fill(startRecord, maxRecords, dt);
+            else
+                adapter.Fill(dt);
+
+            if (canCloseConnection && ownsConnection)
+                connection.Dispose();
+
+            return dt;
+        }
+
+        /// <summary>
+        /// Sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataTable" />.
+        /// </summary>
+        /// <param name="command">The command.</param>
+        /// <returns>A <see cref="System.Data.DataTable" /> object.</returns>
+        public DataTable ExecuteDataTable(DbCommand command)
+        {
+            return ExecuteDataTable(command, -1, -1);
+        }
+
+        /// <summary>
+        /// Sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataTable" />.
+        /// </summary>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The command parameters.</param>
+        /// <param name="startRecord">The zero-based record number to start with.</param>
+        /// <param name="maxRecords">The maximum number of records to retrieve.</param>
+        /// <returns>A <see cref="System.Data.DataTable" /> object.</returns>
+        public DataTable ExecuteDataTable(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, int startRecord, int maxRecords)
+        {
+            return ExecuteDataTable(CreateCommand(cmdText, cmdType, parameters), startRecord, maxRecords);
+        }
+
+        /// <summary>
+        /// Sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataTable" />.
+        /// </summary>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="startRecord">The zero-based record number to start with.</param>
+        /// <param name="maxRecords">The maximum number of records to retrieve.</param>
+        /// <returns>A <see cref="System.Data.DataTable" /> object.</returns>
+        public DataTable ExecuteDataTable(string cmdText, CommandType cmdType, int startRecord, int maxRecords)
+        {
+            return ExecuteDataTable(cmdText, cmdType, null, startRecord, maxRecords);
+        }
+
+        /// <summary>
+        /// Sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataTable" />.
+        /// </summary>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The command parameters.</param>
+        /// <returns>A <see cref="System.Data.DataTable" /> object.</returns>
+        public DataTable ExecuteDataTable(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null)
+        {
+            return ExecuteDataTable(cmdText, cmdType, parameters, -1, -1);
+        }
+
+        /// <summary>
+        /// Sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataTable" />.
+        /// </summary>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="parameters">The command parameters.</param>
+        /// <param name="startRecord">The zero-based record number to start with.</param>
+        /// <param name="maxRecords">The maximum number of records to retrieve.</param>
+        /// <returns>A <see cref="System.Data.DataTable" /> object.</returns>
+        public DataTable ExecuteDataTable(string cmdText, Dictionary<string, object> parameters, int startRecord, int maxRecords)
+        {
+            return ExecuteDataTable(cmdText, CommandType.Text, parameters, startRecord, maxRecords);
+        }
+
+        /// <summary>
+        /// Sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataTable" />.
+        /// </summary>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="startRecord">The zero-based record number to start with.</param>
+        /// <param name="maxRecords">The maximum number of records to retrieve.</param>
+        /// <returns>A <see cref="System.Data.DataTable" /> object.</returns>
+        public DataTable ExecuteDataTable(string cmdText, int startRecord, int maxRecords)
+        {
+            return ExecuteDataTable(cmdText, null, startRecord, maxRecords);
+        }
+
+        /// <summary>
+        /// Sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataTable" />.
+        /// </summary>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="parameters">The command parameters.</param>
+        /// <returns>A <see cref="System.Data.DataTable" /> object.</returns>
+        public DataTable ExecuteDataTable(string cmdText, Dictionary<string, object> parameters = null)
+        {
+            return ExecuteDataTable(cmdText, CommandType.Text, parameters, -1, -1);
+        }
+
+        /// <summary>
         /// Asynchronously executes a SQL statement against a connection.
         /// </summary>
         /// <param name="command">The command.</param>
@@ -877,6 +1002,139 @@ namespace DotNetToolkit.Repository.AdoNet
 
                 return new Dictionary<TDictionaryKey, TElement>(dict);
             }
+        }
+
+        /// <summary>
+        /// Asynchronously sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataTable" />.
+        /// </summary>
+        /// <param name="command">The command.</param>
+        /// <param name="startRecord">The zero-based record number to start with.</param>
+        /// <param name="maxRecords">The maximum number of records to retrieve.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a <see cref="System.Data.DataTable" /> object.</returns>
+        public async Task<DataTable> ExecuteDataTableAsync(DbCommand command, int startRecord, int maxRecords, CancellationToken cancellationToken = new CancellationToken())
+        {
+            Guard.NotNull(command, nameof(command));
+
+            var connection = command.Connection;
+            var ownsConnection = _ownsConnection && command.Transaction == null;
+            var canCloseConnection = false;
+
+            if (connection.State == ConnectionState.Closed)
+            {
+                await connection.OpenAsync(cancellationToken);
+                canCloseConnection = true;
+            }
+
+            LogExecutingCommandQuery(command);
+
+            var adapter = _factory.CreateDataAdapter();
+
+            adapter.SelectCommand = command;
+
+            var dt = new DataTable();
+
+            if (startRecord >= 0 || maxRecords >= 0)
+                adapter.Fill(startRecord, maxRecords, dt);
+            else
+                adapter.Fill(dt);
+
+            if (canCloseConnection && ownsConnection)
+                connection.Dispose();
+
+            return dt;
+        }
+
+        /// <summary>
+        /// Asynchronously sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataTable" />.
+        /// </summary>
+        /// <param name="command">The command.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a <see cref="System.Data.DataTable" /> object.</returns>
+        public Task<DataTable> ExecuteDataTableAsync(DbCommand command, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteDataTableAsync(command, -1, -1, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataTable" />.
+        /// </summary>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The command parameters.</param>
+        /// <param name="startRecord">The zero-based record number to start with.</param>
+        /// <param name="maxRecords">The maximum number of records to retrieve.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a <see cref="System.Data.DataTable" /> object.</returns>
+        public Task<DataTable> ExecuteDataTableAsync(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, int startRecord, int maxRecords, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteDataTableAsync(CreateCommand(cmdText, cmdType, parameters), startRecord, maxRecords, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataTable" />.
+        /// </summary>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="startRecord">The zero-based record number to start with.</param>
+        /// <param name="maxRecords">The maximum number of records to retrieve.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a <see cref="System.Data.DataTable" /> object.</returns>
+        public Task<DataTable> ExecuteDataTableAsync(string cmdText, CommandType cmdType, int startRecord, int maxRecords, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteDataTableAsync(cmdText, cmdType, null, startRecord, maxRecords, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataTable" />.
+        /// </summary>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The command parameters.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a <see cref="System.Data.DataTable" /> object.</returns>
+        public Task<DataTable> ExecuteDataTableAsync(string cmdText, CommandType cmdType, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteDataTableAsync(cmdText, cmdType, parameters, -1, -1, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataTable" />.
+        /// </summary>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="parameters">The command parameters.</param>
+        /// <param name="startRecord">The zero-based record number to start with.</param>
+        /// <param name="maxRecords">The maximum number of records to retrieve.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a <see cref="System.Data.DataTable" /> object.</returns>
+        public Task<DataTable> ExecuteDataTableAsync(string cmdText, Dictionary<string, object> parameters, int startRecord, int maxRecords, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteDataTableAsync(cmdText, CommandType.Text, parameters, startRecord, maxRecords, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataTable" />.
+        /// </summary>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="startRecord">The zero-based record number to start with.</param>
+        /// <param name="maxRecords">The maximum number of records to retrieve.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a <see cref="System.Data.DataTable" /> object.</returns>
+        public Task<DataTable> ExecuteDataTableAsync(string cmdText, int startRecord, int maxRecords, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteDataTableAsync(cmdText, null, startRecord, maxRecords, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously sends the query string to the <see cref="DbConnection" /> and builds a <see cref="DataTable" />.
+        /// </summary>
+        /// <param name="cmdText">The command text.</param>
+        /// <param name="parameters">The command parameters.</param>
+        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a <see cref="System.Data.DataTable" /> object.</returns>
+        public Task<DataTable> ExecuteDataTableAsync(string cmdText, Dictionary<string, object> parameters = null, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return ExecuteDataTableAsync(cmdText, CommandType.Text, parameters, -1, -1, cancellationToken);
         }
 
         /// <summary>
