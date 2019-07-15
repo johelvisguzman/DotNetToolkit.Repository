@@ -57,7 +57,7 @@
                 _logger = value;
 
                 if (_dbHelper != null)
-                    _dbHelper.UseLogger(_logger);
+                    _dbHelper.Logger = _logger;
             }
         }
 
