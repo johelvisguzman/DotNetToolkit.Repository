@@ -23,7 +23,7 @@ namespace DotNetToolkit.Repository.AdoNet
     /// <summary>
     /// Represents a database helper which contains various methods for retrieving and manipulating data in a database.
     /// </summary>
-    public class DbHelper : IDisposable
+    public sealed class DbHelper : IDisposable
     {
         #region Fields
 
@@ -83,7 +83,7 @@ namespace DotNetToolkit.Repository.AdoNet
         /// </summary>
         /// <param name="conventions">The configurable conventions.</param>
         /// <param name="nameOrConnectionString">Either the database name or a connection string.</param>
-        public DbHelper(IRepositoryConventions conventions, string nameOrConnectionString)
+        internal DbHelper(IRepositoryConventions conventions, string nameOrConnectionString)
         {
             Guard.NotNull(conventions, nameof(conventions));
             Guard.NotEmpty(nameOrConnectionString, nameof(nameOrConnectionString));
@@ -103,7 +103,7 @@ namespace DotNetToolkit.Repository.AdoNet
         /// <param name="conventions">The configurable conventions.</param>
         /// <param name="providerName">The name of the provider.</param>
         /// <param name="connectionString">The connection string.</param>
-        public DbHelper(IRepositoryConventions conventions, string providerName, string connectionString)
+        internal DbHelper(IRepositoryConventions conventions, string providerName, string connectionString)
         {
             Guard.NotNull(conventions, nameof(conventions));
             Guard.NotEmpty(providerName, nameof(providerName));
@@ -121,7 +121,7 @@ namespace DotNetToolkit.Repository.AdoNet
         /// </summary>
         /// <param name="conventions">The configurable conventions.</param>
         /// <param name="existingConnection">The existing connection.</param>
-        public DbHelper(IRepositoryConventions conventions, DbConnection existingConnection)
+        internal DbHelper(IRepositoryConventions conventions, DbConnection existingConnection)
         {
             Guard.NotNull(conventions, nameof(conventions));
             Guard.NotNull(existingConnection, nameof(existingConnection));
