@@ -67,7 +67,7 @@ namespace DotNetToolkit.Repository.AdoNet
         /// <summary>
         /// Gets the repository context logger.
         /// </summary>
-        public ILogger Logger { get; private set; } = NullLogger.Instance;
+        internal ILogger Logger { get; set; } = NullLogger.Instance;
 
         /// <summary>
         /// Gets the repository conventions.
@@ -143,15 +143,6 @@ namespace DotNetToolkit.Repository.AdoNet
         #region Public Methods
 
         /// <summary>
-        /// Sets the repository context logger to use.
-        /// </summary>
-        /// <param name="logger">The logger.</param>
-        public void UseLogger(ILogger logger)
-        {
-            Logger = Guard.NotNull(logger, nameof(logger));
-        }
-
-        /// <summary>
         /// Starts a database transaction.
         /// </summary>
         /// <returns>The new transaction.</returns>
@@ -160,6 +151,24 @@ namespace DotNetToolkit.Repository.AdoNet
             _underlyingTransaction = CreateConnection().BeginTransaction();
 
             return _underlyingTransaction;
+        }
+
+        /// <summary>
+        /// Creates the connection.
+        /// </summary>
+        /// <returns>The connection.</returns>
+        public DbConnection CreateConnection()
+        {
+            if (_underlyingTransaction != null)
+                throw new InvalidOperationException("Unable to create a new connection. A transaction has already been started.");
+
+            if (_ownsConnection)
+            {
+                _connection = _factory.CreateConnection();
+                _connection.ConnectionString = _connectionString;
+            }
+
+            return _connection;
         }
 
         /// <summary>
@@ -909,28 +918,6 @@ namespace DotNetToolkit.Repository.AdoNet
             }
 
             throw new ArgumentException($"{type.FullName} is not a supported .NET class");
-        }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        /// Creates the connection.
-        /// </summary>
-        /// <returns>The connection.</returns>
-        protected DbConnection CreateConnection()
-        {
-            if (_underlyingTransaction != null)
-                throw new InvalidOperationException("Unable to create a new connection. A transaction has already been started.");
-
-            if (_ownsConnection)
-            {
-                _connection = _factory.CreateConnection();
-                _connection.ConnectionString = _connectionString;
-            }
-
-            return _connection;
         }
 
         #endregion
