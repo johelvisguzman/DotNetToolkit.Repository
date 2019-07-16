@@ -1,7 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
-    using Configuration.Logging;
-    using Extensions;
     using System.Data.Common;
     using Transactions;
     using Utility;
@@ -12,12 +10,6 @@
     /// <seealso cref="ITransactionManager" />
     internal class AdoNetTransactionManager : ITransactionManager
     {
-        #region Fields
-
-        private readonly ILogger _logger;
-
-        #endregion
-
         #region Properties
 
         /// <summary>
@@ -33,12 +25,8 @@
         /// Initializes a new instance of the <see cref="AdoNetTransactionManager" /> class.
         /// </summary>
         /// <param name="transaction">The underlying transaction.</param>
-        /// <param name="logger">The logger.</param>
-        public AdoNetTransactionManager(DbTransaction transaction, ILogger logger)
+        public AdoNetTransactionManager(DbTransaction transaction)
         {
-            _logger = Guard.NotNull(logger, nameof(logger));
-            _logger.Debug("Started transaction");
-
             Transaction = Guard.NotNull(transaction, nameof(transaction));
         }
 
@@ -52,8 +40,6 @@
         public void Dispose()
         {
             Transaction.Dispose();
-
-            _logger.Debug("Disposed transaction");
         }
 
         #endregion
@@ -73,8 +59,6 @@
             Transaction.Commit();
 
             Status = TransactionStatus.Committed;
-
-            _logger.Debug("Committed transaction");
         }
 
         /// <summary>
@@ -85,8 +69,6 @@
             Transaction.Rollback();
 
             Status = TransactionStatus.Aborted;
-
-            _logger.Debug("Rolled-back transaction");
         }
 
         #endregion

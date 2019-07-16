@@ -74,10 +74,10 @@
             get { return _underlyingContext.Conventions; }
         }
 
-        public ILogger Logger
+        public ILoggerProvider LoggerProvider
         {
-            get { return _underlyingContext.Logger; }
-            set { _underlyingContext.Logger = value; }
+            get { return _underlyingContext.LoggerProvider; }
+            set { _underlyingContext.LoggerProvider = value; }
         }
 
         public void Add<TEntity>(TEntity entity) where TEntity : class
