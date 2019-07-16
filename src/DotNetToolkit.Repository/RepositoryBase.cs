@@ -6,7 +6,6 @@
     using Configuration.Conventions;
     using Configuration.Interceptors;
     using Configuration.Logging;
-    using Configuration.Logging.Internal;
     using Configuration.Mapper;
     using Configuration.Options;
     using Extensions;
@@ -2982,14 +2981,10 @@
             Guard.EnsureNotNull(context.Conventions, "No conventions have been configured for this context.");
 
             if (_options.Conventions != null)
-            {
                 context.Conventions.Apply(_options.Conventions);
-            }
 
-            if (context.Logger == null || context.Logger is NullLogger)
-            {
-                context.Logger = LoggerProvider.Create(context.GetType().FullName);
-            }
+            if (context.LoggerProvider == null && LoggerProvider != null)
+                context.LoggerProvider = LoggerProvider;
 
             return context;
         }

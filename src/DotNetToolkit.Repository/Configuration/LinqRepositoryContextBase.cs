@@ -4,7 +4,6 @@
     using Extensions;
     using JetBrains.Annotations;
     using Logging;
-    using Logging.Internal;
     using Properties;
     using Queries;
     using Queries.Internal;
@@ -23,6 +22,13 @@
     /// </summary>
     public abstract class LinqRepositoryContextBase : IRepositoryContext
     {
+        #region Fields
+
+        private ILoggerProvider _loggerProvider;
+        private ILogger _logger;
+
+        #endregion
+
         #region Properties
 
         /// <summary>
@@ -33,7 +39,29 @@
         /// <summary>
         /// Gets or sets the repository context logger.
         /// </summary>
-        public ILogger Logger { get; set; } = NullLogger.Instance;
+        public ILogger Logger
+        {
+            get
+            {
+                if (_logger == null)
+                    _logger = LoggerProvider?.Create(GetType().FullName);
+
+                return _logger;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the repository context logger provider.
+        /// </summary>
+        public ILoggerProvider LoggerProvider
+        {
+            get { return _loggerProvider; }
+            set
+            {
+                _logger = null;
+                _loggerProvider = value;
+            }
+        }
 
         #endregion
 
@@ -45,6 +73,8 @@
         protected LinqRepositoryContextBase()
         {
             Conventions = RepositoryConventions.Default<LinqRepositoryContextBase>();
+
+            _loggerProvider = NullLoggerProvider.Instance;
         }
 
         #endregion

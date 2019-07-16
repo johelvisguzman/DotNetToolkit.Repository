@@ -2,7 +2,6 @@
 {
     using Configuration.Conventions;
     using Configuration.Logging;
-    using Configuration.Logging.Internal;
     using Extensions;
     using Extensions.Internal;
     using Properties;
@@ -35,7 +34,8 @@
         private readonly SchemaTableConfigurationHelper _schemaConfigHelper;
         private readonly DbHelper _dbHelper;
         private readonly bool _ensureDatabaseCreated;
-        private ILogger _logger = NullLogger.Instance;
+        private ILoggerProvider _loggerProvider;
+        private ILogger _logger;
 
         #endregion
 
@@ -51,13 +51,26 @@
         /// </summary>
         public ILogger Logger
         {
-            get { return _logger; }
+            get
+            {
+                if (_logger == null)
+                    _logger = LoggerProvider?.Create(GetType().FullName);
+
+                return _logger;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the repository context logger provider.
+        /// </summary>
+        public ILoggerProvider LoggerProvider
+        {
+            get { return _loggerProvider; }
             set
             {
-                _logger = value;
-
-                if (_dbHelper != null)
-                    _dbHelper.Logger = _logger;
+                _logger = null;
+                _loggerProvider = value;
+                _dbHelper.Logger = _loggerProvider?.Create(_dbHelper.GetType().FullName);
             }
         }
 
@@ -83,6 +96,7 @@
             _dbHelper = new DbHelper(Conventions, nameOrConnectionString);
             _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
             _ensureDatabaseCreated = ensureDatabaseCreated;
+            _loggerProvider = NullLoggerProvider.Instance;
         }
 
         /// <summary>
@@ -105,6 +119,7 @@
             _dbHelper = new DbHelper(Conventions, providerName, connectionString);
             _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
             _ensureDatabaseCreated = ensureDatabaseCreated;
+            _loggerProvider = NullLoggerProvider.Instance;
         }
 
         /// <summary>
@@ -125,16 +140,8 @@
             _dbHelper = new DbHelper(Conventions, existingConnection);
             _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
             _ensureDatabaseCreated = ensureDatabaseCreated;
+            _loggerProvider = NullLoggerProvider.Instance;
         }
-
-        #endregion
-
-        #region Implementation of IAdoNetRepositoryContext
-
-        /// <summary>
-        /// Gets the database helper which contains various methods for retrieving and manipulating data in a database.
-        /// </summary>
-        public DbHelper DbHelper { get { return _dbHelper; } }
 
         #endregion
 
@@ -201,6 +208,15 @@
 
         #endregion
 
+        #region Implementation of IAdoNetRepositoryContext
+
+        /// <summary>
+        /// Gets the database helper which contains various methods for retrieving and manipulating data in a database.
+        /// </summary>
+        public DbHelper DbHelper { get { return _dbHelper; } }
+
+        #endregion
+
         #region Implementation of IRepositoryContext
 
         /// <summary>
@@ -251,7 +267,7 @@
         {
             var transaction = _dbHelper.BeginTransaction();
 
-            CurrentTransaction = new AdoNetTransactionManager(transaction, Logger);
+            CurrentTransaction = new AdoNetTransactionManager(transaction);
 
             return CurrentTransaction;
         }

@@ -52,9 +52,9 @@
         IRepositoryConventions Conventions { get; }
 
         /// <summary>
-        /// Gets or sets the repository context logger.
+        /// Gets or sets the repository context logger provider.
         /// </summary>
-        ILogger Logger { get; set; }
+        ILoggerProvider LoggerProvider { get; set; }
 
         /// <summary>
         /// Tracks the specified entity in memory and will be inserted into the database when <see cref="SaveChanges()" /> is called.
