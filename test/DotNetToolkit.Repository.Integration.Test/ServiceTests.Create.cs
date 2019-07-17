@@ -112,8 +112,8 @@
 
             var entities = new List<Customer>
             {
-                new Customer { Name = name },
-                new Customer { Name = name }
+                new Customer { Id = 1, Name = name },
+                new Customer { Id = 2, Name = name }
             };
 
             Assert.Equal(0, service.GetCount());
@@ -178,8 +178,8 @@
 
             var entities = new List<Customer>
             {
-                new Customer { Name = name },
-                new Customer { Name = name }
+                new Customer { Id = 1, Name = name },
+                new Customer { Id = 2, Name = name }
             };
 
             Assert.Equal(0, await service.GetCountAsync());

@@ -18,7 +18,7 @@
         {
             // run for all repositories context except for ef core.. it looks like this will not pass for some reason.
             // will need to comeback to this at somepoint
-            ForAllRepositoryFactories(TestAddWithSeededIdForIdentity, ContextProviderType.EntityFrameworkCore);
+            ForAllRepositoryFactories(TestAddWithSeededIdForIdentity, ContextProviderType.EntityFrameworkCore, ContextProviderType.AzureStorageBlob);
         }
 
         [Fact]
@@ -44,7 +44,7 @@
         {
             // run for all repositories context except for ef core.. it looks like this will not pass for some reason.
             // will need to comeback to this at somepoint
-            ForAllRepositoryFactoriesAsync(TestAddWithSeededIdForIdentityAsync, ContextProviderType.EntityFrameworkCore);
+            ForAllRepositoryFactoriesAsync(TestAddWithSeededIdForIdentityAsync, ContextProviderType.EntityFrameworkCore, ContextProviderType.AzureStorageBlob);
         }
 
         [Fact]
@@ -114,8 +114,8 @@
 
             var entities = new List<Customer>
             {
-                new Customer { Name = name },
-                new Customer { Name = name }
+                new Customer { Id = 1, Name = name },
+                new Customer { Id = 2, Name = name }
             };
 
             Assert.Equal(0, repo.Count());
@@ -180,8 +180,8 @@
 
             var entities = new List<Customer>
             {
-                new Customer { Name = name },
-                new Customer { Name = name }
+                new Customer { Id = 1, Name = name },
+                new Customer { Id = 2, Name = name }
             };
 
             Assert.Equal(0, await repo.CountAsync());

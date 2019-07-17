@@ -46,37 +46,70 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="CachingServers\Memcached\tools\memcached-server\default_engine.so">
+    <None Update="Tasks\tools\azure-storage-emulator\AzureStorageEmulator.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="CachingServers\Memcached\tools\memcached-server\libevent-2-0-5.dll">
+    <None Update="Tasks\tools\azure-storage-emulator\AzureStorageEmulator.exe.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="CachingServers\Memcached\tools\memcached-server\libgcc_s_dw2-1.dll">
+    <None Update="Tasks\tools\azure-storage-emulator\Microsoft.Azure.DevelopmentStorage.Services.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="CachingServers\Memcached\tools\memcached-server\memcached.exe">
+    <None Update="Tasks\tools\azure-storage-emulator\Microsoft.Azure.DevelopmentStorage.Store.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="CachingServers\Memcached\tools\memcached-server\pthreadGC2.dll">
+    <None Update="Tasks\tools\azure-storage-emulator\Microsoft.Azure.Storage.Emulator.Controller.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="CachingServers\Redis\tools\redis-server\redis-benchmark.exe">
+    <None Update="Tasks\tools\azure-storage-emulator\Microsoft.Data.Edm.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="CachingServers\Redis\tools\redis-server\redis-check-aof.exe">
+    <None Update="Tasks\tools\azure-storage-emulator\Microsoft.Data.OData.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="CachingServers\Redis\tools\redis-server\redis-check-dump.exe">
+    <None Update="Tasks\tools\azure-storage-emulator\Microsoft.Data.Services.Client.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="CachingServers\Redis\tools\redis-server\redis-cli.exe">
+    <None Update="Tasks\tools\azure-storage-emulator\Microsoft.Data.Services.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="CachingServers\Redis\tools\redis-server\redis-server.exe">
+    <None Update="Tasks\tools\azure-storage-emulator\StartStorageEmulator.cmd">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="CachingServers\Redis\tools\redis-server\redis.conf">
+    <None Update="Tasks\tools\azure-storage-emulator\System.Spatial.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Tasks\tools\memcached-server\default_engine.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Tasks\tools\memcached-server\libevent-2-0-5.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Tasks\tools\memcached-server\libgcc_s_dw2-1.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Tasks\tools\memcached-server\memcached.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Tasks\tools\memcached-server\pthreadGC2.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Tasks\tools\redis-server\redis-benchmark.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Tasks\tools\redis-server\redis-check-aof.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Tasks\tools\redis-server\redis-check-dump.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Tasks\tools\redis-server\redis-cli.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Tasks\tools\redis-server\redis-server.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Tasks\tools\redis-server\redis.conf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

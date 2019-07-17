@@ -13,7 +13,7 @@
     {
         public RepositoryCachingTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
         {
-            CachingServers.Setup.Run();
+            Tasks.CachingServerTasks.Run();
         }
 
         [Fact]
@@ -1061,7 +1061,7 @@ WHERE NewCustomers.Id = @p0",
 
         public void Dispose()
         {
-            CachingServers.Setup.Cleanup();
+            Tasks.CachingServerTasks.Cleanup();
         }
     }
 }

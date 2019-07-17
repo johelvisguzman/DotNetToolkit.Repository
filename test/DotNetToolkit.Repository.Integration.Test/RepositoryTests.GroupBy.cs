@@ -98,8 +98,8 @@
 
             var entities = new List<Customer>
             {
-                new Customer { Name = "Random Name 2" },
-                new Customer { Name = "Random Name 1" }
+                new Customer { Id = 1, Name = "Random Name 2" },
+                new Customer { Id = 2, Name = "Random Name 1" }
             };
 
             var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
@@ -116,8 +116,8 @@
 
             var entities = new List<Customer>
             {
-                new Customer { Name = "Random Name 2" },
-                new Customer { Name = "Random Name 1" }
+                new Customer { Id = 1, Name = "Random Name 2" },
+                new Customer { Id = 2, Name = "Random Name 1" }
             };
 
             var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
@@ -136,7 +136,7 @@
 
             for (var i = 0; i < 21; i++)
             {
-                entities.Add(new Customer { Name = "Random Name " + i });
+                entities.Add(new Customer { Id = i + 1, Name = "Random Name " + i });
             }
 
             repo.Add(entities);
@@ -220,7 +220,7 @@
 
             for (var i = 0; i < 21; i++)
             {
-                entities.Add(new Customer { Name = "Random Name " + i });
+                entities.Add(new Customer { Id = i + 1, Name = "Random Name " + i });
             }
 
             repo.Add(entities);
@@ -326,8 +326,8 @@
 
             var entities = new List<Customer>
             {
-                new Customer { Name = "Random Name 2" },
-                new Customer { Name = "Random Name 1" }
+                new Customer { Id = 1, Name = "Random Name 2" },
+                new Customer { Id = 2, Name = "Random Name 1" }
             };
 
             var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
@@ -344,8 +344,8 @@
 
             var entities = new List<Customer>
             {
-                new Customer { Name = "Random Name 2" },
-                new Customer { Name = "Random Name 1" }
+                new Customer { Id = 1, Name = "Random Name 2" },
+                new Customer { Id = 2, Name = "Random Name 1" }
             };
 
             var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
@@ -364,7 +364,7 @@
 
             for (var i = 0; i < 21; i++)
             {
-                entities.Add(new Customer { Name = "Random Name " + i });
+                entities.Add(new Customer { Id = i + 1, Name = "Random Name " + i });
             }
 
             await repo.AddAsync(entities);
@@ -449,7 +449,7 @@
 
             for (var i = 0; i < 21; i++)
             {
-                entities.Add(new Customer { Name = "Random Name " + i });
+                entities.Add(new Customer { Id = i + 1, Name = "Random Name " + i });
             }
 
             await repo.AddAsync(entities);

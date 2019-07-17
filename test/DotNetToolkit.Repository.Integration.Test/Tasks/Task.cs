@@ -1,27 +1,20 @@
-﻿namespace DotNetToolkit.Repository.Integration.Test.CachingServers
+﻿namespace DotNetToolkit.Repository.Integration.Test.Tasks
 {
     using System;
-    using System.Diagnostics;
     using System.IO;
     using Utility;
+    using System.Diagnostics;
 
-    public class ServerProcess
+    public class Task
     {
-        public static IDisposable Run<TConfig>() where TConfig : IServerProcessConfig, new()
+       public static IDisposable Run(string basePath, string exe, string args = null)
         {
-            return Run(new TConfig());
-        }
+            var workingDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, basePath);
+            var fileName = Path.Combine(workingDirectory, exe);
 
-        public static IDisposable Run(IServerProcessConfig config)
-        {
-            Guard.NotNull(config, nameof(config));
-
-            var workingDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, config.BasePath);
-            var fileName = Path.Combine(workingDirectory, config.Exe);
-
-            var process = Process.Start(new ProcessStartInfo
+            var process = System.Diagnostics.Process.Start(new ProcessStartInfo
             {
-                Arguments = config.Args,
+                Arguments = args,
                 FileName = fileName,
                 WorkingDirectory = workingDirectory,
                 WindowStyle = ProcessWindowStyle.Hidden
@@ -58,7 +51,7 @@
             {
                 GC.SuppressFinalize(this);
 
-                if (_process != null)
+                if (_process != null && !_process.HasExited)
                 {
                     _process.Kill();
                     _process.Dispose();

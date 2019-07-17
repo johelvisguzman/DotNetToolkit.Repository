@@ -1,6 +1,7 @@
 namespace DotNetToolkit.Repository.Integration.Test.Data
 {
     using AdoNet;
+    //using AzureStorageBlob;
     using Caching.Couchbase;
     using Caching.InMemory;
     using Caching.Memcached;
@@ -13,6 +14,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
     using global::NHibernate.Driver;
     using global::NHibernate.Mapping.ByCode;
     using global::NHibernate.Tool.hbm2ddl;
+    using Helpers;
     using InMemory;
     using Json;
     using Microsoft.EntityFrameworkCore;
@@ -197,14 +199,14 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                     }
                 case ContextProviderType.AdoNet:
                     {
-                        builder.UseAdoNet(TestDbConnectionHelper.CreateConnection(), ensureDatabaseCreated: true);
+                        builder.UseAdoNet(DbConnectionHelper.CreateConnection(), ensureDatabaseCreated: true);
                         break;
                     }
                 case ContextProviderType.NHibernate:
                     {
                         builder.UseNHibernate(cfg =>
                         {
-                            var currentFile = TestPathHelper.GetTempFileName();
+                            var currentFile = PathHelper.GetTempFileName();
                             var connectionString = $"Data Source={currentFile};Persist Security Info=False";
 
                             cfg.DataBaseIntegration(x =>
@@ -233,7 +235,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                     }
                 case ContextProviderType.EntityFramework:
                     {
-                        builder.UseEntityFramework<TestEfDbContext>(TestDbConnectionHelper.CreateConnection());
+                        builder.UseEntityFramework<TestEfDbContext>(DbConnectionHelper.CreateConnection());
                         break;
                     }
                 case ContextProviderType.EntityFrameworkCore:
@@ -246,6 +248,18 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                         });
                         break;
                     }
+                //case ContextProviderType.AzureStorageBlob:
+                //    {
+                //        builder.UseAzureStorageBlob(
+                //            nameOrConnectionString:
+                //                "DefaultEndpointsProtocol=http;" +
+                //                "AccountName=devstoreaccount1;" +
+                //                "AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;" +
+                //                "BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;",
+                //            container: Guid.NewGuid().ToString(),
+                //            createIfNotExists: true);
+                //        break;
+                //    }
                 default:
                     throw new ArgumentOutOfRangeException(nameof(provider));
             }
@@ -309,7 +323,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             return new[]
             {
                 ContextProviderType.InMemory,
-                ContextProviderType.EntityFrameworkCore
+                ContextProviderType.EntityFrameworkCore,
             };
         }
 
@@ -318,7 +332,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             return new[]
             {
                 ContextProviderType.Json,
-                ContextProviderType.Xml
+                ContextProviderType.Xml,
             };
         }
 
@@ -328,7 +342,15 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             {
                 ContextProviderType.AdoNet,
                 ContextProviderType.NHibernate,
-                ContextProviderType.EntityFramework
+                ContextProviderType.EntityFramework,
+            };
+        }
+
+        protected static IEnumerable<ContextProviderType> AzureStorageContextProviders()
+        {
+            return new[]
+            {
+                ContextProviderType.AzureStorageBlob,
             };
         }
 
@@ -339,6 +361,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             list.AddRange(SqlServerContextProviders());
             list.AddRange(InMemoryContextProviders());
             list.AddRange(FileStreamContextProviders());
+            //list.AddRange(AzureStorageContextProviders());
 
             return list;
         }
@@ -366,6 +389,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             NHibernate,
             EntityFramework,
             EntityFrameworkCore,
+            AzureStorageBlob,
         }
 
         public enum CachingProviderType

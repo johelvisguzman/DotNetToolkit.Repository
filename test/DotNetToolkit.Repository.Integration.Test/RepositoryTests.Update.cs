@@ -60,8 +60,8 @@
 
             var entities = new List<Customer>
             {
-                new Customer { Name = name },
-                new Customer { Name = name }
+                new Customer { Id = 1, Name = name },
+                new Customer { Id = 2, Name = name }
             };
 
             repo.Add(entities);
@@ -107,8 +107,8 @@
 
             var entities = new List<Customer>
             {
-                new Customer { Name = name },
-                new Customer { Name = name }
+                new Customer { Id = 1, Name = name },
+                new Customer { Id = 2, Name = name }
             };
 
             await repo.AddAsync(entities);
