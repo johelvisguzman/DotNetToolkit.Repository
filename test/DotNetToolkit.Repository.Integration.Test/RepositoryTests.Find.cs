@@ -73,49 +73,49 @@
         [Fact]
         public void FindWithThreeCompositePrimaryKey()
         {
-            ForAllRepositoryFactories(TestFindWithThreeCompositePrimaryKey);
+            ForAllRepositoryFactories(TestFindWithThreeCompositePrimaryKey, ContextProviderType.AzureStorageTable);
         }
 
         [Fact]
         public void FindWithNavigationProperty_OneToOneRelationship()
         {
             // currently not working for hibernate
-            ForAllRepositoryFactories(TestFindWithNavigationProperty_OneToOneRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob);
+            ForAllRepositoryFactories(TestFindWithNavigationProperty_OneToOneRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob, ContextProviderType.AzureStorageTable);
         }
 
         [Fact]
         public void FindWithNavigationPropertyByKey_OneToOneRelationship()
         {
             // currently not working for hibernate
-            ForAllRepositoryFactories(TestFindWithNavigationPropertyByKey_OneToOneRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob);
+            ForAllRepositoryFactories(TestFindWithNavigationPropertyByKey_OneToOneRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob, ContextProviderType.AzureStorageTable);
         }
 
         [Fact]
         public void FindWithNavigationPropertyByCompositeKey_OneToOneRelationship()
         {
             // currently not working for hibernate
-            ForAllRepositoryFactories(TestFindWithNavigationPropertyByCompositeKey_OneToOneRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob);
+            ForAllRepositoryFactories(TestFindWithNavigationPropertyByCompositeKey_OneToOneRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob, ContextProviderType.AzureStorageTable);
         }
 
         [Fact]
         public void FindAllWithNavigationProperty_OneToOneRelationship()
         {
             // currently not working for hibernate
-            ForAllRepositoryFactories(TestFindAllWithNavigationProperty_OneToOneRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob);
+            ForAllRepositoryFactories(TestFindAllWithNavigationProperty_OneToOneRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob, ContextProviderType.AzureStorageTable);
         }
 
         [Fact]
         public void FindWithNavigationProperty_OneToManyRelationship()
         {
             // currently not working for hibernate
-            ForAllRepositoryFactories(TestFindWithNavigationProperty_OneToManyRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob);
+            ForAllRepositoryFactories(TestFindWithNavigationProperty_OneToManyRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob, ContextProviderType.AzureStorageTable);
         }
 
         [Fact]
         public void FindAllWithNavigationProperty_OneToManyRelationship()
         {
             // currently not working for hibernate
-            ForAllRepositoryFactories(TestFindAllWithNavigationProperty_OneToManyRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob);
+            ForAllRepositoryFactories(TestFindAllWithNavigationProperty_OneToManyRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob, ContextProviderType.AzureStorageTable);
         }
 
         [Fact]
@@ -181,42 +181,42 @@
         [Fact]
         public void FindWithThreeCompositePrimaryKeyAsync()
         {
-            ForAllRepositoryFactoriesAsync(TestFindWithThreeCompositePrimaryKeyAsync);
+            ForAllRepositoryFactoriesAsync(TestFindWithThreeCompositePrimaryKeyAsync, ContextProviderType.AzureStorageTable);
         }
 
         [Fact]
         public void FindWithNavigationPropertyByKeyAsync_OneToOneRelationship()
         {
             // currently not working for hibernate
-            ForAllRepositoryFactoriesAsync(TestFindWithNavigationPropertyByKeyAsync_OneToOneRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob);
+            ForAllRepositoryFactoriesAsync(TestFindWithNavigationPropertyByKeyAsync_OneToOneRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob, ContextProviderType.AzureStorageTable);
         }
 
         [Fact]
         public void FindWithNavigationPropertyAsync_OneToOneRelationship()
         {
             // currently not working for hibernate
-            ForAllRepositoryFactoriesAsync(TestFindWithNavigationPropertyAsync_OneToOneRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob);
+            ForAllRepositoryFactoriesAsync(TestFindWithNavigationPropertyAsync_OneToOneRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob, ContextProviderType.AzureStorageTable);
         }
 
         [Fact]
         public void FindAllWithNavigationPropertyAsync_OneToOneRelationship()
         {
             // currently not working for hibernate
-            ForAllRepositoryFactoriesAsync(TestFindAllWithNavigationPropertyAsync_OneToOneRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob);
+            ForAllRepositoryFactoriesAsync(TestFindAllWithNavigationPropertyAsync_OneToOneRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob, ContextProviderType.AzureStorageTable);
         }
 
         [Fact]
         public void FindWithNavigationPropertyAsync_OneToManyRelationship()
         {
             // currently not working for hibernate
-            ForAllRepositoryFactoriesAsync(TestFindWithNavigationPropertyAsync_OneToManyRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob);
+            ForAllRepositoryFactoriesAsync(TestFindWithNavigationPropertyAsync_OneToManyRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob, ContextProviderType.AzureStorageTable);
         }
 
         [Fact]
         public void FindAllWithNavigationPropertyAsync_OneToManyRelationship()
         {
             // currently not working for hibernate
-            ForAllRepositoryFactoriesAsync(TestFindAllWithNavigationPropertyAsync_OneToManyRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob);
+            ForAllRepositoryFactoriesAsync(TestFindAllWithNavigationPropertyAsync_OneToManyRelationship, ContextProviderType.NHibernate, ContextProviderType.AzureStorageBlob, ContextProviderType.AzureStorageTable);
         }
 
         private static void TestFind(IRepositoryFactory repoFactory)
@@ -226,7 +226,7 @@
             const string name = "Random Name";
 
             var options = new QueryOptions<Customer>();
-            var entity = new Customer { Name = name };
+            var entity = new Customer { Id = 1, Name = name };
 
             Assert.Null(repo.Find(x => x.Name.Equals(name)));
             Assert.Null(repo.Find(options));
@@ -313,7 +313,7 @@
             const string name = "Random Name";
 
             var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
-            var entity = new Customer { Name = name };
+            var entity = new Customer { Id = 1, Name = name };
 
             Assert.Empty(repo.FindAll());
             Assert.Empty(repo.FindAll(x => x.Name.Equals(name)));
@@ -819,7 +819,7 @@
             const string name = "Random Name";
 
             var options = new QueryOptions<Customer>();
-            var entity = new Customer { Name = name };
+            var entity = new Customer { Id = 1, Name = name };
 
             Assert.Null(await repo.FindAsync(x => x.Name.Equals(name)));
             Assert.Null(await repo.FindAsync(options));
@@ -906,7 +906,7 @@
             const string name = "Random Name";
 
             var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
-            var entity = new Customer { Name = name };
+            var entity = new Customer { Id = 1, Name = name };
 
             Assert.Empty(await repo.FindAllAsync());
             Assert.Empty(await repo.FindAllAsync(x => x.Name.Equals(name)));

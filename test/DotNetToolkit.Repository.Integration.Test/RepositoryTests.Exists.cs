@@ -22,7 +22,7 @@
         [Fact]
         public void ExistWithNavigationProperty_OneToOneRelationship()
         {
-            ForAllRepositoryFactories(TestExistWithNavigationProperty_OneToOneRelationship, ContextProviderType.AzureStorageBlob);
+            ForAllRepositoryFactories(TestExistWithNavigationProperty_OneToOneRelationship, ContextProviderType.AzureStorageBlob, ContextProviderType.AzureStorageTable);
         }
 
         [Fact]
@@ -40,7 +40,7 @@
         [Fact]
         public void ExistWithNavigationPropertyAsync_OneToOneRelationship()
         {
-            ForAllRepositoryFactoriesAsync(TestExistWithNavigationPropertyAsync_OneToOneRelationship, ContextProviderType.AzureStorageBlob);
+            ForAllRepositoryFactoriesAsync(TestExistWithNavigationPropertyAsync_OneToOneRelationship, ContextProviderType.AzureStorageBlob, ContextProviderType.AzureStorageTable);
         }
 
         private static void TestExists(IRepositoryFactory repoFactory)
@@ -50,7 +50,7 @@
             const string name = "Random Name";
 
             var options = new QueryOptions<Customer>().SatisfyBy(x => x.Name.Equals(name));
-            var entity = new Customer { Name = name };
+            var entity = new Customer { Id = 1, Name = name };
 
             Assert.False(repo.Exists(x => x.Name.Equals(name)));
             Assert.False(repo.Exists(options));
@@ -121,7 +121,7 @@
             const string name = "Random Name";
 
             var options = new QueryOptions<Customer>().SatisfyBy(x => x.Name.Equals(name));
-            var entity = new Customer { Name = name };
+            var entity = new Customer { Id = 1, Name = name };
 
             Assert.False(await repo.ExistsAsync(x => x.Name.Equals(name)));
             Assert.False(await repo.ExistsAsync(options));

@@ -18,7 +18,7 @@
         {
             // run for all repositories context except for ef core.. it looks like this will not pass for some reason.
             // will need to comeback to this at somepoint
-            ForAllRepositoryFactories(TestAddWithSeededIdForIdentity, ContextProviderType.EntityFrameworkCore, ContextProviderType.AzureStorageBlob);
+            ForAllRepositoryFactories(TestAddWithSeededIdForIdentity, ContextProviderType.EntityFrameworkCore, ContextProviderType.AzureStorageBlob, ContextProviderType.AzureStorageTable);
         }
 
         [Fact]
@@ -44,7 +44,7 @@
         {
             // run for all repositories context except for ef core.. it looks like this will not pass for some reason.
             // will need to comeback to this at somepoint
-            ForAllRepositoryFactoriesAsync(TestAddWithSeededIdForIdentityAsync, ContextProviderType.EntityFrameworkCore, ContextProviderType.AzureStorageBlob);
+            ForAllRepositoryFactoriesAsync(TestAddWithSeededIdForIdentityAsync, ContextProviderType.EntityFrameworkCore, ContextProviderType.AzureStorageBlob, ContextProviderType.AzureStorageTable);
         }
 
         [Fact]
@@ -65,7 +65,7 @@
 
             const string name = "Random Name";
 
-            var entity = new Customer { Name = name };
+            var entity = new Customer { Id = 1, Name = name };
 
             Assert.False(repo.Exists(x => x.Name.Equals(name)));
 
@@ -131,7 +131,7 @@
 
             const string name = "Random Name";
 
-            var entity = new Customer { Name = name };
+            var entity = new Customer { Id = 1, Name = name };
 
             Assert.False(await repo.ExistsAsync(x => x.Name.Equals(name)));
 

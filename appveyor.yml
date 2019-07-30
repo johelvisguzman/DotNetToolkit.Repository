@@ -55,6 +55,7 @@ after_build:
   - dotnet pack .\src\DotNetToolkit.Repository.Json\DotNetToolkit.Repository.Json.csproj --configuration Release
   - dotnet pack .\src\DotNetToolkit.Repository.Xml\DotNetToolkit.Repository.Xml.csproj --configuration Release
   - dotnet pack .\src\DotNetToolkit.Repository.AzureStorageBlob\DotNetToolkit.Repository.AzureStorageBlob.csproj --configuration Release
+  - dotnet pack .\src\DotNetToolkit.Repository.AzureStorageTable\DotNetToolkit.Repository.AzureStorageTable.csproj --configuration Release
   - dotnet pack .\src\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.csproj --configuration Release
   - dotnet pack .\src\DotNetToolkit.Repository.Extensions.Unity\DotNetToolkit.Repository.Extensions.Unity.csproj --configuration Release
   - dotnet pack .\src\DotNetToolkit.Repository.Extensions.Ninject\DotNetToolkit.Repository.Extensions.Ninject.csproj --configuration Release

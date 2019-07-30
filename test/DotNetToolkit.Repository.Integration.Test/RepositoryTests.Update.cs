@@ -38,7 +38,7 @@
             const string expectedName = "New Random Name";
             const string name = "Random Name";
 
-            var entity = new Customer { Name = name };
+            var entity = new Customer { Id = 1, Name = name };
 
             repo.Add(entity);
 
@@ -85,7 +85,7 @@
             const string expectedName = "New Random Name";
             const string name = "Random Name";
 
-            var entity = new Customer { Name = name };
+            var entity = new Customer { Id = 1, Name = name };
 
             await repo.AddAsync(entity);
 

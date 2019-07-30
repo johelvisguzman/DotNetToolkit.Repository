@@ -78,7 +78,7 @@
             var options = new QueryOptions<Customer>();
             var entities = new List<Customer>()
             {
-                new Customer {Name = name}
+                new Customer { Id = 1, Name = name }
             };
 
             var expectedGroupByElementSelector = entities.GroupBy(y => y.Id, y => y.Name);
@@ -305,7 +305,7 @@
             var options = new QueryOptions<Customer>();
             var entities = new List<Customer>()
             {
-                new Customer {Name = name}
+                new Customer { Id = 1, Name = name }
             };
 
             var expectedGroup = entities.GroupBy(y => y.Id);
