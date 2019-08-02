@@ -224,7 +224,7 @@
 
             var propertiesMapping = entityType
                 .GetRuntimeProperties()
-                .Where(x => x.IsPrimitive())
+                .Where(x => x.IsPrimitive() && _dbHelper.Conventions.IsColumnMapped(x))
                 .OrderBy(_dbHelper.Conventions.GetColumnOrderOrDefault)
                 .ToDictionary(_dbHelper.Conventions.GetColumnName, x => x);
 
@@ -489,11 +489,14 @@
 
             // Check if has composite foreign keys (more than one key for a given navigation property), and if so, it needs to defined an ordering
             var propertiesMapping = properties
-                .Where(x => x.IsPrimitive())
+                .Where(x => x.IsPrimitive() && _dbHelper.Conventions.IsColumnMapped(x))
                 .OrderBy(_dbHelper.Conventions.GetColumnOrderOrDefault)
                 .ToDictionary(_dbHelper.Conventions.GetColumnName, x => x);
 
-            var primaryKeyPropertyInfosMapping = _dbHelper.Conventions.GetPrimaryKeyPropertyInfos(entityType).ToDictionary(_dbHelper.Conventions.GetColumnName, x => x);
+            var primaryKeyPropertyInfosMapping = _dbHelper.Conventions
+                .GetPrimaryKeyPropertyInfos(entityType)
+                .ToDictionary(_dbHelper.Conventions.GetColumnName, x => x);
+
             var primaryKeyConstraints = new List<string>();
             var foreignKeyConstraints = new Dictionary<string, List<Tuple<string, string>>>();
             var foreignKeyOrder = 0;
