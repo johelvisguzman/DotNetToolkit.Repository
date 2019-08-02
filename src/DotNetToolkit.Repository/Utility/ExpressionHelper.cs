@@ -58,7 +58,7 @@
 
             Expression body = param;
 
-            foreach (var pi in parts.Select(prop => type.GetTypeInfo().GetDeclaredProperty(prop)))
+            foreach (var pi in parts.Select(prop => type.GetProperty(prop)))
             {
                 body = Expression.Property(body, pi);
                 type = pi.PropertyType;
