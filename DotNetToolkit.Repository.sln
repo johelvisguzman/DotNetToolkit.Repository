@@ -47,7 +47,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Ca
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Extensions.Ninject", "src\DotNetToolkit.Repository.Extensions.Ninject\DotNetToolkit.Repository.Extensions.Ninject.csproj", "{BC5B405A-725D-47EC-8FE1-D420CFED8939}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetToolkit.Repository.Caching.Couchbase", "src\DotNetToolkit.Repository.Caching.Couchbase\DotNetToolkit.Repository.Caching.Couchbase.csproj", "{45E365E2-B249-4AB8-AC90-8C0CDE5CC61D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Caching.Couchbase", "src\DotNetToolkit.Repository.Caching.Couchbase\DotNetToolkit.Repository.Caching.Couchbase.csproj", "{45E365E2-B249-4AB8-AC90-8C0CDE5CC61D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.AzureStorageBlob", "src\DotNetToolkit.Repository.AzureStorageBlob\DotNetToolkit.Repository.AzureStorageBlob.csproj", "{6B934185-F853-4664-B90A-B923690461D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetToolkit.Repository.AzureStorageTable", "src\DotNetToolkit.Repository.AzureStorageTable\DotNetToolkit.Repository.AzureStorageTable.csproj", "{567784ED-4989-4664-A8F5-E7AA31107A3C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -130,6 +134,14 @@ Global
 		{45E365E2-B249-4AB8-AC90-8C0CDE5CC61D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45E365E2-B249-4AB8-AC90-8C0CDE5CC61D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{45E365E2-B249-4AB8-AC90-8C0CDE5CC61D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B934185-F853-4664-B90A-B923690461D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B934185-F853-4664-B90A-B923690461D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B934185-F853-4664-B90A-B923690461D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B934185-F853-4664-B90A-B923690461D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{567784ED-4989-4664-A8F5-E7AA31107A3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{567784ED-4989-4664-A8F5-E7AA31107A3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{567784ED-4989-4664-A8F5-E7AA31107A3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{567784ED-4989-4664-A8F5-E7AA31107A3C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -154,6 +166,8 @@ Global
 		{421F9CC1-9A5F-4F3D-A851-AB72958A4E96} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{BC5B405A-725D-47EC-8FE1-D420CFED8939} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{45E365E2-B249-4AB8-AC90-8C0CDE5CC61D} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
+		{6B934185-F853-4664-B90A-B923690461D8} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
+		{567784ED-4989-4664-A8F5-E7AA31107A3C} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96973E0C-81D1-42DE-9F78-7103241B4E07}

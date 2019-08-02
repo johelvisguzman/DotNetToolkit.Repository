@@ -26,7 +26,7 @@
             const string name = "Random Name";
 
             var options = new QueryOptions<Customer>();
-            var entity = new Customer { Name = name };
+            var entity = new Customer { Id = 1, Name = name };
 
             Assert.Equal(0, repo.Count());
             Assert.Equal(0, repo.Count(x => x.Name.Equals(name)));
@@ -46,7 +46,7 @@
             const string name = "Random Name";
 
             var options = new QueryOptions<Customer>();
-            var entity = new Customer { Name = name };
+            var entity = new Customer { Id = 1, Name = name };
 
             Assert.Equal(0, await repo.CountAsync());
             Assert.Equal(0, await repo.CountAsync(x => x.Name.Equals(name)));

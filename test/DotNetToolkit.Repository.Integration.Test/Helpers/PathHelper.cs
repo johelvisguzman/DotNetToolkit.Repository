@@ -1,8 +1,8 @@
-﻿namespace DotNetToolkit.Repository.Integration.Test.Data
+﻿namespace DotNetToolkit.Repository.Integration.Test.Helpers
 {
     using System.IO;
 
-    public class TestPathHelper
+    public class PathHelper
     {
         public static string GetTempFileName()
         {

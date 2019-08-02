@@ -76,6 +76,18 @@ If you want to use DotNetToolkit.Repository for the first time, the [Getting Sta
 	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.EntityFrameworkCore"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.EntityFrameworkCore.svg?label=myget" alt="MyGet (dev)"></a></td>
     </tr>
 	<tr>
+      <td><a href="https://github.com/johelvisguzman/DotNetToolkit.Repository/tree/master/src/DotNetToolkit.Repository.AzureStorageBlob/">DotNetToolkit.Repository.AzureStorageBlob</a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.AzureStorageBlob/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.AzureStorageBlob.svg" alt="DotNetToolkit.Repository.AzureStorageBlob"></a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.AzureStorageBlob/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.AzureStorageBlob.svg" alt="DotNetToolkit.Repository.AzureStorageBlob"></a></td>
+	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.AzureStorageBlob"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.AzureStorageBlob.svg?label=myget" alt="MyGet (dev)"></a></td>
+    </tr>
+	<tr>
+      <td><a href="https://github.com/johelvisguzman/DotNetToolkit.Repository/tree/master/src/DotNetToolkit.Repository.AzureStorageTable/">DotNetToolkit.Repository.AzureStorageTable</a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.AzureStorageTable/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.AzureStorageTable.svg" alt="DotNetToolkit.Repository.AzureStorageTable"></a></td>
+      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.AzureStorageTable/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.AzureStorageTable.svg" alt="DotNetToolkit.Repository.AzureStorageTable"></a></td>
+	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.AzureStorageTable"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/v/DotNetToolkit.Repository.AzureStorageTable.svg?label=myget" alt="MyGet (dev)"></a></td>
+    </tr>
+	<tr>
 		<th colspan="4">Caching Providers</th>
 	</tr>
 	<tr>

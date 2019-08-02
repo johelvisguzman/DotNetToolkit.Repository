@@ -7,9 +7,12 @@
     using Xunit;
     using Xunit.Abstractions;
 
-    public partial class RepositoryTests : TestBase
+    public partial class RepositoryTests : TestBase, IDisposable
     {
-        public RepositoryTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+        public RepositoryTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+            //Tasks.AzureEmulatorTasks.Run(GetType());
+        }
 
         [Fact]
         public void FactoryCreate()
@@ -89,6 +92,11 @@
 
             ex = await Assert.ThrowsAsync<InvalidOperationException>(() => repo.DeleteAsync(emptyQueryOptions));
             Assert.Equal("The specified query options is missing a specification predicate.", ex.Message);
+        }
+
+        public void Dispose()
+        {
+            //Tasks.AzureEmulatorTasks.Cleanup();
         }
     }
 }
