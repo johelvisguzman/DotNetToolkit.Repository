@@ -32,17 +32,11 @@ namespace DotNetToolkit.Repository.AdoNet
         private readonly string _connectionString;
         private DbConnection _connection;
         private readonly bool _ownsConnection;
-        private readonly Internal.DataAccessProviderType _providerType;
         private readonly IRepositoryConventions _conventions;
 
         #endregion
 
         #region Properties
-
-        /// <summary>
-        /// Gets the provider type.
-        /// </summary>
-        internal Internal.DataAccessProviderType ProviderType { get { return _providerType; } }
 
         /// <summary>
         /// Gets the provider factory.
@@ -88,13 +82,14 @@ namespace DotNetToolkit.Repository.AdoNet
             Guard.NotNull(conventions, nameof(conventions));
             Guard.NotEmpty(nameOrConnectionString, nameof(nameOrConnectionString));
 
-            var css = GetConnectionStringSettings(nameOrConnectionString);
+            var css = Guard.EnsureNotNull(
+                GetConnectionStringSettings(nameOrConnectionString),
+                "The connection string does not exist in your configuration file.");
 
             _conventions = conventions;
             _factory = Internal.DbProviderFactories.GetFactory(css.ProviderName);
             _connectionString = css.ConnectionString;
             _ownsConnection = true;
-            _providerType = Internal.DataAccessProvider.GetProviderType(css.ProviderName);
         }
 
         /// <summary>
@@ -113,7 +108,6 @@ namespace DotNetToolkit.Repository.AdoNet
             _factory = Internal.DbProviderFactories.GetFactory(providerName);
             _connectionString = connectionString;
             _ownsConnection = true;
-            _providerType = Internal.DataAccessProvider.GetProviderType(providerName);
         }
 
         /// <summary>
@@ -126,16 +120,9 @@ namespace DotNetToolkit.Repository.AdoNet
             Guard.NotNull(conventions, nameof(conventions));
             Guard.NotNull(existingConnection, nameof(existingConnection));
 
-            if (existingConnection.State == ConnectionState.Closed)
-                existingConnection.Open();
-
             _conventions = conventions;
             _connection = existingConnection;
             _ownsConnection = false;
-
-            var css = GetConnectionStringSettings(existingConnection.ConnectionString);
-
-            _providerType = Internal.DataAccessProvider.GetProviderType(css.ProviderName);
         }
 
         #endregion
@@ -1305,21 +1292,18 @@ namespace DotNetToolkit.Repository.AdoNet
         {
             var css = ConfigurationManager.ConnectionStrings[nameOrConnectionString];
 
-            if (css == null)
-            {
-                for (var i = 0; i < ConfigurationManager.ConnectionStrings.Count; i++)
-                {
-                    css = ConfigurationManager.ConnectionStrings[i];
+            if (css != null)
+                return css;
 
-                    if (css.ConnectionString.Equals(nameOrConnectionString))
-                        break;
-                }
+            for (var i = 0; i < ConfigurationManager.ConnectionStrings.Count; i++)
+            {
+                css = ConfigurationManager.ConnectionStrings[i];
+
+                if (css.ConnectionString.Equals(nameOrConnectionString))
+                    return css;
             }
 
-            if (css == null)
-                throw new ArgumentException("The connection string does not exist in your configuration file.");
-
-            return css;
+            return null;
         }
 
         private static T ConvertValue<T>(object value)
