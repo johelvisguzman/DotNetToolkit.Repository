@@ -40,6 +40,16 @@
             return _underlyingService.Get(key1, key2, key3);
         }
 
+        public TEntity Get(TKey1 key1, TKey2 key2, TKey3 key3, params string[] paths)
+        {
+            return _underlyingService.Get(key1, key2, key3, paths);
+        }
+
+        public TEntity Get(TKey1 key1, TKey2 key2, TKey3 key3, params Expression<Func<TEntity, object>>[] paths)
+        {
+            return _underlyingService.Get(key1, key2, key3, paths);
+        }
+
         public TEntity Get(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
             return _underlyingService.Get(key1, key2, key3, fetchStrategy);
@@ -158,6 +168,26 @@
         public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
             return _underlyingService.GetAsync(key1, key2, key3, cancellationToken);
+        }
+
+        public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, params string[] paths)
+        {
+            return _underlyingService.GetAsync(key1, key2, key3, paths);
+        }
+
+        public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, string[] paths, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _underlyingService.GetAsync(key1, key2, key3, paths, cancellationToken);
+        }
+
+        public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, params Expression<Func<TEntity, object>>[] paths)
+        {
+            return _underlyingService.GetAsync(key1, key2, key3, paths);
+        }
+
+        public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _underlyingService.GetAsync(key1, key2, key3, paths, cancellationToken);
         }
 
         public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, TKey3 key3, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
@@ -306,6 +336,16 @@
             return _underlyingService.Get(key1, key2);
         }
 
+        public TEntity Get(TKey1 key1, TKey2 key2, params string[] paths)
+        {
+            return _underlyingService.Get(key1, key2, paths);
+        }
+
+        public TEntity Get(TKey1 key1, TKey2 key2, params Expression<Func<TEntity, object>>[] paths)
+        {
+            return _underlyingService.Get(key1, key2, paths);
+        }
+
         public TEntity Get(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
             return _underlyingService.Get(key1, key2, fetchStrategy);
@@ -424,6 +464,26 @@
         public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
             return _underlyingService.GetAsync(key1, key2, cancellationToken);
+        }
+
+        public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, params string[] paths)
+        {
+            return _underlyingService.GetAsync(key1, key2, paths);
+        }
+
+        public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, string[] paths, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _underlyingService.GetAsync(key1, key2, paths, cancellationToken);
+        }
+
+        public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, params Expression<Func<TEntity, object>>[] paths)
+        {
+            return _underlyingService.GetAsync(key1, key2, paths);
+        }
+
+        public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _underlyingService.GetAsync(key1, key2, paths, cancellationToken);
         }
 
         public Task<TEntity> GetAsync(TKey1 key1, TKey2 key2, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
@@ -572,6 +632,16 @@
             return _underlyingService.Get(key);
         }
 
+        public TEntity Get(TKey key, params string[] paths)
+        {
+            return _underlyingService.Get(key, paths);
+        }
+
+        public TEntity Get(TKey key, params Expression<Func<TEntity, object>>[] paths)
+        {
+            return _underlyingService.Get(key, paths);
+        }
+
         public TEntity Get(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy)
         {
             return _underlyingService.Get(key, fetchStrategy);
@@ -690,6 +760,26 @@
         public Task<TEntity> GetAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
             return _underlyingService.GetAsync(key, cancellationToken);
+        }
+
+        public Task<TEntity> GetAsync(TKey key, params string[] paths)
+        {
+            return _underlyingService.GetAsync(key, paths);
+        }
+
+        public Task<TEntity> GetAsync(TKey key, string[] paths, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _underlyingService.GetAsync(key, paths, cancellationToken);
+        }
+
+        public Task<TEntity> GetAsync(TKey key, params Expression<Func<TEntity, object>>[] paths)
+        {
+            return _underlyingService.GetAsync(key, paths);
+        }
+
+        public Task<TEntity> GetAsync(TKey key, Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _underlyingService.GetAsync(key, paths, cancellationToken);
         }
 
         public Task<TEntity> GetAsync(TKey key, IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())

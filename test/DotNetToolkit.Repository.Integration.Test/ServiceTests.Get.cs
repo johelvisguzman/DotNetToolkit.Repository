@@ -4,8 +4,10 @@
     using Queries;
     using Queries.Strategies;
     using Services;
+    using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Xunit;
 
@@ -457,20 +459,23 @@
             var service = serviceFactory.Create<Customer>();
 
             int key = 1;
-            const string name = "Random Name";
 
-            var fetchStrategy = new FetchQueryStrategy<Customer>();
-            fetchStrategy.Fetch(x => x.Address);
+            var fetchStrategy = new FetchQueryStrategy<Customer>()
+                .Fetch(x => x.Address);
 
-            var entity = new Customer {Id = key, Name = name};
+            var entity = new Customer {Id = key, Name = "Random Name" };
 
             Assert.Null(service.Get(key));
             Assert.Null(service.Get(key, fetchStrategy));
+            Assert.Null(service.Get(key, x => x.Address));
+            Assert.Null(service.Get(key, "Address"));
 
             service.Create(entity);
 
             Assert.NotNull(service.Get(key));
             Assert.NotNull(service.Get(key, fetchStrategy));
+            Assert.NotNull(service.Get(key, x => x.Address));
+            Assert.NotNull(service.Get(key, "Address"));
         }
 
         private static void TestGetWithTwoCompositePrimaryKey(IServiceFactory serviceFactory)
@@ -479,7 +484,6 @@
 
             var key1 = 1;
             var key2 = "2";
-            var randomKey = "3";
 
             var fetchStrategy = new FetchQueryStrategy<CustomerWithTwoCompositePrimaryKey>();
 
@@ -490,8 +494,6 @@
 
             repo.Create(entity);
 
-            Assert.Null(repo.Get(key1, randomKey));
-            Assert.Null(repo.Get(key1, randomKey, fetchStrategy));
             Assert.NotNull(repo.Get(key1, key2));
             Assert.NotNull(repo.Get(key1, key2, fetchStrategy));
         }
@@ -503,8 +505,7 @@
             var key1 = 1;
             var key2 = "2";
             var key3 = 3;
-            var randomKey = 4;
-
+            
             var fetchStrategy = new FetchQueryStrategy<CustomerWithThreeCompositePrimaryKey>();
 
             var entity = new CustomerWithThreeCompositePrimaryKey { Id1 = key1, Id2 = key2, Id3 = key3, Name = "Random Name" };
@@ -514,8 +515,6 @@
 
             repo.Create(entity);
 
-            Assert.Null(repo.Get(key1, key2, randomKey));
-            Assert.Null(repo.Get(key1, key2, randomKey, fetchStrategy));
             Assert.NotNull(repo.Get(key1, key2, key3));
             Assert.NotNull(repo.Get(key1, key2, key3, fetchStrategy));
         }
@@ -836,20 +835,23 @@
             var service = serviceFactory.Create<Customer>();
 
             int key = 1;
-            const string name = "Random Name";
 
-            var fetchStrategy = new FetchQueryStrategy<Customer>();
-            fetchStrategy.Fetch(x => x.Address);
+            var fetchStrategy = new FetchQueryStrategy<Customer>()
+                .Fetch(x => x.Address);
 
-            var entity = new Customer {Id = key, Name = name};
+            var entity = new Customer {Id = key, Name = "Random Name" };
 
             Assert.Null(await service.GetAsync(key));
             Assert.Null(await service.GetAsync(key, fetchStrategy));
+            Assert.Null(await service.GetAsync(key, x => x.Address));
+            Assert.Null(await service.GetAsync(key, "Address"));
 
             await service.CreateAsync(entity);
 
             Assert.NotNull(await service.GetAsync(key));
             Assert.NotNull(await service.GetAsync(key, fetchStrategy));
+            Assert.NotNull(await service.GetAsync(key, x => x.Address));
+            Assert.NotNull(await service.GetAsync(key, "Address"));
         }
 
         private static async Task TestGetWithTwoCompositePrimaryKeyAsync(IServiceFactory serviceFactory)
@@ -858,7 +860,6 @@
 
             var key1 = 1;
             var key2 = "2";
-            var randomKey = "3";
 
             var fetchStrategy = new FetchQueryStrategy<CustomerWithTwoCompositePrimaryKey>();
 
@@ -869,8 +870,6 @@
 
             await repo.CreateAsync(entity);
 
-            Assert.Null(await repo.GetAsync(key1, randomKey));
-            Assert.Null(await repo.GetAsync(key1, randomKey, fetchStrategy));
             Assert.NotNull(await repo.GetAsync(key1, key2));
             Assert.NotNull(await repo.GetAsync(key1, key2, fetchStrategy));
         }
@@ -882,7 +881,6 @@
             var key1 = 1;
             var key2 = "2";
             var key3 = 3;
-            var randomKey = 4;
 
             var fetchStrategy = new FetchQueryStrategy<CustomerWithThreeCompositePrimaryKey>();
 
@@ -893,8 +891,6 @@
 
             repo.Create(entity);
 
-            Assert.Null(await repo.GetAsync(key1, key2, randomKey));
-            Assert.Null(await repo.GetAsync(key1, key2, randomKey, fetchStrategy));
             Assert.NotNull(await repo.GetAsync(key1, key2, key3));
             Assert.NotNull(await repo.GetAsync(key1, key2, key3, fetchStrategy));
         }
