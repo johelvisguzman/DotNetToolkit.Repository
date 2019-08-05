@@ -147,7 +147,7 @@
 
         #region Private Methods
 
-        private void PrepareEntitySetQuery(EntitySet entitySet, bool existInDb, out string sql, out Dictionary<string, object> parameters)
+        private void PrepareEntitySetQuery(EntitySet entitySet, out string sql, out Dictionary<string, object> parameters)
         {
             sql = string.Empty;
             parameters = new Dictionary<string, object>();
@@ -156,28 +156,31 @@
             {
                 case EntityState.Added:
                     {
-                        if (existInDb)
-                            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityAlreadyBeingTrackedInStore, entitySet.Entity.GetType()));
-
-                        QueryBuilder.CreateInsertStatement(Conventions, entitySet.Entity, out sql, out parameters);
+                        QueryBuilder.CreateInsertStatement(
+                            Conventions, 
+                            entitySet.Entity, 
+                            out sql, 
+                            out parameters);
 
                         break;
                     }
                 case EntityState.Removed:
                     {
-                        if (!existInDb)
-                            throw new InvalidOperationException(Resources.EntityNotFoundInStore);
-
-                        QueryBuilder.CreateDeleteStatement(Conventions, entitySet.Entity, out sql, out parameters);
+                        QueryBuilder.CreateDeleteStatement(
+                            Conventions, 
+                            entitySet.Entity, 
+                            out sql, 
+                            out parameters);
 
                         break;
                     }
                 case EntityState.Modified:
                     {
-                        if (!existInDb)
-                            throw new InvalidOperationException(Resources.EntityNotFoundInStore);
-
-                        QueryBuilder.CreateUpdateStatement(Conventions, entitySet.Entity, out sql, out parameters);
+                        QueryBuilder.CreateUpdateStatement(
+                            Conventions, 
+                            entitySet.Entity, 
+                            out sql, 
+                            out parameters);
 
                         break;
                     }
@@ -327,13 +330,9 @@
                         var primaryKeyPropertyInfo = Conventions.GetPrimaryKeyPropertyInfos(entityType).First();
                         var isIdentity = Conventions.IsColumnIdentity(primaryKeyPropertyInfo);
 
-                        // Checks if the entity exist in the database
-                        var existInDb = _dbHelper.ExecuteObjectExist(Conventions, command, entitySet.Entity);
-
                         // Prepare the sql statement
                         PrepareEntitySetQuery(
                             entitySet,
-                            existInDb,
                             out string sql,
                             out Dictionary<string, object> parameters);
 
@@ -675,13 +674,9 @@
                         var primaryKeyPropertyInfo = Conventions.GetPrimaryKeyPropertyInfos(entityType).First();
                         var isIdentity = Conventions.IsColumnIdentity(primaryKeyPropertyInfo);
 
-                        // Checks if the entity exist in the database
-                        var existInDb = await _dbHelper.ExecuteObjectExistAsync(Conventions, command, entitySet.Entity, cancellationToken);
-
                         // Prepare the sql statement
                         PrepareEntitySetQuery(
                             entitySet,
-                            existInDb,
                             out string sql,
                             out Dictionary<string, object> parameters);
 
