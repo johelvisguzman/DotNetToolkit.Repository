@@ -22,25 +22,25 @@
         public int Id
         {
             get { return _id; }
-            set { Set(ref _id, value); }
+            set { SetProperty(ref _id, value); }
         }
 
         public string Name
         {
             get { return _name; }
-            set { Set(ref _name, value); }
+            set { SetProperty(ref _name, value); }
         }
 
         public string Notes
         {
             get { return _notes; }
-            set { Set(ref _notes, value); }
+            set { SetProperty(ref _notes, value); }
         }
 
         public DateTime? Date
         {
             get { return _date; }
-            set { Set(ref _date, value); }
+            set { SetProperty(ref _date, value); }
         }
 
         public RelayCommand SubmitCommand { get; private set; }

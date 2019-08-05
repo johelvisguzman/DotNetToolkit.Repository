@@ -26,7 +26,7 @@
         public ObservableCollection<CustomerFormViewModel> Customers
         {
             get { return _customers; }
-            private set { Set(ref _customers, value); }
+            private set { SetProperty(ref _customers, value); }
         }
 
         public RelayCommand AddCommand { get; private set; }

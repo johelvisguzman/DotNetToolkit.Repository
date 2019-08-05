@@ -25,7 +25,7 @@
         public bool IsDirty
         {
             get { return _isDirty; }
-            set { Set(ref _isDirty, value); }
+            set { SetProperty(ref _isDirty, value); }
         }
 
         #endregion
