@@ -161,16 +161,6 @@
 
                         QueryBuilder.CreateInsertStatement(Conventions, entitySet.Entity, out sql, out parameters);
 
-                        var canGetScopeIdentity = true;
-
-#if NETFULL
-                        if (_dbHelper.ProviderType == DataAccessProviderType.SqlServerCompact)
-                            canGetScopeIdentity = false;
-#endif
-
-                        if (canGetScopeIdentity)
-                            sql += $"{Environment.NewLine}SELECT SCOPE_IDENTITY()";
-
                         break;
                     }
                 case EntityState.Removed:
@@ -353,30 +343,17 @@
                         command.Parameters.Clear();
                         command.AddParameters(parameters);
 
+                        rows += _dbHelper.ExecuteNonQuery(command);
+
                         if (entitySet.State == EntityState.Added && isIdentity)
                         {
-#if NETFULL
-                            if (_dbHelper.ProviderType == DataAccessProviderType.SqlServerCompact)
-                            {
-                                _dbHelper.ExecuteNonQuery(command);
+                            command.CommandText = "SELECT @@IDENTITY";
+                            command.Parameters.Clear();
 
-                                sql = "SELECT @@IDENTITY";
-                                parameters.Clear();
-
-                                command.CommandText = sql;
-                                command.Parameters.Clear();
-                            }
-#endif
                             var newKey = _dbHelper.ExecuteScalar<object>(command);
                             var convertedKeyValue = Convert.ChangeType(newKey, primaryKeyPropertyInfo.PropertyType);
 
                             primaryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
-
-                            rows++;
-                        }
-                        else
-                        {
-                            rows += _dbHelper.ExecuteNonQuery(command);
                         }
                     }
                 }
@@ -714,30 +691,17 @@
                         command.Parameters.Clear();
                         command.AddParameters(parameters);
 
+                        rows += await _dbHelper.ExecuteNonQueryAsync(command, cancellationToken);
+
                         if (entitySet.State == EntityState.Added && isIdentity)
                         {
-#if NETFULL
-                            if (_dbHelper.ProviderType == DataAccessProviderType.SqlServerCompact)
-                            {
-                                await _dbHelper.ExecuteNonQueryAsync(command, cancellationToken);
+                            command.CommandText = "SELECT @@IDENTITY";
+                            command.Parameters.Clear();
 
-                                sql = "SELECT @@IDENTITY";
-                                parameters.Clear();
-
-                                command.CommandText = sql;
-                                command.Parameters.Clear();
-                            }
-#endif
                             var newKey = await _dbHelper.ExecuteScalarAsync<object>(command, cancellationToken);
                             var convertedKeyValue = Convert.ChangeType(newKey, primaryKeyPropertyInfo.PropertyType);
 
                             primaryKeyPropertyInfo.SetValue(entitySet.Entity, convertedKeyValue, null);
-
-                            rows++;
-                        }
-                        else
-                        {
-                            rows += await _dbHelper.ExecuteNonQueryAsync(command, cancellationToken);
                         }
                     }
                 }
