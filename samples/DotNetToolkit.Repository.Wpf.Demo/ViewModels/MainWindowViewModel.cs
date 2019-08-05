@@ -21,7 +21,7 @@
         public object ActiveItem
         {
             get { return _activeItem; }
-            set { Set(ref _activeItem, value); }
+            set { SetProperty(ref _activeItem, value); }
         }
 
         public IEnumerable<ViewModelBase> Workspaces { get; private set; }
