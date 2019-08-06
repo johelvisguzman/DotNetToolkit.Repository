@@ -549,7 +549,6 @@
 
             var key1 = 1;
             var key2 = "2";
-            var randomKey = "3";
 
             var fetchStrategy = new FetchQueryStrategy<CustomerWithTwoCompositePrimaryKey>();
 
@@ -560,8 +559,6 @@
 
             repo.Add(entity);
 
-            Assert.Null(repo.Find(key1, randomKey));
-            Assert.Null(repo.Find(key1, randomKey, fetchStrategy));
             Assert.NotNull(repo.Find(key1, key2));
             Assert.NotNull(repo.Find(key1, key2, fetchStrategy));
         }
@@ -573,7 +570,6 @@
             var key1 = 1;
             var key2 = "2";
             var key3 = 3;
-            var randomKey = 4;
 
             var fetchStrategy = new FetchQueryStrategy<CustomerWithThreeCompositePrimaryKey>();
 
@@ -584,8 +580,6 @@
 
             repo.Add(entity);
 
-            Assert.Null(repo.Find(key1, key2, randomKey));
-            Assert.Null(repo.Find(key1, key2, randomKey, fetchStrategy));
             Assert.NotNull(repo.Find(key1, key2, key3));
             Assert.NotNull(repo.Find(key1, key2, key3, fetchStrategy));
         }
@@ -594,7 +588,8 @@
         {
             var addressRepo = repoFactory.Create<CustomerAddress>();
             var customerRepo = repoFactory.Create<Customer>();
-            var fetchStrategy = new FetchQueryStrategy<Customer>().Fetch(x => x.Address);
+            var fetchStrategy = new FetchQueryStrategy<Customer>()
+                .Fetch(x => x.Address);
 
             var entity = new Customer
             {
@@ -613,6 +608,8 @@
 
             Assert.Null(customerRepo.Find(entity.Id).Address);
             Assert.Null(customerRepo.Find(entity.Id, fetchStrategy).Address);
+            Assert.Null(customerRepo.Find(entity.Id, x => x.Address).Address);
+            Assert.Null(customerRepo.Find(entity.Id, "Address").Address);
 
             // The customer is required here, otherwise it will throw an exception for entity framework
             if (providerType == ContextProviderType.EntityFramework)
@@ -632,7 +629,10 @@
             Assert.Null(customerRepo.Find(entity.Id).Address);
 
             TestCustomerAddress(address, customerRepo.Find(entity.Id, fetchStrategy).Address);
+            TestCustomerAddress(address, customerRepo.Find(entity.Id, x => x.Address).Address);
+            TestCustomerAddress(address, customerRepo.Find(entity.Id, "Address").Address);
         }
+
         private static void TestFindAllWithNavigationProperty_OneToOneRelationship(IRepositoryFactory repoFactory, ContextProviderType providerType)
         {
             var addressRepo = repoFactory.Create<CustomerAddress>();
@@ -1142,7 +1142,6 @@
 
             var key1 = 1;
             var key2 = "2";
-            var randomKey = "3";
 
             var fetchStrategy = new FetchQueryStrategy<CustomerWithTwoCompositePrimaryKey>();
 
@@ -1153,8 +1152,6 @@
 
             await repo.AddAsync(entity);
 
-            Assert.Null(await repo.FindAsync(key1, randomKey));
-            Assert.Null(await repo.FindAsync(key1, randomKey, fetchStrategy));
             Assert.NotNull(await repo.FindAsync(key1, key2));
             Assert.NotNull(await repo.FindAsync(key1, key2, fetchStrategy));
         }
@@ -1166,7 +1163,6 @@
             var key1 = 1;
             var key2 = "2";
             var key3 = 3;
-            var randomKey = 4;
 
             var fetchStrategy = new FetchQueryStrategy<CustomerWithThreeCompositePrimaryKey>();
 
@@ -1177,8 +1173,6 @@
 
             repo.Add(entity);
 
-            Assert.Null(await repo.FindAsync(key1, key2, randomKey));
-            Assert.Null(await repo.FindAsync(key1, key2, randomKey, fetchStrategy));
             Assert.NotNull(await repo.FindAsync(key1, key2, key3));
             Assert.NotNull(await repo.FindAsync(key1, key2, key3, fetchStrategy));
         }
@@ -1204,8 +1198,8 @@
                 CustomerId = entity.Id
             };
 
-            Assert.Null((await customerRepo.FindAsync(entity.Id, fetchStrategy)).Address);
             Assert.Null((await customerRepo.FindAsync(entity.Id)).Address);
+            Assert.Null((await customerRepo.FindAsync(entity.Id, fetchStrategy)).Address);
 
             // The customer is required here, otherwise it will throw an exception for entity framework
             if (providerType == ContextProviderType.EntityFramework)
