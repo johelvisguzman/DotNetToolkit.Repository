@@ -23,9 +23,12 @@
     /// </summary>
     public static class CachingProviderExtensions
     {
+        private static string CachePrefix = "RepositoriesCachingPrefix";
+        private static string CacheCounterPrefix = "RepositoriesCachingCounterPrefix";
+        private static string CachePrefixGlue = "§";
+
         private static readonly object _syncRoot = new object();
         private static string Name<T>() => typeof(T).FullName;
-        private static string Glue => CacheProviderManager.CachePrefixGlue;
 
         /// <summary>
         /// Gets or sets a cached query result that matches the specified key.
@@ -484,9 +487,9 @@
         private static string FormatCachePrefixCounterKey<T>()
         {
             return string.Format("{1}{0}{2}",
-                Glue,
+                CachePrefixGlue,
                 Name<T>(),
-                CacheProviderManager.CacheCounterPrefix);
+                CacheCounterPrefix);
         }
 
         private static string FormatHashedKey<T>([NotNull] this ICacheProvider cacheProvider, [NotNull] string key)
@@ -496,12 +499,11 @@
 
             var cacheKeyTransformer = cacheProvider.KeyTransformer ?? new DefaultCacheKeyTransformer();
 
-            return string.Format("{1}{0}{2}{0}{3}{0}{4}",
-                Glue,
-                CacheProviderManager.GlobalCachingPrefixCounter,
+            return string.Format("{1}{0}{2}{0}{3}",
+                CachePrefixGlue,
                 cacheProvider.GetCachingPrefixCounter<T>(),
                 cacheKeyTransformer.Transform(key),
-                CacheProviderManager.CachePrefix);
+                CachePrefix);
         }
 
         private static string FormatQueryOptions<T>([CanBeNull] IQueryOptions<T> options)
