@@ -4,7 +4,6 @@
     using Configuration.Logging;
     using Extensions;
     using Extensions.Internal;
-    using Properties;
     using Queries;
     using Queries.Internal;
     using Queries.Strategies;
@@ -14,7 +13,6 @@
     using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
-    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Threading;

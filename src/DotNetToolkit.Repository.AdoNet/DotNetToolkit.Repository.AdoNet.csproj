@@ -9,10 +9,6 @@
     <Description>A repository context provider for ADO.NET (for testing purposes only).</Description>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="System.Data.SqlClient" Version="4.6.0" />
-  </ItemGroup>
-
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD2_0</DefineConstants>
   </PropertyGroup>
@@ -20,10 +16,6 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'net451'">
     <DefineConstants>NET45;NETFULL</DefineConstants>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.Data.SqlClient" Version="4.6.1" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DotNetToolkit.Repository\DotNetToolkit.Repository.csproj" />
@@ -35,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.Data.SqlClient" Version="4.6.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.1.0" />
   </ItemGroup>
 
