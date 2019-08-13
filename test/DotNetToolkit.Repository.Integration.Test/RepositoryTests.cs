@@ -11,7 +11,7 @@
     {
         public RepositoryTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
         {
-            //Tasks.AzureEmulatorTasks.Run(GetType());
+            Tasks.AzureEmulatorTasks.Run(GetType());
         }
 
         [Fact]
@@ -96,7 +96,7 @@
 
         public void Dispose()
         {
-            //Tasks.AzureEmulatorTasks.Cleanup();
+            Tasks.AzureEmulatorTasks.Cleanup();
         }
     }
 }

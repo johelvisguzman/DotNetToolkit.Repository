@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.AdoNet\DotNetToolkit.Repository.AdoNet.csproj" />
+    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.AzureStorageBlob\DotNetToolkit.Repository.AzureStorageBlob.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Caching.Couchbase\DotNetToolkit.Repository.Caching.Couchbase.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Caching.InMemory\DotNetToolkit.Repository.Caching.InMemory.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Caching.Memcached\DotNetToolkit.Repository.Caching.Memcached.csproj" />
