@@ -9,5 +9,6 @@
         NHibernate,
         EntityFramework,
         EntityFrameworkCore,
+        AzureStorageBlob,
     }
 }

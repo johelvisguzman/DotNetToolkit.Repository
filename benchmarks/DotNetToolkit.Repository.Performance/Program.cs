@@ -8,13 +8,17 @@
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Using ConnectionString: " + BenchmarkBase.ConnectionString);
-
+            Console.WriteLine("// * Database Setup: Start *");
             EnsureDBSetup();
+            Console.WriteLine("// * Database Setup: End *");
 
-            Console.WriteLine("Database setup complete.");
+            Console.WriteLine("// * AzureStorageEmulator: Start *");
+            Tasks.AzureEmulatorTasks.Run();
 
             BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, new Config());
+
+            Tasks.AzureEmulatorTasks.Cleanup();
+            Console.WriteLine("// * AzureStorageEmulator: End *");
         }
 
         private static void EnsureDBSetup()
