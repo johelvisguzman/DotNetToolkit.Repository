@@ -920,7 +920,6 @@
             Assert.Equal(string.Format(AdoNet.Properties.Resources.UnableToDetermineCompositePrimaryKeyOrdering, "foreign", typeof(CustomerWithTwoCompositeForeignKeyAndNoOrdering).FullName), ex.Message);
         }
 
-        [Table("Customers")]
         class CustomerWithKeyAnnotation
         {
             [Key]
