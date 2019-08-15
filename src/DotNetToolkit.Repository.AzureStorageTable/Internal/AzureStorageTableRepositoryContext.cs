@@ -4,9 +4,9 @@
     using Configuration.Conventions;
     using Extensions;
     using Extensions.Internal;
-    using Microsoft.Azure.CosmosDB.Table;
-    using Microsoft.Azure.CosmosDB.Table.Queryable;
-    using Microsoft.Azure.Storage;
+    using Microsoft.WindowsAzure.Storage;
+    using Microsoft.WindowsAzure.Storage.Table;
+    using Microsoft.WindowsAzure.Storage.Table.Queryable;
     using Queries;
     using Queries.Strategies;
     using System;

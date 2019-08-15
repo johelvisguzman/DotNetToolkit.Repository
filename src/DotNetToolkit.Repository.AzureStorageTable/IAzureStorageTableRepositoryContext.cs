@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.AzureStorageTable
 {
     using Configuration;
-    using Microsoft.Azure.CosmosDB.Table;
+    using Microsoft.WindowsAzure.Storage.Table;
 
     /// <summary>
     /// Represents a repository context provider for the Microsoft Azure Storage Table service for storing structured NoSQL data in the cloud.
