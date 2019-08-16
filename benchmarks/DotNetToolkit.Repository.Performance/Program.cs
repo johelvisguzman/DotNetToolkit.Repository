@@ -13,11 +13,11 @@
             Console.WriteLine("// * Database Setup: End *");
 
             Console.WriteLine("// * AzureStorageEmulator: Start *");
-            Tasks.AzureEmulatorTasks.Run();
+            Running.AzureStorageEmulatorManager.Start();
 
             BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, new Config());
 
-            Tasks.AzureEmulatorTasks.Cleanup();
+            Running.AzureStorageEmulatorManager.Stop();
             Console.WriteLine("// * AzureStorageEmulator: End *");
         }
 

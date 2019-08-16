@@ -1,18 +1,16 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test
 {
     using Data;
+    using Fixtures;
     using Queries;
     using System;
     using System.Threading.Tasks;
     using Xunit;
     using Xunit.Abstractions;
 
-    public partial class RepositoryTests : TestBase, IDisposable
+    public partial class RepositoryTests : TestBase, IClassFixture<RepositoryTestsFixture>
     {
-        public RepositoryTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
-        {
-            Tasks.AzureEmulatorTasks.Run(GetType());
-        }
+        public RepositoryTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
 
         [Fact]
         public void FactoryCreate()
@@ -92,11 +90,6 @@
 
             ex = await Assert.ThrowsAsync<InvalidOperationException>(() => repo.DeleteAsync(emptyQueryOptions));
             Assert.Equal("The specified query options is missing a specification predicate.", ex.Message);
-        }
-
-        public void Dispose()
-        {
-            Tasks.AzureEmulatorTasks.Cleanup();
         }
     }
 }

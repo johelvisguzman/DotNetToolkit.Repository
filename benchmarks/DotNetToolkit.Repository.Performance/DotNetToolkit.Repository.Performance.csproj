@@ -45,40 +45,4 @@
     <Reference Include="System.Configuration" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Tasks\tools\azure-storage-emulator\AzureStorageEmulator.exe">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Tasks\tools\azure-storage-emulator\AzureStorageEmulator.exe.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Tasks\tools\azure-storage-emulator\Microsoft.Azure.DevelopmentStorage.Services.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Tasks\tools\azure-storage-emulator\Microsoft.Azure.DevelopmentStorage.Store.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Tasks\tools\azure-storage-emulator\Microsoft.Azure.Storage.Emulator.Controller.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Tasks\tools\azure-storage-emulator\Microsoft.Data.Edm.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Tasks\tools\azure-storage-emulator\Microsoft.Data.OData.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Tasks\tools\azure-storage-emulator\Microsoft.Data.Services.Client.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Tasks\tools\azure-storage-emulator\Microsoft.Data.Services.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Tasks\tools\azure-storage-emulator\StartStorageEmulator.cmd">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Tasks\tools\azure-storage-emulator\System.Spatial.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>
