@@ -22,7 +22,7 @@
 
             _pagingOptions = _defaultOptions.Page(1, 10);
 
-            _customer = new Customer { Name = "Random Name" };
+            _customer = new Customer { Id = new System.Random().Next(), Name = "Random Name" };
 
             _repo = new Repository<Customer>(BuildOptions(Provider));
             _repo.Add(_customer);

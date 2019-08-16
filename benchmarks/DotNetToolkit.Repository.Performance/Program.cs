@@ -28,18 +28,16 @@
                 cnn.Open();
                 var cmd = cnn.CreateCommand();
                 cmd.CommandText = @"
-If (Object_Id('Customers') Is Null)
-Begin
-	Create Table Customers
-	(
-		Id int identity primary key, 
-		Name varchar(max)
-	);
-End
-Else
-Begin
-    Truncate Table Customers;
-End
+If (Object_Id('Customers') IS NOT NULL)
+    DROP TABLE Customers;
+
+CREATE TABLE Customers
+(
+	Id int primary key, 
+	Name varchar(max),
+    PartitionKey nvarchar(max),
+    RowKey nvarchar(max)
+);
 ";
                 cmd.Connection = cnn;
                 cmd.ExecuteNonQuery();

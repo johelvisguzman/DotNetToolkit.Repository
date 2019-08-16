@@ -14,7 +14,7 @@
         {
             BaseSetup();
 
-            _customer = new Customer { Name = "Random Name" };
+            _customer = new Customer { Id = new System.Random().Next(), Name = "Random Name" };
 
             _repo = new Repository<Customer>(BuildOptions(Provider));
         }

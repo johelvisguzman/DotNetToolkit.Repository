@@ -2,6 +2,7 @@
 {
     using AdoNet;
     using AzureStorageBlob;
+    using AzureStorageTable;
     using BenchmarkDotNet.Attributes;
     using Configuration.Options;
     using Data;
@@ -106,6 +107,14 @@
                             createIfNotExists: true);
                         break;
                     }
+                case ContextProviderType.AzureStorageTable:
+                    {
+                        builder.UseAzureStorageTable(
+                            nameOrConnectionString: "AzureStorageTableConnection",
+                            tableName: "TableName" + Guid.NewGuid().ToString("N").ToUpper(),
+                            createIfNotExists: true);
+                        break;
+                    }
                 default:
                     throw new ArgumentOutOfRangeException(nameof(provider));
             }
@@ -125,6 +134,7 @@
                 ContextProviderType.EntityFramework,
                 ContextProviderType.EntityFrameworkCore,
                 ContextProviderType.AzureStorageBlob,
+                ContextProviderType.AzureStorageTable,
             };
         }
 
