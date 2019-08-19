@@ -3,18 +3,15 @@
     using Caching.InMemory;
     using Configuration.Caching.Internal;
     using Data;
+    using Fixtures;
     using Queries;
-    using System;
     using System.Threading.Tasks;
     using Xunit;
     using Xunit.Abstractions;
 
-    public class RepositoryCachingTests : TestBase, IDisposable
+    public class RepositoryCachingTests : TestBase, IClassFixture<RepositoryCachingTestsFixture>
     {
-        public RepositoryCachingTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
-        {
-            Tasks.CachingServerTasks.Run();
-        }
+        public RepositoryCachingTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
 
         [Fact]
         public void CacheEnabled()
@@ -1057,11 +1054,6 @@ WHERE NewCustomers.Id = @p0",
             Assert.NotEmpty((await repo.GroupByAsync(queryOptions, x => x.Id, (key, g) => key)).Result);
 
             Assert.False(repo.CacheUsed);
-        }
-
-        public void Dispose()
-        {
-            Tasks.CachingServerTasks.Cleanup();
         }
     }
 }

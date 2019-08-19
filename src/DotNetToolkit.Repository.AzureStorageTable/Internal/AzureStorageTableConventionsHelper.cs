@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.AzureStorageTable.Internal
 {
-    using Microsoft.Azure.CosmosDB.Table;
+    using Microsoft.WindowsAzure.Storage.Table;
     using System;
     using System.Reflection;
     using Utility;

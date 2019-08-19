@@ -8,13 +8,17 @@
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Using ConnectionString: " + BenchmarkBase.ConnectionString);
-
+            Console.WriteLine("// * Database Setup: Start *");
             EnsureDBSetup();
+            Console.WriteLine("// * Database Setup: End *");
 
-            Console.WriteLine("Database setup complete.");
+            Console.WriteLine("// * AzureStorageEmulator: Start *");
+            Running.AzureStorageEmulatorManager.Start();
 
             BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, new Config());
+
+            Running.AzureStorageEmulatorManager.Stop();
+            Console.WriteLine("// * AzureStorageEmulator: End *");
         }
 
         private static void EnsureDBSetup()
@@ -24,18 +28,16 @@
                 cnn.Open();
                 var cmd = cnn.CreateCommand();
                 cmd.CommandText = @"
-If (Object_Id('Customers') Is Null)
-Begin
-	Create Table Customers
-	(
-		Id int identity primary key, 
-		Name varchar(max)
-	);
-End
-Else
-Begin
-    Truncate Table Customers;
-End
+If (Object_Id('Customers') IS NOT NULL)
+    DROP TABLE Customers;
+
+CREATE TABLE Customers
+(
+	Id int primary key, 
+	Name varchar(max),
+    PartitionKey nvarchar(max),
+    RowKey nvarchar(max)
+);
 ";
                 cmd.Connection = cnn;
                 cmd.ExecuteNonQuery();

@@ -41,13 +41,20 @@
         }
 
         public bool IsColumnMapped(PropertyInfo pi)
-            => GetPropertyNames(pi).Contains(pi.Name);
+            => GetPropertyNames(pi)
+            .Contains(pi.Name);
 
         private string[] GetPropertyNames(PropertyInfo pi)
         {
             var persister = GetAbstractEntityPersister(Guard.NotNull(pi, nameof(pi)).DeclaringType);
 
-            return persister.KeyColumnNames.Concat(persister.PropertyNames).ToArray();
+            if (persister == null)
+                return new string[] { };
+
+            return persister
+                .KeyColumnNames
+                .Concat(persister.PropertyNames)
+                .ToArray();
         }
 
         private AbstractEntityPersister GetAbstractEntityPersister(Type entityType)

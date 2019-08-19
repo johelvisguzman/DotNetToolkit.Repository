@@ -1,6 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.Performance
 {
     using AdoNet;
+    using AzureStorageBlob;
+    using AzureStorageTable;
     using BenchmarkDotNet.Attributes;
     using Configuration.Options;
     using Data;
@@ -97,6 +99,22 @@
                         builder.UseEntityFrameworkCore<EfCoreDbContext>(x => x.UseSqlServer(ConnectionString));
                         break;
                     }
+                case ContextProviderType.AzureStorageBlob:
+                    {
+                        builder.UseAzureStorageBlob(
+                            nameOrConnectionString: "AzureStorageBlobConnection",
+                            container: Guid.NewGuid().ToString(),
+                            createIfNotExists: true);
+                        break;
+                    }
+                case ContextProviderType.AzureStorageTable:
+                    {
+                        builder.UseAzureStorageTable(
+                            nameOrConnectionString: "AzureStorageTableConnection",
+                            tableName: "TableName" + Guid.NewGuid().ToString("N").ToUpper(),
+                            createIfNotExists: true);
+                        break;
+                    }
                 default:
                     throw new ArgumentOutOfRangeException(nameof(provider));
             }
@@ -114,7 +132,9 @@
                 ContextProviderType.AdoNet,
                 ContextProviderType.NHibernate,
                 ContextProviderType.EntityFramework,
-                ContextProviderType.EntityFrameworkCore
+                ContextProviderType.EntityFrameworkCore,
+                ContextProviderType.AzureStorageBlob,
+                ContextProviderType.AzureStorageTable,
             };
         }
 

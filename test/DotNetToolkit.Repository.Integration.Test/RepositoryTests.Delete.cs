@@ -41,7 +41,8 @@
         [Fact]
         public void DeleteWithThreeCompositePrimaryKey()
         {
-            ForAllRepositoryFactories(TestDeleteWithThreeCompositePrimaryKey, ContextProviderType.AzureStorageTable);
+            ForAllRepositoryFactories(TestDeleteWithThreeCompositePrimaryKey, 
+                ContextProviderType.AzureStorageTable);
         }
         
         [Fact]
@@ -77,7 +78,8 @@
         [Fact]
         public void DeleteWithThreeCompositePrimaryKeyAsync()
         {
-            ForAllRepositoryFactoriesAsync(TestDeleteWithThreeCompositePrimaryKeyAsync, ContextProviderType.AzureStorageTable);
+            ForAllRepositoryFactoriesAsync(TestDeleteWithThreeCompositePrimaryKeyAsync, 
+                ContextProviderType.AzureStorageTable);
         }
 
         private static void TestDelete(IRepositoryFactory repoFactory)

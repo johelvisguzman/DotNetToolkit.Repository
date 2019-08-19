@@ -5,13 +5,32 @@
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
-    public class Customer
+    public class Customer : Microsoft.WindowsAzure.Storage.Table.TableEntity
     {
+        private int _id;
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public int Id
+        {
+            get { return _id; }
+            set
+            {
+                _id = value;
+                RowKey = _id.ToString();
+            }
+        }
         public string Name { get; set; }
         public CustomerAddress Address { get; set; }
+
+        // for azure table compability (do not map since DateTimeOffset is not supported for sql)
+        [NotMapped]
+        public new DateTimeOffset Timestamp { get; set; }
+
+        public Customer()
+        {
+            PartitionKey = string.Empty;
+        }
     }
 
     [Table("CustomersWithNoIdentity")]
@@ -46,15 +65,38 @@
         public string Name { get; set; }
     }
 
-    public class CustomerWithTwoCompositePrimaryKey
+    public class CustomerWithTwoCompositePrimaryKey : Microsoft.WindowsAzure.Storage.Table.TableEntity
     {
+        private int _id1;
+        private string _id2;
+
         [Key]
         [Column(Order = 1)]
-        public int Id1 { get; set; }
+        public int Id1
+        {
+            get { return _id1; }
+            set
+            {
+                _id1 = value;
+                PartitionKey = _id1.ToString();
+            }
+        }
         [Key]
         [Column(Order = 2)]
-        public string Id2 { get; set; }
+        public string Id2
+        {
+            get { return _id2; }
+            set
+            {
+                _id2 = value;
+                RowKey = _id2;
+            }
+        }
         public string Name { get; set; }
+
+        // for azure table compability (do not map since DateTimeOffset is not supported for sql)
+        [NotMapped]
+        public new DateTimeOffset Timestamp { get; set; }
 
         public override int GetHashCode()
         {

@@ -18,7 +18,7 @@
         private readonly IComparer<ExpressionType> _comparer = new OperatorPrecedenceComparer();
         private readonly Dictionary<string, object> _parameters = new Dictionary<string, object>();
         private Func<Type, string> _getTableAlias;
-        private Func<PropertyInfo, string> _getColumnAlias;
+        private Func<PropertyInfo, Type, string> _getColumnAlias;
 
         #endregion
 
@@ -27,7 +27,7 @@
         /// <summary>
         /// Translates the specified predicate.
         /// </summary>
-        public void Translate<T>(Expression<Func<T, bool>> predicate, Func<Type, string> getTableAlias, Func<PropertyInfo, string> getColumnAlias, out string sql, out Dictionary<string, object> parameters)
+        public void Translate<T>(Expression<Func<T, bool>> predicate, Func<Type, string> getTableAlias, Func<PropertyInfo, Type, string> getColumnAlias, out string sql, out Dictionary<string, object> parameters)
         {
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
@@ -275,7 +275,7 @@
             var tableType = ExpressionHelper.GetMemberExpression(variableExpression).Expression.Type;
             var tableAlias = _getTableAlias(tableType);
 
-            columnAlias = _getColumnAlias(propertyInfo);
+            columnAlias = _getColumnAlias(propertyInfo, tableType);
             column = !string.IsNullOrEmpty(columnAlias)
                 ? $"[{tableAlias}].[{columnAlias}]"
                 : null;

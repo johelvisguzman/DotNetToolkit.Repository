@@ -1,8 +1,8 @@
 namespace DotNetToolkit.Repository.Integration.Test.Data
 {
     using AdoNet;
-    //using AzureStorageBlob;
-    //using AzureStorageTable;
+    using AzureStorageBlob;
+    using AzureStorageTable;
     using Caching.Couchbase;
     using Caching.InMemory;
     using Caching.Memcached;
@@ -249,31 +249,22 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                         });
                         break;
                     }
-                //case ContextProviderType.AzureStorageBlob:
-                //    {
-                //        builder.UseAzureStorageBlob(
-                //            nameOrConnectionString:
-                //                "DefaultEndpointsProtocol=http;" +
-                //                "AccountName=devstoreaccount1;" +
-                //                "AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;" +
-                //                "BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;",
-                //            container: Guid.NewGuid().ToString(),
-                //            createIfNotExists: true);
-                //        break;
-                //    }
-                //TODO: THIS IS NOT WORKING WELL ALONG WITH AzureStorageBlob.. NEEDS TO COMEBACK TO IT
-                //case ContextProviderType.AzureStorageTable:
-                //    {
-                //        builder.UseAzureStorageTable(
-                //            nameOrConnectionString:
-                //                "DefaultEndpointsProtocol=http;" +
-                //                "AccountName=devstoreaccount1;" +
-                //                "AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;" +
-                //                "TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;",
-                //            tableName: "TableName" + Guid.NewGuid().ToString("N").ToUpper(),
-                //            createIfNotExists: true);
-                //        break;
-                //    }
+                case ContextProviderType.AzureStorageBlob:
+                    {
+                        builder.UseAzureStorageBlob(
+                            nameOrConnectionString: "AzureStorageBlobConnection",
+                            container: Guid.NewGuid().ToString(),
+                            createIfNotExists: true);
+                        break;
+                    }
+                case ContextProviderType.AzureStorageTable:
+                    {
+                        builder.UseAzureStorageTable(
+                            nameOrConnectionString: "AzureStorageTableConnection",
+                            tableName: "TableName" + Guid.NewGuid().ToString("N").ToUpper(),
+                            createIfNotExists: true);
+                        break;
+                    }
                 default:
                     throw new ArgumentOutOfRangeException(nameof(provider));
             }
@@ -376,7 +367,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             list.AddRange(SqlServerContextProviders());
             list.AddRange(InMemoryContextProviders());
             list.AddRange(FileStreamContextProviders());
-            //list.AddRange(AzureStorageContextProviders());
+            list.AddRange(AzureStorageContextProviders());
 
             return list;
         }

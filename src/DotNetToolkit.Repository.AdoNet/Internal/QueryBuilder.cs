@@ -147,14 +147,14 @@
                 return tableAlias;
             }
 
-            string GenerateColumnAlias(PropertyInfo pi)
+            string GenerateColumnAlias(PropertyInfo pi, Type tableType)
             {
                 if (pi == null)
                     throw new ArgumentNullException(nameof(pi));
 
                 var columnName = conventions.GetColumnName(pi);
                 var columnAlias = columnName;
-                var tableName = conventions.GetTableName(pi.DeclaringType);
+                var tableName = conventions.GetTableName(tableType);
 
                 if (columnAliasMappingCount.TryGetValue(columnName, out int columnAliasCount))
                 {
@@ -211,13 +211,13 @@
             string GetTableAliasFromType(Type tableType)
                 => GetTableAliasFromName(GetTableNameFromType(tableType));
 
-            string GetColumnAliasFromProperty(PropertyInfo pi)
+            string GetColumnAliasFromProperty(PropertyInfo pi, Type tableType)
             {
                 if (pi == null)
                     throw new ArgumentNullException(nameof(pi));
 
                 var columnName = conventions.GetColumnName(pi);
-                var tableName = conventions.GetTableName(pi.DeclaringType);
+                var tableName = conventions.GetTableName(tableType);
                 var columnMapping = tableColumnAliasMapping[tableName];
 
                 if (!columnMapping.ContainsKey(columnName))
@@ -258,7 +258,7 @@
 
             foreach (var pi in properties.Values)
             {
-                GenerateColumnAlias(pi);
+                GenerateColumnAlias(pi, mainTableType);
             }
 
             // -----------------------------------------------------------------------------------------------------------
@@ -270,7 +270,7 @@
                 // Default select
                 select = string.Join($",{Environment.NewLine}\t", properties.Select(x =>
                 {
-                    var colAlias = GetColumnAliasFromProperty(x.Value);
+                    var colAlias = GetColumnAliasFromProperty(x.Value, mainTableType);
                     var colName = x.Key;
 
                     return $"[{mainTableAlias}].[{colName}] AS [{colAlias}]";
@@ -307,7 +307,7 @@
                                 .Where(DotNetToolkit.Repository.Extensions.Internal.PropertyInfoExtensions.IsPrimitive)
                                 .Select(x =>
                                 {
-                                    var colAlias = GenerateColumnAlias(x);
+                                    var colAlias = GenerateColumnAlias(x, joinTableType);
                                     var colName = conventions.GetColumnName(x);
 
                                     return $"[{joinTableAlias}].[{colName}] AS [{colAlias}]";
@@ -449,7 +449,7 @@
                         var tableName = GetTableNameFromType(tableType);
                         var tableAlias = GetTableAliasFromName(tableName);
                         var sortingPropertyInfo = ExpressionHelper.GetPropertyInfo(lambda);
-                        var columnAlias = GetColumnAliasFromProperty(sortingPropertyInfo);
+                        var columnAlias = GetColumnAliasFromProperty(sortingPropertyInfo, tableType);
 
                         sb.Append($"[{tableAlias}].[{columnAlias}] {(sortOrder == SortOrder.Descending ? "DESC" : "ASC")}, ");
                     }

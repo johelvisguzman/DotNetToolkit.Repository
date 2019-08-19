@@ -11,7 +11,10 @@
         [Fact]
         public void ExecuteQuery()
         {
-            var exclude = InMemoryContextProviders().Union(FileStreamContextProviders()).Union(AzureStorageContextProviders()).ToArray();
+            var exclude = InMemoryContextProviders()
+                .Union(FileStreamContextProviders())
+                .Union(AzureStorageContextProviders())
+                .ToArray();
 
             ForAllRepositoryFactories(TestExecuteQuery, exclude);
         }
@@ -19,7 +22,10 @@
         [Fact]
         public void ExecuteQueryWithDefaultMapper()
         {
-            var exclude = InMemoryContextProviders().Union(FileStreamContextProviders()).Union(AzureStorageContextProviders()).ToArray();
+            var exclude = InMemoryContextProviders()
+                .Union(FileStreamContextProviders())
+                .Union(AzureStorageContextProviders())
+                .ToArray();
 
             ForAllRepositoryFactories(TestExecuteQueryWithDefaultMapper, exclude);
         }
@@ -27,7 +33,10 @@
         [Fact]
         public void ExecuteQueryWithRegisteredMapper()
         {
-            var exclude = InMemoryContextProviders().Union(FileStreamContextProviders()).Union(AzureStorageContextProviders()).ToArray();
+            var exclude = InMemoryContextProviders()
+                .Union(FileStreamContextProviders())
+                .Union(AzureStorageContextProviders())
+                .ToArray();
 
             ForAllRepositoryFactories(TestExecuteQueryWithRegisteredMapper, exclude);
         }
@@ -35,7 +44,10 @@
         [Fact]
         public void ExecuteQueryAsync()
         {
-            var exclude = InMemoryContextProviders().Union(FileStreamContextProviders()).Union(AzureStorageContextProviders()).ToArray();
+            var exclude = InMemoryContextProviders()
+                .Union(FileStreamContextProviders())
+                .Union(AzureStorageContextProviders())
+                .ToArray();
 
             ForAllRepositoryFactoriesAsync(TestExecuteQueryAsync, exclude);
         }
@@ -43,7 +55,10 @@
         [Fact]
         public void ExecuteQueryWithDefaultMapperAsync()
         {
-            var exclude = InMemoryContextProviders().Union(FileStreamContextProviders()).Union(AzureStorageContextProviders()).ToArray();
+            var exclude = InMemoryContextProviders()
+                .Union(FileStreamContextProviders())
+                .Union(AzureStorageContextProviders())
+                .ToArray();
 
             ForAllRepositoryFactoriesAsync(TestExecuteQueryWithDefaultMapperAsync, exclude);
         }
@@ -51,7 +66,10 @@
         [Fact]
         public void ExecuteQueryWithRegisteredMapperAsync()
         {
-            var exclude = InMemoryContextProviders().Union(FileStreamContextProviders()).Union(AzureStorageContextProviders()).ToArray();
+            var exclude = InMemoryContextProviders()
+                .Union(FileStreamContextProviders())
+                .Union(AzureStorageContextProviders())
+                .ToArray();
 
             ForAllRepositoryFactoriesAsync(TestExecuteQueryWithRegisteredMapperAsync, exclude);
         }

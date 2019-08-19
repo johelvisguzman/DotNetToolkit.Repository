@@ -16,15 +16,17 @@
         [Fact]
         public void AddWithSeededIdForIdentity()
         {
-            // run for all repositories context except for ef core.. it looks like this will not pass for some reason.
-            // will need to comeback to this at somepoint
-            ForAllRepositoryFactories(TestAddWithSeededIdForIdentity, ContextProviderType.EntityFrameworkCore, ContextProviderType.AzureStorageBlob, ContextProviderType.AzureStorageTable);
+            ForAllRepositoryFactories(TestAddWithSeededIdForIdentity, 
+                ContextProviderType.EntityFrameworkCore, 
+                ContextProviderType.AzureStorageBlob, 
+                ContextProviderType.AzureStorageTable);
         }
 
         [Fact]
         public void AddWithSeededIdForNoneIdentity()
         {
-            ForAllRepositoryFactories(TestAddWithSeededIdForNoneIdentity);
+            ForAllRepositoryFactories(TestAddWithSeededIdForNoneIdentity,
+                ContextProviderType.AzureStorageTable);
         }
 
         [Fact]
@@ -42,15 +44,17 @@
         [Fact]
         public void AddWithSeededIdForIdentityAsync()
         {
-            // run for all repositories context except for ef core.. it looks like this will not pass for some reason.
-            // will need to comeback to this at somepoint
-            ForAllRepositoryFactoriesAsync(TestAddWithSeededIdForIdentityAsync, ContextProviderType.EntityFrameworkCore, ContextProviderType.AzureStorageBlob, ContextProviderType.AzureStorageTable);
+            ForAllRepositoryFactoriesAsync(TestAddWithSeededIdForIdentityAsync, 
+                ContextProviderType.EntityFrameworkCore, 
+                ContextProviderType.AzureStorageBlob, 
+                ContextProviderType.AzureStorageTable);
         }
 
         [Fact]
         public void AddWithSeededIdForNoneIdentityAsync()
         {
-            ForAllRepositoryFactoriesAsync(TestAddWithSeededIdForNoneIdentityAsync);
+            ForAllRepositoryFactoriesAsync(TestAddWithSeededIdForNoneIdentityAsync,
+                ContextProviderType.AzureStorageTable);
         }
 
         [Fact]
