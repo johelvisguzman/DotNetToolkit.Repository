@@ -8,7 +8,6 @@
     using Queries.Strategies;
     using System;
     using System.Collections.Concurrent;
-    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
@@ -294,49 +293,21 @@
         }
 
         /// <summary>
-        /// Throws an exception if the specified key type collection does not match the ones defined for the entity.
+        /// Throws an exception if the specified entity type has an invalid primary key definition.
         /// </summary>
         /// <param name="source">The configurable conventions.</param>
-        /// <param name="keyTypes">The key type collection to check against.</param>
-        public static void ThrowsIfInvalidPrimaryKeyDefinition<T>([NotNull] this IRepositoryConventions source, [NotNull] params Type[] keyTypes) where T : class
+        internal static void ThrowsIfInvalidPrimaryKeyDefinition<T>([NotNull] this IRepositoryConventions source) where T : class
         {
             EnsureOwner(source);
-            Guard.NotEmpty(keyTypes, nameof(keyTypes));
 
             var definedKeyInfos = source.GetPrimaryKeyPropertyInfos<T>();
 
             if (!definedKeyInfos.Any())
             {
-                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
+                throw new InvalidOperationException(string.Format(
                     Resources.EntityRequiresPrimaryKey,
                     typeof(T).FullName));
             }
-
-            if (definedKeyInfos.Length > 1)
-            {
-                var hasNoKeyOrdering = definedKeyInfos.Any(x =>
-                {
-                    var columnOrdering = source.GetColumnOrder(x);
-
-                    if (!columnOrdering.HasValue)
-                        return true;
-
-                    return columnOrdering.Value <= 0;
-                });
-
-                if (hasNoKeyOrdering)
-                {
-                    throw new InvalidOperationException(string.Format(
-                        Resources.UnableToDetermineCompositePrimaryKeyOrdering, typeof(T).FullName));
-                }
-            }
-
-            var definedKeyTypes = definedKeyInfos
-                .Select(x => x.PropertyType)
-                .ToArray();
-
-            if (keyTypes.Length != definedKeyTypes.Length || definedKeyTypes.Where((t, i) => t != keyTypes[i]).Any())
-                throw new InvalidOperationException(Resources.EntityPrimaryKeyTypesMismatch);
         }
 
         /// <summary>

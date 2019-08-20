@@ -4,6 +4,7 @@
     using Fixtures;
     using Queries;
     using System;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Xunit;
     using Xunit.Abstractions;
@@ -34,6 +35,13 @@
         public void ThrowsIfSpecificationMissingFromQueryOptionsAsync()
         {
             ForAllRepositoryFactoriesAsync(TestThrowsIfSpecificationMissingFromQueryOptionsAsync);
+        }
+
+        [Fact]
+        public void ThrowsIfEntityHasNoIdOnContextCreation()
+        {
+            ForAllRepositoryFactories(TestThrowsIfEntityHasNoIdOnContextCreation,
+                ContextProviderType.AzureStorageTable);
         }
 
         private static void TestFactoryCreate(IRepositoryFactory repoFactory)
@@ -90,6 +98,19 @@
 
             ex = await Assert.ThrowsAsync<InvalidOperationException>(() => repo.DeleteAsync(emptyQueryOptions));
             Assert.Equal("The specified query options is missing a specification predicate.", ex.Message);
+        }
+
+        private static void TestThrowsIfEntityHasNoIdOnContextCreation(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<CustomerWithNoId>();
+
+            var method = typeof(InternalRepositoryBase<CustomerWithNoId>)
+                .GetTypeInfo()
+                .GetDeclaredMethod("GetContext"); // protected method
+
+            var ex = Assert.Throws<TargetInvocationException>(() => method.Invoke(repo, null));
+
+            Assert.Equal($"The instance of entity type '{typeof(CustomerWithNoId).FullName}' requires a primary key to be defined.", ex.InnerException?.Message);
         }
     }
 }

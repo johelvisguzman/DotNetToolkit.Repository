@@ -3046,17 +3046,30 @@
         /// Gets the repository context.
         /// </summary>
         /// <returns>The repository context.</returns>
-        protected virtual IRepositoryContext GetContext()
+        protected IRepositoryContext GetContext()
         {
             var context = _contextFactory.Create();
 
-            Guard.EnsureNotNull(context.Conventions, "No conventions have been configured for this context.");
+            try
+            {
+                var conventions = Guard.EnsureNotNull(
+                    context.Conventions, 
+                    "No conventions have been configured for this context.");
 
-            if (_options.Conventions != null)
-                context.Conventions.Apply(_options.Conventions);
+                if (_options.Conventions != null)
+                    conventions.Apply(_options.Conventions);
 
-            if (context.LoggerProvider == null && LoggerProvider != null)
-                context.LoggerProvider = LoggerProvider;
+                if (context.LoggerProvider == null && LoggerProvider != null)
+                    context.LoggerProvider = LoggerProvider;
+
+                conventions.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>();
+            }
+            catch (Exception)
+            {
+                DisposeContext(context);
+
+                throw;
+            }
 
             return context;
         }
