@@ -43,125 +43,131 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
         protected ILoggerProvider TestXUnitLoggerProvider { get; }
 
         protected void ForRepositoryFactoryWithAllCachingProviders(ContextProviderType contextProvider, Action<IRepositoryFactory, CachingProviderType> action)
-        {
-            CachingProviders().ToList().ForEach(cachingProvider =>
-            {
-                var builder = GetRepositoryOptionsBuilder(contextProvider);
+            => CachingProviders()
+                .ToList()
+                .ForEach(cachingProvider =>
+                {
+                    var builder = GetRepositoryOptionsBuilder(contextProvider);
 
-                ApplyCachingProvider(cachingProvider, builder);
+                    ApplyCachingProvider(cachingProvider, builder);
 
-                action(new RepositoryFactory(builder.Options), cachingProvider);
-            });
-        }
+                    action(new RepositoryFactory(builder.Options), cachingProvider);
+                });
 
         protected void ForRepositoryFactoryWithAllCachingProviders(ContextProviderType contextProvider, Action<IRepositoryFactory> action)
             => ForRepositoryFactoryWithAllCachingProviders(contextProvider, (factory, type) => action(factory));
 
         protected void ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType contextProvider, Func<IRepositoryFactory, CachingProviderType, Task> action)
-        {
-            CachingProviders().ToList().ForEach(async cachingProvider =>
-            {
-                var builder = GetRepositoryOptionsBuilder(contextProvider);
+            => CachingProviders()
+                .ToList()
+                .ForEach(async cachingProvider =>
+                {
+                    var builder = GetRepositoryOptionsBuilder(contextProvider);
 
-                ApplyCachingProvider(cachingProvider, builder);
+                    ApplyCachingProvider(cachingProvider, builder);
 
-                await HandleExceptionAsync(() => action(new RepositoryFactory(builder.Options), cachingProvider));
-            });
-        }
+                    await HandleExceptionAsync(() => action(
+                        new RepositoryFactory(builder.Options), 
+                        cachingProvider));
+                });
 
         protected void ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType contextProvider, Func<IRepositoryFactory, Task> action)
             => ForRepositoryFactoryWithAllCachingProvidersAsync(contextProvider, (factory, type) => action(factory));
 
         protected void ForAllRepositoryFactories(Action<IRepositoryFactory, ContextProviderType> action, params ContextProviderType[] exclude)
-        {
-            ContextProviders().ToList().ForEach(x =>
-            {
-                if (exclude != null && exclude.Contains(x))
-                    return;
+            => ContextProviders()
+                .ToList()
+                .ForEach(x =>
+                {
+                    if (exclude != null && exclude.Contains(x))
+                        return;
 
-                action(new RepositoryFactory(BuildOptions(x)), x);
-            });
-        }
+                    action(new RepositoryFactory(BuildOptions(x)), x);
+                });
 
         protected void ForAllRepositoryFactories(Action<IRepositoryFactory> action, params ContextProviderType[] exclude)
             => ForAllRepositoryFactories((factory, type) => action(factory), exclude);
 
         protected void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactory, ContextProviderType, Task> action, params ContextProviderType[] exclude)
-        {
-            ContextProviders().ToList().ForEach(async x =>
-            {
-                if (exclude != null && exclude.Contains(x))
-                    return;
+            => ContextProviders()
+                .ToList()
+                .ForEach(async x =>
+                {
+                    if (exclude != null && exclude.Contains(x))
+                        return;
 
-                await HandleExceptionAsync(() => action(new RepositoryFactory(BuildOptions(x)), x));
-            });
-        }
+                    await HandleExceptionAsync(() => action(
+                        new RepositoryFactory(BuildOptions(x)), x));
+                });
 
         protected void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactory, Task> action, params ContextProviderType[] exclude)
             => ForAllRepositoryFactoriesAsync((factory, type) => action(factory), exclude);
 
         protected void ForAllServiceFactories(Action<IServiceFactory, ContextProviderType> action, params ContextProviderType[] exclude)
-        {
-            ContextProviders().Where(SupportsTransactions).ToList().ForEach(x =>
-            {
-                if (exclude != null && exclude.Contains(x))
-                    return;
+            => ContextProviders()
+                .Where(SupportsTransactions)
+                .ToList()
+                .ForEach(x =>
+                {
+                    if (exclude != null && exclude.Contains(x))
+                        return;
 
-                action(new ServiceFactory(new UnitOfWorkFactory(BuildOptions(x))), x);
-            });
-        }
+                    action(new ServiceFactory(new UnitOfWorkFactory(BuildOptions(x))), x);
+                });
 
         protected void ForAllServiceFactories(Action<IServiceFactory> action, params ContextProviderType[] exclude)
             => ForAllServiceFactories((factory, type) => action(factory), exclude);
 
         protected void ForAllServiceFactoriesAsync(Func<IServiceFactory, ContextProviderType, Task> action, params ContextProviderType[] exclude)
-        {
-            ContextProviders().Where(SupportsTransactions).ToList().ForEach(async x =>
-            {
-                if (exclude != null && exclude.Contains(x))
-                    return;
+            => ContextProviders()
+                .Where(SupportsTransactions)
+                .ToList()
+                .ForEach(async x =>
+                {
+                    if (exclude != null && exclude.Contains(x))
+                        return;
 
-                await HandleExceptionAsync(() => action(new ServiceFactory(new UnitOfWorkFactory(BuildOptions(x))), x));
-            });
-        }
+                    await HandleExceptionAsync(() => action(
+                        new ServiceFactory(
+                            new UnitOfWorkFactory(
+                                BuildOptions(x))), x));
+                });
 
         protected void ForAllServiceFactoriesAsync(Func<IServiceFactory, Task> action, params ContextProviderType[] exclude)
             => ForAllServiceFactoriesAsync((factory, type) => action(factory), exclude);
 
         protected void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory, ContextProviderType> action)
-        {
-            ContextProviders().Where(SupportsTransactions).ToList().ForEach(x =>
-            {
-                action(new UnitOfWorkFactory(BuildOptions(x)), x);
-            });
-        }
+            => ContextProviders()
+                .Where(SupportsTransactions)
+                .ToList()
+                .ForEach(x => action(new UnitOfWorkFactory(BuildOptions(x)), x));
 
         protected void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory> action)
             => ForAllUnitOfWorkFactories((factory, type) => action(factory));
 
         protected void ForAllUnitOfWorkFactoriesAsync(Func<IUnitOfWorkFactory, ContextProviderType, Task> action)
-        {
-            ContextProviders().Where(SupportsTransactions).ToList().ForEach(async x =>
-            {
-                await HandleExceptionAsync(() => action(new UnitOfWorkFactory(BuildOptions(x)), x));
-            });
-        }
+            => ContextProviders()
+                .Where(SupportsTransactions)
+                .ToList()
+                .ForEach(async x => await HandleExceptionAsync(
+                    () => action(
+                        new UnitOfWorkFactory(
+                            BuildOptions(x)), x)));
 
         protected void ForAllUnitOfWorkFactoriesAsync(Func<IUnitOfWorkFactory, Task> action)
             => ForAllUnitOfWorkFactoriesAsync((factory, type) => action(factory));
 
         protected void ForAllFileStreamContextProviders(Action<IRepositoryOptions, ContextProviderType> action)
-        {
-            FileStreamContextProviders().ToList().ForEach(x => action(BuildOptions(x), x));
-        }
+            => FileStreamContextProviders()
+                .ToList()
+                .ForEach(x => action(BuildOptions(x), x));
 
         protected void ForAllFileStreamContextProviders(Action<IRepositoryOptions> action)
             => ForAllFileStreamContextProviders((options, type) => action(options));
 
         private static bool SupportsTransactions(ContextProviderType x)
-        {
-            return SqlServerContextProviders().Contains(x);
-        }
+            => SqlServerContextProviders()
+                .Contains(x);
 
         private static async Task HandleExceptionAsync(Func<Task> testCode)
         {
@@ -321,60 +327,40 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             }
         }
 
-        protected IRepositoryOptions BuildOptions(ContextProviderType provider) => GetRepositoryOptionsBuilder(provider).Options;
+        protected IRepositoryOptions BuildOptions(ContextProviderType provider)
+            => GetRepositoryOptionsBuilder(provider).Options;
 
-        protected static IEnumerable<ContextProviderType> InMemoryContextProviders()
-        {
-            return new[]
+        protected static ContextProviderType[] InMemoryContextProviders()
+            => new[]
             {
                 ContextProviderType.InMemory,
                 ContextProviderType.EntityFrameworkCore,
             };
-        }
 
-        protected static IEnumerable<ContextProviderType> FileStreamContextProviders()
-        {
-            return new[]
+        protected static ContextProviderType[] FileStreamContextProviders()
+            => new[]
             {
                 ContextProviderType.Json,
                 ContextProviderType.Xml,
             };
-        }
 
-        protected static IEnumerable<ContextProviderType> SqlServerContextProviders()
-        {
-            return new[]
+        protected static ContextProviderType[] SqlServerContextProviders()
+            => new[]
             {
                 ContextProviderType.AdoNet,
                 ContextProviderType.NHibernate,
                 ContextProviderType.EntityFramework,
             };
-        }
 
-        protected static IEnumerable<ContextProviderType> AzureStorageContextProviders()
-        {
-            return new[]
+        protected static ContextProviderType[] AzureStorageContextProviders()
+            => new[]
             {
                 ContextProviderType.AzureStorageBlob,
                 ContextProviderType.AzureStorageTable,
             };
-        }
 
-        private static IEnumerable<ContextProviderType> ContextProviders()
-        {
-            var list = new List<ContextProviderType>();
-
-            list.AddRange(SqlServerContextProviders());
-            list.AddRange(InMemoryContextProviders());
-            list.AddRange(FileStreamContextProviders());
-            list.AddRange(AzureStorageContextProviders());
-
-            return list;
-        }
-
-        private static IEnumerable<CachingProviderType> CachingProviders()
-        {
-            return new[]
+        private static CachingProviderType[] CachingProviders()
+            => new[]
             {
                 CachingProviderType.MicrosoftInMemory,
                 CachingProviderType.Redis,
@@ -384,6 +370,17 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                 //the server (similar to redis and memcached). I am going to comment out testing couchbase for now
                 //CachingProviderType.Couchbase,
             };
+
+        private static ContextProviderType[] ContextProviders()
+        {
+            var list = new List<ContextProviderType>();
+
+            list.AddRange(SqlServerContextProviders());
+            list.AddRange(InMemoryContextProviders());
+            list.AddRange(FileStreamContextProviders());
+            list.AddRange(AzureStorageContextProviders());
+
+            return list.ToArray();
         }
 
         public enum ContextProviderType
