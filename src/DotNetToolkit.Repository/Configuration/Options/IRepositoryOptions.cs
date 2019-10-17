@@ -4,7 +4,6 @@
     using Conventions;
     using Interceptors;
     using Logging;
-    using Mapper;
     using System;
     using System.Collections.Generic;
 
@@ -27,11 +26,6 @@
         /// Gets the configured caching provider.
         /// </summary>
         ICacheProvider CachingProvider { get; }
-
-        /// <summary>
-        /// Gets the configured mapper provider.
-        /// </summary>
-        IMapperProvider MapperProvider { get; }
 
         /// <summary>
         /// Gets the configured internal context factory.

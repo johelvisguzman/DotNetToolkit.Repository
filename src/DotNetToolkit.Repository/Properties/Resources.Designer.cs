@@ -10,8 +10,8 @@
 
 namespace DotNetToolkit.Repository.Properties {
     using System.Reflection;
-
-
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -165,15 +165,6 @@ namespace DotNetToolkit.Repository.Properties {
         internal static string TransactionNotSupported {
             get {
                 return ResourceManager.GetString("TransactionNotSupported", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The mapping provider is unable to create a mapper for &apos;{0}&apos;..
-        /// </summary>
-        internal static string UnableToCreateMappingForType {
-            get {
-                return ResourceManager.GetString("UnableToCreateMappingForType", resourceCulture);
             }
         }
         

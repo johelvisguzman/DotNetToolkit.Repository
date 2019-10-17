@@ -5,7 +5,6 @@
     using Interceptors;
     using JetBrains.Annotations;
     using Logging;
-    using Mapper;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -22,7 +21,6 @@
         private IRepositoryContextFactory _contextFactory;
         private ILoggerProvider _loggerProvider;
         private ICacheProvider _cachingProvider;
-        private IMapperProvider _mapperProvider;
         private IRepositoryConventions _conventions;
 
         #endregion
@@ -43,11 +41,6 @@
         /// Gets the configured caching provider.
         /// </summary>
         public ICacheProvider CachingProvider { get { return _cachingProvider; } }
-
-        /// <summary>
-        /// Gets the configured mapper provider.
-        /// </summary>
-        public IMapperProvider MapperProvider { get { return _mapperProvider; } }
 
         /// <summary>
         /// Gets the configured internal context factory.
@@ -79,7 +72,6 @@
             _interceptors = options.Interceptors.ToDictionary(x => x.Key, x => x.Value);
             _cachingProvider = options.CachingProvider;
             _loggerProvider = options.LoggerProvider;
-            _mapperProvider = options.MapperProvider;
             _contextFactory = options.ContextFactory;
             _conventions = options.Conventions;
         }
@@ -155,20 +147,6 @@
             var clone = Clone();
 
             clone._cachingProvider = Guard.NotNull(cacheProvider, nameof(cacheProvider));
-
-            return clone;
-        }
-
-        /// <summary>
-        /// Returns the option instance with a configured mapper provider for mapping an query result to a valid entity object within the repository.
-        /// </summary>
-        /// <param name="mapperProvider">The entity mapper provider.</param>
-        /// <returns>The same option instance.</returns>
-        public RepositoryOptions With([NotNull] IMapperProvider mapperProvider)
-        {
-            var clone = Clone();
-
-            clone._mapperProvider = Guard.NotNull(mapperProvider, nameof(mapperProvider));
 
             return clone;
         }

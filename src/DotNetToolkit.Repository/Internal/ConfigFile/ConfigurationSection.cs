@@ -6,7 +6,6 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
     using Configuration.Caching;
     using Configuration.Interceptors;
     using Configuration.Logging;
-    using Configuration.Mapper;
     using Extensions.Internal;
     using System;
     using System.Collections.Generic;
@@ -56,12 +55,6 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
             get => (CachingProviderElement)this[CachingProviderKey];
         }
 
-        [ConfigurationProperty(MappingProviderKey, IsRequired = false)]
-        public virtual MappingProviderElement MappingProvider
-        {
-            get => (MappingProviderElement)this[MappingProviderKey];
-        }
-
         #endregion
 
         #region Implementation of IConfigurationSection
@@ -81,11 +74,6 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
             return CachingProvider.GetTypedValue();
         }
 
-        public IMapperProvider GetMappingProvider()
-        {
-            return MappingProvider.GetTypedValue();
-        }
-
         public Dictionary<Type, Func<IRepositoryInterceptor>> GetInterceptors()
         {
             return Interceptors.GetTypedValues();
@@ -97,8 +85,6 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
     class LoggingProviderElement : TypedConfigurationElementBase<ILoggerProvider> { }
 
     class CachingProviderElement : TypedConfigurationElementBase<ICacheProvider> { }
-
-    class MappingProviderElement : TypedConfigurationElementBase<IMapperProvider> { }
 
     class RepositoryContextFactoryElement : TypedConfigurationElementBase<IRepositoryContextFactory> { }
 

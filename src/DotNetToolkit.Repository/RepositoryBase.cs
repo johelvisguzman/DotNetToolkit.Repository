@@ -3,10 +3,8 @@
     using Configuration;
     using Configuration.Caching;
     using Configuration.Caching.Internal;
-    using Configuration.Conventions;
     using Configuration.Interceptors;
     using Configuration.Logging;
-    using Configuration.Mapper;
     using Configuration.Options;
     using Extensions;
     using Extensions.Internal;
@@ -1238,11 +1236,6 @@
         /// </summary>
         protected internal ICacheProvider CacheProvider { get; private set; }
 
-        /// <summary>
-        /// Gets the mapping provider.
-        /// </summary>
-        protected internal IMapperProvider MapperProvider { get; }
-
         #endregion
 
         #region Constructors
@@ -1272,8 +1265,6 @@
 
             if (CacheProvider.GetType() != typeof(NullCacheProvider))
                 CacheEnabled = true;
-
-            MapperProvider = _options.MapperProvider ?? Configuration.Mapper.MapperProvider.Instance;
         }
 
         #endregion

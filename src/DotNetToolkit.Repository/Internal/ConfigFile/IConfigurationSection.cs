@@ -4,7 +4,6 @@
     using Configuration.Caching;
     using Configuration.Interceptors;
     using Configuration.Logging;
-    using Configuration.Mapper;
     using System;
     using System.Collections.Generic;
 
@@ -18,8 +17,6 @@
         ILoggerProvider GetLoggerProvider();
 
         ICacheProvider GetCachingProvider();
-
-        IMapperProvider GetMappingProvider();
 
         Dictionary<Type, Func<IRepositoryInterceptor>> GetInterceptors();
     }
