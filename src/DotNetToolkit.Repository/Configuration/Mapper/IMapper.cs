@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Mapper
 {
-    using Conventions;
     using System.Data;
 
     /// <summary>
@@ -13,8 +12,7 @@
         /// Maps each element to a new form.
         /// </summary>
         /// <param name="reader">The data reader used for transforming each element.</param>
-        /// <param name="conventions">The configurable conventions.</param>
         /// <returns>The new projected element form.</returns>
-        T Map(IDataReader reader, IRepositoryConventions conventions);
+        T Map(IDataReader reader);
     }
 }

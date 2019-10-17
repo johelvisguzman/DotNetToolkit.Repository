@@ -52,7 +52,7 @@
 
         #region Implementation of IRepositoryContext
 
-        public IEnumerable<TEntity> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, IRepositoryConventions, TEntity> projector) where TEntity : class
+        public IEnumerable<TEntity> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector) where TEntity : class
         {
             return _underlyingContext.ExecuteSqlQuery(sql, cmdType, parameters, projector);
         }
@@ -139,7 +139,7 @@
 
         #region Implementation of IRepositoryContextAsync
 
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, IRepositoryConventions, TEntity> projector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             if (_underlyingContext is IRepositoryContextAsync contextAsync)
             {

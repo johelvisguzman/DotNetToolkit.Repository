@@ -1,12 +1,11 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Data
 {
-    using Configuration.Conventions;
     using Configuration.Mapper;
     using System.Data;
 
     public class TestCustomerMapper : IMapper<Customer>
     {
-        public Customer Map(IDataReader reader, IRepositoryConventions conventions)
+        public Customer Map(IDataReader reader)
         {
             return new Customer()
             {

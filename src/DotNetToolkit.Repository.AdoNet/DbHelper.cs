@@ -388,7 +388,7 @@ namespace DotNetToolkit.Repository.AdoNet
         /// <param name="parameters">The command parameters.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>An entity which has been projected into a new form.</returns>
-        public T ExecuteObject<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, IRepositoryConventions, T> projector)
+        public T ExecuteObject<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
         {
             using (var reader = ExecuteReader(cmdText, cmdType, parameters))
             {
@@ -396,7 +396,7 @@ namespace DotNetToolkit.Repository.AdoNet
 
                 while (reader.Read())
                 {
-                    list.Add(projector(reader, _conventions));
+                    list.Add(projector(reader));
                 }
 
                 var result = list.FirstOrDefault();
@@ -413,7 +413,7 @@ namespace DotNetToolkit.Repository.AdoNet
         /// <param name="parameters">The command parameters.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>An entity which has been projected into a new form.</returns>
-        public T ExecuteObject<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, IRepositoryConventions, T> projector)
+        public T ExecuteObject<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
         {
             return ExecuteObject<T>(cmdText, CommandType.Text, parameters, projector);
         }
@@ -427,7 +427,7 @@ namespace DotNetToolkit.Repository.AdoNet
         /// <param name="parameters">The command parameters.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        internal IPagedQueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, IRepositoryConventions, T> projector)
+        internal IPagedQueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
         {
             using (var reader = ExecuteReader(cmdText, cmdType, parameters))
             {
@@ -451,7 +451,7 @@ namespace DotNetToolkit.Repository.AdoNet
                         }
                     }
 
-                    list.Add(projector(reader, _conventions));
+                    list.Add(projector(reader));
                 }
 
                 if (!foundCrossJoinCountColumn)
@@ -469,7 +469,7 @@ namespace DotNetToolkit.Repository.AdoNet
         /// <param name="parameters">The command parameters.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        internal IPagedQueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, IRepositoryConventions, T> projector)
+        internal IPagedQueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
         {
             return ExecuteList<T>(cmdText, CommandType.Text, parameters, projector);
         }
@@ -485,7 +485,7 @@ namespace DotNetToolkit.Repository.AdoNet
         {
             var mapper = new Mapper<T>(_conventions);
 
-            return ExecuteList<T>(cmdText, parameters, (r, c) => mapper.Map(r));
+            return ExecuteList<T>(cmdText, parameters, mapper.Map);
         }
 
         /// <summary>
@@ -496,7 +496,7 @@ namespace DotNetToolkit.Repository.AdoNet
         /// <param name="cmdType">The command type.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        internal IPagedQueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, CommandType cmdType, Func<DbDataReader, IRepositoryConventions, T> projector)
+        internal IPagedQueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, CommandType cmdType, Func<DbDataReader, T> projector)
         {
             return ExecuteList<T>(cmdText, cmdType, null, projector);
         }
@@ -918,7 +918,7 @@ namespace DotNetToolkit.Repository.AdoNet
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing an entity which has been projected into a new form.</returns>
-        public async Task<T> ExecuteObjectAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, IRepositoryConventions, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<T> ExecuteObjectAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var reader = await ExecuteReaderAsync(cmdText, cmdType, parameters, cancellationToken))
             {
@@ -926,7 +926,7 @@ namespace DotNetToolkit.Repository.AdoNet
 
                 while (reader.Read())
                 {
-                    list.Add(projector(reader, _conventions));
+                    list.Add(projector(reader));
                 }
 
                 var result = list.FirstOrDefault();
@@ -944,7 +944,7 @@ namespace DotNetToolkit.Repository.AdoNet
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing an entity which has been projected into a new form.</returns>
-        public Task<T> ExecuteObjectAsync<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, IRepositoryConventions, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<T> ExecuteObjectAsync<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteObjectAsync<T>(cmdText, CommandType.Text, parameters, projector, cancellationToken);
         }
@@ -959,7 +959,7 @@ namespace DotNetToolkit.Repository.AdoNet
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
-        internal async Task<IPagedQueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, IRepositoryConventions, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        internal async Task<IPagedQueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var reader = await ExecuteReaderAsync(cmdText, cmdType, parameters, cancellationToken))
             {
@@ -983,7 +983,7 @@ namespace DotNetToolkit.Repository.AdoNet
                         }
                     }
 
-                    list.Add(projector(reader, _conventions));
+                    list.Add(projector(reader));
                 }
 
                 if (!foundCrossJoinCountColumn)
@@ -1002,7 +1002,7 @@ namespace DotNetToolkit.Repository.AdoNet
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
-        internal Task<IPagedQueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, IRepositoryConventions, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        internal Task<IPagedQueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteListAsync<T>(cmdText, CommandType.Text, parameters, projector, cancellationToken);
         }
@@ -1019,7 +1019,7 @@ namespace DotNetToolkit.Repository.AdoNet
         {
             var mapper = new Mapper<T>(_conventions);
 
-            return ExecuteListAsync<T>(cmdText, parameters, (r, c) => mapper.Map(r), cancellationToken);
+            return ExecuteListAsync<T>(cmdText, parameters, mapper.Map, cancellationToken);
         }
 
         /// <summary>

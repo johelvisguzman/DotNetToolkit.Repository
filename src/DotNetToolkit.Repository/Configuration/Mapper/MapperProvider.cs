@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Mapper
 {
-    using Internal;
     using JetBrains.Annotations;
+    using Properties;
     using System;
     using System.Collections.Generic;
     using Utility;
@@ -45,7 +45,7 @@
             if (_mappings.ContainsKey(typeof(T)))
                 return (IMapper<T>)_mappings[typeof(T)];
 
-            return new DefaultMapper<T>();
+            throw new InvalidOperationException(string.Format(Resources.UnableToCreateMappingForType, typeof(T).FullName));
         }
 
         /// <summary>
