@@ -125,7 +125,11 @@
             var ex = Assert.Throws<NotSupportedException>(() => repo.ExecuteSqlCommand("SELECT * FROM Customers"));
             Assert.Equal("This context provider does not support SQL query execution.", ex.Message);
 
-            ex = Assert.Throws<NotSupportedException>(() => repo.ExecuteSqlQuery("SELECT * FROM Customers"));
+            ex = Assert.Throws<NotSupportedException>(() => repo.ExecuteSqlQuery("SELECT * FROM Customers", r => new Customer()
+            {
+                Id = r.GetInt32(0),
+                Name = r.GetString(1)
+            }));
             Assert.Equal("This context provider does not support SQL query execution.", ex.Message);
         }
 
@@ -139,7 +143,11 @@
             var repo = new Repository<Customer>(options);
 
             repo.ExecuteSqlCommand("SELECT * FROM Customers");
-            repo.ExecuteSqlQuery("SELECT * FROM Customers");
+            repo.ExecuteSqlQuery("SELECT * FROM Customers", r => new Customer()
+            {
+                Id = r.GetInt32(0),
+                Name = r.GetString(1)
+            });
         }
     }
 }

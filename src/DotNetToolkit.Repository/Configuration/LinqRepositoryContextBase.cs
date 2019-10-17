@@ -125,7 +125,7 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public virtual IEnumerable<TEntity> ExecuteSqlQuery<TEntity>([NotNull] string sql, CommandType cmdType, [CanBeNull] Dictionary<string, object> parameters, [NotNull] Func<IDataReader, IRepositoryConventions, TEntity> projector) where TEntity : class
+        public virtual IEnumerable<TEntity> ExecuteSqlQuery<TEntity>([NotNull] string sql, CommandType cmdType, [CanBeNull] Dictionary<string, object> parameters, [NotNull] Func<IDataReader, TEntity> projector) where TEntity : class
         {
             throw new NotSupportedException(Resources.QueryExecutionNotSupported);
         }

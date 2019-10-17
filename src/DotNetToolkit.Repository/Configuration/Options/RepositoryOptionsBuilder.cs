@@ -6,7 +6,6 @@
     using Internal;
     using JetBrains.Annotations;
     using Logging;
-    using Mapper;
     using Properties;
     using System;
     using System.Linq;
@@ -35,7 +34,6 @@
                 return Options.ContextFactory != null ||
                        Options.LoggerProvider != null ||
                        Options.CachingProvider != null ||
-                       Options.MapperProvider != null ||
                        Options.Conventions != null ||
                        Options.Interceptors.Any();
             }
@@ -194,18 +192,6 @@
         }
 
         /// <summary>
-        /// Configures the repository options with a mapper provider for mapping an query result to a valid entity object within the repository.
-        /// </summary>
-        /// <param name="mapperProvider">The entity mapper provider.</param>
-        /// <returns>The same builder instance.</returns>
-        public virtual RepositoryOptionsBuilder UseMapperProvider([NotNull] IMapperProvider mapperProvider)
-        {
-            _options = _options.With(Guard.NotNull(mapperProvider, nameof(mapperProvider)));
-
-            return this;
-        }
-
-        /// <summary>
         /// Configures the repository options with an internal context factory.
         /// </summary>
         /// <param name="contextFactory">The context factory.</param>
@@ -259,12 +245,6 @@
             if (cachingProvider != null)
             {
                 UseCachingProvider(cachingProvider);
-            }
-
-            var mappingProvider = config.GetMappingProvider();
-            if (mappingProvider != null)
-            {
-                UseMapperProvider(mappingProvider);
             }
 
             foreach (var item in config.GetInterceptors())

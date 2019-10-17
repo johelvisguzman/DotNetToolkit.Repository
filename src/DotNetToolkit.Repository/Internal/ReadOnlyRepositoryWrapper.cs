@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Internal
 {
-    using Configuration.Conventions;
     using JetBrains.Annotations;
     using Queries;
     using Queries.Strategies;
@@ -47,36 +46,6 @@
             _underlyingRepo.ClearCache();
         }
 
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, CommandType cmdType, object[] parameters)
-        {
-            return _underlyingRepo.ExecuteSqlQuery(sql, cmdType, parameters);
-        }
-
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, object[] parameters)
-        {
-            return _underlyingRepo.ExecuteSqlQuery(sql, parameters);
-        }
-
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql)
-        {
-            return _underlyingRepo.ExecuteSqlQuery(sql);
-        }
-
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, IRepositoryConventions, TEntity> projector)
-        {
-            return _underlyingRepo.ExecuteSqlQuery(sql, cmdType, parameters, projector);
-        }
-
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, object[] parameters, Func<IDataReader, IRepositoryConventions, TEntity> projector)
-        {
-            return _underlyingRepo.ExecuteSqlQuery(sql, parameters, projector);
-        }
-
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, Func<IDataReader, IRepositoryConventions, TEntity> projector)
-        {
-            return _underlyingRepo.ExecuteSqlQuery(sql, projector);
-        }
-
         public IEnumerable<TEntity> ExecuteSqlQuery(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector)
         {
             return _underlyingRepo.ExecuteSqlQuery(sql, cmdType, parameters, projector);
@@ -90,51 +59,6 @@
         public IEnumerable<TEntity> ExecuteSqlQuery(string sql, Func<IDataReader, TEntity> projector)
         {
             return _underlyingRepo.ExecuteSqlQuery(sql, projector);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CommandType cmdType, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, cmdType, parameters, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, parameters, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, IRepositoryConventions, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, cmdType, parameters, projector, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, object[] parameters, Func<IDataReader, IRepositoryConventions, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, parameters, projector, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, Func<IDataReader, IRepositoryConventions, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, projector, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, cmdType, parameters, projector, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, parameters, projector, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, projector, cancellationToken);
         }
 
         public TEntity Find(TKey1 key1, TKey2 key2, TKey3 key3)
@@ -265,6 +189,21 @@
         public IPagedQueryResult<IEnumerable<TResult>> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
             return _underlyingRepo.GroupBy<TGroupKey, TResult>(options, keySelector, resultSelector);
+        }
+
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _underlyingRepo.ExecuteSqlQueryAsync(sql, cmdType, parameters, projector, cancellationToken);
+        }
+
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _underlyingRepo.ExecuteSqlQueryAsync(sql, parameters, projector, cancellationToken);
+        }
+
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _underlyingRepo.ExecuteSqlQueryAsync(sql, projector, cancellationToken);
         }
 
         public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
@@ -444,36 +383,6 @@
             _underlyingRepo.ClearCache();
         }
 
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, CommandType cmdType, object[] parameters)
-        {
-            return _underlyingRepo.ExecuteSqlQuery(sql, cmdType, parameters);
-        }
-
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, object[] parameters)
-        {
-            return _underlyingRepo.ExecuteSqlQuery(sql, parameters);
-        }
-
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql)
-        {
-            return _underlyingRepo.ExecuteSqlQuery(sql);
-        }
-
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, IRepositoryConventions, TEntity> projector)
-        {
-            return _underlyingRepo.ExecuteSqlQuery(sql, cmdType, parameters, projector);
-        }
-
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, object[] parameters, Func<IDataReader, IRepositoryConventions, TEntity> projector)
-        {
-            return _underlyingRepo.ExecuteSqlQuery(sql, parameters, projector);
-        }
-
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, Func<IDataReader, IRepositoryConventions, TEntity> projector)
-        {
-            return _underlyingRepo.ExecuteSqlQuery(sql, projector);
-        }
-
         public IEnumerable<TEntity> ExecuteSqlQuery(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector)
         {
             return _underlyingRepo.ExecuteSqlQuery(sql, cmdType, parameters, projector);
@@ -487,51 +396,6 @@
         public IEnumerable<TEntity> ExecuteSqlQuery(string sql, Func<IDataReader, TEntity> projector)
         {
             return _underlyingRepo.ExecuteSqlQuery(sql, projector);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CommandType cmdType, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, cmdType, parameters, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, parameters, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, IRepositoryConventions, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, cmdType, parameters, projector, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, object[] parameters, Func<IDataReader, IRepositoryConventions, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, parameters, projector, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, Func<IDataReader, IRepositoryConventions, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, projector, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, cmdType, parameters, projector, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, parameters, projector, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, projector, cancellationToken);
         }
 
         public TEntity Find(TKey1 key1, TKey2 key2)
@@ -662,6 +526,21 @@
         public IPagedQueryResult<IEnumerable<TResult>> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
             return _underlyingRepo.GroupBy<TGroupKey, TResult>(options, keySelector, resultSelector);
+        }
+
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _underlyingRepo.ExecuteSqlQueryAsync(sql, cmdType, parameters, projector, cancellationToken);
+        }
+
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _underlyingRepo.ExecuteSqlQueryAsync(sql, parameters, projector, cancellationToken);
+        }
+
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _underlyingRepo.ExecuteSqlQueryAsync(sql, projector, cancellationToken);
         }
 
         public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
@@ -841,36 +720,6 @@
             _underlyingRepo.ClearCache();
         }
 
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, CommandType cmdType, object[] parameters)
-        {
-            return _underlyingRepo.ExecuteSqlQuery(sql, cmdType, parameters);
-        }
-
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, object[] parameters)
-        {
-            return _underlyingRepo.ExecuteSqlQuery(sql, parameters);
-        }
-
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql)
-        {
-            return _underlyingRepo.ExecuteSqlQuery(sql);
-        }
-
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, IRepositoryConventions, TEntity> projector)
-        {
-            return _underlyingRepo.ExecuteSqlQuery(sql, cmdType, parameters, projector);
-        }
-
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, object[] parameters, Func<IDataReader, IRepositoryConventions, TEntity> projector)
-        {
-            return _underlyingRepo.ExecuteSqlQuery(sql, parameters, projector);
-        }
-
-        public IEnumerable<TEntity> ExecuteSqlQuery(string sql, Func<IDataReader, IRepositoryConventions, TEntity> projector)
-        {
-            return _underlyingRepo.ExecuteSqlQuery(sql, projector);
-        }
-
         public IEnumerable<TEntity> ExecuteSqlQuery(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector)
         {
             return _underlyingRepo.ExecuteSqlQuery(sql, cmdType, parameters, projector);
@@ -884,51 +733,6 @@
         public IEnumerable<TEntity> ExecuteSqlQuery(string sql, Func<IDataReader, TEntity> projector)
         {
             return _underlyingRepo.ExecuteSqlQuery(sql, projector);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CommandType cmdType, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, cmdType, parameters, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, object[] parameters, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, parameters, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, IRepositoryConventions, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, cmdType, parameters, projector, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, object[] parameters, Func<IDataReader, IRepositoryConventions, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, parameters, projector, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, Func<IDataReader, IRepositoryConventions, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, projector, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, cmdType, parameters, projector, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, parameters, projector, cancellationToken);
-        }
-
-        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _underlyingRepo.ExecuteSqlQueryAsync(sql, projector, cancellationToken);
         }
 
         public TEntity Find(TKey key)
@@ -1059,6 +863,21 @@
         public IPagedQueryResult<IEnumerable<TResult>> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
             return _underlyingRepo.GroupBy<TGroupKey, TResult>(options, keySelector, resultSelector);
+        }
+
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, CommandType cmdType, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _underlyingRepo.ExecuteSqlQueryAsync(sql, cmdType, parameters, projector, cancellationToken);
+        }
+
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, object[] parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _underlyingRepo.ExecuteSqlQueryAsync(sql, parameters, projector, cancellationToken);
+        }
+
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync(string sql, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        {
+            return _underlyingRepo.ExecuteSqlQueryAsync(sql, projector, cancellationToken);
         }
 
         public Task<TEntity> FindAsync(TKey key, CancellationToken cancellationToken = new CancellationToken())

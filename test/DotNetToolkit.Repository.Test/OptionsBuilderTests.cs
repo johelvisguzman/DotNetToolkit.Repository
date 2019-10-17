@@ -1,13 +1,10 @@
 ﻿namespace DotNetToolkit.Repository.Test
 {
     using Caching.InMemory;
-    using Configuration.Conventions;
     using Configuration.Logging;
-    using Configuration.Mapper;
     using Configuration.Options;
     using Data;
     using InMemory;
-    using Integration.Test.Data;
     using System;
     using System.IO;
     using System.Linq;
@@ -99,20 +96,6 @@
 
             Assert.NotNull(optionsBuilder.Options.Conventions);
             Assert.NotNull(optionsBuilder.Options.Conventions.TableNameCallback);
-        }
-
-        [Fact]
-        public void ConfigureMappingProvider()
-        {
-            var optionsBuilder = new RepositoryOptionsBuilder();
-
-            Assert.False(optionsBuilder.IsConfigured);
-
-            optionsBuilder.UseMapperProvider(new MapperProvider());
-
-            Assert.True(optionsBuilder.IsConfigured);
-
-            Assert.NotNull(optionsBuilder.Options.MapperProvider);
         }
 
         [Fact]
@@ -225,7 +208,6 @@
             Assert.NotNull(optionsBuilder.Options.LoggerProvider);
             Assert.NotNull(optionsBuilder.Options.CachingProvider);
             Assert.NotNull(optionsBuilder.Options.CachingProvider.Expiry);
-            Assert.NotNull(optionsBuilder.Options.MapperProvider);
 
             Assert.Equal(1, optionsBuilder.Options.Interceptors.Count());
             Assert.True(optionsBuilder.Options.Interceptors.ContainsKey(typeof(TestRepositoryInterceptor)));

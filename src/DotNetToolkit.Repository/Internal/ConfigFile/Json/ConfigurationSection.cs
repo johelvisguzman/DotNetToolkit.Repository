@@ -6,7 +6,6 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile.Json
     using Configuration.Caching;
     using Configuration.Interceptors;
     using Configuration.Logging;
-    using Configuration.Mapper;
     using Extensions.Internal;
     using JetBrains.Annotations;
     using Microsoft.Extensions.Configuration;
@@ -80,18 +79,6 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile.Json
                 var value = GetTypedValue<ICacheProvider>(section);
 
                 return value;
-            }
-
-            return null;
-        }
-
-        public IMapperProvider GetMappingProvider()
-        {
-            var section = _root.GetSection(MappingProviderSectionKey);
-
-            if (section != null)
-            {
-                return GetTypedValue<IMapperProvider>(section);
             }
 
             return null;

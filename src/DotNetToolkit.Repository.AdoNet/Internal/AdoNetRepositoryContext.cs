@@ -218,7 +218,7 @@
         /// <param name="parameters">The parameters to apply to the SQL query string.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        public IEnumerable<TEntity> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, IRepositoryConventions, TEntity> projector) where TEntity : class
+        public IEnumerable<TEntity> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector) where TEntity : class
         {
             Guard.NotEmpty(sql, nameof(sql));
             Guard.NotNull(projector, nameof(projector));
@@ -229,7 +229,7 @@
 
                 while (reader.Read())
                 {
-                    list.Add(projector(reader, Conventions));
+                    list.Add(projector(reader));
                 }
 
                 return list;
@@ -402,7 +402,7 @@
 
             ExecuteSchemaValidate(typeof(TEntity));
 
-            return _dbHelper.ExecuteObject<TEntity>(sql, parameters, (r, c) => mapper.Map<TEntity>(r, selectorFunc));
+            return _dbHelper.ExecuteObject<TEntity>(sql, parameters, r => mapper.Map<TEntity>(r, selectorFunc));
         }
 
         /// <summary>
@@ -431,7 +431,7 @@
 
             ExecuteSchemaValidate(typeof(TEntity));
 
-            return _dbHelper.ExecuteObject<TResult>(sql, parameters, (r, c) => mapper.Map<TResult>(r, selectorFunc));
+            return _dbHelper.ExecuteObject<TResult>(sql, parameters, r => mapper.Map<TResult>(r, selectorFunc));
         }
 
         /// <summary>
@@ -460,7 +460,7 @@
 
             ExecuteSchemaValidate(typeof(TEntity));
 
-            return _dbHelper.ExecuteList<TResult>(sql, parameters, (r, c) => mapper.Map<TResult>(r, selectorFunc));
+            return _dbHelper.ExecuteList<TResult>(sql, parameters, r => mapper.Map<TResult>(r, selectorFunc));
         }
 
         /// <summary>
@@ -609,7 +609,7 @@
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
-        public async Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, IRepositoryConventions, TEntity> projector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public async Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             Guard.NotEmpty(sql, nameof(sql));
             Guard.NotNull(projector, nameof(projector));
@@ -620,7 +620,7 @@
 
                 while (await reader.ReadAsync(cancellationToken))
                 {
-                    list.Add(projector(reader, Conventions));
+                    list.Add(projector(reader));
                 }
 
                 return list;
@@ -747,7 +747,7 @@
 
             await ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 
-            return await _dbHelper.ExecuteObjectAsync<TEntity>(sql, parameters, (r, c) => mapper.Map<TEntity>(r, selectorFunc), cancellationToken);
+            return await _dbHelper.ExecuteObjectAsync<TEntity>(sql, parameters, r => mapper.Map<TEntity>(r, selectorFunc), cancellationToken);
         }
 
         /// <summary>
@@ -777,7 +777,7 @@
 
             await ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 
-            return await _dbHelper.ExecuteObjectAsync<TResult>(sql, parameters, (r, c) => mapper.Map<TResult>(r, selectorFunc), cancellationToken);
+            return await _dbHelper.ExecuteObjectAsync<TResult>(sql, parameters, r => mapper.Map<TResult>(r, selectorFunc), cancellationToken);
         }
 
         /// <summary>
@@ -807,7 +807,7 @@
 
             await ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 
-            return await _dbHelper.ExecuteListAsync<TResult>(sql, parameters, (r, c) => mapper.Map<TResult>(r, selectorFunc), cancellationToken);
+            return await _dbHelper.ExecuteListAsync<TResult>(sql, parameters, r => mapper.Map<TResult>(r, selectorFunc), cancellationToken);
         }
 
         /// <summary>
