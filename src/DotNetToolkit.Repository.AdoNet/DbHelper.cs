@@ -121,6 +121,7 @@ namespace DotNetToolkit.Repository.AdoNet
             Guard.NotNull(existingConnection, nameof(existingConnection));
 
             _conventions = conventions;
+            _factory = DbProviderFactories.GetFactory(existingConnection);
             _connection = existingConnection;
             _ownsConnection = false;
         }
