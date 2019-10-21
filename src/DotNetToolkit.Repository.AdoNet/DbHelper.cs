@@ -87,7 +87,7 @@ namespace DotNetToolkit.Repository.AdoNet
                 "The connection string does not exist in your configuration file.");
 
             _conventions = conventions;
-            _factory = Internal.DbProviderFactories.GetFactory(css.ProviderName);
+            _factory = DbProviderFactories.GetFactory(css.ProviderName);
             _connectionString = css.ConnectionString;
             _ownsConnection = true;
         }
@@ -105,7 +105,7 @@ namespace DotNetToolkit.Repository.AdoNet
             Guard.NotEmpty(connectionString, nameof(connectionString));
 
             _conventions = conventions;
-            _factory = Internal.DbProviderFactories.GetFactory(providerName);
+            _factory = DbProviderFactories.GetFactory(providerName);
             _connectionString = connectionString;
             _ownsConnection = true;
         }
@@ -121,6 +121,7 @@ namespace DotNetToolkit.Repository.AdoNet
             Guard.NotNull(existingConnection, nameof(existingConnection));
 
             _conventions = conventions;
+            _factory = DbProviderFactories.GetFactory(existingConnection);
             _connection = existingConnection;
             _ownsConnection = false;
         }
