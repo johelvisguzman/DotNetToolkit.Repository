@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
-    using System.Reflection;
     using System.Text;
     using Utility;
 
@@ -17,8 +16,7 @@
 
         private readonly IComparer<ExpressionType> _comparer = new OperatorPrecedenceComparer();
         private readonly Dictionary<string, object> _parameters = new Dictionary<string, object>();
-        private Func<Type, string> _getTableAlias;
-        private Func<PropertyInfo, Type, string> _getColumnAlias;
+        private IEnumerable<MappingProperty> _mappings;
 
         #endregion
 
@@ -27,19 +25,15 @@
         /// <summary>
         /// Translates the specified predicate.
         /// </summary>
-        public void Translate<T>(Expression<Func<T, bool>> predicate, Func<Type, string> getTableAlias, Func<PropertyInfo, Type, string> getColumnAlias, out string sql, out Dictionary<string, object> parameters)
+        public void Translate<T>(Expression<Func<T, bool>> predicate, IEnumerable<MappingProperty> mappings, out string sql, out Dictionary<string, object> parameters)
         {
             if (predicate == null)
                 throw new ArgumentNullException(nameof(predicate));
 
-            if (getTableAlias == null)
-                throw new ArgumentNullException(nameof(getTableAlias));
+            if (mappings == null)
+                throw new ArgumentNullException(nameof(mappings));
 
-            if (getColumnAlias == null)
-                throw new ArgumentNullException(nameof(getColumnAlias));
-
-            _getTableAlias = getTableAlias;
-            _getColumnAlias = getColumnAlias;
+            _mappings = mappings;
 
             var sb = new StringBuilder();
 
@@ -271,19 +265,22 @@
 
         private void TranslateVariableExpression(Expression variableExpression, out string column, out string columnAlias)
         {
-            var propertyInfo = ExpressionHelper.GetPropertyInfo(variableExpression);
-            var tableType = ExpressionHelper.GetMemberExpression(variableExpression).Expression.Type;
-            var tableAlias = _getTableAlias(tableType);
+            var pi = ExpressionHelper.GetPropertyInfo(variableExpression);
+            var mappingProperty = _mappings.FirstOrDefault(x => x.PropertyInfo == pi);
 
-            columnAlias = _getColumnAlias(propertyInfo, tableType);
-            column = !string.IsNullOrEmpty(columnAlias)
-                ? $"[{tableAlias}].[{columnAlias}]"
-                : null;
+            column = null;
+            columnAlias = null;
+
+            if (mappingProperty != null)
+            {
+                columnAlias = mappingProperty.ColumnAlias;
+                column = $"[{mappingProperty.TableAlias}].[{columnAlias}]";
+            }
         }
 
         private void TranslateVariableExpression(Expression variableExpression, out string column)
         {
-            TranslateVariableExpression(variableExpression, out column, out var columnAlias);
+            TranslateVariableExpression(variableExpression, out column, out _);
         }
 
         private void TranslateParameterizedVariableExpression(Expression variableExpression, ConstantExpression constantExpression, string methodName, out string column, out string parameter)

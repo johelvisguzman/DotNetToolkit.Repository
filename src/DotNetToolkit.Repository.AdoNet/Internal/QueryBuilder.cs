@@ -27,7 +27,7 @@
             var tableName = conventions.GetTableName(entityType);
 
             var primaryKeyPropertyInfos = conventions.GetPrimaryKeyPropertyInfos(entityType).ToList();
-            var properties = GetProperties(conventions, entityType);
+            var properties = GetProperties(conventions, entityType).ToDictionary(conventions.GetColumnName, x => x);
 
             if (primaryKeyPropertyInfos.Count == 1)
             {
@@ -64,7 +64,7 @@
 
             var primaryKeyPropertyInfos = conventions.GetPrimaryKeyPropertyInfos(entityType).ToList();
             var primaryKeyColumnNamesDict = primaryKeyPropertyInfos.ToDictionary(conventions.GetColumnName, x => x);
-            var properties = GetProperties(conventions, entityType);
+            var properties = GetProperties(conventions, entityType).ToDictionary(conventions.GetColumnName, x => x);
 
             if (primaryKeyPropertyInfos.Count == 1)
             {
@@ -113,12 +113,11 @@
             }
         }
 
-        public static void CreateSelectStatement<T>(IRepositoryConventions conventions, IQueryOptions<T> options, string defaultSelect, bool applyFetchOptions, out string sql, out Dictionary<string, object> parameters, out Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, out Func<string, Type> getTableTypeByColumnAliasCallback)
+        public static void CreateSelectStatement<T>(IRepositoryConventions conventions, IQueryOptions<T> options, string defaultSelect, bool applyFetchOptions, out string sql, out Dictionary<string, object> parameters, out IEnumerable<MappingProperty> mappingProperties)
         {
             Guard.NotNull(conventions, nameof(conventions));
 
             parameters = new Dictionary<string, object>();
-            navigationProperties = new Dictionary<Type, Dictionary<string, PropertyInfo>>();
 
             var tableAliasCount = 1;
             var tableAliasMapping = new Dictionary<string, string>();
@@ -202,79 +201,42 @@
                 return tableAlias;
             }
 
-            string GetTableNameFromType(Type tableType)
-                => tableTypeAndNameMapping[tableType];
-
-            string GetTableAliasFromName(string tableName)
-                => tableAliasMapping[tableName];
-
-            string GetTableAliasFromType(Type tableType)
-                => GetTableAliasFromName(GetTableNameFromType(tableType));
-
-            string GetColumnAliasFromProperty(PropertyInfo pi, Type tableType)
-            {
-                if (pi == null)
-                    throw new ArgumentNullException(nameof(pi));
-
-                var columnName = conventions.GetColumnName(pi);
-                var tableName = conventions.GetTableName(tableType);
-                var columnMapping = tableColumnAliasMapping[tableName];
-
-                if (!columnMapping.ContainsKey(columnName))
-                    return null;
-
-                return columnMapping[columnName];
-            }
-
-            getTableTypeByColumnAliasCallback = columnAlias =>
-            {
-                if (columnAliasTableNameMapping.ContainsKey(columnAlias))
-                {
-                    var tableName = columnAliasTableNameMapping[columnAlias];
-
-                    return tableNameAndTypeMapping[tableName];
-                }
-
-                return null;
-            };
-
             var sb = new StringBuilder();
             var joinStatementSb = new StringBuilder();
 
             var mainTableType = typeof(T);
             var mainTableName = conventions.GetTableName(mainTableType);
             var mainTableAlias = GenerateTableAlias(mainTableType);
-            var mainTableProperties = mainTableType.GetRuntimeProperties().ToList();
+            var mainTableProperties = mainTableType.GetRuntimeProperties();
             var mainTablePrimaryKeyPropertyInfo = conventions.GetPrimaryKeyPropertyInfos<T>().First();
             var mainTablePrimaryKeyName = conventions.GetColumnName(mainTablePrimaryKeyPropertyInfo);
             var fetchingPaths = applyFetchOptions
-                ? options.DefaultIfFetchStrategyEmpty(conventions).PropertyPaths.ToList()
+                ? options.DefaultIfFetchStrategyEmpty(conventions).PropertyPaths
                 : Enumerable.Empty<string>().ToList();
 
             const string DEFAULT_CROSS_JOIN_COLUMN_ALIAS = "C1";
             const string DEFAULT_CROSS_JOIN_TABLE_ALIAS = "GroupBy1";
 
-            var properties = GetProperties(conventions, mainTableType);
+            var mainTableMappingProperties = GetProperties(conventions, mainTableType)
+                .Select(x => new MappingProperty(
+                    mainTableName,
+                    mainTableAlias,
+                    conventions.GetColumnName(x),
+                    GenerateColumnAlias(x, mainTableType),
+                    x)
+                )
+                .ToList();
 
-            foreach (var pi in properties.Values)
-            {
-                GenerateColumnAlias(pi, mainTableType);
-            }
+            mappingProperties = mainTableMappingProperties;
 
             // -----------------------------------------------------------------------------------------------------------
             // Select clause
             // -----------------------------------------------------------------------------------------------------------
 
+            // Default select
             if (string.IsNullOrEmpty(defaultSelect))
             {
-                // Default select
-                select = string.Join($",{Environment.NewLine}\t", properties.Select(x =>
-                {
-                    var colAlias = GetColumnAliasFromProperty(x.Value, mainTableType);
-                    var colName = x.Key;
-
-                    return $"[{mainTableAlias}].[{colName}] AS [{colAlias}]";
-                }));
+                select = string.Join($",{Environment.NewLine}\t", mainTableMappingProperties);
             }
             else
             {
@@ -289,32 +251,43 @@
 
                 foreach (var path in fetchingPaths)
                 {
-                    var joinTablePropertyInfo = mainTableProperties.Single(x => x.Name.Equals(path));
+                    var joinTablePropertyInfo = mainTableProperties.FirstOrDefault(x => x.Name.Equals(path));
+
+                    if (joinTablePropertyInfo == null)
+                        continue;
+
                     var joinTableType = joinTablePropertyInfo.PropertyType.IsGenericCollection()
                         ? joinTablePropertyInfo.PropertyType.GetGenericArguments().First()
                         : joinTablePropertyInfo.PropertyType;
-                    var joinTableForeignKeyPropertyInfo = conventions.GetForeignKeyPropertyInfos(joinTableType, mainTableType).FirstOrDefault();
+                    var joinTableForeignKeyPropertyInfo = conventions
+                        .GetForeignKeyPropertyInfos(joinTableType, mainTableType)
+                        .FirstOrDefault();
 
                     // Only do a join when the primary table has a foreign key property for the join table
                     if (joinTableForeignKeyPropertyInfo != null)
                     {
                         var joinTableForeignKeyName = conventions.GetColumnName(joinTableForeignKeyPropertyInfo);
-                        var joinTableProperties = joinTableType.GetRuntimeProperties().ToList();
+                        var joinTableProperties = GetProperties(conventions, joinTableType);
                         var joinTableName = conventions.GetTableName(joinTableType);
                         var joinTableAlias = GenerateTableAlias(joinTableType);
-                        var joinTableColumnNames = string.Join($",{Environment.NewLine}\t",
-                            joinTableProperties
-                                .Where(DotNetToolkit.Repository.Extensions.Internal.PropertyInfoExtensions.IsPrimitive)
-                                .Select(x =>
+                        var joinTableMappingProperties = joinTableProperties
+                            .Where(PropertyInfoExtensions.IsPrimitive)
+                            .Select(x => new MappingProperty(
+                                joinTableName,
+                                joinTableAlias,
+                                conventions.GetColumnName(x),
+                                GenerateColumnAlias(x, joinTableType),
+                                x)
                                 {
-                                    var colAlias = GenerateColumnAlias(x, joinTableType);
-                                    var colName = conventions.GetColumnName(x);
-
-                                    return $"[{joinTableAlias}].[{colName}] AS [{colAlias}]";
-                                }));
+                                    JoinTablePropertyInfo = joinTablePropertyInfo
+                                }
+                            )
+                            .ToList();
 
                         if (string.IsNullOrEmpty(defaultSelect))
                         {
+                            var joinTableColumnNames = string.Join($",{Environment.NewLine}\t", joinTableMappingProperties);
+
                             sb.Append($",{Environment.NewLine}\t");
                             sb.Append(joinTableColumnNames);
                         }
@@ -322,7 +295,8 @@
                         joinStatementSb.Append(Environment.NewLine);
                         joinStatementSb.Append($"LEFT OUTER JOIN [{joinTableName}] AS [{joinTableAlias}] ON [{mainTableAlias}].[{mainTablePrimaryKeyName}] = [{joinTableAlias}].[{joinTableForeignKeyName}]");
 
-                        navigationProperties.Add(joinTableType, joinTableProperties.ToDictionary(conventions.GetColumnName, x => x));
+                        // Sets up all of the mapping properties
+                        mappingProperties = mainTableMappingProperties.Concat(joinTableMappingProperties);
                     }
                 }
 
@@ -385,8 +359,7 @@
                     {
                         new ExpressionTranslator().Translate(
                             options.SpecificationStrategy.Predicate,
-                            GetTableAliasFromType,
-                            GetColumnAliasFromProperty,
+                            mappingProperties,
                             out var expSql,
                             out _);
 
@@ -406,8 +379,7 @@
                 {
                     new ExpressionTranslator().Translate(
                         options.SpecificationStrategy.Predicate,
-                        GetTableAliasFromType,
-                        GetColumnAliasFromProperty,
+                        mappingProperties,
                         out var expSql,
                         out var expParameters);
 
@@ -445,13 +417,10 @@
                         var sortOrder = sort.Value;
                         var sortProperty = sort.Key;
                         var lambda = ExpressionHelper.GetExpression<T>(sortProperty);
-                        var tableType = ExpressionHelper.GetMemberExpression(lambda).Expression.Type;
-                        var tableName = GetTableNameFromType(tableType);
-                        var tableAlias = GetTableAliasFromName(tableName);
-                        var sortingPropertyInfo = ExpressionHelper.GetPropertyInfo(lambda);
-                        var columnAlias = GetColumnAliasFromProperty(sortingPropertyInfo, tableType);
+                        var pi = ExpressionHelper.GetPropertyInfo(lambda);
+                        var mappingProperty = mappingProperties.First(x => x.PropertyInfo == pi);
 
-                        sb.Append($"[{tableAlias}].[{columnAlias}] {(sortOrder == SortOrder.Descending ? "DESC" : "ASC")}, ");
+                        sb.Append($"[{mappingProperty.TableAlias}].[{mappingProperty.ColumnAlias}] {(sortOrder == SortOrder.Descending ? "DESC" : "ASC")}, ");
                     }
 
                     sb.Remove(sb.Length - 2, 2);
@@ -473,64 +442,59 @@
             sql = sb.ToString();
         }
 
-        public static void CreateSelectStatement<T>(IRepositoryConventions conventions, IQueryOptions<T> options, bool applyFetchOptions, out string sql, out Dictionary<string, object> parameters, out Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, out Func<string, Type> getTableTypeByColumnAliasCallback)
+        public static void CreateSelectStatement<T>(IRepositoryConventions conventions, IQueryOptions<T> options, bool applyFetchOptions, out string sql, out Dictionary<string, object> parameters, out IEnumerable<MappingProperty> mappingProperties)
         {
             CreateSelectStatement<T>(
-                conventions, 
+                conventions,
                 options,
                 null,
                 applyFetchOptions,
                 out sql,
                 out parameters,
-                out navigationProperties,
-                out getTableTypeByColumnAliasCallback);
+                out mappingProperties);
         }
 
-        public static void CreateSelectStatement<T>(IRepositoryConventions conventions, IQueryOptions<T> options, out string sql, out Dictionary<string, object> parameters, out Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, out Func<string, Type> getTableTypeByColumnAliasCallback)
+        public static void CreateSelectStatement<T>(IRepositoryConventions conventions, IQueryOptions<T> options, out string sql, out Dictionary<string, object> parameters, out IEnumerable<MappingProperty> mappingProperties)
         {
             CreateSelectStatement<T>(
-                conventions, 
+                conventions,
                 options,
                 true,
                 out sql,
                 out parameters,
-                out navigationProperties,
-                out getTableTypeByColumnAliasCallback);
+                out mappingProperties);
         }
 
         public static void CreateSelectStatement<T>(IRepositoryConventions conventions, IQueryOptions<T> options, out string sql, out Dictionary<string, object> parameters)
         {
             CreateSelectStatement<T>(
-                conventions, 
+                conventions,
                 options,
-                false,
                 out sql,
                 out parameters,
-                out var navigationProperties,
-                out var getPropertyFromColumnAliasCallback);
+                out _);
         }
-        
+
         public static void CreateSelectStatement<T>(IRepositoryConventions conventions, IQueryOptions<T> options, string select, out string sql, out Dictionary<string, object> parameters)
         {
             CreateSelectStatement<T>(
-                conventions, 
+                conventions,
                 options,
                 select,
                 false,
                 out sql,
                 out parameters,
-                out var navigationProperties,
-                out var getPropertyFromColumnAliasCallback);
+                out _);
         }
 
         public static void CreateSelectStatement<T>(IRepositoryConventions conventions, string select, out string sql)
         {
-            CreateSelectStatement<T>(conventions, null, select, out sql, out var parameters);
+            CreateSelectStatement<T>(conventions, null, select, out sql, out _);
         }
 
         public static void CreateSelectStatement<T>(IRepositoryConventions conventions, out string sql)
         {
-            CreateSelectStatement<T>(conventions, null, out sql, out var parameters);
+            CreateSelectStatement<T>(conventions, null, out sql, out _);
         }
 
         public static void ExtractCrossJoinColumnName(string sql, out string columnName)
@@ -552,16 +516,10 @@
             }
         }
 
-        private static Dictionary<string, PropertyInfo> GetProperties(IRepositoryConventions conventions, Type entityType)
-        {
-            Guard.NotNull(conventions, nameof(conventions));
-            Guard.NotNull(entityType, nameof(entityType));
-
-            return entityType
-                .GetRuntimeProperties()
-                .Where(x => x.IsPrimitive() && conventions.IsColumnMapped(x))
-                .OrderBy(conventions.GetColumnOrderOrDefault)
-                .ToDictionary(conventions.GetColumnName, x => x);
-        }
+        private static IEnumerable<PropertyInfo> GetProperties(IRepositoryConventions conventions, Type entityType)
+            => entityType
+            .GetRuntimeProperties()
+            .Where(x => x.IsPrimitive() && conventions.IsColumnMapped(x))
+            .OrderBy(conventions.GetColumnOrderOrDefault);
     }
 }

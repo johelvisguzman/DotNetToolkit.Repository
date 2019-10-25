@@ -395,14 +395,13 @@
                 fetchStrategy != null,
                 out var sql,
                 out var parameters,
-                out var navigationProperties,
-                out var getPropertyFromColumnAliasCallback);
+                out var mappingProperties);
 
-            var mapper = new Mapper<TEntity>(Conventions, navigationProperties, getPropertyFromColumnAliasCallback);
+            var mapper = new Mapper<TEntity>(Conventions, mappingProperties);
 
             ExecuteSchemaValidate(typeof(TEntity));
 
-            return _dbHelper.ExecuteObject<TEntity>(sql, parameters, r => mapper.Map<TEntity>(r, selectorFunc));
+            return _dbHelper.ExecuteObject<TEntity>(sql, parameters, r => selectorFunc(mapper.Map(r)));
         }
 
         /// <summary>
@@ -424,14 +423,13 @@
                 options,
                 out var sql,
                 out var parameters,
-                out var navigationProperties,
-                out var getPropertyFromColumnAliasCallback);
+                out var mappingProperties);
 
-            var mapper = new Mapper<TEntity>(Conventions, navigationProperties, getPropertyFromColumnAliasCallback);
+            var mapper = new Mapper<TEntity>(Conventions, mappingProperties);
 
             ExecuteSchemaValidate(typeof(TEntity));
 
-            return _dbHelper.ExecuteObject<TResult>(sql, parameters, r => mapper.Map<TResult>(r, selectorFunc));
+            return _dbHelper.ExecuteObject<TResult>(sql, parameters, r => selectorFunc(mapper.Map(r)));
         }
 
         /// <summary>
@@ -453,14 +451,42 @@
                 options,
                 out var sql,
                 out var parameters,
-                out var navigationProperties,
-                out var getPropertyFromColumnAliasCallback);
+                out var mappingProperties);
 
-            var mapper = new Mapper<TEntity>(Conventions, navigationProperties, getPropertyFromColumnAliasCallback);
+            var mapper = new Mapper<TEntity>(Conventions, mappingProperties);
 
             ExecuteSchemaValidate(typeof(TEntity));
 
-            return _dbHelper.ExecuteList<TResult>(sql, parameters, r => mapper.Map<TResult>(r, selectorFunc));
+            using (var reader = _dbHelper.ExecuteReader(sql, parameters))
+            {
+                var list = new List<TResult>();
+                var foundCrossJoinCountColumn = false;
+                var total = 0;
+
+                QueryBuilder.ExtractCrossJoinColumnName(sql, out var crossJoinColumnName);
+
+                while (reader.Read())
+                {
+                    for (var i = 0; i < reader.FieldCount; i++)
+                    {
+                        var name = reader.GetName(i);
+
+                        if (!string.IsNullOrEmpty(crossJoinColumnName) && name.Equals(crossJoinColumnName))
+                        {
+                            total = (int)reader[name];
+                            foundCrossJoinCountColumn = true;
+                            break;
+                        }
+                    }
+
+                    list.Add(selectorFunc(mapper.Map(reader)));
+                }
+
+                if (!foundCrossJoinCountColumn)
+                    total = list.Count;
+
+                return new PagedQueryResult<IEnumerable<TResult>>(list, total);
+            }
         }
 
         /// <summary>
@@ -530,10 +556,9 @@
                 options,
                 out var sql,
                 out var parameters,
-                out var navigationProperties,
-                out var getPropertyFromColumnAliasCallback);
+                out var mappingProperties);
 
-            var mapper = new Mapper<TEntity>(Conventions, navigationProperties, getPropertyFromColumnAliasCallback);
+            var mapper = new Mapper<TEntity>(Conventions, mappingProperties);
 
             ExecuteSchemaValidate(typeof(TEntity));
 
@@ -559,7 +584,9 @@
                         }
                     }
 
-                    dict.Add(mapper.Map<TDictionaryKey>(reader, keySelectFunc), mapper.Map<TElement>(reader, elementSelectorFunc));
+                    var mapped = mapper.Map(reader);
+
+                    dict.Add(keySelectFunc(mapped), elementSelectorFunc(mapped));
                 }
 
                 if (!foundCrossJoinCountColumn)
@@ -740,14 +767,13 @@
                 fetchStrategy != null,
                 out var sql,
                 out var parameters,
-                out var navigationProperties,
-                out var getPropertyFromColumnAliasCallback);
+                out var mappingProperties);
 
-            var mapper = new Mapper<TEntity>(Conventions, navigationProperties, getPropertyFromColumnAliasCallback);
+            var mapper = new Mapper<TEntity>(Conventions, mappingProperties);
 
             await ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 
-            return await _dbHelper.ExecuteObjectAsync<TEntity>(sql, parameters, r => mapper.Map<TEntity>(r, selectorFunc), cancellationToken);
+            return await _dbHelper.ExecuteObjectAsync<TEntity>(sql, parameters, r => selectorFunc(mapper.Map(r)), cancellationToken);
         }
 
         /// <summary>
@@ -770,14 +796,13 @@
                 options,
                 out var sql,
                 out var parameters,
-                out var navigationProperties,
-                out var getPropertyFromColumnAliasCallback);
+                out var mappingProperties);
 
-            var mapper = new Mapper<TEntity>(Conventions, navigationProperties, getPropertyFromColumnAliasCallback);
+            var mapper = new Mapper<TEntity>(Conventions, mappingProperties);
 
             await ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 
-            return await _dbHelper.ExecuteObjectAsync<TResult>(sql, parameters, r => mapper.Map<TResult>(r, selectorFunc), cancellationToken);
+            return await _dbHelper.ExecuteObjectAsync<TResult>(sql, parameters, r => selectorFunc(mapper.Map(r)), cancellationToken);
         }
 
         /// <summary>
@@ -800,14 +825,42 @@
                 options,
                 out var sql,
                 out var parameters,
-                out var navigationProperties,
-                out var getPropertyFromColumnAliasCallback);
+                out var mappingProperties);
 
-            var mapper = new Mapper<TEntity>(Conventions, navigationProperties, getPropertyFromColumnAliasCallback);
+            var mapper = new Mapper<TEntity>(Conventions, mappingProperties);
 
             await ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 
-            return await _dbHelper.ExecuteListAsync<TResult>(sql, parameters, r => mapper.Map<TResult>(r, selectorFunc), cancellationToken);
+            using (var reader = await _dbHelper.ExecuteReaderAsync(sql, parameters, cancellationToken))
+            {
+                var list = new List<TResult>();
+                var foundCrossJoinCountColumn = false;
+                var total = 0;
+
+                QueryBuilder.ExtractCrossJoinColumnName(sql, out var crossJoinColumnName);
+
+                while (await reader.ReadAsync(cancellationToken))
+                {
+                    for (var i = 0; i < reader.FieldCount; i++)
+                    {
+                        var name = reader.GetName(i);
+
+                        if (!string.IsNullOrEmpty(crossJoinColumnName) && name.Equals(crossJoinColumnName))
+                        {
+                            total = (int)reader[name];
+                            foundCrossJoinCountColumn = true;
+                            break;
+                        }
+                    }
+
+                    list.Add(selectorFunc(mapper.Map(reader)));
+                }
+
+                if (!foundCrossJoinCountColumn)
+                    total = list.Count;
+
+                return new PagedQueryResult<IEnumerable<TResult>>(list, total);
+            }
         }
 
         /// <summary>
@@ -880,10 +933,9 @@
                 options,
                 out var sql,
                 out var parameters,
-                out var navigationProperties,
-                out var getPropertyFromColumnAliasCallback);
+                out var mappingProperties);
 
-            var mapper = new Mapper<TEntity>(Conventions, navigationProperties, getPropertyFromColumnAliasCallback);
+            var mapper = new Mapper<TEntity>(Conventions, mappingProperties);
 
             await ExecuteSchemaValidateAsync(typeof(TEntity), cancellationToken);
 
@@ -909,7 +961,9 @@
                         }
                     }
 
-                    dict.Add(mapper.Map<TDictionaryKey>(reader, keySelectFunc), mapper.Map<TElement>(reader, elementSelectorFunc));
+                    var mapped = mapper.Map(reader);
+
+                    dict.Add(keySelectFunc(mapped), elementSelectorFunc(mapped));
                 }
 
                 if (!foundCrossJoinCountColumn)

@@ -344,18 +344,87 @@
 
         private IEnumerable<SchemaTableColumn> GetSchemaTableColumns(string tableName)
         {
-            var sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName";
+            var sql = @"
+SELECT
+    TABLE_CATALOG,
+    TABLE_SCHEMA,
+    TABLE_NAME,
+    COLUMN_NAME,
+    ORDINAL_POSITION,
+    COLUMN_DEFAULT,
+    IS_NULLABLE,
+    DATA_TYPE,
+    CHARACTER_MAXIMUM_LENGTH,
+    CHARACTER_OCTET_LENGTH,
+    NUMERIC_PRECISION,
+    NUMERIC_SCALE,
+    DATETIME_PRECISION
+FROM INFORMATION_SCHEMA.COLUMNS 
+WHERE TABLE_NAME = @tableName";
             var parameters = new Dictionary<string, object> { { "@tableName", tableName } };
 
-            return _dbHelper.ExecuteList<SchemaTableColumn>(sql, parameters)?.Result;
+            return _dbHelper.ExecuteList<SchemaTableColumn>(sql, parameters, r =>
+            {
+                return new SchemaTableColumn
+                {
+                    TableCatalog = r.GetValue<string>(0),
+                    TableSchema = r.GetValue<string>(1),
+                    TableName = r.GetValue<string>(2),
+                    ColumnName = r.GetValue<string>(3),
+                    OrdinalPosition = r.GetValue<int>(4),
+                    ColumnDefault = r.GetValue<string>(5),
+                    IsNullable = r.GetValue<string>(6),
+                    DataType = r.GetValue<string>(7),
+                    CharacterMaximunLength = r.GetValue<int>(8),
+                    CharacterOctetLength = r.GetValue<int>(9),
+                    NumericPrecision = r.GetValue<short>(10),
+                    NumericScale = r.GetValue<int?>(11),
+                    DateTimePrecision = r.GetValue<int?>(12),
+                };
+            });
         }
 
-        private async Task<IEnumerable<SchemaTableColumn>> GetSchemaTableColumnsAsync(string tableName, CancellationToken cancellationToken)
+        private Task<IEnumerable<SchemaTableColumn>> GetSchemaTableColumnsAsync(string tableName, CancellationToken cancellationToken)
         {
-            var sql = "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName";
+            var sql = @"
+SELECT
+    TABLE_CATALOG,
+    TABLE_SCHEMA,
+    TABLE_NAME,
+    COLUMN_NAME,
+    ORDINAL_POSITION,
+    COLUMN_DEFAULT,
+    IS_NULLABLE,
+    DATA_TYPE,
+    CHARACTER_MAXIMUM_LENGTH,
+    CHARACTER_OCTET_LENGTH,
+    NUMERIC_PRECISION,
+    NUMERIC_SCALE,
+    DATETIME_PRECISION
+FROM INFORMATION_SCHEMA.COLUMNS 
+WHERE TABLE_NAME = @tableName";
             var parameters = new Dictionary<string, object> { { "@tableName", tableName } };
 
-            return (await _dbHelper.ExecuteListAsync<SchemaTableColumn>(sql, parameters, cancellationToken))?.Result;
+            return _dbHelper.ExecuteListAsync<SchemaTableColumn>(sql, parameters, r =>
+            {
+                return new SchemaTableColumn
+                {
+                    TableCatalog = r.GetValue<string>(0),
+                    TableSchema = r.GetValue<string>(1),
+                    TableName = r.GetValue<string>(2),
+                    ColumnName = r.GetValue<string>(3),
+                    OrdinalPosition = r.GetValue<int>(4),
+                    ColumnDefault = r.GetValue<string>(5),
+                    IsNullable = r.GetValue<string>(6),
+                    DataType = r.GetValue<string>(7),
+                    CharacterMaximunLength = r.GetValue<int>(8),
+                    CharacterOctetLength = r.GetValue<int>(9),
+                    NumericPrecision = r.GetValue<short>(10),
+                    NumericScale = r.GetValue<int?>(11),
+                    DateTimePrecision = r.GetValue<int?>(12),
+                };
+            },
+            cancellationToken);
         }
 
         private Dictionary<string, string> GetSchemaTableColumnConstraintsMapping(string tableName, string[] columns)
