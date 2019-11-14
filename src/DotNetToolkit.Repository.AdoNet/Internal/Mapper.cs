@@ -3,217 +3,142 @@
     using Configuration.Conventions;
     using Extensions;
     using Extensions.Internal;
+    using JetBrains.Annotations;
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Data.Common;
     using System.Linq;
     using System.Reflection;
-    using System.Text.RegularExpressions;
     using Utility;
 
     internal class Mapper<T>
     {
         #region Fields
 
-        private readonly Dictionary<string, PropertyInfo> _properties;
-        private readonly Dictionary<Type, Dictionary<string, PropertyInfo>> _navigationProperties;
-        private readonly Func<string, Type> _getTableTypeByColumnAliasCallback;
-        private readonly ConcurrentDictionary<object, object> _entityDataReaderMapping = new ConcurrentDictionary<object, object>();
         private readonly IRepositoryConventions _conventions;
+        private readonly Dictionary<string, MappingProperty> _mappings;
+        private readonly Dictionary<object, object> _entityDataReaderMapping;
 
         #endregion
 
         #region Constructors
 
-        public Mapper(IRepositoryConventions conventions)
+        public Mapper([NotNull] IRepositoryConventions conventions, [NotNull] IEnumerable<MappingProperty> mappings)
         {
             _conventions = Guard.NotNull(conventions, nameof(conventions));
-
-            _properties = typeof(T).GetRuntimeProperties()
-                .Where(x => x.IsPrimitive() && _conventions.IsColumnMapped(x))
-                .OrderBy(_conventions.GetColumnOrderOrDefault)
-                .ToDictionary(_conventions.GetColumnName, x => x);
-
-            _navigationProperties = new Dictionary<Type, Dictionary<string, PropertyInfo>>();
-        }
-
-        public Mapper(IRepositoryConventions conventions, Dictionary<Type, Dictionary<string, PropertyInfo>> navigationProperties, Func<string, Type> getTableTypeByColumnAliasCallback)
-        {
-            _conventions = Guard.NotNull(conventions, nameof(conventions));
-
-            _properties = typeof(T).GetRuntimeProperties()
-                .Where(x => x.IsPrimitive() && _conventions.IsColumnMapped(x))
-                .OrderBy(_conventions.GetColumnOrderOrDefault)
-                .ToDictionary(_conventions.GetColumnName, x => x);
-
-            _navigationProperties = navigationProperties ?? new Dictionary<Type, Dictionary<string, PropertyInfo>>();
-            _getTableTypeByColumnAliasCallback = Guard.NotNull(getTableTypeByColumnAliasCallback, nameof(getTableTypeByColumnAliasCallback));
+            _mappings = Guard.NotNull(mappings, nameof(mappings)).ToDictionary(x => x.ColumnAlias);
+            _entityDataReaderMapping = new Dictionary<object, object>();
         }
 
         #endregion
 
         #region Public Methods
 
-        public TElement Map<TElement>(DbDataReader r, Func<T, TElement> elementSelector)
+        public T Map(DbDataReader r)
         {
-            if (r == null)
-                throw new ArgumentNullException(nameof(r));
-
-            if (elementSelector == null)
-                throw new ArgumentNullException(nameof(elementSelector));
-
-            var key = GetDataReaderPrimaryKey<T>(r);
-
-            var entity = _entityDataReaderMapping.ContainsKey(key)
-                ? (T)_entityDataReaderMapping[key]
+            var entityType = typeof(T);
+            var entityMappingKey = string.Join(":", GetPrimaryKeyValues(entityType, r));
+            var entity = _entityDataReaderMapping.ContainsKey(entityMappingKey)
+                ? (T)_entityDataReaderMapping[entityMappingKey]
                 : Activator.CreateInstance<T>();
 
-            var entityType = typeof(T);
-            var joinTableInstances = _navigationProperties.Keys.ToDictionary(x => x, Activator.CreateInstance);
+            var joinEntityMapping = _mappings.Values
+               .Where(x => x.PropertyInfo.DeclaringType != entityType)
+               .GroupBy(x => x.TableAlias)
+               .ToDictionary(
+                   grp => grp.Key,
+                   grp => new Lazy<object>(
+                       () => Activator.CreateInstance(grp.First().PropertyInfo.DeclaringType)));
 
             for (var i = 0; i < r.FieldCount; i++)
             {
                 var name = r.GetName(i);
-                var value = r[name];
 
-                if (value == DBNull.Value)
-                    value = null;
-
-                if (_properties.ContainsKey(name))
+                if (_mappings.ContainsKey(name))
                 {
-                    if (!r.IsDBNull(r.GetOrdinal(name)))
-                        _properties[name].SetValue(entity, value);
-                }
-                else if (joinTableInstances.Any())
-                {
-                    var joinTableProperty = _getTableTypeByColumnAliasCallback(name);
+                    var mappingProperty = _mappings[name];
+                    var pi = mappingProperty.PropertyInfo;
+                    var value = r[name] == DBNull.Value ? null : r[name];
 
-                    if (joinTableProperty != null)
+                    // Map properties in main entity table
+                    if (entityType.IsSubclassOf(pi.DeclaringType) || pi.DeclaringType == entityType)
                     {
-                        var joinTableType = _getTableTypeByColumnAliasCallback(name);
-
-                        if (joinTableType != null)
+                        if (!r.IsDBNull(r.GetOrdinal(name)))
                         {
-                            var columnPropertyInfosMapping = _navigationProperties.Single(x => x.Key == joinTableType).Value;
+                            pi.SetValue(entity, value);
+                        }
+                    }
+                    // Assumes this is a foreign property column
+                    else
+                    {
+                        if (!r.IsDBNull(r.GetOrdinal(name)))
+                        {
+                            var joinTablePropertyInfo = mappingProperty.JoinTablePropertyInfo;
+                            var joinEntityFactory = joinEntityMapping[mappingProperty.TableAlias];
+                            var joinEntityIsNew = !joinEntityFactory.IsValueCreated;
+                            var joinEntity = joinEntityFactory.Value;
 
-                            if (columnPropertyInfosMapping.ContainsKey(name))
+                            // Map property in foreign entity
+                            pi.DeclaringType.GetProperty(pi.Name).SetValue(joinEntity, value);
+
+                            // Do the following if the entity is newly created
+                            if (joinEntityIsNew)
                             {
-                                columnPropertyInfosMapping[name].SetValue(joinTableInstances[joinTableType], value);
-                            }
-                            else
-                            {
-                                columnPropertyInfosMapping[NormalizeColumnAlias(name)].SetValue(joinTableInstances[joinTableType], value);
+                                // Sets the main table property in the join table
+                                var mainTablePropertyInfo = joinEntity
+                                    .GetType()
+                                    .GetRuntimeProperties()
+                                    .FirstOrDefault(x => x.PropertyType == entityType);
+
+                                if (mainTablePropertyInfo != null)
+                                {
+                                    mainTablePropertyInfo.SetValue(joinEntity, entity);
+                                }
+
+                                // Sets the join table property in the main table
+                                if (joinTablePropertyInfo.PropertyType.IsGenericCollection())
+                                {
+                                    var collection = joinTablePropertyInfo.GetValue(entity, null);
+
+                                    if (collection == null)
+                                    {
+                                        var collectionTypeParam = joinTablePropertyInfo.PropertyType.GetGenericArguments().First();
+
+                                        collection = Activator.CreateInstance(typeof(List<>).MakeGenericType(collectionTypeParam));
+
+                                        joinTablePropertyInfo.SetValue(entity, collection);
+                                    }
+
+                                    collection.GetType().GetMethod("Add").Invoke(collection, new[] { joinEntity });
+                                }
+                                else
+                                {
+                                    joinTablePropertyInfo.SetValue(entity, joinEntity);
+                                }
                             }
                         }
                     }
                 }
             }
-            
-            if (joinTableInstances.Any())
-            {
-                var mainTablePrimaryKeyPropertyInfo = _conventions.GetPrimaryKeyPropertyInfos<T>().First();
-                var mainTablePrimaryKeyValue = mainTablePrimaryKeyPropertyInfo.GetValue(entity);
 
-                // Needs to make sure we are not dealing with navigation properties that are not actually linked to this entity
-                var validJoinTableInstances = joinTableInstances
-                    .Where(x =>
-                    {
-                        var joinTableForeignKeyPropertyInfo = _conventions
-                            .GetForeignKeyPropertyInfos(x.Key, entityType)
-                            .First();
+            _entityDataReaderMapping[entityMappingKey] = entity;
 
-                        var joinTableForeignKeyValue = joinTableForeignKeyPropertyInfo.GetValue(x.Value);
-
-                        return mainTablePrimaryKeyValue.Equals(joinTableForeignKeyValue);
-                    })
-                    .ToDictionary(x => x.Key, x => x.Value);
-
-                if (validJoinTableInstances.Any())
-                {
-                    var mainTableProperties = entityType.GetRuntimeProperties().ToList();
-
-                    foreach (var item in validJoinTableInstances)
-                    {
-                        var joinTableInstance = item.Value;
-                        var joinTableType = item.Key;
-                        var isJoinPropertyCollection = false;
-
-                        // Sets the main table property in the join table
-                        var mainTablePropertyInfo = joinTableType.GetRuntimeProperties().Single(x => x.PropertyType == entityType);
-
-                        mainTablePropertyInfo.SetValue(joinTableInstance, entity);
-
-                        // Sets the join table property in the main table
-                        var joinTablePropertyInfo = mainTableProperties.Single(x =>
-                        {
-                            isJoinPropertyCollection = x.PropertyType.IsGenericCollection();
-
-                            var type = isJoinPropertyCollection
-                                ? x.PropertyType.GetGenericArguments().First()
-                                : x.PropertyType;
-
-                            return type == joinTableType;
-                        });
-
-                        if (isJoinPropertyCollection)
-                        {
-                            var collection = joinTablePropertyInfo.GetValue(entity, null);
-
-                            if (collection == null)
-                            {
-                                var collectionTypeParam = joinTablePropertyInfo.PropertyType.GetGenericArguments().First();
-
-                                collection = Activator.CreateInstance(typeof(List<>).MakeGenericType(collectionTypeParam));
-
-                                joinTablePropertyInfo.SetValue(entity, collection);
-                            }
-
-                            collection.GetType().GetMethod("Add").Invoke(collection, new[] { joinTableInstance });
-                        }
-                        else
-                        {
-                            joinTablePropertyInfo.SetValue(entity, joinTableInstance);
-                        }
-                    }
-                } 
-            }
-
-            _entityDataReaderMapping[key] = entity;
-
-            return elementSelector(entity);
+            return entity;
         }
-
-        public T Map(DbDataReader r) => Map<T>(r, IdentityFunction<T>.Instance);
 
         #endregion
 
         #region Private Methods
 
-        private object GetDataReaderPrimaryKey<T>(DbDataReader r)
+        private IEnumerable<object> GetPrimaryKeyValues(Type type, DbDataReader r)
         {
-            if (r == null)
-                throw new ArgumentNullException(nameof(r));
-
-            var primaryKeyValues = _conventions
-                .GetPrimaryKeyPropertyInfos<T>()
-                .Select(x => r[_conventions.GetColumnName(x)])
-                .ToList();
-
-            switch (primaryKeyValues.Count)
+            foreach (var pi in _conventions.GetPrimaryKeyPropertyInfos(type))
             {
-                case 0:
-                    return Guid.NewGuid();
-                case 1:
-                    return primaryKeyValues[0];
-                default:
-                    return string.Join(":", primaryKeyValues);
-            }
-        }
+                var mappingProperty = _mappings.Values.First(x => x.PropertyInfo.DeclaringType == type && x.PropertyInfo.Name.Equals(pi.Name));
+                var value = r[mappingProperty.ColumnAlias];
 
-        private string NormalizeColumnAlias(string columnAlias)
-        {
-            return Regex.Replace(columnAlias, @"[\d-]", string.Empty);
+                yield return r[mappingProperty.ColumnAlias];
+            }
         }
 
         #endregion

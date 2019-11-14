@@ -428,37 +428,18 @@ namespace DotNetToolkit.Repository.AdoNet
         /// <param name="parameters">The command parameters.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        internal IPagedQueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
+        internal IEnumerable<T> ExecuteList<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
         {
             using (var reader = ExecuteReader(cmdText, cmdType, parameters))
             {
                 var list = new List<T>();
-                var foundCrossJoinCountColumn = false;
-                var total = 0;
-
-                QueryBuilder.ExtractCrossJoinColumnName(cmdText, out var crossJoinColumnName);
 
                 while (reader.Read())
                 {
-                    for (var i = 0; i < reader.FieldCount; i++)
-                    {
-                        var name = reader.GetName(i);
-
-                        if (!string.IsNullOrEmpty(crossJoinColumnName) && name.Equals(crossJoinColumnName))
-                        {
-                            total = (int)reader[name];
-                            foundCrossJoinCountColumn = true;
-                            break;
-                        }
-                    }
-
                     list.Add(projector(reader));
                 }
 
-                if (!foundCrossJoinCountColumn)
-                    total = list.Count;
-
-                return new PagedQueryResult<IEnumerable<T>>(list, total);
+                return list;
             }
         }
 
@@ -470,23 +451,9 @@ namespace DotNetToolkit.Repository.AdoNet
         /// <param name="parameters">The command parameters.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        internal IPagedQueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
+        internal IEnumerable<T> ExecuteList<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector)
         {
             return ExecuteList<T>(cmdText, CommandType.Text, parameters, projector);
-        }
-
-        /// <summary>
-        /// Executes the query, and returns a list which each entity has been projected into a new form.
-        /// </summary>
-        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <returns>A list which each entity has been projected into a new form.</returns>
-        internal IPagedQueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, Dictionary<string, object> parameters) where T : class
-        {
-            var mapper = new Mapper<T>(_conventions);
-
-            return ExecuteList<T>(cmdText, parameters, mapper.Map);
         }
 
         /// <summary>
@@ -497,7 +464,7 @@ namespace DotNetToolkit.Repository.AdoNet
         /// <param name="cmdType">The command type.</param>
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <returns>A list which each entity has been projected into a new form.</returns>
-        internal IPagedQueryResult<IEnumerable<T>> ExecuteList<T>(string cmdText, CommandType cmdType, Func<DbDataReader, T> projector)
+        internal IEnumerable<T> ExecuteList<T>(string cmdText, CommandType cmdType, Func<DbDataReader, T> projector)
         {
             return ExecuteList<T>(cmdText, cmdType, null, projector);
         }
@@ -960,37 +927,18 @@ namespace DotNetToolkit.Repository.AdoNet
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
-        internal async Task<IPagedQueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        internal async Task<IEnumerable<T>> ExecuteListAsync<T>(string cmdText, CommandType cmdType, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var reader = await ExecuteReaderAsync(cmdText, cmdType, parameters, cancellationToken))
             {
                 var list = new List<T>();
-                var foundCrossJoinCountColumn = false;
-                var total = 0;
 
-                QueryBuilder.ExtractCrossJoinColumnName(cmdText, out var crossJoinColumnName);
-
-                while (reader.Read())
+                while (await reader.ReadAsync(cancellationToken))
                 {
-                    for (var i = 0; i < reader.FieldCount; i++)
-                    {
-                        var name = reader.GetName(i);
-
-                        if (!string.IsNullOrEmpty(crossJoinColumnName) && name.Equals(crossJoinColumnName))
-                        {
-                            total = (int)reader[name];
-                            foundCrossJoinCountColumn = true;
-                            break;
-                        }
-                    }
-
                     list.Add(projector(reader));
                 }
 
-                if (!foundCrossJoinCountColumn)
-                    total = list.Count;
-
-                return new PagedQueryResult<IEnumerable<T>>(list, total);
+                return list;
             }
         }
 
@@ -1003,24 +951,9 @@ namespace DotNetToolkit.Repository.AdoNet
         /// <param name="projector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
-        internal Task<IPagedQueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
+        internal Task<IEnumerable<T>> ExecuteListAsync<T>(string cmdText, Dictionary<string, object> parameters, Func<DbDataReader, T> projector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ExecuteListAsync<T>(cmdText, CommandType.Text, parameters, projector, cancellationToken);
-        }
-
-        /// <summary>
-        /// Asynchronously executes the query, and returns a list which each entity has been projected into a new form.
-        /// </summary>
-        /// <typeparam name="T">The type of the result set returned by the query.</typeparam>
-        /// <param name="cmdText">The command text.</param>
-        /// <param name="parameters">The command parameters.</param>
-        /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns>
-        internal Task<IPagedQueryResult<IEnumerable<T>>> ExecuteListAsync<T>(string cmdText, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken()) where T : class
-        {
-            var mapper = new Mapper<T>(_conventions);
-
-            return ExecuteListAsync<T>(cmdText, parameters, mapper.Map, cancellationToken);
         }
 
         /// <summary>
