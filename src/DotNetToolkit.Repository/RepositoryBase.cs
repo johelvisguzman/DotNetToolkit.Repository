@@ -1206,6 +1206,7 @@
         private readonly IRepositoryContextFactory _contextFactory;
         private IEnumerable<IRepositoryInterceptor> _interceptors;
         private string _currentExecutingLoggingMethod;
+        private readonly ILoggerProvider _loggerProvider;
 
         #endregion
 
@@ -1225,11 +1226,6 @@
         /// Gets the repository logger.
         /// </summary>
         protected internal ILogger Logger { get; }
-
-        /// <summary>
-        /// Gets the repository logger provider.
-        /// </summary>
-        protected internal ILoggerProvider LoggerProvider { get; }
 
         /// <summary>
         /// Gets the caching provider.
@@ -1257,9 +1253,9 @@
             _contextFactory = Guard.EnsureNotNull(_options.ContextFactory, "No context provider has been configured for this repository.");
 
             // Sets the default logger provider (prints all messages levels)
-            LoggerProvider = _options.LoggerProvider ?? new ConsoleLoggerProvider(LogLevel.Debug);
+            _loggerProvider = _options.LoggerProvider ?? new ConsoleLoggerProvider(LogLevel.Debug);
 
-            Logger = LoggerProvider.Create($"DotNetToolkit.Repository<{typeof(TEntity).Name}>");
+            Logger = _loggerProvider.Create($"DotNetToolkit.Repository<{typeof(TEntity).Name}>");
 
             CacheProvider = _options.CachingProvider ?? NullCacheProvider.Instance;
 
@@ -2833,8 +2829,8 @@
                 if (_options.Conventions != null)
                     conventions.Apply(_options.Conventions);
 
-                if (context.LoggerProvider == null && LoggerProvider != null)
-                    context.LoggerProvider = LoggerProvider;
+                if (_loggerProvider != null)
+                    context.LoggerProvider = _loggerProvider;
 
                 conventions.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>();
             }
