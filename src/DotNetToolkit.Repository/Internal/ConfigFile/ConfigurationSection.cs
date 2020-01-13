@@ -74,7 +74,7 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
             return CachingProvider.GetTypedValue();
         }
 
-        public Dictionary<Type, Func<IRepositoryInterceptor>> GetInterceptors()
+        public IReadOnlyDictionary<Type, Func<IRepositoryInterceptor>> GetInterceptors()
         {
             return Interceptors.GetTypedValues();
         }
