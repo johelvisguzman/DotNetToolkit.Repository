@@ -37,19 +37,19 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
             get => (RepositoryInterceptorElementCollection)this[InterceptorsKey];
         }
 
-        [ConfigurationProperty(DefaultContextFactoryKey, IsRequired = false)]
+        [ConfigurationProperty(DefaultContextFactoryKey, IsRequired = false, IsDefaultCollection = false)]
         public virtual RepositoryContextFactoryElement DefaultContextFactory
         {
             get => (RepositoryContextFactoryElement)this[DefaultContextFactoryKey];
         }
 
-        [ConfigurationProperty(LoggingProviderKey, IsRequired = false)]
+        [ConfigurationProperty(LoggingProviderKey, IsRequired = false, IsDefaultCollection = false)]
         public virtual LoggingProviderElement LoggingProvider
         {
             get => (LoggingProviderElement)this[LoggingProviderKey];
         }
 
-        [ConfigurationProperty(CachingProviderKey, IsRequired = false)]
+        [ConfigurationProperty(CachingProviderKey, IsRequired = false, IsDefaultCollection = false)]
         public virtual CachingProviderElement CachingProvider
         {
             get => (CachingProviderElement)this[CachingProviderKey];
@@ -145,7 +145,7 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
 
     class ParameterCollection : ConfigurationElementCollection
     {
-        private const string ParameterKey = "parameter";
+        private const string ParameterKey = "param";
 
         public override ConfigurationElementCollectionType CollectionType
         {
@@ -168,10 +168,9 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
         }
     }
 
-    abstract class TypedConfigurationElementBase<T> : ConfigurationElement
+    abstract class TypedConfigurationElementBase<T> : ParameterCollection
     {
         private const string TypeKey = "type";
-        private const string ParametersKey = "parameters";
 
         private Type _type;
 
@@ -203,12 +202,6 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
             }
         }
 
-        [ConfigurationProperty(ParametersKey, IsDefaultCollection = false)]
-        public ParameterCollection Parameters
-        {
-            get { return (ParameterCollection)this[ParametersKey]; }
-        }
-
         public virtual T GetTypedValue()
         {
             var type = Type;
@@ -216,8 +209,7 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
             if (type == null)
                 return default(T);
 
-            var keyValues = Parameters
-                .Cast<ParameterElement>()
+            var keyValues = this.Cast<ParameterElement>()
                 .ToDictionary(x => x.Name, x => x.ValueString);
 
             if (!keyValues.Any())
