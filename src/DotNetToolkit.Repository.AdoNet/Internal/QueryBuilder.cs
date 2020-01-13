@@ -398,7 +398,7 @@
 
                 if (string.IsNullOrEmpty(defaultSelect))
                 {
-                    var sorting = options.SortingPropertiesMapping.ToDictionary(x => x.Key, x => x.Value);
+                    var sorting = options.SortingProperties.ToDictionary(x => x.Key, x => x.Value);
 
                     if (!sorting.Any())
                     {
