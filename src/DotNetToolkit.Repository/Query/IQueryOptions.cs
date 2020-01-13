@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Queries
+﻿namespace DotNetToolkit.Repository.Query
 {
     using Strategies;
     using System.Collections.Generic;
@@ -22,7 +22,7 @@
         /// <summary>
         /// Gets a collection of sorting property paths.
         /// </summary>
-        IReadOnlyDictionary<string, SortOrder> SortingPropertiesMapping { get; }
+        IReadOnlyDictionary<string, SortOrder> SortingProperties { get; }
 
         /// <summary>
         /// Gets the fetch strategy which defines the child objects that should be retrieved when loading the entity.

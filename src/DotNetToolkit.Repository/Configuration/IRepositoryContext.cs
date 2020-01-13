@@ -2,8 +2,8 @@
 {
     using Conventions;
     using Logging;
-    using Queries;
-    using Queries.Strategies;
+    using Query;
+    using Query.Strategies;
     using System;
     using System.Collections.Generic;
     using System.Data;

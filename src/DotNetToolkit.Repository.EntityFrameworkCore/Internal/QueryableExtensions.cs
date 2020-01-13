@@ -3,7 +3,7 @@
     using Configuration.Conventions;
     using Extensions;
     using Microsoft.EntityFrameworkCore;
-    using Queries;
+    using Query;
     using System.Linq;
     using Utility;
 

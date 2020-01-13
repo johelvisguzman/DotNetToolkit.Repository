@@ -2,7 +2,7 @@
 {
     using Configuration.Conventions;
     using Extensions;
-    using Queries;
+    using Query;
     using System.Data.Entity;
     using System.Linq;
     using Utility;

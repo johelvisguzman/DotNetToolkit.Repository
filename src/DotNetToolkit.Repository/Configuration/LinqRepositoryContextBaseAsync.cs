@@ -4,9 +4,9 @@
     using Extensions;
     using JetBrains.Annotations;
     using Properties;
-    using Queries;
-    using Queries.Internal;
-    using Queries.Strategies;
+    using Query;
+    using Query.Internal;
+    using Query.Strategies;
     using System;
     using System.Collections.Generic;
     using System.Data;

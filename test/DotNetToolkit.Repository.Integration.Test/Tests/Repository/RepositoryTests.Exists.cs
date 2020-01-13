@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Repository
 {
     using Data;
-    using Queries;
+    using Query;
     using System.Threading.Tasks;
     using Xunit;
 

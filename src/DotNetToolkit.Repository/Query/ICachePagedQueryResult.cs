@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Queries
+﻿namespace DotNetToolkit.Repository.Query
 {
     /// <summary>
     /// Represents an internal cache paged query result.

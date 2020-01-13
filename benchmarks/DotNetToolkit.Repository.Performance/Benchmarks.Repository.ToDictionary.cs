@@ -2,7 +2,7 @@
 {
     using BenchmarkDotNet.Attributes;
     using Data;
-    using Queries;
+    using Query;
 
     [BenchmarkCategory("ToDictionary")]
     public class Repository_ToDictionary_Benchmarks : BenchmarkBase

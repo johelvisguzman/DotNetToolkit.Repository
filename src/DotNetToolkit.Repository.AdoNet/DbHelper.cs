@@ -6,8 +6,8 @@ namespace DotNetToolkit.Repository.AdoNet
     using Extensions;
     using Extensions.Internal;
     using Internal;
-    using Queries;
-    using Queries.Internal;
+    using Query;
+    using Query.Internal;
     using System;
     using System.Collections.Generic;
     using System.Configuration;

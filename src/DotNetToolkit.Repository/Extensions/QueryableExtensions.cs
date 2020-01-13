@@ -3,7 +3,7 @@
     using Configuration.Conventions;
     using Extensions.Internal;
     using JetBrains.Annotations;
-    using Queries;
+    using Query;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -45,7 +45,7 @@
             var sorting = new Dictionary<string, SortOrder>();
 
             if (options != null)
-                sorting = options.SortingPropertiesMapping.ToDictionary(x => x.Key, x => x.Value);
+                sorting = options.SortingProperties.ToDictionary(x => x.Key, x => x.Value);
 
             // Sorts on the composite key by default if no sorting is provided
             if (!sorting.Any())

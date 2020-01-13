@@ -2,8 +2,8 @@
 {
     using Configuration.Conventions;
     using JetBrains.Annotations;
-    using Queries;
-    using Queries.Strategies;
+    using Query;
+    using Query.Strategies;
     using System;
     using System.Linq;
     using System.Linq.Expressions;

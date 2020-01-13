@@ -4,9 +4,9 @@
     using Configuration.Logging;
     using Extensions;
     using Extensions.Internal;
-    using Queries;
-    using Queries.Internal;
-    using Queries.Strategies;
+    using Query;
+    using Query.Internal;
+    using Query.Strategies;
     using Schema;
     using System;
     using System.Collections.Concurrent;

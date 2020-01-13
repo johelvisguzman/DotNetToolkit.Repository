@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Queries
+﻿namespace DotNetToolkit.Repository.Query
 {
     using Extensions.Internal;
     using JetBrains.Annotations;
@@ -14,7 +14,7 @@
     /// An implementation of <see cref="IQueryOptions{T}" />.
     /// </summary>
     /// <typeparam name="T">The entity type of the repository.</typeparam>
-    /// <seealso cref="DotNetToolkit.Repository.Queries.IQueryOptions{T}" />
+    /// <seealso cref="DotNetToolkit.Repository.Query.IQueryOptions{T}" />
     public class QueryOptions<T> : IQueryOptions<T>
     {
         #region Fields
@@ -247,7 +247,7 @@
         /// <summary>
         /// Gets a collection of sorting property paths.
         /// </summary>
-        IReadOnlyDictionary<string, SortOrder> IQueryOptions<T>.SortingPropertiesMapping { get { return _sortingPropertiesMapping; } }
+        IReadOnlyDictionary<string, SortOrder> IQueryOptions<T>.SortingProperties { get { return _sortingPropertiesMapping; } }
 
         /// <summary>
         /// Gets the fetch strategy which defines the child objects that should be retrieved when loading the entity.

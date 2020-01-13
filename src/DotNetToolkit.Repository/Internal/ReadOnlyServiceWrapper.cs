@@ -1,8 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.Internal
 {
     using JetBrains.Annotations;
-    using Queries;
-    using Queries.Strategies;
+    using Query;
+    using Query.Strategies;
     using Services;
     using System;
     using System.Collections.Generic;

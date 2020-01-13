@@ -3,7 +3,7 @@
     using Configuration.Conventions;
     using Extensions;
     using Extensions.Internal;
-    using Queries;
+    using Query;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -398,7 +398,7 @@
 
                 if (string.IsNullOrEmpty(defaultSelect))
                 {
-                    var sorting = options.SortingPropertiesMapping.ToDictionary(x => x.Key, x => x.Value);
+                    var sorting = options.SortingProperties.ToDictionary(x => x.Key, x => x.Value);
 
                     if (!sorting.Any())
                     {

@@ -11,8 +11,8 @@
     using Internal;
     using JetBrains.Annotations;
     using Properties;
-    using Queries;
-    using Queries.Strategies;
+    using Query;
+    using Query.Strategies;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;

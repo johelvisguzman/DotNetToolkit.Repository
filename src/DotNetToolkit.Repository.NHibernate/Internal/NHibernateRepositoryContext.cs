@@ -6,7 +6,7 @@
     using Extensions.Internal;
     using global::NHibernate;
     using global::NHibernate.Linq;
-    using Queries;
+    using Query;
     using System;
     using System.Collections.Generic;
     using System.Data;

@@ -2,7 +2,7 @@
 {
     using BenchmarkDotNet.Attributes;
     using Data;
-    using Queries;
+    using Query;
 
     [BenchmarkCategory("Find")]
     public class Repository_Find_Benchmarks : BenchmarkBase

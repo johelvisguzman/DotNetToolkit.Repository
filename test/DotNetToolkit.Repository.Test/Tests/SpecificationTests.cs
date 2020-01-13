@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Test
 {
-    using Queries.Strategies;
+    using Query.Strategies;
     using Xunit;
 
     public class SpecificationTests

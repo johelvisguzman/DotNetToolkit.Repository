@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Queries
+﻿namespace DotNetToolkit.Repository.Query
 {
     /// <summary>
     /// Represents a paged query result.

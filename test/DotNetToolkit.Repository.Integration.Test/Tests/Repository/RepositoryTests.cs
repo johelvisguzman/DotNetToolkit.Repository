@@ -2,7 +2,7 @@
 {
     using Data;
     using Fixtures;
-    using Queries;
+    using Query;
     using System;
     using System.Reflection;
     using System.Threading.Tasks;
