@@ -2,7 +2,7 @@
 {
     using BenchmarkDotNet.Attributes;
     using Data;
-    using Queries;
+    using Query;
 
     [BenchmarkCategory("GroupBy")]
     public class Repository_GroupBy_Benchmarks : BenchmarkBase

@@ -6,8 +6,8 @@
     using Microsoft.Azure.Storage;
     using Microsoft.Azure.Storage.Blob;
     using Newtonsoft.Json;
-    using Queries;
-    using Queries.Strategies;
+    using Query;
+    using Query.Strategies;
     using System.Collections.Generic;
     using System.Configuration;
     using System.Linq;

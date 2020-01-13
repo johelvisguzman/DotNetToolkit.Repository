@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Services
 {
-    using Queries;
-    using Queries.Strategies;
+    using Query;
+    using Query.Strategies;
     using System;
     using System.Collections.Generic;
     using System.Linq.Expressions;

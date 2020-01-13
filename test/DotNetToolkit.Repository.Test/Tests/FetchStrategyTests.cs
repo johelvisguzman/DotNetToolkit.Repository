@@ -1,7 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Test
 {
     using Data;
-    using Queries.Strategies;
+    using Query.Strategies;
     using Xunit;
 
     public class FetchStrategyTests

@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Queries.Internal
+﻿namespace DotNetToolkit.Repository.Query.Internal
 {
     using JetBrains.Annotations;
 

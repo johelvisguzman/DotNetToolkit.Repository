@@ -4,7 +4,7 @@
     using Configuration.Caching.Internal;
     using Data;
     using Fixtures;
-    using Queries;
+    using Query;
     using System.Threading.Tasks;
     using Xunit;
     using Xunit.Abstractions;

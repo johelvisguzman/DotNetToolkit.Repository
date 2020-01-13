@@ -3,7 +3,7 @@
     using Configuration.Conventions;
     using Extensions;
     using Extensions.Internal;
-    using Queries;
+    using Query;
     using System;
     using System.Collections.Generic;
     using System.Linq;

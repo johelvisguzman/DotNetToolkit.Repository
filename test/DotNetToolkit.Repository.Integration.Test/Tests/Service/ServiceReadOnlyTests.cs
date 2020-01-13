@@ -3,8 +3,8 @@
     using Data;
     using Internal;
     using Moq;
-    using Queries;
-    using Queries.Strategies;
+    using Query;
+    using Query.Strategies;
     using Services;
     using System;
     using System.Collections.Generic;

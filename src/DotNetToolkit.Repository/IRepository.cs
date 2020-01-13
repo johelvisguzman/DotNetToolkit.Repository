@@ -1,6 +1,6 @@
 ﻿namespace DotNetToolkit.Repository
 {
-    using Queries;
+    using Query;
     using System;
     using System.Collections.Generic;
     using System.Data;

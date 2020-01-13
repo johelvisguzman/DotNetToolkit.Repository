@@ -1,8 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Service
 {
     using Data;
-    using Queries;
-    using Queries.Strategies;
+    using Query;
+    using Query.Strategies;
     using Services;
     using System.Collections.Generic;
     using System.Linq;

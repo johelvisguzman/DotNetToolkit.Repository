@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Queries.Strategies
+﻿namespace DotNetToolkit.Repository.Query.Strategies
 {
     using System;
     using System.Collections.Generic;

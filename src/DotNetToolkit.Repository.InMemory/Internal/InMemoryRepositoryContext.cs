@@ -4,7 +4,7 @@
     using Configuration.Conventions;
     using Extensions;
     using Properties;
-    using Queries.Strategies;
+    using Query.Strategies;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;

@@ -3,7 +3,7 @@
     using Configuration.Conventions;
     using Extensions.Internal;
     using JetBrains.Annotations;
-    using Queries;
+    using Query;
     using System;
     using System.Collections;
     using System.Collections.Generic;
