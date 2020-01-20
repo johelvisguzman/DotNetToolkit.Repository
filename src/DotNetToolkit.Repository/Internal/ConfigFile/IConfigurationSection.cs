@@ -18,6 +18,6 @@
 
         ICacheProvider GetCachingProvider();
 
-        Dictionary<Type, Func<IRepositoryInterceptor>> GetInterceptors();
+        IReadOnlyDictionary<Type, Func<IRepositoryInterceptor>> GetInterceptors();
     }
 }

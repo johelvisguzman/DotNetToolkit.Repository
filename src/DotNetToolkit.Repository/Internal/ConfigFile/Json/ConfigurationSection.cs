@@ -84,7 +84,7 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile.Json
             return null;
         }
 
-        public Dictionary<Type, Func<IRepositoryInterceptor>> GetInterceptors()
+        public IReadOnlyDictionary<Type, Func<IRepositoryInterceptor>> GetInterceptors()
         {
             var interceptorsDict = new Dictionary<Type, Func<IRepositoryInterceptor>>();
             var section = _root.GetSection(InterceptorCollectionSectionKey);
