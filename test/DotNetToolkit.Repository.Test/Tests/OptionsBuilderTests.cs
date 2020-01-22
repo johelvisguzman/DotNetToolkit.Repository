@@ -202,15 +202,32 @@
 
         private static void TestConfiguration(RepositoryOptionsBuilder optionsBuilder)
         {
+            // is configured
             Assert.True(optionsBuilder.IsConfigured);
 
+            // context factory
             Assert.NotNull(optionsBuilder.Options.ContextFactory);
-            Assert.NotNull(optionsBuilder.Options.LoggerProvider);
-            Assert.NotNull(optionsBuilder.Options.CachingProvider);
-            Assert.NotNull(optionsBuilder.Options.CachingProvider.Expiry);
 
-            Assert.Equal(1, optionsBuilder.Options.Interceptors.Count());
+            var context = optionsBuilder.Options.ContextFactory.Create() as IInMemoryRepositoryContext;
+
+            Assert.NotNull(context);
+            Assert.Equal("__InMemoryDatabaseName__", context.DatabaseName);
+
+            // logging provider
+            Assert.NotNull(optionsBuilder.Options.LoggerProvider);
+            
+            // caching provider
+            Assert.NotNull(optionsBuilder.Options.CachingProvider);
+            Assert.Equal(optionsBuilder.Options.CachingProvider.Expiry, TimeSpan.FromSeconds(30));
+
+            // interceptor
+            Assert.Single(optionsBuilder.Options.Interceptors);
             Assert.True(optionsBuilder.Options.Interceptors.ContainsKey(typeof(TestRepositoryInterceptor)));
+
+            var interceptor = optionsBuilder.Options.Interceptors[typeof(TestRepositoryInterceptor)].Value as TestRepositoryInterceptor;
+
+            Assert.Equal("random param", interceptor.P1);
+            Assert.True(interceptor.P2);
         }
     }
 }

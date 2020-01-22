@@ -84,7 +84,26 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
 
     class LoggingProviderElement : TypedConfigurationElementBase<ILoggerProvider> { }
 
-    class CachingProviderElement : TypedConfigurationElementBase<ICacheProvider> { }
+    class CachingProviderElement : TypedConfigurationElementBase<ICacheProvider>
+    {
+        private const string ExpiryKey = "expiry";
+
+        [ConfigurationProperty(ExpiryKey)]
+        public ExpiryElement Expiry
+        {
+            get { return (ExpiryElement)this[ExpiryKey]; }
+        }
+
+        public override ICacheProvider GetTypedValue()
+        {
+            var provider = base.GetTypedValue();
+
+            if (Expiry != null)
+                provider.Expiry = Expiry.Value;
+
+            return provider;
+        }
+    }
 
     class RepositoryContextFactoryElement : TypedConfigurationElementBase<IRepositoryContextFactory> { }
 
@@ -165,6 +184,18 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
         protected override string ElementName
         {
             get { return ParameterKey; }
+        }
+    }
+
+    class ExpiryElement : ConfigurationElement
+    {
+        private const string ValueKey = "value";
+
+        [ConfigurationProperty(ValueKey, IsRequired = true)]
+        public TimeSpan? Value
+        {
+            get { return (TimeSpan?)this[ValueKey]; }
+            set { this[ValueKey] = value; }
         }
     }
 
