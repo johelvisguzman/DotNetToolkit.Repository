@@ -25,7 +25,7 @@
     {
         private static string CachePrefix = "RepositoriesCachingPrefix";
         private static string CacheCounterPrefix = "RepositoriesCachingCounterPrefix";
-        private static string CachePrefixGlue = "§";
+        private static string CachePrefixGlue = "§...";
 
         private static readonly object _syncRoot = new object();
         private static string Name<T>() => typeof(T).FullName;
