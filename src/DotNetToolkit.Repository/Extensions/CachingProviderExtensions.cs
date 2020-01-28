@@ -50,10 +50,10 @@
             Guard.NotEmpty(key, nameof(key));
             Guard.NotNull(logger, nameof(logger));
 
-            var hashedKey = FormatHashedKey<TEntity>(cacheProvider, key);
+            var hashedKey = FormatHashedKey<TEntity>(cacheProvider, key, logger);
             var cacheUsed = false;
 
-            if (!cacheProvider.TryGetValue<TResult>(hashedKey, out var value))
+            if (cacheProvider.TryGetValue<TResult>(hashedKey, logger, out var value) == false)
             {
                 var expiry = cacheProvider.Expiry;
 
@@ -93,10 +93,10 @@
             Guard.NotNull(getter, nameof(getter));
             Guard.NotNull(logger, nameof(logger));
 
-            var hashedKey = FormatHashedKey<TEntity>(cacheProvider, key);
+            var hashedKey = FormatHashedKey<TEntity>(cacheProvider, key, logger);
             var cacheUsed = false;
 
-            if (!cacheProvider.TryGetValue<PagedQueryResult<TResult>>(hashedKey, out var value))
+            if (cacheProvider.TryGetValue<PagedQueryResult<TResult>>(hashedKey, logger, out var value) == false)
             {
                 var expiry = cacheProvider.Expiry;
 
@@ -136,10 +136,10 @@
             Guard.NotNull(getter, nameof(getter));
             Guard.NotNull(logger, nameof(logger));
 
-            var hashedKey = FormatHashedKey<TEntity>(cacheProvider, key);
+            var hashedKey = FormatHashedKey<TEntity>(cacheProvider, key, logger);
             var cacheUsed = false;
 
-            if (!cacheProvider.TryGetValue<TResult>(hashedKey, out var value))
+            if (cacheProvider.TryGetValue<TResult>(hashedKey, logger, out var value) == false)
             {
                 var expiry = cacheProvider.Expiry;
 
@@ -179,10 +179,10 @@
             Guard.NotNull(getter, nameof(getter));
             Guard.NotNull(logger, nameof(logger));
 
-            var hashedKey = FormatHashedKey<TEntity>(cacheProvider, key);
+            var hashedKey = FormatHashedKey<TEntity>(cacheProvider, key, logger);
             var cacheUsed = false;
 
-            if (!cacheProvider.TryGetValue<PagedQueryResult<TResult>>(hashedKey, out var value))
+            if (cacheProvider.TryGetValue<PagedQueryResult<TResult>>(hashedKey, logger, out var value) == false)
             {
                 var expiry = cacheProvider.Expiry;
 
@@ -453,35 +453,56 @@
 
             lock (_syncRoot)
             {
-                logger.Debug(expiry.HasValue
+                try
+                {
+                    cacheProvider.Cache.Set<T>(
+                        hashedKey,
+                        value,
+                        expiry,
+                        reason => logger.Debug($"Cache for '{hashedKey}' has expired. Evicting from cache for '{reason}'"));
+
+                    logger.Debug(expiry.HasValue
                         ? $"Setting up cache for '{hashedKey}' expire handling in {expiry.Value.TotalSeconds} seconds"
                         : $"Setting up cache for '{hashedKey}'");
-
-                cacheProvider.Cache.Set<T>(
-                    hashedKey,
-                    value,
-                    expiry,
-                    reason => logger.Debug($"Cache for '{hashedKey}' has expired. Evicting from cache for '{reason}'"));
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex, $"Unable to set cache value for '{hashedKey}'");
+                }
             }
         }
 
-        private static bool TryGetValue<T>([NotNull] this ICacheProvider cacheProvider, [NotNull] string key, out T value)
+        private static bool? TryGetValue<T>([NotNull] this ICacheProvider cacheProvider, [NotNull] string key, [NotNull] ILogger logger, out T value)
         {
             Guard.NotNull(cacheProvider, nameof(cacheProvider));
-            Guard.NotEmpty(key, nameof(key));
             Guard.EnsureNotNull(cacheProvider.Cache, "The caching cannot be null.");
+            Guard.NotEmpty(key, nameof(key));
+            Guard.NotNull(logger, nameof(logger));
 
             lock (_syncRoot)
             {
-                return cacheProvider.Cache.TryGetValue<T>(key, out value);
+                bool? result = null;
+                value = default(T);
+
+                try
+                {
+                    result = cacheProvider.Cache.TryGetValue<T>(key, out value);
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex, $"Unable to get cache value for '{key}'");
+                }
+
+                return result;
             }
         }
 
-        private static int GetCachingPrefixCounter<T>([NotNull] this ICacheProvider cacheProvider)
+        private static int GetCachingPrefixCounter<T>([NotNull] this ICacheProvider cacheProvider, [NotNull] ILogger logger)
         {
             Guard.NotNull(cacheProvider, nameof(cacheProvider));
+            Guard.NotNull(logger, nameof(logger));
 
-            return !cacheProvider.TryGetValue<int>(FormatCachePrefixCounterKey<T>(), out var key) ? 1 : key;
+            return cacheProvider.TryGetValue<int>(FormatCachePrefixCounterKey<T>(), logger, out var key) == true ? key : 1;
         }
 
         private static string FormatCachePrefixCounterKey<T>()
@@ -492,16 +513,17 @@
                 CacheCounterPrefix);
         }
 
-        private static string FormatHashedKey<T>([NotNull] this ICacheProvider cacheProvider, [NotNull] string key)
+        private static string FormatHashedKey<T>([NotNull] this ICacheProvider cacheProvider, [NotNull] string key, [NotNull] ILogger logger)
         {
             Guard.NotNull(cacheProvider, nameof(cacheProvider));
             Guard.NotEmpty(key, nameof(key));
+            Guard.NotNull(logger, nameof(logger));
 
             var cacheKeyTransformer = cacheProvider.KeyTransformer ?? new DefaultCacheKeyTransformer();
 
             return string.Format("{1}{0}{2}{0}{3}",
                 CachePrefixGlue,
-                cacheProvider.GetCachingPrefixCounter<T>(),
+                cacheProvider.GetCachingPrefixCounter<T>(logger),
                 cacheKeyTransformer.Transform(key),
                 CachePrefix);
         }
