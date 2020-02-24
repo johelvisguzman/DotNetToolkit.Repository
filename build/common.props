@@ -16,6 +16,8 @@
   <PackageLicenseUrl>https://github.com/johelvisguzman/DotNetToolkit.Repository/blob/master/LICENSE.md</PackageLicenseUrl>
   <RepositoryType>git</RepositoryType>
   <RepositoryUrl>https://github.com/johelvisguzman/DotNetToolkit.Repository</RepositoryUrl>
+  <IncludeSymbols>true</IncludeSymbols>
+  <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Key.snk</AssemblyOriginatorKeyFile>
   <SignAssembly>true</SignAssembly>
   <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
