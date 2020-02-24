@@ -85,6 +85,8 @@ deploy:
   server: https://www.myget.org/F/dotnettoolkitrepository-dev/api/v2/package
   api_key:
     secure: SR7XeaMyomlDy1JekkpUVvPhQ9RnaRmvDZ68gR1S/xFEe1QfYFbsss9GDq0Q/8Rq
+  skip_symbols: false
+  symbol_server: https://www.myget.org/F/dotnettoolkitrepository-dev/symbols/api/v2/package
   on:
     branch: master                    # release from master branch only
 - provider: NuGet
