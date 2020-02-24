@@ -46,23 +46,23 @@ build:
   project: DotNetToolkit.Repository.sln             # path to Visual Studio solution or project
 
 after_build:
-  - dotnet pack .\src\DotNetToolkit.Repository\DotNetToolkit.Repository.csproj --configuration Release
-  - dotnet pack .\src\DotNetToolkit.Repository.InMemory\DotNetToolkit.Repository.InMemory.csproj --configuration Release
-  - dotnet pack .\src\DotNetToolkit.Repository.EntityFramework\DotNetToolkit.Repository.EntityFramework.csproj --configuration Release
-  - dotnet pack .\src\DotNetToolkit.Repository.EntityFrameworkCore\DotNetToolkit.Repository.EntityFrameworkCore.csproj --configuration Release
-  - dotnet pack .\src\DotNetToolkit.Repository.AdoNet\DotNetToolkit.Repository.AdoNet.csproj --configuration Release
-  - dotnet pack .\src\DotNetToolkit.Repository.NHibernate\DotNetToolkit.Repository.NHibernate.csproj --configuration Release
-  - dotnet pack .\src\DotNetToolkit.Repository.Json\DotNetToolkit.Repository.Json.csproj --configuration Release
-  - dotnet pack .\src\DotNetToolkit.Repository.Xml\DotNetToolkit.Repository.Xml.csproj --configuration Release
-  - dotnet pack .\src\DotNetToolkit.Repository.AzureStorageBlob\DotNetToolkit.Repository.AzureStorageBlob.csproj --configuration Release
-  - dotnet pack .\src\DotNetToolkit.Repository.AzureStorageTable\DotNetToolkit.Repository.AzureStorageTable.csproj --configuration Release
-  - dotnet pack .\src\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.csproj --configuration Release
-  - dotnet pack .\src\DotNetToolkit.Repository.Extensions.Unity\DotNetToolkit.Repository.Extensions.Unity.csproj --configuration Release
-  - dotnet pack .\src\DotNetToolkit.Repository.Extensions.Ninject\DotNetToolkit.Repository.Extensions.Ninject.csproj --configuration Release
-  - dotnet pack .\src\DotNetToolkit.Repository.Caching.InMemory\DotNetToolkit.Repository.Caching.InMemory.csproj --configuration Release
-  - dotnet pack .\src\DotNetToolkit.Repository.Caching.Redis\DotNetToolkit.Repository.Caching.Redis.csproj --configuration Release
-  - dotnet pack .\src\DotNetToolkit.Repository.Caching.Memcached\DotNetToolkit.Repository.Caching.Memcached.csproj --configuration Release
-  - dotnet pack .\src\DotNetToolkit.Repository.Caching.Couchbase\DotNetToolkit.Repository.Caching.Couchbase.csproj --configuration Release
+  - dotnet pack .\src\DotNetToolkit.Repository\DotNetToolkit.Repository.csproj --configuration Release --include-symbols -p:SymbolPackageFormat=snupkg
+  - dotnet pack .\src\DotNetToolkit.Repository.InMemory\DotNetToolkit.Repository.InMemory.csproj --configuration Release --include-symbols -p:SymbolPackageFormat=snupkg
+  - dotnet pack .\src\DotNetToolkit.Repository.EntityFramework\DotNetToolkit.Repository.EntityFramework.csproj --configuration Release --include-symbols -p:SymbolPackageFormat=snupkg
+  - dotnet pack .\src\DotNetToolkit.Repository.EntityFrameworkCore\DotNetToolkit.Repository.EntityFrameworkCore.csproj --configuration Release --include-symbols -p:SymbolPackageFormat=snupkg
+  - dotnet pack .\src\DotNetToolkit.Repository.AdoNet\DotNetToolkit.Repository.AdoNet.csproj --configuration Release --include-symbols -p:SymbolPackageFormat=snupkg
+  - dotnet pack .\src\DotNetToolkit.Repository.NHibernate\DotNetToolkit.Repository.NHibernate.csproj --configuration Release --include-symbols -p:SymbolPackageFormat=snupkg
+  - dotnet pack .\src\DotNetToolkit.Repository.Json\DotNetToolkit.Repository.Json.csproj --configuration Release --include-symbols -p:SymbolPackageFormat=snupkg
+  - dotnet pack .\src\DotNetToolkit.Repository.Xml\DotNetToolkit.Repository.Xml.csproj --configuration Release --include-symbols -p:SymbolPackageFormat=snupkg
+  - dotnet pack .\src\DotNetToolkit.Repository.AzureStorageBlob\DotNetToolkit.Repository.AzureStorageBlob.csproj --configuration Release --include-symbols -p:SymbolPackageFormat=snupkg
+  - dotnet pack .\src\DotNetToolkit.Repository.AzureStorageTable\DotNetToolkit.Repository.AzureStorageTable.csproj --configuration Release --include-symbols -p:SymbolPackageFormat=snupkg
+  - dotnet pack .\src\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.csproj --configuration Release --include-symbols -p:SymbolPackageFormat=snupkg
+  - dotnet pack .\src\DotNetToolkit.Repository.Extensions.Unity\DotNetToolkit.Repository.Extensions.Unity.csproj --configuration Release --include-symbols -p:SymbolPackageFormat=snupkg
+  - dotnet pack .\src\DotNetToolkit.Repository.Extensions.Ninject\DotNetToolkit.Repository.Extensions.Ninject.csproj --configuration Release --include-symbols -p:SymbolPackageFormat=snupkg
+  - dotnet pack .\src\DotNetToolkit.Repository.Caching.InMemory\DotNetToolkit.Repository.Caching.InMemory.csproj --configuration Release --include-symbols -p:SymbolPackageFormat=snupkg
+  - dotnet pack .\src\DotNetToolkit.Repository.Caching.Redis\DotNetToolkit.Repository.Caching.Redis.csproj --configuration Release --include-symbols -p:SymbolPackageFormat=snupkg
+  - dotnet pack .\src\DotNetToolkit.Repository.Caching.Memcached\DotNetToolkit.Repository.Caching.Memcached.csproj --configuration Release --include-symbols -p:SymbolPackageFormat=snupkg
+  - dotnet pack .\src\DotNetToolkit.Repository.Caching.Couchbase\DotNetToolkit.Repository.Caching.Couchbase.csproj --configuration Release --include-symbols -p:SymbolPackageFormat=snupkg
 
 #---------------------------------#
 #      artifacts configuration    #
@@ -85,7 +85,6 @@ deploy:
   server: https://www.myget.org/F/dotnettoolkitrepository-dev/api/v2/package
   api_key:
     secure: SR7XeaMyomlDy1JekkpUVvPhQ9RnaRmvDZ68gR1S/xFEe1QfYFbsss9GDq0Q/8Rq
-  skip_symbols: true
   on:
     branch: master                    # release from master branch only
 - provider: NuGet
