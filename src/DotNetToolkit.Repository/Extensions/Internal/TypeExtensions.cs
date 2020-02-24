@@ -18,9 +18,7 @@
         /// <returns>The default value of the specified type.</returns>
         public static object GetDefault([NotNull] this Type type)
         {
-            Guard.NotNull(type, nameof(type));
-
-            return type.GetTypeInfo().IsValueType ? Activator.CreateInstance(type) : null;
+            return type == null ? null : (type.GetTypeInfo().IsValueType ? Activator.CreateInstance(type) : null);
         }
 
         /// <summary>
@@ -30,9 +28,7 @@
         /// <returns><c>true</c> if the specified type is a <see cref="ICollection{T}"/>; otherwise, <c>false</c>.</returns>
         public static bool IsGenericCollection([NotNull] this Type type)
         {
-            Guard.NotNull(type, nameof(type));
-
-            return type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>);
+            return type != null && type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(ICollection<>);
         }
 
         /// <summary>
@@ -42,9 +38,7 @@
         /// <returns><c>true</c> if the specified type is nullable; otherwise, <c>false</c>.</returns>
         public static bool IsNullableType([NotNull] this Type type)
         {
-            Guard.NotNull(type, nameof(type));
-
-            return type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+            return type != null && type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
         }
 
         /// <summary>
@@ -54,7 +48,7 @@
         /// <returns><c>true</c> if the specified type is enumerable; otherwise, <c>false</c>.</returns>
         public static bool IsEnumerable([NotNull] this Type type)
         {
-            return typeof(IEnumerable).IsAssignableFrom(Guard.NotNull(type, nameof(type)));
+            return type != null && typeof(IEnumerable).IsAssignableFrom(Guard.NotNull(type, nameof(type)));
         }
 
         /// <summary>
@@ -65,12 +59,12 @@
         /// <returns><c>true</c> if specified type implements the specified interface type; otherwise, <c>false</c>.</returns>
         public static bool ImplementsInterface([NotNull] this Type type, [NotNull] Type interfaceType)
         {
-            Guard.NotNull(type, nameof(type));
-            Guard.NotNull(interfaceType, nameof(interfaceType));
-
-            return interfaceType.IsAssignableFrom(type) ||
-                   type.IsGenericType(interfaceType) ||
-                   type.GetTypeInfo().ImplementedInterfaces.Any(@interface => IsGenericType(@interface, interfaceType));
+            return type != null && interfaceType != null &&
+                   (
+                       interfaceType.IsAssignableFrom(type) ||
+                       type.IsGenericType(interfaceType) ||
+                       type.GetTypeInfo().ImplementedInterfaces.Any(@interface => IsGenericType(@interface, interfaceType))
+                   );
         }
 
         /// <summary>
@@ -81,10 +75,7 @@
         /// <returns><c>true</c> if the specified type is a generic type of the specified interface type; otherwise, <c>false</c>.</returns>
         public static bool IsGenericType([NotNull] this Type type, [NotNull] Type genericType)
         {
-            Guard.NotNull(type, nameof(type));
-            Guard.NotNull(genericType, nameof(genericType));
-
-            return type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == genericType;
+            return type != null && genericType != null && type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == genericType;
         }
 
         /// <summary>
@@ -95,7 +86,8 @@
         /// <returns>The converted result.</returns>
         public static object ConvertTo([NotNull] this Type type, [CanBeNull] string value)
         {
-            Guard.NotNull(type, nameof(type));
+            if (type == null)
+                return null;
 
             object Result = null;
 
@@ -167,7 +159,8 @@
         /// <returns>The new instance of the specified type.</returns>
         public static object InvokeConstructor([NotNull] this Type type, [CanBeNull] Dictionary<string, string> keyValues)
         {
-            Guard.NotNull(type, nameof(type));
+            if (type == null)
+                return null;
 
             if (keyValues == null || keyValues.Count == 0)
                 return Activator.CreateInstance(type);
@@ -220,20 +213,20 @@
             {
                 // Try to get all the values for the parameters we already have,
                 // and set the rest to their default value
-                var args  = matchedCtorParams.Value.Select(pi =>
-                {
-                    // If we find a matching parameter, then delete it from the collection,
-                    // that way we don't try to initialize a property that has the same name
-                    if (kvs.ContainsKey(pi.Name))
-                    {
-                        kvs.TryGetValue(pi.Name, out var value);
-                        kvs.Remove(pi.Name);
+                var args = matchedCtorParams.Value.Select(pi =>
+               {
+                   // If we find a matching parameter, then delete it from the collection,
+                   // that way we don't try to initialize a property that has the same name
+                   if (kvs.ContainsKey(pi.Name))
+                   {
+                       kvs.TryGetValue(pi.Name, out var value);
+                       kvs.Remove(pi.Name);
 
-                        return pi.ParameterType.ConvertTo(value);
-                    }
+                       return pi.ParameterType.ConvertTo(value);
+                   }
 
-                    return pi.ParameterType.GetDefault();
-                }).ToArray();
+                   return pi.ParameterType.GetDefault();
+               }).ToArray();
 
                 obj = matchedCtorParams.Key.Invoke(args);
             }
