@@ -33,7 +33,10 @@
             Assert.Equal(pageIndex, ((IQueryOptions<Customer>)options).PageIndex);
             Assert.Equal(pageSize, ((IQueryOptions<Customer>)options).PageSize);
 
-            var ex = Assert.Throws<ArgumentOutOfRangeException>(() => options.Page(0, 1));
+            Exception ex;
+
+#if NETFULL
+            ex = Assert.Throws<ArgumentOutOfRangeException>(() => options.Page(0, 1));
             Assert.Equal("Cannot be lower than 1.\r\nParameter name: pageIndex", ex.Message);
 
             ex = Assert.Throws<ArgumentOutOfRangeException>(() => options.Page(1, 0));
@@ -41,6 +44,16 @@
 
             ex = Assert.Throws<ArgumentOutOfRangeException>(() => options.Page(0));
             Assert.Equal("Cannot be lower than 1.\r\nParameter name: pageIndex", ex.Message);
+#else
+            ex = Assert.Throws<ArgumentOutOfRangeException>(() => options.Page(0, 1));
+            Assert.Equal("Cannot be lower than 1. (Parameter 'pageIndex')", ex.Message);
+
+            ex = Assert.Throws<ArgumentOutOfRangeException>(() => options.Page(1, 0));
+            Assert.Equal("Cannot be lower than zero. (Parameter 'pageSize')", ex.Message);
+
+            ex = Assert.Throws<ArgumentOutOfRangeException>(() => options.Page(0));
+            Assert.Equal("Cannot be lower than 1. (Parameter 'pageIndex')", ex.Message);
+#endif
 
             options = new QueryOptions<Customer>().Page(pageIndex);
 

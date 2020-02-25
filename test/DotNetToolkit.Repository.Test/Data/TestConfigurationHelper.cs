@@ -1,4 +1,5 @@
-﻿namespace DotNetToolkit.Repository.Integration.Test.Data
+﻿#if NETSTANDARD2_0
+namespace DotNetToolkit.Repository.Test.Data
 {
     using Microsoft.Extensions.Configuration;
     using System;
@@ -14,3 +15,4 @@
         }
     }
 }
+#endif
