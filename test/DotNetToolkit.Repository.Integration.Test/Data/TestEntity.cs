@@ -5,7 +5,11 @@
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
+#if NETFULL
     public class Customer : Microsoft.WindowsAzure.Storage.Table.TableEntity
+#else
+    public class Customer
+#endif
     {
         private int _id;
 
@@ -17,12 +21,15 @@
             set
             {
                 _id = value;
+#if NETFULL
                 RowKey = _id.ToString();
+#endif
             }
         }
         public string Name { get; set; }
         public CustomerAddress Address { get; set; }
 
+#if NETFULL
         // for azure table compability (do not map since DateTimeOffset is not supported for sql)
         [NotMapped]
         public new DateTimeOffset Timestamp { get; set; }
@@ -31,6 +38,7 @@
         {
             PartitionKey = string.Empty;
         }
+#endif
     }
 
     [Table("CustomersWithNoIdentity")]
@@ -65,7 +73,11 @@
         public string Name { get; set; }
     }
 
+#if NETFULL
     public class CustomerWithTwoCompositePrimaryKey : Microsoft.WindowsAzure.Storage.Table.TableEntity
+#else
+    public class CustomerWithTwoCompositePrimaryKey
+#endif
     {
         private int _id1;
         private string _id2;
@@ -78,7 +90,9 @@
             set
             {
                 _id1 = value;
+#if NETFULL
                 PartitionKey = _id1.ToString();
+#endif
             }
         }
         [Key]
@@ -89,14 +103,18 @@
             set
             {
                 _id2 = value;
+#if NETFULL
                 RowKey = _id2;
+#endif
             }
         }
         public string Name { get; set; }
 
+#if NETFULL
         // for azure table compability (do not map since DateTimeOffset is not supported for sql)
         [NotMapped]
         public new DateTimeOffset Timestamp { get; set; }
+#endif
 
         public override int GetHashCode()
         {

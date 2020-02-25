@@ -1,4 +1,5 @@
-﻿namespace DotNetToolkit.Repository.Integration.Test.ContextProvider
+﻿#if NETFULL
+namespace DotNetToolkit.Repository.Integration.Test.ContextProvider
 {
     using AdoNet;
     using AdoNet.Internal;
@@ -1055,3 +1056,5 @@
         }
     }
 }
+
+#endif

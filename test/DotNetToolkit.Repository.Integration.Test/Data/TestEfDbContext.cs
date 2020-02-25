@@ -1,17 +1,18 @@
-﻿namespace DotNetToolkit.Repository.Integration.Test.Data
+﻿#if NETFULL
+namespace DotNetToolkit.Repository.Integration.Test.Data
 {
     using System.Data.Common;
     using System.Data.Entity;
 
-    public class TestEfDbContext : System.Data.Entity.DbContext
+    public class TestEfDbContext : DbContext
     {
-        public System.Data.Entity.DbSet<Customer> Customers { get; set; }
-        public System.Data.Entity.DbSet<CustomerAddress> CustomerAddresses { get; set; }
-        public System.Data.Entity.DbSet<CustomerWithMultipleAddresses> CustomerWithMultipleAddresses { get; set; }
-        public System.Data.Entity.DbSet<CustomerWithCompositeAddress> CustomersWithCompositeAddress { get; set; }
-        public System.Data.Entity.DbSet<CustomerWithTwoCompositePrimaryKey> CustomersWithTwoCompositePrimaryKey { get; set; }
-        public System.Data.Entity.DbSet<CustomerWithThreeCompositePrimaryKey> CustomersWithThreeCompositePrimaryKey { get; set; }
-        public System.Data.Entity.DbSet<CustomerWithNoIdentity> CustomersWithNoIdentity { get; set; }
+        public DbSet<Customer> Customers { get; set; }
+        public DbSet<CustomerAddress> CustomerAddresses { get; set; }
+        public DbSet<CustomerWithMultipleAddresses> CustomerWithMultipleAddresses { get; set; }
+        public DbSet<CustomerWithCompositeAddress> CustomersWithCompositeAddress { get; set; }
+        public DbSet<CustomerWithTwoCompositePrimaryKey> CustomersWithTwoCompositePrimaryKey { get; set; }
+        public DbSet<CustomerWithThreeCompositePrimaryKey> CustomersWithThreeCompositePrimaryKey { get; set; }
+        public DbSet<CustomerWithNoIdentity> CustomersWithNoIdentity { get; set; }
 
         public TestEfDbContext(DbConnection connection, bool contextOwnsConnection)
             : base(connection, contextOwnsConnection) { }
@@ -44,3 +45,5 @@
         }
     }
 }
+
+#endif

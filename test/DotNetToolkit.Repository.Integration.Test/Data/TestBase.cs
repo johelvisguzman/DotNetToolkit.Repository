@@ -67,7 +67,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                     ApplyCachingProvider(cachingProvider, builder);
 
                     await HandleExceptionAsync(() => action(
-                        new RepositoryFactory(builder.Options), 
+                        new RepositoryFactory(builder.Options),
                         cachingProvider));
                 });
 
@@ -204,6 +204,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                         builder.UseXmlDatabase(Path.GetTempPath() + Guid.NewGuid().ToString("N"));
                         break;
                     }
+#if NETFULL
                 case ContextProviderType.AdoNet:
                     {
                         builder.UseAdoNet(DbConnectionHelper.CreateConnection(), ensureDatabaseCreated: true);
@@ -245,16 +246,6 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                         builder.UseEntityFramework<TestEfDbContext>(DbConnectionHelper.CreateConnection());
                         break;
                     }
-                case ContextProviderType.EntityFrameworkCore:
-                    {
-                        builder.UseEntityFrameworkCore<TestEfCoreDbContext>(options =>
-                        {
-                            options
-                                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-                        });
-                        break;
-                    }
                 case ContextProviderType.AzureStorageBlob:
                     {
                         builder.UseAzureStorageBlob(
@@ -271,6 +262,18 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                             createIfNotExists: true);
                         break;
                     }
+#else
+                case ContextProviderType.EntityFrameworkCore:
+                    {
+                        builder.UseEntityFrameworkCore<TestEfCoreDbContext>(options =>
+                        {
+                            options
+                                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+                        });
+                        break;
+                    }
+#endif
                 default:
                     throw new ArgumentOutOfRangeException(nameof(provider));
             }
@@ -299,6 +302,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 
                         break;
                     }
+#if NETFULL
                 case CachingProviderType.Memcached:
                     {
                         var provider = new MemcachedCacheProvider("127.0.0.1", 11211);
@@ -309,6 +313,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 
                         break;
                     }
+#endif
                 case CachingProviderType.Couchbase:
                     {
                         var provider = new CouchbaseCacheProvider("http://localhost:8091", "default", "password");
@@ -334,7 +339,9 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             => new[]
             {
                 ContextProviderType.InMemory,
-                ContextProviderType.EntityFrameworkCore,
+#if NETSTANDARD2_0
+		        ContextProviderType.EntityFrameworkCore,  
+#endif
             };
 
         protected static ContextProviderType[] FileStreamContextProviders()
@@ -345,26 +352,36 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             };
 
         protected static ContextProviderType[] SqlServerContextProviders()
+#if NETFULL
             => new[]
             {
-                ContextProviderType.AdoNet,
                 ContextProviderType.NHibernate,
+                ContextProviderType.AdoNet,
                 ContextProviderType.EntityFramework,
             };
+#else
+            => Array.Empty<ContextProviderType>();
+#endif
 
         protected static ContextProviderType[] AzureStorageContextProviders()
+#if NETFULL
             => new[]
             {
                 ContextProviderType.AzureStorageBlob,
                 ContextProviderType.AzureStorageTable,
             };
+#else
+            => Array.Empty<ContextProviderType>();
+#endif
 
         private static CachingProviderType[] CachingProviders()
             => new[]
             {
                 CachingProviderType.MicrosoftInMemory,
                 CachingProviderType.Redis,
-                CachingProviderType.Memcached,
+#if NETFULL
+		        CachingProviderType.Memcached,  
+#endif
                 //TODO: Cannot test when Appveyor is running tests.
                 //I am not able to find the pre-built binaries so that I can manually run
                 //the server (similar to redis and memcached). I am going to comment out testing couchbase for now
