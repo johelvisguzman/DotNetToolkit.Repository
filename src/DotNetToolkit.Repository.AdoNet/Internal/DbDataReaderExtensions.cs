@@ -7,16 +7,19 @@
     {
         public static T GetValue<T>(this DbDataReader reader, int ordinal)
         {
+            var t = typeof(T);
             var value = reader.GetValue(ordinal);
 
             if (value == null || value == DBNull.Value)
             {
                 return default(T);
             }
-            else
+            else if (t.IsGenericType && t.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
             {
-                return (T)value;
+                t = Nullable.GetUnderlyingType(t);
             }
+
+            return (T)Convert.ChangeType(value, t);
         }
     }
 }
