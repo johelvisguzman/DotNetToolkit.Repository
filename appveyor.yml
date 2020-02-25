@@ -97,6 +97,7 @@ deploy:
   name: production
   api_key:
     secure: uSU6YGrWfh7Ruar11vqDFOtauPZXzKYFHUp8WoK86wDjT5ahRJXpLqPfusF+oKFd
+  skip_symbols: true
   on:
     branch: master                   # release from master branch only
     appveyor_repo_tag: true          # deploy on tag push only
