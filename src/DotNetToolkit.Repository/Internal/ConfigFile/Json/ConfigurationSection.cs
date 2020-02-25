@@ -97,7 +97,7 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile.Json
                     {
                         var type = ExtractType(subSection, isRequired: true);
 
-                        interceptorsDict.Add(type, () => GetTypedValue<IRepositoryInterceptor>(section, type));
+                        interceptorsDict.Add(type, () => GetTypedValue<IRepositoryInterceptor>(subSection, type));
                     }
                 }
             }
