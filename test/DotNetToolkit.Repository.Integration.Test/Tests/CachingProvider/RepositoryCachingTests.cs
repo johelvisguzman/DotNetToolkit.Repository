@@ -11,7 +11,16 @@
 
     public class RepositoryCachingTests : TestBase, IClassFixture<RepositoryCachingTestsFixture>
     {
-        public RepositoryCachingTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+        private ContextProviderType contextType;
+
+        public RepositoryCachingTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+#if NETFULL
+            contextType = ContextProviderType.EntityFramework;
+#else
+            contextType = ContextProviderType.EntityFrameworkCore;
+#endif
+        }
 
         [Fact]
         public void CacheEnabled()
@@ -36,7 +45,7 @@
             Assert.False(repo.CacheEnabled);
             Assert.True(repo.CacheProvider is NullCacheProvider);
 
-            options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
+            options = GetRepositoryOptionsBuilder(contextType)
                 .Options;
 
             repo = new Repository<Customer>(options);
@@ -57,7 +66,7 @@
             customerRepo.Add(customer);
 
             var customerAddressRepo = new Repository<CustomerAddress>(options);
-            var customerAddress = new CustomerAddress() {CustomerId = customer.Id};
+            var customerAddress = new CustomerAddress() { CustomerId = customer.Id };
 
             customerAddressRepo.Add(customerAddress);
 
@@ -93,169 +102,173 @@
         [Fact]
         public void ExecuteQuery()
         {
-            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestExecuteQuery);
+#if NETFULL
+            ForRepositoryFactoryWithAllCachingProviders(contextType, TestExecuteQuery);
+#endif
         }
 
         [Fact]
         public void Find()
         {
-            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestFind);
+            ForRepositoryFactoryWithAllCachingProviders(contextType, TestFind);
         }
 
         [Fact]
         public void FindWithId()
         {
-            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestFindWithId);
+            ForRepositoryFactoryWithAllCachingProviders(contextType, TestFindWithId);
         }
 
         [Fact]
         public void FindWithOptions()
         {
-            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestFindWithOptions);
+            ForRepositoryFactoryWithAllCachingProviders(contextType, TestFindWithOptions);
         }
 
         [Fact]
         public void FindAll()
         {
-            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestFindAll);
+            ForRepositoryFactoryWithAllCachingProviders(contextType, TestFindAll);
         }
 
         [Fact]
         public void FindAllWithOptions()
         {
-            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestFindAllWithOptions);
+            ForRepositoryFactoryWithAllCachingProviders(contextType, TestFindAllWithOptions);
         }
 
         [Fact]
         public void Count()
         {
-            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestCount);
+            ForRepositoryFactoryWithAllCachingProviders(contextType, TestCount);
         }
 
         [Fact]
         public void CountWithOptions()
         {
-            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestCountWithOptions);
+            ForRepositoryFactoryWithAllCachingProviders(contextType, TestCountWithOptions);
         }
 
         [Fact]
         public void Exists()
         {
-            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestExists);
+            ForRepositoryFactoryWithAllCachingProviders(contextType, TestExists);
         }
 
         [Fact]
         public void ExistsWithOptions()
         {
-            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestExistsWithOptions);
+            ForRepositoryFactoryWithAllCachingProviders(contextType, TestExistsWithOptions);
         }
 
         [Fact]
         public void ToDictionary()
         {
-            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestToDictionary);
+            ForRepositoryFactoryWithAllCachingProviders(contextType, TestToDictionary);
         }
 
         [Fact]
         public void ToDictionaryWithOptions()
         {
-            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestToDictionaryWithOptions);
+            ForRepositoryFactoryWithAllCachingProviders(contextType, TestToDictionaryWithOptions);
         }
 
         [Fact]
         public void GroupBy()
         {
-            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestGroupBy);
+            ForRepositoryFactoryWithAllCachingProviders(contextType, TestGroupBy);
         }
 
         [Fact]
         public void GroupByWithOptions()
         {
-            ForRepositoryFactoryWithAllCachingProviders(ContextProviderType.AdoNet, TestGroupByWithOptions);
+            ForRepositoryFactoryWithAllCachingProviders(contextType, TestGroupByWithOptions);
         }
 
         [Fact]
         public void ExecuteQueryAsync()
         {
-            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestExecuteQueryAsync);
+#if NETFULL
+            ForRepositoryFactoryWithAllCachingProvidersAsync(contextType, TestExecuteQueryAsync);
+#endif
         }
 
         [Fact]
         public void FindAsync()
         {
-            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestFindAsync);
+            ForRepositoryFactoryWithAllCachingProvidersAsync(contextType, TestFindAsync);
         }
 
         [Fact]
         public void FindWithIdAsync()
         {
-            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestFindWithIdAsync);
+            ForRepositoryFactoryWithAllCachingProvidersAsync(contextType, TestFindWithIdAsync);
         }
 
         [Fact]
         public void FindWithOptionsAsync()
         {
-            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestFindWithOptionsAsync);
+            ForRepositoryFactoryWithAllCachingProvidersAsync(contextType, TestFindWithOptionsAsync);
         }
 
         [Fact]
         public void FindAllAsync()
         {
-            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestFindAllAsync);
+            ForRepositoryFactoryWithAllCachingProvidersAsync(contextType, TestFindAllAsync);
         }
 
         [Fact]
         public void FindAllWithOptionsAsync()
         {
-            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestFindAllWithOptionsAsync);
+            ForRepositoryFactoryWithAllCachingProvidersAsync(contextType, TestFindAllWithOptionsAsync);
         }
 
         [Fact]
         public void CountAsync()
         {
-            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestCountAsync);
+            ForRepositoryFactoryWithAllCachingProvidersAsync(contextType, TestCountAsync);
         }
 
         [Fact]
         public void CountWithOptionsAsync()
         {
-            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestCountWithOptionsAsync);
+            ForRepositoryFactoryWithAllCachingProvidersAsync(contextType, TestCountWithOptionsAsync);
         }
 
         [Fact]
         public void ExistsAsync()
         {
-            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestExistsAsync);
+            ForRepositoryFactoryWithAllCachingProvidersAsync(contextType, TestExistsAsync);
         }
 
         [Fact]
         public void ExistsWithOptionsAsync()
         {
-            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestExistsWithOptionsAsync);
+            ForRepositoryFactoryWithAllCachingProvidersAsync(contextType, TestExistsWithOptionsAsync);
         }
 
         [Fact]
         public void ToDictionaryAsync()
         {
-            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestToDictionaryAsync);
+            ForRepositoryFactoryWithAllCachingProvidersAsync(contextType, TestToDictionaryAsync);
         }
 
         [Fact]
         public void ToDictionaryWithOptionsAsync()
         {
-            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestToDictionaryWithOptionsAsync);
+            ForRepositoryFactoryWithAllCachingProvidersAsync(contextType, TestToDictionaryWithOptionsAsync);
         }
 
         [Fact]
         public void GroupByAsync()
         {
-            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestGroupByAsync);
+            ForRepositoryFactoryWithAllCachingProvidersAsync(contextType, TestGroupByAsync);
         }
 
         [Fact]
         public void GroupByWithOptionsAsync()
         {
-            ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType.AdoNet, TestGroupByWithOptionsAsync);
+            ForRepositoryFactoryWithAllCachingProvidersAsync(contextType, TestGroupByWithOptionsAsync);
         }
 
         private static void TestExecuteQuery(IRepositoryFactory repoFactory)

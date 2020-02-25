@@ -1,4 +1,4 @@
-﻿#if !NETSTANDARD1_3
+﻿#if NETFULL
 
 namespace DotNetToolkit.Repository.Internal.ConfigFile
 {

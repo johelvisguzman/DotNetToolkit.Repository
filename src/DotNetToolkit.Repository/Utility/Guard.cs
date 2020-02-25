@@ -16,11 +16,7 @@
         [ContractAnnotation("value:null => halt")]
         public static T NotNull<T>([ValidatedNotNull] [NoEnumeration] T value, [InvokerParameterName] string parameterName)
         {
-#if NETSTANDARD2_0
-            if (typeof(T).IsNullableType() && value == null)
-#else
             if (ReferenceEquals(value, null))
-#endif
             {
                 NotEmpty(parameterName, nameof(parameterName));
 
@@ -74,11 +70,7 @@
         [ContractAnnotation("value:null => halt")]
         public static T EnsureNotNull<T>([ValidatedNotNull] [NoEnumeration] T value, string message) where T : class
         {
-#if NETSTANDARD2_0
-            if (typeof(T).IsNullableType() && value == null)
-#else
             if (ReferenceEquals(value, null))
-#endif
                 throw new InvalidOperationException(message);
 
             return value;

@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Test
 {
-    using Caching.InMemory;
     using Configuration.Logging;
     using Configuration.Options;
     using Data;
@@ -119,15 +118,16 @@
 
             Assert.False(optionsBuilder.IsConfigured);
 
-            optionsBuilder.UseCachingProvider(new InMemoryCacheProvider());
+            optionsBuilder.UseCachingProvider(new TestCacheProvider());
 
             Assert.True(optionsBuilder.IsConfigured);
 
             Assert.NotNull(optionsBuilder.Options.CachingProvider);
         }
 
+#if NETFULL
         [Fact]
-        public void ConfigureFromAppConfig()
+        public void ConfigureFromXml()
         {
             var optionsBuilder = new RepositoryOptionsBuilder();
 
@@ -141,7 +141,7 @@
         }
 
         [Fact]
-        public void ConfigureFromRepositoryConfig()
+        public void ConfigureFromFile()
         {
             var optionsBuilder = new RepositoryOptionsBuilder();
 
@@ -153,10 +153,9 @@
 
             TestConfiguration(optionsBuilder);
         }
-
-#if NETSTANDARD
+#else
         [Fact]
-        public void ConfigureFromAppSetting()
+        public void ConfigureFromJson()
         {
             var optionsBuilder = new RepositoryOptionsBuilder();
 
@@ -167,10 +166,10 @@
             Assert.True(optionsBuilder.IsConfigured);
 
             TestConfiguration(optionsBuilder);
-        } 
+        }
 #endif
 
-
+#if NETFULL
         [Fact]
         public void ThrowsIfConfigureFromRepositoryConfigNotFound()
         {
@@ -181,17 +180,19 @@
             Assert.Equal("The file is not found.", ex.Message);
             Assert.Equal("random.config", ex.FileName);
         }
+#endif
 
         [Fact]
         public void ThrowsIfConfigurationSectionNotFound()
         {
-            var ex = Assert.Throws<InvalidOperationException>(
+            Exception ex;
+#if NETFULL
+            ex = Assert.Throws<InvalidOperationException>(
                 () => new RepositoryOptionsBuilder()
                     .UseConfiguration("empty_repository.config"));
 
             Assert.Equal("Unable to find a 'repository' configuration section. For more information on DotNetToolkit.Repository configuration, visit the https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Config-File-Setup.", ex.Message);
-
-#if NETSTANDARD
+#else
             ex = Assert.Throws<InvalidOperationException>(
                     () => new RepositoryOptionsBuilder()
                         .UseConfiguration(TestConfigurationHelper.GetConfiguration("empty_repository.json")));
@@ -215,7 +216,7 @@
 
             // logging provider
             Assert.NotNull(optionsBuilder.Options.LoggerProvider);
-            
+
             // caching provider
             Assert.NotNull(optionsBuilder.Options.CachingProvider);
             Assert.Equal(optionsBuilder.Options.CachingProvider.Expiry, TimeSpan.FromSeconds(30));
