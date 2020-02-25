@@ -69,7 +69,7 @@
 
         #region Public Methods
 
-#if !NETSTANDARD1_3
+#if NETFULL
         /// <summary>
         /// Configures the repository options with the data from the <paramref name="fileName"/>; otherwise, it will configure using the default App.config.
         /// </summary>
@@ -104,16 +104,14 @@
 
             return this;
         }
-#endif
-
-#if NETSTANDARD
+#else
         /// <summary>
         /// Configures the repository options using the specified configuration.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
         /// <returns>The same builder instance.</returns>
         /// <remarks>Any element that is defined in the config file can be resolved using the <see cref="RepositoryDependencyResolver"/>.</remarks>
-        public virtual RepositoryOptionsBuilder UseConfiguration([NotNull]  Microsoft.Extensions.Configuration.IConfigurationRoot configuration)
+        public virtual RepositoryOptionsBuilder UseConfiguration([NotNull] Microsoft.Extensions.Configuration.IConfigurationRoot configuration)
         {
             Guard.NotNull(configuration, nameof(configuration));
 
