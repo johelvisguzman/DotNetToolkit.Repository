@@ -24,12 +24,29 @@
         /// </summary>
         /// <param name="services">The service collection.</param>
         /// <param name="optionsAction">A builder action used to create or modify options for the repositories.</param>
+        /// <param name="serviceLifetime">The Microsoft.Extensions.DependencyInjection.ServiceLifetime of the service.</param>
+        /// <returns>The same instance of the service collection which has been configured with the repositories.</returns>
+        /// <remarks>
+        /// This method will scan for repositories and interceptors from the assemblies that have been loaded into the
+        /// execution context of this application domain, and will register them to the container.
+        /// </remarks>
+        public static IServiceCollection AddRepositories([NotNull] this IServiceCollection services, [NotNull] Action<RepositoryOptionsBuilder> optionsAction, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
+        {
+            return AddRepositories(services, optionsAction, AppDomain.CurrentDomain.GetAssemblies(), serviceLifetime);
+        }
+
+        /// <summary>
+        /// Adds all the repository services using the specified options builder.
+        /// </summary>
+        /// <param name="services">The service collection.</param>
+        /// <param name="optionsAction">A builder action used to create or modify options for the repositories.</param>
         /// <param name="assembliesToScan">The assemblies to scan.</param>
+        /// <param name="serviceLifetime">The Microsoft.Extensions.DependencyInjection.ServiceLifetime of the service.</param>
         /// <returns>The same instance of the service collection which has been configured with the repositories.</returns>
         /// <remarks>
         /// This method will scan for repositories and interceptors from the specified assemblies collection, and will register them to the container.
         /// </remarks>
-        public static IServiceCollection AddRepositories([NotNull] this IServiceCollection services, [NotNull] Action<RepositoryOptionsBuilder> optionsAction, [NotNull] params Assembly[] assembliesToScan)
+        public static IServiceCollection AddRepositories([NotNull] this IServiceCollection services, [NotNull] Action<RepositoryOptionsBuilder> optionsAction, [NotNull] Assembly[] assembliesToScan, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
         {
             Guard.NotNull(services, nameof(services));
             Guard.NotNull(optionsAction, nameof(optionsAction));
@@ -94,60 +111,59 @@
                         if (services.Any(x => x.ServiceType == implementationType) || optionsBuilder.Options.Interceptors.ContainsKey(implementationType))
                             continue;
 
-                        services.AddScoped(implementationType, implementationType);
-                        services.AddScoped(serviceType, implementationType);
+                        services.AddTransient(implementationType, implementationType);
+                        services.AddTransient(serviceType, implementationType);
                         registeredInterceptorTypes.Add(implementationType);
                     }
                     else
                     {
-                        services.AddScoped(serviceType, implementationType);
+                        services.AddTransient(serviceType, implementationType);
                     }
                 }
             }
 
             // Register other services
-            services.AddScoped<IRepositoryFactory, RepositoryFactory>(sp => new RepositoryFactory(sp.GetService<IRepositoryOptions>()));
-            services.AddScoped<IUnitOfWork, UnitOfWork>(sp => new UnitOfWork(sp.GetService<IRepositoryOptions>()));
-            services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>(sp => new UnitOfWorkFactory(sp.GetService<IRepositoryOptions>()));
-            services.AddScoped<IServiceFactory, ServiceFactory>(sp => new ServiceFactory(sp.GetService<IUnitOfWorkFactory>()));
-            services.AddScoped<IRepositoryOptions>(sp =>
-            {
-                var options = new RepositoryOptions(optionsBuilder.Options);
+            services.Add(new ServiceDescriptor(
+                typeof(IRepositoryFactory), 
+                sp => new RepositoryFactory(sp.GetRequiredService<IRepositoryOptions>()), 
+                serviceLifetime));
 
-                foreach (var interceptorType in registeredInterceptorTypes)
+            services.Add(new ServiceDescriptor(
+                typeof(IUnitOfWork),
+                sp => new UnitOfWork(sp.GetRequiredService<IRepositoryOptions>()),
+                serviceLifetime));
+
+            services.Add(new ServiceDescriptor(
+                typeof(IUnitOfWorkFactory),
+                sp => new UnitOfWorkFactory(sp.GetRequiredService<IRepositoryOptions>()),
+                serviceLifetime));
+
+            services.Add(new ServiceDescriptor(
+                typeof(IServiceFactory),
+                sp => new ServiceFactory(sp.GetRequiredService<IRepositoryOptions>()),
+                serviceLifetime));
+
+            services.Add(new ServiceDescriptor(
+                typeof(IRepositoryOptions),
+                sp =>
                 {
-                    options = options.With(interceptorType, () => (IRepositoryInterceptor)sp.GetService(interceptorType));
-                }
+                    var options = new RepositoryOptions(optionsBuilder.Options);
 
-                return options;
-            });
+                    foreach (var interceptorType in registeredInterceptorTypes)
+                    {
+                        options = options.With(interceptorType, () => (IRepositoryInterceptor)sp.GetService(interceptorType));
+                    }
+
+                    return options;
+                },
+                serviceLifetime));
 
             // Register resolver
-            RepositoryDependencyResolver.SetResolver(type =>
-            {
-                return services
-                    .BuildServiceProvider()
-                    .GetService(type);
-            });
+            RepositoryDependencyResolver.SetResolver(type => services.BuildServiceProvider().GetService(type));
 
-            services.AddScoped<IRepositoryDependencyResolver>(sp => RepositoryDependencyResolver.Current);
+            services.AddSingleton<IRepositoryDependencyResolver>(sp => RepositoryDependencyResolver.Current);
 
             return services;
-        }
-
-        /// <summary>
-        /// Adds all the repository services using the specified options builder.
-        /// </summary>
-        /// <param name="services">The service collection.</param>
-        /// <param name="optionsAction">A builder action used to create or modify options for the repositories.</param>
-        /// <returns>The same instance of the service collection which has been configured with the repositories.</returns>
-        /// <remarks>
-        /// This method will scan for repositories and interceptors from the assemblies that have been loaded into the
-        /// execution context of this application domain, and will register them to the container.
-        /// </remarks>
-        public static IServiceCollection AddRepositories([NotNull] this IServiceCollection services, [NotNull] Action<RepositoryOptionsBuilder> optionsAction)
-        {
-            return AddRepositories(services, optionsAction, AppDomain.CurrentDomain.GetAssemblies());
         }
     }
 }
