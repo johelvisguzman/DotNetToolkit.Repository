@@ -69,14 +69,18 @@
 
         #region Public Methods
 
-#if NETFULL
+#if !NETSTANDARD1_3
         /// <summary>
         /// Configures the repository options with the data from the <paramref name="fileName"/>; otherwise, it will configure using the default App.config.
         /// </summary>
         /// <param name="fileName">The name of the file to configure from.</param>
         /// <returns>The same builder instance.</returns>
         /// <remarks>Any element that is defined in the config file can be resolved using the <see cref="RepositoryDependencyResolver"/>.</remarks>
+#if NETFULL
         public virtual RepositoryOptionsBuilder UseConfiguration([CanBeNull] string fileName = null)
+#else
+        public virtual RepositoryOptionsBuilder UseConfiguration([CanBeNull] string fileName)
+#endif
         {
             const string SectionName = DotNetToolkit.Repository.Internal.ConfigFile.ConfigurationSection.SectionName;
 
@@ -104,7 +108,9 @@
 
             return this;
         }
-#else
+#endif
+
+#if NETSTANDARD2_0
         /// <summary>
         /// Configures the repository options using the specified configuration.
         /// </summary>
