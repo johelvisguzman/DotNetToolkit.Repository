@@ -29,7 +29,7 @@
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
             },
-                typeof(MicrosoftDependencyInjectionTests).Assembly);
+                new[] { typeof(MicrosoftDependencyInjectionTests).Assembly });
 
             var provider = services.BuildServiceProvider();
 
@@ -73,7 +73,7 @@
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
             },
-                typeof(MicrosoftDependencyInjectionTests).Assembly);
+                new[] { typeof(MicrosoftDependencyInjectionTests).Assembly });
 
             var provider = services.BuildServiceProvider();
 
@@ -94,7 +94,7 @@
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
             },
-                typeof(MicrosoftDependencyInjectionTests).Assembly);
+                new[] { typeof(MicrosoftDependencyInjectionTests).Assembly });
 
             var provider = services.BuildServiceProvider();
 
@@ -118,7 +118,7 @@
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
             },
-                    typeof(MicrosoftDependencyInjectionTests).Assembly);
+                    new[] { typeof(MicrosoftDependencyInjectionTests).Assembly });
 
             var provider = services.BuildServiceProvider();
 
@@ -141,7 +141,7 @@
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
             },
-                typeof(MicrosoftDependencyInjectionTests).Assembly);
+                new[] { typeof(MicrosoftDependencyInjectionTests).Assembly });
 
             var provider = services.BuildServiceProvider();
 
