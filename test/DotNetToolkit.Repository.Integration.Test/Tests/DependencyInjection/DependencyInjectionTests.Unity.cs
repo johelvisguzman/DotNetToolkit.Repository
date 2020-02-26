@@ -30,7 +30,7 @@
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
             },
-                typeof(UnityContainerDependencyInjectionTests).Assembly);
+                new[] { typeof(MicrosoftDependencyInjectionTests).Assembly });
 
             Assert.NotNull(container.Resolve<TestRepositoryInterceptorWithDependencyInjectedServices>());
             Assert.NotNull(container.Resolve<TestRepositoryTimeStampInterceptor>());
@@ -72,7 +72,7 @@
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
             },
-                typeof(UnityContainerDependencyInjectionTests).Assembly);
+                new[] { typeof(MicrosoftDependencyInjectionTests).Assembly });
 
             var service = container.Resolve<IService<Customer>>();
 
@@ -91,7 +91,7 @@
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
             },
-                typeof(MicrosoftDependencyInjectionTests).Assembly);
+                new[] { typeof(MicrosoftDependencyInjectionTests).Assembly });
 
             var repoOptions = container.Resolve<RepositoryOptions>();
             var repo = new Repository<Customer>(repoOptions);
@@ -113,7 +113,7 @@
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
             },
-                typeof(UnityContainerDependencyInjectionTests).Assembly);
+                new[] { typeof(MicrosoftDependencyInjectionTests).Assembly });
 
             var repo = new Repository<Customer>(container.Resolve<RepositoryOptions>());
 
@@ -134,7 +134,7 @@
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
             },
-                typeof(UnityContainerDependencyInjectionTests).Assembly);
+                new[] { typeof(MicrosoftDependencyInjectionTests).Assembly });
 
             var repo = new Repository<Customer>(container.Resolve<RepositoryOptions>());
 
