@@ -69,7 +69,7 @@
         {
             Guard.NotNull(source, nameof(source));
 
-            source.UseInternalContextFactory(new EfRepositoryContextFactory());
+            source.UseInternalContextFactory(new EfCoreRepositoryContextFactory());
 
             return source;
         }

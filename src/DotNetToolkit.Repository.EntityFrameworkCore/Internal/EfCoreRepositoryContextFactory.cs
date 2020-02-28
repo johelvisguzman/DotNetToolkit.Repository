@@ -68,7 +68,7 @@
     /// An implementation of <see cref="IRepositoryContextFactory" /> with the <see cref="RepositoryDependencyResolver"/> using an IOC container to resolve the <see cref="DbContext"/>.
     /// </summary>
     /// <seealso cref="IRepositoryContextFactory" />
-    internal class EfRepositoryContextFactory : IRepositoryContextFactory
+    internal class EfCoreRepositoryContextFactory : IRepositoryContextFactory
     {
         #region Implementation of IRepositoryContextFactory
 
