@@ -65,7 +65,7 @@
         /// </summary>
         /// <param name="source">The repository options builder.</param>
         /// <returns>The same builder instance.</returns>
-        public static RepositoryOptionsBuilder UseEntityFramework([NotNull] this RepositoryOptionsBuilder source)
+        public static RepositoryOptionsBuilder UseEntityFrameworkCore([NotNull] this RepositoryOptionsBuilder source)
         {
             Guard.NotNull(source, nameof(source));
 
