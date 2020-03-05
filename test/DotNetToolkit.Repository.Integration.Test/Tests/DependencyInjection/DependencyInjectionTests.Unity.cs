@@ -25,12 +25,11 @@
         {
             var container = new UnityContainer();
 
-            container.RegisterRepositories(options =>
+            container.RegisterRepositories<MicrosoftDependencyInjectionTests>(options =>
             {
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
-            },
-                new[] { typeof(MicrosoftDependencyInjectionTests).Assembly });
+            });
 
             Assert.NotNull(container.Resolve<TestRepositoryInterceptorWithDependencyInjectedServices>());
             Assert.NotNull(container.Resolve<TestRepositoryTimeStampInterceptor>());
@@ -67,12 +66,11 @@
         {
             var container = new UnityContainer();
 
-            container.RegisterRepositories(options =>
+            container.RegisterRepositories<MicrosoftDependencyInjectionTests>(options =>
             {
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
-            },
-                new[] { typeof(MicrosoftDependencyInjectionTests).Assembly });
+            });
 
             var service = container.Resolve<IService<Customer>>();
 
@@ -86,12 +84,11 @@
         {
             var container = new UnityContainer();
 
-            container.RegisterRepositories(options =>
+            container.RegisterRepositories<MicrosoftDependencyInjectionTests>(options =>
             {
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
-            },
-                new[] { typeof(MicrosoftDependencyInjectionTests).Assembly });
+            });
 
             var repoOptions = container.Resolve<RepositoryOptions>();
             var repo = new Repository<Customer>(repoOptions);
@@ -106,14 +103,13 @@
         {
             var container = new UnityContainer();
 
-            container.RegisterRepositories(options =>
+            container.RegisterRepositories<MicrosoftDependencyInjectionTests>(options =>
             {
                 options.UseInterceptor(new TestRepositoryInterceptor("RANDOM P1", true));
                 options.UseInterceptor(new TestRepositoryTimeStampInterceptor("RANDOM USER"));
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
-            },
-                new[] { typeof(MicrosoftDependencyInjectionTests).Assembly });
+            });
 
             var repo = new Repository<Customer>(container.Resolve<RepositoryOptions>());
 
@@ -151,12 +147,11 @@
         {
             var container = new UnityContainer();
 
-            container.RegisterRepositories(options =>
+            container.RegisterRepositories<MicrosoftDependencyInjectionTests>(options =>
             {
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
-            },
-                new[] { typeof(MicrosoftDependencyInjectionTests).Assembly });
+            });
 
             var repo = new Repository<Customer>(container.Resolve<RepositoryOptions>());
 
