@@ -3,13 +3,11 @@
     using Configuration.Interceptors;
     using Configuration.Options;
     using Configuration.Options.Internal;
-    using Extensions.Internal;
     using global::Microsoft.Extensions.DependencyInjection;
     using JetBrains.Annotations;
     using Services;
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Reflection;
     using Transactions;
     using Utility;
@@ -19,6 +17,23 @@
     /// </summary>
     public static class ServiceCollectionExtensions
     {
+        /// <summary>
+        /// Adds all the repository services using the specified options builder.
+        /// </summary>
+        /// <typeparam name="T">Used for scanning the assembly containing the specified type.</typeparam>
+        /// <param name="services">The service collection.</param>
+        /// <param name="optionsAction">A builder action used to create or modify options for the repositories.</param>
+        /// <param name="serviceLifetime">The Microsoft.Extensions.DependencyInjection.ServiceLifetime of the service.</param>
+        /// <returns>The same instance of the service collection which has been configured with the repositories.</returns>
+        /// <remarks>
+        /// This method will scan for repositories and interceptors from the assemblies that have been loaded into the
+        /// execution context of this application domain, and will register them to the container.
+        /// </remarks>
+        public static IServiceCollection AddRepositories<T>([NotNull] this IServiceCollection services, [NotNull] Action<RepositoryOptionsBuilder> optionsAction, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
+        {
+            return AddRepositories(services, optionsAction, new[] { typeof(T).GetTypeInfo().Assembly }, serviceLifetime);
+        }
+
         /// <summary>
         /// Adds all the repository services using the specified options builder.
         /// </summary>
@@ -52,80 +67,42 @@
             Guard.NotNull(optionsAction, nameof(optionsAction));
             Guard.NotEmpty(assembliesToScan, nameof(assembliesToScan));
 
-            var baseAssembly = Assembly.Load("DotNetToolkit.Repository");
-
-            var assToScan = !assembliesToScan.Any(x => x.FullName.Equals(baseAssembly.FullName))
-                ? assembliesToScan.Concat(new[] { baseAssembly })
-                : assembliesToScan;
-
-            var types = assToScan.SelectMany(x => x.GetAccessibleTypes());
-
-            var interfaceTypesToScan = new[]
-            {
-                typeof(IService<>),
-                typeof(IService<,>),
-                typeof(IService<,,>),
-                typeof(IService<,,,>),
-                typeof(IRepository<>),
-                typeof(IRepository<,>),
-                typeof(IRepository<,,>),
-                typeof(IRepository<,,,>),
-                typeof(IReadOnlyService<>),
-                typeof(IReadOnlyService<,>),
-                typeof(IReadOnlyService<,,>),
-                typeof(IReadOnlyService<,,,>),
-                typeof(IReadOnlyRepository<>),
-                typeof(IReadOnlyRepository<,>),
-                typeof(IReadOnlyRepository<,,>),
-                typeof(IReadOnlyRepository<,,,>),
-                typeof(IRepositoryInterceptor)
-            };
-
-            // Gets all the interfaces that inherent from IRepository<> or IRepositoryInterceptor
-            var interfaceTypes = interfaceTypesToScan
-                .SelectMany(interfaceType => types.Where(t => !t.IsClass && t.ImplementsInterface(interfaceType)))
-                .Distinct();
-
-            var serviceTypesMapping = interfaceTypes
-                .SelectMany(interfaceType => types.Where(t => t.IsClass && !t.IsAbstract && t.ImplementsInterface(interfaceType))
-                .GroupBy(t => interfaceType, t => t));
-
-            // Register the repositories and interceptors that have been scanned
             var optionsBuilder = new RepositoryOptionsBuilder();
 
             optionsAction(optionsBuilder);
 
             var registeredInterceptorTypes = new List<Type>();
 
-            foreach (var t in serviceTypesMapping)
-            {
-                var serviceType = t.Key;
-                var implementationTypes = t.Where(x => x.IsGenericType == serviceType.IsGenericType &&
-                                                       x.GetGenericArguments().Length == serviceType.GetGenericArguments().Length &&
-                                                       x.IsVisible && !x.IsAbstract);
-
-                foreach (var implementationType in implementationTypes)
+            // Scan assemblies for repositories, services, and interceptors
+            AssemblyScanner
+                .FindRepositoriesFromAssemblies(assembliesToScan)
+                .ForEach(scanResult =>
                 {
-                    if (serviceType == typeof(IRepositoryInterceptor))
+                    foreach (var implementationType in scanResult.ImplementationTypes)
                     {
-                        if (services.Any(x => x.ServiceType == implementationType) || optionsBuilder.Options.Interceptors.ContainsKey(implementationType))
-                            continue;
+                        // Register as interface
+                        services.Add(new ServiceDescriptor(
+                            scanResult.InterfaceType,
+                            implementationType,
+                            serviceLifetime));
 
-                        services.AddTransient(implementationType, implementationType);
-                        services.AddTransient(serviceType, implementationType);
-                        registeredInterceptorTypes.Add(implementationType);
+                        // Register as self
+                        services.Add(new ServiceDescriptor(
+                            implementationType,
+                            implementationType,
+                            serviceLifetime));
+
+                        if (scanResult.InterfaceType == typeof(IRepositoryInterceptor))
+                        {
+                            registeredInterceptorTypes.Add(implementationType);
+                        }
                     }
-                    else
-                    {
-                        services.AddTransient(serviceType, implementationType);
-                    }
-                }
-            }
+                });
 
             // Register other services
             services.Add(new ServiceDescriptor(
-                typeof(IRepositoryFactory), 
-                sp => new RepositoryFactory(sp.GetRequiredService<IRepositoryOptions>()), 
+                typeof(IRepositoryFactory),
+                sp => new RepositoryFactory(sp.GetRequiredService<IRepositoryOptions>()),
                 serviceLifetime));
 
             services.Add(new ServiceDescriptor(
@@ -151,7 +128,10 @@
 
                     foreach (var interceptorType in registeredInterceptorTypes)
                     {
-                        options = options.With(interceptorType, () => (IRepositoryInterceptor)sp.GetService(interceptorType));
+                        if (!optionsBuilder.Options.Interceptors.ContainsKey(interceptorType))
+                        {
+                            options = options.With(interceptorType, () => (IRepositoryInterceptor)sp.GetService(interceptorType));
+                        }
                     }
 
                     return options;
