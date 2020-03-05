@@ -20,6 +20,23 @@
         /// <summary>
         /// Adds all the repository services using the specified options builder.
         /// </summary>
+        /// <typeparam name="T">Used for scanning the assembly containing the specified type.</typeparam>
+        /// <param name="services">The service collection.</param>
+        /// <param name="optionsAction">A builder action used to create or modify options for the repositories.</param>
+        /// <param name="serviceLifetime">The Microsoft.Extensions.DependencyInjection.ServiceLifetime of the service.</param>
+        /// <returns>The same instance of the service collection which has been configured with the repositories.</returns>
+        /// <remarks>
+        /// This method will scan for repositories and interceptors from the assemblies that have been loaded into the
+        /// execution context of this application domain, and will register them to the container.
+        /// </remarks>
+        public static IServiceCollection AddRepositories<T>([NotNull] this IServiceCollection services, [NotNull] Action<RepositoryOptionsBuilder> optionsAction, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
+        {
+            return AddRepositories(services, optionsAction, new[] { typeof(T).GetTypeInfo().Assembly }, serviceLifetime);
+        }
+
+        /// <summary>
+        /// Adds all the repository services using the specified options builder.
+        /// </summary>
         /// <param name="services">The service collection.</param>
         /// <param name="optionsAction">A builder action used to create or modify options for the repositories.</param>
         /// <param name="serviceLifetime">The Microsoft.Extensions.DependencyInjection.ServiceLifetime of the service.</param>

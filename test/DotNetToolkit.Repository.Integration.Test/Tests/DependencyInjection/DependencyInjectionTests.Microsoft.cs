@@ -24,12 +24,11 @@
         {
             var services = new ServiceCollection();
 
-            services.AddRepositories(options =>
+            services.AddRepositories<MicrosoftDependencyInjectionTests>(options =>
             {
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
-            },
-                new[] { typeof(MicrosoftDependencyInjectionTests).Assembly });
+            });
 
             var provider = services.BuildServiceProvider();
 
@@ -68,12 +67,11 @@
         {
             var services = new ServiceCollection();
 
-            services.AddRepositories(options =>
-            {
-                options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
-                options.UseLoggerProvider(TestXUnitLoggerProvider);
-            },
-                new[] { typeof(MicrosoftDependencyInjectionTests).Assembly });
+            services.AddRepositories<MicrosoftDependencyInjectionTests>(options =>
+           {
+               options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
+               options.UseLoggerProvider(TestXUnitLoggerProvider);
+           });
 
             var provider = services.BuildServiceProvider();
 
@@ -89,12 +87,11 @@
         {
             var services = new ServiceCollection();
 
-            services.AddRepositories(options =>
+            services.AddRepositories<MicrosoftDependencyInjectionTests>(options =>
             {
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
-            },
-                new[] { typeof(MicrosoftDependencyInjectionTests).Assembly });
+            });
 
             var provider = services.BuildServiceProvider();
 
@@ -111,14 +108,13 @@
         {
             var services = new ServiceCollection();
 
-            services.AddRepositories(options =>
+            services.AddRepositories<MicrosoftDependencyInjectionTests>(options =>
             {
                 options.UseInterceptor(new TestRepositoryInterceptor("RANDOM P1", true));
                 options.UseInterceptor(new TestRepositoryTimeStampInterceptor("RANDOM USER"));
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
-            },
-                    new[] { typeof(MicrosoftDependencyInjectionTests).Assembly });
+            });
 
             var provider = services.BuildServiceProvider();
 
@@ -158,12 +154,11 @@
         {
             var services = new ServiceCollection();
 
-            services.AddRepositories(options =>
+            services.AddRepositories<MicrosoftDependencyInjectionTests>(options =>
             {
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
-            },
-                new[] { typeof(MicrosoftDependencyInjectionTests).Assembly });
+            });
 
             var provider = services.BuildServiceProvider();
 
