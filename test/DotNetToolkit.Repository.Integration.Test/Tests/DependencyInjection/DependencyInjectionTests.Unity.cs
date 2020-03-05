@@ -108,7 +108,7 @@
 
             container.RegisterRepositories(options =>
             {
-                options.UseInterceptor(new TestRepositoryInterceptor("RANDOM P1", false));
+                options.UseInterceptor(new TestRepositoryInterceptor("RANDOM P1", true));
                 options.UseInterceptor(new TestRepositoryTimeStampInterceptor("RANDOM USER"));
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
@@ -117,11 +117,33 @@
 
             var repo = new Repository<Customer>(container.Resolve<RepositoryOptions>());
 
-            Assert.Equal(3, GetLazyInterceptorsOptionsFromPrivateField<InternalRepositoryBase<Customer>>(repo).Count());
-            Assert.Single(container.ResolveAll<IRepositoryInterceptor>());
+            var configuredInterceptors = GetLazyInterceptorsOptionsFromPrivateField<InternalRepositoryBase<Customer>>(repo);
+
+            Assert.Equal(3, configuredInterceptors.Count());
+            Assert.Equal(3, container.ResolveAll<IRepositoryInterceptor>().Count());
             Assert.NotNull(container.Resolve<TestRepositoryInterceptorWithDependencyInjectedServices>());
-            Assert.NotNull(container.Resolve<TestRepositoryTimeStampInterceptor>());
-            Assert.NotNull(container.Resolve<TestRepositoryInterceptor>());
+
+            var registeredInterceptor1 = container.Resolve<TestRepositoryTimeStampInterceptor>();
+
+            Assert.NotNull(registeredInterceptor1);
+            Assert.Equal("UNKNOWN_USER", registeredInterceptor1.User);
+
+            var registeredInterceptor2 = container.Resolve<TestRepositoryInterceptor>();
+
+            Assert.NotNull(registeredInterceptor2);
+            Assert.Null(registeredInterceptor2.P1);
+            Assert.False(registeredInterceptor2.P2);
+
+            var configueredInterceptor1 = (TestRepositoryTimeStampInterceptor)configuredInterceptors[typeof(TestRepositoryTimeStampInterceptor)].Value;
+
+            Assert.NotNull(configueredInterceptor1);
+            Assert.Equal("RANDOM USER", configueredInterceptor1.User);
+
+            var configueredInterceptor2 = (TestRepositoryInterceptor)configuredInterceptors[typeof(TestRepositoryInterceptor)].Value;
+
+            Assert.NotNull(configueredInterceptor2);
+            Assert.Equal("RANDOM P1", configueredInterceptor2.P1);
+            Assert.True(configueredInterceptor2.P2);
         }
 
         [Fact]
@@ -145,13 +167,13 @@
             Assert.NotNull(container.Resolve<TestRepositoryInterceptor>());
         }
 
-        private static IEnumerable<Lazy<IRepositoryInterceptor>> GetLazyInterceptorsOptionsFromPrivateField<T>(object obj)
+        private static IReadOnlyDictionary<Type, Lazy<IRepositoryInterceptor>> GetLazyInterceptorsOptionsFromPrivateField<T>(object obj)
         {
             var options = (IRepositoryOptions)typeof(T)
                 .GetField("_options", BindingFlags.NonPublic | BindingFlags.Instance)
                 .GetValue(obj);
 
-            return options.Interceptors.Values;
+            return options.Interceptors;
         }
     }
 }
