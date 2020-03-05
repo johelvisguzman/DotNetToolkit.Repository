@@ -25,12 +25,11 @@
             var kernel = new StandardKernel();
             kernel.Load(Assembly.GetExecutingAssembly());
 
-            kernel.BindRepositories(options =>
+            kernel.BindRepositories<NinjectDependencyInjectionTests>(options =>
             {
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
-            },
-                typeof(NinjectDependencyInjectionTests).Assembly);
+            });
 
             Assert.NotNull(kernel.Get<TestRepositoryInterceptorWithDependencyInjectedServices>());
             Assert.NotNull(kernel.Get<TestRepositoryTimeStampInterceptor>());
@@ -67,12 +66,11 @@
         {
             var kernel = new StandardKernel();
 
-            kernel.BindRepositories(options =>
+            kernel.BindRepositories<NinjectDependencyInjectionTests>(options =>
             {
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
-            },
-                typeof(NinjectDependencyInjectionTests).Assembly);
+            });
 
             var service = kernel.Get<IService<Customer>>();
 
@@ -86,12 +84,11 @@
         {
             var kernel = new StandardKernel();
 
-            kernel.BindRepositories(options =>
+            kernel.BindRepositories<NinjectDependencyInjectionTests>(options =>
             {
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
-            },
-                typeof(NinjectDependencyInjectionTests).Assembly);
+            });
 
             var repoOptions = kernel.Get<IRepositoryOptions>();
             var repo = new Repository<Customer>(repoOptions);
@@ -106,14 +103,13 @@
         {
             var kernel = new StandardKernel();
 
-            kernel.BindRepositories(options =>
+            kernel.BindRepositories<NinjectDependencyInjectionTests>(options =>
             {
                 options.UseInterceptor(new TestRepositoryInterceptor("RANDOM P1", true));
                 options.UseInterceptor(new TestRepositoryTimeStampInterceptor("RANDOM USER"));
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
-            },
-                    typeof(NinjectDependencyInjectionTests).Assembly);
+            });
 
             var repo = new Repository<Customer>(kernel.Get<IRepositoryOptions>());
 
@@ -151,12 +147,11 @@
         {
             var kernel = new StandardKernel();
 
-            kernel.BindRepositories(options =>
+            kernel.BindRepositories<NinjectDependencyInjectionTests>(options =>
             {
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
-            },
-                typeof(NinjectDependencyInjectionTests).Assembly);
+            });
 
             var repo = new Repository<Customer>(kernel.Get<IRepositoryOptions>());
 

@@ -8,7 +8,6 @@
     using Services;
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Reflection;
     using Transactions;
     using Utility;
@@ -21,13 +20,28 @@
         /// <summary>
         /// Binds all the repositories services using the specified options builder.
         /// </summary>
+        /// <typeparam name="T">Used for scanning the assembly containing the specified type.</typeparam>
         /// <param name="kernel">The kernel.</param>
         /// <param name="optionsAction">A builder action used to create or modify options for the repositories.</param>
         /// <remarks>
         /// This method will scan for repositories and interceptors from the assemblies that have been loaded into the
         /// execution context of this application domain, and will bind them to the container.
         /// </remarks>
-        public static void RegisterRepositories([NotNull] this IKernel kernel, [NotNull] Action<RepositoryOptionsBuilder> optionsAction)
+        public static void BindRepositories<T>([NotNull] this IKernel kernel, [NotNull] Action<RepositoryOptionsBuilder> optionsAction)
+        {
+            BindRepositories(kernel, optionsAction, new[] { typeof(T).GetTypeInfo().Assembly });
+        }
+
+        /// <summary>
+        /// Binds all the repositories services using the specified options builder.
+        /// </summary>
+        /// <param name="kernel">The kernel.</param>
+        /// <param name="optionsAction">A builder action used to create or modify options for the repositories.</param>
+        /// <remarks>
+        /// This method will scan for repositories and interceptors from the assemblies that have been loaded into the
+        /// execution context of this application domain, and will bind them to the container.
+        /// </remarks>
+        public static void BindRepositories([NotNull] this IKernel kernel, [NotNull] Action<RepositoryOptionsBuilder> optionsAction)
         {
             BindRepositories(kernel, optionsAction, AppDomain.CurrentDomain.GetAssemblies());
         }
