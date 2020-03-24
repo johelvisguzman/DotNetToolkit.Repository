@@ -21,7 +21,7 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EfCoreRepositoryContextFactory{TDbContext}"/> class.
+        /// Initializes a new instance of the <see cref="EfCoreRepositoryContextFactory{TDbContext}"/> using an IOC container to resolve the <typeparamref name="TDbContext"/>.
         /// </summary>
         public EfCoreRepositoryContextFactory() { }
 
@@ -44,41 +44,12 @@
         /// <returns>The new repository context.</returns>
         public IRepositoryContext Create()
         {
-            TDbContext underlyingContext;
-
-            try
-            {
-                underlyingContext = _contextOptions != null
-                    ? (TDbContext)Activator.CreateInstance(typeof(TDbContext), _contextOptions)
-                    : (TDbContext)Activator.CreateInstance(typeof(TDbContext));
-            }
-            catch (Exception ex)
-            {
-                throw ex.InnerException ?? ex;
-            }
+            var underlyingContext = _contextOptions != null
+                ? (TDbContext)Activator.CreateInstance(typeof(TDbContext), _contextOptions)
+                : RepositoryDependencyResolver.Current.Resolve<TDbContext>();
 
             return new EfCoreRepositoryContext(underlyingContext);
 
-        }
-
-        #endregion
-    }
-
-    /// <summary>
-    /// An implementation of <see cref="IRepositoryContextFactory" /> with the <see cref="RepositoryDependencyResolver"/> using an IOC container to resolve the <see cref="DbContext"/>.
-    /// </summary>
-    /// <seealso cref="IRepositoryContextFactory" />
-    internal class EfCoreRepositoryContextFactory : IRepositoryContextFactory
-    {
-        #region Implementation of IRepositoryContextFactory
-
-        /// <summary>
-        /// Create a new repository context.
-        /// </summary>
-        /// <returns>The new repository context.</returns>
-        public IRepositoryContext Create()
-        {
-            return new EfCoreRepositoryContext(RepositoryDependencyResolver.Current.Resolve<DbContext>());
         }
 
         #endregion
