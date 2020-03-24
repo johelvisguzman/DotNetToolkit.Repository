@@ -13,7 +13,7 @@
     public static class RepositoryOptionsBuilderExtensions
     {
         /// <summary>
-        /// Configures the context to use entity framework core.
+        /// Configures the context to use entity framework core using an IOC container to resolve the <typeparamref name="TDbContext"/>.
         /// </summary>
         /// <param name="source">The repository options builder.</param>
         /// <returns>The same builder instance.</returns>
@@ -56,20 +56,6 @@
             Guard.NotNull(options, nameof(options));
 
             source.UseInternalContextFactory(new EfCoreRepositoryContextFactory<TDbContext>(options));
-
-            return source;
-        }
-
-        /// <summary>
-        /// Configures the context to use entity framework with the <see cref="RepositoryDependencyResolver"/> using an IOC container to resolve the <see cref="DbContext"/>.
-        /// </summary>
-        /// <param name="source">The repository options builder.</param>
-        /// <returns>The same builder instance.</returns>
-        public static RepositoryOptionsBuilder UseEntityFrameworkCore([NotNull] this RepositoryOptionsBuilder source)
-        {
-            Guard.NotNull(source, nameof(source));
-
-            source.UseInternalContextFactory(new EfCoreRepositoryContextFactory());
 
             return source;
         }
