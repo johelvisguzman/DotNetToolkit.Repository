@@ -1,13 +1,14 @@
 ﻿namespace DotNetToolkit.Repository.Extensions.Ninject
 {
     using Configuration.Interceptors;
+    using Configuration.Logging;
     using Configuration.Options;
     using Configuration.Options.Internal;
     using global::Ninject;
     using JetBrains.Annotations;
     using Services;
     using System;
-    using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using Transactions;
     using Utility;
@@ -65,27 +66,23 @@
 
             optionsAction(optionsBuilder);
 
-            var registeredInterceptorTypes = new List<Type>();
+            var scanResults = AssemblyScanner.FindRepositoriesFromAssemblies(assembliesToScan);
 
-            // Scan assemblies for repositories, services, and interceptors
-            AssemblyScanner
-                .FindRepositoriesFromAssemblies(assembliesToScan)
-                .ForEach(scanResult =>
+            scanResults.ForEach(scanResult =>
+            {
+                foreach (var implementationType in scanResult.ImplementationTypes)
                 {
-                    foreach (var implementationType in scanResult.ImplementationTypes)
+                    if (scanResult.InterfaceType == typeof(IRepositoryInterceptor))
                     {
-                        if (scanResult.InterfaceType == typeof(IRepositoryInterceptor))
-                        {
-                            kernel.Bind(implementationType).ToSelf();
-                            kernel.Bind(scanResult.InterfaceType).To(implementationType);
-                            registeredInterceptorTypes.Add(implementationType);
-                        }
-                        else
-                        {
-                            kernel.Bind(scanResult.InterfaceType).To(implementationType);
-                        }
+                        kernel.Bind(implementationType).ToSelf();
+                        kernel.Bind(scanResult.InterfaceType).To(implementationType);
                     }
-                });
+                    else
+                    {
+                        kernel.Bind(scanResult.InterfaceType).To(implementationType);
+                    }
+                }
+            });
 
             // Binds other services
             kernel.Bind<IRepositoryFactory>().ToMethod(c => new RepositoryFactory(c.Kernel.Get<IRepositoryOptions>()));
@@ -96,12 +93,19 @@
             {
                 var options = new RepositoryOptions(optionsBuilder.Options);
 
-                foreach (var interceptorType in registeredInterceptorTypes)
+                foreach (var interceptorType in scanResults.OfType<IRepositoryInterceptor>())
                 {
                     if (!optionsBuilder.Options.Interceptors.ContainsKey(interceptorType))
                     {
                         options = options.With(interceptorType, () => (IRepositoryInterceptor)c.Kernel.Get(interceptorType));
                     }
+                }
+
+                if (optionsBuilder.Options.LoggerProvider == null)
+                {
+                    var loggerProviderType = scanResults.OfType<ILoggerProvider>().FirstOrDefault();
+
+                    options = options.With((ILoggerProvider)c.Kernel.Get(loggerProviderType));
                 }
 
                 return options;
