@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Utility
 {
     using Configuration.Interceptors;
+    using Configuration.Logging;
     using Extensions.Internal;
     using JetBrains.Annotations;
     using Services;
@@ -49,6 +50,7 @@
                 typeof(IReadOnlyRepository<,,>),
                 typeof(IReadOnlyRepository<,,,>),
                 typeof(IRepositoryInterceptor),
+                typeof(ILoggerProvider),
             };
         }
 
