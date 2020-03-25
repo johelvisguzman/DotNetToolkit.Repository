@@ -1213,6 +1213,11 @@
         #region Properties
 
         /// <summary>
+        /// Gets or sets the value indicating whether all the repository interceptors should be enabled or not.
+        /// </summary>
+        public bool InterceptorsEnabled { get; set; }
+
+        /// <summary>
         /// Gets or sets the value indicating whether caching is enabled or not.
         /// </summary>
         public bool CacheEnabled { get; set; }
@@ -1261,6 +1266,8 @@
 
             if (CacheProvider.GetType() != typeof(NullCacheProvider))
                 CacheEnabled = true;
+
+            InterceptorsEnabled = true;
         }
 
         #endregion
@@ -3046,6 +3053,9 @@
         {
             Guard.NotNull(action, nameof(action));
 
+            if (!InterceptorsEnabled)
+                return;
+
             foreach (var interceptor in GetInterceptors())
             {
                 action(interceptor);
@@ -3055,6 +3065,9 @@
         internal async Task InterceptAsync([NotNull] Func<IRepositoryInterceptor, Task> action)
         {
             Guard.NotNull(action, nameof(action));
+
+            if (!InterceptorsEnabled)
+                return;
 
             foreach (var interceptor in GetInterceptors())
             {

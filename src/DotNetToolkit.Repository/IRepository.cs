@@ -19,6 +19,11 @@
     public interface IRepository<TEntity, in TKey1, in TKey2, in TKey3> : IReadOnlyRepository<TEntity, TKey1, TKey2, TKey3> where TEntity : class
     {
         /// <summary>
+        /// Gets or sets the value indicating whether all the repository interceptors should be enabled or not.
+        /// </summary>
+        bool InterceptorsEnabled { get; set; }
+
+        /// <summary>
         /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey1, TKey2, TKey3}" /> wrapper for the current repository.
         /// </summary>
         /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
