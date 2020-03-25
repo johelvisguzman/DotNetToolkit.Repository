@@ -245,6 +245,16 @@
     public interface IRepository<TEntity, in TKey1, in TKey2> : IReadOnlyRepository<TEntity, TKey1, TKey2> where TEntity : class
     {
         /// <summary>
+        /// Gets or sets the value indicating whether all the repository interceptors should be enabled or not.
+        /// </summary>
+        bool InterceptorsEnabled { get; set; }
+
+        /// <summary>
+        /// Gets a dictionary for indicating whether the repository interceptor of the specified type should be disabled.
+        /// </summary>
+        Dictionary<Type, bool> InterceptorTypesDisabled { get; }
+
+        /// <summary>
         /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey1, TKey2}" /> wrapper for the current repository.
         /// </summary>
         /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>
@@ -455,6 +465,16 @@
     /// <seealso cref="IReadOnlyRepository{TEntity, TKey}" />
     public interface IRepository<TEntity, in TKey> : IReadOnlyRepository<TEntity, TKey> where TEntity : class
     {
+        /// <summary>
+        /// Gets or sets the value indicating whether all the repository interceptors should be enabled or not.
+        /// </summary>
+        bool InterceptorsEnabled { get; set; }
+
+        /// <summary>
+        /// Gets a dictionary for indicating whether the repository interceptor of the specified type should be disabled.
+        /// </summary>
+        Dictionary<Type, bool> InterceptorTypesDisabled { get; }
+
         /// <summary>
         /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey}" /> wrapper for the current repository.
         /// </summary>
