@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Extensions.Unity
 {
     using Configuration.Interceptors;
+    using Configuration.Logging;
     using Configuration.Options;
     using Configuration.Options.Internal;
     using global::Unity;
@@ -8,7 +9,7 @@
     using JetBrains.Annotations;
     using Services;
     using System;
-    using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using Transactions;
     using Utility;
@@ -72,27 +73,23 @@
 
             optionsAction(optionsBuilder);
 
-            var registeredInterceptorTypes = new List<Type>();
+            var scanResults = AssemblyScanner.FindRepositoriesFromAssemblies(assembliesToScan);
 
-            // Scan assemblies for repositories, services, and interceptors
-            AssemblyScanner
-                .FindRepositoriesFromAssemblies(assembliesToScan)
-                .ForEach(scanResult =>
+            scanResults.ForEach(scanResult =>
+            {
+                foreach (var implementationType in scanResult.ImplementationTypes)
                 {
-                    foreach (var implementationType in scanResult.ImplementationTypes)
+                    if (scanResult.InterfaceType == typeof(IRepositoryInterceptor))
                     {
-                        if (scanResult.InterfaceType == typeof(IRepositoryInterceptor))
-                        {
-                            container.RegisterType(implementationType, implementationType);
-                            container.RegisterType(scanResult.InterfaceType, implementationType, implementationType.FullName);
-                            registeredInterceptorTypes.Add(implementationType);
-                        }
-                        else
-                        {
-                            container.RegisterType(scanResult.InterfaceType, implementationType);
-                        }
+                        container.RegisterType(implementationType, implementationType);
+                        container.RegisterType(scanResult.InterfaceType, implementationType, implementationType.FullName);
                     }
-                });
+                    else
+                    {
+                        container.RegisterType(scanResult.InterfaceType, implementationType);
+                    }
+                }
+            });
 
             // Register other services
             container.RegisterFactory<IRepositoryFactory>(c => new RepositoryFactory(c.Resolve<IRepositoryOptions>()), factorylifetimeManager);
@@ -103,12 +100,19 @@
             {
                 var options = new RepositoryOptions(optionsBuilder.Options);
 
-                foreach (var interceptorType in registeredInterceptorTypes)
+                foreach (var interceptorType in scanResults.OfType<IRepositoryInterceptor>())
                 {
                     if (!optionsBuilder.Options.Interceptors.ContainsKey(interceptorType))
                     {
                         options = options.With(interceptorType, () => (IRepositoryInterceptor)c.Resolve(interceptorType));
                     }
+                }
+
+                if (optionsBuilder.Options.LoggerProvider == null)
+                {
+                    var loggerProviderType = scanResults.OfType<ILoggerProvider>().FirstOrDefault();
+
+                    options = options.With((ILoggerProvider)c.Resolve(loggerProviderType));
                 }
 
                 return options;

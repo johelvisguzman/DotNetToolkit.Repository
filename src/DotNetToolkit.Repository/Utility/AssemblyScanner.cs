@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Utility
 {
     using Configuration.Interceptors;
+    using Configuration.Logging;
     using Extensions.Internal;
     using JetBrains.Annotations;
     using Services;
@@ -49,6 +50,7 @@
                 typeof(IReadOnlyRepository<,,>),
                 typeof(IReadOnlyRepository<,,,>),
                 typeof(IRepositoryInterceptor),
+                typeof(ILoggerProvider),
             };
         }
 
@@ -89,6 +91,18 @@
             {
                 action(result);
             }
+        }
+
+        /// <summary>
+        /// Gets a collection of types that implement the specified interface type.
+        /// </summary>
+        /// <typeparam name="T">The interface type to get the implementations from.</typeparam>
+        /// <returns>A collection of types that implement the specified interface type.</returns>
+        public IEnumerable<Type> OfType<T>()
+        {
+            return this
+                .Where(result => result.InterfaceType == typeof(T))
+                .SelectMany(result => result.ImplementationTypes);
         }
 
         #endregion
