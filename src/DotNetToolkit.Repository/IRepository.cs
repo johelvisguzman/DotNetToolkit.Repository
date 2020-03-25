@@ -24,6 +24,11 @@
         bool InterceptorsEnabled { get; set; }
 
         /// <summary>
+        /// Gets a dictionary for indicating whether the repository interceptor of the specified type should be disabled.
+        /// </summary>
+        Dictionary<Type, bool> InterceptorTypesDisabled { get; }
+
+        /// <summary>
         /// Returns a read-only <see cref="IReadOnlyRepository{TEntity, TKey1, TKey2, TKey3}" /> wrapper for the current repository.
         /// </summary>
         /// <returns>An object that acts as a read-only wrapper around the current repository.</returns>

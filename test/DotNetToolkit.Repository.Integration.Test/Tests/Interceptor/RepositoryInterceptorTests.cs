@@ -135,6 +135,37 @@
         }
 
         [Fact]
+        public void CantModifyUserOnInterceptionsWhenDisabledByType()
+        {
+            const string user = "Random User";
+
+            var entity = new CustomerWithTimeStamp();
+            var options = new RepositoryOptionsBuilder()
+                .UseInMemoryDatabase()
+                .UseInterceptor(new TestRepositoryTimeStampInterceptor(user))
+                .Options;
+
+            var repo = new Repository<CustomerWithTimeStamp>(options)
+            {
+                InterceptorsEnabled = true
+            };
+
+            repo.InterceptorTypesDisabled.Add(typeof(TestRepositoryTimeStampInterceptor), true);
+
+            Assert.Null(entity.CreateTime);
+            Assert.Null(entity.ModTime);
+            Assert.Null(entity.CreateUser);
+            Assert.Null(entity.ModUser);
+
+            repo.Add(entity);
+
+            Assert.Null(entity.CreateTime);
+            Assert.Null(entity.ModTime);
+            Assert.Null(entity.CreateUser);
+            Assert.Null(entity.ModUser);
+        }
+
+        [Fact]
         public async Task AddAsync()
         {
             var entity = new Customer();
@@ -239,6 +270,37 @@
             {
                 InterceptorsEnabled = false
             };
+
+            Assert.Null(entity.CreateTime);
+            Assert.Null(entity.ModTime);
+            Assert.Null(entity.CreateUser);
+            Assert.Null(entity.ModUser);
+
+            await repo.AddAsync(entity);
+
+            Assert.Null(entity.CreateTime);
+            Assert.Null(entity.ModTime);
+            Assert.Null(entity.CreateUser);
+            Assert.Null(entity.ModUser);
+        }
+
+        [Fact]
+        public async Task CantModifyUserOnInterceptionsWhenDisabledByTypeAsync()
+        {
+            const string user = "Random User";
+
+            var entity = new CustomerWithTimeStamp();
+            var options = new RepositoryOptionsBuilder()
+                .UseInMemoryDatabase()
+                .UseInterceptor(new TestRepositoryTimeStampInterceptor(user))
+                .Options;
+
+            var repo = new Repository<CustomerWithTimeStamp>(options)
+            {
+                InterceptorsEnabled = true
+            };
+
+            repo.InterceptorTypesDisabled.Add(typeof(TestRepositoryTimeStampInterceptor), true);
 
             Assert.Null(entity.CreateTime);
             Assert.Null(entity.ModTime);
