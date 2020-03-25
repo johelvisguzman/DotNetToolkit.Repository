@@ -1213,6 +1213,16 @@
         #region Properties
 
         /// <summary>
+        /// Gets or sets the value indicating whether all the repository interceptors should be enabled or not.
+        /// </summary>
+        public bool InterceptorsEnabled { get; set; }
+
+        /// <summary>
+        /// Gets a dictionary for indicating whether the repository interceptor of the specified type should be disabled.
+        /// </summary>
+        public Dictionary<Type, bool> InterceptorTypesDisabled { get; }
+
+        /// <summary>
         /// Gets or sets the value indicating whether caching is enabled or not.
         /// </summary>
         public bool CacheEnabled { get; set; }
@@ -1261,6 +1271,9 @@
 
             if (CacheProvider.GetType() != typeof(NullCacheProvider))
                 CacheEnabled = true;
+
+            InterceptorsEnabled = true;
+            InterceptorTypesDisabled = new Dictionary<Type, bool>();
         }
 
         #endregion
@@ -3046,9 +3059,17 @@
         {
             Guard.NotNull(action, nameof(action));
 
+            if (!InterceptorsEnabled)
+                return;
+
             foreach (var interceptor in GetInterceptors())
             {
-                action(interceptor);
+                var interceptorType = interceptor.GetType();
+                var isEnabled = InterceptorTypesDisabled.ContainsKey(interceptorType)
+                    ? !InterceptorTypesDisabled[interceptorType]
+                    : true;
+
+                if (isEnabled) action(interceptor);
             }
         }
 
@@ -3056,9 +3077,17 @@
         {
             Guard.NotNull(action, nameof(action));
 
+            if (!InterceptorsEnabled)
+                return;
+
             foreach (var interceptor in GetInterceptors())
             {
-                await action(interceptor);
+                var interceptorType = interceptor.GetType();
+                var isEnabled = InterceptorTypesDisabled.ContainsKey(interceptorType)
+                    ? !InterceptorTypesDisabled[interceptorType]
+                    : true;
+
+                if (isEnabled) await action(interceptor);
             }
         }
 
