@@ -93,6 +93,18 @@
             }
         }
 
+        /// <summary>
+        /// Gets a collection of types that implement the specified interface type.
+        /// </summary>
+        /// <typeparam name="T">The interface type to get the implementations from.</typeparam>
+        /// <returns>A collection of types that implement the specified interface type.</returns>
+        public IEnumerable<Type> OfType<T>()
+        {
+            return this
+                .Where(result => result.InterfaceType == typeof(T))
+                .SelectMany(result => result.ImplementationTypes);
+        }
+
         #endregion
 
         #region Private Methods
