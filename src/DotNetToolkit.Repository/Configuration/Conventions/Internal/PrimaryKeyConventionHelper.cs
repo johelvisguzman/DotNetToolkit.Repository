@@ -36,7 +36,7 @@
             {
                 foreach (var propertyName in GetDefaultPrimaryKeyNameChecks(entityType))
                 {
-                    var propertyInfo = entityType.GetTypeInfo().GetDeclaredProperty(propertyName);
+                    var propertyInfo = entityType.GetProperty(propertyName);
 
                     if (propertyInfo != null && conventions.IsColumnMapped(propertyInfo))
                     {
