@@ -8,9 +8,7 @@
     using InMemory;
     using Services;
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
     using Transactions;
     using Unity;
     using Xunit;
@@ -28,10 +26,10 @@
             container.RegisterRepositories<MicrosoftDependencyInjectionTests>(options =>
             {
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
-                options.UseLoggerProvider(TestXUnitLoggerProvider);
             });
 
             Assert.NotNull(container.Resolve<TestRepositoryInterceptorWithDependencyInjectedServices>());
+            Assert.NotNull(container.Resolve<TestLoggerProvider>());
             Assert.NotNull(container.Resolve<TestRepositoryTimeStampInterceptor>());
             Assert.NotNull(container.Resolve<TestRepositoryInterceptor>());
             Assert.Equal(3, container.ResolveAll<IRepositoryInterceptor>().Count());
@@ -111,11 +109,9 @@
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
             });
 
-            var repo = new Repository<Customer>(container.Resolve<RepositoryOptions>());
+            var repoOptions = container.Resolve<IRepositoryOptions>();
 
-            var configuredInterceptors = GetLazyInterceptorsOptionsFromPrivateField<InternalRepositoryBase<Customer>>(repo);
-
-            Assert.Equal(3, configuredInterceptors.Count());
+            Assert.Equal(3, repoOptions.Interceptors.Count());
             Assert.Equal(3, container.ResolveAll<IRepositoryInterceptor>().Count());
             Assert.NotNull(container.Resolve<TestRepositoryInterceptorWithDependencyInjectedServices>());
 
@@ -130,12 +126,12 @@
             Assert.Null(registeredInterceptor2.P1);
             Assert.False(registeredInterceptor2.P2);
 
-            var configueredInterceptor1 = (TestRepositoryTimeStampInterceptor)configuredInterceptors[typeof(TestRepositoryTimeStampInterceptor)].Value;
+            var configueredInterceptor1 = (TestRepositoryTimeStampInterceptor)repoOptions.Interceptors[typeof(TestRepositoryTimeStampInterceptor)].Value;
 
             Assert.NotNull(configueredInterceptor1);
             Assert.Equal("RANDOM USER", configueredInterceptor1.User);
 
-            var configueredInterceptor2 = (TestRepositoryInterceptor)configuredInterceptors[typeof(TestRepositoryInterceptor)].Value;
+            var configueredInterceptor2 = (TestRepositoryInterceptor)repoOptions.Interceptors[typeof(TestRepositoryInterceptor)].Value;
 
             Assert.NotNull(configueredInterceptor2);
             Assert.Equal("RANDOM P1", configueredInterceptor2.P1);
@@ -153,22 +149,35 @@
                 options.UseLoggerProvider(TestXUnitLoggerProvider);
             });
 
-            var repo = new Repository<Customer>(container.Resolve<RepositoryOptions>());
+            var repoOptions = container.Resolve<IRepositoryOptions>();
 
-            Assert.Equal(3, GetLazyInterceptorsOptionsFromPrivateField<InternalRepositoryBase<Customer>>(repo).Count());
+            Assert.Equal(3, repoOptions.Interceptors.Count());
             Assert.Equal(3, container.ResolveAll<IRepositoryInterceptor>().Count());
             Assert.NotNull(container.Resolve<TestRepositoryInterceptorWithDependencyInjectedServices>());
             Assert.NotNull(container.Resolve<TestRepositoryTimeStampInterceptor>());
             Assert.NotNull(container.Resolve<TestRepositoryInterceptor>());
         }
 
-        private static IReadOnlyDictionary<Type, Lazy<IRepositoryInterceptor>> GetLazyInterceptorsOptionsFromPrivateField<T>(object obj)
+        [Fact]
+        public void DependencyInjectionCanConfigureLogginProviderWithScannedLogger()
         {
-            var options = (IRepositoryOptions)typeof(T)
-                .GetField("_options", BindingFlags.NonPublic | BindingFlags.Instance)
-                .GetValue(obj);
+            var container = new UnityContainer();
 
-            return options.Interceptors;
+            container.RegisterRepositories<MicrosoftDependencyInjectionTests>(options =>
+            {
+                options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
+                options.UseLoggerProvider(TestXUnitLoggerProvider);
+            });
+
+            var repoOptions = container.Resolve<IRepositoryOptions>();
+
+            Assert.Equal(typeof(TestXUnitLoggerProvider), repoOptions.LoggerProvider.GetType());
+
+            Assert.Equal(3, repoOptions.Interceptors.Count());
+            Assert.Equal(3, container.ResolveAll<IRepositoryInterceptor>().Count());
+            Assert.NotNull(container.Resolve<TestRepositoryInterceptorWithDependencyInjectedServices>());
+            Assert.NotNull(container.Resolve<TestRepositoryTimeStampInterceptor>());
+            Assert.NotNull(container.Resolve<TestRepositoryInterceptor>());
         }
     }
 }
