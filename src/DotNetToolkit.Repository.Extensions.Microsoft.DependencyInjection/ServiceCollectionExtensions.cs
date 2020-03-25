@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection
 {
     using Configuration.Interceptors;
+    using Configuration.Logging;
     using Configuration.Options;
     using Configuration.Options.Internal;
     using global::Microsoft.Extensions.DependencyInjection;
@@ -8,6 +9,7 @@
     using Services;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using Transactions;
     using Utility;
@@ -71,33 +73,25 @@
 
             optionsAction(optionsBuilder);
 
-            var registeredInterceptorTypes = new List<Type>();
+            var scanResults = AssemblyScanner.FindRepositoriesFromAssemblies(assembliesToScan);
 
-            // Scan assemblies for repositories, services, and interceptors
-            AssemblyScanner
-                .FindRepositoriesFromAssemblies(assembliesToScan)
-                .ForEach(scanResult =>
+            scanResults.ForEach(scanResult =>
+            {
+                foreach (var implementationType in scanResult.ImplementationTypes)
                 {
-                    foreach (var implementationType in scanResult.ImplementationTypes)
-                    {
-                        // Register as interface
-                        services.Add(new ServiceDescriptor(
-                            scanResult.InterfaceType,
-                            implementationType,
-                            serviceLifetime));
+                    // Register as interface
+                    services.Add(new ServiceDescriptor(
+                        scanResult.InterfaceType,
+                        implementationType,
+                        serviceLifetime));
 
-                        // Register as self
-                        services.Add(new ServiceDescriptor(
-                            implementationType,
-                            implementationType,
-                            serviceLifetime));
-
-                        if (scanResult.InterfaceType == typeof(IRepositoryInterceptor))
-                        {
-                            registeredInterceptorTypes.Add(implementationType);
-                        }
-                    }
-                });
+                    // Register as self
+                    services.Add(new ServiceDescriptor(
+                        implementationType,
+                        implementationType,
+                        serviceLifetime));
+                }
+            });
 
             // Register other services
             services.Add(new ServiceDescriptor(
@@ -126,12 +120,19 @@
                 {
                     var options = new RepositoryOptions(optionsBuilder.Options);
 
-                    foreach (var interceptorType in registeredInterceptorTypes)
+                    foreach (var interceptorType in scanResults.OfType<IRepositoryInterceptor>())
                     {
                         if (!optionsBuilder.Options.Interceptors.ContainsKey(interceptorType))
                         {
                             options = options.With(interceptorType, () => (IRepositoryInterceptor)sp.GetService(interceptorType));
                         }
+                    }
+
+                    if (optionsBuilder.Options.LoggerProvider == null)
+                    {
+                        var loggerProviderType = scanResults.OfType<ILoggerProvider>().FirstOrDefault();
+
+                        options = options.With((ILoggerProvider)sp.GetService(loggerProviderType));
                     }
 
                     return options;
