@@ -95,37 +95,6 @@
         #region Implementation of IUnitOfWork
 
         /// <summary>
-        /// Commits all changes made in this unit of work.
-        /// </summary>
-        public virtual void Commit()
-        {
-            ThrowIfDisposed();
-
-            if (_transactionManager == null)
-                throw new InvalidOperationException("The transaction has already been committed.");
-
-            _transactionManager.Commit();
-            _transactionManager = null;
-        }
-
-        #endregion
-
-        #region Implementation of IDisposable
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        #endregion
-
-        #region Implementation of IRepositoryFactory
-
-        /// <summary>
         /// Creates a new repository for the specified entity type.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
@@ -189,6 +158,33 @@
             ThrowIfDisposed();
 
             return (T)Activator.CreateInstance(typeof(T), new object[] { _options });
+        }
+
+        /// <summary>
+        /// Commits all changes made in this unit of work.
+        /// </summary>
+        public virtual void Commit()
+        {
+            ThrowIfDisposed();
+
+            if (_transactionManager == null)
+                throw new InvalidOperationException("The transaction has already been committed.");
+
+            _transactionManager.Commit();
+            _transactionManager = null;
+        }
+
+        #endregion
+
+        #region Implementation of IDisposable
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         #endregion
