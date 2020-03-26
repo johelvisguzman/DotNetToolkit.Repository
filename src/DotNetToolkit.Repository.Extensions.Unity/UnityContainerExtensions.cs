@@ -75,13 +75,15 @@
 
             var scanResults = AssemblyScanner.FindRepositoriesFromAssemblies(assembliesToScan);
 
+            // Register scanned types
             scanResults.ForEach(scanResult =>
             {
                 foreach (var implementationType in scanResult.ImplementationTypes)
                 {
+                    container.RegisterType(implementationType);
+                    
                     if (scanResult.InterfaceType == typeof(IRepositoryInterceptor))
                     {
-                        container.RegisterType(implementationType, implementationType);
                         container.RegisterType(scanResult.InterfaceType, implementationType, implementationType.FullName);
                     }
                     else
@@ -91,11 +93,7 @@
                 }
             });
 
-            // Register other services
-            container.RegisterFactory<IRepositoryFactory>(c => new RepositoryFactory(c.Resolve<IRepositoryOptions>()), factorylifetimeManager);
-            container.RegisterFactory<IUnitOfWork>(c => new UnitOfWork(c.Resolve<IRepositoryOptions>()), factorylifetimeManager);
-            container.RegisterFactory<IUnitOfWorkFactory>(c => new UnitOfWorkFactory(c.Resolve<IRepositoryOptions>()), factorylifetimeManager);
-            container.RegisterFactory<IServiceFactory>(c => new ServiceFactory(c.Resolve<IUnitOfWorkFactory>()), factorylifetimeManager);
+            // Register options services
             container.RegisterFactory<IRepositoryOptions>(c =>
             {
                 var options = new RepositoryOptions(optionsBuilder.Options);
