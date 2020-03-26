@@ -68,27 +68,17 @@
 
             var scanResults = AssemblyScanner.FindRepositoriesFromAssemblies(assembliesToScan);
 
+            // Binds scanned types
             scanResults.ForEach(scanResult =>
             {
                 foreach (var implementationType in scanResult.ImplementationTypes)
                 {
-                    if (scanResult.InterfaceType == typeof(IRepositoryInterceptor))
-                    {
-                        kernel.Bind(implementationType).ToSelf();
-                        kernel.Bind(scanResult.InterfaceType).To(implementationType);
-                    }
-                    else
-                    {
-                        kernel.Bind(scanResult.InterfaceType).To(implementationType);
-                    }
+                    kernel.Bind(implementationType).ToSelf();
+                    kernel.Bind(scanResult.InterfaceType).To(implementationType);
                 }
             });
 
-            // Binds other services
-            kernel.Bind<IRepositoryFactory>().ToMethod(c => new RepositoryFactory(c.Kernel.Get<IRepositoryOptions>()));
-            kernel.Bind<IUnitOfWork>().ToMethod(c => new UnitOfWork(c.Kernel.Get<IRepositoryOptions>()));
-            kernel.Bind<IUnitOfWorkFactory>().ToMethod(c => new UnitOfWorkFactory(c.Kernel.Get<IRepositoryOptions>()));
-            kernel.Bind<IServiceFactory>().ToMethod(c => new ServiceFactory(c.Kernel.Get<IUnitOfWorkFactory>()));
+            // Binds options services
             kernel.Bind<IRepositoryOptions>().ToMethod(c =>
             {
                 var options = new RepositoryOptions(optionsBuilder.Options);

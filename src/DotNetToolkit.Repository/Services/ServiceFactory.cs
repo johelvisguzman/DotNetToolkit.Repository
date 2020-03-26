@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Services
 {
-    using Configuration.Options;
     using JetBrains.Annotations;
     using System;
     using Transactions;
@@ -19,18 +18,6 @@
         #endregion
 
         #region Constructors
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ServiceFactory" /> class.
-        /// </summary>
-        /// <param name="optionsAction">A builder action used to create or modify options for this service factory.</param>
-        public ServiceFactory([NotNull] Action<RepositoryOptionsBuilder> optionsAction) : this(new UnitOfWorkFactory(Guard.NotNull(optionsAction, nameof(optionsAction)))) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ServiceFactory" /> class.
-        /// </summary>
-        /// <param name="options">The service options.</param>
-        public ServiceFactory([NotNull] IRepositoryOptions options) : this(new UnitOfWorkFactory(Guard.NotNull(options, nameof(options)))) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServiceFactory"/> class.
