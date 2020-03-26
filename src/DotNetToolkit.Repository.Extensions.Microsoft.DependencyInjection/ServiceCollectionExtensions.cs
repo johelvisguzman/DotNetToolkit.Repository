@@ -6,12 +6,9 @@
     using Configuration.Options.Internal;
     using global::Microsoft.Extensions.DependencyInjection;
     using JetBrains.Annotations;
-    using Services;
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using Transactions;
     using Utility;
 
     /// <summary>
@@ -75,6 +72,7 @@
 
             var scanResults = AssemblyScanner.FindRepositoriesFromAssemblies(assembliesToScan);
 
+            // Register scanned types
             scanResults.ForEach(scanResult =>
             {
                 foreach (var implementationType in scanResult.ImplementationTypes)
@@ -93,27 +91,7 @@
                 }
             });
 
-            // Register other services
-            services.Add(new ServiceDescriptor(
-                typeof(IRepositoryFactory),
-                sp => new RepositoryFactory(sp.GetRequiredService<IRepositoryOptions>()),
-                serviceLifetime));
-
-            services.Add(new ServiceDescriptor(
-                typeof(IUnitOfWork),
-                sp => new UnitOfWork(sp.GetRequiredService<IRepositoryOptions>()),
-                serviceLifetime));
-
-            services.Add(new ServiceDescriptor(
-                typeof(IUnitOfWorkFactory),
-                sp => new UnitOfWorkFactory(sp.GetRequiredService<IRepositoryOptions>()),
-                serviceLifetime));
-
-            services.Add(new ServiceDescriptor(
-                typeof(IServiceFactory),
-                sp => new ServiceFactory(sp.GetRequiredService<IRepositoryOptions>()),
-                serviceLifetime));
-
+            // Register options services
             services.Add(new ServiceDescriptor(
                 typeof(IRepositoryOptions),
                 sp =>
