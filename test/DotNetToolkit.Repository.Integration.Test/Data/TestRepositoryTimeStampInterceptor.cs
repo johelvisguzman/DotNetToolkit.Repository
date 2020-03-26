@@ -23,9 +23,9 @@
             _user = loggedInUser;
         }
 
-        public override void AddExecuting<TEntity>(TEntity entity)
+        public override void AddExecuting<TEntity>(RepositoryInterceptionContext<TEntity> interceptionContext)
         {
-            if (entity is IHaveTimeStamp haveStamp)
+            if (interceptionContext.Entity is IHaveTimeStamp haveStamp)
             {
                 var currentTime = DateTime.UtcNow;
 
@@ -36,9 +36,9 @@
             }
         }
 
-        public override void UpdateExecuting<TEntity>(TEntity entity)
+        public override void UpdateExecuting<TEntity>(RepositoryInterceptionContext<TEntity> interceptionContext)
         {
-            if (entity is IHaveTimeStamp haveStamp)
+            if (interceptionContext.Entity is IHaveTimeStamp haveStamp)
             {
                 var currentTime = DateTime.UtcNow;
 
@@ -47,9 +47,9 @@
             }
         }
 
-        public override Task AddExecutingAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
+        public override Task AddExecutingAsync<TEntity>(RepositoryInterceptionContext<TEntity> interceptionContext, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (entity is IHaveTimeStamp haveStamp)
+            if (interceptionContext.Entity is IHaveTimeStamp haveStamp)
             {
                 var currentTime = DateTime.UtcNow;
 
@@ -62,9 +62,9 @@
             return Task.FromResult(0);
         }
 
-        public override Task UpdateExecutingAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
+        public override Task UpdateExecutingAsync<TEntity>(RepositoryInterceptionContext<TEntity> interceptionContext, CancellationToken cancellationToken = new CancellationToken())
         {
-            if (entity is IHaveTimeStamp haveStamp)
+            if (interceptionContext.Entity is IHaveTimeStamp haveStamp)
             {
                 var currentTime = DateTime.UtcNow;
 

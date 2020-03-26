@@ -28,11 +28,11 @@
 
             var repo = new Repository<Customer>(options);
 
-            mock.Verify(x => x.AddExecuting(It.IsAny<Customer>()), Times.Never);
+            mock.Verify(x => x.AddExecuting(It.IsAny<RepositoryInterceptionContext<Customer>>()), Times.Never);
 
             repo.Add(entity);
 
-            mock.Verify(x => x.AddExecuting(It.Is<Customer>(z => z == entity)), Times.Once);
+            mock.Verify(x => x.AddExecuting(It.Is<RepositoryInterceptionContext<Customer>>(z => z.Entity == entity)), Times.Once);
         }
 
         [Fact]
@@ -50,11 +50,11 @@
 
             repo.Add(entity);
 
-            mock.Verify(x => x.UpdateExecuting(It.IsAny<Customer>()), Times.Never);
+            mock.Verify(x => x.UpdateExecuting(It.IsAny<RepositoryInterceptionContext<Customer>>()), Times.Never);
 
             repo.Update(entity);
 
-            mock.Verify(x => x.UpdateExecuting(It.Is<Customer>(z => z == entity)), Times.Once);
+            mock.Verify(x => x.UpdateExecuting(It.Is<RepositoryInterceptionContext<Customer>>(z => z.Entity == entity)), Times.Once);
         }
 
         [Fact]
@@ -72,11 +72,11 @@
 
             repo.Add(entity);
 
-            mock.Verify(x => x.DeleteExecuting(It.IsAny<Customer>()), Times.Never);
+            mock.Verify(x => x.DeleteExecuting(It.IsAny<RepositoryInterceptionContext<Customer>>()), Times.Never);
 
             repo.Delete(entity);
 
-            mock.Verify(x => x.DeleteExecuting(It.Is<Customer>(z => z == entity)), Times.Once);
+            mock.Verify(x => x.DeleteExecuting(It.Is<RepositoryInterceptionContext<Customer>>(z => z.Entity == entity)), Times.Once);
         }
 
         [Fact]
@@ -178,11 +178,11 @@
 
             var repo = new Repository<Customer>(options);
 
-            mock.Verify(x => x.AddExecutingAsync(It.IsAny<Customer>(), It.IsAny<CancellationToken>()), Times.Never);
+            mock.Verify(x => x.AddExecutingAsync(It.IsAny<RepositoryInterceptionContext<Customer>>(), It.IsAny<CancellationToken>()), Times.Never);
 
             await repo.AddAsync(entity);
 
-            mock.Verify(x => x.AddExecutingAsync(It.Is<Customer>(z => z == entity), It.IsAny<CancellationToken>()), Times.Once);
+            mock.Verify(x => x.AddExecutingAsync(It.Is<RepositoryInterceptionContext<Customer>>(z => z.Entity == entity), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -200,11 +200,11 @@
 
             await repo.AddAsync(entity);
 
-            mock.Verify(x => x.UpdateExecutingAsync(It.IsAny<Customer>(), It.IsAny<CancellationToken>()), Times.Never);
+            mock.Verify(x => x.UpdateExecutingAsync(It.IsAny<RepositoryInterceptionContext<Customer>>(), It.IsAny<CancellationToken>()), Times.Never);
 
             await repo.UpdateAsync(entity);
 
-            mock.Verify(x => x.UpdateExecutingAsync(It.Is<Customer>(z => z == entity), It.IsAny<CancellationToken>()), Times.Once);
+            mock.Verify(x => x.UpdateExecutingAsync(It.Is<RepositoryInterceptionContext<Customer>>(z => z.Entity == entity), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -222,11 +222,11 @@
 
             await repo.AddAsync(entity);
 
-            mock.Verify(x => x.DeleteExecutingAsync(It.IsAny<Customer>(), It.IsAny<CancellationToken>()), Times.Never);
+            mock.Verify(x => x.DeleteExecutingAsync(It.IsAny<RepositoryInterceptionContext<Customer>>(), It.IsAny<CancellationToken>()), Times.Never);
 
             await repo.DeleteAsync(entity);
 
-            mock.Verify(x => x.DeleteExecutingAsync(It.Is<Customer>(z => z == entity), It.IsAny<CancellationToken>()), Times.Once);
+            mock.Verify(x => x.DeleteExecutingAsync(It.Is<RepositoryInterceptionContext<Customer>>(z => z.Entity == entity), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
