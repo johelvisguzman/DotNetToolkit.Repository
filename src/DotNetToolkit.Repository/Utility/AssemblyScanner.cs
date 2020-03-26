@@ -10,6 +10,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using Transactions;
 
     /// <summary>
     /// A helper class for scanning all repositories and interceptors from a specified assembly collection.
@@ -51,6 +52,10 @@
                 typeof(IReadOnlyRepository<,,,>),
                 typeof(IRepositoryInterceptor),
                 typeof(ILoggerProvider),
+                typeof(IRepositoryFactory),
+                typeof(IServiceFactory),
+                typeof(IUnitOfWork),
+                typeof(IUnitOfWorkFactory),
             };
         }
 
