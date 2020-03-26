@@ -1430,10 +1430,11 @@
 
             InterceptError(() => Guard.NotNull(entity, nameof(entity)));
 
-            Intercept(x => x.AddExecuting(entity));
-
             UseContext(context =>
             {
+                Intercept(x => x.AddExecuting(
+                    new RepositoryInterceptionContext<TEntity>(entity, context)));
+
                 context.Add(entity);
                 context.SaveChanges();
             });
@@ -1457,7 +1458,8 @@
             {
                 foreach (var entity in entities)
                 {
-                    Intercept(x => x.AddExecuting(entity));
+                    Intercept(x => x.AddExecuting(
+                        new RepositoryInterceptionContext<TEntity>(entity, context)));
 
                     context.Add(entity);
                 }
@@ -1480,10 +1482,11 @@
 
             InterceptError(() => Guard.NotNull(entity, nameof(entity)));
 
-            Intercept(x => x.UpdateExecuting(entity));
-
             UseContext(context =>
             {
+                Intercept(x => x.UpdateExecuting(
+                    new RepositoryInterceptionContext<TEntity>(entity, context)));
+
                 context.Update(entity);
                 context.SaveChanges();
             });
@@ -1507,7 +1510,8 @@
             {
                 foreach (var entity in entities)
                 {
-                    Intercept(x => x.UpdateExecuting(entity));
+                    Intercept(x => x.UpdateExecuting(
+                        new RepositoryInterceptionContext<TEntity>(entity, context)));
 
                     context.Update(entity);
                 }
@@ -1530,10 +1534,11 @@
 
             InterceptError(() => Guard.NotNull(entity, nameof(entity)));
 
-            Intercept(x => x.DeleteExecuting(entity));
-
             UseContext(context =>
             {
+                Intercept(x => x.DeleteExecuting(
+                    new RepositoryInterceptionContext<TEntity>(entity, context)));
+
                 context.Remove(entity);
                 context.SaveChanges();
             });
@@ -1591,7 +1596,8 @@
             {
                 foreach (var entity in entities)
                 {
-                    Intercept(x => x.DeleteExecuting(entity));
+                    Intercept(x => x.DeleteExecuting(
+                        new RepositoryInterceptionContext<TEntity>(entity, context)));
 
                     context.Remove(entity);
                 }
@@ -2175,10 +2181,12 @@
                 cancellationToken.ThrowIfCancellationRequested();
             });
 
-            await InterceptAsync(x => x.AddExecutingAsync(entity, cancellationToken));
-
             await UseContextAsync(async context =>
             {
+                await InterceptAsync(x => x.AddExecutingAsync(
+                    new RepositoryInterceptionContext<TEntity>(entity, context),
+                    cancellationToken));
+
                 context.Add(entity);
                 await context.SaveChangesAsync(cancellationToken);
             });
@@ -2209,7 +2217,9 @@
             {
                 foreach (var entity in entities)
                 {
-                    await InterceptAsync(x => x.AddExecutingAsync(entity, cancellationToken));
+                    await InterceptAsync(x => x.AddExecutingAsync(
+                        new RepositoryInterceptionContext<TEntity>(entity, context),
+                        cancellationToken));
 
                     context.Add(entity);
                 }
@@ -2239,10 +2249,12 @@
                 cancellationToken.ThrowIfCancellationRequested();
             });
 
-            await InterceptAsync(x => x.UpdateExecutingAsync(entity, cancellationToken));
-
             await UseContextAsync(async context =>
             {
+                await InterceptAsync(x => x.UpdateExecutingAsync(
+                    new RepositoryInterceptionContext<TEntity>(entity, context),
+                    cancellationToken));
+
                 context.Update(entity);
                 await context.SaveChangesAsync(cancellationToken);
             });
@@ -2273,7 +2285,9 @@
             {
                 foreach (var entity in entities)
                 {
-                    await InterceptAsync(x => x.UpdateExecutingAsync(entity, cancellationToken));
+                    await InterceptAsync(x => x.UpdateExecutingAsync(
+                        new RepositoryInterceptionContext<TEntity>(entity, context),
+                        cancellationToken));
 
                     context.Update(entity);
                 }
@@ -2303,10 +2317,12 @@
                 cancellationToken.ThrowIfCancellationRequested();
             });
 
-            await InterceptAsync(x => x.DeleteExecutingAsync(entity, cancellationToken));
-
             await UseContextAsync(async context =>
             {
+                await InterceptAsync(x => x.DeleteExecutingAsync(
+                    new RepositoryInterceptionContext<TEntity>(entity, context), 
+                    cancellationToken));
+
                 context.Remove(entity);
                 await context.SaveChangesAsync(cancellationToken);
             });
@@ -2377,7 +2393,9 @@
             {
                 foreach (var entity in entities)
                 {
-                    await InterceptAsync(x => x.DeleteExecutingAsync(entity, cancellationToken));
+                    await InterceptAsync(x => x.DeleteExecutingAsync(
+                        new RepositoryInterceptionContext<TEntity>(entity, context),
+                        cancellationToken));
 
                     context.Remove(entity);
                 }
