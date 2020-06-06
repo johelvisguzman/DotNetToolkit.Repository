@@ -95,7 +95,10 @@
                 {
                     var loggerProviderType = scanResults.OfType<ILoggerProvider>().FirstOrDefault();
 
-                    options = options.With((ILoggerProvider)c.Kernel.Get(loggerProviderType));
+                    if (loggerProviderType != null)
+                    {
+                        options = options.With((ILoggerProvider)c.Kernel.Get(loggerProviderType));
+                    }
                 }
 
                 return options;
