@@ -3,13 +3,7 @@
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <!--
-    This failing in appveyor due to SqlServerCompact not being compatible with Visual Studio 2019...
-    From now on, if netcoreapp3.1 needs to be tested, it will need to be added back manually, until another solution is found
-    -->
-    <!--<TargetFrameworks>net461;netcoreapp3.1</TargetFrameworks>-->
-    <TargetFramework>net461</TargetFramework>
-
+    <TargetFrameworks>net461;netcoreapp3.1</TargetFrameworks>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
