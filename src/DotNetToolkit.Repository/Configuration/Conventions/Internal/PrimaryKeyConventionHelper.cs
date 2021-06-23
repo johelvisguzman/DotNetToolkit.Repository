@@ -12,15 +12,14 @@
 
     internal class PrimaryKeyConventionHelper
     {
-        public static PropertyInfo[] GetPrimaryKeyPropertyInfos([NotNull] IRepositoryConventions conventions, [NotNull] Type entityType)
+        public static PropertyInfo[] GetPrimaryKeyPropertyInfos([NotNull] Type entityType)
         {
-            Guard.NotNull(conventions, nameof(conventions));
             Guard.NotNull(entityType, nameof(entityType));
             
             // Gets by checking the annotations
             var propertyInfos = entityType
                 .GetRuntimeProperties()
-                .Where(x => conventions.IsColumnMapped(x) && x.GetCustomAttribute<KeyAttribute>() != null)
+                .Where(x => ModelConventionHelper.IsColumnMapped(x) && x.GetCustomAttribute<KeyAttribute>() != null)
                 .OrderBy(x =>
                 {
                     var columnAttribute = x.GetCustomAttribute<ColumnAttribute>();
@@ -38,7 +37,7 @@
                 {
                     var propertyInfo = entityType.GetProperty(propertyName);
 
-                    if (propertyInfo != null && conventions.IsColumnMapped(propertyInfo))
+                    if (propertyInfo != null && ModelConventionHelper.IsColumnMapped(propertyInfo))
                     {
                         propertyInfos.Add(propertyInfo);
 

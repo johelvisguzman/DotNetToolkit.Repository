@@ -72,7 +72,7 @@
         /// </summary>
         protected LinqRepositoryContextBase()
         {
-            Conventions = RepositoryConventions.Default<LinqRepositoryContextBase>();
+            Conventions = RepositoryConventions.Default();
 
             _loggerProvider = NullLoggerProvider.Instance;
         }

@@ -21,7 +21,7 @@
             if (sourceType.IsEnumerable() || foreignType.IsEnumerable())
                 return new PropertyInfo[0];
 
-            var properties = sourceType.GetRuntimeProperties().Where(conventions.IsColumnMapped).ToList();
+            var properties = sourceType.GetRuntimeProperties().Where(ModelConventionHelper.IsColumnMapped).ToList();
             var foreignNavigationPropertyInfo = properties.SingleOrDefault(x => x.PropertyType == foreignType);
             var propertyInfos = new List<PropertyInfo>();
 
@@ -35,7 +35,7 @@
                     foreach (var propertyInfosWithForeignKey in propertyInfosWithForeignKeys)
                     {
                         var foreignKeyAttributeName = propertyInfosWithForeignKey.GetCustomAttribute<ForeignKeyAttribute>().Name;
-                        if (!properties.Any(x => foreignKeyAttributeName.Equals(conventions.GetColumnName(x))))
+                        if (!properties.Any(x => foreignKeyAttributeName.Equals(ModelConventionHelper.GetColumnName(x))))
                         {
                             throw new InvalidOperationException(
                                 string.Format(
@@ -57,7 +57,7 @@
                     {
                         propertyInfos = properties
                             .Where(DotNetToolkit.Repository.Extensions.Internal.PropertyInfoExtensions.IsPrimitive)
-                            .Where(x => foreignNavigationPropertyInfo.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(conventions.GetColumnName(x)))
+                            .Where(x => foreignNavigationPropertyInfo.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(ModelConventionHelper.GetColumnName(x)))
                             .ToList();
                     }
                 }
@@ -68,7 +68,7 @@
                 if (!propertyInfos.Any() && primaryKeyPropertyInfos.Length == 1)
                 {
                     var primaryKeyPropertyInfo = primaryKeyPropertyInfos.First();
-                    var foreignPrimaryKeyName = conventions.GetColumnName(primaryKeyPropertyInfo);
+                    var foreignPrimaryKeyName = ModelConventionHelper.GetColumnName(primaryKeyPropertyInfo);
                     var propertyInfo = properties.SingleOrDefault(x => x.Name == $"{foreignNavigationPropertyInfo.Name}{foreignPrimaryKeyName}");
 
                     if (propertyInfo != null)

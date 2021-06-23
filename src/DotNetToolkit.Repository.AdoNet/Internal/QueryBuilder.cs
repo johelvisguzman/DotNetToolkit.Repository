@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
     using Configuration.Conventions;
+    using Configuration.Conventions.Internal;
     using Extensions;
     using Extensions.Internal;
     using Query;
@@ -24,17 +25,17 @@
             parameters = new Dictionary<string, object>();
 
             var entityType = entity.GetType();
-            var tableName = conventions.GetTableName(entityType);
+            var tableName = ModelConventionHelper.GetTableName(entityType);
 
             var primaryKeyPropertyInfos = conventions.GetPrimaryKeyPropertyInfos(entityType).ToList();
-            var properties = GetProperties(conventions, entityType).ToDictionary(conventions.GetColumnName, x => x);
+            var properties = GetProperties(conventions, entityType).ToDictionary(ModelConventionHelper.GetColumnName, x => x);
 
             if (primaryKeyPropertyInfos.Count == 1)
             {
                 var primaryKeyPropertyInfo = primaryKeyPropertyInfos.First();
-                var primaryKeyColumnName = conventions.GetColumnName(primaryKeyPropertyInfo);
+                var primaryKeyColumnName = ModelConventionHelper.GetColumnName(primaryKeyPropertyInfo);
 
-                if (conventions.IsColumnIdentity(primaryKeyPropertyInfo))
+                if (ModelConventionHelper.IsColumnIdentity(conventions, primaryKeyPropertyInfo))
                 {
                     properties.Remove(primaryKeyColumnName);
                     parameters.Add($"@{primaryKeyColumnName}", primaryKeyPropertyInfo.GetValue(entity, null));
@@ -60,18 +61,18 @@
             parameters = new Dictionary<string, object>();
 
             var entityType = entity.GetType();
-            var tableName = conventions.GetTableName(entityType);
+            var tableName = ModelConventionHelper.GetTableName(entityType);
 
             var primaryKeyPropertyInfos = conventions.GetPrimaryKeyPropertyInfos(entityType).ToList();
-            var primaryKeyColumnNamesDict = primaryKeyPropertyInfos.ToDictionary(conventions.GetColumnName, x => x);
-            var properties = GetProperties(conventions, entityType).ToDictionary(conventions.GetColumnName, x => x);
+            var primaryKeyColumnNamesDict = primaryKeyPropertyInfos.ToDictionary(ModelConventionHelper.GetColumnName, x => x);
+            var properties = GetProperties(conventions, entityType).ToDictionary(ModelConventionHelper.GetColumnName, x => x);
 
             if (primaryKeyPropertyInfos.Count == 1)
             {
                 var primaryKeyPropertyInfo = primaryKeyPropertyInfos.First();
-                var primaryKeyColumnName = conventions.GetColumnName(primaryKeyPropertyInfo);
+                var primaryKeyColumnName = ModelConventionHelper.GetColumnName(primaryKeyPropertyInfo);
 
-                if (conventions.IsColumnIdentity(primaryKeyPropertyInfo))
+                if (ModelConventionHelper.IsColumnIdentity(conventions, primaryKeyPropertyInfo))
                 {
                     properties.Remove(primaryKeyColumnName);
                     parameters.Add($"@{primaryKeyColumnName}", primaryKeyPropertyInfo.GetValue(entity, null));
@@ -97,11 +98,11 @@
             parameters = new Dictionary<string, object>();
 
             var entityType = entity.GetType();
-            var tableName = conventions.GetTableName(entityType);
+            var tableName = ModelConventionHelper.GetTableName(entityType);
 
             var primaryKeyColumnNamesDict = conventions
                 .GetPrimaryKeyPropertyInfos(entityType)
-                .ToDictionary(conventions.GetColumnName, x => x);
+                .ToDictionary(ModelConventionHelper.GetColumnName, x => x);
 
             var condition = string.Join(" AND ", primaryKeyColumnNamesDict.Select(kv => "(" + kv.Key + " = @" + kv.Key + ")"));
 
@@ -136,7 +137,7 @@
                     throw new ArgumentNullException(nameof(tableType));
 
                 var tableAlias = $"Extent{tableAliasCount++}";
-                var tableName = conventions.GetTableName(tableType);
+                var tableName = ModelConventionHelper.GetTableName(tableType);
 
                 tableAliasMapping.Add(tableName, tableAlias);
                 tableNameAndTypeMapping.Add(tableName, tableType);
@@ -151,9 +152,9 @@
                 if (pi == null)
                     throw new ArgumentNullException(nameof(pi));
 
-                var columnName = conventions.GetColumnName(pi);
+                var columnName = ModelConventionHelper.GetColumnName(pi);
                 var columnAlias = columnName;
-                var tableName = conventions.GetTableName(tableType);
+                var tableName = ModelConventionHelper.GetTableName(tableType);
 
                 if (columnAliasMappingCount.TryGetValue(columnName, out int columnAliasCount))
                 {
@@ -205,11 +206,11 @@
             var joinStatementSb = new StringBuilder();
 
             var mainTableType = typeof(T);
-            var mainTableName = conventions.GetTableName(mainTableType);
+            var mainTableName = ModelConventionHelper.GetTableName(mainTableType);
             var mainTableAlias = GenerateTableAlias(mainTableType);
             var mainTableProperties = mainTableType.GetRuntimeProperties();
             var mainTablePrimaryKeyPropertyInfo = conventions.GetPrimaryKeyPropertyInfos<T>().First();
-            var mainTablePrimaryKeyName = conventions.GetColumnName(mainTablePrimaryKeyPropertyInfo);
+            var mainTablePrimaryKeyName = ModelConventionHelper.GetColumnName(mainTablePrimaryKeyPropertyInfo);
             var fetchingPaths = applyFetchOptions
                 ? options.DefaultIfFetchStrategyEmpty(conventions).PropertyPaths
                 : Enumerable.Empty<string>().ToList();
@@ -221,7 +222,7 @@
                 .Select(x => new MappingProperty(
                     mainTableName,
                     mainTableAlias,
-                    conventions.GetColumnName(x),
+                    ModelConventionHelper.GetColumnName(x),
                     GenerateColumnAlias(x, mainTableType),
                     x)
                 )
@@ -259,23 +260,23 @@
                     var joinTableType = joinTablePropertyInfo.PropertyType.IsGenericCollection()
                         ? joinTablePropertyInfo.PropertyType.GetGenericArguments().First()
                         : joinTablePropertyInfo.PropertyType;
-                    var joinTableForeignKeyPropertyInfo = conventions
-                        .GetForeignKeyPropertyInfos(joinTableType, mainTableType)
+                    var joinTableForeignKeyPropertyInfo = ForeignKeyConventionHelper
+                        .GetForeignKeyPropertyInfos(conventions, joinTableType, mainTableType)
                         .FirstOrDefault();
 
                     // Only do a join when the primary table has a foreign key property for the join table
                     if (joinTableForeignKeyPropertyInfo != null)
                     {
-                        var joinTableForeignKeyName = conventions.GetColumnName(joinTableForeignKeyPropertyInfo);
+                        var joinTableForeignKeyName = ModelConventionHelper.GetColumnName(joinTableForeignKeyPropertyInfo);
                         var joinTableProperties = GetProperties(conventions, joinTableType);
-                        var joinTableName = conventions.GetTableName(joinTableType);
+                        var joinTableName = ModelConventionHelper.GetTableName(joinTableType);
                         var joinTableAlias = GenerateTableAlias(joinTableType);
                         var joinTableMappingProperties = joinTableProperties
                             .Where(PropertyInfoExtensions.IsPrimitive)
                             .Select(x => new MappingProperty(
                                 joinTableName,
                                 joinTableAlias,
-                                conventions.GetColumnName(x),
+                                ModelConventionHelper.GetColumnName(x),
                                 GenerateColumnAlias(x, joinTableType),
                                 x)
                                 {
@@ -519,7 +520,7 @@
         private static IEnumerable<PropertyInfo> GetProperties(IRepositoryConventions conventions, Type entityType)
             => entityType
             .GetRuntimeProperties()
-            .Where(x => x.IsPrimitive() && conventions.IsColumnMapped(x))
-            .OrderBy(conventions.GetColumnOrderOrDefault);
+            .Where(x => x.IsPrimitive() && ModelConventionHelper.IsColumnMapped(x))
+            .OrderBy(x => ModelConventionHelper.GetColumnOrderOrDefault(conventions, x));
     }
 }

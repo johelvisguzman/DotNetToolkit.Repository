@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
     using Configuration.Conventions;
+    using Configuration.Conventions.Internal;
     using Extensions.Internal;
     using JetBrains.Annotations;
     using Query;
@@ -120,8 +121,8 @@
                     var innerQuery = joinQueryCallback(joinTableType);
 
                     // Only do a join when the primary table has a foreign key property for the join table
-                    var joinTableForeignKeyPropertyInfo = conventions
-                        .GetForeignKeyPropertyInfos(joinTableType, mainTableType)
+                    var joinTableForeignKeyPropertyInfo = ForeignKeyConventionHelper
+                        .GetForeignKeyPropertyInfos(conventions, joinTableType, mainTableType)
                         .FirstOrDefault();
 
                     if (joinTableForeignKeyPropertyInfo != null)

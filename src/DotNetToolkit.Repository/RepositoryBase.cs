@@ -3,6 +3,7 @@
     using Configuration;
     using Configuration.Caching;
     using Configuration.Caching.Internal;
+    using Configuration.Conventions;
     using Configuration.Interceptors;
     using Configuration.Logging;
     using Configuration.Options;
@@ -2320,7 +2321,7 @@
             await UseContextAsync(async context =>
             {
                 await InterceptAsync(x => x.DeleteExecutingAsync(
-                    new RepositoryInterceptionContext<TEntity>(entity, context), 
+                    new RepositoryInterceptionContext<TEntity>(entity, context),
                     cancellationToken));
 
                 context.Remove(entity);
@@ -2853,17 +2854,7 @@
 
             try
             {
-                var conventions = Guard.EnsureNotNull(
-                    context.Conventions, 
-                    "No conventions have been configured for this context.");
-
-                if (_options.Conventions != null)
-                    conventions.Apply(_options.Conventions);
-
-                if (_loggerProvider != null)
-                    context.LoggerProvider = _loggerProvider;
-
-                conventions.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>();
+                ConfigureContext(context);
             }
             catch (Exception)
             {
@@ -3083,9 +3074,8 @@
             foreach (var interceptor in GetInterceptors())
             {
                 var interceptorType = interceptor.GetType();
-                var isEnabled = InterceptorTypesDisabled.ContainsKey(interceptorType)
-                    ? !InterceptorTypesDisabled[interceptorType]
-                    : true;
+                var isEnabled = !InterceptorTypesDisabled.ContainsKey(interceptorType) ||
+                    !InterceptorTypesDisabled[interceptorType];
 
                 if (isEnabled) action(interceptor);
             }
@@ -3101,9 +3091,8 @@
             foreach (var interceptor in GetInterceptors())
             {
                 var interceptorType = interceptor.GetType();
-                var isEnabled = InterceptorTypesDisabled.ContainsKey(interceptorType)
-                    ? !InterceptorTypesDisabled[interceptorType]
-                    : true;
+                var isEnabled = !InterceptorTypesDisabled.ContainsKey(interceptorType) ||
+                    !InterceptorTypesDisabled[interceptorType];
 
                 if (isEnabled) await action(interceptor);
             }
@@ -3115,20 +3104,26 @@
 
         private IEnumerable<IRepositoryInterceptor> GetInterceptors()
         {
-            if (_interceptors == null)
-            {
-                _interceptors = _options.Interceptors.Any()
-                    ? _options.Interceptors.Values.Select(lazyInterceptor => lazyInterceptor.Value)
-                    : Enumerable.Empty<IRepositoryInterceptor>();
-            }
-
-            return _interceptors;
+            return _interceptors ?? (_interceptors = _options.Interceptors.Values.Select(lazyInterceptor => lazyInterceptor.Value));
         }
 
         private static void DisposeContext([CanBeNull] IRepositoryContext context)
         {
             if (context != null && context.CurrentTransaction == null)
                 context.Dispose();
+        }
+
+        private void ConfigureContext(IRepositoryContext context)
+        {
+            Guard.EnsureNotNull(context.Conventions, "No conventions have been configured for this context.");
+
+            if (_options.Conventions != null)
+                RepositoryConventions.Combine(_options.Conventions, context.Conventions);
+
+            if (_loggerProvider != null)
+                context.LoggerProvider = _loggerProvider;
+
+            context.Conventions.ThrowsIfInvalidPrimaryKeyDefinition<TEntity>();
         }
 
         private void ClearCache([NotNull] string sql)

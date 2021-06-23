@@ -58,12 +58,9 @@
         {
             var helper = new NHibernateConventionsHelper(Guard.NotNull(sessionFactory, nameof(sessionFactory)));
 
-            Conventions = new RepositoryConventions(GetType())
+            Conventions = new RepositoryConventions()
             {
-                PrimaryKeysCallback = type => helper.GetPrimaryKeyPropertyInfos(type),
-                ColumnNameCallback = pi => helper.GetColumnName(pi),
-                ColumnOrderCallback = pi => helper.GetColumnOrder(pi),
-                IsColumnMappedCallback = pi => helper.IsColumnMapped(pi)
+                PrimaryKeysCallback = type => helper.GetPrimaryKeyPropertyInfos(type)
             };
         }
 

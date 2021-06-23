@@ -2,6 +2,7 @@
 {
     using Configuration;
     using Configuration.Conventions;
+    using Configuration.Conventions.Internal;
     using Extensions;
     using Properties;
     using System;
@@ -58,7 +59,7 @@
             if (!path.EndsWith(@"\"))
                 path += @"\";
 
-            Conventions = RepositoryConventions.Default<FileStreamRepositoryContextBase>();
+            Conventions = RepositoryConventions.Default();
 
             _items = new BlockingCollection<EntitySet>();
             _ignoreTransactionWarning = ignoreTransactionWarning;
@@ -92,7 +93,7 @@
         /// <returns>The file name for the specified type.</returns>
         public virtual string GetFileName(Type type)
         {
-            return $"{_path}{Conventions.GetTableName(type)}{_extension}";
+            return $"{_path}{ModelConventionHelper.GetTableName(type)}{_extension}";
         }
 
         #endregion
@@ -273,7 +274,7 @@
 
                         var primaryKeyPropertyInfo = Conventions.GetPrimaryKeyPropertyInfos(entityType).First();
 
-                        if (Conventions.IsColumnIdentity(primaryKeyPropertyInfo))
+                        if (ModelConventionHelper.IsColumnIdentity(Conventions, primaryKeyPropertyInfo))
                         {
                             key = GeneratePrimaryKey(entityType, context.Keys.LastOrDefault());
 

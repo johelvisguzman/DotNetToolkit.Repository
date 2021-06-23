@@ -252,6 +252,42 @@
         }
 
         /// <summary>
+        /// Combines properties and their value using the specified merging expression.
+        /// </summary>
+        public static Expression<Func<T, bool>> Combine<T>([NotNull] PropertyInfo[] propInfos, [NotNull] object[] propValues, Func<Expression, Expression, Expression> merge)
+        {
+            Guard.NotEmpty(propInfos, nameof(propInfos));
+            Guard.NotEmpty(propValues, nameof(propValues));
+
+            if (propValues.Length != propInfos.Length)
+                throw new ArgumentException("The properties constraint must match the number of property values.");
+
+            var type = typeof(T);
+            var parameter = Expression.Parameter(type, "x");
+
+            Expression exp = null;
+
+            for (var i = 0; i < propInfos.Length; i++)
+            {
+                var propInfo = propInfos[i];
+                var propValue = propValues[i];
+
+                if (propInfo.DeclaringType != type)
+                {
+                    throw new InvalidOperationException($"The propery {propInfo.Name} does not belong to the specified {type.FullName} type.");
+                }
+
+                var x = Expression.Equal(
+                    Expression.PropertyOrField(parameter, propInfo.Name),
+                    Expression.Constant(propValue));
+
+                exp = exp == null ? x : merge(x, exp);
+            }
+
+            return Expression.Lambda<Func<T, bool>>(exp, parameter);
+        }
+
+        /// <summary>
         /// Creates a ConstantExpression that has the Value property set to the specified expression's value.
         /// </summary>
         /// <param name="exp">The expression.</param>
