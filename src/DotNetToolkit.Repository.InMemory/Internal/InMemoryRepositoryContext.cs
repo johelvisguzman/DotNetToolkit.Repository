@@ -310,7 +310,7 @@
                 var store = InMemoryCache.Instance.GetDatabaseStore(DatabaseName);
 
                 if (!store.ContainsKey(entityType))
-                    return default(TEntity);
+                    return default;
 
                 var key = Combine(keyValues);
 

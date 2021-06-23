@@ -8,7 +8,7 @@
     internal static class Evaluator
     {
         /// <summary>
-        /// Performs evaluation & replacement of independent sub-trees
+        /// Performs evaluation and replacement of independent sub-trees
         /// </summary>
         /// <param name="expression">The root of the expression tree.</param>
         /// <param name="fnCanBeEvaluated">A function that decides whether a given expression node can be part of the local function.</param>
@@ -19,7 +19,7 @@
         }
 
         /// <summary>
-        /// Performs evaluation & replacement of independent sub-trees
+        /// Performs evaluation and replacement of independent sub-trees
         /// </summary>
         /// <param name="expression">The root of the expression tree.</param>
         /// <returns>A new tree with sub-trees evaluated and replaced.</returns>
@@ -34,15 +34,15 @@
         }
 
         /// <summary>
-        /// Evaluates & replaces sub-trees when first candidate is reached (top-down)
+        /// Evaluates and replaces sub-trees when first candidate is reached (top-down)
         /// </summary>
         class SubtreeEvaluator : ExpressionVisitor
         {
-            HashSet<Expression> candidates;
+            private readonly HashSet<Expression> _candidates;
 
             internal SubtreeEvaluator(HashSet<Expression> candidates)
             {
-                this.candidates = candidates;
+                this._candidates = candidates;
             }
 
             internal Expression Eval(Expression exp)
@@ -58,7 +58,7 @@
                 }
 
 
-                if (this.candidates.Contains(exp))
+                if (this._candidates.Contains(exp))
                 {
                     return this.Evaluate(exp);
                 }
@@ -86,46 +86,46 @@
         /// </summary>
         class Nominator : ExpressionVisitor
         {
-            Func<Expression, bool> fnCanBeEvaluated;
-            HashSet<Expression> candidates;
-            bool cannotBeEvaluated;
+            private readonly Func<Expression, bool> _fnCanBeEvaluated;
+            private HashSet<Expression> _candidates;
+            private bool _cannotBeEvaluated;
 
             internal Nominator(Func<Expression, bool> fnCanBeEvaluated)
             {
-                this.fnCanBeEvaluated = fnCanBeEvaluated;
+                this._fnCanBeEvaluated = fnCanBeEvaluated;
             }
 
             internal HashSet<Expression> Nominate(Expression expression)
             {
-                this.candidates = new HashSet<Expression>();
+                this._candidates = new HashSet<Expression>();
                 this.Visit(expression);
 
-                return this.candidates;
+                return this._candidates;
             }
 
             public override Expression Visit(Expression expression)
             {
                 if (expression != null)
                 {
-                    bool saveCannotBeEvaluated = this.cannotBeEvaluated;
+                    bool saveCannotBeEvaluated = this._cannotBeEvaluated;
 
-                    this.cannotBeEvaluated = false;
+                    this._cannotBeEvaluated = false;
 
                     base.Visit(expression);
 
-                    if (!this.cannotBeEvaluated)
+                    if (!this._cannotBeEvaluated)
                     {
-                        if (this.fnCanBeEvaluated(expression))
+                        if (this._fnCanBeEvaluated(expression))
                         {
-                            this.candidates.Add(expression);
+                            this._candidates.Add(expression);
                         }
                         else
                         {
-                            this.cannotBeEvaluated = true;
+                            this._cannotBeEvaluated = true;
                         }
                     }
 
-                    this.cannotBeEvaluated |= saveCannotBeEvaluated;
+                    this._cannotBeEvaluated |= saveCannotBeEvaluated;
                 }
 
                 return expression;
