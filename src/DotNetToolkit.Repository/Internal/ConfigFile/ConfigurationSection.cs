@@ -98,7 +98,7 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
         {
             var provider = base.GetTypedValue();
 
-            if (Expiry != null)
+            if (provider != null && Expiry != null)
                 provider.Expiry = Expiry.Value;
 
             return provider;
