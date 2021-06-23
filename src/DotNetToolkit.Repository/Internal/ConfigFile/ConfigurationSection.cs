@@ -25,7 +25,6 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
         private const string DefaultContextFactoryKey = "defaultContextFactory";
         private const string LoggingProviderKey = "loggingProvider";
         private const string CachingProviderKey = "cachingProvider";
-        private const string MappingProviderKey = "mappingProvider";
 
         #endregion
 
