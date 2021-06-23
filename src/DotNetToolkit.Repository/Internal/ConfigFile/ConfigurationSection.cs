@@ -25,7 +25,6 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
         private const string DefaultContextFactoryKey = "defaultContextFactory";
         private const string LoggingProviderKey = "loggingProvider";
         private const string CachingProviderKey = "cachingProvider";
-        private const string MappingProviderKey = "mappingProvider";
 
         #endregion
 
@@ -98,7 +97,7 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
         {
             var provider = base.GetTypedValue();
 
-            if (Expiry != null)
+            if (provider != null && Expiry != null)
                 provider.Expiry = Expiry.Value;
 
             return provider;
