@@ -36,7 +36,7 @@
         /// <param name="context">The context.</param>
         public EfRepositoryContext(DbContext context)
         {
-            Conventions = RepositoryConventions.Default<EfRepositoryContext>();
+            Conventions = RepositoryConventions.Default();
 
             _context = Guard.NotNull(context, nameof(context));
             _context.Database.Log = s => Logger?.Debug(s.TrimEnd(Environment.NewLine.ToCharArray()));

@@ -712,7 +712,7 @@ namespace DotNetToolkit.Repository.Integration.Test.ContextProvider
         [Fact]
         public void CreateTableOnSaveChanges()
         {
-            var conventions = RepositoryConventions.Default<AdoNetRepositoryContext>();
+            var conventions = RepositoryConventions.Default();
             var ensureDatabaseCreated = true;
             var connection = DbConnectionHelper.CreateConnection();
             var schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(conventions, connection));
@@ -797,7 +797,7 @@ namespace DotNetToolkit.Repository.Integration.Test.ContextProvider
         [Fact]
         public async Task CreateTableOnSaveChangesAsync()
         {
-            var conventions = RepositoryConventions.Default<AdoNetRepositoryContext>();
+            var conventions = RepositoryConventions.Default();
             var ensureDatabaseCreated = true;
             var connection = DbConnectionHelper.CreateConnection();
             var schemaHelper = new SchemaTableConfigurationHelper(new DbHelper(conventions, connection));

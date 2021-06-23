@@ -2,6 +2,7 @@
 {
     using Configuration;
     using Configuration.Conventions;
+    using Configuration.Conventions.Internal;
     using Extensions;
     using Properties;
     using Query.Strategies;
@@ -49,7 +50,7 @@
         public InMemoryRepositoryContext(string databaseName, bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false)
         {
             DatabaseName = string.IsNullOrEmpty(databaseName) ? DefaultDatabaseName : databaseName;
-            Conventions = RepositoryConventions.Default<InMemoryRepositoryContext>();
+            Conventions = RepositoryConventions.Default();
 
             _ignoreTransactionWarning = ignoreTransactionWarning;
             _ignoreSqlQueryWarning = ignoreSqlQueryWarning;
@@ -220,7 +221,7 @@
 
                         var primaryKeyPropertyInfo = Conventions.GetPrimaryKeyPropertyInfos(entityType).First();
 
-                        if (Conventions.IsColumnIdentity(primaryKeyPropertyInfo))
+                        if (ModelConventionHelper.IsColumnIdentity(Conventions, primaryKeyPropertyInfo))
                         {
                             key = GeneratePrimaryKey(entityType);
 

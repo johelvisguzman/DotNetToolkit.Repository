@@ -72,6 +72,14 @@
             return null;
         }
 
+        public static int GetColumnOrderOrDefault([NotNull] IRepositoryConventions conventions, [NotNull] PropertyInfo pi)
+        {
+            return GetColumnOrder(
+                    Guard.NotNull(conventions, nameof(conventions)),
+                    Guard.NotNull(pi, nameof(pi)))
+                ?? Int32.MaxValue;
+        }
+
         public static bool IsColumnIdentity([NotNull] IRepositoryConventions conventions, [NotNull] PropertyInfo pi)
         {
             Guard.NotNull(pi, nameof(pi));

@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.AdoNet.Internal
 {
     using Configuration.Conventions;
+    using Configuration.Conventions.Internal;
     using Configuration.Logging;
     using Extensions;
     using Extensions.Internal;
@@ -89,7 +90,7 @@
         {
             Guard.NotEmpty(nameOrConnectionString, nameof(nameOrConnectionString));
 
-            Conventions = RepositoryConventions.Default<AdoNetRepositoryContext>();
+            Conventions = RepositoryConventions.Default();
 
             _dbHelper = new DbHelper(Conventions, nameOrConnectionString);
             _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
@@ -112,7 +113,7 @@
             Guard.NotEmpty(providerName, nameof(providerName));
             Guard.NotEmpty(connectionString, nameof(connectionString));
 
-            Conventions = RepositoryConventions.Default<AdoNetRepositoryContext>();
+            Conventions = RepositoryConventions.Default();
 
             _dbHelper = new DbHelper(Conventions, providerName, connectionString);
             _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
@@ -133,7 +134,7 @@
         {
             Guard.NotNull(existingConnection, nameof(existingConnection));
 
-            Conventions = RepositoryConventions.Default<AdoNetRepositoryContext>();
+            Conventions = RepositoryConventions.Default();
 
             _dbHelper = new DbHelper(Conventions, existingConnection);
             _schemaConfigHelper = new SchemaTableConfigurationHelper(_dbHelper);
@@ -326,7 +327,7 @@
                         ExecuteSchemaValidate(entityType);
 
                         var primaryKeyPropertyInfo = Conventions.GetPrimaryKeyPropertyInfos(entityType).First();
-                        var isIdentity = Conventions.IsColumnIdentity(primaryKeyPropertyInfo);
+                        var isIdentity = ModelConventionHelper.IsColumnIdentity(Conventions, primaryKeyPropertyInfo);
 
                         // Prepare the sql statement
                         PrepareEntitySetQuery(
@@ -697,7 +698,7 @@
                         await ExecuteSchemaValidateAsync(entityType, cancellationToken);
 
                         var primaryKeyPropertyInfo = Conventions.GetPrimaryKeyPropertyInfos(entityType).First();
-                        var isIdentity = Conventions.IsColumnIdentity(primaryKeyPropertyInfo);
+                        var isIdentity = ModelConventionHelper.IsColumnIdentity(Conventions, primaryKeyPropertyInfo);
 
                         // Prepare the sql statement
                         PrepareEntitySetQuery(

@@ -40,7 +40,7 @@
         {
             Guard.NotEmpty(nameOrConnectionString, nameof(nameOrConnectionString));
 
-            Conventions = RepositoryConventions.Default<AzureStorageBlobRepositoryContext>();
+            Conventions = RepositoryConventions.Default();
 
             var css = GetConnectionStringSettings(nameOrConnectionString);
 

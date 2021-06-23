@@ -36,10 +36,22 @@
         /// <param name="context">The context.</param>
         public EfCoreRepositoryContext(DbContext context)
         {
-            Conventions = RepositoryConventions.Default<EfCoreRepositoryContext>();
-
             _context = Guard.NotNull(context, nameof(context));
             _context.ConfigureLogging(s => Logger.Debug(s.TrimEnd(Environment.NewLine.ToCharArray())));
+
+            ConfigureConventions(context);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void ConfigureConventions(DbContext context)
+        {
+            Conventions = new RepositoryConventions()
+            {
+                PrimaryKeysCallback = type => EfCoreRepositoryContextConventionHelper.GetPrimaryKeyPropertyInfos(context, type)
+            };
         }
 
         #endregion

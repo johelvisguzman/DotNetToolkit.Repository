@@ -69,7 +69,7 @@
 
         private void ConfigureConventions()
         {
-            Conventions = new RepositoryConventions(GetType())
+            Conventions = new RepositoryConventions()
             {
                 PrimaryKeysCallback = type => AzureStorageTableConventionsHelper.GetPrimaryKeyPropertyInfos(type)
             };

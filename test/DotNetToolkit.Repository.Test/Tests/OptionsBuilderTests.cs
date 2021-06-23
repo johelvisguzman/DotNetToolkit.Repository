@@ -88,13 +88,13 @@
 
             optionsBuilder.UseConventions(c =>
             {
-                c.TableNameCallback = (type) => type.Name;
+                c.PrimaryKeysCallback = (type) => new System.Reflection.PropertyInfo[] { };
             });
 
             Assert.True(optionsBuilder.IsConfigured);
 
             Assert.NotNull(optionsBuilder.Options.Conventions);
-            Assert.NotNull(optionsBuilder.Options.Conventions.TableNameCallback);
+            Assert.NotNull(optionsBuilder.Options.Conventions.PrimaryKeysCallback);
         }
 
         [Fact]
