@@ -48,9 +48,11 @@
 
         private void ConfigureConventions(DbContext context)
         {
+            var helper = new EfCoreRepositoryConventionHelper(context);
+
             Conventions = new RepositoryConventions()
             {
-                PrimaryKeysCallback = type => EfCoreRepositoryConventionHelper.GetPrimaryKeyPropertyInfos(context, type)
+                PrimaryKeysCallback = type => helper.GetPrimaryKeyPropertyInfos(type)
             };
         }
 
