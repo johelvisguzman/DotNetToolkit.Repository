@@ -3,6 +3,7 @@
     using Extensions;
     using JetBrains.Annotations;
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
@@ -12,10 +13,23 @@
 
     internal class PrimaryKeyConventionHelper
     {
+        private static readonly ConcurrentDictionary<Type, PropertyInfo[]> _primaryKeyCache = new ConcurrentDictionary<Type, PropertyInfo[]>();
+
         public static PropertyInfo[] GetPrimaryKeyPropertyInfos([NotNull] Type entityType)
         {
             Guard.NotNull(entityType, nameof(entityType));
             
+            if (!_primaryKeyCache.TryGetValue(entityType, out PropertyInfo[] result))
+            {
+                result = GetPrimaryKeyPropertyInfosCore(entityType);
+                _primaryKeyCache.TryAdd(entityType, result);
+            }
+            
+            return result;
+        }
+
+        private static PropertyInfo[] GetPrimaryKeyPropertyInfosCore(Type entityType)
+        {
             // Gets by checking the annotations
             var propertyInfos = entityType
                 .GetRuntimeProperties()
