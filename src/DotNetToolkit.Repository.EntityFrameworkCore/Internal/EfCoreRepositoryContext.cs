@@ -50,7 +50,7 @@
         {
             Conventions = new RepositoryConventions()
             {
-                PrimaryKeysCallback = type => EfCoreRepositoryContextConventionHelper.GetPrimaryKeyPropertyInfos(context, type)
+                PrimaryKeysCallback = type => EfCoreRepositoryConventionHelper.GetPrimaryKeyPropertyInfos(context, type)
             };
         }
 
