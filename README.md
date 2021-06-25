@@ -34,34 +34,10 @@ If you want to use DotNetToolkit.Repository for the first time, the [Getting Sta
 		<th colspan="4">ORM Providers</th>
 	</tr>
 	<tr>
-      <td><a href="https://github.com/johelvisguzman/DotNetToolkit.Repository/tree/master/src/DotNetToolkit.Repository.AdoNet/">DotNetToolkit.Repository.AdoNet</a> (for testing purposes only)</td>
-      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.AdoNet/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.AdoNet.svg" alt="DotNetToolkit.Repository.AdoNet"></a></td>
-      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.AdoNet/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.AdoNet.svg" alt="DotNetToolkit.Repository.AdoNet"></a></td>
-	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.AdoNet"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/vpre/DotNetToolkit.Repository.AdoNet.svg?label=myget" alt="MyGet (dev)"></a></td>
-    </tr>
-	<tr>
-      <td><a href="https://github.com/johelvisguzman/DotNetToolkit.Repository/tree/master/src/DotNetToolkit.Repository.Json/">DotNetToolkit.Repository.Json</a></td>
-      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Json/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.Json.svg" alt="DotNetToolkit.Repository.Json"></a></td>
-      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Json/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.Json.svg" alt="DotNetToolkit.Repository.Json"></a></td>
-	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.Json"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/vpre/DotNetToolkit.Repository.Json.svg?label=myget" alt="MyGet (dev)"></a></td>
-    </tr>
-	<tr>
-      <td><a href="https://github.com/johelvisguzman/DotNetToolkit.Repository/tree/master/src/DotNetToolkit.Repository.Xml/">DotNetToolkit.Repository.Xml</a></td>
-      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Xml/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.Xml.svg" alt="DotNetToolkit.Repository.Xml"></a></td>
-      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.Xml/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.Xml.svg" alt="DotNetToolkit.Repository.Xml"></a></td>
-	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.Xml"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/vpre/DotNetToolkit.Repository.Xml.svg?label=myget" alt="MyGet (dev)"></a></td>
-    </tr>
-	<tr>
       <td><a href="https://github.com/johelvisguzman/DotNetToolkit.Repository/tree/master/src/DotNetToolkit.Repository.InMemory/">DotNetToolkit.Repository.InMemory</a> (for testing purposes only)</td>
       <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.InMemory/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.InMemory.svg" alt="DotNetToolkit.Repository.InMemory"></a></td>
       <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.InMemory/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.InMemory.svg" alt="DotNetToolkit.Repository.InMemory"></a></td>
 	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.InMemory"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/vpre/DotNetToolkit.Repository.InMemory.svg?label=myget" alt="MyGet (dev)"></a></td>
-    </tr>
-	<tr>
-      <td><a href="https://github.com/johelvisguzman/DotNetToolkit.Repository/tree/master/src/DotNetToolkit.Repository.NHibernate/">DotNetToolkit.Repository.NHibernate</a></td>
-      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.NHibernate/"><img src="https://img.shields.io/nuget/v/DotNetToolkit.Repository.NHibernate.svg" alt="DotNetToolkit.Repository.NHibernate"></a></td>
-      <td><a href="https://www.nuget.org/packages/DotNetToolkit.Repository.NHibernate/"><img src="https://img.shields.io/nuget/dt/DotNetToolkit.Repository.NHibernate.svg" alt="DotNetToolkit.Repository.NHibernate"></a></td>
-	  <td><a href="https://www.myget.org/feed/dotnettoolkitrepository-dev/package/nuget/DotNetToolkit.Repository.NHibernate"><img src="https://img.shields.io/myget/dotnettoolkitrepository-dev/vpre/DotNetToolkit.Repository.NHibernate.svg?label=myget" alt="MyGet (dev)"></a></td>
     </tr>
 	<tr>
       <td><a href="https://github.com/johelvisguzman/DotNetToolkit.Repository/tree/master/src/DotNetToolkit.Repository.EntityFramework/">DotNetToolkit.Repository.EntityFramework</a></td>

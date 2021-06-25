@@ -51,7 +51,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.AdoNet\DotNetToolkit.Repository.AdoNet.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.AzureStorageBlob\DotNetToolkit.Repository.AzureStorageBlob.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.AzureStorageTable\DotNetToolkit.Repository.AzureStorageTable.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Caching.Couchbase\DotNetToolkit.Repository.Caching.Couchbase.csproj" />
@@ -64,9 +63,6 @@
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Extensions.Ninject\DotNetToolkit.Repository.Extensions.Ninject.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Extensions.Unity\DotNetToolkit.Repository.Extensions.Unity.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.InMemory\DotNetToolkit.Repository.InMemory.csproj" />
-    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Json\DotNetToolkit.Repository.Json.csproj" />
-    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.NHibernate\DotNetToolkit.Repository.NHibernate.csproj" />
-    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Xml\DotNetToolkit.Repository.Xml.csproj" />
   </ItemGroup>
 
   <ItemGroup>

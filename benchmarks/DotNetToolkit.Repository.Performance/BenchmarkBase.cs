@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Performance
 {
-    using AdoNet;
     using AzureStorageBlob;
     using AzureStorageTable;
     using BenchmarkDotNet.Attributes;
@@ -8,15 +7,8 @@
     using Data;
     using EntityFramework;
     using EntityFrameworkCore;
-    using global::NHibernate.Cfg;
-    using global::NHibernate.Dialect;
-    using global::NHibernate.Driver;
-    using global::NHibernate.Mapping.ByCode;
-    using global::NHibernate.Tool.hbm2ddl;
     using InMemory;
-    using Json;
     using Microsoft.EntityFrameworkCore;
-    using NHibernate;
     using System;
     using System.Collections.Generic;
     using System.Configuration;
@@ -44,49 +36,6 @@
                 case ContextProviderType.InMemory:
                     {
                         builder.UseInMemoryDatabase(Guid.NewGuid().ToString());
-                        break;
-                    }
-                case ContextProviderType.Json:
-                    {
-                        builder.UseJsonDatabase(Path.GetTempPath() + Guid.NewGuid().ToString("N"));
-                        break;
-                    }
-                case ContextProviderType.Xml:
-                    {
-                        builder.UseJsonDatabase(Path.GetTempPath() + Guid.NewGuid().ToString("N"));
-                        break;
-                    }
-                case ContextProviderType.AdoNet:
-                    {
-                        builder.UseAdoNet(_connection);
-                        break;
-                    }
-                case ContextProviderType.NHibernate:
-                    {
-                        builder.UseNHibernate(cfg =>
-                        {
-                            cfg.DataBaseIntegration(x =>
-                            {
-                                x.Dialect<MsSql2012Dialect>();
-                                x.Driver<SqlClientDriver>();
-                                x.ConnectionString = ConnectionString;
-                                x.LogSqlInConsole = true;
-                                x.LogFormattedSql = true;
-                            });
-
-                            var mapper = new ModelMapper();
-
-                            mapper.AddMappings(Assembly.GetExecutingAssembly().GetExportedTypes());
-
-                            var mapping = mapper.CompileMappingForAllExplicitlyAddedEntities();
-
-                            cfg.AddMapping(mapping);
-
-                            var exporter = new SchemaExport(cfg);
-
-                            exporter.Execute(true, true, false);
-                        });
-
                         break;
                     }
                 case ContextProviderType.EntityFramework:

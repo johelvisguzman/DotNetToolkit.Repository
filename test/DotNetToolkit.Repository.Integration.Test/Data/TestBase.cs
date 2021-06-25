@@ -1,6 +1,5 @@
 namespace DotNetToolkit.Repository.Integration.Test.Data
 {
-    using AdoNet;
     using AzureStorageBlob;
     using AzureStorageTable;
     using Caching.Couchbase;
@@ -11,25 +10,16 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
     using Configuration.Options;
     using EntityFramework;
     using EntityFrameworkCore;
-    using global::NHibernate.Cfg;
-    using global::NHibernate.Driver;
-    using global::NHibernate.Mapping.ByCode;
-    using global::NHibernate.Tool.hbm2ddl;
     using Helpers;
     using InMemory;
-    using Json;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
-    using NHibernate;
     using Services;
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
-    using System.Reflection;
     using System.Threading.Tasks;
     using Transactions;
-    using Xml;
     using Xunit;
     using Xunit.Abstractions;
 
@@ -157,14 +147,6 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
         protected void ForAllUnitOfWorkFactoriesAsync(Func<IUnitOfWorkFactory, Task> action)
             => ForAllUnitOfWorkFactoriesAsync((factory, type) => action(factory));
 
-        protected void ForAllFileStreamContextProviders(Action<IRepositoryOptions, ContextProviderType> action)
-            => FileStreamContextProviders()
-                .ToList()
-                .ForEach(x => action(BuildOptions(x), x));
-
-        protected void ForAllFileStreamContextProviders(Action<IRepositoryOptions> action)
-            => ForAllFileStreamContextProviders((options, type) => action(options));
-
         private static bool SupportsTransactions(ContextProviderType x)
             => SqlServerContextProviders()
                 .Contains(x);
@@ -194,53 +176,17 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                         builder.UseInMemoryDatabase(Guid.NewGuid().ToString());
                         break;
                     }
-                case ContextProviderType.Json:
+                case ContextProviderType.EntityFrameworkCore:
                     {
-                        builder.UseJsonDatabase(Path.GetTempPath() + Guid.NewGuid().ToString("N"));
-                        break;
-                    }
-                case ContextProviderType.Xml:
-                    {
-                        builder.UseXmlDatabase(Path.GetTempPath() + Guid.NewGuid().ToString("N"));
+                        builder.UseEntityFrameworkCore<TestEfCoreDbContext>(options =>
+                        {
+                            options
+                                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+                        });
                         break;
                     }
 #if NETFULL
-                case ContextProviderType.AdoNet:
-                    {
-                        builder.UseAdoNet(DbConnectionHelper.CreateConnection(), ensureDatabaseCreated: true);
-                        break;
-                    }
-                case ContextProviderType.NHibernate:
-                    {
-                        builder.UseNHibernate(cfg =>
-                        {
-                            var currentFile = PathHelper.GetTempFileName();
-                            var connectionString = $"Data Source={currentFile};Persist Security Info=False";
-
-                            cfg.DataBaseIntegration(x =>
-                            {
-                                x.Dialect<TestFixedMsSqlCe40Dialect>();
-                                x.Driver<SqlServerCeDriver>();
-                                x.ConnectionString = connectionString;
-                                x.LogSqlInConsole = true;
-                                x.LogFormattedSql = true;
-                            });
-
-                            var mapper = new ModelMapper();
-
-                            mapper.AddMappings(Assembly.GetExecutingAssembly().GetExportedTypes());
-
-                            var mapping = mapper.CompileMappingForAllExplicitlyAddedEntities();
-
-                            cfg.AddMapping(mapping);
-
-                            var exporter = new SchemaExport(cfg);
-
-                            exporter.Execute(true, true, false);
-                        });
-
-                        break;
-                    }
                 case ContextProviderType.EntityFramework:
                     {
                         builder.UseEntityFramework<TestEfDbContext>(DbConnectionHelper.CreateConnection());
@@ -260,17 +206,6 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                             nameOrConnectionString: "AzureStorageTableConnection",
                             tableName: "TableName" + Guid.NewGuid().ToString("N").ToUpper(),
                             createIfNotExists: true);
-                        break;
-                    }
-#else
-                case ContextProviderType.EntityFrameworkCore:
-                    {
-                        builder.UseEntityFrameworkCore<TestEfCoreDbContext>(options =>
-                        {
-                            options
-                                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-                        });
                         break;
                     }
 #endif
@@ -339,24 +274,13 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
             => new[]
             {
                 ContextProviderType.InMemory,
-#if NETSTANDARD2_0
 		        ContextProviderType.EntityFrameworkCore,  
-#endif
-            };
-
-        protected static ContextProviderType[] FileStreamContextProviders()
-            => new[]
-            {
-                ContextProviderType.Json,
-                ContextProviderType.Xml,
             };
 
         protected static ContextProviderType[] SqlServerContextProviders()
 #if NETFULL
             => new[]
             {
-                ContextProviderType.NHibernate,
-                ContextProviderType.AdoNet,
                 ContextProviderType.EntityFramework,
             };
 #else
@@ -394,7 +318,6 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 
             list.AddRange(SqlServerContextProviders());
             list.AddRange(InMemoryContextProviders());
-            list.AddRange(FileStreamContextProviders());
             list.AddRange(AzureStorageContextProviders());
 
             return list.ToArray();
@@ -403,10 +326,6 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
         public enum ContextProviderType
         {
             InMemory,
-            Json,
-            Xml,
-            AdoNet,
-            NHibernate,
             EntityFramework,
             EntityFrameworkCore,
             AzureStorageBlob,
