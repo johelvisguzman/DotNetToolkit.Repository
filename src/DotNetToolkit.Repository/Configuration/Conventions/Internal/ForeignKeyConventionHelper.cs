@@ -5,6 +5,7 @@
     using JetBrains.Annotations;
     using Properties;
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
@@ -13,11 +14,25 @@
 
     internal class ForeignKeyConventionHelper
     {
+        private static readonly ConcurrentDictionary<Tuple<Type, Type>, PropertyInfo[]> _foreignKeyCache = new ConcurrentDictionary<Tuple<Type, Type>, PropertyInfo[]>();
+
         public static PropertyInfo[] GetForeignKeyPropertyInfos([NotNull] IRepositoryConventions conventions, [NotNull] Type sourceType, [NotNull] Type foreignType)
         {
             Guard.NotNull(sourceType, nameof(sourceType));
             Guard.NotNull(foreignType, nameof(foreignType));
+            
+            var key = Tuple.Create(sourceType, foreignType);
+            if (!_foreignKeyCache.TryGetValue(key, out PropertyInfo[] result))
+            {
+                result = GetForeignKeyPropertyInfosCore(conventions, sourceType, foreignType);
+                _foreignKeyCache.TryAdd(key, result);
+            }
+            
+            return result;
+        }
 
+        private static PropertyInfo[] GetForeignKeyPropertyInfosCore(IRepositoryConventions conventions, Type sourceType, Type foreignType)
+        {
             if (sourceType.IsEnumerable() || foreignType.IsEnumerable())
                 return new PropertyInfo[0];
 
