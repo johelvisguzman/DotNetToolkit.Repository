@@ -4,12 +4,20 @@
     using System;
     using System.Linq;
     using System.Reflection;
+    using Utility;
 
-    internal static class EfCoreRepositoryConventionHelper
+    internal class EfCoreRepositoryConventionHelper
     {
-        public static PropertyInfo[] GetPrimaryKeyPropertyInfos(DbContext context, Type entityType)
+        private readonly DbContext _context;
+
+        public EfCoreRepositoryConventionHelper(DbContext context)
         {
-            return context.Model
+            _context = Guard.NotNull(context, nameof(context));
+        }
+
+        public PropertyInfo[] GetPrimaryKeyPropertyInfos(Type entityType)
+        {
+            return _context.Model
                 .FindEntityType(entityType)
                 ?.FindPrimaryKey()
                 ?.Properties
