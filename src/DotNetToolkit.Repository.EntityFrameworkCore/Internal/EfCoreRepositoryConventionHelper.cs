@@ -5,14 +5,14 @@
     using System.Linq;
     using System.Reflection;
 
-    internal static class EfCoreRepositoryContextConventionHelper
+    internal static class EfCoreRepositoryConventionHelper
     {
         public static PropertyInfo[] GetPrimaryKeyPropertyInfos(DbContext context, Type entityType)
         {
             return context.Model
                 .FindEntityType(entityType)
-                .FindPrimaryKey()
-                .Properties
+                ?.FindPrimaryKey()
+                ?.Properties
                 .Select(x => x.PropertyInfo)
                 .ToArray();
         }
