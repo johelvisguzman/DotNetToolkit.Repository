@@ -56,7 +56,7 @@
 
         private void ConfigureConventions(ISessionFactory sessionFactory)
         {
-            var helper = new NHibernateConventionsHelper(Guard.NotNull(sessionFactory, nameof(sessionFactory)));
+            var helper = new NHibernateConventionHelper(sessionFactory);
 
             Conventions = new RepositoryConventions()
             {
