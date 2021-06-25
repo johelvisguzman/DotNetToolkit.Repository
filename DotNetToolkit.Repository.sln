@@ -15,8 +15,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.En
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.EntityFrameworkCore", "src\DotNetToolkit.Repository.EntityFrameworkCore\DotNetToolkit.Repository.EntityFrameworkCore.csproj", "{0A9D9AA4-F01C-470F-AD5B-5A81EA7A398D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.AdoNet", "src\DotNetToolkit.Repository.AdoNet\DotNetToolkit.Repository.AdoNet.csproj", "{77973BF2-E352-43C9-8CF2-99E01142B2A8}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{257E837B-5B99-44D7-9647-1C2FE0A07520}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetToolkit.Repository.Wpf.Demo", "samples\DotNetToolkit.Repository.Wpf.Demo\DotNetToolkit.Repository.Wpf.Demo.csproj", "{14409451-ED11-4DEF-8A89-783834F8316C}"
@@ -30,12 +28,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection", "src\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.csproj", "{6658C0C2-366C-4906-A333-BAB42A512CC5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Extensions.Unity", "src\DotNetToolkit.Repository.Extensions.Unity\DotNetToolkit.Repository.Extensions.Unity.csproj", "{33BA3639-6B06-4D2B-8273-9CFDFF46A431}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Json", "src\DotNetToolkit.Repository.Json\DotNetToolkit.Repository.Json.csproj", "{4CE4219B-92D6-464C-8A0E-5151AD842AF8}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Xml", "src\DotNetToolkit.Repository.Xml\DotNetToolkit.Repository.Xml.csproj", "{85FECE4B-2092-4C91-A089-963BAF89E502}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.NHibernate", "src\DotNetToolkit.Repository.NHibernate\DotNetToolkit.Repository.NHibernate.csproj", "{32262A29-A96F-423B-BA97-F7E2F79FAB16}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Caching.InMemory", "src\DotNetToolkit.Repository.Caching.InMemory\DotNetToolkit.Repository.Caching.InMemory.csproj", "{75757CCF-9F6E-433A-885E-F92DE12FFB51}"
 EndProject
@@ -51,7 +43,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.Ca
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.AzureStorageBlob", "src\DotNetToolkit.Repository.AzureStorageBlob\DotNetToolkit.Repository.AzureStorageBlob.csproj", "{6B934185-F853-4664-B90A-B923690461D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetToolkit.Repository.AzureStorageTable", "src\DotNetToolkit.Repository.AzureStorageTable\DotNetToolkit.Repository.AzureStorageTable.csproj", "{567784ED-4989-4664-A8F5-E7AA31107A3C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetToolkit.Repository.AzureStorageTable", "src\DotNetToolkit.Repository.AzureStorageTable\DotNetToolkit.Repository.AzureStorageTable.csproj", "{567784ED-4989-4664-A8F5-E7AA31107A3C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,10 +67,6 @@ Global
 		{0A9D9AA4-F01C-470F-AD5B-5A81EA7A398D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A9D9AA4-F01C-470F-AD5B-5A81EA7A398D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A9D9AA4-F01C-470F-AD5B-5A81EA7A398D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{77973BF2-E352-43C9-8CF2-99E01142B2A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{77973BF2-E352-43C9-8CF2-99E01142B2A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{77973BF2-E352-43C9-8CF2-99E01142B2A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{77973BF2-E352-43C9-8CF2-99E01142B2A8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{14409451-ED11-4DEF-8A89-783834F8316C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{14409451-ED11-4DEF-8A89-783834F8316C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14409451-ED11-4DEF-8A89-783834F8316C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -98,18 +86,6 @@ Global
 		{33BA3639-6B06-4D2B-8273-9CFDFF46A431}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33BA3639-6B06-4D2B-8273-9CFDFF46A431}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33BA3639-6B06-4D2B-8273-9CFDFF46A431}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4CE4219B-92D6-464C-8A0E-5151AD842AF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4CE4219B-92D6-464C-8A0E-5151AD842AF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4CE4219B-92D6-464C-8A0E-5151AD842AF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4CE4219B-92D6-464C-8A0E-5151AD842AF8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{85FECE4B-2092-4C91-A089-963BAF89E502}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{85FECE4B-2092-4C91-A089-963BAF89E502}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{85FECE4B-2092-4C91-A089-963BAF89E502}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{85FECE4B-2092-4C91-A089-963BAF89E502}.Release|Any CPU.Build.0 = Release|Any CPU
-		{32262A29-A96F-423B-BA97-F7E2F79FAB16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{32262A29-A96F-423B-BA97-F7E2F79FAB16}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{32262A29-A96F-423B-BA97-F7E2F79FAB16}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{32262A29-A96F-423B-BA97-F7E2F79FAB16}.Release|Any CPU.Build.0 = Release|Any CPU
 		{75757CCF-9F6E-433A-885E-F92DE12FFB51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{75757CCF-9F6E-433A-885E-F92DE12FFB51}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75757CCF-9F6E-433A-885E-F92DE12FFB51}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -151,15 +127,11 @@ Global
 		{EAE7B507-D908-4650-A301-C3341F005A51} = {DAB3DD1E-AD99-46C9-AC42-07E2F03D5A06}
 		{8DBCF7DE-532D-45DF-A6B8-5D89415C5B77} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{0A9D9AA4-F01C-470F-AD5B-5A81EA7A398D} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
-		{77973BF2-E352-43C9-8CF2-99E01142B2A8} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{14409451-ED11-4DEF-8A89-783834F8316C} = {257E837B-5B99-44D7-9647-1C2FE0A07520}
 		{05705FCB-B361-4139-8C83-D4D5DF085A62} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{2700614E-A941-42C9-B86F-22D8A47690F3} = {91D14746-3446-48E3-B01C-BF77B848738A}
 		{6658C0C2-366C-4906-A333-BAB42A512CC5} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{33BA3639-6B06-4D2B-8273-9CFDFF46A431} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
-		{4CE4219B-92D6-464C-8A0E-5151AD842AF8} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
-		{85FECE4B-2092-4C91-A089-963BAF89E502} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
-		{32262A29-A96F-423B-BA97-F7E2F79FAB16} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{75757CCF-9F6E-433A-885E-F92DE12FFB51} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{445F6C84-FF28-4243-8148-DAB5A4813F93} = {DD273D5E-6D6C-41FA-A0C8-646CC53C4DC3}
 		{C895B8F4-5083-4D97-A1E6-D7DF01BDBE9D} = {DAB3DD1E-AD99-46C9-AC42-07E2F03D5A06}

@@ -22,6 +22,22 @@
     /// <seealso cref="IAzureStorageTableRepositoryContext" />
     internal class AzureStorageTableRepositoryContext : LinqRepositoryContextBase, IAzureStorageTableRepositoryContext
     {
+        #region Fields
+
+        private static readonly MethodInfo _createQuery = typeof(CloudTable).GetRuntimeMethods()
+            .Single(x => x.Name == nameof(CloudTable.CreateQuery) &&
+                         x.IsGenericMethodDefinition &&
+                         x.GetGenericArguments().Length == 1 &&
+                         x.GetParameters().Length == 0);
+
+        private static readonly MethodInfo _retrive = typeof(TableOperation).GetRuntimeMethods()
+            .Single(x => x.Name == nameof(TableOperation.Retrieve) &&
+                         x.IsGenericMethodDefinition &&
+                         x.GetGenericArguments().Length == 1 &&
+                         x.GetParameters().Length == 3);
+
+        #endregion
+
         #region Properties
 
         /// <summary>
@@ -104,30 +120,6 @@
             return results;
         }
 
-        private TableQuery<TEntity> InvokeCreateQuery<TEntity>()
-        {
-            return (TableQuery<TEntity>)typeof(CloudTable)
-                .GetRuntimeMethods()
-                .Single(x => x.Name == nameof(CloudTable.CreateQuery) &&
-                             x.IsGenericMethodDefinition &&
-                             x.GetGenericArguments().Length == 1 &&
-                             x.GetParameters().Length == 0)
-                .MakeGenericMethod(typeof(TEntity))
-                .Invoke(Table, null);
-        }
-
-        private TableOperation InvokeRetrieve<TEntity>(string partitionKey, string rowKey)
-        {
-            return (TableOperation)typeof(TableOperation)
-                .GetRuntimeMethods()
-                .Single(x => x.Name == nameof(TableOperation.Retrieve) &&
-                             x.IsGenericMethodDefinition &&
-                             x.GetGenericArguments().Length == 1 &&
-                             x.GetParameters().Length == 3)
-                .MakeGenericMethod(typeof(TEntity))
-                .Invoke(Table, new[] { partitionKey, rowKey, null });
-        }
-
         private static void ThrowsIfNotTableEntity<TEntity>()
         {
             if (!typeof(TEntity).ImplementsInterface(typeof(ITableEntity)))
@@ -165,9 +157,11 @@
         {
             ThrowsIfNotTableEntity<TEntity>();
 
-            return ExecuteTableQuery<TEntity>(
-                InvokeCreateQuery<TEntity>())
-                .AsQueryable();
+            var query = (TableQuery<TEntity>)_createQuery
+                .MakeGenericMethod(typeof(TEntity))
+                .Invoke(Table, null);
+
+            return ExecuteTableQuery<TEntity>(query).AsQueryable();
         }
 
         /// <summary>
@@ -267,7 +261,10 @@
                 rowKey = keyValues[1].ToString();
             }
 
-            var opertation = InvokeRetrieve<TEntity>(partitionKey, rowKey);
+            var opertation = (TableOperation)_retrive
+                .MakeGenericMethod(typeof(TEntity))
+                .Invoke(Table, new[] { partitionKey, rowKey, null });
+
             var tableResult = Table.Execute(opertation);
 
             return tableResult.Result as TEntity;

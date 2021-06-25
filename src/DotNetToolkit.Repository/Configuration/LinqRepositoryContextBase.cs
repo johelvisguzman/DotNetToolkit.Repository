@@ -27,6 +27,12 @@
         private ILoggerProvider _loggerProvider;
         private ILogger _logger;
 
+        private static readonly MethodInfo _asQueryable = typeof(LinqRepositoryContextBase).GetRuntimeMethods()
+            .Single(x => x.Name == nameof(AsQueryable) &&
+                         x.IsGenericMethodDefinition &&
+                         x.GetGenericArguments().Length == 1 &&
+                         x.GetParameters().Length == 0);
+
         #endregion
 
         #region Properties
@@ -103,12 +109,7 @@
 
         private IQueryable<object> InvokeAsQueryable(Type type)
         {
-            return (IQueryable<object>)GetType()
-                .GetRuntimeMethods()
-                .Single(x => x.Name == nameof(AsQueryable) &&
-                             x.IsGenericMethodDefinition &&
-                             x.GetGenericArguments().Length == 1 &&
-                             x.GetParameters().Length == 0)
+            return (IQueryable<object>)_asQueryable
                 .MakeGenericMethod(type)
                 .Invoke(this, null);
         }

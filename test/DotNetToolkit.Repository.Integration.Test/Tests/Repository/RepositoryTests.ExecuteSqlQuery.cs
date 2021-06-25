@@ -11,7 +11,6 @@
         public void ExecuteQuery()
         {
             var exclude = InMemoryContextProviders()
-                .Union(FileStreamContextProviders())
                 .Union(AzureStorageContextProviders())
                 .ToArray();
 
@@ -22,7 +21,6 @@
         public void ExecuteQueryAsync()
         {
             var exclude = InMemoryContextProviders()
-                .Union(FileStreamContextProviders())
                 .Union(AzureStorageContextProviders())
                 .ToArray();
 
