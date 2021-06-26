@@ -39,11 +39,15 @@ platform: Any CPU
 # build Configuration, i.e. Debug, Release, etc.
 configuration: Release
 
-image: Visual Studio 2017
+image: Visual Studio 2019
 
 before_build:
   - dotnet --info
   - dotnet restore
+  - ps: |
+      $exePath = "$env:TEMP\SSCERuntime_x64-ENU.exe"
+      (New-Object Net.WebClient).DownloadFile('https://download.microsoft.com/download/F/F/D/FFDF76E3-9E55-41DA-A750-1798B971936C/ENU/SSCERuntime_x64-ENU.exe', $exePath)
+      cmd /c start /wait $exePath /i /quiet /qn /norestart
 
 build:
   parallel: true                                    # enable MSBuild parallel builds
