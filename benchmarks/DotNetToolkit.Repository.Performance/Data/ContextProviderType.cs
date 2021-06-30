@@ -6,6 +6,5 @@
         EntityFramework,
         EntityFrameworkCore,
         AzureStorageBlob,
-        AzureStorageTable,
     }
 }

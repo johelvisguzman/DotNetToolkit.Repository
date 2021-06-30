@@ -5,40 +5,13 @@
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
-#if NETFULL
-    public class Customer : Microsoft.WindowsAzure.Storage.Table.TableEntity
-#else
     public class Customer
-#endif
     {
-        private int _id;
-
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id
-        {
-            get { return _id; }
-            set
-            {
-                _id = value;
-#if NETFULL
-                RowKey = _id.ToString();
-#endif
-            }
-        }
+        public int Id { get; set; }
         public string Name { get; set; }
         public CustomerAddress Address { get; set; }
-
-#if NETFULL
-        // for azure table compability (do not map since DateTimeOffset is not supported for sql)
-        [NotMapped]
-        public new DateTimeOffset Timestamp { get; set; }
-
-        public Customer()
-        {
-            PartitionKey = string.Empty;
-        }
-#endif
     }
 
     [Table("CustomersWithNoIdentity")]
@@ -73,48 +46,15 @@
         public string Name { get; set; }
     }
 
-#if NETFULL
-    public class CustomerWithTwoCompositePrimaryKey : Microsoft.WindowsAzure.Storage.Table.TableEntity
-#else
     public class CustomerWithTwoCompositePrimaryKey
-#endif
     {
-        private int _id1;
-        private string _id2;
-
         [Key]
         [Column(Order = 1)]
-        public int Id1
-        {
-            get { return _id1; }
-            set
-            {
-                _id1 = value;
-#if NETFULL
-                PartitionKey = _id1.ToString();
-#endif
-            }
-        }
+        public int Id1 { get; set; }
         [Key]
         [Column(Order = 2)]
-        public string Id2
-        {
-            get { return _id2; }
-            set
-            {
-                _id2 = value;
-#if NETFULL
-                RowKey = _id2;
-#endif
-            }
-        }
+        public string Id2 { get; set; }
         public string Name { get; set; }
-
-#if NETFULL
-        // for azure table compability (do not map since DateTimeOffset is not supported for sql)
-        [NotMapped]
-        public new DateTimeOffset Timestamp { get; set; }
-#endif
 
         public override int GetHashCode()
         {

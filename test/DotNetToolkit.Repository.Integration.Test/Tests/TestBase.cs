@@ -4,7 +4,6 @@ namespace DotNetToolkit.Repository.Integration.Test
     using AzureStorageBlob; 
 #endif
 #if NETFULL
-    using AzureStorageTable;
     using Caching.Memcached;
     using EntityFramework;
 #endif
@@ -204,14 +203,6 @@ namespace DotNetToolkit.Repository.Integration.Test
                         builder.UseEntityFramework<TestEfDbContext>(DbConnectionHelper.CreateConnection());
                         break;
                     }
-                case ContextProviderType.AzureStorageTable:
-                    {
-                        builder.UseAzureStorageTable(
-                            nameOrConnectionString: "AzureStorageTableConnection",
-                            tableName: "TableName" + Guid.NewGuid().ToString("N").ToUpper(),
-                            createIfNotExists: true);
-                        break;
-                    }
 #endif
                 default:
                     throw new ArgumentOutOfRangeException(nameof(provider));
@@ -292,16 +283,15 @@ namespace DotNetToolkit.Repository.Integration.Test
 #endif
 
         protected static ContextProviderType[] AzureStorageContextProviders()
+#if NETSTANDARD2_1
             => new[]
             {
-#if NETSTANDARD2_1
 		
                 ContextProviderType.AzureStorageBlob, 
-#endif
-#if NETFULL
-                ContextProviderType.AzureStorageTable,
-#endif
             };
+#else
+            => Array.Empty<ContextProviderType>();
+#endif
 
         private static CachingProviderType[] CachingProviders()
             => new[]
@@ -334,7 +324,6 @@ namespace DotNetToolkit.Repository.Integration.Test
             EntityFramework,
             EntityFrameworkCore,
             AzureStorageBlob,
-            AzureStorageTable,
         }
 
         public enum CachingProviderType
