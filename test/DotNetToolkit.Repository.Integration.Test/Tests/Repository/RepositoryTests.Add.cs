@@ -18,15 +18,13 @@
         {
             ForAllRepositoryFactories(TestAddWithSeededIdForIdentity, 
                 ContextProviderType.EntityFrameworkCore, 
-                ContextProviderType.AzureStorageBlob, 
-                ContextProviderType.AzureStorageTable);
+                ContextProviderType.AzureStorageBlob);
         }
 
         [Fact]
         public void AddWithSeededIdForNoneIdentity()
         {
-            ForAllRepositoryFactories(TestAddWithSeededIdForNoneIdentity,
-                ContextProviderType.AzureStorageTable);
+            ForAllRepositoryFactories(TestAddWithSeededIdForNoneIdentity);
         }
 
         [Fact]
@@ -46,15 +44,13 @@
         {
             ForAllRepositoryFactoriesAsync(TestAddWithSeededIdForIdentityAsync, 
                 ContextProviderType.EntityFrameworkCore, 
-                ContextProviderType.AzureStorageBlob, 
-                ContextProviderType.AzureStorageTable);
+                ContextProviderType.AzureStorageBlob);
         }
 
         [Fact]
         public void AddWithSeededIdForNoneIdentityAsync()
         {
-            ForAllRepositoryFactoriesAsync(TestAddWithSeededIdForNoneIdentityAsync,
-                ContextProviderType.AzureStorageTable);
+            ForAllRepositoryFactoriesAsync(TestAddWithSeededIdForNoneIdentityAsync);
         }
 
         [Fact]

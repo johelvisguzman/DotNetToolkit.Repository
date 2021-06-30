@@ -56,7 +56,6 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.AzureStorageTable\DotNetToolkit.Repository.AzureStorageTable.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.EntityFramework\DotNetToolkit.Repository.EntityFramework.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Caching.Memcached\DotNetToolkit.Repository.Caching.Memcached.csproj" />
   </ItemGroup>

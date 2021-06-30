@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Performance
 {
 #if NETFULL
-    using AzureStorageTable;
     using EntityFramework;
     using System.Data.SqlClient;
 #endif
@@ -55,14 +54,6 @@
                         builder.UseEntityFramework<EfDbContext>(_connection);
                         break;
                     }
-                case ContextProviderType.AzureStorageTable:
-                    {
-                        builder.UseAzureStorageTable(
-                            nameOrConnectionString: "AzureStorageTableConnection",
-                            tableName: "TableName" + Guid.NewGuid().ToString("N").ToUpper(),
-                            createIfNotExists: true);
-                        break;
-                    }
 #endif
 #if NETSTANDARD2_1
                 case ContextProviderType.AzureStorageBlob:
@@ -86,7 +77,6 @@
             return new[]
             {
 #if NETFULL
-                ContextProviderType.AzureStorageTable,
                 ContextProviderType.EntityFramework,
 #endif
                 ContextProviderType.InMemory,

@@ -40,8 +40,7 @@
         [Fact]
         public void ThrowsIfEntityHasNoIdOnContextCreation()
         {
-            ForAllRepositoryFactories(TestThrowsIfEntityHasNoIdOnContextCreation,
-                ContextProviderType.AzureStorageTable);
+            ForAllRepositoryFactories(TestThrowsIfEntityHasNoIdOnContextCreation);
         }
 
         private static void TestFactoryCreate(IRepositoryFactory repoFactory)

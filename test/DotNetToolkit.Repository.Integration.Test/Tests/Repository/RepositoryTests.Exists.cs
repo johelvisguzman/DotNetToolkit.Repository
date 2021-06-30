@@ -22,7 +22,7 @@
         [Fact]
         public void ExistWithNavigationProperty_OneToOneRelationship()
         {
-            ForAllRepositoryFactories(TestExistWithNavigationProperty_OneToOneRelationship, ContextProviderType.AzureStorageBlob, ContextProviderType.AzureStorageTable);
+            ForAllRepositoryFactories(TestExistWithNavigationProperty_OneToOneRelationship, ContextProviderType.AzureStorageBlob);
         }
 
         [Fact]
@@ -40,7 +40,7 @@
         [Fact]
         public void ExistWithNavigationPropertyAsync_OneToOneRelationship()
         {
-            ForAllRepositoryFactoriesAsync(TestExistWithNavigationPropertyAsync_OneToOneRelationship, ContextProviderType.AzureStorageBlob, ContextProviderType.AzureStorageTable);
+            ForAllRepositoryFactoriesAsync(TestExistWithNavigationPropertyAsync_OneToOneRelationship, ContextProviderType.AzureStorageBlob);
         }
 
         private static void TestExists(IRepositoryFactory repoFactory)
