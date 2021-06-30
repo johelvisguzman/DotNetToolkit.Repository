@@ -16,10 +16,6 @@
     using Transactions.Internal;
     using Utility;
 
-    /// <summary>
-    /// An implementation of <see cref="IInMemoryRepositoryContext" />.
-    /// </summary>
-    /// <seealso cref="IInMemoryRepositoryContext" />
     internal class InMemoryRepositoryContext : LinqRepositoryContextBase, IInMemoryRepositoryContext
     {
         #region Fields
@@ -34,19 +30,10 @@
 
         #region Constructors
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryRepositoryContext" /> class.
-        /// </summary>
-        /// <param name="ignoreTransactionWarning">If a transaction operation is requested, ignore any warnings since the in-memory provider does not support transactions.</param>
-        /// <param name="ignoreSqlQueryWarning">If a SQL query is executed, ignore any warnings since the in-memory provider does not support SQL query execution.</param>
-        public InMemoryRepositoryContext(bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false) : this(DefaultDatabaseName, ignoreTransactionWarning, ignoreSqlQueryWarning) { }
+        public InMemoryRepositoryContext(bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false) 
+            : this(DefaultDatabaseName, ignoreTransactionWarning, ignoreSqlQueryWarning)
+        { }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryRepositoryContext" /> class.
-        /// </summary>
-        /// <param name="databaseName">The name of the in-memory database. This allows the scope of the in-memory database to be controlled independently of the context.</param>
-        /// <param name="ignoreTransactionWarning">If a transaction operation is requested, ignore any warnings since the in-memory provider does not support transactions.</param>
-        /// <param name="ignoreSqlQueryWarning">If a SQL query is executed, ignore any warnings since the in-memory provider does not support SQL query execution.</param>
         public InMemoryRepositoryContext(string databaseName, bool ignoreTransactionWarning = false, bool ignoreSqlQueryWarning = false)
         {
             DatabaseName = string.IsNullOrEmpty(databaseName) ? DefaultDatabaseName : databaseName;
@@ -102,14 +89,8 @@
 
         #region Implementation of IInMemoryRepositoryContext
 
-        /// <summary>
-        /// Gets or sets the name of the database.
-        /// </summary>
         public string DatabaseName { get; set; }
 
-        /// <summary>
-        /// Ensures the in-memory store is completely deleted.
-        /// </summary>
         public void EnsureDeleted()
         {
             // Clears the collection
@@ -125,11 +106,6 @@
 
         #region Implementation of IRepositoryContext
 
-        /// <summary>
-        /// Returns the entity's query.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <returns>The entity's query.</returns>
         protected override IQueryable<TEntity> AsQueryable<TEntity>()
         {
             var entityType = typeof(TEntity);
@@ -146,10 +122,6 @@
             return query;
         }
 
-        /// <summary>
-        /// Begins the transaction.
-        /// </summary>
-        /// <returns>The transaction.</returns>
         public override ITransactionManager BeginTransaction()
         {
             if (!_ignoreTransactionWarning)
@@ -160,40 +132,21 @@
             return CurrentTransaction;
         }
 
-        /// <summary>
-        /// Tracks the specified entity in memory and will be inserted into the database when <see cref="SaveChanges" /> is called.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <param name="entity">The entity.</param>
         public override void Add<TEntity>(TEntity entity)
         {
             _items.Add(new EntitySet(Guard.NotNull(entity, nameof(entity)), EntityState.Added));
         }
 
-        /// <summary>
-        /// Tracks the specified entity in memory and will be updated in the database when <see cref="SaveChanges" /> is called.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <param name="entity">The entity.</param>
         public override void Update<TEntity>(TEntity entity)
         {
             _items.Add(new EntitySet(Guard.NotNull(entity, nameof(entity)), EntityState.Modified));
         }
 
-        /// <summary>
-        /// Tracks the specified entity in memory and will be removed from the database when <see cref="SaveChanges" /> is called.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <param name="entity">The entity.</param>
         public override void Remove<TEntity>(TEntity entity)
         {
             _items.Add(new EntitySet(Guard.NotNull(entity, nameof(entity)), EntityState.Removed));
         }
 
-        /// <summary>
-        /// Saves all changes made in this context to the database.
-        /// </summary>
-        /// <returns>The number of state entries written to the database.</returns>
         public override int SaveChanges()
         {
             var store = InMemoryCache.Instance.GetDatabaseStore(DatabaseName);
@@ -257,14 +210,6 @@
             return count;
         }
 
-        /// <summary>
-        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
-        /// </summary>
-        /// <param name="sql">The SQL query string.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
-        /// <param name="projector">A function to project each entity into a new form.</param>
-        /// <returns>A list which each entity has been projected into a new form.</returns>
         public override IEnumerable<TEntity> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector)
         {
             if (!_ignoreSqlQueryWarning)
@@ -276,13 +221,6 @@
             return Enumerable.Empty<TEntity>();
         }
 
-        /// <summary>
-        /// Creates a raw SQL query that is executed directly in the database.
-        /// </summary>
-        /// <param name="sql">The SQL query string.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
-        /// <returns>The number of rows affected.</returns>
         public override int ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters)
         {
             if (!_ignoreSqlQueryWarning)
@@ -293,13 +231,6 @@
             return 0;
         }
 
-        /// <summary>
-        /// Finds an entity with the given primary key values in the repository.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
-        /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
-        /// <returns>The entity found in the repository.</returns>
         public override TEntity Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues)
         {
             Guard.NotEmpty(keyValues, nameof(keyValues));
@@ -328,9 +259,6 @@
 
         #region Implementation of IDisposable
 
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
         public override void Dispose()
         {
             // Clears the collection
@@ -346,9 +274,6 @@
 
         #region Nested Type: EntitySet
 
-        /// <summary>
-        /// Represents an internal entity set, which holds the entity and it's state representing the operation that was performed at the time.
-        /// </summary>
         class EntitySet
         {
             public EntitySet(object entity, EntityState state)
@@ -366,9 +291,6 @@
 
         #region Nested Type: EntityState
 
-        /// <summary>
-        /// Represents an internal state for an entity.
-        /// </summary>
         enum EntityState
         {
             Added,

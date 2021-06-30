@@ -45,5 +45,4 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
         }
     }
 }
-
 #endif

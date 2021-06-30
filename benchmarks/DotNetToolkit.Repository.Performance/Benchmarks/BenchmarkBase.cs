@@ -1,30 +1,36 @@
 ﻿namespace DotNetToolkit.Repository.Performance
 {
-    using AzureStorageBlob;
+#if NETFULL
     using AzureStorageTable;
+    using EntityFramework;
+    using System.Data.SqlClient;
+#endif
+#if NETSTANDARD2_1
+    using AzureStorageBlob;  
+#endif
     using BenchmarkDotNet.Attributes;
     using Configuration.Options;
     using Data;
-    using EntityFramework;
     using EntityFrameworkCore;
     using InMemory;
-    using Microsoft.EntityFrameworkCore;
     using System;
     using System.Collections.Generic;
+    using Microsoft.EntityFrameworkCore;
     using System.Configuration;
-    using System.Data.SqlClient;
-    using System.IO;
-    using System.Reflection;
 
     public abstract class BenchmarkBase
     {
+#if NETFULL
         private SqlConnection _connection;
-        public static string ConnectionString { get; } = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+#endif
+        public static string ConnectionString { get; } = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString; 
 
         protected void BaseSetup()
         {
+#if NETFULL
             _connection = new SqlConnection(ConnectionString);
-            _connection.Open();
+            _connection.Open(); 
+#endif
         }
 
         protected IRepositoryOptions BuildOptions(ContextProviderType provider)
@@ -38,22 +44,15 @@
                         builder.UseInMemoryDatabase(Guid.NewGuid().ToString());
                         break;
                     }
-                case ContextProviderType.EntityFramework:
-                    {
-                        builder.UseEntityFramework<EfDbContext>(_connection);
-                        break;
-                    }
                 case ContextProviderType.EntityFrameworkCore:
                     {
                         builder.UseEntityFrameworkCore<EfCoreDbContext>(x => x.UseSqlServer(ConnectionString));
                         break;
                     }
-                case ContextProviderType.AzureStorageBlob:
+#if NETFULL
+                case ContextProviderType.EntityFramework:
                     {
-                        builder.UseAzureStorageBlob(
-                            nameOrConnectionString: "AzureStorageBlobConnection",
-                            container: Guid.NewGuid().ToString(),
-                            createIfNotExists: true);
+                        builder.UseEntityFramework<EfDbContext>(_connection);
                         break;
                     }
                 case ContextProviderType.AzureStorageTable:
@@ -64,7 +63,18 @@
                             createIfNotExists: true);
                         break;
                     }
-                default:
+#endif
+#if NETSTANDARD2_1
+                case ContextProviderType.AzureStorageBlob:
+                    {
+                        builder.UseAzureStorageBlob(
+                            connectionString: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;",
+                            container: Guid.NewGuid().ToString(),
+                            createIfNotExists: true);
+                        break;
+                    } 
+#endif
+                default: 
                     throw new ArgumentOutOfRangeException(nameof(provider));
             }
 
@@ -75,15 +85,15 @@
         {
             return new[]
             {
-                ContextProviderType.InMemory,
-                ContextProviderType.Json,
-                ContextProviderType.Xml,
-                ContextProviderType.AdoNet,
-                ContextProviderType.NHibernate,
-                ContextProviderType.EntityFramework,
-                ContextProviderType.EntityFrameworkCore,
-                ContextProviderType.AzureStorageBlob,
+#if NETFULL
                 ContextProviderType.AzureStorageTable,
+                ContextProviderType.EntityFramework,
+#endif
+                ContextProviderType.InMemory,
+                ContextProviderType.EntityFrameworkCore,
+#if NETSTANDARD2_1
+		        ContextProviderType.AzureStorageBlob,
+#endif
             };
         }
 
