@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD2_0</DefineConstants>
+    <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD2_0;NETSTANDARD2_1</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net461'">
@@ -45,18 +45,24 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.AzureStorageBlob\DotNetToolkit.Repository.AzureStorageBlob.csproj" />
-    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.AzureStorageTable\DotNetToolkit.Repository.AzureStorageTable.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Caching.Couchbase\DotNetToolkit.Repository.Caching.Couchbase.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Caching.InMemory\DotNetToolkit.Repository.Caching.InMemory.csproj" />
-    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Caching.Memcached\DotNetToolkit.Repository.Caching.Memcached.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Caching.Redis\DotNetToolkit.Repository.Caching.Redis.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.EntityFrameworkCore\DotNetToolkit.Repository.EntityFrameworkCore.csproj" />
-    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.EntityFramework\DotNetToolkit.Repository.EntityFramework.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection\DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Extensions.Ninject\DotNetToolkit.Repository.Extensions.Ninject.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Extensions.Unity\DotNetToolkit.Repository.Extensions.Unity.csproj" />
     <ProjectReference Include="..\..\src\DotNetToolkit.Repository.InMemory\DotNetToolkit.Repository.InMemory.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.AzureStorageTable\DotNetToolkit.Repository.AzureStorageTable.csproj" />
+    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.EntityFramework\DotNetToolkit.Repository.EntityFramework.csproj" />
+    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.Caching.Memcached\DotNetToolkit.Repository.Caching.Memcached.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+    <ProjectReference Include="..\..\src\DotNetToolkit.Repository.AzureStorageBlob\DotNetToolkit.Repository.AzureStorageBlob.csproj" />
   </ItemGroup>
 
   <ItemGroup>

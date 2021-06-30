@@ -1,253 +1,417 @@
 ﻿namespace DotNetToolkit.Repository.AzureStorageBlob.Internal
 {
-    using Configuration;
+    using Azure;
+    using Azure.Storage.Blobs;
     using Configuration.Conventions;
+    using Configuration.Logging;
     using Extensions;
-    using Microsoft.Azure.Storage;
-    using Microsoft.Azure.Storage.Blob;
-    using Newtonsoft.Json;
+    using Properties;
     using Query;
+    using Query.Internal;
     using Query.Strategies;
+    using System;
     using System.Collections.Generic;
-    using System.Configuration;
+    using System.Data;
     using System.Linq;
+    using System.Linq.Expressions;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Transactions;
     using Utility;
 
-    /// <summary>
-    /// An implementation of <see cref="IAzureStorageBlobRepositoryContext" />.
-    /// </summary>
-    /// <seealso cref="IAzureStorageBlobRepositoryContext" />
-    internal class AzureStorageBlobRepositoryContext : LinqRepositoryContextBase, IAzureStorageBlobRepositoryContext
+    internal class AzureStorageBlobRepositoryContext : IAzureStorageBlobRepositoryContext
     {
-        #region Properties
-
-        /// <summary>
-        /// Gest the cloud blob container.
-        /// </summary>
-        public CloudBlobContainer BlobContainer { get; }
-
-        #endregion
-
         #region Constructors
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AzureStorageBlobRepositoryContext" /> class.
-        /// </summary>
-        /// <param name="nameOrConnectionString">Either the database name or a connection string.</param>
-        /// <param name="container">The name of the container.</param>
-        /// <param name="createIfNotExists">Creates the container if it does not exist.</param>
-        public AzureStorageBlobRepositoryContext(string nameOrConnectionString, string container = null, bool createIfNotExists = false)
+        public AzureStorageBlobRepositoryContext(string connectionString, string container = null, bool createIfNotExists = false)
         {
-            Guard.NotEmpty(nameOrConnectionString, nameof(nameOrConnectionString));
+            Guard.NotEmpty(connectionString, nameof(connectionString));
 
-            Conventions = RepositoryConventions.Default();
-
-            var css = GetConnectionStringSettings(nameOrConnectionString);
-
-            var connectionString = css != null
-                ? css.ConnectionString
-                : nameOrConnectionString;
-
-            var account = CloudStorageAccount.Parse(connectionString);
-            var client = account.CreateCloudBlobClient();
+            var client = new BlobServiceClient(connectionString);
 
             if (string.IsNullOrEmpty(container))
                 container = GetType().Name.ToLower();
 
-            BlobContainer = client.GetContainerReference(container);
+            BlobContainer = client.GetBlobContainerClient(container);
 
             if (createIfNotExists)
                 BlobContainer.CreateIfNotExists();
+
+            Conventions = RepositoryConventions.Default();
         }
 
         #endregion
 
         #region Private Methods
 
-        private static ConnectionStringSettings GetConnectionStringSettings(string nameOrConnectionString)
+        private BlobClient GetBlobClient<TEntity>(TEntity entity) where TEntity : class
         {
-            var css = ConfigurationManager.ConnectionStrings[nameOrConnectionString];
-
-            if (css != null)
-                return css;
-
-            for (var i = 0; i < ConfigurationManager.ConnectionStrings.Count; i++)
-            {
-                css = ConfigurationManager.ConnectionStrings[i];
-
-                if (css.ConnectionString.Equals(nameOrConnectionString))
-                    return css;
-            }
-
-            return null;
-        }
-
-        private CloudBlockBlob GetBlobkBlobReference(params object[] keyValues)
-        {
+            var keyValues = Conventions.GetPrimaryKeyValues(entity);
             var key = string.Join(":", keyValues);
-            var blob = BlobContainer.GetBlockBlobReference(key);
 
-            return blob;
+            return BlobContainer.GetBlobClient(key);
         }
 
-        private CloudBlockBlob GetBlobkBlobReference<TEntity>(TEntity entity) where TEntity : class
+        private TEntity DownloadEntity<TEntity>(string blobName) where TEntity : class
         {
-            return GetBlobkBlobReference(Conventions.GetPrimaryKeyValues(entity));
-        }
-
-        private IEnumerable<CloudBlockBlob> GetBlobs()
-        {
-            BlobContinuationToken continuationToken = null;
-
-            do
+            try
             {
-                var response = BlobContainer.ListBlobsSegmented(continuationToken);
+                var blob = BlobContainer.GetBlobClient(blobName);
+                var contentResult = blob.DownloadContent();
+                var result = contentResult.Value.Content.ToObjectFromJson<TEntity>();
 
-                continuationToken = response.ContinuationToken;
-
-                foreach (var blob in response.Results.OfType<CloudBlockBlob>())
-                {
-                    yield return blob;
-                }
-
-            } while (continuationToken != null);
-        }
-
-        private static string Serialize(object o)
-        {
-            if (o == null)
-                return null;
-
-            return JsonConvert.SerializeObject(o, new JsonSerializerSettings()
+                return result;
+            }
+            catch (RequestFailedException)
             {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            });
+                return default(TEntity);
+            }
         }
 
-        private static T Deserialize<T>(string v)
+        private async Task<TEntity> DownloadEntityAsync<TEntity>(string blobName, CancellationToken cancellationToken = default) where TEntity : class
         {
-            if (string.IsNullOrEmpty(v))
-                return default(T);
+            try
+            {
+                var blob = BlobContainer.GetBlobClient(blobName);
+                var contentResult = await blob.DownloadContentAsync(cancellationToken: cancellationToken);
+                var result = contentResult.Value.Content.ToObjectFromJson<TEntity>();
 
-            return JsonConvert.DeserializeObject<T>(v);
+                return result;
+            }
+            catch (RequestFailedException)
+            {
+                return default(TEntity);
+            }
+        }
+
+        private IEnumerable<TEntity> DownloadEntities<TEntity>() where TEntity : class
+        {
+            foreach (var blobItem in BlobContainer.GetBlobs())
+            {
+                yield return DownloadEntity<TEntity>(blobItem.Name);
+            }
+        }
+
+        private async IAsyncEnumerable<TEntity> DownloadEntitiesAsync<TEntity>() where TEntity : class
+        {
+            await foreach (var blobItem in BlobContainer.GetBlobsAsync())
+            {
+                yield return DownloadEntity<TEntity>(blobItem.Name);
+            }
+        }
+
+        private void UploadEntity<TEntity>(TEntity entity) where TEntity : class
+        {
+            var blob = GetBlobClient(entity);
+            var binaryData = BinaryData.FromObjectAsJson<TEntity>(entity);
+
+            blob.Upload(binaryData, overwrite: true);
         }
 
         #endregion
 
-        #region Overrides of LinqRepositoryContextBase
+        #region Implementation of IAzureStorageBlobRepositoryContext
 
-        /// <summary>
-        /// Returns the entity's query.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <returns>The entity's query.</returns>
-        protected override IQueryable<TEntity> AsQueryable<TEntity>()
+        public BlobContainerClient BlobContainer { get; }
+
+        #endregion
+
+        #region Implementation of IRepositoryContext
+
+        public ITransactionManager CurrentTransaction { get; set; }
+
+        public IRepositoryConventions Conventions { get; }
+
+        public ILoggerProvider LoggerProvider { get; set; } = NullLoggerProvider.Instance;
+
+        public void Add<TEntity>(TEntity entity) where TEntity : class
         {
-            return GetBlobs()
-                .Select(x =>
-                {
-                    try
-                    {
-                        return Deserialize<TEntity>(x.DownloadText());
-                    }
-                    catch (StorageException storageException)
-                    {
-                        if (storageException.RequestInformation.HttpStatusCode == 404)
-                            return default(TEntity);
-
-                        throw;
-                    }
-                })
-                .AsQueryable();
+            UploadEntity(Guard.NotNull(entity, nameof(entity)));
         }
 
-        /// <summary>
-        /// Apply a fetching options to the specified entity's query.
-        /// </summary>
-        /// <returns>The entity's query with the applied options.</returns>
-        protected override IQueryable<TEntity> ApplyFetchingOptions<TEntity>(IQueryable<TEntity> query, IQueryOptions<TEntity> options)
+        public void Update<TEntity>(TEntity entity) where TEntity : class
         {
-            if (options?.FetchStrategy?.PropertyPaths?.Any() == true)
-                Logger.Debug("The azure storage blob context does not support fetching strategy.");
-
-            return query;
+            UploadEntity(Guard.NotNull(entity, nameof(entity)));
         }
 
-        /// <summary>
-        /// Tracks the specified entity in memory and will be inserted into the database when <see cref="SaveChanges" /> is called.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <param name="entity">The entity.</param>
-        public override void Add<TEntity>(TEntity entity)
+        public void Remove<TEntity>(TEntity entity) where TEntity : class
         {
             Guard.NotNull(entity, nameof(entity));
 
-            var blob = GetBlobkBlobReference(entity);
-
-            blob.UploadText(Serialize(entity));
-        }
-
-        /// <summary>
-        /// Tracks the specified entity in memory and will be updated in the database when <see cref="SaveChanges" /> is called.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <param name="entity">The entity.</param>
-        public override void Update<TEntity>(TEntity entity)
-        {
-            Guard.NotNull(entity, nameof(entity));
-
-            var blob = GetBlobkBlobReference(entity);
-
-            blob.UploadText(Serialize(entity));
-        }
-
-        /// <summary>
-        /// Tracks the specified entity in memory and will be removed from the database when <see cref="SaveChanges" /> is called.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <param name="entity">The entity.</param>
-        public override void Remove<TEntity>(TEntity entity)
-        {
-            Guard.NotNull(entity, nameof(entity));
-
-            var blob = GetBlobkBlobReference(entity);
+            var blob = GetBlobClient(entity);
 
             blob.DeleteIfExists();
         }
 
-        /// <summary>
-        /// Saves all changes made in this context to the database.
-        /// </summary>
-        /// <returns>The number of state entries written to the database.</returns>
-        public override int SaveChanges()
+        public int SaveChanges() => -1;
+
+        public IEnumerable<TEntity> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector) where TEntity : class
         {
-            return -1;
+            throw new NotSupportedException(Resources.QueryExecutionNotSupported);
         }
 
-        /// <summary>
-        /// Finds an entity with the given primary key values in the repository.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
-        /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
-        /// <param name="keyValues">The values of the primary key for the entity to be found.</param>
-        /// <returns>The entity found in the repository.</returns>
-        public override TEntity Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues)
+        public int ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters)
+        {
+            throw new NotSupportedException(Resources.QueryExecutionNotSupported);
+        }
+
+        public ITransactionManager BeginTransaction()
+        {
+            throw new NotSupportedException(Resources.TransactionNotSupported);
+        }
+
+        public TEntity Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
             Guard.NotEmpty(keyValues, nameof(keyValues));
 
-            try
-            {
-                var blob = GetBlobkBlobReference(keyValues);
+            var key = string.Join(":", keyValues);
+            var result = DownloadEntity<TEntity>(key);
 
-                return Deserialize<TEntity>(blob.DownloadText());
-            }
-            catch (StorageException storageException)
-            {
-                if (storageException.RequestInformation.HttpStatusCode == 404)
-                    return default(TEntity);
+            return result;
+        }
 
-                throw;
+        public TResult Find<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
+        {
+            Guard.NotNull(selector, nameof(selector));
+
+            var result = DownloadEntities<TEntity>().AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(Conventions, options)
+                .ApplyPagingOptions(options)
+                .Select(selector)
+                .FirstOrDefault();
+
+            return result;
+        }
+
+        public IPagedQueryResult<IEnumerable<TResult>> FindAll<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
+        {
+            Guard.NotNull(selector, nameof(selector));
+
+            var query = DownloadEntities<TEntity>().AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(Conventions, options);
+
+            var total = query.Count();
+
+            var result = query
+                .ApplyPagingOptions(options)
+                .Select(selector)
+                .ToList();
+
+            return new PagedQueryResult<IEnumerable<TResult>>(result, total);
+        }
+
+        public int Count<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
+        {
+            var result = DownloadEntities<TEntity>().AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(Conventions, options)
+                .ApplyPagingOptions(options)
+                .Count();
+
+            return result;
+        }
+
+        public bool Exists<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
+        {
+            Guard.NotNull(options, nameof(options));
+
+            var result = DownloadEntities<TEntity>().AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(Conventions, options)
+                .ApplyPagingOptions(options)
+                .Any();
+
+            return result;
+        }
+
+        public IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector) where TEntity : class
+        {
+            Guard.NotNull(keySelector, nameof(keySelector));
+            Guard.NotNull(elementSelector, nameof(elementSelector));
+
+            var keySelectFunc = keySelector.Compile();
+            var elementSelectorFunc = elementSelector.Compile();
+
+            var query = DownloadEntities<TEntity>().AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(Conventions, options);
+
+            Dictionary<TDictionaryKey, TElement> result;
+            int total;
+
+            if (options != null && options.PageSize != -1)
+            {
+                total = query.Count();
+
+                result = query
+                    .ApplyPagingOptions(options)
+                    .ToDictionary(keySelectFunc, elementSelectorFunc);
             }
+            else
+            {
+                // Gets the total count from memory
+                result = query.ToDictionary(keySelectFunc, elementSelectorFunc);
+                total = result.Count;
+            }
+
+            return new PagedQueryResult<Dictionary<TDictionaryKey, TElement>>(result, total);
+        }
+
+        public IPagedQueryResult<IEnumerable<TResult>> GroupBy<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector) where TEntity : class
+        {
+            Guard.NotNull(keySelector, nameof(keySelector));
+            Guard.NotNull(resultSelector, nameof(resultSelector));
+
+            var keySelectFunc = keySelector.Compile();
+            var resultSelectorFunc = resultSelector.Compile();
+
+            var query = DownloadEntities<TEntity>().AsQueryable()
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(Conventions, options);
+
+            var total = query.Count();
+
+            var result = query
+                .ApplyPagingOptions(options)
+                .GroupBy(keySelectFunc, resultSelectorFunc)
+                .ToList();
+
+            return new PagedQueryResult<IEnumerable<TResult>>(result, total);
+        }
+
+        #endregion
+
+        #region Implementation of IRepositoryContextAsync
+
+        public Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = default) where TEntity : class
+        {
+            throw new NotSupportedException(Resources.QueryExecutionNotSupported);
+        }
+
+        public Task<int> ExecuteSqlCommandAsync(string sql, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = default)
+        {
+            throw new NotSupportedException(Resources.QueryExecutionNotSupported);
+        }
+
+        public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) => Task.FromResult(-1);
+
+        public Task<TEntity> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
+        {
+            Guard.NotEmpty(keyValues, nameof(keyValues));
+
+            var key = string.Join(":", keyValues);
+            var result = DownloadEntityAsync<TEntity>(key, cancellationToken);
+
+            return result;
+        }
+
+        public async Task<TResult> FindAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = default) where TEntity : class
+        {
+            Guard.NotNull(selector, nameof(selector));
+
+            var selectorFunc = selector.Compile();
+
+            var result = await DownloadEntitiesAsync<TEntity>()
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(Conventions, options)
+                .ApplyPagingOptions(options)
+                .Select(selectorFunc)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return result;
+        }
+
+        public async Task<IPagedQueryResult<IEnumerable<TResult>>> FindAllAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = default) where TEntity : class
+        {
+            Guard.NotNull(selector, nameof(selector));
+
+            var selectorFunc = selector.Compile();
+
+            var query = DownloadEntitiesAsync<TEntity>()
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(Conventions, options);
+
+            var total = await query.CountAsync(cancellationToken);
+
+            var result = await query
+                .ApplyPagingOptions(options)
+                .Select(selectorFunc)
+                .ToListAsync(cancellationToken);
+
+            return new PagedQueryResult<IEnumerable<TResult>>(result, total);
+        }
+
+        public async Task<int> CountAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = default) where TEntity : class
+        {
+            var result = await DownloadEntitiesAsync<TEntity>()
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(Conventions, options)
+                .ApplyPagingOptions(options)
+                .CountAsync(cancellationToken);
+
+            return result;
+        }
+
+        public async Task<bool> ExistsAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = default) where TEntity : class
+        {
+            Guard.NotNull(options, nameof(options));
+
+            var result = await DownloadEntitiesAsync<TEntity>()
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(Conventions, options)
+                .ApplyPagingOptions(options)
+                .AnyAsync(cancellationToken);
+
+            return result;
+        }
+
+        public async Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = default) where TEntity : class
+        {
+            Guard.NotNull(keySelector, nameof(keySelector));
+            Guard.NotNull(elementSelector, nameof(elementSelector));
+
+            var keySelectFunc = keySelector.Compile();
+            var elementSelectorFunc = elementSelector.Compile();
+
+            var query = DownloadEntitiesAsync<TEntity>()
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(Conventions, options);
+
+            Dictionary<TDictionaryKey, TElement> result;
+            int total;
+
+            if (options != null && options.PageSize != -1)
+            {
+                total = await query.CountAsync(cancellationToken);
+
+                result = await query
+                    .ApplyPagingOptions(options)
+                    .ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken);
+            }
+            else
+            {
+                // Gets the total count from memory
+                result = await query.ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken);
+                total = result.Count;
+            }
+
+            return new PagedQueryResult<Dictionary<TDictionaryKey, TElement>>(result, total);
+        }
+
+        public Task<IPagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = default) where TEntity : class
+        {
+            return Task.FromResult(GroupBy<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector));
+        }
+
+        #endregion
+
+        #region Implementation of IDisposable
+
+        public void Dispose()
+        {
+            CurrentTransaction = null;
         }
 
         #endregion

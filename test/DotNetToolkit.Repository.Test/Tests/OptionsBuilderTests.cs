@@ -155,6 +155,27 @@
             TestConfiguration(optionsBuilder);
         }
 
+        [Fact]
+        public void ThrowsIfConfigureFromXmlArbitraryFileNotFound()
+        {
+            var ex = Assert.Throws<FileNotFoundException>(
+                () => new RepositoryOptionsBuilder()
+                    .UseConfiguration("random.config"));
+
+            Assert.Equal("The file is not found.", ex.Message);
+            Assert.Equal("random.config", ex.FileName);
+        }
+
+        [Fact]
+        public void ThrowsIfXmlConfigurationSectionNotFound()
+        {
+            var ex = Assert.Throws<InvalidOperationException>(
+                () => new RepositoryOptionsBuilder()
+                    .UseConfiguration("empty_repository.config"));
+
+            Assert.Equal("Unable to find a 'repository' configuration section. For more information on DotNetToolkit.Repository configuration, visit the https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Config-File-Setup.", ex.Message);
+        }
+
 #if NETSTANDARD2_0
         [Fact]
         public void ConfigureFromJson()
@@ -169,45 +190,13 @@
 
             TestConfiguration(optionsBuilder);
         }
-#endif
 
-        [Fact]
-        public void ThrowsIfConfigureFromRepositoryConfigNotFound()
-        {
-            var ex = Assert.Throws<FileNotFoundException>(
-                () => new RepositoryOptionsBuilder()
-                    .UseConfiguration("random.config"));
-
-            Assert.Equal("The file is not found.", ex.Message);
-            Assert.Equal("random.config", ex.FileName);
-        }
-
-        [Fact]
-        public void ThrowsIfXmlConfigurationSectionNotFound()
-        {
-            Exception ex;
-            ex = Assert.Throws<InvalidOperationException>(
-                () => new RepositoryOptionsBuilder()
-                    .UseConfiguration("empty_repository.config"));
-
-            Assert.Equal("Unable to find a 'repository' configuration section. For more information on DotNetToolkit.Repository configuration, visit the https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Config-File-Setup.", ex.Message);
-
-#if NETSTANDARD2_0
-            ex = Assert.Throws<InvalidOperationException>(
-                    () => new RepositoryOptionsBuilder()
-                        .UseConfiguration(TestConfigurationHelper.GetConfiguration("empty_repository.json")));
-
-            Assert.Equal("Unable to find a 'repository' configuration section. For more information on DotNetToolkit.Repository configuration, visit the https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Config-File-Setup.", ex.Message); 
-#endif
-        }
-
-#if NETSTANDARD2_0
         [Fact]
         public void ThrowsIfJsonConfigurationSectionNotFound()
         {
             var ex = Assert.Throws<InvalidOperationException>(
-                    () => new RepositoryOptionsBuilder()
-                        .UseConfiguration(TestConfigurationHelper.GetConfiguration("empty_repository.json")));
+                () => new RepositoryOptionsBuilder()
+                    .UseConfiguration(TestConfigurationHelper.GetConfiguration("empty_repository.json")));
 
             Assert.Equal("Unable to find a 'repository' configuration section. For more information on DotNetToolkit.Repository configuration, visit the https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Config-File-Setup.", ex.Message);
         }

@@ -2,7 +2,9 @@
 {
     using BenchmarkDotNet.Running;
     using System;
-    using System.Data.SqlClient;
+#if NETFULL
+    using System.Data.SqlClient; 
+#endif
 
     class Program
     {
@@ -23,6 +25,7 @@
 
         private static void EnsureDBSetup()
         {
+#if NETFULL
             using (var cnn = new SqlConnection(BenchmarkBase.ConnectionString))
             {
                 cnn.Open();
@@ -41,7 +44,8 @@ CREATE TABLE Customers
 ";
                 cmd.Connection = cnn;
                 cmd.ExecuteNonQuery();
-            }
+            } 
+#endif
         }
     }
 }

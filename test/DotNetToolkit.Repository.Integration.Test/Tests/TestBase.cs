@@ -1,14 +1,18 @@
-namespace DotNetToolkit.Repository.Integration.Test.Data
+namespace DotNetToolkit.Repository.Integration.Test
 {
-    using AzureStorageBlob;
+#if NETSTANDARD2_1
+    using AzureStorageBlob; 
+#endif
+#if NETFULL
     using AzureStorageTable;
+    using Caching.Memcached;
+    using EntityFramework;
+#endif
     using Caching.Couchbase;
     using Caching.InMemory;
-    using Caching.Memcached;
     using Caching.Redis;
     using Configuration.Logging;
     using Configuration.Options;
-    using EntityFramework;
     using EntityFrameworkCore;
     using Helpers;
     using InMemory;
@@ -22,6 +26,7 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
     using Transactions;
     using Xunit;
     using Xunit.Abstractions;
+    using Data;
 
     public abstract class TestBase
     {
@@ -144,9 +149,6 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                         new UnitOfWorkFactory(
                             BuildOptions(x)), x)));
 
-        protected void ForAllUnitOfWorkFactoriesAsync(Func<IUnitOfWorkFactory, Task> action)
-            => ForAllUnitOfWorkFactoriesAsync((factory, type) => action(factory));
-
         private static bool SupportsTransactions(ContextProviderType x)
             => SqlServerContextProviders()
                 .Contains(x);
@@ -186,18 +188,20 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
                         });
                         break;
                     }
+#if NETSTANDARD2_1
+                case ContextProviderType.AzureStorageBlob:
+                    {
+                        builder.UseAzureStorageBlob(
+                            connectionString: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;",
+                            container: Guid.NewGuid().ToString(),
+                            createIfNotExists: true);
+                        break;
+                    } 
+#endif
 #if NETFULL
                 case ContextProviderType.EntityFramework:
                     {
                         builder.UseEntityFramework<TestEfDbContext>(DbConnectionHelper.CreateConnection());
-                        break;
-                    }
-                case ContextProviderType.AzureStorageBlob:
-                    {
-                        builder.UseAzureStorageBlob(
-                            nameOrConnectionString: "AzureStorageBlobConnection",
-                            container: Guid.NewGuid().ToString(),
-                            createIfNotExists: true);
                         break;
                     }
                 case ContextProviderType.AzureStorageTable:
@@ -288,15 +292,16 @@ namespace DotNetToolkit.Repository.Integration.Test.Data
 #endif
 
         protected static ContextProviderType[] AzureStorageContextProviders()
-#if NETFULL
             => new[]
             {
-                ContextProviderType.AzureStorageBlob,
-                ContextProviderType.AzureStorageTable,
-            };
-#else
-            => Array.Empty<ContextProviderType>();
+#if NETSTANDARD2_1
+		
+                ContextProviderType.AzureStorageBlob, 
 #endif
+#if NETFULL
+                ContextProviderType.AzureStorageTable,
+#endif
+            };
 
         private static CachingProviderType[] CachingProviders()
             => new[]

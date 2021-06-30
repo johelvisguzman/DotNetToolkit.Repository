@@ -48,7 +48,7 @@
         /// <summary>
         /// Returns an expression property selector for the specified property path.
         /// </summary>
-        public static Expression GetExpression<T>([NotNull] string path)
+        public static LambdaExpression GetExpression<T>([NotNull] string path)
         {
             Guard.NotEmpty(path, nameof(path));
 

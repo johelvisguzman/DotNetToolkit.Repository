@@ -3,10 +3,6 @@
     public enum ContextProviderType
     {
         InMemory,
-        Json,
-        Xml,
-        AdoNet,
-        NHibernate,
         EntityFramework,
         EntityFrameworkCore,
         AzureStorageBlob,

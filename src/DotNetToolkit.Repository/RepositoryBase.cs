@@ -2887,6 +2887,10 @@
                 {
                     action(context);
                 }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
                 finally
                 {
                     DisposeContext(context);
@@ -2908,6 +2912,10 @@
                 try
                 {
                     return action(context);
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
                 }
                 finally
                 {
@@ -2931,6 +2939,10 @@
                 {
                     await action(context);
                 }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
                 finally
                 {
                     DisposeContext(context);
@@ -2952,6 +2964,10 @@
                 try
                 {
                     return await action(context);
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
                 }
                 finally
                 {
