@@ -2188,7 +2188,7 @@
                     new RepositoryInterceptionContext<TEntity>(entity, context),
                     cancellationToken));
 
-                context.Add(entity);
+                await context.AddAsync(entity, cancellationToken);
                 await context.SaveChangesAsync(cancellationToken);
             });
 
@@ -2222,7 +2222,7 @@
                         new RepositoryInterceptionContext<TEntity>(entity, context),
                         cancellationToken));
 
-                    context.Add(entity);
+                    await context.AddAsync(entity, cancellationToken);
                 }
 
                 await context.SaveChangesAsync(cancellationToken);
@@ -2256,7 +2256,7 @@
                     new RepositoryInterceptionContext<TEntity>(entity, context),
                     cancellationToken));
 
-                context.Update(entity);
+                await context.UpdateAsync(entity, cancellationToken);
                 await context.SaveChangesAsync(cancellationToken);
             });
 
@@ -2290,7 +2290,7 @@
                         new RepositoryInterceptionContext<TEntity>(entity, context),
                         cancellationToken));
 
-                    context.Update(entity);
+                    await context.UpdateAsync(entity, cancellationToken);
                 }
 
                 await context.SaveChangesAsync(cancellationToken);
@@ -2324,7 +2324,7 @@
                     new RepositoryInterceptionContext<TEntity>(entity, context),
                     cancellationToken));
 
-                context.Remove(entity);
+                await context.RemoveAsync(entity, cancellationToken);
                 await context.SaveChangesAsync(cancellationToken);
             });
 
@@ -2398,7 +2398,7 @@
                         new RepositoryInterceptionContext<TEntity>(entity, context),
                         cancellationToken));
 
-                    context.Remove(entity);
+                    await context.RemoveAsync(entity, cancellationToken);
                 }
 
                 await context.SaveChangesAsync(cancellationToken);

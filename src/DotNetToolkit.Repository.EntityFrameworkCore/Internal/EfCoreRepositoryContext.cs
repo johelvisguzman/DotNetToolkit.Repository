@@ -295,6 +295,55 @@
             }
         }
 
+        public override async Task AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
+        {
+            await _context.Set<TEntity>().AddAsync(Guard.NotNull(entity, nameof(entity)), cancellationToken);
+        }
+
+        public override async Task UpdateAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
+        {
+            Guard.NotNull(entity, nameof(entity));
+
+            var entry = _context.Entry(entity);
+
+            if (entry.State == EntityState.Detached)
+            {
+                var keyValues = Conventions.GetPrimaryKeyValues(entity);
+
+                var entityInDb = await _context.Set<TEntity>().FindAsync(keyValues, cancellationToken);
+
+                if (entityInDb != null)
+                {
+                    _context.Entry(entityInDb).CurrentValues.SetValues(entity);
+                }
+            }
+            else
+            {
+                entry.State = EntityState.Modified;
+            }
+        }
+
+        public override async Task RemoveAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
+        {
+            Guard.NotNull(entity, nameof(entity));
+
+            if (_context.Entry(entity).State == EntityState.Detached)
+            {
+                var keyValues = Conventions.GetPrimaryKeyValues(entity);
+
+                var entityInDb = await _context.Set<TEntity>().FindAsync(keyValues, cancellationToken);
+
+                if (entityInDb != null)
+                {
+                    _context.Set<TEntity>().Remove(entityInDb);
+                }
+            }
+            else
+            {
+                _context.Set<TEntity>().Remove(entity);
+            }
+        }
+
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             return _context.SaveChangesAsync(cancellationToken);
