@@ -48,6 +48,15 @@
             return Task.FromResult<TResult>(function());
         }
 
+        private Task RunAsync(Action action, CancellationToken cancellationToken)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+
+            action();
+            return Task.FromResult(0);
+        }
+
         #endregion
 
         #region Implementation of IRepositoryContext
@@ -157,6 +166,36 @@
             }
 
             return RunAsync<int>(() => ExecuteSqlCommand(sql, cmdType, parameters), cancellationToken);
+        }
+
+        public Task AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            if (_underlyingContext is IRepositoryContextAsync contextAsync)
+            {
+                return contextAsync.AddAsync(entity, cancellationToken);
+            }
+
+            return RunAsync(() => Add(entity), cancellationToken);
+        }
+
+        public Task UpdateAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            if (_underlyingContext is IRepositoryContextAsync contextAsync)
+            {
+                return contextAsync.UpdateAsync(entity, cancellationToken);
+            }
+
+            return RunAsync(() => Update(entity), cancellationToken);
+        }
+
+        public Task RemoveAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            if (_underlyingContext is IRepositoryContextAsync contextAsync)
+            {
+                return contextAsync.RemoveAsync(entity, cancellationToken);
+            }
+
+            return RunAsync(() => Remove(entity), cancellationToken);
         }
 
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())

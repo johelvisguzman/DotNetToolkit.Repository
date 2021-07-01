@@ -17,25 +17,6 @@
     public interface IRepositoryContext : IDisposable
     {
         /// <summary>
-        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
-        /// </summary>
-        /// <param name="sql">The SQL query string.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
-        /// <param name="projector">A function to project each entity into a new form.</param>
-        /// <returns>A list which each entity has been projected into a new form.</returns>
-        IEnumerable<TEntity> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector) where TEntity : class;
-
-        /// <summary>
-        /// Creates a raw SQL query that is executed directly in the database.
-        /// </summary>
-        /// <param name="sql">The SQL query string.</param>
-        /// <param name="cmdType">The command type.</param>
-        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
-        /// <returns>The number of rows affected.</returns>
-        int ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters);
-
-        /// <summary>
         /// Begins the transaction.
         /// </summary>
         /// <returns>The transaction.</returns>
@@ -82,6 +63,25 @@
         /// </summary>
         /// <returns>The number of state entries written to the database.</returns>
         int SaveChanges();
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database and returns a collection of entities.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <param name="projector">A function to project each entity into a new form.</param>
+        /// <returns>A list which each entity has been projected into a new form.</returns>
+        IEnumerable<TEntity> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector) where TEntity : class;
+
+        /// <summary>
+        /// Creates a raw SQL query that is executed directly in the database.
+        /// </summary>
+        /// <param name="sql">The SQL query string.</param>
+        /// <param name="cmdType">The command type.</param>
+        /// <param name="parameters">The parameters to apply to the SQL query string.</param>
+        /// <returns>The number of rows affected.</returns>
+        int ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters);
 
         /// <summary>
         /// Finds an entity with the given primary key values in the repository.

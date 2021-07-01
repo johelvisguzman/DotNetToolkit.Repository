@@ -107,6 +107,14 @@
             blob.Upload(binaryData, overwrite: true);
         }
 
+        private Task UploadEntityAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            var blob = GetBlobClient(entity);
+            var binaryData = BinaryData.FromObjectAsJson<TEntity>(entity);
+
+            return blob.UploadAsync(binaryData, overwrite: true, cancellationToken);
+        }
+
         #endregion
 
         #region Implementation of IAzureStorageBlobRepositoryContext
@@ -292,6 +300,25 @@
         public Task<int> ExecuteSqlCommandAsync(string sql, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = default)
         {
             throw new NotSupportedException(Resources.QueryExecutionNotSupported);
+        }
+
+        public Task AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            return UploadEntityAsync(Guard.NotNull(entity, nameof(entity)), cancellationToken);
+        }
+
+        public Task UpdateAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            return UploadEntityAsync(Guard.NotNull(entity, nameof(entity)), cancellationToken);
+        }
+
+        public Task RemoveAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            Guard.NotNull(entity, nameof(entity));
+
+            var blob = GetBlobClient(entity);
+
+            return blob.DeleteIfExistsAsync(cancellationToken: cancellationToken);
         }
 
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) => Task.FromResult(-1);
