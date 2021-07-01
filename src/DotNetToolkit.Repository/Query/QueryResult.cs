@@ -1,12 +1,12 @@
-﻿namespace DotNetToolkit.Repository.Query.Internal
+﻿namespace DotNetToolkit.Repository.Query
 {
     using JetBrains.Annotations;
 
     /// <summary>
-    /// An implementation of <see cref="IPagedQueryResult{TResult}" />.
+    /// Represents an internal paged query result.
     /// </summary>
     /// <typeparam name="TResult">The type of the result.</typeparam>
-    internal class PagedQueryResult<TResult> : IPagedQueryResult<TResult>
+    public class PagedQueryResult<TResult>
     {
         /// <summary>
         /// Gets the result.
@@ -28,11 +28,5 @@
             Result = result;
             Total = total;
         }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PagedQueryResult{TResult}"/> class.
-        /// </summary>
-        /// <param name="result">The paged result.</param>
-        internal PagedQueryResult(IPagedQueryResult<TResult> result) : this(result.Result, result.Total) { }
     }
 }

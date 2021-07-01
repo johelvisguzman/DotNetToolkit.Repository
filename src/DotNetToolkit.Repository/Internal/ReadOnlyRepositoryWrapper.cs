@@ -111,7 +111,7 @@
             return _underlyingRepo.FindAll(predicate);
         }
 
-        public IPagedQueryResult<IEnumerable<TEntity>> FindAll(IQueryOptions<TEntity> options)
+        public PagedQueryResult<IEnumerable<TEntity>> FindAll(IQueryOptions<TEntity> options)
         {
             return _underlyingRepo.FindAll(options);
         }
@@ -126,7 +126,7 @@
             return _underlyingRepo.FindAll<TResult>(predicate, selector);
         }
 
-        public IPagedQueryResult<IEnumerable<TResult>> FindAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
+        public PagedQueryResult<IEnumerable<TResult>> FindAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
             return _underlyingRepo.FindAll<TResult>(options, selector);
         }
@@ -166,7 +166,7 @@
             return _underlyingRepo.ToDictionary<TDictionaryKey>(keySelector);
         }
 
-        public IPagedQueryResult<Dictionary<TDictionaryKey, TEntity>> ToDictionary<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector)
+        public PagedQueryResult<Dictionary<TDictionaryKey, TEntity>> ToDictionary<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector)
         {
             return _underlyingRepo.ToDictionary<TDictionaryKey>(options, keySelector);
         }
@@ -176,7 +176,7 @@
             return _underlyingRepo.ToDictionary<TDictionaryKey, TElement>(keySelector, elementSelector);
         }
 
-        public IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
+        public PagedQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
             return _underlyingRepo.ToDictionary<TDictionaryKey, TElement>(options, keySelector, elementSelector);
         }
@@ -186,7 +186,7 @@
             return _underlyingRepo.GroupBy<TGroupKey, TResult>(keySelector, resultSelector);
         }
 
-        public IPagedQueryResult<IEnumerable<TResult>> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
+        public PagedQueryResult<IEnumerable<TResult>> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
             return _underlyingRepo.GroupBy<TGroupKey, TResult>(options, keySelector, resultSelector);
         }
@@ -266,7 +266,7 @@
             return _underlyingRepo.FindAllAsync(predicate, cancellationToken);
         }
 
-        public Task<IPagedQueryResult<IEnumerable<TEntity>>> FindAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        public Task<PagedQueryResult<IEnumerable<TEntity>>> FindAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             return _underlyingRepo.FindAllAsync(options, cancellationToken);
         }
@@ -281,7 +281,7 @@
             return _underlyingRepo.FindAllAsync<TResult>(predicate, selector, cancellationToken);
         }
 
-        public Task<IPagedQueryResult<IEnumerable<TResult>>> FindAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<PagedQueryResult<IEnumerable<TResult>>> FindAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             return _underlyingRepo.FindAllAsync<TResult>(options, selector, cancellationToken);
         }
@@ -321,7 +321,7 @@
             return _underlyingRepo.ToDictionaryAsync<TDictionaryKey>(keySelector, cancellationToken);
         }
 
-        public Task<IPagedQueryResult<Dictionary<TDictionaryKey, TEntity>>> ToDictionaryAsync<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<PagedQueryResult<Dictionary<TDictionaryKey, TEntity>>> ToDictionaryAsync<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
         {
             return _underlyingRepo.ToDictionaryAsync<TDictionaryKey>(options, keySelector, cancellationToken);
         }
@@ -331,7 +331,7 @@
             return _underlyingRepo.ToDictionaryAsync<TDictionaryKey, TElement>(keySelector, elementSelector, cancellationToken);
         }
 
-        public Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<PagedQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             return _underlyingRepo.ToDictionaryAsync<TDictionaryKey, TElement>(options, keySelector, elementSelector, cancellationToken);
         }
@@ -341,7 +341,7 @@
             return _underlyingRepo.GroupByAsync<TGroupKey, TResult>(keySelector, resultSelector, cancellationToken);
         }
 
-        public Task<IPagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<PagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             return _underlyingRepo.GroupByAsync<TGroupKey, TResult>(options, keySelector, resultSelector, cancellationToken);
         }
@@ -448,7 +448,7 @@
             return _underlyingRepo.FindAll(predicate);
         }
 
-        public IPagedQueryResult<IEnumerable<TEntity>> FindAll(IQueryOptions<TEntity> options)
+        public PagedQueryResult<IEnumerable<TEntity>> FindAll(IQueryOptions<TEntity> options)
         {
             return _underlyingRepo.FindAll(options);
         }
@@ -463,7 +463,7 @@
             return _underlyingRepo.FindAll<TResult>(predicate, selector);
         }
 
-        public IPagedQueryResult<IEnumerable<TResult>> FindAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
+        public PagedQueryResult<IEnumerable<TResult>> FindAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
             return _underlyingRepo.FindAll<TResult>(options, selector);
         }
@@ -503,7 +503,7 @@
             return _underlyingRepo.ToDictionary<TDictionaryKey>(keySelector);
         }
 
-        public IPagedQueryResult<Dictionary<TDictionaryKey, TEntity>> ToDictionary<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector)
+        public PagedQueryResult<Dictionary<TDictionaryKey, TEntity>> ToDictionary<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector)
         {
             return _underlyingRepo.ToDictionary<TDictionaryKey>(options, keySelector);
         }
@@ -513,7 +513,7 @@
             return _underlyingRepo.ToDictionary<TDictionaryKey, TElement>(keySelector, elementSelector);
         }
 
-        public IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
+        public PagedQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
             return _underlyingRepo.ToDictionary<TDictionaryKey, TElement>(options, keySelector, elementSelector);
         }
@@ -523,7 +523,7 @@
             return _underlyingRepo.GroupBy<TGroupKey, TResult>(keySelector, resultSelector);
         }
 
-        public IPagedQueryResult<IEnumerable<TResult>> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
+        public PagedQueryResult<IEnumerable<TResult>> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
             return _underlyingRepo.GroupBy<TGroupKey, TResult>(options, keySelector, resultSelector);
         }
@@ -603,7 +603,7 @@
             return _underlyingRepo.FindAllAsync(predicate, cancellationToken);
         }
 
-        public Task<IPagedQueryResult<IEnumerable<TEntity>>> FindAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        public Task<PagedQueryResult<IEnumerable<TEntity>>> FindAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             return _underlyingRepo.FindAllAsync(options, cancellationToken);
         }
@@ -618,7 +618,7 @@
             return _underlyingRepo.FindAllAsync<TResult>(predicate, selector, cancellationToken);
         }
 
-        public Task<IPagedQueryResult<IEnumerable<TResult>>> FindAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<PagedQueryResult<IEnumerable<TResult>>> FindAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             return _underlyingRepo.FindAllAsync<TResult>(options, selector, cancellationToken);
         }
@@ -658,7 +658,7 @@
             return _underlyingRepo.ToDictionaryAsync<TDictionaryKey>(keySelector, cancellationToken);
         }
 
-        public Task<IPagedQueryResult<Dictionary<TDictionaryKey, TEntity>>> ToDictionaryAsync<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<PagedQueryResult<Dictionary<TDictionaryKey, TEntity>>> ToDictionaryAsync<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
         {
             return _underlyingRepo.ToDictionaryAsync<TDictionaryKey>(options, keySelector, cancellationToken);
         }
@@ -668,7 +668,7 @@
             return _underlyingRepo.ToDictionaryAsync<TDictionaryKey, TElement>(keySelector, elementSelector, cancellationToken);
         }
 
-        public Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<PagedQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             return _underlyingRepo.ToDictionaryAsync<TDictionaryKey, TElement>(options, keySelector, elementSelector, cancellationToken);
         }
@@ -678,7 +678,7 @@
             return _underlyingRepo.GroupByAsync<TGroupKey, TResult>(keySelector, resultSelector, cancellationToken);
         }
 
-        public Task<IPagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<PagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             return _underlyingRepo.GroupByAsync<TGroupKey, TResult>(options, keySelector, resultSelector, cancellationToken);
         }
@@ -785,7 +785,7 @@
             return _underlyingRepo.FindAll(predicate);
         }
 
-        public IPagedQueryResult<IEnumerable<TEntity>> FindAll(IQueryOptions<TEntity> options)
+        public PagedQueryResult<IEnumerable<TEntity>> FindAll(IQueryOptions<TEntity> options)
         {
             return _underlyingRepo.FindAll(options);
         }
@@ -800,7 +800,7 @@
             return _underlyingRepo.FindAll<TResult>(predicate, selector);
         }
 
-        public IPagedQueryResult<IEnumerable<TResult>> FindAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
+        public PagedQueryResult<IEnumerable<TResult>> FindAll<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector)
         {
             return _underlyingRepo.FindAll<TResult>(options, selector);
         }
@@ -840,7 +840,7 @@
             return _underlyingRepo.ToDictionary<TDictionaryKey>(keySelector);
         }
 
-        public IPagedQueryResult<Dictionary<TDictionaryKey, TEntity>> ToDictionary<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector)
+        public PagedQueryResult<Dictionary<TDictionaryKey, TEntity>> ToDictionary<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector)
         {
             return _underlyingRepo.ToDictionary<TDictionaryKey>(options, keySelector);
         }
@@ -850,7 +850,7 @@
             return _underlyingRepo.ToDictionary<TDictionaryKey, TElement>(keySelector, elementSelector);
         }
 
-        public IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
+        public PagedQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector)
         {
             return _underlyingRepo.ToDictionary<TDictionaryKey, TElement>(options, keySelector, elementSelector);
         }
@@ -860,7 +860,7 @@
             return _underlyingRepo.GroupBy<TGroupKey, TResult>(keySelector, resultSelector);
         }
 
-        public IPagedQueryResult<IEnumerable<TResult>> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
+        public PagedQueryResult<IEnumerable<TResult>> GroupBy<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
             return _underlyingRepo.GroupBy<TGroupKey, TResult>(options, keySelector, resultSelector);
         }
@@ -940,7 +940,7 @@
             return _underlyingRepo.FindAllAsync(predicate, cancellationToken);
         }
 
-        public Task<IPagedQueryResult<IEnumerable<TEntity>>> FindAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        public Task<PagedQueryResult<IEnumerable<TEntity>>> FindAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             return _underlyingRepo.FindAllAsync(options, cancellationToken);
         }
@@ -955,7 +955,7 @@
             return _underlyingRepo.FindAllAsync<TResult>(predicate, selector, cancellationToken);
         }
 
-        public Task<IPagedQueryResult<IEnumerable<TResult>>> FindAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<PagedQueryResult<IEnumerable<TResult>>> FindAllAsync<TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             return _underlyingRepo.FindAllAsync<TResult>(options, selector, cancellationToken);
         }
@@ -995,7 +995,7 @@
             return _underlyingRepo.ToDictionaryAsync<TDictionaryKey>(keySelector, cancellationToken);
         }
 
-        public Task<IPagedQueryResult<Dictionary<TDictionaryKey, TEntity>>> ToDictionaryAsync<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<PagedQueryResult<Dictionary<TDictionaryKey, TEntity>>> ToDictionaryAsync<TDictionaryKey>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
         {
             return _underlyingRepo.ToDictionaryAsync<TDictionaryKey>(options, keySelector, cancellationToken);
         }
@@ -1005,7 +1005,7 @@
             return _underlyingRepo.ToDictionaryAsync<TDictionaryKey, TElement>(keySelector, elementSelector, cancellationToken);
         }
 
-        public Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<PagedQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             return _underlyingRepo.ToDictionaryAsync<TDictionaryKey, TElement>(options, keySelector, elementSelector, cancellationToken);
         }
@@ -1015,7 +1015,7 @@
             return _underlyingRepo.GroupByAsync<TGroupKey, TResult>(keySelector, resultSelector, cancellationToken);
         }
 
-        public Task<IPagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<PagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             return _underlyingRepo.GroupByAsync<TGroupKey, TResult>(options, keySelector, resultSelector, cancellationToken);
         }

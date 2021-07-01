@@ -110,7 +110,7 @@
             return _underlyingContext.Find<TEntity, TResult>(options, selector);
         }
 
-        public IPagedQueryResult<IEnumerable<TResult>> FindAll<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
+        public PagedQueryResult<IEnumerable<TResult>> FindAll<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
         {
             return _underlyingContext.FindAll<TEntity, TResult>(options, selector);
         }
@@ -125,12 +125,12 @@
             return _underlyingContext.Exists<TEntity>(options);
         }
 
-        public IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector) where TEntity : class
+        public PagedQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector) where TEntity : class
         {
             return _underlyingContext.ToDictionary<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector);
         }
 
-        public IPagedQueryResult<IEnumerable<TResult>> GroupBy<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector) where TEntity : class
+        public PagedQueryResult<IEnumerable<TResult>> GroupBy<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector) where TEntity : class
         {
             return _underlyingContext.GroupBy<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector);
         }
@@ -189,14 +189,14 @@
             return RunAsync<TResult>(() => Find<TEntity, TResult>(options, selector), cancellationToken);
         }
 
-        public Task<IPagedQueryResult<IEnumerable<TResult>>> FindAllAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public Task<PagedQueryResult<IEnumerable<TResult>>> FindAllAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             if (_underlyingContext is IRepositoryContextAsync contextAsync)
             {
                 return contextAsync.FindAllAsync<TEntity, TResult>(options, selector, cancellationToken);
             }
 
-            return RunAsync<IPagedQueryResult<IEnumerable<TResult>>>(() => FindAll<TEntity, TResult>(options, selector), cancellationToken);
+            return RunAsync<PagedQueryResult<IEnumerable<TResult>>>(() => FindAll<TEntity, TResult>(options, selector), cancellationToken);
         }
 
         public Task<int> CountAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
@@ -219,24 +219,24 @@
             return RunAsync<bool>(() => Exists<TEntity>(options), cancellationToken);
         }
 
-        public Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public Task<PagedQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             if (_underlyingContext is IRepositoryContextAsync contextAsync)
             {
                 return contextAsync.ToDictionaryAsync<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector, cancellationToken);
             }
 
-            return RunAsync<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(() => ToDictionary<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector), cancellationToken);
+            return RunAsync<PagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(() => ToDictionary<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector), cancellationToken);
         }
 
-        public Task<IPagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public Task<PagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             if (_underlyingContext is IRepositoryContextAsync contextAsync)
             {
                 return contextAsync.GroupByAsync<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector, cancellationToken);
             }
 
-            return RunAsync<IPagedQueryResult<IEnumerable<TResult>>>(() => GroupBy<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector), cancellationToken);
+            return RunAsync<PagedQueryResult<IEnumerable<TResult>>>(() => GroupBy<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector), cancellationToken);
         }
 
         #endregion
