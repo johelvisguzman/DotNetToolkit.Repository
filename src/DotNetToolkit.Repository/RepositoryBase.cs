@@ -197,7 +197,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = InterceptError<ICacheQueryResult<TEntity>>(
+                var cacheResult = InterceptError<CacheQueryResult<TEntity>>(
                     () => CacheProvider.GetOrSetFind<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -374,7 +374,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = await InterceptErrorAsync<ICacheQueryResult<TEntity>>(
+                var cacheResult = await InterceptErrorAsync<CacheQueryResult<TEntity>>(
                     () => CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -600,7 +600,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = InterceptError<ICacheQueryResult<TEntity>>(
+                var cacheResult = InterceptError<CacheQueryResult<TEntity>>(
                     () => CacheProvider.GetOrSetFind<TEntity>(new object[] { key1, key2 }, fetchStrategy, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -766,7 +766,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = await InterceptErrorAsync<ICacheQueryResult<TEntity>>(
+                var cacheResult = await InterceptErrorAsync<CacheQueryResult<TEntity>>(
                     () => CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key1, key2 }, fetchStrategy, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -977,7 +977,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = InterceptError<ICacheQueryResult<TEntity>>(
+                var cacheResult = InterceptError<CacheQueryResult<TEntity>>(
                     () => CacheProvider.GetOrSetFind<TEntity>(new object[] { key }, fetchStrategy, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -1129,7 +1129,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = await InterceptErrorAsync<ICacheQueryResult<TEntity>>(
+                var cacheResult = await InterceptErrorAsync<CacheQueryResult<TEntity>>(
                     () => CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key }, fetchStrategy, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -1318,7 +1318,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = InterceptError<ICacheQueryResult<IEnumerable<TEntity>>>(
+                var cacheResult = InterceptError<CacheQueryResult<IEnumerable<TEntity>>>(
                     () => CacheProvider.GetOrSetExecuteSqlQuery<TEntity>(sql, cmdType, parametersDict, projector, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -1381,7 +1381,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = InterceptError<ICacheQueryResult<int>>(
+                var cacheResult = InterceptError<CacheQueryResult<int>>(
                     () => CacheProvider.GetOrSetExecuteSqlCommand<TEntity>(sql, cmdType, parametersDict, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -1674,7 +1674,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = InterceptError<ICacheQueryResult<TResult>>(
+                var cacheResult = InterceptError<CacheQueryResult<TResult>>(
                     () => CacheProvider.GetOrSetFind<TEntity, TResult>(options, selector, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -1773,7 +1773,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = InterceptError<ICachePagedQueryResult<IEnumerable<TResult>>>(
+                var cacheResult = InterceptError<CachePagedQueryResult<IEnumerable<TResult>>>(
                     () => CacheProvider.GetOrSetFindAll<TEntity, TResult>(options, selector, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -1874,7 +1874,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = InterceptError<ICacheQueryResult<int>>(
+                var cacheResult = InterceptError<CacheQueryResult<int>>(
                     () => CacheProvider.GetOrSetCount<TEntity>(options, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -1954,7 +1954,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = InterceptError<ICachePagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
+                var cacheResult = InterceptError<CachePagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
                     () => CacheProvider.GetOrSetDictionary<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -2011,7 +2011,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = InterceptError<ICachePagedQueryResult<IEnumerable<TResult>>>(
+                var cacheResult = InterceptError<CachePagedQueryResult<IEnumerable<TResult>>>(
                     () => CacheProvider.GetOrSetGroup<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -2057,7 +2057,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = await InterceptErrorAsync<ICacheQueryResult<IEnumerable<TEntity>>>(
+                var cacheResult = await InterceptErrorAsync<CacheQueryResult<IEnumerable<TEntity>>>(
                     () => CacheProvider.GetOrSetExecuteSqlQueryAsync<TEntity>(sql, cmdType, parametersDict, projector, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -2123,7 +2123,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = await InterceptErrorAsync<ICacheQueryResult<int>>(
+                var cacheResult = await InterceptErrorAsync<CacheQueryResult<int>>(
                     () => CacheProvider.GetOrSetExecuteSqlCommandAsync<TEntity>(sql, cmdType, parametersDict, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -2472,7 +2472,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = await InterceptErrorAsync<ICacheQueryResult<TResult>>(
+                var cacheResult = await InterceptErrorAsync<CacheQueryResult<TResult>>(
                     () => CacheProvider.GetOrSetFindAsync<TEntity, TResult>(options, selector, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -2573,7 +2573,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = await InterceptErrorAsync<ICachePagedQueryResult<IEnumerable<TResult>>>(
+                var cacheResult = await InterceptErrorAsync<CachePagedQueryResult<IEnumerable<TResult>>>(
                     () => CacheProvider.GetOrSetFindAllAsync<TEntity, TResult>(options, selector, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -2679,7 +2679,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = await InterceptErrorAsync<ICacheQueryResult<int>>(
+                var cacheResult = await InterceptErrorAsync<CacheQueryResult<int>>(
                     () => CacheProvider.GetOrSetCountAsync<TEntity>(options, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -2763,7 +2763,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = await InterceptErrorAsync<ICachePagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
+                var cacheResult = await InterceptErrorAsync<CachePagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
                     () => CacheProvider.GetOrSetDictionaryAsync<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -2823,7 +2823,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = await InterceptErrorAsync<ICachePagedQueryResult<IEnumerable<TResult>>>(
+                var cacheResult = await InterceptErrorAsync<CachePagedQueryResult<IEnumerable<TResult>>>(
                     () => CacheProvider.GetOrSetGroupAsync<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector, Getter, Logger));
 
                 result = cacheResult.Result;

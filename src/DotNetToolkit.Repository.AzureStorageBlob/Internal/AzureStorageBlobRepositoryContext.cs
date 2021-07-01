@@ -7,7 +7,6 @@
     using Extensions;
     using Properties;
     using Query;
-    using Query.Internal;
     using Query.Strategies;
     using System;
     using System.Collections.Generic;
