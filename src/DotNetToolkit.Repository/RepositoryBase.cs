@@ -197,7 +197,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = InterceptError<ICacheQueryResult<TEntity>>(
+                var cacheResult = InterceptError<CacheQueryResult<TEntity>>(
                     () => CacheProvider.GetOrSetFind<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -374,7 +374,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = await InterceptErrorAsync<ICacheQueryResult<TEntity>>(
+                var cacheResult = await InterceptErrorAsync<CacheQueryResult<TEntity>>(
                     () => CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -600,7 +600,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = InterceptError<ICacheQueryResult<TEntity>>(
+                var cacheResult = InterceptError<CacheQueryResult<TEntity>>(
                     () => CacheProvider.GetOrSetFind<TEntity>(new object[] { key1, key2 }, fetchStrategy, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -766,7 +766,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = await InterceptErrorAsync<ICacheQueryResult<TEntity>>(
+                var cacheResult = await InterceptErrorAsync<CacheQueryResult<TEntity>>(
                     () => CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key1, key2 }, fetchStrategy, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -977,7 +977,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = InterceptError<ICacheQueryResult<TEntity>>(
+                var cacheResult = InterceptError<CacheQueryResult<TEntity>>(
                     () => CacheProvider.GetOrSetFind<TEntity>(new object[] { key }, fetchStrategy, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -1129,7 +1129,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = await InterceptErrorAsync<ICacheQueryResult<TEntity>>(
+                var cacheResult = await InterceptErrorAsync<CacheQueryResult<TEntity>>(
                     () => CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key }, fetchStrategy, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -1318,7 +1318,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = InterceptError<ICacheQueryResult<IEnumerable<TEntity>>>(
+                var cacheResult = InterceptError<CacheQueryResult<IEnumerable<TEntity>>>(
                     () => CacheProvider.GetOrSetExecuteSqlQuery<TEntity>(sql, cmdType, parametersDict, projector, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -1381,7 +1381,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = InterceptError<ICacheQueryResult<int>>(
+                var cacheResult = InterceptError<CacheQueryResult<int>>(
                     () => CacheProvider.GetOrSetExecuteSqlCommand<TEntity>(sql, cmdType, parametersDict, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -1674,7 +1674,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = InterceptError<ICacheQueryResult<TResult>>(
+                var cacheResult = InterceptError<CacheQueryResult<TResult>>(
                     () => CacheProvider.GetOrSetFind<TEntity, TResult>(options, selector, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -1715,7 +1715,7 @@
         /// </summary>
         /// <param name="options">The options to apply to the query.</param>
         /// <returns>The collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public IPagedQueryResult<IEnumerable<TEntity>> FindAll([CanBeNull] IQueryOptions<TEntity> options)
+        public PagedQueryResult<IEnumerable<TEntity>> FindAll([CanBeNull] IQueryOptions<TEntity> options)
         {
             return FindAll<TEntity>(options, IdentityExpression<TEntity>.Instance);
         }
@@ -1759,21 +1759,21 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public IPagedQueryResult<IEnumerable<TResult>> FindAll<TResult>(IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TResult>> selector)
+        public PagedQueryResult<IEnumerable<TResult>> FindAll<TResult>(IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TResult>> selector)
         {
             LogExecutingMethod();
 
             InterceptError(() => Guard.NotNull(selector, nameof(selector)));
 
-            IPagedQueryResult<IEnumerable<TResult>> Getter() =>
-                UseContext<IPagedQueryResult<IEnumerable<TResult>>>(
+            PagedQueryResult<IEnumerable<TResult>> Getter() =>
+                UseContext<PagedQueryResult<IEnumerable<TResult>>>(
                     context => context.FindAll<TEntity, TResult>(options, selector));
 
-            IPagedQueryResult<IEnumerable<TResult>> result;
+            PagedQueryResult<IEnumerable<TResult>> result;
 
             if (CacheEnabled)
             {
-                var cacheResult = InterceptError<ICachePagedQueryResult<IEnumerable<TResult>>>(
+                var cacheResult = InterceptError<CachePagedQueryResult<IEnumerable<TResult>>>(
                     () => CacheProvider.GetOrSetFindAll<TEntity, TResult>(options, selector, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -1874,7 +1874,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = InterceptError<ICacheQueryResult<int>>(
+                var cacheResult = InterceptError<CacheQueryResult<int>>(
                     () => CacheProvider.GetOrSetCount<TEntity>(options, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -1909,7 +1909,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public IPagedQueryResult<Dictionary<TDictionaryKey, TEntity>> ToDictionary<TDictionaryKey>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector)
+        public PagedQueryResult<Dictionary<TDictionaryKey, TEntity>> ToDictionary<TDictionaryKey>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector)
         {
             return ToDictionary<TDictionaryKey, TEntity>(options, keySelector, IdentityExpression<TEntity>.Instance);
         }
@@ -1936,7 +1936,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TDictionaryKey, TElement>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector, [NotNull] Expression<Func<TEntity, TElement>> elementSelector)
+        public PagedQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TDictionaryKey, TElement>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector, [NotNull] Expression<Func<TEntity, TElement>> elementSelector)
         {
             LogExecutingMethod();
 
@@ -1946,15 +1946,15 @@
                 Guard.NotNull(elementSelector, nameof(elementSelector));
             });
 
-            IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> Getter() =>
-                UseContext<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
+            PagedQueryResult<Dictionary<TDictionaryKey, TElement>> Getter() =>
+                UseContext<PagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
                     context => context.ToDictionary(options, keySelector, elementSelector));
 
-            IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> result;
+            PagedQueryResult<Dictionary<TDictionaryKey, TElement>> result;
 
             if (CacheEnabled)
             {
-                var cacheResult = InterceptError<ICachePagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
+                var cacheResult = InterceptError<CachePagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
                     () => CacheProvider.GetOrSetDictionary<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -1993,7 +1993,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="resultSelector">A transform function to produce a result value from each element.</param>
         /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public IPagedQueryResult<IEnumerable<TResult>> GroupBy<TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
+        public PagedQueryResult<IEnumerable<TResult>> GroupBy<TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
         {
             LogExecutingMethod();
 
@@ -2003,15 +2003,15 @@
                 Guard.NotNull(resultSelector, nameof(resultSelector));
             });
 
-            IPagedQueryResult<IEnumerable<TResult>> Getter() =>
-                UseContext<IPagedQueryResult<IEnumerable<TResult>>>(
+            PagedQueryResult<IEnumerable<TResult>> Getter() =>
+                UseContext<PagedQueryResult<IEnumerable<TResult>>>(
                     context => context.GroupBy(options, keySelector, resultSelector));
 
-            IPagedQueryResult<IEnumerable<TResult>> result;
+            PagedQueryResult<IEnumerable<TResult>> result;
 
             if (CacheEnabled)
             {
-                var cacheResult = InterceptError<ICachePagedQueryResult<IEnumerable<TResult>>>(
+                var cacheResult = InterceptError<CachePagedQueryResult<IEnumerable<TResult>>>(
                     () => CacheProvider.GetOrSetGroup<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -2057,7 +2057,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = await InterceptErrorAsync<ICacheQueryResult<IEnumerable<TEntity>>>(
+                var cacheResult = await InterceptErrorAsync<CacheQueryResult<IEnumerable<TEntity>>>(
                     () => CacheProvider.GetOrSetExecuteSqlQueryAsync<TEntity>(sql, cmdType, parametersDict, projector, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -2123,7 +2123,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = await InterceptErrorAsync<ICacheQueryResult<int>>(
+                var cacheResult = await InterceptErrorAsync<CacheQueryResult<int>>(
                     () => CacheProvider.GetOrSetExecuteSqlCommandAsync<TEntity>(sql, cmdType, parametersDict, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -2472,7 +2472,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = await InterceptErrorAsync<ICacheQueryResult<TResult>>(
+                var cacheResult = await InterceptErrorAsync<CacheQueryResult<TResult>>(
                     () => CacheProvider.GetOrSetFindAsync<TEntity, TResult>(options, selector, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -2516,7 +2516,7 @@
         /// <param name="options">The options to apply to the query.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of entities in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public Task<IPagedQueryResult<IEnumerable<TEntity>>> FindAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
+        public Task<PagedQueryResult<IEnumerable<TEntity>>> FindAllAsync(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
             return FindAllAsync<TEntity>(options, IdentityExpression<TEntity>.Instance, cancellationToken);
         }
@@ -2559,21 +2559,21 @@
         /// <param name="selector">A function to project each entity into a new form.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
-        public async Task<IPagedQueryResult<IEnumerable<TResult>>> FindAllAsync<TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<PagedQueryResult<IEnumerable<TResult>>> FindAllAsync<TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod();
 
             InterceptError(() => Guard.NotNull(selector, nameof(selector)));
 
-            Task<IPagedQueryResult<IEnumerable<TResult>>> Getter() =>
-                UseContextAsync<IPagedQueryResult<IEnumerable<TResult>>>(
+            Task<PagedQueryResult<IEnumerable<TResult>>> Getter() =>
+                UseContextAsync<PagedQueryResult<IEnumerable<TResult>>>(
                     context => context.FindAllAsync<TEntity, TResult>(options, selector, cancellationToken));
 
-            IPagedQueryResult<IEnumerable<TResult>> result;
+            PagedQueryResult<IEnumerable<TResult>> result;
 
             if (CacheEnabled)
             {
-                var cacheResult = await InterceptErrorAsync<ICachePagedQueryResult<IEnumerable<TResult>>>(
+                var cacheResult = await InterceptErrorAsync<CachePagedQueryResult<IEnumerable<TResult>>>(
                     () => CacheProvider.GetOrSetFindAllAsync<TEntity, TResult>(options, selector, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -2679,7 +2679,7 @@
 
             if (CacheEnabled)
             {
-                var cacheResult = await InterceptErrorAsync<ICacheQueryResult<int>>(
+                var cacheResult = await InterceptErrorAsync<CacheQueryResult<int>>(
                     () => CacheProvider.GetOrSetCountAsync<TEntity>(options, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -2716,7 +2716,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public Task<IPagedQueryResult<Dictionary<TDictionaryKey, TEntity>>> ToDictionaryAsync<TDictionaryKey>(IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
+        public Task<PagedQueryResult<Dictionary<TDictionaryKey, TEntity>>> ToDictionaryAsync<TDictionaryKey>(IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
         {
             return ToDictionaryAsync<TDictionaryKey, TEntity>(options, keySelector, IdentityExpression<TEntity>.Instance, cancellationToken);
         }
@@ -2745,7 +2745,7 @@
         /// <param name="elementSelector">A transform function to produce a result element value from each element.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public async Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TDictionaryKey, TElement>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector, [NotNull] Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<PagedQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TDictionaryKey, TElement>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector, [NotNull] Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod();
 
@@ -2755,15 +2755,15 @@
                 Guard.NotNull(elementSelector, nameof(elementSelector));
             });
 
-            Task<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>> Getter() =>
-                UseContextAsync<IPagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
+            Task<PagedQueryResult<Dictionary<TDictionaryKey, TElement>>> Getter() =>
+                UseContextAsync<PagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
                     context => context.ToDictionaryAsync(options, keySelector, elementSelector, cancellationToken));
 
-            IPagedQueryResult<Dictionary<TDictionaryKey, TElement>> result;
+            PagedQueryResult<Dictionary<TDictionaryKey, TElement>> result;
 
             if (CacheEnabled)
             {
-                var cacheResult = await InterceptErrorAsync<ICachePagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
+                var cacheResult = await InterceptErrorAsync<CachePagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
                     () => CacheProvider.GetOrSetDictionaryAsync<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector, Getter, Logger));
 
                 result = cacheResult.Result;
@@ -2805,7 +2805,7 @@
         /// <param name="resultSelector">A transform function to produce a result value from each element.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public async Task<IPagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<PagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             LogExecutingMethod();
 
@@ -2815,15 +2815,15 @@
                 Guard.NotNull(resultSelector, nameof(resultSelector));
             });
 
-            Task<IPagedQueryResult<IEnumerable<TResult>>> Getter() =>
-                UseContextAsync<IPagedQueryResult<IEnumerable<TResult>>>(
+            Task<PagedQueryResult<IEnumerable<TResult>>> Getter() =>
+                UseContextAsync<PagedQueryResult<IEnumerable<TResult>>>(
                     context => context.GroupByAsync(options, keySelector, resultSelector, cancellationToken));
 
-            IPagedQueryResult<IEnumerable<TResult>> result;
+            PagedQueryResult<IEnumerable<TResult>> result;
 
             if (CacheEnabled)
             {
-                var cacheResult = await InterceptErrorAsync<ICachePagedQueryResult<IEnumerable<TResult>>>(
+                var cacheResult = await InterceptErrorAsync<CachePagedQueryResult<IEnumerable<TResult>>>(
                     () => CacheProvider.GetOrSetGroupAsync<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector, Getter, Logger));
 
                 result = cacheResult.Result;
