@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Performance
+﻿namespace DotNetToolkit.Repository.Performance.Benchmarks
 {
     using BenchmarkDotNet.Attributes;
     using Data;

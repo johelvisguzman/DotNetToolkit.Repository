@@ -2,6 +2,7 @@
 {
     using BenchmarkDotNet.Running;
     using System;
+    using Benchmarks;
 #if NETFULL
     using System.Data.SqlClient; 
 #endif
