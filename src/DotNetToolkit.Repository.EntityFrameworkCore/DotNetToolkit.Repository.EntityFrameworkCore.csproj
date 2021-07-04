@@ -3,7 +3,7 @@
   <Import Project="..\..\build\common.props" />
   
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.3;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard1.3;netstandard2.0;netstandard2.1</TargetFrameworks>
     <AssemblyName>DotNetToolkit.Repository.EntityFrameworkCore</AssemblyName>
     <RootNamespace>DotNetToolkit.Repository.EntityFrameworkCore</RootNamespace>
     <Description>A repository context provider for the Entity Framework Core.</Description>
@@ -17,6 +17,11 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.2" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.7" />
   </ItemGroup>
   
   <ItemGroup>
