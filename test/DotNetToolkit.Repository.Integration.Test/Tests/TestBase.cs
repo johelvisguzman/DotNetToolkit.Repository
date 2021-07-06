@@ -1,7 +1,7 @@
 namespace DotNetToolkit.Repository.Integration.Test
 {
-#if NETSTANDARD2_1
-    using AzureStorageBlob; 
+#if NETCORE
+    using AzureStorageBlob;
 #endif
 #if NETFULL
     using Caching.Memcached;
@@ -13,7 +13,6 @@ namespace DotNetToolkit.Repository.Integration.Test
     using Configuration.Logging;
     using Configuration.Options;
     using EntityFrameworkCore;
-    using Helpers;
     using InMemory;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -139,15 +138,6 @@ namespace DotNetToolkit.Repository.Integration.Test
         protected void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory> action)
             => ForAllUnitOfWorkFactories((factory, type) => action(factory));
 
-        protected void ForAllUnitOfWorkFactoriesAsync(Func<IUnitOfWorkFactory, ContextProviderType, Task> action)
-            => ContextProviders()
-                .Where(SupportsTransactions)
-                .ToList()
-                .ForEach(async x => await HandleExceptionAsync(
-                    () => action(
-                        new UnitOfWorkFactory(
-                            BuildOptions(x)), x)));
-
         private static bool SupportsTransactions(ContextProviderType x)
             => SqlServerContextProviders()
                 .Contains(x);
@@ -155,7 +145,7 @@ namespace DotNetToolkit.Repository.Integration.Test
         private static async Task HandleExceptionAsync(Func<Task> testCode)
         {
             // Perform test
-            var task = Record.ExceptionAsync(() => testCode());
+            var task = Record.ExceptionAsync(testCode);
 
             // Checks to see if we have any un-handled exception
             if (task != null)
@@ -187,7 +177,7 @@ namespace DotNetToolkit.Repository.Integration.Test
                         });
                         break;
                     }
-#if NETSTANDARD2_1
+#if NETCORE
                 case ContextProviderType.AzureStorageBlob:
                     {
                         builder.UseAzureStorageBlob(
@@ -200,7 +190,7 @@ namespace DotNetToolkit.Repository.Integration.Test
 #if NETFULL
                 case ContextProviderType.EntityFramework:
                     {
-                        builder.UseEntityFramework<TestEfDbContext>(DbConnectionHelper.CreateConnection());
+                        builder.UseEntityFramework<TestEfDbContext>(Helpers.DbConnectionHelper.CreateConnection());
                         break;
                     }
 #endif
@@ -283,7 +273,7 @@ namespace DotNetToolkit.Repository.Integration.Test
 #endif
 
         protected static ContextProviderType[] AzureStorageContextProviders()
-#if NETSTANDARD2_1
+#if NETCORE
             => new[]
             {
 		

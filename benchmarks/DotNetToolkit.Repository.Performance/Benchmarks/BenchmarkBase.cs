@@ -1,21 +1,24 @@
-﻿namespace DotNetToolkit.Repository.Performance
+﻿namespace DotNetToolkit.Repository.Performance.Benchmarks
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Configuration;
+
 #if NETFULL
-    using EntityFramework;
     using System.Data.SqlClient;
-#endif
-#if NETSTANDARD2_1
-    using AzureStorageBlob;  
 #endif
     using BenchmarkDotNet.Attributes;
     using Configuration.Options;
     using Data;
+#if NETFULL
+    using EntityFramework;
+#endif
     using EntityFrameworkCore;
     using InMemory;
-    using System;
-    using System.Collections.Generic;
     using Microsoft.EntityFrameworkCore;
-    using System.Configuration;
+#if NETCORE
+    using AzureStorageBlob;  
+#endif
 
     public abstract class BenchmarkBase
     {
@@ -55,7 +58,7 @@
                         break;
                     }
 #endif
-#if NETSTANDARD2_1
+#if NETCORE
                 case ContextProviderType.AzureStorageBlob:
                     {
                         builder.UseAzureStorageBlob(
@@ -81,7 +84,7 @@
 #endif
                 ContextProviderType.InMemory,
                 ContextProviderType.EntityFrameworkCore,
-#if NETSTANDARD2_1
+#if NETCORE
 		        ContextProviderType.AzureStorageBlob,
 #endif
             };

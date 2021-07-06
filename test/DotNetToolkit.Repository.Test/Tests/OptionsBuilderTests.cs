@@ -176,7 +176,7 @@
             Assert.Equal("Unable to find a 'repository' configuration section. For more information on DotNetToolkit.Repository configuration, visit the https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Config-File-Setup.", ex.Message);
         }
 
-#if NETSTANDARD2_0
+#if NETCORE
         [Fact]
         public void ConfigureFromJson()
         {
