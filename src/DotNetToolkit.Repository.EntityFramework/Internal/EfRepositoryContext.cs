@@ -11,12 +11,13 @@
     using System.Data;
     using System.Data.Entity;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
     using Transactions;
     using Utility;
 
-    internal class EfRepositoryContext : LinqRepositoryContextBaseAsync, IEfRepositoryContext
+    internal class EfRepositoryContext : LinqRepositoryContextBase, IEfRepositoryContext
     {
         #region Fields
 
@@ -193,32 +194,62 @@
 
         #region Implementation of IRepositoryContextAsync
 
-        protected override Task<TSource> FirstOrDefaultAsync<TSource>(IQueryable<TSource> source, CancellationToken cancellationToken)
+        public Task AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            return source.FirstOrDefaultAsync(cancellationToken);
+            _context.Set<TEntity>().Add(Guard.NotNull(entity, nameof(entity)));
+            return Task.FromResult(0);
         }
 
-        protected override Task<List<TSource>> ToListAsync<TSource>(IQueryable<TSource> source, CancellationToken cancellationToken)
+        public async Task UpdateAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            return source.ToListAsync(cancellationToken);
+            Guard.NotNull(entity, nameof(entity));
+
+            var entry = _context.Entry(entity);
+
+            if (entry.State == EntityState.Detached)
+            {
+                var keyValues = Conventions.GetPrimaryKeyValues(entity);
+
+                var entityInDb = await _context.Set<TEntity>().FindAsync(cancellationToken, keyValues);
+
+                if (entityInDb != null)
+                {
+                    _context.Entry(entityInDb).CurrentValues.SetValues(entity);
+                }
+            }
+            else
+            {
+                entry.State = EntityState.Modified;
+            }
         }
 
-        protected override Task<int> CountAsync<TSource>(IQueryable<TSource> source, CancellationToken cancellationToken)
+        public async Task RemoveAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            return source.CountAsync(cancellationToken);
+            Guard.NotNull(entity, nameof(entity));
+
+            if (_context.Entry(entity).State == EntityState.Detached)
+            {
+                var keyValues = Conventions.GetPrimaryKeyValues(entity);
+
+                var entityInDb = await _context.Set<TEntity>().FindAsync(cancellationToken, keyValues);
+
+                if (entityInDb != null)
+                {
+                    _context.Set<TEntity>().Remove(entityInDb);
+                }
+            }
+            else
+            {
+                _context.Set<TEntity>().Remove(entity);
+            }
         }
 
-        protected override Task<bool> AnyAsync<TSource>(IQueryable<TSource> source, CancellationToken cancellationToken)
+        public Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
-            return source.AnyAsync(cancellationToken);
+            return _context.SaveChangesAsync(cancellationToken);
         }
 
-        protected override Task<Dictionary<TKey, TElement>> ToDictionaryAsync<TSource, TKey, TElement>(IQueryable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, CancellationToken cancellationToken)
-        {
-            return source.ToDictionaryAsync(keySelector, elementSelector, cancellationToken);
-        }
-
-        public override async Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             Guard.NotEmpty(sql, nameof(sql));
             Guard.NotNull(projector, nameof(projector));
@@ -248,7 +279,7 @@
             }
         }
 
-        public override async Task<int> ExecuteSqlCommandAsync(string sql, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken())
+        public async Task<int> ExecuteSqlCommandAsync(string sql, CommandType cmdType, Dictionary<string, object> parameters, CancellationToken cancellationToken = new CancellationToken())
         {
             Guard.NotEmpty(sql, nameof(sql));
 
@@ -278,73 +309,138 @@
             }
         }
 
-        public override Task AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
-        {
-            _context.Set<TEntity>().Add(Guard.NotNull(entity, nameof(entity)));
-            return Task.FromResult(0);
-        }
-
-        public override async Task UpdateAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
-        {
-            Guard.NotNull(entity, nameof(entity));
-
-            var entry = _context.Entry(entity);
-
-            if (entry.State == EntityState.Detached)
-            {
-                var keyValues = Conventions.GetPrimaryKeyValues(entity);
-
-                var entityInDb = await _context.Set<TEntity>().FindAsync(cancellationToken, keyValues);
-
-                if (entityInDb != null)
-                {
-                    _context.Entry(entityInDb).CurrentValues.SetValues(entity);
-                }
-            }
-            else
-            {
-                entry.State = EntityState.Modified;
-            }
-        }
-
-        public override async Task RemoveAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
-        {
-            Guard.NotNull(entity, nameof(entity));
-
-            if (_context.Entry(entity).State == EntityState.Detached)
-            {
-                var keyValues = Conventions.GetPrimaryKeyValues(entity);
-
-                var entityInDb = await _context.Set<TEntity>().FindAsync(cancellationToken, keyValues);
-
-                if (entityInDb != null)
-                {
-                    _context.Set<TEntity>().Remove(entityInDb);
-                }
-            }
-            else
-            {
-                _context.Set<TEntity>().Remove(entity);
-            }
-        }
-
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
-        {
-            return _context.SaveChangesAsync(cancellationToken);
-        }
-
-        public override async Task<TEntity> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues)
+        public async Task<TEntity> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
             Guard.NotEmpty(keyValues, nameof(keyValues));
 
             if (fetchStrategy == null)
             {
-                var result = await _context.Set<TEntity>().FindAsync(cancellationToken, keyValues);
-
-                return result;
+                return await _context.Set<TEntity>().FindAsync(cancellationToken, keyValues);
             }
 
-            return await base.FindAsync(cancellationToken, fetchStrategy, keyValues);
+            var options = new QueryOptions<TEntity>()
+                .Include(Conventions.GetByPrimaryKeySpecification<TEntity>(keyValues));
+
+            var query = ApplyFetchingOptions(
+                AsQueryable<TEntity>(),
+                options.Include(fetchStrategy));
+
+            var result = await query
+                .ApplySpecificationOptions(options)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return result;
+        }
+
+        public Task<TResult> FindAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            Guard.NotNull(selector, nameof(selector));
+
+            var result = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(Conventions, options)
+                .ApplyPagingOptions(options)
+                .Select(selector)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return result;
+        }
+
+        public async Task<PagedQueryResult<IEnumerable<TResult>>> FindAllAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            Guard.NotNull(selector, nameof(selector));
+
+            var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(Conventions, options);
+
+            var total = await query.CountAsync(cancellationToken);
+
+            var result = await query
+                .ApplyPagingOptions(options)
+                .Select(selector)
+                .ToListAsync(cancellationToken);
+
+            return new PagedQueryResult<IEnumerable<TResult>>(result, total);
+        }
+
+        public Task<int> CountAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            var result = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(Conventions, options)
+                .ApplyPagingOptions(options)
+                .CountAsync(cancellationToken);
+
+            return result;
+        }
+
+        public Task<bool> ExistsAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            Guard.NotNull(options, nameof(options));
+
+            var result = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(Conventions, options)
+                .ApplyPagingOptions(options)
+                .AnyAsync(cancellationToken);
+
+            return result;
+        }
+
+        public async Task<PagedQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            Guard.NotNull(keySelector, nameof(keySelector));
+            Guard.NotNull(elementSelector, nameof(elementSelector));
+
+            var keySelectFunc = keySelector.Compile();
+            var elementSelectorFunc = elementSelector.Compile();
+
+            var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(Conventions, options);
+
+            Dictionary<TDictionaryKey, TElement> result;
+            int total;
+
+            if (options != null && options.PageSize != -1)
+            {
+                total = await query.CountAsync(cancellationToken);
+
+                result = query
+                    .ApplyPagingOptions(options)
+                    .ToDictionary(keySelectFunc, elementSelectorFunc);
+            }
+            else
+            {
+                // Gets the total count from memory
+                result = await query.ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken);
+                total = result.Count;
+            }
+
+            return new PagedQueryResult<Dictionary<TDictionaryKey, TElement>>(result, total);
+        }
+
+        public async Task<PagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        {
+            Guard.NotNull(keySelector, nameof(keySelector));
+            Guard.NotNull(resultSelector, nameof(resultSelector));
+
+            var keySelectFunc = keySelector.Compile();
+            var resultSelectorFunc = resultSelector.Compile();
+
+            var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
+                .ApplySpecificationOptions(options)
+                .ApplySortingOptions(Conventions, options);
+
+            var total = await query.CountAsync(cancellationToken);
+
+            var result = query
+                .ApplyPagingOptions(options)
+                .GroupBy(keySelectFunc, resultSelectorFunc)
+                .ToList();
+
+            return new PagedQueryResult<IEnumerable<TResult>>(result, total);
         }
 
         #endregion
