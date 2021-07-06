@@ -1,6 +1,6 @@
 namespace DotNetToolkit.Repository.Integration.Test
 {
-#if NETSTANDARD2_1
+#if NETCORE
     using AzureStorageBlob;
 #endif
 #if NETFULL
@@ -177,7 +177,7 @@ namespace DotNetToolkit.Repository.Integration.Test
                         });
                         break;
                     }
-#if NETSTANDARD2_1
+#if NETCORE
                 case ContextProviderType.AzureStorageBlob:
                     {
                         builder.UseAzureStorageBlob(
@@ -273,7 +273,7 @@ namespace DotNetToolkit.Repository.Integration.Test
 #endif
 
         protected static ContextProviderType[] AzureStorageContextProviders()
-#if NETSTANDARD2_1
+#if NETCORE
             => new[]
             {
 		
