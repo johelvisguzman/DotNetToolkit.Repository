@@ -16,7 +16,7 @@
     using EntityFrameworkCore;
     using InMemory;
     using Microsoft.EntityFrameworkCore;
-#if NETSTANDARD2_1
+#if NETCORE
     using AzureStorageBlob;  
 #endif
 
@@ -58,7 +58,7 @@
                         break;
                     }
 #endif
-#if NETSTANDARD2_1
+#if NETCORE
                 case ContextProviderType.AzureStorageBlob:
                     {
                         builder.UseAzureStorageBlob(
@@ -84,7 +84,7 @@
 #endif
                 ContextProviderType.InMemory,
                 ContextProviderType.EntityFrameworkCore,
-#if NETSTANDARD2_1
+#if NETCORE
 		        ContextProviderType.AzureStorageBlob,
 #endif
             };
