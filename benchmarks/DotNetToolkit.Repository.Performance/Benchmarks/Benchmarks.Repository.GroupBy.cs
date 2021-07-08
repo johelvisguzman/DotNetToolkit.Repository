@@ -31,13 +31,13 @@
         [Benchmark]
         public void GroupByWithPredicateOptions()
         {
-            _repo.GroupBy(_defaultOptions, y => y.Id, (key, g) => key);
+            _repo.GroupBy(_defaultOptions, y => y.Id, z => z.Key);
         }
 
         [Benchmark]
         public void GroupByWithPagingOptions()
         {
-            _repo.GroupBy(_pagingOptions, y => y.Id, (key, g) => key);
+            _repo.GroupBy(_pagingOptions, y => y.Id, z => z.Key);
         }
     }
 }

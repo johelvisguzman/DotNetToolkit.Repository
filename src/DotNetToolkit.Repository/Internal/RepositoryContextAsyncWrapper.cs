@@ -9,6 +9,7 @@
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Runtime.InteropServices;
     using System.Threading;
@@ -139,7 +140,7 @@
             return _underlyingContext.ToDictionary<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector);
         }
 
-        public PagedQueryResult<IEnumerable<TResult>> GroupBy<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector) where TEntity : class
+        public PagedQueryResult<IEnumerable<TResult>> GroupBy<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector) where TEntity : class
         {
             return _underlyingContext.GroupBy<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector);
         }
@@ -268,7 +269,7 @@
             return RunAsync<PagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(() => ToDictionary<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector), cancellationToken);
         }
 
-        public Task<PagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public Task<PagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             if (_underlyingContext is IRepositoryContextAsync contextAsync)
             {

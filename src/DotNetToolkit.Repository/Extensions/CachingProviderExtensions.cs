@@ -290,7 +290,7 @@
             [NotNull] this ICacheProvider cacheProvider,
             [CanBeNull] IQueryOptions<T> options,
             [NotNull] Expression<Func<T, TGroupKey>> keySelector,
-            [NotNull] Expression<Func<TGroupKey, IEnumerable<T>, TResult>> resultSelector,
+            [NotNull] Expression<Func<IGrouping<TGroupKey, T>, TResult>> resultSelector,
             [NotNull] Func<PagedQueryResult<IEnumerable<TResult>>> getter,
             [NotNull] ILogger logger)
             => GetOrSet<T, IEnumerable<TResult>>(
@@ -404,7 +404,7 @@
             [NotNull] this ICacheProvider cacheProvider,
             [CanBeNull] IQueryOptions<T> options,
             [NotNull] Expression<Func<T, TGroupKey>> keySelector,
-            [NotNull] Expression<Func<TGroupKey, IEnumerable<T>, TResult>> resultSelector,
+            [NotNull] Expression<Func<IGrouping<TGroupKey, T>, TResult>> resultSelector,
             [NotNull] Func<Task<PagedQueryResult<IEnumerable<TResult>>>> getter,
             [NotNull] ILogger logger)
             => GetOrSetAsync<T, IEnumerable<TResult>>(
@@ -605,7 +605,7 @@
             return $"GetOrSetDictionary<{Name<T>()}, {typeof(TDictionaryKey).Name}, {typeof(TElement).Name}>: [ \n\t{o},\n\tKeySelector = {ExpressionHelper.TranslateToString(keySelector)},\n\tElementSelector = {ExpressionHelper.TranslateToString(elementSelector)} ]";
         }
 
-        private static string FormatGetOrSetGroupKey<T, TGroupKey, TResult>([CanBeNull] IQueryOptions<T> options, [NotNull] Expression<Func<T, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<T>, TResult>> resultSelector)
+        private static string FormatGetOrSetGroupKey<T, TGroupKey, TResult>([CanBeNull] IQueryOptions<T> options, [NotNull] Expression<Func<T, TGroupKey>> keySelector, [NotNull] Expression<Func<IGrouping<TGroupKey, T>, TResult>> resultSelector)
         {
             Guard.NotNull(keySelector, nameof(keySelector));
             Guard.NotNull(resultSelector, nameof(resultSelector));

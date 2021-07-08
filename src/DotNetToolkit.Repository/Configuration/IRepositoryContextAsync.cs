@@ -5,6 +5,7 @@
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
@@ -13,8 +14,7 @@
     /// Represents an asynchronous repository context.
     /// </summary>
     /// <seealso cref="IRepositoryContext" />
-    /// <seealso cref="System.IDisposable" />
-    public interface IRepositoryContextAsync : IRepositoryContext, IDisposable
+    public interface IRepositoryContextAsync : IRepositoryContext
     {
         /// <summary>
         /// Tracks the specified entity in memory and will be inserted into the database when <see cref="SaveChangesAsync" /> is called.
@@ -145,6 +145,6 @@
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        Task<PagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class;
+        Task<PagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class;
     }
 }

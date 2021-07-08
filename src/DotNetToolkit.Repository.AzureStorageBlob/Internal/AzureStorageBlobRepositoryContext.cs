@@ -266,23 +266,26 @@
             return new PagedQueryResult<Dictionary<TDictionaryKey, TElement>>(result, total);
         }
 
-        public PagedQueryResult<IEnumerable<TResult>> GroupBy<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector) where TEntity : class
+        public PagedQueryResult<IEnumerable<TResult>> GroupBy<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector) where TEntity : class
         {
             Guard.NotNull(keySelector, nameof(keySelector));
             Guard.NotNull(resultSelector, nameof(resultSelector));
 
-            var keySelectFunc = keySelector.Compile();
-            var resultSelectorFunc = resultSelector.Compile();
-
             var query = DownloadEntities<TEntity>().AsQueryable()
-                .ApplySpecificationOptions(options)
-                .ApplySortingOptions(Conventions, options);
+                .ApplySpecificationOptions(options);
+
+            if (options?.SortingProperties.Count > 0)
+            {
+                throw new InvalidOperationException(Resources.GroupBySortingNotSupported);
+            }
 
             var total = query.Count();
 
             var result = query
                 .ApplyPagingOptions(options)
-                .GroupBy(keySelectFunc, resultSelectorFunc)
+                .GroupBy(keySelector)
+                .OrderBy(x => x.Key)
+                .Select(resultSelector)
                 .ToList();
 
             return new PagedQueryResult<IEnumerable<TResult>>(result, total);
@@ -426,7 +429,7 @@
             return new PagedQueryResult<Dictionary<TDictionaryKey, TElement>>(result, total);
         }
 
-        public Task<PagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = default) where TEntity : class
+        public Task<PagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = default) where TEntity : class
         {
             return Task.FromResult(GroupBy<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector));
         }

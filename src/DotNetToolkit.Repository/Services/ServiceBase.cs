@@ -6,6 +6,7 @@
     using Query.Strategies;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
@@ -639,7 +640,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains keys and values.</returns>
-        public virtual IEnumerable<TResult> GetGroupBy<TGroupKey, TResult>([NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
+        public virtual IEnumerable<TResult> GetGroupBy<TGroupKey, TResult>([NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
@@ -660,7 +661,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public virtual PagedQueryResult<IEnumerable<TResult>> GetGroupBy<TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
+        public virtual PagedQueryResult<IEnumerable<TResult>> GetGroupBy<TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
@@ -1335,7 +1336,7 @@
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains keys and values.</returns>
-        public virtual async Task<IEnumerable<TResult>> GetGroupByAsync<TGroupKey, TResult>([NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<IEnumerable<TResult>> GetGroupByAsync<TGroupKey, TResult>([NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
@@ -1357,7 +1358,7 @@
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public virtual async Task<PagedQueryResult<IEnumerable<TResult>>> GetGroupByAsync<TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<PagedQueryResult<IEnumerable<TResult>>> GetGroupByAsync<TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
@@ -1991,7 +1992,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains keys and values.</returns>
-        public virtual IEnumerable<TResult> GetGroupBy<TGroupKey, TResult>([NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
+        public virtual IEnumerable<TResult> GetGroupBy<TGroupKey, TResult>([NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
@@ -2012,7 +2013,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public virtual PagedQueryResult<IEnumerable<TResult>> GetGroupBy<TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
+        public virtual PagedQueryResult<IEnumerable<TResult>> GetGroupBy<TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
@@ -2678,7 +2679,7 @@
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains keys and values.</returns>
-        public virtual async Task<IEnumerable<TResult>> GetGroupByAsync<TGroupKey, TResult>([NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<IEnumerable<TResult>> GetGroupByAsync<TGroupKey, TResult>([NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
@@ -2700,7 +2701,7 @@
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public virtual async Task<PagedQueryResult<IEnumerable<TResult>>> GetGroupByAsync<TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<PagedQueryResult<IEnumerable<TResult>>> GetGroupByAsync<TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
@@ -3326,7 +3327,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains keys and values.</returns>
-        public virtual IEnumerable<TResult> GetGroupBy<TGroupKey, TResult>([NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
+        public virtual IEnumerable<TResult> GetGroupBy<TGroupKey, TResult>([NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
@@ -3347,7 +3348,7 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public virtual PagedQueryResult<IEnumerable<TResult>> GetGroupBy<TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector)
+        public virtual PagedQueryResult<IEnumerable<TResult>> GetGroupBy<TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector)
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
@@ -4004,7 +4005,7 @@
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains keys and values.</returns>
-        public virtual async Task<IEnumerable<TResult>> GetGroupByAsync<TGroupKey, TResult>([NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<IEnumerable<TResult>> GetGroupByAsync<TGroupKey, TResult>([NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
@@ -4026,7 +4027,7 @@
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public virtual async Task<PagedQueryResult<IEnumerable<TResult>>> GetGroupByAsync<TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<PagedQueryResult<IEnumerable<TResult>>> GetGroupByAsync<TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
