@@ -7,6 +7,7 @@
     using Query.Strategies;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
@@ -182,13 +183,13 @@
         public void GroupBy()
         {
             Expression<Func<Customer, string>> selector = x => x.Name;
-            Expression<Func<string, IEnumerable<Customer>, string>> grouping = (key, g) => key;
+            Expression<Func<IGrouping<string, Customer>, string>> grouping = z => z.Key;
             var options = new QueryOptions<Customer>();
 
             var mock = new Mock<IRepository<Customer>>();
 
-            mock.Setup(x => x.GroupBy(It.IsAny<Expression<Func<Customer, string>>>(), It.IsAny<Expression<Func<string, IEnumerable<Customer>, string>>>()));
-            mock.Setup(x => x.GroupBy(It.IsAny<IQueryOptions<Customer>>(), It.IsAny<Expression<Func<Customer, string>>>(), It.IsAny<Expression<Func<string, IEnumerable<Customer>, string>>>()));
+            mock.Setup(x => x.GroupBy(It.IsAny<Expression<Func<Customer, string>>>(), It.IsAny<Expression<Func<IGrouping<string, Customer>, string>>>()));
+            mock.Setup(x => x.GroupBy(It.IsAny<IQueryOptions<Customer>>(), It.IsAny<Expression<Func<Customer, string>>>(), It.IsAny<Expression<Func<IGrouping<string, Customer>, string>>>()));
 
             var readOnlyRepo = new ReadOnlyRepositoryWrapper<Customer, int>(mock.Object);
 
@@ -370,13 +371,13 @@
         public async Task GroupByAsync()
         {
             Expression<Func<Customer, string>> selector = x => x.Name;
-            Expression<Func<string, IEnumerable<Customer>, string>> grouping = (key, g) => key;
+            Expression<Func<IGrouping<string, Customer>, string>> grouping = z => z.Key;
             var options = new QueryOptions<Customer>();
 
             var mock = new Mock<IRepository<Customer>>();
 
-            mock.Setup(x => x.GroupByAsync(It.IsAny<Expression<Func<Customer, string>>>(), It.IsAny<Expression<Func<string, IEnumerable<Customer>, string>>>(), It.IsAny<CancellationToken>()));
-            mock.Setup(x => x.GroupByAsync(It.IsAny<IQueryOptions<Customer>>(), It.IsAny<Expression<Func<Customer, string>>>(), It.IsAny<Expression<Func<string, IEnumerable<Customer>, string>>>(), It.IsAny<CancellationToken>()));
+            mock.Setup(x => x.GroupByAsync(It.IsAny<Expression<Func<Customer, string>>>(), It.IsAny<Expression<Func<IGrouping<string, Customer>, string>>>(), It.IsAny<CancellationToken>()));
+            mock.Setup(x => x.GroupByAsync(It.IsAny<IQueryOptions<Customer>>(), It.IsAny<Expression<Func<Customer, string>>>(), It.IsAny<Expression<Func<IGrouping<string, Customer>, string>>>(), It.IsAny<CancellationToken>()));
 
             var readOnlyRepo = new ReadOnlyRepositoryWrapper<Customer, int>(mock.Object);
 

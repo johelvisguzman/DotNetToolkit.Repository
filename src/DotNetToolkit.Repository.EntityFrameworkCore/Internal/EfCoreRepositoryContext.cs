@@ -5,6 +5,7 @@
     using Extensions;
     using Extensions.Internal;
     using Microsoft.EntityFrameworkCore;
+    using Properties;
     using Query;
     using Query.Strategies;
     using System;
@@ -423,9 +424,9 @@
             {
                 total = await query.CountAsync(cancellationToken);
 
-                result = query
+                result = await query
                     .ApplyPagingOptions(options)
-                    .ToDictionary(keySelectFunc, elementSelectorFunc);
+                    .ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken);
             }
             else
             {
@@ -437,24 +438,27 @@
             return new PagedQueryResult<Dictionary<TDictionaryKey, TElement>>(result, total);
         }
 
-        public async Task<PagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public async Task<PagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             Guard.NotNull(keySelector, nameof(keySelector));
             Guard.NotNull(resultSelector, nameof(resultSelector));
 
-            var keySelectFunc = keySelector.Compile();
-            var resultSelectorFunc = resultSelector.Compile();
-
             var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
-                .ApplySpecificationOptions(options)
-                .ApplySortingOptions(Conventions, options);
+                .ApplySpecificationOptions(options);
+
+            if (options?.SortingProperties.Count > 0)
+            {
+                throw new InvalidOperationException(Resources.GroupBySortingNotSupported);
+            }
 
             var total = await query.CountAsync(cancellationToken);
 
-            var result = query
+            var result = await query
                 .ApplyPagingOptions(options)
-                .GroupBy(keySelectFunc, resultSelectorFunc)
-                .ToList();
+                .GroupBy(keySelector)
+                .OrderBy(x => x.Key)
+                .Select(resultSelector)
+                .ToListAsync(cancellationToken);
 
             return new PagedQueryResult<IEnumerable<TResult>>(result, total);
         }

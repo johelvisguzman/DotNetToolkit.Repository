@@ -628,17 +628,17 @@ WHERE NewCustomers.Id = @p0",
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            Assert.NotEmpty(repo.GroupBy(x => x.Id, (key, g) => key));
+            Assert.NotEmpty(repo.GroupBy(x => x.Id, z => z.Key));
 
             Assert.False(repo.CacheUsed);
 
-            Assert.NotEmpty(repo.GroupBy(x => x.Id, (key, g) => key));
+            Assert.NotEmpty(repo.GroupBy(x => x.Id, z => z.Key));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            Assert.NotEmpty(repo.GroupBy(x => x.Id, (key, g) => key));
+            Assert.NotEmpty(repo.GroupBy(x => x.Id, z => z.Key));
 
             Assert.False(repo.CacheUsed);
         }
@@ -655,17 +655,17 @@ WHERE NewCustomers.Id = @p0",
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            Assert.NotEmpty(repo.GroupBy(queryOptions, x => x.Id, (key, g) => key).Result);
+            Assert.NotEmpty(repo.GroupBy(queryOptions, x => x.Id, z => z.Key).Result);
 
             Assert.False(repo.CacheUsed);
 
-            Assert.NotEmpty(repo.GroupBy(queryOptions, x => x.Id, (key, g) => key).Result);
+            Assert.NotEmpty(repo.GroupBy(queryOptions, x => x.Id, z => z.Key).Result);
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            Assert.NotEmpty(repo.GroupBy(queryOptions, x => x.Id, (key, g) => key).Result);
+            Assert.NotEmpty(repo.GroupBy(queryOptions, x => x.Id, z => z.Key).Result);
 
             Assert.False(repo.CacheUsed);
         }
@@ -1027,17 +1027,17 @@ WHERE NewCustomers.Id = @p0",
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            Assert.NotEmpty(await repo.GroupByAsync(x => x.Id, (key, g) => key));
+            Assert.NotEmpty(await repo.GroupByAsync(x => x.Id, z => z.Key));
 
             Assert.False(repo.CacheUsed);
 
-            Assert.NotEmpty(await repo.GroupByAsync(x => x.Id, (key, g) => key));
+            Assert.NotEmpty(await repo.GroupByAsync(x => x.Id, z => z.Key));
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            Assert.NotEmpty(await repo.GroupByAsync(x => x.Id, (key, g) => key));
+            Assert.NotEmpty(await repo.GroupByAsync(x => x.Id, z => z.Key));
 
             Assert.False(repo.CacheUsed);
         }
@@ -1054,17 +1054,17 @@ WHERE NewCustomers.Id = @p0",
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
 
-            Assert.NotEmpty((await repo.GroupByAsync(queryOptions, x => x.Id, (key, g) => key)).Result);
+            Assert.NotEmpty((await repo.GroupByAsync(queryOptions, x => x.Id, z => z.Key)).Result);
 
             Assert.False(repo.CacheUsed);
 
-            Assert.NotEmpty((await repo.GroupByAsync(queryOptions, x => x.Id, (key, g) => key)).Result);
+            Assert.NotEmpty((await repo.GroupByAsync(queryOptions, x => x.Id, z => z.Key)).Result);
 
             Assert.True(repo.CacheUsed);
 
             repo.CacheEnabled = false;
 
-            Assert.NotEmpty((await repo.GroupByAsync(queryOptions, x => x.Id, (key, g) => key)).Result);
+            Assert.NotEmpty((await repo.GroupByAsync(queryOptions, x => x.Id, z => z.Key)).Result);
 
             Assert.False(repo.CacheUsed);
         }

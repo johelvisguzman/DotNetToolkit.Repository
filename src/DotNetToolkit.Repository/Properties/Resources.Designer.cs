@@ -133,6 +133,15 @@ namespace DotNetToolkit.Repository.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This context provider does not support groupby operation with sorting..
+        /// </summary>
+        internal static string GroupBySortingNotSupported {
+            get {
+                return ResourceManager.GetString("GroupBySortingNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This context provider does not support SQL query execution..
         /// </summary>
         internal static string QueryExecutionNotSupported {

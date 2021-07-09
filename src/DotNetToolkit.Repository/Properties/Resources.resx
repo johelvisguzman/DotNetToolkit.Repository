@@ -165,4 +165,7 @@
   <data name="RepositoryExceptionMessage" xml:space="preserve">
     <value>An error has occurred while performing an operation within the repository. Please see inner exception for fault details.</value>
   </data>
+  <data name="GroupBySortingNotSupported" xml:space="preserve">
+    <value>This context provider does not support groupby operation with sorting.</value>
+  </data>
 </root>

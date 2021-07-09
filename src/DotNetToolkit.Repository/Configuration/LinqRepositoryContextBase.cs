@@ -346,23 +346,26 @@
         /// <param name="keySelector">A function to extract a key from each entity.</param>
         /// <param name="resultSelector">A function to project each entity into a new form</param>
         /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
-        public virtual PagedQueryResult<IEnumerable<TResult>> GroupBy<TEntity, TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<TGroupKey, IEnumerable<TEntity>, TResult>> resultSelector) where TEntity : class
+        public virtual PagedQueryResult<IEnumerable<TResult>> GroupBy<TEntity, TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector) where TEntity : class
         {
             Guard.NotNull(keySelector, nameof(keySelector));
             Guard.NotNull(resultSelector, nameof(resultSelector));
 
-            var keySelectFunc = keySelector.Compile();
-            var resultSelectorFunc = resultSelector.Compile();
-
             var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
-                .ApplySpecificationOptions(options)
-                .ApplySortingOptions(Conventions, options);
+                .ApplySpecificationOptions(options);
+
+            if (options?.SortingProperties.Count > 0)
+            {
+                throw new InvalidOperationException(Resources.GroupBySortingNotSupported);
+            }
 
             var total = query.Count();
 
             var result = query
                 .ApplyPagingOptions(options)
-                .GroupBy(keySelectFunc, resultSelectorFunc)
+                .GroupBy(keySelector)
+                .OrderBy(x => x.Key)
+                .Select(resultSelector)
                 .ToList();
 
             return new PagedQueryResult<IEnumerable<TResult>>(result, total);
