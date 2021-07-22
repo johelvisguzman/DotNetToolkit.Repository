@@ -329,7 +329,7 @@
         /// <param name="paths">The dot-separated list of related objects to return in the query results.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, string[] paths, CancellationToken cancellationToken = new CancellationToken());
+        Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, string[] paths, CancellationToken cancellationToken);
 
         /// <summary>
         /// Asynchronously finds an entity with the given composite primary key values in the repository.
@@ -350,7 +350,7 @@
         /// <param name="paths">A collection of lambda expressions representing the paths to include.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken = new CancellationToken());
+        Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken);
 
         /// <summary>
         /// Asynchronously finds an entity with the given composite primary key values in the repository.
@@ -871,7 +871,7 @@
         /// <param name="paths">The dot-separated list of related objects to return in the query results.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, string[] paths, CancellationToken cancellationToken = new CancellationToken());
+        Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, string[] paths, CancellationToken cancellationToken);
 
         /// <summary>
         /// Asynchronously finds an entity with the given composite primary key values in the repository.
@@ -890,7 +890,7 @@
         /// <param name="paths">A collection of lambda expressions representing the paths to include.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken = new CancellationToken());
+        Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken);
 
         /// <summary>
         /// Asynchronously finds an entity with the given composite primary key values in the repository.
@@ -1400,7 +1400,7 @@
         /// <param name="paths">The dot-separated list of related objects to return in the query results.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        Task<TEntity> FindAsync(TKey key, string[] paths, CancellationToken cancellationToken = new CancellationToken());
+        Task<TEntity> FindAsync(TKey key, string[] paths, CancellationToken cancellationToken);
 
         /// <summary>
         /// Asynchronously finds an entity with the given composite primary key values in the repository.
@@ -1417,7 +1417,7 @@
         /// <param name="paths">A collection of lambda expressions representing the paths to include.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        Task<TEntity> FindAsync(TKey key, Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken = new CancellationToken());
+        Task<TEntity> FindAsync(TKey key, Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken);
 
         /// <summary>
         /// Asynchronously finds an entity with the given primary key value in the repository.

@@ -217,7 +217,7 @@
             return _underlyingRepo.FindAsync(key1, key2, key3, paths);
         }
 
-        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, string[] paths, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, string[] paths, CancellationToken cancellationToken)
         {
             return _underlyingRepo.FindAsync(key1, key2, key3, paths, cancellationToken);
         }
@@ -227,7 +227,7 @@
             return _underlyingRepo.FindAsync(key1, key2, key3, paths);
         }
 
-        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, TKey3 key3, Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken)
         {
             return _underlyingRepo.FindAsync(key1, key2, key3, paths, cancellationToken);
         }
@@ -554,7 +554,7 @@
             return _underlyingRepo.FindAsync(key1, key2, paths);
         }
 
-        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, string[] paths, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, string[] paths, CancellationToken cancellationToken)
         {
             return _underlyingRepo.FindAsync(key1, key2, paths, cancellationToken);
         }
@@ -564,7 +564,7 @@
             return _underlyingRepo.FindAsync(key1, key2, paths);
         }
 
-        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync(TKey1 key1, TKey2 key2, Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken)
         {
             return _underlyingRepo.FindAsync(key1, key2, paths, cancellationToken);
         }
@@ -891,7 +891,7 @@
             return _underlyingRepo.FindAsync(key, paths);
         }
 
-        public Task<TEntity> FindAsync(TKey key, string[] paths, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync(TKey key, string[] paths, CancellationToken cancellationToken)
         {
             return _underlyingRepo.FindAsync(key, paths, cancellationToken);
         }
@@ -901,7 +901,7 @@
             return _underlyingRepo.FindAsync(key, paths);
         }
 
-        public Task<TEntity> FindAsync(TKey key, Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync(TKey key, Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken)
         {
             return _underlyingRepo.FindAsync(key, paths, cancellationToken);
         }
