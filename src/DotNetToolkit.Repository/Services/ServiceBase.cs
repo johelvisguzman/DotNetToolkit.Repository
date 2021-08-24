@@ -2226,7 +2226,7 @@
         /// <param name="paths">The dot-separated list of related objects to return in the query results.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        public virtual async Task<TEntity> GetAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] string[] paths, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<TEntity> GetAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] string[] paths, CancellationToken cancellationToken)
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
@@ -2265,7 +2265,7 @@
         /// <param name="paths">A collection of lambda expressions representing the paths to include.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        public virtual async Task<TEntity> GetAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<TEntity> GetAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken)
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
@@ -3556,7 +3556,7 @@
         /// <param name="paths">The dot-separated list of related objects to return in the query results.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        public virtual async Task<TEntity> GetAsync([NotNull] TKey key, [NotNull] string[] paths, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<TEntity> GetAsync([NotNull] TKey key, [NotNull] string[] paths, CancellationToken cancellationToken)
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
@@ -3593,7 +3593,7 @@
         /// <param name="paths">A collection of lambda expressions representing the paths to include.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        public virtual async Task<TEntity> GetAsync([NotNull] TKey key, [NotNull] Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken = new CancellationToken())
+        public virtual async Task<TEntity> GetAsync([NotNull] TKey key, [NotNull] Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken)
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
