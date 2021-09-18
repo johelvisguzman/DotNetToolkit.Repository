@@ -209,7 +209,7 @@
         {
             Guard.NotNull(selector, nameof(selector));
 
-            var result = AsQueryable(options.FetchStrategy)
+            var result = AsQueryable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
@@ -231,7 +231,7 @@
         {
             Guard.NotNull(selector, nameof(selector));
 
-            var query = AsQueryable(options.FetchStrategy)
+            var query = AsQueryable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options);
 
@@ -253,7 +253,7 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public virtual int Count<TEntity>([CanBeNull] IQueryOptions<TEntity> options) where TEntity : class
         {
-            var result = AsQueryable(options.FetchStrategy)
+            var result = AsQueryable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
@@ -272,7 +272,7 @@
         {
             Guard.NotNull(options, nameof(options));
 
-            var result = AsQueryable(options.FetchStrategy)
+            var result = AsQueryable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
@@ -299,7 +299,7 @@
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            var query = AsQueryable(options.FetchStrategy)
+            var query = AsQueryable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options);
 
@@ -339,7 +339,7 @@
             Guard.NotNull(keySelector, nameof(keySelector));
             Guard.NotNull(resultSelector, nameof(resultSelector));
 
-            var query = AsQueryable(options.FetchStrategy)
+            var query = AsQueryable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options);
 
             if (options?.SortingProperties.Count > 0)
