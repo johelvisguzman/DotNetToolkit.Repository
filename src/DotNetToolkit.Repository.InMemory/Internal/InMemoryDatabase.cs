@@ -1,10 +1,10 @@
 ﻿namespace DotNetToolkit.Repository.InMemory.Internal
 {
-    using Utility;
     using System;
-    using System.Collections;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Linq;
+    using Utility;
 
     internal class InMemoryDatabase
     {
@@ -104,7 +104,7 @@
             return false;
         }
 
-        public IEnumerable FindAll(Type entityType)
+        public IEnumerable<object> FindAll(Type entityType)
         {
             Guard.NotNull(entityType, nameof(entityType));
             
