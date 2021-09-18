@@ -181,11 +181,11 @@
         {
             Guard.NotNull(selector, nameof(selector));
 
-            var result = DownloadEntities<TEntity>().AsQueryable()
+            var result = DownloadEntities<TEntity>()
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
-                .Select(selector)
+                .Select(selector.Compile())
                 .FirstOrDefault();
 
             return result;
@@ -195,7 +195,7 @@
         {
             Guard.NotNull(selector, nameof(selector));
 
-            var query = DownloadEntities<TEntity>().AsQueryable()
+            var query = DownloadEntities<TEntity>()
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options);
 
@@ -203,7 +203,7 @@
 
             var result = query
                 .ApplyPagingOptions(options)
-                .Select(selector)
+                .Select(selector.Compile())
                 .ToList();
 
             return new PagedQueryResult<IEnumerable<TResult>>(result, total);
@@ -211,7 +211,7 @@
 
         public int Count<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
         {
-            var result = DownloadEntities<TEntity>().AsQueryable()
+            var result = DownloadEntities<TEntity>()
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
@@ -224,7 +224,7 @@
         {
             Guard.NotNull(options, nameof(options));
 
-            var result = DownloadEntities<TEntity>().AsQueryable()
+            var result = DownloadEntities<TEntity>()
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
@@ -241,7 +241,7 @@
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            var query = DownloadEntities<TEntity>().AsQueryable()
+            var query = DownloadEntities<TEntity>()
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options);
 
@@ -271,7 +271,7 @@
             Guard.NotNull(keySelector, nameof(keySelector));
             Guard.NotNull(resultSelector, nameof(resultSelector));
 
-            var query = DownloadEntities<TEntity>().AsQueryable()
+            var query = DownloadEntities<TEntity>()
                 .ApplySpecificationOptions(options);
 
             if (options?.SortingProperties.Count > 0)
@@ -283,9 +283,9 @@
 
             var result = query
                 .ApplyPagingOptions(options)
-                .GroupBy(keySelector)
+                .GroupBy(keySelector.Compile())
                 .OrderBy(x => x.Key)
-                .Select(resultSelector)
+                .Select(resultSelector.Compile())
                 .ToList();
 
             return new PagedQueryResult<IEnumerable<TResult>>(result, total);
