@@ -19,7 +19,7 @@
     /// <summary>
     /// Represents a repository context class which handles linq operations for querying data sources that implement <see cref="IEnumerable" />.
     /// </summary>
-    public abstract class EnumerableLinqRepositoryContextBase : IRepositoryContext
+    public abstract class LinqEnumerableRepositoryContextBase : IRepositoryContext
     {
         #region Fields
 
@@ -67,9 +67,9 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EnumerableLinqRepositoryContextBase"/> class.
+        /// Initializes a new instance of the <see cref="LinqEnumerableRepositoryContextBase"/> class.
         /// </summary>
-        protected EnumerableLinqRepositoryContextBase()
+        protected LinqEnumerableRepositoryContextBase()
         {
             Conventions = RepositoryConventions.Default();
 
