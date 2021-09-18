@@ -8,6 +8,7 @@
     using Query;
     using Query.Strategies;
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Data;
     using System.Linq;
@@ -16,7 +17,7 @@
     using Utility;
 
     /// <summary>
-    /// Represents a repository context class which handles linq operations for querying data sources that implement <see cref="System.Collections.IEnumerable" />.
+    /// Represents a repository context class which handles linq operations for querying data sources that implement <see cref="IEnumerable" />.
     /// </summary>
     public abstract class EnumerableLinqRepositoryContextBase : IRepositoryContext
     {
@@ -66,7 +67,7 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="LinqRepositoryContextBase"/> class.
+        /// Initializes a new instance of the <see cref="EnumerableLinqRepositoryContextBase"/> class.
         /// </summary>
         protected EnumerableLinqRepositoryContextBase()
         {
