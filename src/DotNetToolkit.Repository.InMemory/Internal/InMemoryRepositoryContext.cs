@@ -12,7 +12,7 @@
     using Transactions.Internal;
     using Utility;
 
-    internal class InMemoryRepositoryContext : LinqRepositoryContextBase, IInMemoryRepositoryContext
+    internal class InMemoryRepositoryContext : EnumerableLinqRepositoryContextBase, IInMemoryRepositoryContext
     {
         #region Fields
 
@@ -56,11 +56,6 @@
         #endregion
 
         #region Implementation of IRepositoryContext
-
-        protected override IQueryable<TEntity> AsQueryable<TEntity>()
-        {
-            return _underlyingContext.FindAll<TEntity>().AsQueryable();
-        }
 
         public override ITransactionManager BeginTransaction()
         {
@@ -135,6 +130,29 @@
         {
             _underlyingContext.Dispose();
             base.Dispose();
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private InMemoryDatabase GetDatabase()
+        {
+            return InMemoryDatabaseStoreCache.Instance.GetDatabase(DatabaseName);
+        }
+
+        #endregion
+
+        #region Overrides of EnumerableLinqRepositoryContextBase
+
+        protected override IEnumerable<TEntity> AsEnumerable<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy)
+        {
+            return _underlyingContext
+                .FindAll<TEntity>()
+                .ApplyFetchingOptions(
+                    Conventions,
+                    fetchStrategy,
+                    type => GetDatabase().FindAll(type));
         }
 
         #endregion
