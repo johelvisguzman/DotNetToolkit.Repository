@@ -19,6 +19,7 @@
     public static class EnumerableExtensions
     {
         private static readonly MethodInfo _castMethod = typeof(Enumerable).GetMethod(nameof(Enumerable.Cast));
+        private static readonly MethodInfo _toListMethod = typeof(Enumerable).GetMethod(nameof(Enumerable.ToList));
 
         /// <summary>
         /// Apply a specification strategy options to the specified entity's query.
@@ -130,14 +131,12 @@
                     var mainTablePrimaryKeyPropertyInfo = conventions.GetPrimaryKeyPropertyInfos(mainTableType).First();
                     var mainTablePropertyInfo = joinTableType.GetRuntimeProperties().Single(x => x.PropertyType == mainTableType);
 
-                    // TODO: NEEDS TO COME BACK TO THIS
-                    // Needs a way to dynamically set the child and parent property to point at each other using the Queryable extension methods.
                     if (isJoinPropertyCollection)
                     {
                         var innerList = innerQuery.ToList();
 
                         query = query.LeftJoin(
-                            innerList,
+                            innerQuery,
                             outer => outer != null ? mainTablePrimaryKeyPropertyInfo.GetValue(outer) : null,
                             inner => inner != null ? joinTableForeignKeyPropertyInfo.GetValue(inner) : null,
                             (outer, inner) =>
@@ -158,7 +157,7 @@
                                 if (outer != null)
                                 {
                                         // Type casting
-                                        var items = Cast(joinTableType, inner);
+                                        var items = CastToList(joinTableType, inner);
 
                                         // Sets the join table property in the main table
                                         joinTablePropertyInfo.SetValue(outer, items);
@@ -170,7 +169,7 @@
                     else
                     {
                         query = query.LeftJoin(
-                            innerQuery.AsEnumerable<object>(),
+                            innerQuery,
                             outer => outer != null ? mainTablePrimaryKeyPropertyInfo.GetValue(outer) : null,
                             inner => inner != null ? joinTableForeignKeyPropertyInfo.GetValue(inner) : null,
                             (outer, inner) =>
@@ -247,11 +246,17 @@
             return ApplyOrder<T>(source, propertyName, nameof(Enumerable.ThenByDescending));
         }
 
-        private static IEnumerable Cast(Type type, IEnumerable<object> items)
+        private static IList CastToList(Type type, IEnumerable items)
         {
-            return (IEnumerable)_castMethod
+            var castItems = _castMethod
                 .MakeGenericMethod(new Type[] { type })
                 .Invoke(null, new object[] { items });
+
+            var list = _toListMethod
+                .MakeGenericMethod(new Type[] { type })
+                .Invoke(null, new object[] { castItems });
+
+            return (IList)list;
         }
     }
 }
