@@ -192,11 +192,13 @@
         {
             Guard.NotNull(selector, nameof(selector));
 
+            var selectorFunc = selector.Compile();
+
             var result = AsEnumerable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
-                .Select(selector.Compile())
+                .Select(selectorFunc)
                 .FirstOrDefault();
 
             return result;
@@ -214,6 +216,8 @@
         {
             Guard.NotNull(selector, nameof(selector));
 
+            var selectorFunc = selector.Compile();
+
             var query = AsEnumerable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options);
@@ -222,7 +226,7 @@
 
             var result = query
                 .ApplyPagingOptions(options)
-                .Select(selector.Compile())
+                .Select(selectorFunc)
                 .ToList();
 
             return new PagedQueryResult<IEnumerable<TResult>>(result, total);
@@ -322,6 +326,9 @@
             Guard.NotNull(keySelector, nameof(keySelector));
             Guard.NotNull(resultSelector, nameof(resultSelector));
 
+            var keySelectorFunc = keySelector.Compile();
+            var resultSelectorFunc = resultSelector.Compile();
+
             var query = AsEnumerable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options);
 
@@ -334,9 +341,9 @@
 
             var result = query
                 .ApplyPagingOptions(options)
-                .GroupBy(keySelector.Compile())
+                .GroupBy(keySelectorFunc)
                 .OrderBy(x => x.Key)
-                .Select(resultSelector.Compile())
+                .Select(resultSelectorFunc)
                 .ToList();
 
             return new PagedQueryResult<IEnumerable<TResult>>(result, total);
