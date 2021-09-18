@@ -12,7 +12,7 @@
     using Transactions.Internal;
     using Utility;
 
-    internal class InMemoryRepositoryContext : EnumerableLinqRepositoryContextBase, IInMemoryRepositoryContext
+    internal class InMemoryRepositoryContext : LinqEnumerableRepositoryContextBase, IInMemoryRepositoryContext
     {
         #region Fields
 
@@ -40,6 +40,20 @@
             _ignoreSqlQueryWarning = ignoreSqlQueryWarning;
 
             _underlyingContext = new InMemoryUnderlyingDbContext(databaseName, Conventions);
+        }
+
+        #endregion
+
+        #region Overrides of LinqEnumerableRepositoryContextBase
+
+        protected override IEnumerable<TEntity> AsEnumerable<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy)
+        {
+            return _underlyingContext
+                .FindAll<TEntity>()
+                .ApplyFetchingOptions(
+                    Conventions,
+                    fetchStrategy,
+                    type => GetDatabase().FindAll(type));
         }
 
         #endregion
@@ -139,20 +153,6 @@
         private InMemoryDatabase GetDatabase()
         {
             return InMemoryDatabaseStoreCache.Instance.GetDatabase(DatabaseName);
-        }
-
-        #endregion
-
-        #region Overrides of EnumerableLinqRepositoryContextBase
-
-        protected override IEnumerable<TEntity> AsEnumerable<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy)
-        {
-            return _underlyingContext
-                .FindAll<TEntity>()
-                .ApplyFetchingOptions(
-                    Conventions,
-                    fetchStrategy,
-                    type => GetDatabase().FindAll(type));
         }
 
         #endregion
