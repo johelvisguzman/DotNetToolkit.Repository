@@ -1,12 +1,9 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
     using Configuration.Conventions;
-    using Configuration.Conventions.Internal;
-    using Extensions.Internal;
     using JetBrains.Annotations;
     using Query;
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
@@ -18,9 +15,6 @@
     /// </summary>
     public static class QueryableExtensions
     {
-        private static readonly MethodInfo CastMethod = typeof(Enumerable).GetMethod(nameof(Enumerable.Cast));
-        private static readonly MethodInfo ToListMethod = typeof(Enumerable).GetMethod(nameof(Enumerable.ToList));
-
         /// <summary>
         /// Apply a specification strategy options to the specified entity's query.
         /// </summary>
@@ -105,19 +99,6 @@
                 .SelectMany(
                     a => a.innerCollection.DefaultIfEmpty(),
                     (a, i) => resultSelector(a.outer, i));
-        }
-
-        private static IList CastToList(Type type, IEnumerable items)
-        {
-            var castItems = CastMethod
-                .MakeGenericMethod(new Type[] { type })
-                .Invoke(null, new object[] { items });
-
-            var list = ToListMethod
-                .MakeGenericMethod(new Type[] { type })
-                .Invoke(null, new object[] { castItems });
-
-            return (IList)list;
         }
 
         private static IOrderedQueryable<T> ApplyOrder<T>([NotNull] IQueryable<T> source, [NotNull] string propertyName, [NotNull] string methodName)
