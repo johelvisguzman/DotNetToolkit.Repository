@@ -5,6 +5,7 @@
     using Extensions.Internal;
     using JetBrains.Annotations;
     using Query;
+    using Query.Strategies;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -100,14 +101,14 @@
         /// Apply a fetching options to the specified entity's query.
         /// </summary>
         /// <returns>The entity's query with the applied options.</returns>
-        public static IEnumerable<T> ApplyFetchingOptions<T>([NotNull] this IEnumerable<T> query, [NotNull] IRepositoryConventions conventions, [CanBeNull] IQueryOptions<T> options, [NotNull] Func<Type, IEnumerable<object>> joinQueryCallback) where T : class
+        public static IEnumerable<T> ApplyFetchingOptions<T>([NotNull] this IEnumerable<T> query, [NotNull] IRepositoryConventions conventions, [CanBeNull] IFetchQueryStrategy<T> fetchStrategy, [NotNull] Func<Type, IEnumerable<object>> joinQueryCallback) where T : class
         {
             Guard.NotNull(query, nameof(query));
             Guard.NotNull(joinQueryCallback, nameof(joinQueryCallback));
 
             var mainTableType = typeof(T);
             var mainTableProperties = mainTableType.GetRuntimeProperties().ToList();
-            var fetchingPaths = options.DefaultIfFetchStrategyEmpty(conventions).PropertyPaths.ToList();
+            var fetchingPaths = fetchStrategy.DefaultIfFetchStrategyEmpty(conventions).PropertyPaths.ToList();
 
             foreach (var path in fetchingPaths)
             {
