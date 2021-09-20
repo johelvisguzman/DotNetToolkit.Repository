@@ -133,35 +133,34 @@
 
                     if (isJoinPropertyCollection)
                     {
-                        var innerList = innerQuery.ToList();
-
-                        query = query.LeftJoin(
+                        query = query.GroupJoin(
                             innerQuery,
                             outer => outer != null ? mainTablePrimaryKeyPropertyInfo.GetValue(outer) : null,
                             inner => inner != null ? joinTableForeignKeyPropertyInfo.GetValue(inner) : null,
                             (outer, inner) =>
                             {
-                                if (inner != null)
+                                // Type casting
+                                var items = CastToList(joinTableType, inner);
+
+                                foreach (var item in items)
                                 {
-                                        // Sets the main table property in the join table
-                                        mainTablePropertyInfo.SetValue(inner, outer);
+                                    // Sets the main table property in the join table
+                                     mainTablePropertyInfo.SetValue(item, outer);
                                 }
 
-                                return outer;
-                            }).ToList().GroupJoin(
-                            innerList,
-                            outer => outer != null ? mainTablePrimaryKeyPropertyInfo.GetValue(outer) : null,
-                            inner => inner != null ? joinTableForeignKeyPropertyInfo.GetValue(inner) : null,
-                            (outer, inner) =>
-                            {
-                                if (outer != null)
-                                {
-                                        // Type casting
-                                        var items = CastToList(joinTableType, inner);
+                                //// Type casting
+                                //var projectedItems = inner.Select(item =>
+                                //{
+                                //    // Sets the main table property in the join table
+                                //    mainTablePropertyInfo.SetValue(item, outer);
 
-                                        // Sets the join table property in the main table
-                                        joinTablePropertyInfo.SetValue(outer, items);
-                                }
+                                //    return item;
+                                //});
+
+                                //var list = CastToList(joinTableType, projectedItems);
+
+                                // Sets the join table property in the main table
+                                joinTablePropertyInfo.SetValue(outer, items);
 
                                 return outer;
                             });
@@ -190,6 +189,19 @@
             }
 
             return query;
+        }
+
+        private static IList CastToList(Type type, IEnumerable items)
+        {
+            var castItems = _castMethod
+                .MakeGenericMethod(new Type[] { type })
+                .Invoke(null, new object[] { items });
+
+            var list = _toListMethod
+                .MakeGenericMethod(new Type[] { type })
+                .Invoke(null, new object[] { castItems });
+
+            return (IList)list;
         }
 
         private static IEnumerable<TResult> LeftJoin<TOuter, TInner, TKey, TResult>(this IEnumerable<TOuter> outer, IEnumerable<TInner> inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector)
@@ -244,19 +256,6 @@
         private static IOrderedEnumerable<T> ThenByDescending<T>(this IOrderedEnumerable<T> source, string propertyName)
         {
             return ApplyOrder<T>(source, propertyName, nameof(Enumerable.ThenByDescending));
-        }
-
-        private static IList CastToList(Type type, IEnumerable items)
-        {
-            var castItems = _castMethod
-                .MakeGenericMethod(new Type[] { type })
-                .Invoke(null, new object[] { items });
-
-            var list = _toListMethod
-                .MakeGenericMethod(new Type[] { type })
-                .Invoke(null, new object[] { castItems });
-
-            return (IList)list;
         }
     }
 }

@@ -301,9 +301,10 @@ namespace DotNetToolkit.Repository.Integration.Test
         {
             var list = new List<ContextProviderType>();
 
-            list.AddRange(SqlServerContextProviders());
-            list.AddRange(InMemoryContextProviders());
-            list.AddRange(AzureStorageContextProviders());
+            //list.AddRange(SqlServerContextProviders());
+            //list.AddRange(InMemoryContextProviders());
+            //list.AddRange(AzureStorageContextProviders());
+            list.Add(ContextProviderType.InMemory);
 
             return list.ToArray();
         }
