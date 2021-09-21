@@ -113,27 +113,30 @@
 
             foreach (var path in fetchingPaths)
             {
-                var joinTablePropertyInfo = mainTablePropertiesMap[path];
-                var isJoinPropertyCollection = joinTablePropertyInfo.PropertyType.IsGenericCollection();
-                var joinTableType = isJoinPropertyCollection
-                    ? joinTablePropertyInfo.PropertyType.GetGenericArguments().First()
-                    : joinTablePropertyInfo.PropertyType;
-
-
                 // Only do a join when the primary table has a foreign key property for the join table
-                var joinTableForeignKeyPropertyInfo = ForeignKeyConventionHelper
-                    .GetForeignKeyPropertyInfos(conventions, joinTableType, mainTableType)
-                    .FirstOrDefault();
+                var joinTablePropertyInfo = mainTablePropertiesMap[path];
+                var joinTableForeignKeyPropertyInfos = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(conventions, joinTablePropertyInfo);
 
-                if (joinTableForeignKeyPropertyInfo != null)
+                if (joinTableForeignKeyPropertyInfos != null && joinTableForeignKeyPropertyInfos.Length > 0)
                 {
+                    var joinTableType = joinTablePropertyInfo.PropertyType.TryGetGenericTypeOrDefault(out bool isJoinPropertyCollection);
                     var innerQuery = innerQueryCallback(joinTableType);
 
-                    var mainTablePrimaryKeyPropertyInfo = conventions.GetPrimaryKeyPropertyInfos(mainTableType).First();
+                    var mainTablePrimaryKeyPropertyInfos = conventions.GetPrimaryKeyPropertyInfos(mainTableType);
                     var mainTablePropertyInfo = joinTableType.GetRuntimeProperties().FirstOrDefault(x => x.PropertyType == mainTableType);
 
-                    Func<T, object> outerKeySelectorFunc = (outer) => outer != null ? mainTablePrimaryKeyPropertyInfo.GetValue(outer) : null;
-                    Func<object, object> innerKeySelectorFunc = (inner) => inner != null ? joinTableForeignKeyPropertyInfo.GetValue(inner) : null;
+                    var comparer = new ObjectArrayComparer();
+
+                    // key selector functions
+                    object[] outerKeySelectorFunc(T outer)
+                    {
+                        return mainTablePrimaryKeyPropertyInfos.Select(pi => pi.GetValue(outer)).ToArray();
+                    }
+
+                    object[] innerKeySelectorFunc(object inner)
+                    {
+                        return joinTableForeignKeyPropertyInfos.Select(pi => pi.GetValue(inner)).ToArray();
+                    }
 
                     if (isJoinPropertyCollection)
                     {
@@ -161,7 +164,7 @@
                                 }
 
                                 return outer;
-                            });
+                            }, comparer);
                     }
                     else
                     {
@@ -184,7 +187,7 @@
                                 }
 
                                 return outer;
-                            });
+                            }, comparer);
                     }
                 }
             }
@@ -205,13 +208,14 @@
             return (ICollection)list;
         }
 
-        private static IEnumerable<TResult> LeftJoin<TOuter, TInner, TKey, TResult>(this IEnumerable<TOuter> outer, IEnumerable<TInner> inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector)
+        private static IEnumerable<TResult> LeftJoin<TOuter, TInner, TKey, TResult>(this IEnumerable<TOuter> outer, IEnumerable<TInner> inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector, IEqualityComparer<TKey> comparer)
         {
             return outer.GroupJoin(
                     inner,
                     outerKeySelector,
                     innerKeySelector,
-                    (o, i) => new { outer = o, innerCollection = i })
+                    (o, i) => new { outer = o, innerCollection = i },
+                    comparer)
                 .SelectMany(
                     a => a.innerCollection.DefaultIfEmpty(),
                     (a, i) => resultSelector(a.outer, i));
@@ -257,6 +261,20 @@
         private static IOrderedEnumerable<T> ThenByDescending<T>(this IOrderedEnumerable<T> source, string propertyName)
         {
             return ApplyOrder<T>(source, propertyName, nameof(Enumerable.ThenByDescending));
+        }
+
+        private class ObjectArrayComparer : IEqualityComparer<object[]>
+        {
+            public bool Equals(object[] x, object[] y)
+            {
+                return x.Length == y.Length && Enumerable.SequenceEqual(x, y);
+            }
+
+            public int GetHashCode(object[] o)
+            {
+                var result = o.Aggregate((a, b) => a.GetHashCode() ^ b.GetHashCode());
+                return result.GetHashCode();
+            }
         }
     }
 }

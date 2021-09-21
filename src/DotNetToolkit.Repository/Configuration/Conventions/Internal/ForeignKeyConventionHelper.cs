@@ -14,26 +14,27 @@
 
     internal class ForeignKeyConventionHelper
     {
-        private static readonly ConcurrentDictionary<Tuple<Type, Type>, PropertyInfo[]> _foreignKeyCache = new ConcurrentDictionary<Tuple<Type, Type>, PropertyInfo[]>();
+        private static readonly ConcurrentDictionary<PropertyInfo, PropertyInfo[]> _foreignKeyCache = new ConcurrentDictionary<PropertyInfo, PropertyInfo[]>();
 
-        public static PropertyInfo[] GetForeignKeyPropertyInfos([NotNull] IRepositoryConventions conventions, [NotNull] Type sourceType, [NotNull] Type foreignType)
+        public static PropertyInfo[] GetForeignKeyPropertyInfos([NotNull] IRepositoryConventions conventions, [NotNull] PropertyInfo pi)
         {
             Guard.NotNull(conventions, nameof(conventions));
-            Guard.NotNull(sourceType, nameof(sourceType));
-            Guard.NotNull(foreignType, nameof(foreignType));
+            Guard.NotNull(pi, nameof(pi));
             
-            var key = Tuple.Create(sourceType, foreignType);
-            if (!_foreignKeyCache.TryGetValue(key, out PropertyInfo[] result))
+            if (!_foreignKeyCache.TryGetValue(pi, out PropertyInfo[] result))
             {
-                result = GetForeignKeyPropertyInfosCore(conventions, sourceType, foreignType);
-                _foreignKeyCache.TryAdd(key, result);
+                result = GetForeignKeyPropertyInfosCore(conventions, pi);
+                _foreignKeyCache.TryAdd(pi, result);
             }
             
             return result;
         }
 
-        private static PropertyInfo[] GetForeignKeyPropertyInfosCore([NotNull] IRepositoryConventions conventions, Type foreignType, Type declaringType)
+        private static PropertyInfo[] GetForeignKeyPropertyInfosCore([NotNull] IRepositoryConventions conventions, PropertyInfo pi)
         {
+            var foreignType = pi.PropertyType.GetGenericTypeOrDefault();
+            var declaringType = pi.DeclaringType;
+
             if (foreignType.IsEnumerable() || declaringType.IsEnumerable())
                 return new PropertyInfo[0];
 
@@ -81,15 +82,17 @@
                 // Try to find by naming convention
                 var primaryKeyPropertyInfos = conventions.GetPrimaryKeyPropertyInfos(declaringType);
 
-                if (!propertyInfos.Any() && primaryKeyPropertyInfos.Length == 1)
+                if (!propertyInfos.Any() && primaryKeyPropertyInfos.Any())
                 {
-                    var primaryKeyPropertyInfo = primaryKeyPropertyInfos.First();
-                    var foreignPrimaryKeyName = ModelConventionHelper.GetColumnName(primaryKeyPropertyInfo);
-                    var propertyInfo = properties.SingleOrDefault(x => x.Name == $"{foreignNavigationPropertyInfo.Name}{foreignPrimaryKeyName}");
-
-                    if (propertyInfo != null)
+                    foreach (var primaryKeyPropertyInfo in primaryKeyPropertyInfos)
                     {
-                        propertyInfos.Add(propertyInfo);
+                        var foreignPrimaryKeyName = ModelConventionHelper.GetColumnName(primaryKeyPropertyInfo);
+                        var propertyInfo = properties.FirstOrDefault(x => x.Name == $"{foreignNavigationPropertyInfo.Name}{foreignPrimaryKeyName}");
+
+                        if (propertyInfo != null)
+                        {
+                            propertyInfos.Add(propertyInfo);
+                        }
                     }
                 }
             }
