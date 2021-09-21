@@ -108,12 +108,12 @@
             Guard.NotNull(innerQueryCallback, nameof(innerQueryCallback));
 
             var mainTableType = typeof(T);
-            var mainTableProperties = mainTableType.GetRuntimeProperties().ToList();
+            var mainTablePropertiesMap = mainTableType.GetRuntimeProperties().ToDictionary(x => x.Name);
             var fetchingPaths = fetchStrategy.DefaultIfFetchStrategyEmpty(conventions).PropertyPaths.ToList();
 
             foreach (var path in fetchingPaths)
             {
-                var joinTablePropertyInfo = mainTableProperties.Single(x => x.Name.Equals(path));
+                var joinTablePropertyInfo = mainTablePropertiesMap[path];
                 var isJoinPropertyCollection = joinTablePropertyInfo.PropertyType.IsGenericCollection();
                 var joinTableType = isJoinPropertyCollection
                     ? joinTablePropertyInfo.PropertyType.GetGenericArguments().First()
@@ -130,7 +130,7 @@
                     var innerQuery = innerQueryCallback(joinTableType);
 
                     var mainTablePrimaryKeyPropertyInfo = conventions.GetPrimaryKeyPropertyInfos(mainTableType).First();
-                    var mainTablePropertyInfo = joinTableType.GetRuntimeProperties().Single(x => x.PropertyType == mainTableType);
+                    var mainTablePropertyInfo = joinTableType.GetRuntimeProperties().FirstOrDefault(x => x.PropertyType == mainTableType);
 
                     Func<T, object> outerKeySelectorFunc = (outer) => outer != null ? mainTablePrimaryKeyPropertyInfo.GetValue(outer) : null;
                     Func<object, object> innerKeySelectorFunc = (inner) => inner != null ? joinTableForeignKeyPropertyInfo.GetValue(inner) : null;
@@ -147,8 +147,11 @@
                                 {
                                     var items = inner.Select(item =>
                                     {
-                                        // Sets the main table property in the join table
-                                        mainTablePropertyInfo.SetValue(item, outer);
+                                        if (mainTablePropertyInfo != null)
+                                        {
+                                            // Sets the main table property in the join table
+                                            mainTablePropertyInfo.SetValue(item, outer);
+                                        }
 
                                         return item;
                                     }).ToList(joinTableType);
@@ -170,8 +173,11 @@
                             {
                                 if (inner != null)
                                 {
-                                    // Sets the main table property in the join table
-                                    mainTablePropertyInfo.SetValue(inner, outer);
+                                    if (mainTablePropertyInfo != null)
+                                    {
+                                        // Sets the main table property in the join table
+                                        mainTablePropertyInfo.SetValue(inner, outer);
+                                    }
 
                                     // Sets the join table property in the main table
                                     joinTablePropertyInfo.SetValue(outer, inner);

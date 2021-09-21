@@ -18,6 +18,7 @@
 
         public static PropertyInfo[] GetForeignKeyPropertyInfos([NotNull] IRepositoryConventions conventions, [NotNull] Type sourceType, [NotNull] Type foreignType)
         {
+            Guard.NotNull(conventions, nameof(conventions));
             Guard.NotNull(sourceType, nameof(sourceType));
             Guard.NotNull(foreignType, nameof(foreignType));
             
@@ -31,13 +32,13 @@
             return result;
         }
 
-        private static PropertyInfo[] GetForeignKeyPropertyInfosCore(IRepositoryConventions conventions, Type sourceType, Type foreignType)
+        private static PropertyInfo[] GetForeignKeyPropertyInfosCore([NotNull] IRepositoryConventions conventions, Type foreignType, Type declaringType)
         {
-            if (sourceType.IsEnumerable() || foreignType.IsEnumerable())
+            if (foreignType.IsEnumerable() || declaringType.IsEnumerable())
                 return new PropertyInfo[0];
 
-            var properties = sourceType.GetRuntimeProperties().Where(ModelConventionHelper.IsColumnMapped).ToList();
-            var foreignNavigationPropertyInfo = properties.SingleOrDefault(x => x.PropertyType == foreignType);
+            var properties = foreignType.GetRuntimeProperties().Where(ModelConventionHelper.IsColumnMapped).ToList();
+            var foreignNavigationPropertyInfo = properties.SingleOrDefault(x => x.PropertyType == declaringType);
             var propertyInfos = new List<PropertyInfo>();
 
             if (foreignNavigationPropertyInfo != null)
@@ -56,7 +57,7 @@
                                 string.Format(
                                     Resources.ForeignKeyAttributeOnPropertyNotFoundOnDependentType,
                                     propertyInfosWithForeignKey.Name,
-                                    sourceType.FullName,
+                                    foreignType.FullName,
                                     foreignKeyAttributeName));
                         }
                     }
@@ -78,7 +79,7 @@
                 }
 
                 // Try to find by naming convention
-                var primaryKeyPropertyInfos = conventions.GetPrimaryKeyPropertyInfos(foreignType);
+                var primaryKeyPropertyInfos = conventions.GetPrimaryKeyPropertyInfos(declaringType);
 
                 if (!propertyInfos.Any() && primaryKeyPropertyInfos.Length == 1)
                 {

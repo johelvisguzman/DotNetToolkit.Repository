@@ -35,17 +35,6 @@
         public Customer Customer { get; set; }
     }
 
-    public class CustomerWithThreeCompositePrimaryKeyAndNoOrder
-    {
-        [Key]
-        public int Id1 { get; set; }
-        [Key]
-        public string Id2 { get; set; }
-        [Key]
-        public int Id3 { get; set; }
-        public string Name { get; set; }
-    }
-
     public class CustomerWithTwoCompositePrimaryKey
     {
         [Key]

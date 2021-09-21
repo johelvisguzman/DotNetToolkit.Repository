@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Test.Data
 {
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     public class Customer
     {
@@ -28,5 +29,30 @@
         public int CustomerId { get; set; }
         [Required]
         public Customer Customer { get; set; }
+    }
+
+    public class CustomerWithThreeCompositePrimaryKey
+    {
+        [Key]
+        [Column(Order = 1)]
+        public int Id1 { get; set; }
+        [Key]
+        [Column(Order = 2)]
+        public string Id2 { get; set; }
+        [Key]
+        [Column(Order = 3)]
+        public int Id3 { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class CustomerWithNoId
+    {
+        public string Name { get; set; }
+    }
+
+    public class CustomerWithNavigationProperties
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
     }
 }
