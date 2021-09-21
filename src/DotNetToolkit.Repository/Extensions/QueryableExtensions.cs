@@ -1,15 +1,10 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
     using Configuration.Conventions;
-    using Configuration.Conventions.Internal;
-    using Extensions.Internal;
     using JetBrains.Annotations;
     using Query;
-    using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Linq.Expressions;
     using System.Reflection;
     using Utility;
 
@@ -18,9 +13,6 @@
     /// </summary>
     public static class QueryableExtensions
     {
-        private static readonly MethodInfo CastMethod = typeof(Enumerable).GetMethod(nameof(Enumerable.Cast));
-        private static readonly MethodInfo ToListMethod = typeof(Enumerable).GetMethod(nameof(Enumerable.ToList));
-
         /// <summary>
         /// Apply a specification strategy options to the specified entity's query.
         /// </summary>
@@ -93,132 +85,6 @@
             }
 
             return query;
-        }
-
-        /// <summary>
-        /// Apply a fetching options to the specified entity's query.
-        /// </summary>
-        /// <returns>The entity's query with the applied options.</returns>
-        public static IQueryable<T> ApplyFetchingOptions<T>([NotNull] this IQueryable<T> query, [NotNull] IRepositoryConventions conventions, [CanBeNull] IQueryOptions<T> options, [NotNull] Func<Type, IQueryable<object>> joinQueryCallback) where T : class
-        {
-            Guard.NotNull(query, nameof(query));
-            Guard.NotNull(joinQueryCallback, nameof(joinQueryCallback));
-
-            var mainTableType = typeof(T);
-            var mainTableProperties = mainTableType.GetRuntimeProperties().ToList();
-            var fetchingPaths = options.DefaultIfFetchStrategyEmpty(conventions).PropertyPaths.ToList();
-
-            if (fetchingPaths.Any())
-            {
-                foreach (var path in fetchingPaths)
-                {
-                    var joinTablePropertyInfo = mainTableProperties.Single(x => x.Name.Equals(path));
-                    var isJoinPropertyCollection = joinTablePropertyInfo.PropertyType.IsGenericCollection();
-                    var joinTableType = isJoinPropertyCollection
-                        ? joinTablePropertyInfo.PropertyType.GetGenericArguments().First()
-                        : joinTablePropertyInfo.PropertyType;
-
-                    var innerQuery = joinQueryCallback(joinTableType);
-
-                    // Only do a join when the primary table has a foreign key property for the join table
-                    var joinTableForeignKeyPropertyInfo = ForeignKeyConventionHelper
-                        .GetForeignKeyPropertyInfos(conventions, joinTableType, mainTableType)
-                        .FirstOrDefault();
-
-                    if (joinTableForeignKeyPropertyInfo != null)
-                    {
-                        var mainTablePrimaryKeyPropertyInfo = conventions.GetPrimaryKeyPropertyInfos(mainTableType).First();
-                        var mainTablePropertyInfo = joinTableType.GetRuntimeProperties().Single(x => x.PropertyType == mainTableType);
-
-                        // TODO: NEEDS TO COME BACK TO THIS
-                        // Needs a way to dynamically set the child and parent property to point at each other using the Queryable extension methods.
-                        if (isJoinPropertyCollection)
-                        {
-                            var innerList = innerQuery.ToList();
-
-                            query = query.LeftJoin(
-                                    innerList,
-                                    outer => outer != null ? mainTablePrimaryKeyPropertyInfo.GetValue(outer) : null,
-                                    inner => inner != null ? joinTableForeignKeyPropertyInfo.GetValue(inner) : null,
-                                    (outer, inner) =>
-                                    {
-                                        if (inner != null)
-                                        {
-                                            // Sets the main table property in the join table
-                                            mainTablePropertyInfo.SetValue(inner, outer);
-                                        }
-
-                                        return outer;
-                                    }).ToList().GroupJoin(
-                                    innerList,
-                                    outer => outer != null ? mainTablePrimaryKeyPropertyInfo.GetValue(outer) : null,
-                                    inner => inner != null ? joinTableForeignKeyPropertyInfo.GetValue(inner) : null,
-                                    (outer, inner) =>
-                                    {
-                                        if (outer != null)
-                                        {
-                                            // Type casting
-                                            var items = CastToList(joinTableType, inner);
-
-                                            // Sets the join table property in the main table
-                                            joinTablePropertyInfo.SetValue(outer, items);
-                                        }
-
-                                        return outer;
-                                    })
-                                    .AsQueryable();
-                        }
-                        else
-                        {
-                            query = query.LeftJoin(
-                                    innerQuery.AsEnumerable<object>(),
-                                    outer => outer != null ? mainTablePrimaryKeyPropertyInfo.GetValue(outer) : null,
-                                    inner => inner != null ? joinTableForeignKeyPropertyInfo.GetValue(inner) : null,
-                                    (outer, inner) =>
-                                    {
-                                        if (outer != null && inner != null)
-                                        {
-                                            // Sets the main table property in the join table
-                                            mainTablePropertyInfo.SetValue(inner, outer);
-
-                                            // Sets the join table property in the main table
-                                            joinTablePropertyInfo.SetValue(outer, inner);
-                                        }
-
-                                        return outer;
-                                    })
-                                    .AsQueryable();
-                        }
-                    }
-                }
-            }
-
-            return query;
-        }
-
-        private static IQueryable<TResult> LeftJoin<TOuter, TInner, TKey, TResult>(this IQueryable<TOuter> outer, IEnumerable<TInner> inner, Expression<Func<TOuter, TKey>> outerKeySelector, Expression<Func<TInner, TKey>> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector)
-        {
-            return outer.GroupJoin(
-                    inner,
-                    outerKeySelector,
-                    innerKeySelector,
-                    (o, i) => new { outer = o, innerCollection = i })
-                .SelectMany(
-                    a => a.innerCollection.DefaultIfEmpty(),
-                    (a, i) => resultSelector(a.outer, i));
-        }
-
-        private static IList CastToList(Type type, IEnumerable items)
-        {
-            var castItems = CastMethod
-                .MakeGenericMethod(new Type[] { type })
-                .Invoke(null, new object[] { items });
-
-            var list = ToListMethod
-                .MakeGenericMethod(new Type[] { type })
-                .Invoke(null, new object[] { castItems });
-
-            return (IList)list;
         }
 
         private static IOrderedQueryable<T> ApplyOrder<T>([NotNull] IQueryable<T> source, [NotNull] string propertyName, [NotNull] string methodName)

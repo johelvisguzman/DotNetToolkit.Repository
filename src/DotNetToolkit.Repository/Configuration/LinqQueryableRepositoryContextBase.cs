@@ -12,25 +12,18 @@
     using System.Data;
     using System.Linq;
     using System.Linq.Expressions;
-    using System.Reflection;
     using Transactions;
     using Utility;
 
     /// <summary>
-    /// Represents a repository context class which handles linq operations.
+    /// Represents a repository context class which handles linq operations for querying data sources that implement <see cref="IQueryable" />.
     /// </summary>
-    public abstract class LinqRepositoryContextBase : IRepositoryContext
+    public abstract class LinqQueryableRepositoryContextBase : IRepositoryContext
     {
         #region Fields
 
         private ILoggerProvider _loggerProvider;
         private ILogger _logger;
-
-        private static readonly MethodInfo _asQueryable = typeof(LinqRepositoryContextBase).GetRuntimeMethods()
-            .Single(x => x.Name == nameof(AsQueryable) &&
-                         x.IsGenericMethodDefinition &&
-                         x.GetGenericArguments().Length == 1 &&
-                         x.GetParameters().Length == 0);
 
         #endregion
 
@@ -73,9 +66,9 @@
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="LinqRepositoryContextBase"/> class.
+        /// Initializes a new instance of the <see cref="LinqQueryableRepositoryContextBase"/> class.
         /// </summary>
-        protected LinqRepositoryContextBase()
+        protected LinqQueryableRepositoryContextBase()
         {
             Conventions = RepositoryConventions.Default();
 
@@ -91,27 +84,7 @@
         /// </summary>
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
         /// <returns>The entity's query.</returns>
-        protected abstract IQueryable<TEntity> AsQueryable<TEntity>() where TEntity : class;
-
-        /// <summary>
-        /// Apply a fetching options to the specified entity's query.
-        /// </summary>
-        /// <returns>The entity's query with the applied options.</returns>
-        protected virtual IQueryable<TEntity> ApplyFetchingOptions<TEntity>(IQueryable<TEntity> query, IQueryOptions<TEntity> options) where TEntity : class
-        {
-            return query.ApplyFetchingOptions(Conventions, options, InvokeAsQueryable);
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        private IQueryable<object> InvokeAsQueryable(Type type)
-        {
-            return (IQueryable<object>)_asQueryable
-                .MakeGenericMethod(type)
-                .Invoke(this, null);
-        }
+        protected abstract IQueryable<TEntity> AsQueryable<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy) where TEntity : class;
 
         #endregion
 
@@ -197,10 +170,7 @@
             var options = new QueryOptions<TEntity>()
                 .Include(Conventions.GetByPrimaryKeySpecification<TEntity>(keyValues));
 
-            var query = AsQueryable<TEntity>();
-
-            if (fetchStrategy != null)
-                query = ApplyFetchingOptions(query, options.Include(fetchStrategy));
+            var query = AsQueryable<TEntity>(fetchStrategy);
 
             var result = query
                 .ApplySpecificationOptions(options)
@@ -221,7 +191,7 @@
         {
             Guard.NotNull(selector, nameof(selector));
 
-            var result = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
+            var result = AsQueryable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
@@ -243,7 +213,7 @@
         {
             Guard.NotNull(selector, nameof(selector));
 
-            var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
+            var query = AsQueryable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options);
 
@@ -265,7 +235,7 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public virtual int Count<TEntity>([CanBeNull] IQueryOptions<TEntity> options) where TEntity : class
         {
-            var result = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
+            var result = AsQueryable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
@@ -284,7 +254,7 @@
         {
             Guard.NotNull(options, nameof(options));
 
-            var result = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
+            var result = AsQueryable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
@@ -311,7 +281,7 @@
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
+            var query = AsQueryable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options);
 
@@ -351,7 +321,7 @@
             Guard.NotNull(keySelector, nameof(keySelector));
             Guard.NotNull(resultSelector, nameof(resultSelector));
 
-            var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
+            var query = AsQueryable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options);
 
             if (options?.SortingProperties.Count > 0)

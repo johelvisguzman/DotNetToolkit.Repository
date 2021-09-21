@@ -18,7 +18,7 @@
     using Transactions;
     using Utility;
 
-    internal class EfRepositoryContext : LinqRepositoryContextBase, IEfRepositoryContext
+    internal class EfRepositoryContext : LinqQueryableRepositoryContextBase, IEfRepositoryContext
     {
         #region Fields
 
@@ -38,6 +38,18 @@
 
         #endregion
 
+        #region Overrides of LinqQueryableRepositoryContextBase
+
+        protected override IQueryable<TEntity> AsQueryable<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy)
+        {
+            return _context
+                .Set<TEntity>()
+                .AsQueryable()
+                .ApplyFetchingOptions(Conventions, fetchStrategy);
+        }
+
+        #endregion
+
         #region Implementation of IEfRepositoryContext
 
         public DbContext UnderlyingContext { get { return _context; } }
@@ -45,16 +57,6 @@
         #endregion
 
         #region Implementation of IRepositoryContext
-
-        protected override IQueryable<TEntity> AsQueryable<TEntity>()
-        {
-            return _context.Set<TEntity>().AsQueryable();
-        }
-
-        protected override IQueryable<TEntity> ApplyFetchingOptions<TEntity>(IQueryable<TEntity> query, IQueryOptions<TEntity> options)
-        {
-            return query.ApplyFetchingOptions(Conventions, options);
-        }
 
         public override IEnumerable<TEntity> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector)
         {
@@ -322,9 +324,7 @@
             var options = new QueryOptions<TEntity>()
                 .Include(Conventions.GetByPrimaryKeySpecification<TEntity>(keyValues));
 
-            var query = ApplyFetchingOptions(
-                AsQueryable<TEntity>(),
-                options.Include(fetchStrategy));
+            var query = AsQueryable(fetchStrategy);
 
             var result = await query
                 .ApplySpecificationOptions(options)
@@ -337,7 +337,7 @@
         {
             Guard.NotNull(selector, nameof(selector));
 
-            var result = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
+            var result = AsQueryable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
@@ -351,7 +351,7 @@
         {
             Guard.NotNull(selector, nameof(selector));
 
-            var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
+            var query = AsQueryable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options);
 
@@ -367,7 +367,7 @@
 
         public Task<int> CountAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            var result = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
+            var result = AsQueryable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
@@ -380,7 +380,7 @@
         {
             Guard.NotNull(options, nameof(options));
 
-            var result = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
+            var result = AsQueryable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
@@ -397,7 +397,7 @@
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
+            var query = AsQueryable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options);
 
@@ -427,7 +427,7 @@
             Guard.NotNull(keySelector, nameof(keySelector));
             Guard.NotNull(resultSelector, nameof(resultSelector));
 
-            var query = ApplyFetchingOptions(AsQueryable<TEntity>(), options)
+            var query = AsQueryable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options);
 
             if (options?.SortingProperties.Count > 0)

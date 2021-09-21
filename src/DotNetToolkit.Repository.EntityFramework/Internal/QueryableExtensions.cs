@@ -2,18 +2,19 @@
 {
     using Configuration.Conventions;
     using Extensions;
-    using Query;
+    using Query.Strategies;
     using System.Data.Entity;
     using System.Linq;
     using Utility;
 
     internal static class QueryableExtensions
     {
-        public static IQueryable<T> ApplyFetchingOptions<T>(this IQueryable<T> query, IRepositoryConventions conventions, IQueryOptions<T> options) where T : class
+        public static IQueryable<T> ApplyFetchingOptions<T>(this IQueryable<T> query, IRepositoryConventions conventions, IFetchQueryStrategy<T> fetchStrategy) where T : class
         {
             Guard.NotNull(query, nameof(query));
+            Guard.NotNull(conventions, nameof(conventions));
 
-            var fetchingPaths = options.DefaultIfFetchStrategyEmpty(conventions).PropertyPaths.ToList();
+            var fetchingPaths = fetchStrategy.DefaultIfFetchStrategyEmpty(conventions).PropertyPaths.ToList();
 
             if (fetchingPaths.Any())
                 query = fetchingPaths.Aggregate(query, (current, path) => current.Include(path));

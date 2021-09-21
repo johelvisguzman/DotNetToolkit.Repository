@@ -2,8 +2,7 @@
 {
     using Azure;
     using Azure.Storage.Blobs;
-    using Configuration.Conventions;
-    using Configuration.Logging;
+    using Configuration;
     using Extensions;
     using Properties;
     using Query;
@@ -15,10 +14,9 @@
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
-    using Transactions;
     using Utility;
 
-    internal class AzureStorageBlobRepositoryContext : IAzureStorageBlobRepositoryContext
+    internal class AzureStorageBlobRepositoryContext : LinqEnumerableRepositoryContextBase, IAzureStorageBlobRepositoryContext
     {
         #region Constructors
 
@@ -35,13 +33,16 @@
 
             if (createIfNotExists)
                 BlobContainer.CreateIfNotExists();
-
-            Conventions = RepositoryConventions.Default();
         }
 
         #endregion
 
         #region Private Methods
+
+        private IAsyncEnumerable<TEntity> AsAsyncEnumerable<TEntity>() where TEntity : class
+        {
+            return DownloadEntitiesAsync<TEntity>();
+        }
 
         private BlobClient GetBlobClient<TEntity>(TEntity entity) where TEntity : class
         {
@@ -117,6 +118,15 @@
 
         #endregion
 
+        #region Overrides of LinqEnumerableRepositoryContextBase
+
+        protected override IEnumerable<TEntity> AsEnumerable<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy)
+        {
+            return DownloadEntities<TEntity>();
+        }
+
+        #endregion
+
         #region Implementation of IAzureStorageBlobRepositoryContext
 
         public BlobContainerClient BlobContainer { get; }
@@ -125,23 +135,17 @@
 
         #region Implementation of IRepositoryContext
 
-        public ITransactionManager CurrentTransaction { get; set; }
-
-        public IRepositoryConventions Conventions { get; }
-
-        public ILoggerProvider LoggerProvider { get; set; } = NullLoggerProvider.Instance;
-
-        public void Add<TEntity>(TEntity entity) where TEntity : class
+        public override void Add<TEntity>(TEntity entity)
         {
             UploadEntity(Guard.NotNull(entity, nameof(entity)));
         }
 
-        public void Update<TEntity>(TEntity entity) where TEntity : class
+        public override void Update<TEntity>(TEntity entity)
         {
             UploadEntity(Guard.NotNull(entity, nameof(entity)));
         }
 
-        public void Remove<TEntity>(TEntity entity) where TEntity : class
+        public override void Remove<TEntity>(TEntity entity)
         {
             Guard.NotNull(entity, nameof(entity));
 
@@ -150,24 +154,9 @@
             blob.DeleteIfExists();
         }
 
-        public int SaveChanges() => -1;
+        public override int SaveChanges() => -1;
 
-        public IEnumerable<TEntity> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector) where TEntity : class
-        {
-            throw new NotSupportedException(Resources.QueryExecutionNotSupported);
-        }
-
-        public int ExecuteSqlCommand(string sql, CommandType cmdType, Dictionary<string, object> parameters)
-        {
-            throw new NotSupportedException(Resources.QueryExecutionNotSupported);
-        }
-
-        public ITransactionManager BeginTransaction()
-        {
-            throw new NotSupportedException(Resources.TransactionNotSupported);
-        }
-
-        public TEntity Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
+        public override TEntity Find<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
             Guard.NotEmpty(keyValues, nameof(keyValues));
 
@@ -175,120 +164,6 @@
             var result = DownloadEntity<TEntity>(key);
 
             return result;
-        }
-
-        public TResult Find<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
-        {
-            Guard.NotNull(selector, nameof(selector));
-
-            var result = DownloadEntities<TEntity>().AsQueryable()
-                .ApplySpecificationOptions(options)
-                .ApplySortingOptions(Conventions, options)
-                .ApplyPagingOptions(options)
-                .Select(selector)
-                .FirstOrDefault();
-
-            return result;
-        }
-
-        public PagedQueryResult<IEnumerable<TResult>> FindAll<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector) where TEntity : class
-        {
-            Guard.NotNull(selector, nameof(selector));
-
-            var query = DownloadEntities<TEntity>().AsQueryable()
-                .ApplySpecificationOptions(options)
-                .ApplySortingOptions(Conventions, options);
-
-            var total = query.Count();
-
-            var result = query
-                .ApplyPagingOptions(options)
-                .Select(selector)
-                .ToList();
-
-            return new PagedQueryResult<IEnumerable<TResult>>(result, total);
-        }
-
-        public int Count<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
-        {
-            var result = DownloadEntities<TEntity>().AsQueryable()
-                .ApplySpecificationOptions(options)
-                .ApplySortingOptions(Conventions, options)
-                .ApplyPagingOptions(options)
-                .Count();
-
-            return result;
-        }
-
-        public bool Exists<TEntity>(IQueryOptions<TEntity> options) where TEntity : class
-        {
-            Guard.NotNull(options, nameof(options));
-
-            var result = DownloadEntities<TEntity>().AsQueryable()
-                .ApplySpecificationOptions(options)
-                .ApplySortingOptions(Conventions, options)
-                .ApplyPagingOptions(options)
-                .Any();
-
-            return result;
-        }
-
-        public PagedQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TEntity, TDictionaryKey, TElement>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TDictionaryKey>> keySelector, Expression<Func<TEntity, TElement>> elementSelector) where TEntity : class
-        {
-            Guard.NotNull(keySelector, nameof(keySelector));
-            Guard.NotNull(elementSelector, nameof(elementSelector));
-
-            var keySelectFunc = keySelector.Compile();
-            var elementSelectorFunc = elementSelector.Compile();
-
-            var query = DownloadEntities<TEntity>().AsQueryable()
-                .ApplySpecificationOptions(options)
-                .ApplySortingOptions(Conventions, options);
-
-            Dictionary<TDictionaryKey, TElement> result;
-            int total;
-
-            if (options != null && options.PageSize != -1)
-            {
-                total = query.Count();
-
-                result = query
-                    .ApplyPagingOptions(options)
-                    .ToDictionary(keySelectFunc, elementSelectorFunc);
-            }
-            else
-            {
-                // Gets the total count from memory
-                result = query.ToDictionary(keySelectFunc, elementSelectorFunc);
-                total = result.Count;
-            }
-
-            return new PagedQueryResult<Dictionary<TDictionaryKey, TElement>>(result, total);
-        }
-
-        public PagedQueryResult<IEnumerable<TResult>> GroupBy<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector) where TEntity : class
-        {
-            Guard.NotNull(keySelector, nameof(keySelector));
-            Guard.NotNull(resultSelector, nameof(resultSelector));
-
-            var query = DownloadEntities<TEntity>().AsQueryable()
-                .ApplySpecificationOptions(options);
-
-            if (options?.SortingProperties.Count > 0)
-            {
-                throw new InvalidOperationException(Resources.GroupBySortingNotSupported);
-            }
-
-            var total = query.Count();
-
-            var result = query
-                .ApplyPagingOptions(options)
-                .GroupBy(keySelector)
-                .OrderBy(x => x.Key)
-                .Select(resultSelector)
-                .ToList();
-
-            return new PagedQueryResult<IEnumerable<TResult>>(result, total);
         }
 
         #endregion
@@ -342,7 +217,7 @@
 
             var selectorFunc = selector.Compile();
 
-            var result = await DownloadEntitiesAsync<TEntity>()
+            var result = await AsAsyncEnumerable<TEntity>()
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
@@ -374,7 +249,7 @@
 
         public async Task<int> CountAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = default) where TEntity : class
         {
-            var result = await DownloadEntitiesAsync<TEntity>()
+            var result = await AsAsyncEnumerable<TEntity>()
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
@@ -387,7 +262,7 @@
         {
             Guard.NotNull(options, nameof(options));
 
-            var result = await DownloadEntitiesAsync<TEntity>()
+            var result = await AsAsyncEnumerable<TEntity>()
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
@@ -432,15 +307,6 @@
         public Task<PagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TEntity, TGroupKey, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TGroupKey>> keySelector, Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = default) where TEntity : class
         {
             return Task.FromResult(GroupBy<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector));
-        }
-
-        #endregion
-
-        #region Implementation of IDisposable
-
-        public void Dispose()
-        {
-            CurrentTransaction = null;
         }
 
         #endregion
