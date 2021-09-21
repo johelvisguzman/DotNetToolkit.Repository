@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Test.Tests
+﻿namespace DotNetToolkit.Repository.Test
 {
     using Configuration.Conventions.Internal;
     using Test.Data;

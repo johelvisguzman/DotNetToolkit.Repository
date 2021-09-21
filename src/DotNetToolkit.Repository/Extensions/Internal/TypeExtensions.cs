@@ -11,6 +11,17 @@
 
     internal static class TypeExtensions
     {
+        public static Type TryGetGenericTypeOrDefault([NotNull] this Type type, out bool isGenericCollection)
+        {
+            isGenericCollection = type.IsGenericCollection();
+            return isGenericCollection ? type.GetGenericArguments().First() : type;
+        }
+
+        public static Type GetGenericTypeOrDefault([NotNull] this Type type)
+        {
+            return type.TryGetGenericTypeOrDefault(out bool _);
+        }
+
         /// <summary>
         /// Gets the default value of the specified type.
         /// </summary>

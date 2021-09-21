@@ -31,6 +31,19 @@
         public Customer Customer { get; set; }
     }
 
+    public class CustomerAddressWithWithThreeCompositePrimaryKey
+    {
+        public int Id { get; set; }
+        public string Street { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public int CustomerId1 { get; set; }
+        public string CustomerId2 { get; set; }
+        public int CustomerId3 { get; set; }
+        [Required]
+        public CustomerWithThreeCompositePrimaryKey Customer { get; set; }
+    }
+
     public class CustomerWithThreeCompositePrimaryKey
     {
         [Key]
@@ -43,6 +56,7 @@
         [Column(Order = 3)]
         public int Id3 { get; set; }
         public string Name { get; set; }
+        public CustomerAddressWithWithThreeCompositePrimaryKey Address { get; set; }
     }
 
     public class CustomerWithNoId
