@@ -38,15 +38,12 @@
                 return new PropertyInfo[0];
 
             PropertyInfo[] propertyInfos = new PropertyInfo[0];
-            PropertyInfo[] foreignKeyPropertyInfosFromTarget;
-            PropertyInfo[] primaryKeyPropertyInfosFromSource;
 
-            if (TryGetForeignKeyPropertyInfos(foreignType, declaringType, out foreignKeyPropertyInfosFromTarget, out _))
+            if (TryGetForeignKeyPropertyInfos(foreignType, declaringType, out var foreignKeyPropertyInfosFromTarget, out _))
             {
                 propertyInfos = foreignKeyPropertyInfosFromTarget;
             }
-
-            if (TryGetForeignKeyPropertyInfos(declaringType, foreignType, out _, out primaryKeyPropertyInfosFromSource))
+            else if (TryGetForeignKeyPropertyInfos(declaringType, foreignType, out _, out var primaryKeyPropertyInfosFromSource))
             {
                 propertyInfos = primaryKeyPropertyInfosFromSource;
             }
