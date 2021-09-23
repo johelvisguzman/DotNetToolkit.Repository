@@ -102,27 +102,27 @@
         /// Apply a fetching options to the specified entity's query.
         /// </summary>
         /// <returns>The entity's query with the applied options.</returns>
-        public static IEnumerable<T> ApplyFetchingOptions<T>([NotNull] this IEnumerable<T> query, [NotNull] IRepositoryConventions conventions, [CanBeNull] IFetchQueryStrategy<T> fetchStrategy, [NotNull] Func<Type, IEnumerable<object>> innerQueryCallback) where T : class
+        public static IEnumerable<T> ApplyFetchingOptions<T>([NotNull] this IEnumerable<T> query, [CanBeNull] IFetchQueryStrategy<T> fetchStrategy, [NotNull] Func<Type, IEnumerable<object>> innerQueryCallback) where T : class
         {
             Guard.NotNull(query, nameof(query));
             Guard.NotNull(innerQueryCallback, nameof(innerQueryCallback));
 
             var mainTableType = typeof(T);
             var mainTablePropertiesMap = mainTableType.GetRuntimeProperties().ToDictionary(x => x.Name);
-            var fetchingPaths = fetchStrategy.DefaultIfFetchStrategyEmpty(conventions).PropertyPaths.ToList();
+            var fetchingPaths = fetchStrategy.DefaultIfFetchStrategyEmpty().PropertyPaths.ToList();
 
             foreach (var path in fetchingPaths)
             {
                 // Only do a join when the primary table has a foreign key property for the join table
                 var joinTablePropertyInfo = mainTablePropertiesMap[path];
-                var joinTableForeignKeyPropertyInfos = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(conventions, joinTablePropertyInfo);
+                var joinTableForeignKeyPropertyInfos = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(joinTablePropertyInfo);
 
                 if (joinTableForeignKeyPropertyInfos != null && joinTableForeignKeyPropertyInfos.Length > 0)
                 {
                     var joinTableType = joinTablePropertyInfo.PropertyType.TryGetGenericTypeOrDefault(out bool isJoinPropertyCollection);
                     var innerQuery = innerQueryCallback(joinTableType);
 
-                    var mainTablePrimaryKeyPropertyInfos = conventions.GetPrimaryKeyPropertyInfos(mainTableType);
+                    var mainTablePrimaryKeyPropertyInfos = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(mainTableType);
                     var mainTablePropertyInfo = joinTableType.GetRuntimeProperties().FirstOrDefault(x => x.PropertyType == mainTableType);
 
                     var comparer = new ObjectArrayComparer();
