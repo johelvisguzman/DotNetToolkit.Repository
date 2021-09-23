@@ -16,21 +16,20 @@
     {
         private static readonly ConcurrentDictionary<PropertyInfo, PropertyInfo[]> _foreignKeyCache = new ConcurrentDictionary<PropertyInfo, PropertyInfo[]>();
 
-        public static PropertyInfo[] GetForeignKeyPropertyInfos([NotNull] IRepositoryConventions conventions, [NotNull] PropertyInfo pi)
+        public static PropertyInfo[] GetForeignKeyPropertyInfos([NotNull] PropertyInfo pi)
         {
-            Guard.NotNull(conventions, nameof(conventions));
             Guard.NotNull(pi, nameof(pi));
             
             if (!_foreignKeyCache.TryGetValue(pi, out PropertyInfo[] result))
             {
-                result = GetForeignKeyPropertyInfosCore(conventions, pi);
+                result = GetForeignKeyPropertyInfosCore(pi);
                 _foreignKeyCache.TryAdd(pi, result);
             }
             
             return result;
         }
 
-        private static PropertyInfo[] GetForeignKeyPropertyInfosCore([NotNull] IRepositoryConventions conventions, PropertyInfo pi)
+        private static PropertyInfo[] GetForeignKeyPropertyInfosCore(PropertyInfo pi)
         {
             var foreignType = pi.PropertyType.GetGenericTypeOrDefault();
             var declaringType = pi.DeclaringType;
@@ -38,9 +37,31 @@
             if (foreignType.IsEnumerable() || declaringType.IsEnumerable())
                 return new PropertyInfo[0];
 
-            var properties = foreignType.GetRuntimeProperties().Where(ModelConventionHelper.IsColumnMapped).ToList();
-            var foreignNavigationPropertyInfo = properties.SingleOrDefault(x => x.PropertyType == declaringType);
+            PropertyInfo[] propertyInfos = new PropertyInfo[0];
+            PropertyInfo[] foreignKeyPropertyInfosFromTarget;
+            PropertyInfo[] primaryKeyPropertyInfosFromSource;
+
+            if (TryGetForeignKeyPropertyInfos(foreignType, declaringType, out foreignKeyPropertyInfosFromTarget, out _))
+            {
+                propertyInfos = foreignKeyPropertyInfosFromTarget;
+            }
+
+            if (TryGetForeignKeyPropertyInfos(declaringType, foreignType, out _, out primaryKeyPropertyInfosFromSource))
+            {
+                propertyInfos = primaryKeyPropertyInfosFromSource;
+            }
+
+            return propertyInfos;
+        }
+
+        private static bool TryGetForeignKeyPropertyInfos(Type source, Type target, out PropertyInfo[] foreignKeyPropertyInfosFromTarget, out PropertyInfo[] primaryKeyPropertyInfosFromSource)
+        {
+            var properties = source.GetRuntimeProperties().Where(ModelConventionHelper.IsColumnMapped).ToList();
+            var foreignNavigationPropertyInfo = properties.SingleOrDefault(x => x.PropertyType == target);
             var propertyInfos = new List<PropertyInfo>();
+
+            foreignKeyPropertyInfosFromTarget = null;
+            primaryKeyPropertyInfosFromSource = null;
 
             if (foreignNavigationPropertyInfo != null)
             {
@@ -58,7 +79,7 @@
                                 string.Format(
                                     Resources.ForeignKeyAttributeOnPropertyNotFoundOnDependentType,
                                     propertyInfosWithForeignKey.Name,
-                                    foreignType.FullName,
+                                    source.FullName,
                                     foreignKeyAttributeName));
                         }
                     }
@@ -80,7 +101,7 @@
                 }
 
                 // Try to find by naming convention
-                var primaryKeyPropertyInfos = conventions.GetPrimaryKeyPropertyInfos(declaringType);
+                var primaryKeyPropertyInfos = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(target);
 
                 if (!propertyInfos.Any() && primaryKeyPropertyInfos.Any())
                 {
@@ -95,9 +116,17 @@
                         }
                     }
                 }
+
+                if (propertyInfos.Any())
+                {
+                    foreignKeyPropertyInfosFromTarget = propertyInfos.ToArray();
+                    primaryKeyPropertyInfosFromSource = primaryKeyPropertyInfos;
+
+                    return true;
+                }
             }
 
-            return propertyInfos.ToArray();
+            return false;
         }
     }
 }

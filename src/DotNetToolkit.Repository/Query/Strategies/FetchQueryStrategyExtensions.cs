@@ -25,5 +25,16 @@
                 ? source
                 : FetchQueryStrategy<T>.Default(conventions);
         }
+
+        /// <summary>
+        /// Returns the fetch strategy, or a default valued if the sequence is empty.
+        /// </summary>
+        /// <typeparam name="T">The type of the entity.</typeparam>
+        /// <param name="source">The source.</param>
+        /// <returns>The fetching strategy.</returns>
+        public static IFetchQueryStrategy<T> DefaultIfFetchStrategyEmpty<T>([CanBeNull] this IFetchQueryStrategy<T> source)
+        {
+            return source.DefaultIfFetchStrategyEmpty(RepositoryConventions.Default());
+        }
     }
 }

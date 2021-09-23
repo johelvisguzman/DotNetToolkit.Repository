@@ -50,10 +50,7 @@
         {
             return _underlyingContext
                 .FindAll<TEntity>()
-                .ApplyFetchingOptions(
-                    Conventions,
-                    fetchStrategy,
-                    type => _underlyingContext.FindAll(type));
+                .ApplyFetchingOptions(fetchStrategy, _underlyingContext.FindAll);
         }
 
         #endregion
