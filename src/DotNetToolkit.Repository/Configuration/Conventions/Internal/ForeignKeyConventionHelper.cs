@@ -105,7 +105,8 @@
                     foreach (var primaryKeyPropertyInfo in primaryKeyPropertyInfos)
                     {
                         var foreignPrimaryKeyName = ModelConventionHelper.GetColumnName(primaryKeyPropertyInfo);
-                        var propertyInfo = properties.FirstOrDefault(x => x.Name == $"{foreignNavigationPropertyInfo.Name}{foreignPrimaryKeyName}");
+                        var propertyName = $"{foreignNavigationPropertyInfo.Name}{foreignPrimaryKeyName}";
+                        var propertyInfo = properties.FirstOrDefault(x => x.Name == propertyName);
 
                         if (propertyInfo != null)
                         {
