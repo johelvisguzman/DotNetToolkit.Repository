@@ -12,34 +12,10 @@
 
     internal static class ModelConventionHelper
     {
-        private static readonly ConcurrentDictionary<Type, string> _tableNameCache = new ConcurrentDictionary<Type, string>();
         private static readonly ConcurrentDictionary<PropertyInfo, bool> _isColumnMappedCache = new ConcurrentDictionary<PropertyInfo, bool>();
         private static readonly ConcurrentDictionary<PropertyInfo, bool> _isColumnIdentityCache = new ConcurrentDictionary<PropertyInfo, bool>();
         private static readonly ConcurrentDictionary<PropertyInfo, int?> _columnOrderCache = new ConcurrentDictionary<PropertyInfo, int?>();
         private static readonly ConcurrentDictionary<PropertyInfo, string> _columnNameCache = new ConcurrentDictionary<PropertyInfo, string>();
-
-        public static string GetTableName([NotNull] Type entityType)
-        {
-            Guard.NotNull(entityType, nameof(entityType));
-
-            if (!_tableNameCache.TryGetValue(entityType, out string result))
-            {
-                result = GetTableNameCore(entityType);
-                _tableNameCache.TryAdd(entityType, result);
-            }
-
-            return result;
-        }
-
-        private static string GetTableNameCore(Type type)
-        {
-            var tableName = type.GetTypeInfo().GetCustomAttribute<TableAttribute>()?.Name;
-
-            if (string.IsNullOrEmpty(tableName))
-                tableName = PluralizationService.Pluralize(type.Name);
-
-            return tableName;
-        }
 
         public static bool IsColumnMapped([NotNull] PropertyInfo pi)
         {

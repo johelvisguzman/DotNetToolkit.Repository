@@ -34,14 +34,7 @@
             var propertyInfos = entityType
                 .GetRuntimeProperties()
                 .Where(x => ModelConventionHelper.IsColumnMapped(x) && x.GetCustomAttribute<KeyAttribute>() != null)
-                .OrderBy(x =>
-                {
-                    var columnAttribute = x.GetCustomAttribute<ColumnAttribute>();
-                    if (columnAttribute != null && columnAttribute.Order > 0)
-                        return columnAttribute.Order;
-
-                    return int.MaxValue;
-                })
+                .OrderBy(GetColumnOrder)
                 .ToList();
 
             // Gets by naming convention
@@ -61,6 +54,15 @@
             }
 
             return propertyInfos.ToArray();
+        }
+
+        private static int GetColumnOrder(PropertyInfo x)
+        {
+            var columnAttribute = x.GetCustomAttribute<ColumnAttribute>();
+            if (columnAttribute != null && columnAttribute.Order > 0)
+                return columnAttribute.Order;
+
+            return int.MaxValue;
         }
 
         private static IEnumerable<string> GetDefaultPrimaryKeyNameChecks([NotNull] Type entityType)
