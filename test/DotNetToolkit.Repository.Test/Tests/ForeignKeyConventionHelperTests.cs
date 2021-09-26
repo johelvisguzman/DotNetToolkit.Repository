@@ -10,48 +10,77 @@
         [Fact]
         public void FindForeignKeysFromNavigationProperty()
         {
-            var keyInfos = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(
-                ExpressionHelper.GetPropertyInfo<Customer>(x => x.Address));
+            var rightPi = ExpressionHelper.GetPropertyInfo<Customer>(x => x.Address);
+            var leftPi = ExpressionHelper.GetPropertyInfo<CustomerAddress>(x => x.Customer);
 
-            Assert.Single(keyInfos);
-            Assert.Equal(nameof(CustomerAddress.CustomerId), keyInfos[0].Name);
+            var result = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(rightPi);
 
-            keyInfos = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(
-                ExpressionHelper.GetPropertyInfo<Customer>(x => x.Phone));
+            Assert.NotNull(result);
 
-            Assert.Single(keyInfos);
-            Assert.Equal(nameof(CustomerPhone.CustomerId), keyInfos[0].Name);
+            Assert.Equal(leftPi, result.LeftNavPi);
+             Assert.Equal(nameof(Customer.Id), result.LeftKeysToJoinOn[0].Name);
+
+            Assert.Equal(rightPi, result.RightNavPi);
+            Assert.Equal(nameof(CustomerAddress.CustomerId), result.RightKeysToJoinOn[0].Name);
         }
 
         [Fact]
         public void FindForeignKeysFromSource()
         {
-            var keyInfos = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(
-                ExpressionHelper.GetPropertyInfo<CustomerPhone>(x => x.Customer));
+            var rightPi = ExpressionHelper.GetPropertyInfo<CustomerPhone>(x => x.Customer);
+            var leftPi = ExpressionHelper.GetPropertyInfo<Customer>(x => x.Phone);
 
-            Assert.Single(keyInfos);
-            Assert.Equal(nameof(Customer.Id), keyInfos[0].Name);
+            var result = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(rightPi);
+
+            Assert.NotNull(result);
+
+            Assert.Equal(leftPi, result.LeftNavPi);
+            Assert.Equal(nameof(CustomerPhone.CustomerId), result.LeftKeysToJoinOn[0].Name);
+
+            Assert.Equal(rightPi, result.RightNavPi);
+            Assert.Equal(nameof(CustomerPhone.Id), result.RightKeysToJoinOn[0].Name);
         }
 
         [Fact]
         public void FindForeignKeysWithNavigationPropertyHavingCompositeKey()
         {
-            var keyInfos = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(
-                ExpressionHelper.GetPropertyInfo<CustomerWithThreeCompositePrimaryKey>(x => x.Address));
+            var rightPi = ExpressionHelper.GetPropertyInfo<CustomerWithThreeCompositePrimaryKey>(x => x.Address);
 
-            Assert.Equal(3, keyInfos.Length);
-            Assert.Equal(nameof(CustomerAddressWithWithThreeCompositePrimaryKey.CustomerId1), keyInfos[0].Name);
-            Assert.Equal(nameof(CustomerAddressWithWithThreeCompositePrimaryKey.CustomerId2), keyInfos[1].Name);
-            Assert.Equal(nameof(CustomerAddressWithWithThreeCompositePrimaryKey.CustomerId3), keyInfos[2].Name);
+            var result = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(rightPi);
+
+            var rightKeys = result.RightKeysToJoinOn;
+
+            Assert.Equal(3, rightKeys.Length);
+            Assert.Equal(nameof(CustomerAddressWithWithThreeCompositePrimaryKey.CustomerId1), rightKeys[0].Name);
+            Assert.Equal(nameof(CustomerAddressWithWithThreeCompositePrimaryKey.CustomerId2), rightKeys[1].Name);
+            Assert.Equal(nameof(CustomerAddressWithWithThreeCompositePrimaryKey.CustomerId3), rightKeys[2].Name);
+        }
+
+        [Fact]
+        public void FindForeignKeysFromSourceWithForeignKeyAttributeOnNavigationProperty()
+        {
+            var rightPi = ExpressionHelper.GetPropertyInfo<CustomerWithForeignKeyAttribute>(x => x.Address);
+            var leftPi = ExpressionHelper.GetPropertyInfo<CustomerAddressWithCustomerWithForeignKeyAttribute>(x => x.Customer);
+
+            var result = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(rightPi);
+
+            Assert.NotNull(result);
+
+            Assert.Equal(leftPi, result.LeftNavPi);
+            Assert.Equal(nameof(CustomerWithForeignKeyAttribute.AddressRefId), result.LeftKeysToJoinOn[0].Name);
+
+            Assert.Equal(rightPi, result.RightNavPi);
+            Assert.Equal(nameof(CustomerAddressWithCustomerWithForeignKeyAttribute.Id), result.RightKeysToJoinOn[0].Name);
         }
 
         [Fact]
         public void CannotFindForeignKeysWithoutIds()
         {
-            var keyInfos = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(
-                ExpressionHelper.GetPropertyInfo<CustomerWithNoId>(x => x.Address));
+            var rightPi = ExpressionHelper.GetPropertyInfo<CustomerWithNoId>(x => x.Address);
 
-            Assert.Empty(keyInfos);
+            var result = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(rightPi);
+
+            Assert.Null(result);
         }
     }
 }

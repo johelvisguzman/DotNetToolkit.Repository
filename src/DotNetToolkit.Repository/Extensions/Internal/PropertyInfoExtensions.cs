@@ -25,5 +25,14 @@
         {
             return !IsComplex(pi);
         }
+
+        public static object GetSafeValue([NotNull] this PropertyInfo pi, object obj)
+        {
+            Guard.NotNull(pi, nameof(pi));
+
+            if (obj == null) return obj;
+
+            return pi.GetValue(obj);
+        }
     }
 }

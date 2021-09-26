@@ -72,4 +72,23 @@
         public string State { get; set; }
         public CustomerWithNoId Customer { get; set; }
     }
+
+    public class CustomerWithForeignKeyAttribute
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int AddressRefId { get; set; }
+
+        [ForeignKey("AddressRefId")]
+        public CustomerAddressWithCustomerWithForeignKeyAttribute Address { get; set; }
+    }
+
+    public class CustomerAddressWithCustomerWithForeignKeyAttribute
+    {
+        public int Id { get; set; }
+        public string Street { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public CustomerWithForeignKeyAttribute Customer { get; set; }
+    }
 }

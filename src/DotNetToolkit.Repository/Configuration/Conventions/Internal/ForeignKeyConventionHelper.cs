@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Configuration.Conventions.Internal
 {
-    using Extensions;
     using Extensions.Internal;
     using JetBrains.Annotations;
     using Properties;
@@ -14,63 +13,96 @@
 
     internal class ForeignKeyConventionHelper
     {
-        private static readonly ConcurrentDictionary<PropertyInfo, PropertyInfo[]> _foreignKeyCache = new ConcurrentDictionary<PropertyInfo, PropertyInfo[]>();
+        private static readonly ConcurrentDictionary<PropertyInfo, Result> _foreignKeyCache = new ConcurrentDictionary<PropertyInfo, Result>();
 
-        public static PropertyInfo[] GetForeignKeyPropertyInfos([NotNull] PropertyInfo pi)
+        public static Result GetForeignKeyPropertyInfos([NotNull] PropertyInfo pi)
         {
             Guard.NotNull(pi, nameof(pi));
-            
-            if (!_foreignKeyCache.TryGetValue(pi, out PropertyInfo[] result))
+
+            if (!_foreignKeyCache.TryGetValue(pi, out var result))
             {
                 result = GetForeignKeyPropertyInfosCore(pi);
                 _foreignKeyCache.TryAdd(pi, result);
             }
-            
+
             return result;
         }
 
-        private static PropertyInfo[] GetForeignKeyPropertyInfosCore(PropertyInfo pi)
+        private static Result GetForeignKeyPropertyInfosCore(PropertyInfo pi)
         {
             var foreignType = pi.PropertyType.GetGenericTypeOrDefault();
             var declaringType = pi.DeclaringType;
 
             if (foreignType.IsEnumerable() || declaringType.IsEnumerable())
-                return new PropertyInfo[0];
+                return null;
 
-            PropertyInfo[] propertyInfos = new PropertyInfo[0];
+            bool foundInSource;
 
-            if (TryGetForeignKeyPropertyInfos(foreignType, declaringType, out var foreignKeyPropertyInfosFromTarget, out _))
+            if (TryGetForeignKeyPropertyInfos(foreignType, declaringType,
+                out var foreignKeyPropertyInfos,
+                out var foreignNavPropertyInfo,
+                out var adjacentNavPropertyInfo))
             {
-                propertyInfos = foreignKeyPropertyInfosFromTarget;
+                foundInSource = false;
+                adjacentNavPropertyInfo = pi;
             }
-            else if (TryGetForeignKeyPropertyInfos(declaringType, foreignType, out _, out var primaryKeyPropertyInfosFromSource))
+            else if (TryGetForeignKeyPropertyInfos(declaringType, foreignType,
+                out foreignKeyPropertyInfos,
+                out foreignNavPropertyInfo,
+                out adjacentNavPropertyInfo))
             {
-                propertyInfos = primaryKeyPropertyInfosFromSource;
+                foundInSource = true;
+            }
+            else
+            {
+                return null;
             }
 
-            return propertyInfos;
+            var rightNavPi = pi;
+            var rightPiType = rightNavPi.PropertyType.GetGenericTypeOrDefault();
+            var rightKeysToJoinOn = foundInSource
+                ? PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(rightPiType)
+                : foreignKeyPropertyInfos;
+
+            var leftNavPi = foreignNavPropertyInfo;
+            var leftPiType = leftNavPi.PropertyType.GetGenericTypeOrDefault();
+            var leftKeysToJoinOn = foundInSource
+                ? foreignKeyPropertyInfos
+                : PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(leftPiType);
+
+            var newLeftNavPi = foundInSource ? adjacentNavPropertyInfo : leftNavPi;
+
+            return new Result(newLeftNavPi, leftKeysToJoinOn, rightNavPi, rightKeysToJoinOn);
         }
 
-        private static bool TryGetForeignKeyPropertyInfos(Type source, Type target, out PropertyInfo[] foreignKeyPropertyInfosFromTarget, out PropertyInfo[] primaryKeyPropertyInfosFromSource)
+        private static bool TryGetForeignKeyPropertyInfos(Type source, Type target,
+            out PropertyInfo[] foreignKeyPropertyInfos,
+            out PropertyInfo foreignNavPropertyInfo,
+            out PropertyInfo adjacentNavPropertyInfo)
         {
-            var properties = source.GetRuntimeProperties().Where(ModelConventionHelper.IsColumnMapped).ToList();
-            var foreignNavigationPropertyInfo = properties.SingleOrDefault(x => x.PropertyType == target);
-            var propertyInfos = new List<PropertyInfo>();
+            var propsFromSource = source.GetRuntimeProperties().Where(ModelConventionHelper.IsColumnMapped).ToList();
+            var propsFromTarget = target.GetRuntimeProperties().Where(ModelConventionHelper.IsColumnMapped).ToList();
 
-            foreignKeyPropertyInfosFromTarget = null;
-            primaryKeyPropertyInfosFromSource = null;
+            var foreignNavPi = propsFromSource.FirstOrDefault(x => x.PropertyType == target);
+            var adjacentNavPi = propsFromTarget.FirstOrDefault(x => x.PropertyType == source);
 
-            if (foreignNavigationPropertyInfo != null)
+            var foreignKeyPiList = new List<PropertyInfo>();
+
+            adjacentNavPropertyInfo = null;
+            foreignKeyPropertyInfos = null;
+            foreignNavPropertyInfo = null;
+
+            if (foreignNavPi != null)
             {
-                // Gets by checking the annotations
-                var propertyInfosWithForeignKeys = properties.Where(x => x.GetCustomAttribute<ForeignKeyAttribute>() != null).ToList();
+                // Gets by checking the annotations in source
+                var propertyInfosWithForeignKeys = propsFromSource.Where(x => x.GetCustomAttribute<ForeignKeyAttribute>() != null).ToList();
                 if (propertyInfosWithForeignKeys.Any())
                 {
                     // Ensure that the foreign key names are valid
                     foreach (var propertyInfosWithForeignKey in propertyInfosWithForeignKeys)
                     {
                         var foreignKeyAttributeName = propertyInfosWithForeignKey.GetCustomAttribute<ForeignKeyAttribute>().Name;
-                        if (!properties.Any(x => foreignKeyAttributeName.Equals(ModelConventionHelper.GetColumnName(x))))
+                        if (!propsFromSource.Any(x => foreignKeyAttributeName.Equals(ModelConventionHelper.GetColumnName(x))))
                         {
                             throw new InvalidOperationException(
                                 string.Format(
@@ -82,17 +114,17 @@
                     }
 
                     // Try to find by checking on the foreign key property
-                    propertyInfos = propertyInfosWithForeignKeys
+                    foreignKeyPiList = propertyInfosWithForeignKeys
                         .Where(DotNetToolkit.Repository.Extensions.Internal.PropertyInfoExtensions.IsPrimitive)
-                        .Where(x => x.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(foreignNavigationPropertyInfo.Name))
+                        .Where(x => x.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(foreignNavPi.Name))
                         .ToList();
 
                     // Try to find by checking on the navigation property
-                    if (!propertyInfos.Any())
+                    if (!foreignKeyPiList.Any())
                     {
-                        propertyInfos = properties
+                        foreignKeyPiList = propsFromSource
                             .Where(DotNetToolkit.Repository.Extensions.Internal.PropertyInfoExtensions.IsPrimitive)
-                            .Where(x => foreignNavigationPropertyInfo.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(ModelConventionHelper.GetColumnName(x)))
+                            .Where(x => foreignNavPi.GetCustomAttribute<ForeignKeyAttribute>().Name.Equals(ModelConventionHelper.GetColumnName(x)))
                             .ToList();
                     }
                 }
@@ -100,31 +132,48 @@
                 // Try to find by naming convention
                 var primaryKeyPropertyInfos = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(target);
 
-                if (!propertyInfos.Any() && primaryKeyPropertyInfos.Any())
+                if (!foreignKeyPiList.Any() && primaryKeyPropertyInfos.Any())
                 {
                     foreach (var primaryKeyPropertyInfo in primaryKeyPropertyInfos)
                     {
                         var foreignPrimaryKeyName = ModelConventionHelper.GetColumnName(primaryKeyPropertyInfo);
-                        var propertyName = $"{foreignNavigationPropertyInfo.Name}{foreignPrimaryKeyName}";
-                        var propertyInfo = properties.FirstOrDefault(x => x.Name == propertyName);
+                        var propertyName = $"{foreignNavPi.Name}{foreignPrimaryKeyName}";
+                        var propertyInfo = propsFromSource.FirstOrDefault(x => x.Name == propertyName);
 
                         if (propertyInfo != null)
                         {
-                            propertyInfos.Add(propertyInfo);
+                            foreignKeyPiList.Add(propertyInfo);
                         }
                     }
                 }
 
-                if (propertyInfos.Any())
+                if (foreignKeyPiList.Any())
                 {
-                    foreignKeyPropertyInfosFromTarget = propertyInfos.ToArray();
-                    primaryKeyPropertyInfosFromSource = primaryKeyPropertyInfos;
+                    foreignKeyPropertyInfos = foreignKeyPiList.ToArray();
+                    foreignNavPropertyInfo = foreignNavPi;
+                    adjacentNavPropertyInfo = adjacentNavPi;
 
                     return true;
                 }
             }
 
             return false;
+        }
+
+        public class Result
+        {
+            public PropertyInfo LeftNavPi { get; }
+            public PropertyInfo[] LeftKeysToJoinOn { get; }
+            public PropertyInfo RightNavPi { get; }
+            public PropertyInfo[] RightKeysToJoinOn { get; }
+
+            public Result(PropertyInfo leftNavPi, PropertyInfo[] leftKeysToJoinOn, PropertyInfo rightNavPi, PropertyInfo[] rightKeysToJoinOn)
+            {
+                LeftNavPi = leftNavPi;
+                LeftKeysToJoinOn = leftKeysToJoinOn;
+                RightNavPi = rightNavPi;
+                RightKeysToJoinOn = rightKeysToJoinOn;
+            }
         }
     }
 }
