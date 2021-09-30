@@ -225,7 +225,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>();
+            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Name.Equals(name));
             var entity = new Customer { Id = 1, Name = name };
 
             Assert.Null(repo.Find(x => x.Name.Equals(name)));
@@ -266,7 +266,7 @@
                 new Customer { Id = 2, Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name).SatisfyBy(x => x.Name.Contains("Random Name"));
 
             Assert.Null(repo.Find(x => x.Name.Contains("Random Name"))?.Name);
             Assert.Null(repo.Find(options)?.Name);
@@ -291,7 +291,7 @@
                 new Customer { Id = 2, Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Name).SatisfyBy(x => x.Name.Contains("Random Name"));
 
             Assert.Null(repo.Find(x => x.Name.Contains("Random Name"))?.Name);
             Assert.Null(repo.Find(options)?.Name);
@@ -818,7 +818,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>();
+            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Name.Equals(name));
             var entity = new Customer { Id = 1, Name = name };
 
             Assert.Null(await repo.FindAsync(x => x.Name.Equals(name)));
@@ -859,7 +859,7 @@
                 new Customer { Id = 2, Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name).SatisfyBy(x => x.Name.Contains("Random Name"));
 
             Assert.Null((await repo.FindAsync(x => x.Name.Contains("Random Name")))?.Name);
             Assert.Null((await repo.FindAsync(options))?.Name);
@@ -884,7 +884,7 @@
                 new Customer { Id = 2, Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Name).SatisfyBy(x => x.Name.Contains("Random Name"));
 
             Assert.Null((await repo.FindAsync(x => x.Name.Contains("Random Name")))?.Name);
             Assert.Null((await repo.FindAsync(options))?.Name);

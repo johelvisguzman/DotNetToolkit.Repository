@@ -149,7 +149,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>();
+            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Name.Equals(name)); ;
             var entity = new Customer {Name = name};
 
             Assert.Null(service.Get(x => x.Name.Equals(name)));
@@ -175,7 +175,7 @@
                 new Customer {Name = "Random Name 1"}
             };
 
-            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name).SatisfyBy(x => x.Name.Contains("Random Name"));
 
             Assert.Null(service.Get(x => x.Name.Contains("Random Name"))?.Name);
             Assert.Null(service.Get(options)?.Name);
@@ -200,7 +200,7 @@
                 new Customer {Name = "Random Name 1"}
             };
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Name).SatisfyBy(x => x.Name.Contains("Random Name"));
 
             Assert.Null(service.Get(x => x.Name.Contains("Random Name"))?.Name);
             Assert.Null(service.Get(options)?.Name);
@@ -523,7 +523,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>();
+            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Name.Equals(name));
             var entity = new Customer {Name = name};
 
             Assert.Null(await service.GetAsync(x => x.Name.Equals(name)));
@@ -549,7 +549,7 @@
                 new Customer {Name = "Random Name 1"}
             };
 
-            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name).SatisfyBy(x => x.Name.Contains("Random Name"));
 
             Assert.Null((await service.GetAsync(x => x.Name.Contains("Random Name")))?.Name);
             Assert.Null((await service.GetAsync(options))?.Name);
@@ -575,7 +575,7 @@
                 new Customer {Name = "Random Name 1"}
             };
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
+            var options = new QueryOptions<Customer>().OrderBy(x => x.Name).SatisfyBy(x => x.Name.Contains("Random Name"));
 
             Assert.Null((await service.GetAsync(x => x.Name.Contains("Random Name")))?.Name);
             Assert.Null((await service.GetAsync(options))?.Name);

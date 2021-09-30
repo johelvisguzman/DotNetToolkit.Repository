@@ -1664,7 +1664,11 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(selector, nameof(selector)));
+            InterceptError(() =>
+            {
+                Guard.NotNull(selector, nameof(selector));
+                Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
+            });
 
             TResult Getter() =>
                 UseContext<TResult>(
@@ -2462,7 +2466,11 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(selector, nameof(selector)));
+            InterceptError(() =>
+            {
+                Guard.NotNull(selector, nameof(selector));
+                Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
+            });
 
             Task<TResult> Getter() =>
                 UseContextAsync<TResult>(
