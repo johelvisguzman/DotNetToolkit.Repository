@@ -1,13 +1,10 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
     using Configuration.Conventions;
-    using Configuration.Conventions.Internal;
-    using Extensions.Internal;
     using JetBrains.Annotations;
     using Query;
     using Query.Strategies;
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
@@ -18,9 +15,6 @@
     /// </summary>
     public static class EnumerableExtensions
     {
-        private static readonly MethodInfo _castMethod = typeof(Enumerable).GetMethod(nameof(Enumerable.Cast));
-        private static readonly MethodInfo _toListMethod = typeof(Enumerable).GetMethod(nameof(Enumerable.ToList));
-
         /// <summary>
         /// Apply a specification strategy options to the specified entity's query.
         /// </summary>
@@ -107,118 +101,13 @@
             Guard.NotNull(query, nameof(query));
             Guard.NotNull(innerQueryCallback, nameof(innerQueryCallback));
 
-            var mainTableType = typeof(T);
-            var mainTablePropertiesMap = mainTableType.GetRuntimeProperties().ToDictionary(x => x.Name);
             var fetchingPaths = fetchStrategy.DefaultIfFetchStrategyEmpty().PropertyPaths.ToList();
+            var fetchHelper = new FetchHelper<T>(innerQueryCallback);
 
-            foreach (var path in fetchingPaths)
-            {
-                // Only do a join when the primary table has a foreign key property for the join table
-                var joinTablePropertyInfo = mainTablePropertiesMap[path];
-                var joinTableForeignKeyPropertyInfos = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(joinTablePropertyInfo);
-
-                if (joinTableForeignKeyPropertyInfos != null && joinTableForeignKeyPropertyInfos.Length > 0)
-                {
-                    var joinTableType = joinTablePropertyInfo.PropertyType.TryGetGenericTypeOrDefault(out bool isJoinPropertyCollection);
-                    var innerQuery = innerQueryCallback(joinTableType);
-
-                    var mainTablePrimaryKeyPropertyInfos = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(mainTableType);
-                    var mainTablePropertyInfo = joinTableType.GetRuntimeProperties().FirstOrDefault(x => x.PropertyType == mainTableType);
-
-                    var comparer = new ObjectArrayComparer();
-
-                    // key selector functions
-                    object[] outerKeySelectorFunc(T outer)
-                    {
-                        return mainTablePrimaryKeyPropertyInfos.Select(pi => pi.GetValue(outer)).ToArray();
-                    }
-
-                    object[] innerKeySelectorFunc(object inner)
-                    {
-                        return joinTableForeignKeyPropertyInfos.Select(pi => pi.GetValue(inner)).ToArray();
-                    }
-
-                    if (isJoinPropertyCollection)
-                    {
-                        query = query.GroupJoin(
-                            innerQuery,
-                            outerKeySelectorFunc,
-                            innerKeySelectorFunc,
-                            (outer, inner) =>
-                            {
-                                if (inner != null)
-                                {
-                                    var items = inner.Select(item =>
-                                    {
-                                        if (mainTablePropertyInfo != null)
-                                        {
-                                            // Sets the main table property in the join table
-                                            mainTablePropertyInfo.SetValue(item, outer);
-                                        }
-
-                                        return item;
-                                    }).ToList(joinTableType);
-
-                                    // Sets the join table property in the main table
-                                    joinTablePropertyInfo.SetValue(outer, items);
-                                }
-
-                                return outer;
-                            }, comparer);
-                    }
-                    else
-                    {
-                        query = query.LeftJoin(
-                            innerQuery,
-                            outerKeySelectorFunc,
-                            innerKeySelectorFunc,
-                            (outer, inner) =>
-                            {
-                                if (inner != null)
-                                {
-                                    if (mainTablePropertyInfo != null)
-                                    {
-                                        // Sets the main table property in the join table
-                                        mainTablePropertyInfo.SetValue(inner, outer);
-                                    }
-
-                                    // Sets the join table property in the main table
-                                    joinTablePropertyInfo.SetValue(outer, inner);
-                                }
-
-                                return outer;
-                            }, comparer);
-                    }
-                }
-            }
+            if (fetchingPaths.Any())
+                query = fetchingPaths.Aggregate(query, (current, path) => fetchHelper.Include(current, path));
 
             return query;
-        }
-
-        private static ICollection ToList(this IEnumerable items, Type type)
-        {
-            var castItems = _castMethod
-                .MakeGenericMethod(new Type[] { type })
-                .Invoke(null, new object[] { items });
-
-            var list = _toListMethod
-                .MakeGenericMethod(new Type[] { type })
-                .Invoke(null, new object[] { castItems });
-
-            return (ICollection)list;
-        }
-
-        private static IEnumerable<TResult> LeftJoin<TOuter, TInner, TKey, TResult>(this IEnumerable<TOuter> outer, IEnumerable<TInner> inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector, IEqualityComparer<TKey> comparer)
-        {
-            return outer.GroupJoin(
-                    inner,
-                    outerKeySelector,
-                    innerKeySelector,
-                    (o, i) => new { outer = o, innerCollection = i },
-                    comparer)
-                .SelectMany(
-                    a => a.innerCollection.DefaultIfEmpty(),
-                    (a, i) => resultSelector(a.outer, i));
         }
 
         private static IOrderedEnumerable<T> ApplyOrder<T>(this IEnumerable<T> source, string propertyName, string methodName)
@@ -261,20 +150,6 @@
         private static IOrderedEnumerable<T> ThenByDescending<T>(this IOrderedEnumerable<T> source, string propertyName)
         {
             return ApplyOrder<T>(source, propertyName, nameof(Enumerable.ThenByDescending));
-        }
-
-        private class ObjectArrayComparer : IEqualityComparer<object[]>
-        {
-            public bool Equals(object[] x, object[] y)
-            {
-                return x.Length == y.Length && Enumerable.SequenceEqual(x, y);
-            }
-
-            public int GetHashCode(object[] o)
-            {
-                var result = o.Aggregate((a, b) => a.GetHashCode() ^ b.GetHashCode());
-                return result.GetHashCode();
-            }
         }
     }
 }

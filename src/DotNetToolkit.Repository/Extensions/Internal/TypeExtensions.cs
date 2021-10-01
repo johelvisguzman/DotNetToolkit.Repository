@@ -13,12 +13,14 @@
     {
         public static Type TryGetGenericTypeOrDefault([NotNull] this Type type, out bool isGenericCollection)
         {
+            Guard.NotNull(type, nameof(type));
             isGenericCollection = type.IsGenericCollection();
             return isGenericCollection ? type.GetGenericArguments().First() : type;
         }
 
         public static Type GetGenericTypeOrDefault([NotNull] this Type type)
         {
+            Guard.NotNull(type, nameof(type));
             return type.TryGetGenericTypeOrDefault(out bool _);
         }
 
