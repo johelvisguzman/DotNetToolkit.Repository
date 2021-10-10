@@ -13,84 +13,124 @@
 
     internal class ForeignKeyConventionHelper
     {
-        private static readonly ConcurrentDictionary<PropertyInfo, Result> _foreignKeyCache = new ConcurrentDictionary<PropertyInfo, Result>();
+        private static readonly ConcurrentDictionary<Tuple<Type, Type, string>, Result> _foreignKeyCache = new ConcurrentDictionary<Tuple<Type, Type, string>, Result>();
 
         public static Result GetForeignKeyPropertyInfos([NotNull] PropertyInfo pi)
         {
             Guard.NotNull(pi, nameof(pi));
 
-            if (!_foreignKeyCache.TryGetValue(pi, out var result))
+            var sourceType = pi.DeclaringType;
+            var targetType = pi.PropertyType.GetGenericTypeOrDefault();
+
+            return GetForeignKeyPropertyInfos(sourceType, targetType, pi.Name);
+        }
+
+        public static Result GetForeignKeyPropertyInfos([NotNull] Type sourceType, [NotNull] Type targetType, [NotNull] string navPiName)
+        {
+            Guard.NotNull(sourceType, nameof(sourceType));
+            Guard.NotNull(targetType, nameof(targetType));
+
+            var key = Tuple.Create(sourceType, targetType, navPiName);
+
+            if (!_foreignKeyCache.TryGetValue(key, out var result))
             {
-                result = GetForeignKeyPropertyInfosCore(pi);
-                _foreignKeyCache.TryAdd(pi, result);
+                result = GetForeignKeyPropertyInfosCore(sourceType, targetType, navPiName);
+                _foreignKeyCache.TryAdd(key, result);
             }
 
             return result;
         }
 
-        private static Result GetForeignKeyPropertyInfosCore(PropertyInfo pi)
+        private static Result GetForeignKeyPropertyInfosCore(Type sourceType, Type targetType, string navPiName)
         {
-            var foreignType = pi.PropertyType.GetGenericTypeOrDefault();
-            var declaringType = pi.DeclaringType;
-
-            if (foreignType.IsEnumerable() || declaringType.IsEnumerable())
+            if (sourceType.IsEnumerable() || targetType.IsEnumerable())
                 return null;
 
             bool foundInSource;
 
-            if (TryGetForeignKeyPropertyInfos(foreignType, declaringType,
+            if (TryGetForeignKeyPropertyInfos(
+                sourceType, targetType, navPiName,
+                searchNavPiInSource: true,
                 out var foreignKeyPropertyInfos,
                 out var foreignNavPropertyInfo,
                 out var adjacentNavPropertyInfo))
             {
-                foundInSource = false;
-                adjacentNavPropertyInfo = pi;
+                foundInSource = true;
             }
-            else if (TryGetForeignKeyPropertyInfos(declaringType, foreignType,
+            else if (TryGetForeignKeyPropertyInfos(
+                targetType, sourceType, navPiName,
+                searchNavPiInSource: false,
                 out foreignKeyPropertyInfos,
                 out foreignNavPropertyInfo,
                 out adjacentNavPropertyInfo))
             {
-                foundInSource = true;
+                foundInSource = false;
             }
             else
             {
                 return null;
             }
 
-            var rightNavPi = pi;
-            var rightPiType = rightNavPi.PropertyType.GetGenericTypeOrDefault();
-            var rightKeysToJoinOn = foundInSource
-                ? PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(rightPiType)
-                : foreignKeyPropertyInfos;
+            // if left is null, its probably because there is no bi-directional nav properties in both types
+            PropertyInfo[] leftKeysToJoinOn = null;
+            var leftNavPi = foundInSource ? adjacentNavPropertyInfo : foreignNavPropertyInfo;
+            if (leftNavPi != null)
+            {
+                var leftPiType = leftNavPi.PropertyType.GetGenericTypeOrDefault();
+                leftKeysToJoinOn = foundInSource
+                    ? foreignKeyPropertyInfos
+                    : PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(leftPiType);
+            }
 
-            var leftNavPi = foreignNavPropertyInfo;
-            var leftPiType = leftNavPi.PropertyType.GetGenericTypeOrDefault();
-            var leftKeysToJoinOn = foundInSource
-                ? foreignKeyPropertyInfos
-                : PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(leftPiType);
+            PropertyInfo[] rightKeysToJoinOn = null;
+            var rightNavPi = foundInSource ? foreignNavPropertyInfo : adjacentNavPropertyInfo;
+            if (rightNavPi != null)
+            {
+                var rightPiType = rightNavPi.PropertyType.GetGenericTypeOrDefault();
+                rightKeysToJoinOn = foundInSource
+                    ? PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(rightPiType)
+                    : foreignKeyPropertyInfos;
+            }
+            // might be doing a backgward tarversal, which is the only reason why
+            // left might have something but the right side wont
+            else if (leftNavPi != null)
+            {
+                rightKeysToJoinOn = foreignKeyPropertyInfos;
+            }
 
-            var newLeftNavPi = foundInSource ? adjacentNavPropertyInfo : leftNavPi;
-
-            return new Result(newLeftNavPi, leftKeysToJoinOn, rightNavPi, rightKeysToJoinOn);
+            return new Result(leftNavPi, leftKeysToJoinOn, rightNavPi, rightKeysToJoinOn);
         }
 
-        private static bool TryGetForeignKeyPropertyInfos(Type source, Type target,
+        private static bool TryGetForeignKeyPropertyInfos(Type sourceType, Type targetType, string navPiName, bool searchNavPiInSource,
             out PropertyInfo[] foreignKeyPropertyInfos,
             out PropertyInfo foreignNavPropertyInfo,
             out PropertyInfo adjacentNavPropertyInfo)
         {
-            var propsFromSource = source.GetRuntimeProperties().Where(ModelConventionHelper.IsColumnMapped).ToList();
-            var propsFromTarget = target.GetRuntimeProperties().Where(ModelConventionHelper.IsColumnMapped).ToList();
-
-            var foreignNavPi = propsFromSource.FirstOrDefault(x => x.PropertyType == target);
-            var adjacentNavPi = propsFromTarget.FirstOrDefault(x => x.PropertyType == source);
-
-            var foreignKeyPiList = new List<PropertyInfo>();
-
             adjacentNavPropertyInfo = null;
             foreignKeyPropertyInfos = null;
             foreignNavPropertyInfo = null;
+
+            var propsFromSource = sourceType.GetRuntimeProperties().Where(ModelConventionHelper.IsColumnMapped).ToList();
+            var propsFromTarget = targetType.GetRuntimeProperties().Where(ModelConventionHelper.IsColumnMapped).ToList();
+
+            PropertyInfo foreignNavPi = null;
+            PropertyInfo adjacentNavPi = null;
+
+            if (!string.IsNullOrEmpty(navPiName))
+            {
+                if (searchNavPiInSource)
+                {
+                    foreignNavPi = propsFromSource.FirstOrDefault(x => x.Name == navPiName);
+                    adjacentNavPi = propsFromTarget.FirstOrDefault(x => x.PropertyType == sourceType);
+                }
+                else
+                {
+                    adjacentNavPi = propsFromTarget.FirstOrDefault(x => x.Name == navPiName);
+                    foreignNavPi = propsFromSource.FirstOrDefault(x => x.PropertyType == targetType);
+                }
+            }
+
+            var foreignKeyPiList = new List<PropertyInfo>();
 
             if (foreignNavPi != null)
             {
@@ -108,7 +148,7 @@
                                 string.Format(
                                     Resources.ForeignKeyAttributeOnPropertyNotFoundOnDependentType,
                                     propertyInfosWithForeignKey.Name,
-                                    source.FullName,
+                                    sourceType.FullName,
                                     foreignKeyAttributeName));
                         }
                     }
@@ -130,7 +170,7 @@
                 }
 
                 // Try to find by naming convention
-                var primaryKeyPropertyInfos = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(target);
+                var primaryKeyPropertyInfos = PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(targetType);
 
                 if (!foreignKeyPiList.Any() && primaryKeyPropertyInfos.Any())
                 {

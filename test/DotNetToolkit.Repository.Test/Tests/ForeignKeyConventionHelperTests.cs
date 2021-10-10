@@ -10,7 +10,7 @@
         [Fact]
         public void FindForeignKeysFromNavigationProperty()
         {
-            var rightPi = ExpressionHelper.GetPropertyInfo<Customer>(x => x.Address);
+            var rightPi = ExpressionHelper.GetPropertyInfo<Customer>(x => x.Address1);
             var leftPi = ExpressionHelper.GetPropertyInfo<CustomerAddress>(x => x.Customer);
 
             var result = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(rightPi);
@@ -18,7 +18,7 @@
             Assert.NotNull(result);
 
             Assert.Equal(leftPi, result.LeftNavPi);
-             Assert.Equal(nameof(Customer.Id), result.LeftKeysToJoinOn[0].Name);
+            Assert.Equal(nameof(Customer.Id), result.LeftKeysToJoinOn[0].Name);
 
             Assert.Equal(rightPi, result.RightNavPi);
             Assert.Equal(nameof(CustomerAddress.CustomerId), result.RightKeysToJoinOn[0].Name);
@@ -81,6 +81,21 @@
             var result = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(rightPi);
 
             Assert.Null(result);
+        }
+
+        [Fact]
+        public void FindForeignKeysFromSourceOneDirection()
+        {
+            var rightPi = ExpressionHelper.GetPropertyInfo<TableI>(x => x.TableJ);
+            var result = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(rightPi);
+
+            Assert.NotNull(result);
+
+            Assert.Null(result.LeftNavPi);
+            Assert.Null(result.LeftKeysToJoinOn);
+
+            Assert.Equal(rightPi, result.RightNavPi);
+            Assert.Equal(nameof(TableJ.Id), result.RightKeysToJoinOn[0].Name);
         }
     }
 }

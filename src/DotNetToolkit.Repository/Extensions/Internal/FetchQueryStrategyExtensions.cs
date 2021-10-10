@@ -4,6 +4,7 @@
     using Query.Strategies;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
     using System.Text;
@@ -12,6 +13,65 @@
     // https://github.com/SharpRepository/SharpRepository/tree/master/SharpRepository.Repository/FetchStrategies/FetchQueryStrategyExtensions.cs
     internal static class FetchQueryStrategyExtensions
     {
+        /// <summary>
+        /// Returns a new array of properties which have been merged by their corresponding sequence, and without and duplicates.
+        /// </summary>
+        /// <param name="paths">The paths to normalize.</param>
+        /// <returns>A new array of properties which have been merged by their corresponding sequence, and without and duplicates</returns>
+        public static string[] NormalizePropertyPaths([NotNull] this IEnumerable<string> paths)
+        {
+            Guard.NotNull(paths, nameof(paths));
+
+            if (paths != null)
+            {
+                var orderedPaths = paths
+                    .Select(x => new { Path = x, Props = x.Split('.') })
+                    .OrderBy(x => x.Props.Length)
+                    .ThenBy(x => x.Path)
+                    .ToArray();
+
+                var pathsSeqDict = new Dictionary<string, bool>();
+
+                for (int i = 0; i < orderedPaths.Length; i++)
+                {
+                    var p1 = orderedPaths[i];
+                    string currPathSeq = orderedPaths[i].Path;
+
+                    if (pathsSeqDict.ContainsKey(currPathSeq))
+                    {
+                        continue;
+                    }
+
+                    string[] currPaths = p1.Props;
+                    bool foundNextSeq = false;
+
+                    for (int j = 1; j < orderedPaths.Length; j++)
+                    {
+                        var p2 = orderedPaths[j];
+                        string nextPathSeq = p2.Path;
+                        string[] nextPaths = p2.Props;
+
+                        // compare the first few properties in both list
+                        if (currPaths.Length == nextPaths.Length - 1 &&
+                            currPaths.SequenceEqual(nextPaths.Take(nextPaths.Length - 1)))
+                        {
+                            currPathSeq = nextPathSeq;
+                            currPaths = nextPaths;
+                            foundNextSeq = true;
+                        }
+                    }
+
+                    if (foundNextSeq || currPaths.Length == 1)
+                        pathsSeqDict[currPathSeq] = true;
+                }
+
+                return pathsSeqDict.Keys.ToArray();
+            }
+
+            return new string[0] { };
+
+        }
+
         /// <summary>
         ///  Evaluates the Linq expression and returns the name of the property or the multiple level deep string representation of the Expression (i.e. prop.Collection.Property).
         /// </summary>

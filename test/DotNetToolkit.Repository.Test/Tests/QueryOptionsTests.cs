@@ -200,20 +200,20 @@
         public void FetchProperties()
         {
             var options = new QueryOptions<Customer>()
-                .Fetch(x => x.Address)
+                .Fetch(x => x.Address1)
                 .Fetch(x => x.Phone)
                 .Fetch(x => x.Phone.Customer);
 
-            Assert.Contains("Address", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
+            Assert.Contains("Address1", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
             Assert.Contains("Phone", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
             Assert.Contains("Phone.Customer", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
 
             options = new QueryOptions<Customer>()
-                .Include(new FetchQueryStrategy<Customer>().Fetch(x => x.Address))
+                .Include(new FetchQueryStrategy<Customer>().Fetch(x => x.Address1))
                 .Include(new FetchQueryStrategy<Customer>().Fetch(x => x.Phone))
                 .Fetch(x => x.Phone.Customer);
 
-            Assert.Contains("Address", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
+            Assert.Contains("Address1", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
             Assert.Contains("Phone", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
             Assert.Contains("Phone.Customer", ((IQueryOptions<Customer>)options).FetchStrategy.PropertyPaths);
         }
@@ -234,14 +234,14 @@
             Assert.Equal(expected, options.ToString());
 
             options = options
-                .Fetch("Address")
+                .Fetch("Address1")
                 .Fetch("Phone")
                 .Fetch("Phone.Customer");
 
             expected =
                 "QueryOptions<Customer>: [ " +
                 "\n\tSpecificationQueryStrategy<Customer>: [ null ]," +
-                "\n\tFetchQueryStrategy<Customer>: [ Paths = Address, Phone, Phone.Customer ]," +
+                "\n\tFetchQueryStrategy<Customer>: [ Paths = Address1, Phone, Phone.Customer ]," +
                 "\n\tSort: [ null ]," +
                 "\n\tPage: [ Index = -1, Size = -1 ]" +
                 " ]";
@@ -255,7 +255,7 @@
             expected =
                 "QueryOptions<Customer>: [ " +
                 "\n\tSpecificationQueryStrategy<Customer>: [ Predicate = x => (x.Name.Equals(\"Random Name\") AndAlso (x.Id > 50)) ]," +
-                "\n\tFetchQueryStrategy<Customer>: [ Paths = Address, Phone, Phone.Customer ]," +
+                "\n\tFetchQueryStrategy<Customer>: [ Paths = Address1, Phone, Phone.Customer ]," +
                 "\n\tSort: [ null ]," +
                 "\n\tPage: [ Index = -1, Size = -1 ]" +
                 " ]";
@@ -269,7 +269,7 @@
             expected =
                 "QueryOptions<Customer>: [ " +
                 "\n\tSpecificationQueryStrategy<Customer>: [ Predicate = x => (x.Name.Equals(\"Random Name\") AndAlso (x.Id > 50)) ]," +
-                "\n\tFetchQueryStrategy<Customer>: [ Paths = Address, Phone, Phone.Customer ]," +
+                "\n\tFetchQueryStrategy<Customer>: [ Paths = Address1, Phone, Phone.Customer ]," +
                 "\n\tSort: [ Id = Ascending, Name = Descending ]," +
                 "\n\tPage: [ Index = -1, Size = -1 ]" +
                 " ]";
@@ -282,7 +282,7 @@
             expected =
                 "QueryOptions<Customer>: [ " +
                 "\n\tSpecificationQueryStrategy<Customer>: [ Predicate = x => (x.Name.Equals(\"Random Name\") AndAlso (x.Id > 50)) ]," +
-                "\n\tFetchQueryStrategy<Customer>: [ Paths = Address, Phone, Phone.Customer ]," +
+                "\n\tFetchQueryStrategy<Customer>: [ Paths = Address1, Phone, Phone.Customer ]," +
                 "\n\tSort: [ Id = Ascending, Name = Descending ]," +
                 "\n\tPage: [ Index = 1, Size = 10 ]" +
                 " ]";
