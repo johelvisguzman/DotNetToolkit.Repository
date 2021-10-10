@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Extensions
 {
     using Configuration.Conventions;
+    using Extensions.Internal;
     using JetBrains.Annotations;
     using Query;
     using Query.Strategies;
@@ -102,10 +103,10 @@
             Guard.NotNull(innerQueryCallback, nameof(innerQueryCallback));
 
             var fetchingPaths = fetchStrategy.DefaultIfFetchStrategyEmpty().PropertyPaths.ToList();
-            var fetchHelper = new FetchHelper<T>(innerQueryCallback);
+            var fetchHelper = new FetchHelper(innerQueryCallback);
 
             if (fetchingPaths.Any())
-                query = fetchingPaths.Aggregate(query, (current, path) => fetchHelper.Include(current, path));
+                query = fetchingPaths.NormalizePropertyPaths().Aggregate(query, (current, path) => fetchHelper.Include(current, path));
 
             return query;
         }

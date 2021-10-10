@@ -8,12 +8,11 @@
     using System.Linq;
     using System.Reflection;
 
-    internal class FetchHelper<T>
+    internal class FetchHelper
     {
         #region Fields
 
         private readonly Func<Type, IEnumerable<object>> _innerQueryCallback;
-        private readonly Dictionary<string, bool> _fetchedQueries = new Dictionary<string, bool>();
         private static readonly IEqualityComparer<object[]> _comparer = new ObjectArrayComparer();
 
         private static readonly MethodInfo _castMethod = typeof(Enumerable).GetMethod(nameof(Enumerable.Cast));
@@ -32,52 +31,41 @@
 
         #region Public Methods
 
-        public IEnumerable<T> Include(IEnumerable<T> query, string path)
+        public IEnumerable<T> Include<T>(IEnumerable<T> query, string path)
         {
             Guard.NotNull(query, nameof(query));
             Guard.NotNull(path, nameof(path));
 
-            var pathList = path.Split('.');
-            var currentPath = pathList[pathList.Length - 1];
-            var firstPath = pathList[0];
-            var parentFullPath = GetParentPath(path);
+            IEnumerable<object> outerQuery = null;
+            Type pathPropType = null, lastPathPropType = null;
+            string pathPropName = null;
 
-            // Prevent from trying to fetch a navigation property without fetching it's parent first
-            if (pathList.Length > 1 && (_fetchedQueries.Any() && !_fetchedQueries.ContainsKey(parentFullPath)))
+            // Join nested nav queries
+            //
+            // if path = "B.C.D"
+            // then, reverse the path to "D.C.B",
+            // and join all the way down to the main query:
+            // D > C > B > MainQuery
+            var pathPropReversedList = GetPropertyInfos<T>(path).Select(x => new { x.Name, x.PropertyType }).Reverse().ToArray();
+            for (int i = 0; i < pathPropReversedList.Length; i++)
             {
-                return query;
+                var pathProp = pathPropReversedList[i];
+                pathPropType = pathProp.PropertyType;
+                pathPropName = pathProp.Name;
+
+                var currentQuery = _innerQueryCallback(pathPropType.GetGenericTypeOrDefault());
+
+                outerQuery = i != 0
+                    ? Join(outerQuery, lastPathPropType, currentQuery, pathPropType, pathPropName)
+                        .Select(x => x.Inner)
+                    : currentQuery;
+
+                lastPathPropType = pathPropType;
             }
-
-            var firstPi = typeof(T).GetProperty(firstPath);
-            var lastPi = GetPropertyInfos(parentFullPath).Last();
-            var lastPiType = lastPi.PropertyType.GetGenericTypeOrDefault();
-
-            IEnumerable<object> outerQuery;
-
-            if (pathList.Length > 1)
-            {
-                var currentPi = lastPiType.GetProperty(currentPath);
-                var currentPiType = currentPi.PropertyType.GetGenericTypeOrDefault();
-                var currentQuery = GetQuery(currentPiType);
-                var lastQuery = GetQuery(query, parentFullPath); // should include fetched entities
-
-                outerQuery = Join(lastQuery, currentQuery, currentPi);
-
-                if (firstPath != parentFullPath)
-                {
-                    outerQuery = GetPropertyInfosReverse(parentFullPath)
-                        .Aggregate(outerQuery, (current, pi) => current.Select(o => pi.GetSafeValue(o)));
-                }
-            }
-            else
-            {
-                outerQuery = GetQuery(lastPiType);
-            }
-
-            _fetchedQueries[path] = true;
 
             // Join with main query
-            query = Join(query.Cast<object>(), outerQuery, firstPi).Cast<T>();
+            query = Join(query, typeof(T), outerQuery, pathPropType, pathPropName)
+                .Select(x => x.Outer);
 
             return query;
         }
@@ -86,34 +74,7 @@
 
         #region Private Methods
 
-        private IEnumerable<object> GetQuery(IEnumerable<T> query, string path)
-        {
-            return GetPropertyInfos(path)
-                .Aggregate(query.Cast<object>(), (current, pi) =>
-                {
-                    return pi.PropertyType.IsGenericCollection()
-                        // Needs to flatten the collection query
-                        ? current.Select(o => pi.GetSafeValue(o))
-                            .Cast<IEnumerable<object>>()
-                            .SelectMany(x => x)
-                        : current.Select(o => pi.GetSafeValue(o));
-                });
-        }
-
-        private IEnumerable<object> GetQuery(Type type)
-        {
-            return _innerQueryCallback(type);
-        }
-
-        private static string GetParentPath(string path)
-        {
-            // if path = TableA.TableB.TableC
-            // then parentPath = TableA.TableB
-            var i = path.LastIndexOf('.');
-            return i >= 0 ? path.Substring(0, i) : path;
-        }
-
-        private static PropertyInfo[] GetPropertyInfos(string path)
+        private static PropertyInfo[] GetPropertyInfos<T>(string path)
         {
             // assumes we are able to get to the end of starting from the main type
             // this means that all properties need to link to each other somehow
@@ -125,58 +86,29 @@
 
             for (int i = 1; i < pathList.Length; i++)
             {
-                pi = pi.PropertyType.GetProperty(pathList[i]);
+                pi = pi.PropertyType.GetGenericTypeOrDefault().GetProperty(pathList[i]);
                 piList[i] = pi;
             }
 
             return piList;
         }
 
-        private static PropertyInfo[] GetPropertyInfosReverse(string path)
-        {
-            var piList = GetPropertyInfos(path);
-            var result = new List<PropertyInfo>();
-            var pathListReverse = path.Split('.').Reverse().ToArray();
-
-            for (int i = 0; i < pathListReverse.Length; i++)
-            {
-                bool found = false;
-
-                for (int j = 0; j < piList.Length - i; j++)
-                {
-                    if (piList[j + 1].Name == pathListReverse[i])
-                    {
-                        var pi = piList[j + 1].PropertyType
-                            .GetGenericTypeOrDefault()
-                            .GetProperty(piList[j].Name);
-
-                        result.Add(pi);
-
-                        found = true;
-
-                        break;
-                    }
-                }
-
-                if (!found) break;
-            }
-
-            return result.ToArray();
-        }
-
-        private static IEnumerable<object> Join(IEnumerable<object> outer, IEnumerable<object> inner, PropertyInfo rightNavPi)
+        private static IEnumerable<JoinResult<TOuter, object>> Join<TOuter>(IEnumerable<TOuter> outer, Type outerType, IEnumerable<object> inner, Type innerType, string propertyName)
         {
             // Only do a join when the primary table has a foreign key property for the join table
-            var fkConventionResult = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(rightNavPi);
+            var innerDefaultType = innerType.TryGetGenericTypeOrDefault(out bool isInnerTypeCollection);
+            var fkConventionResult = ForeignKeyConventionHelper.GetForeignKeyPropertyInfos(outerType, innerDefaultType, propertyName);
+            
             if (fkConventionResult != null)
             {
                 var leftNavPi = fkConventionResult.LeftNavPi;
                 var leftKeysToJoinOn = fkConventionResult.LeftKeysToJoinOn;
+                var rightNavPi = fkConventionResult.RightNavPi;
                 var rightKeysToJoinOn = fkConventionResult.RightKeysToJoinOn;
-                var rightPiType = rightNavPi.PropertyType.TryGetGenericTypeOrDefault(out bool isRightPiCollection);
+                var isRightTypeCollection = rightNavPi != null ? rightNavPi.PropertyType.IsEnumerable() : isInnerTypeCollection;
 
                 // key selector functions
-                object[] outerKeySelectorFunc(object o)
+                object[] outerKeySelectorFunc(TOuter o)
                 {
                     return leftKeysToJoinOn.Select(pi => pi.GetSafeValue(o)).ToArray();
                 }
@@ -186,7 +118,7 @@
                     return rightKeysToJoinOn.Select(pi => pi.GetSafeValue(i)).ToArray();
                 }
 
-                if (isRightPiCollection)
+                if (isRightTypeCollection)
                 {
                     return outer.GroupJoin(
                         inner,
@@ -204,13 +136,18 @@
                                         // Sets the main table property in the join table
                                         leftNavPi.SetValue(item, o);
                                     }
+
                                     return item;
-                                }), rightPiType);
-                                // Sets the join table property in the main table
-                                rightNavPi.SetValue(o, items);
+                                }), innerDefaultType);
+
+                                if (rightNavPi != null)
+                                {
+                                    // Sets the join table property in the main table
+                                    rightNavPi.SetValue(o, items);
+                                }
                             }
 
-                            return o;
+                            return new JoinResult<TOuter, object>(o, i);
                         }, _comparer);
                 }
 
@@ -228,14 +165,19 @@
                                 // Sets the main table property in the join table
                                 leftNavPi.SetValue(i, o);
                             }
-                            // Sets the join table property in the main table
-                            rightNavPi.SetValue(o, i);
+
+                            if (rightNavPi != null)
+                            {
+                                // Sets the join table property in the main table
+                                rightNavPi.SetValue(o, i);
+                            }
                         }
 
-                        return o;
+                        return new JoinResult<TOuter, object>(o, i);
                     }, _comparer);
             }
-            return outer;
+
+            return outer.Select(o => new JoinResult<TOuter, object>(o, null));
         }
 
         private static ICollection ToList(IEnumerable items, Type type)
@@ -279,6 +221,21 @@
             {
                 var result = o.Aggregate((a, b) => a.GetHashCode() ^ b.GetHashCode());
                 return result != null ? result.GetHashCode() : 0;
+            }
+        }
+
+        #endregion
+
+        #region Nested Type: JoinResult
+
+        class JoinResult<TOuter, TInner>
+        {
+            public TOuter Outer { get; }
+            public TInner Inner { get; }
+            public JoinResult(TOuter outer, TInner inner)
+            {
+                Outer = outer;
+                Inner = inner;
             }
         }
 

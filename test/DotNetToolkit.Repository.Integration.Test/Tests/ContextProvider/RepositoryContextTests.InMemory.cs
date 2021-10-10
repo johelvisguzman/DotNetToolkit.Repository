@@ -259,8 +259,13 @@
             var options = BuildOptions(ContextProviderType.InMemory);
             var factory = new RepositoryFactory(options);
 
+            var repoJ = factory.Create<TableJ>();
+            var j = new TableJ { Id = 55 };
+
+            repoJ.Add(j);
+
             var repoI = factory.Create<TableI>();
-            var i = new TableI { Id = 33 };
+            var i = new TableI { Id = 33, TableJId = j.Id };
 
             repoI.Add(i);
 
@@ -277,6 +282,7 @@
             var queryOptions = new QueryOptions<TableG>()
                 .Fetch(x => x.TableH)
                 .Fetch(x => x.TableH.TableI)
+                .Fetch(x => x.TableH.TableI.TableJ)
                 .SatisfyBy(x => x.Id == g.Id);
 
             var result = repoG.Find(queryOptions);
@@ -286,6 +292,9 @@
 
             Assert.NotNull(result.TableH.TableI);
             Assert.Equal(i.Id, result.TableH.TableI.Id);
+
+            Assert.NotNull(result.TableH.TableI.TableJ);
+            Assert.Equal(j.Id, result.TableH.TableI.TableJ.Id);
         }
 
         class TableA
@@ -357,6 +366,14 @@
         }
 
         class TableI
+        {
+            [DatabaseGenerated(DatabaseGeneratedOption.None)]
+            public int Id { get; set; }
+            public int TableJId { get; set; }
+            public TableJ TableJ { get; set; }
+        }
+
+        class TableJ
         {
             [DatabaseGenerated(DatabaseGeneratedOption.None)]
             public int Id { get; set; }
