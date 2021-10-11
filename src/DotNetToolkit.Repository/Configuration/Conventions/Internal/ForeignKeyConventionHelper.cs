@@ -71,32 +71,17 @@
                 return null;
             }
 
-            // if left is null, its probably because there is no bi-directional nav properties in both types
-            PropertyInfo[] leftKeysToJoinOn = null;
             var leftNavPi = foundInSource ? adjacentNavPropertyInfo : foreignNavPropertyInfo;
-            if (leftNavPi != null)
-            {
-                var leftPiType = leftNavPi.PropertyType.GetGenericTypeOrDefault();
-                leftKeysToJoinOn = foundInSource
-                    ? foreignKeyPropertyInfos
-                    : PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(leftPiType);
-            }
+            var leftKeysToJoinOn = foundInSource
+                ? foreignKeyPropertyInfos
+                : PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(
+                    leftNavPi.PropertyType.GetGenericTypeOrDefault());
 
-            PropertyInfo[] rightKeysToJoinOn = null;
             var rightNavPi = foundInSource ? foreignNavPropertyInfo : adjacentNavPropertyInfo;
-            if (rightNavPi != null)
-            {
-                var rightPiType = rightNavPi.PropertyType.GetGenericTypeOrDefault();
-                rightKeysToJoinOn = foundInSource
-                    ? PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(rightPiType)
-                    : foreignKeyPropertyInfos;
-            }
-            // might be doing a backgward tarversal, which is the only reason why
-            // left might have something but the right side wont
-            else if (leftNavPi != null)
-            {
-                rightKeysToJoinOn = foreignKeyPropertyInfos;
-            }
+            var rightKeysToJoinOn = foundInSource
+                ? PrimaryKeyConventionHelper.GetPrimaryKeyPropertyInfos(
+                    rightNavPi.PropertyType.GetGenericTypeOrDefault())
+                : foreignKeyPropertyInfos;
 
             return new Result(leftNavPi, leftKeysToJoinOn, rightNavPi, rightKeysToJoinOn);
         }

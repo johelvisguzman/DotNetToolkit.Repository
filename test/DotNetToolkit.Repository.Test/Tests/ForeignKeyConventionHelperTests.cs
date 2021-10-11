@@ -92,7 +92,7 @@
             Assert.NotNull(result);
 
             Assert.Null(result.LeftNavPi);
-            Assert.Null(result.LeftKeysToJoinOn);
+            Assert.Equal(nameof(TableI.TableJId), result.LeftKeysToJoinOn[0].Name);
 
             Assert.Equal(rightPi, result.RightNavPi);
             Assert.Equal(nameof(TableJ.Id), result.RightKeysToJoinOn[0].Name);
