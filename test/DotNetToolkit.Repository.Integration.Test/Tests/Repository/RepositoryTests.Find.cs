@@ -732,6 +732,7 @@
 
             var entity = new CustomerWithMultipleAddresses
             {
+                Id = 1,
                 Name = "Random Name",
             };
 
@@ -779,6 +780,7 @@
 
             var entity = new CustomerWithMultipleAddresses
             {
+                Id = 1,
                 Name = "Random Name"
             };
 
@@ -1361,6 +1363,7 @@
 
             var entity = new CustomerWithMultipleAddresses
             {
+                Id = 1,
                 Name = "Random Name"
             };
 
@@ -1408,6 +1411,7 @@
 
             var entity = new CustomerWithMultipleAddresses
             {
+                Id = 1,
                 Name = "Random Name"
             };
 

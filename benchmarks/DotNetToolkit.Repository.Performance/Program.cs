@@ -15,13 +15,23 @@
             EnsureDBSetup();
             Console.WriteLine("// * Database Setup: End *");
 
+#if NETCORE
+            Console.WriteLine("// * AzureStorageEmulator: Clear All *");
+            Running.AzureStorageEmulatorManager.Clear();
+
             Console.WriteLine("// * AzureStorageEmulator: Start *");
-            Running.AzureStorageEmulatorManager.Start();
+            Running.AzureStorageEmulatorManager.Start(); 
+#endif
 
             BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, new Config());
 
+#if NETCORE
             Running.AzureStorageEmulatorManager.Stop();
             Console.WriteLine("// * AzureStorageEmulator: End *");
+
+            Console.WriteLine("// * AzureStorageEmulator: Clear All *");
+            Running.AzureStorageEmulatorManager.Clear(); 
+#endif
         }
 
         private static void EnsureDBSetup()

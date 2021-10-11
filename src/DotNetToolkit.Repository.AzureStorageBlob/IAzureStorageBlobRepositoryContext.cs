@@ -10,8 +10,8 @@
     public interface IAzureStorageBlobRepositoryContext : IRepositoryContextAsync
     {
         /// <summary>
-        /// Gest the cloud blob container.
+        /// Gest the cloud blob client.
         /// </summary>
-        BlobContainerClient BlobContainer { get; }
+        BlobServiceClient Client { get; }
     }
 }

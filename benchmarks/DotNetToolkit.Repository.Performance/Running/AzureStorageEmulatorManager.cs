@@ -25,6 +25,14 @@
             WindowStyle = ProcessWindowStyle.Hidden
         };
 
+        static readonly ProcessStartInfo _clearStorageEmulator = new ProcessStartInfo
+        {
+            FileName = _azureStorageEmulatorPath,
+            Arguments = "clear all",
+            UseShellExecute = false,
+            WindowStyle = ProcessWindowStyle.Hidden
+        };
+
         static readonly ProcessStartInfo _stopStorageEmulator = new ProcessStartInfo
         {
             FileName = _azureStorageEmulatorPath,
@@ -44,6 +52,14 @@
                 return;
             }
             using (var process = Process.Start(_startStorageEmulator))
+            {
+                process.WaitForExit();
+            }
+        }
+
+        public static void Clear()
+        {
+            using (var process = Process.Start(_clearStorageEmulator))
             {
                 process.WaitForExit();
             }

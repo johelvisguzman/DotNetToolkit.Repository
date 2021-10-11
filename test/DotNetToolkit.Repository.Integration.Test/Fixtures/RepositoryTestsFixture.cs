@@ -15,6 +15,7 @@
         {
 #if NETCORE
             Running.AzureStorageEmulatorManager.Stop();
+            Running.AzureStorageEmulatorManager.Clear();
 #endif
         }
     }

@@ -12,7 +12,7 @@
         #region Fields
 
         private readonly string _nameOrConnectionString;
-        private readonly string _container;
+        private readonly IAzureStorageBlobContainerNameBuilder _containerNameBuilder;
         private readonly bool _createIfNotExists;
 
         #endregion
@@ -23,12 +23,12 @@
         /// Initializes a new instance of the <see cref="AzureStorageBlobRepositoryContext" /> class.
         /// </summary>
         /// <param name="nameOrConnectionString">Either the database name or a connection string.</param>
-        /// <param name="container">The name of the container.</param>
+        /// <param name="containerNameBuilder">The name of the container builder.</param>
         /// <param name="createIfNotExists">Creates the container if it does not exist.</param>
-        public AzureStorageBlobRepositoryContextFactory(string nameOrConnectionString, string container, bool createIfNotExists)
+        public AzureStorageBlobRepositoryContextFactory(string nameOrConnectionString, IAzureStorageBlobContainerNameBuilder containerNameBuilder, bool createIfNotExists)
         {
             _nameOrConnectionString = Guard.NotEmpty(nameOrConnectionString, nameof(nameOrConnectionString));
-            _container = Guard.NotEmpty(container, nameof(container));
+            _containerNameBuilder = Guard.NotNull(containerNameBuilder, nameof(containerNameBuilder));
             _createIfNotExists = createIfNotExists;
         }
 
@@ -36,11 +36,11 @@
         /// Initializes a new instance of the <see cref="AzureStorageBlobRepositoryContext" /> class.
         /// </summary>
         /// <param name="nameOrConnectionString">Either the database name or a connection string.</param>
-        /// <param name="container">The name of the container.</param>
-        public AzureStorageBlobRepositoryContextFactory(string nameOrConnectionString, string container)
+        /// <param name="containerNameBuilder">The name of the container builder.</param>
+        public AzureStorageBlobRepositoryContextFactory(string nameOrConnectionString, IAzureStorageBlobContainerNameBuilder containerNameBuilder)
         {
             _nameOrConnectionString = Guard.NotEmpty(nameOrConnectionString, nameof(nameOrConnectionString));
-            _container = Guard.NotEmpty(container, nameof(container));
+            _containerNameBuilder = Guard.NotNull(containerNameBuilder, nameof(containerNameBuilder));
         }
 
         /// <summary>
@@ -73,7 +73,7 @@
         /// <returns>The new repository context.</returns>
         public IRepositoryContext Create()
         {
-            return new AzureStorageBlobRepositoryContext(_nameOrConnectionString, _container, _createIfNotExists);
+            return new AzureStorageBlobRepositoryContext(_nameOrConnectionString, _containerNameBuilder, _createIfNotExists);
         }
 
         #endregion
