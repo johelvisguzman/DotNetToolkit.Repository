@@ -32,16 +32,16 @@
         /// </summary>
         /// <param name="source">The repository options builder.</param>
         /// <param name="connectionString">The connection string.</param>
-        /// <param name="container">The name of the container.</param>
+        /// <param name="containerNameBuilder">The name of the container builder.</param>
         /// <param name="createIfNotExists">Creates the container if it does not exist.</param>
         /// <returns>The same builder instance.</returns>
-        public static RepositoryOptionsBuilder UseAzureStorageBlob([NotNull] this RepositoryOptionsBuilder source, [NotNull] string connectionString, string container, bool createIfNotExists = false)
+        public static RepositoryOptionsBuilder UseAzureStorageBlob([NotNull] this RepositoryOptionsBuilder source, [NotNull] string connectionString, IAzureStorageBlobContainerNameBuilder containerNameBuilder, bool createIfNotExists = false)
         {
             Guard.NotNull(source, nameof(source));
             Guard.NotEmpty(connectionString, nameof(connectionString));
-            Guard.NotEmpty(container, nameof(container));
+            Guard.NotNull(containerNameBuilder, nameof(containerNameBuilder));
 
-            source.UseInternalContextFactory(new AzureStorageBlobRepositoryContextFactory(connectionString, container, createIfNotExists));
+            source.UseInternalContextFactory(new AzureStorageBlobRepositoryContextFactory(connectionString, containerNameBuilder, createIfNotExists));
 
             return source;
         }

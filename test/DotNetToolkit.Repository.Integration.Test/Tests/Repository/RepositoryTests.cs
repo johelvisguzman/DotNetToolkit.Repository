@@ -11,7 +11,12 @@
 
     public partial class RepositoryTests : TestBase, IClassFixture<RepositoryTestsFixture>
     {
-        public RepositoryTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
+        public RepositoryTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+#if NETCORE
+            Running.AzureStorageEmulatorManager.Clear();
+#endif
+        }
 
         [Fact]
         public void FactoryCreate()

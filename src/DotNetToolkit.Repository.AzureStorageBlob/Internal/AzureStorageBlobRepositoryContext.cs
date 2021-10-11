@@ -18,26 +18,39 @@
 
     internal class AzureStorageBlobRepositoryContext : LinqEnumerableRepositoryContextBase, IAzureStorageBlobRepositoryContext
     {
+        #region Fields
+
+        private readonly IAzureStorageBlobContainerNameBuilder _containerNameBuilder;
+        private readonly bool _createContainerIfNotExists;
+
+        #endregion
+
         #region Constructors
 
-        public AzureStorageBlobRepositoryContext(string connectionString, string container = null, bool createIfNotExists = false)
+        public AzureStorageBlobRepositoryContext(string connectionString, IAzureStorageBlobContainerNameBuilder containerNameBuilder = null, bool createIfNotExists = false)
         {
             Guard.NotEmpty(connectionString, nameof(connectionString));
 
-            var client = new BlobServiceClient(connectionString);
+            _containerNameBuilder = containerNameBuilder ?? new DefaultContainerNameBuilder();
+            _createContainerIfNotExists = createIfNotExists;
 
-            if (string.IsNullOrEmpty(container))
-                container = GetType().Name.ToLower();
-
-            BlobContainer = client.GetBlobContainerClient(container);
-
-            if (createIfNotExists)
-                BlobContainer.CreateIfNotExists();
+            Client = new BlobServiceClient(connectionString);
         }
 
         #endregion
 
         #region Private Methods
+
+        private BlobContainerClient GetBlobContainer<TEntity>()
+        {
+            var container = _containerNameBuilder.Build<TEntity>();
+            var blobContainer = Client.GetBlobContainerClient(container);
+
+            if (_createContainerIfNotExists)
+                blobContainer.CreateIfNotExists();
+
+            return blobContainer;
+        }
 
         private IAsyncEnumerable<TEntity> AsAsyncEnumerable<TEntity>() where TEntity : class
         {
@@ -48,32 +61,17 @@
         {
             var keyValues = Conventions.GetPrimaryKeyValues(entity);
             var key = string.Join(":", keyValues);
+            var blobContainer = GetBlobContainer<TEntity>();
 
-            return BlobContainer.GetBlobClient(key);
+            return blobContainer.GetBlobClient(key);
         }
 
-        private TEntity DownloadEntity<TEntity>(string blobName) where TEntity : class
+        private TEntity DownloadEntity<TEntity>(BlobContainerClient blobContainer, string blobName) where TEntity : class
         {
             try
             {
-                var blob = BlobContainer.GetBlobClient(blobName);
+                var blob = blobContainer.GetBlobClient(blobName);
                 var contentResult = blob.DownloadContent();
-                var result = contentResult.Value.Content.ToObjectFromJson<TEntity>();
-
-                return result;
-            }
-            catch (RequestFailedException)
-            {
-                return default(TEntity);
-            }
-        }
-
-        private async Task<TEntity> DownloadEntityAsync<TEntity>(string blobName, CancellationToken cancellationToken = default) where TEntity : class
-        {
-            try
-            {
-                var blob = BlobContainer.GetBlobClient(blobName);
-                var contentResult = await blob.DownloadContentAsync(cancellationToken: cancellationToken);
                 var result = contentResult.Value.Content.ToObjectFromJson<TEntity>();
 
                 return result;
@@ -86,17 +84,55 @@
 
         private IEnumerable<TEntity> DownloadEntities<TEntity>() where TEntity : class
         {
-            foreach (var blobItem in BlobContainer.GetBlobs())
+            var blobContainer = GetBlobContainer<TEntity>();
+            foreach (var blobItem in blobContainer.GetBlobs())
             {
-                yield return DownloadEntity<TEntity>(blobItem.Name);
+                yield return DownloadEntity<TEntity>(blobContainer, blobItem.Name);
+            }
+        }
+
+        private async Task<BlobContainerClient> GetBlobContainerAsync<TEntity>()
+        {
+            var container = _containerNameBuilder.Build<TEntity>();
+            var blobContainer = Client.GetBlobContainerClient(container);
+
+            if (_createContainerIfNotExists)
+                await blobContainer.CreateIfNotExistsAsync();
+
+            return blobContainer;
+        }
+
+        private async Task<BlobClient> GetBlobClientAsync<TEntity>(TEntity entity) where TEntity : class
+        {
+            var keyValues = Conventions.GetPrimaryKeyValues(entity);
+            var key = string.Join(":", keyValues);
+            var blobContainer = await GetBlobContainerAsync<TEntity>();
+
+            return blobContainer.GetBlobClient(key);
+        }
+
+        private async Task<TEntity> DownloadEntityAsync<TEntity>(BlobContainerClient blobContainer, string blobName, CancellationToken cancellationToken = default) where TEntity : class
+        {
+            try
+            {
+                var blob = blobContainer.GetBlobClient(blobName);
+                var contentResult = await blob.DownloadContentAsync(cancellationToken);
+                var result = contentResult.Value.Content.ToObjectFromJson<TEntity>();
+
+                return result;
+            }
+            catch (RequestFailedException)
+            {
+                return default(TEntity);
             }
         }
 
         private async IAsyncEnumerable<TEntity> DownloadEntitiesAsync<TEntity>() where TEntity : class
         {
-            await foreach (var blobItem in BlobContainer.GetBlobsAsync())
+            var blobContainer = await GetBlobContainerAsync<TEntity>();
+            await foreach (var blobItem in blobContainer.GetBlobsAsync())
             {
-                yield return DownloadEntity<TEntity>(blobItem.Name);
+                yield return await DownloadEntityAsync<TEntity>(blobContainer, blobItem.Name);
             }
         }
 
@@ -108,12 +144,12 @@
             blob.Upload(binaryData, overwrite: true);
         }
 
-        private Task UploadEntityAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        private async Task UploadEntityAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            var blob = GetBlobClient(entity);
+            var blob = await GetBlobClientAsync(entity);
             var binaryData = BinaryData.FromObjectAsJson<TEntity>(entity);
 
-            return blob.UploadAsync(binaryData, overwrite: true, cancellationToken);
+            await blob.UploadAsync(binaryData, overwrite: true, cancellationToken);
         }
 
         #endregion
@@ -129,7 +165,7 @@
 
         #region Implementation of IAzureStorageBlobRepositoryContext
 
-        public BlobContainerClient BlobContainer { get; }
+        public BlobServiceClient Client { get; }
 
         #endregion
 
@@ -161,7 +197,8 @@
             Guard.NotEmpty(keyValues, nameof(keyValues));
 
             var key = string.Join(":", keyValues);
-            var result = DownloadEntity<TEntity>(key);
+            var blobContainer = GetBlobContainer<TEntity>();
+            var result = DownloadEntity<TEntity>(blobContainer, key);
 
             return result;
         }
@@ -201,12 +238,13 @@
 
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) => Task.FromResult(-1);
 
-        public Task<TEntity> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
+        public async Task<TEntity> FindAsync<TEntity>(CancellationToken cancellationToken, IFetchQueryStrategy<TEntity> fetchStrategy, params object[] keyValues) where TEntity : class
         {
             Guard.NotEmpty(keyValues, nameof(keyValues));
 
             var key = string.Join(":", keyValues);
-            var result = DownloadEntityAsync<TEntity>(key, cancellationToken);
+            var blobContainer = await GetBlobContainerAsync<TEntity>();
+            var result = await DownloadEntityAsync<TEntity>(blobContainer, key, cancellationToken);
 
             return result;
         }
@@ -233,7 +271,7 @@
 
             var selectorFunc = selector.Compile();
 
-            var query = DownloadEntitiesAsync<TEntity>()
+            var query = AsAsyncEnumerable<TEntity>()
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options);
 
@@ -279,7 +317,7 @@
             var keySelectFunc = keySelector.Compile();
             var elementSelectorFunc = elementSelector.Compile();
 
-            var query = DownloadEntitiesAsync<TEntity>()
+            var query = AsAsyncEnumerable<TEntity>()
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options);
 
