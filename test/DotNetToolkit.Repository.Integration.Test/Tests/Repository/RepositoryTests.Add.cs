@@ -16,15 +16,19 @@
         [Fact]
         public void AddWithSeededIdForIdentity()
         {
-            ForAllRepositoryFactories(TestAddWithSeededIdForIdentity, 
-                ContextProviderType.EntityFrameworkCore, 
-                ContextProviderType.AzureStorageBlob);
+            ForAllRepositoryFactories(TestAddWithSeededIdForIdentity, ContextProviderType.EntityFrameworkCore);
         }
 
         [Fact]
         public void AddWithSeededIdForNoneIdentity()
         {
             ForAllRepositoryFactories(TestAddWithSeededIdForNoneIdentity);
+        }
+
+        [Fact]
+        public void AddWithNotSeededIdForIdentity()
+        {
+            ForAllRepositoryFactories(TestAddWithNotSeededIdForIdentity, ContextProviderType.EntityFrameworkCore);
         }
 
         [Fact]
@@ -42,15 +46,19 @@
         [Fact]
         public void AddWithSeededIdForIdentityAsync()
         {
-            ForAllRepositoryFactoriesAsync(TestAddWithSeededIdForIdentityAsync, 
-                ContextProviderType.EntityFrameworkCore, 
-                ContextProviderType.AzureStorageBlob);
+            ForAllRepositoryFactoriesAsync(TestAddWithSeededIdForIdentityAsync, ContextProviderType.EntityFrameworkCore);
         }
 
         [Fact]
         public void AddWithSeededIdForNoneIdentityAsync()
         {
             ForAllRepositoryFactoriesAsync(TestAddWithSeededIdForNoneIdentityAsync);
+        }
+
+        [Fact]
+        public void AddWithNotSeededIdForIdentityAsync()
+        {
+            ForAllRepositoryFactoriesAsync(TestAddWithNotSeededIdForIdentityAsync, ContextProviderType.EntityFrameworkCore);
         }
 
         [Fact]
@@ -104,6 +112,24 @@
 
             Assert.Equal(key, entity.Id);
             Assert.True(repo.Exists(key));
+        }
+
+        private static void TestAddWithNotSeededIdForIdentity(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<Customer>();
+
+            var entity1 = new Customer() { Name = "Random Name 1" };
+            var entity2 = new Customer() { Name = "Random Name 2" };
+
+            Assert.False(repo.Exists(x => x.Name == "Random Name 1"));
+            Assert.False(repo.Exists(x => x.Name == "Random Name 2"));
+
+            repo.Add(entity1);
+            repo.Add(entity2);
+
+            // should be one, and two since it is autogenerating identity models
+            Assert.Equal(1, entity1.Id);
+            Assert.Equal(2, entity2.Id);
         }
 
         private static void TestAddRange(IRepositoryFactory repoFactory)
@@ -170,6 +196,24 @@
 
             Assert.Equal(key, entity.Id);
             Assert.True(await repo.ExistsAsync(key));
+        }
+
+        private static async Task TestAddWithNotSeededIdForIdentityAsync(IRepositoryFactory repoFactory)
+        {
+            var repo = repoFactory.Create<Customer>();
+
+            var entity1 = new Customer() { Name = "Random Name 1" };
+            var entity2 = new Customer() { Name = "Random Name 2" };
+
+            Assert.False(await repo.ExistsAsync(x => x.Name == "Random Name 1"));
+            Assert.False(await repo.ExistsAsync(x => x.Name == "Random Name 2"));
+
+            await repo.AddAsync(entity1);
+            await repo.AddAsync(entity2);
+
+            // should be one, and two since it is autogenerating identity models
+            Assert.Equal(1, entity1.Id);
+            Assert.Equal(2, entity2.Id);
         }
 
         private static async Task TestAddRangeAsync(IRepositoryFactory repoFactory)
