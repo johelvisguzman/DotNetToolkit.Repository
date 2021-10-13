@@ -69,7 +69,7 @@
             }
 
             var underlyingContext = args.Count > 0
-                ? (TDbContext)Activator.CreateInstance(typeof(TDbContext), args.ToArray())
+                ? (TDbContext)FastActivator.CreateInstance(typeof(TDbContext), args.ToArray())
                 : RepositoryDependencyResolver.Current.Resolve<TDbContext>();
 
             return new EfRepositoryContext(underlyingContext);

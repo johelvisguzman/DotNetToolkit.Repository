@@ -85,7 +85,7 @@
         /// <returns>The new service.</returns>
         public T CreateInstance<T>() where T : class
         {
-            return (T)Activator.CreateInstance(typeof(T), new object[] { _uowFactory });
+            return (T)FastActivator.CreateInstance(typeof(T), new object[] { _uowFactory });
         }
 
         #endregion

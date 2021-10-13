@@ -108,7 +108,7 @@
                 {
                     try
                     {
-                        result = Activator.CreateInstance(type);
+                        result = FastActivator.CreateInstance(type);
                     }
                     catch (Exception ex)
                     {

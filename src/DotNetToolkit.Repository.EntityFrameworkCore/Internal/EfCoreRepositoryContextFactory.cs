@@ -45,7 +45,7 @@
         public IRepositoryContext Create()
         {
             var underlyingContext = _contextOptions != null
-                ? (TDbContext)Activator.CreateInstance(typeof(TDbContext), _contextOptions)
+                ? (TDbContext)FastActivator.CreateInstance(typeof(TDbContext), _contextOptions)
                 : RepositoryDependencyResolver.Current.Resolve<TDbContext>();
 
             return new EfCoreRepositoryContext(underlyingContext);

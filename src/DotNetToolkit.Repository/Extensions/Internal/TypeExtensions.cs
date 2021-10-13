@@ -31,7 +31,7 @@
         /// <returns>The default value of the specified type.</returns>
         public static object GetDefault([NotNull] this Type type)
         {
-            return type == null ? null : (type.GetTypeInfo().IsValueType ? Activator.CreateInstance(type) : null);
+            return type == null ? null : (type.GetTypeInfo().IsValueType ? FastActivator.CreateInstance(type) : null);
         }
 
         /// <summary>
@@ -176,7 +176,7 @@
                 return null;
 
             if (keyValues == null || keyValues.Count == 0)
-                return Activator.CreateInstance(type);
+                return FastActivator.CreateInstance(type);
 
             var kvs = keyValues.ToDictionary(x => x.Key, x => x.Value);
             var ctors = type.GetConstructors();
@@ -245,7 +245,7 @@
             }
             else
             {
-                obj = Activator.CreateInstance(type);
+                obj = FastActivator.CreateInstance(type);
             }
 
             if (kvs.Any())
