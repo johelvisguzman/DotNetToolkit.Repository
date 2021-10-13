@@ -10,10 +10,13 @@
     using Query.Strategies;
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations.Schema;
     using System.Data;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Reflection;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -84,6 +87,62 @@
             {
                 return serializer.Deserialize<TEntity>(jsonTextReader);
             }
+        }
+
+        protected async Task<Tuple<bool, object>> TryGeneratePrimaryKeyAsync<TEntity>(TEntity entity) where TEntity : class
+        {
+            Guard.NotNull(entity, nameof(entity));
+
+            var primaryKeyPropertyInfos = Conventions.GetPrimaryKeyPropertyInfos<TEntity>();
+
+            if (primaryKeyPropertyInfos.Length > 1)
+                return Tuple.Create<bool, object>(false, null);
+
+            var primaryKeyPropertyInfo = primaryKeyPropertyInfos.First();
+            var attribute = primaryKeyPropertyInfo.GetCustomAttribute<DatabaseGeneratedAttribute>();
+            if (attribute?.DatabaseGeneratedOption == DatabaseGeneratedOption.None ||
+                attribute?.DatabaseGeneratedOption == DatabaseGeneratedOption.Computed)
+            {
+                return Tuple.Create<bool, object>(false, null);
+            }
+
+            var propertyType = primaryKeyPropertyInfo.PropertyType;
+            object newKey = null;
+
+            if (propertyType == typeof(Guid))
+            {
+                newKey = Guid.NewGuid();
+            }
+            else if (propertyType == typeof(string))
+            {
+                newKey = Guid.NewGuid().ToString("N");
+            }
+            else if (propertyType == typeof(int))
+            {
+                var lambda = ExpressionHelper.GetExpression<TEntity>(primaryKeyPropertyInfo.Name);
+                var func = (Func<TEntity, int>)lambda.Compile();
+
+                var key = await AsAsyncEnumerable<TEntity>()
+                    .Select(func)
+                    .OrderByDescending(x => x)
+                    .FirstOrDefaultAsync();
+
+                newKey = Convert.ToInt32(key) + 1;
+            }
+
+            if (newKey != null)
+            {
+                primaryKeyPropertyInfo.SetValue(entity, newKey);
+
+                return Tuple.Create<bool, object>(true, newKey);
+            }
+
+            throw new InvalidOperationException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    Resources.EntityKeyValueTypeInvalid,
+                    typeof(TEntity).FullName,
+                    propertyType));
         }
 
         private BlobContainerClient GetBlobContainer<TEntity>()
@@ -186,6 +245,9 @@
         private void UploadEntity<TEntity>(TEntity entity) where TEntity : class
         {
             var blob = GetBlobClient(entity);
+
+            TryGeneratePrimaryKey(entity, out var _);
+
             using (var stream = Serialize<TEntity>(entity))
             {
                 var binaryData = BinaryData.FromStream(stream);
@@ -197,6 +259,9 @@
         private async Task UploadEntityAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             var blob = await GetBlobClientAsync(entity);
+
+            await TryGeneratePrimaryKeyAsync(entity);
+
             using (var stream = Serialize<TEntity>(entity))
             {
                 var binaryData = await BinaryData.FromStreamAsync(stream, cancellationToken);

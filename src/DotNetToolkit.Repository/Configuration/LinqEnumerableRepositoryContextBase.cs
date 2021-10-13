@@ -10,9 +10,12 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations.Schema;
     using System.Data;
+    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Reflection;
     using Transactions;
     using Utility;
 
@@ -86,6 +89,66 @@
         /// <typeparam name="TEntity">The type of the of the entity.</typeparam>
         /// <returns>The entity's query.</returns>
         protected abstract IEnumerable<TEntity> AsEnumerable<TEntity>([CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy) where TEntity : class;
+
+        /// <summary>
+        /// Returns <c>true</c> if able to generate a primary key for the specified entity; otherwise, <c>false</c>.
+        /// </summary>
+        protected bool TryGeneratePrimaryKey<TEntity>(TEntity entity, out object newKey) where TEntity : class
+        {
+            Guard.NotNull(entity, nameof(entity));
+
+            var primaryKeyPropertyInfos = Conventions.GetPrimaryKeyPropertyInfos<TEntity>();
+
+            newKey = null;
+
+            if (primaryKeyPropertyInfos.Length > 1)
+                return false;
+
+            var primaryKeyPropertyInfo = primaryKeyPropertyInfos.First();
+            var attribute = primaryKeyPropertyInfo.GetCustomAttribute<DatabaseGeneratedAttribute>();
+            if (attribute?.DatabaseGeneratedOption == DatabaseGeneratedOption.None ||
+                attribute?.DatabaseGeneratedOption == DatabaseGeneratedOption.Computed)
+            {
+                return false;
+            }
+
+            var propertyType = primaryKeyPropertyInfo.PropertyType;
+
+            if (propertyType == typeof(Guid))
+            {
+                newKey = Guid.NewGuid();
+            }
+            else if (propertyType == typeof(string))
+            {
+                newKey = Guid.NewGuid().ToString("N");
+            }
+            else if (propertyType == typeof(int))
+            {
+                var lambda = ExpressionHelper.GetExpression<TEntity>(primaryKeyPropertyInfo.Name);
+                var func = (Func<TEntity, int>)lambda.Compile();
+
+                var key = AsEnumerable<TEntity>(fetchStrategy: null)
+                    .Select(func)
+                    .OrderByDescending(x => x)
+                    .FirstOrDefault();
+
+                newKey = Convert.ToInt32(key) + 1;
+            }
+
+            if (newKey != null)
+            {
+                primaryKeyPropertyInfo.SetValue(entity, newKey);
+
+                return true;
+            }
+
+            throw new InvalidOperationException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    Resources.EntityKeyValueTypeInvalid,
+                    typeof(TEntity).FullName,
+                    propertyType));
+        }
 
         #endregion
 

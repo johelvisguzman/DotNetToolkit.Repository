@@ -3,10 +3,12 @@
     using Configuration;
     using Configuration.Conventions;
     using Extensions;
+    using InMemory.Properties;
     using Query.Strategies;
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Globalization;
     using System.Linq;
     using Transactions;
     using Transactions.Internal;
@@ -21,7 +23,7 @@
         private readonly bool _ignoreTransactionWarning;
         private readonly bool _ignoreSqlQueryWarning;
 
-        private readonly InMemoryUnderlyingDbContext _underlyingContext;
+        private readonly InMemoryDatabase _db;
 
         #endregion
 
@@ -39,7 +41,7 @@
             _ignoreTransactionWarning = ignoreTransactionWarning;
             _ignoreSqlQueryWarning = ignoreSqlQueryWarning;
 
-            _underlyingContext = new InMemoryUnderlyingDbContext(databaseName, Conventions);
+            _db = InMemoryDatabasesCache.Instance.GetDatabase(databaseName);
         }
 
         #endregion
@@ -48,9 +50,9 @@
 
         protected override IEnumerable<TEntity> AsEnumerable<TEntity>(IFetchQueryStrategy<TEntity> fetchStrategy)
         {
-            return _underlyingContext
+            return _db
                 .FindAll<TEntity>()
-                .ApplyFetchingOptions(fetchStrategy, _underlyingContext.FindAll);
+                .ApplyFetchingOptions(fetchStrategy, _db.FindAll);
         }
 
         #endregion
@@ -61,7 +63,7 @@
 
         public void EnsureDeleted()
         {
-            _underlyingContext.ClearDatabase();
+            _db.Clear();
         }
 
         #endregion
@@ -80,22 +82,61 @@
 
         public override void Add<TEntity>(TEntity entity)
         {
-            _underlyingContext.Add(Guard.NotNull(entity, nameof(entity)));
+            Guard.NotNull(entity, nameof(entity));
+
+            var entityType = typeof(TEntity);
+            var keyValues = Conventions.GetPrimaryKeyValues(entity);
+
+            if (_db.TryFind<TEntity>(keyValues, out object _))
+            {
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        Resources.EntityAlreadyBeingTrackedInStore,
+                        entityType));
+            }
+
+            if (TryGeneratePrimaryKey<TEntity>(entity, out var newKey))
+            {
+                // assumes we only have a single key since
+                // we cannot generated for a composite key anyways
+                keyValues[0] = newKey;
+            }
+
+            _db.AddOrUpdate<TEntity>(entity, keyValues);
         }
 
         public override void Update<TEntity>(TEntity entity)
         {
-            _underlyingContext.Update(Guard.NotNull(entity, nameof(entity)));
+            Guard.NotNull(entity, nameof(entity));
+
+            var keyValues = Conventions.GetPrimaryKeyValues(entity);
+
+            if (!_db.TryFind<TEntity>(keyValues, out object _))
+            {
+                throw new InvalidOperationException(Resources.EntityNotFoundInStore);
+            }
+
+            _db.AddOrUpdate<TEntity>(entity, keyValues);
         }
 
         public override void Remove<TEntity>(TEntity entity)
         {
-            _underlyingContext.Remove(Guard.NotNull(entity, nameof(entity)));
+            Guard.NotNull(entity, nameof(entity));
+
+            var keyValues = Conventions.GetPrimaryKeyValues(entity);
+
+            if (!_db.TryFind<TEntity>(keyValues, out object _))
+            {
+                throw new InvalidOperationException(Resources.EntityNotFoundInStore);
+            }
+
+            _db.Remove<TEntity>(keyValues);
         }
 
         public override int SaveChanges()
         {
-            return _underlyingContext.SaveChanges();
+            return -1;
         }
 
         public override IEnumerable<TEntity> ExecuteSqlQuery<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector)
@@ -125,9 +166,12 @@
 
             if (fetchStrategy == null)
             {
-                var result = _underlyingContext.Find<TEntity>(keyValues);
+                if (_db.TryFind<TEntity>(keyValues, out object entity))
+                {
+                    return (TEntity)Convert.ChangeType(entity, typeof(TEntity));
+                }
 
-                return result;
+                return default(TEntity);
             }
 
             return base.Find(fetchStrategy, keyValues);
@@ -139,7 +183,6 @@
 
         public override void Dispose()
         {
-            _underlyingContext.Dispose();
             base.Dispose();
         }
 

@@ -3,11 +3,11 @@
     using System.Collections.Concurrent;
     using Utility;
 
-    internal class InMemoryDatabaseStoreCache
+    internal class InMemoryDatabasesCache
     {
         #region Fields
 
-        private static volatile InMemoryDatabaseStoreCache _instance;
+        private static volatile InMemoryDatabasesCache _instance;
         private static readonly object _syncRoot = new object();
         private readonly ConcurrentDictionary<string, InMemoryDatabase> _dbs;
 
@@ -15,7 +15,7 @@
 
         #region Constructors
 
-        private InMemoryDatabaseStoreCache()
+        private InMemoryDatabasesCache()
         {
             _dbs = new ConcurrentDictionary<string, InMemoryDatabase>();
         }
@@ -24,7 +24,7 @@
 
         #region Properties
 
-        public static InMemoryDatabaseStoreCache Instance
+        public static InMemoryDatabasesCache Instance
         {
             get
             {
@@ -33,7 +33,7 @@
                     lock (_syncRoot)
                     {
                         if (_instance == null)
-                            _instance = new InMemoryDatabaseStoreCache();
+                            _instance = new InMemoryDatabasesCache();
                     }
                 }
 

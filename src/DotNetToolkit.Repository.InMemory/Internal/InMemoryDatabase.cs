@@ -23,6 +23,15 @@
 
         #endregion
 
+        #region Private Methods
+
+        private static object CombinePrimaryKeyValues(object[] keyValues)
+        {
+            return keyValues.Length == 1 ? keyValues[0] : string.Join(":", keyValues);
+        }
+
+        #endregion
+
         #region Public Methods
 
         public static InMemoryDatabase Empty()
@@ -35,63 +44,35 @@
             _store.Clear();
         }
 
-        public void Clear(Type entityType)
+        public void AddOrUpdate<T>(T entity, object[] keyValues)
         {
-            Guard.NotNull(entityType, nameof(entityType));
-
-            var context = GetContext(entityType);
-            context.Clear();
-        }
-
-        public bool Contains(Type entityType, object key)
-        {
-            Guard.NotNull(entityType, nameof(entityType));
-            Guard.NotNull(key, nameof(key));
-
-            return GetContext(entityType).ContainsKey(key);
-        }
-
-        public bool Contains(Type entityType)
-        {
-            Guard.NotNull(entityType, nameof(entityType));
-
-            return GetContext(entityType).Count > 0;
-        }
-
-        public void AddOrUpdate(Type entityType, object entity, object key)
-        {
-            Guard.NotNull(entityType, nameof(entityType));
             Guard.NotNull(entity, nameof(entity));
+            Guard.NotEmpty(keyValues, nameof(keyValues));
 
+            var entityType = typeof(T);
+            var key = CombinePrimaryKeyValues(keyValues);
             var context = GetContext(entityType);
 
             context[key] = Clone(entity);
         }
 
-        public bool Remove(Type entityType, object key)
+        public bool Remove<T>(object[] keyValues)
         {
-            Guard.NotNull(entityType, nameof(entityType));
-            Guard.NotNull(key, nameof(key));
+            Guard.NotEmpty(keyValues, nameof(keyValues));
 
+            var entityType = typeof(T); 
+            var key = CombinePrimaryKeyValues(keyValues);
             var context = GetContext(entityType);
 
             return context.TryRemove(key, out _);
         }
 
-        public object GetLastKey(Type entityType)
+        public bool TryFind<T>(object[] keyValues, out object entity)
         {
-            Guard.NotNull(entityType, nameof(entityType));
+            Guard.NotEmpty(keyValues, nameof(keyValues));
 
-            var context = GetContext(entityType);
-
-            return context.Keys.LastOrDefault();
-        }
-
-        public bool TryFind(Type entityType, object key, out object entity)
-        {
-            Guard.NotNull(entityType, nameof(entityType));
-            Guard.NotNull(key, nameof(key));
-
+            var entityType = typeof(T);
+            var key = CombinePrimaryKeyValues(keyValues);
             var context = GetContext(entityType);
 
             if (context.TryGetValue(key, out object obj))
@@ -114,6 +95,11 @@
             {
                 yield return Clone(item.Value);
             }
+        }
+
+        public IEnumerable<T> FindAll<T>()
+        {
+            return FindAll(typeof(T)).Cast<T>();
         }
 
         #endregion
