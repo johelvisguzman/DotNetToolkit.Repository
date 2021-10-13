@@ -100,7 +100,7 @@
         /// <returns>The new repository.</returns>
         public T CreateInstance<T>() where T : class
         {
-            return (T)Activator.CreateInstance(typeof(T), new object[] { _options });
+            return (T)FastActivator.CreateInstance(typeof(T), new object[] { _options });
         }
 
         #endregion

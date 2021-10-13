@@ -57,7 +57,7 @@
         {
             var value = (IEnumerable)enumerable.Value;
             var printerType = typeof(Printer<>).MakeGenericType(elementType);
-            var printer = Activator.CreateInstance(printerType, value);
+            var printer = FastActivator.CreateInstance(printerType, value);
 
             return Expression.Constant(printer);
         }
