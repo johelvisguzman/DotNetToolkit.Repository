@@ -4,14 +4,17 @@
     using Azure.Storage.Blobs;
     using Configuration;
     using Extensions;
+    using Newtonsoft.Json;
     using Properties;
     using Query;
     using Query.Strategies;
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.IO;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Utility;
@@ -22,17 +25,19 @@
 
         private readonly IAzureStorageBlobContainerNameBuilder _containerNameBuilder;
         private readonly bool _createContainerIfNotExists;
+        private readonly JsonSerializerSettings _serializerSettings;
 
         #endregion
 
         #region Constructors
 
-        public AzureStorageBlobRepositoryContext(string connectionString, IAzureStorageBlobContainerNameBuilder containerNameBuilder = null, bool createIfNotExists = false)
+        public AzureStorageBlobRepositoryContext(string connectionString, IAzureStorageBlobContainerNameBuilder containerNameBuilder = null, bool createIfNotExists = false, JsonSerializerSettings serializerSettings = null)
         {
             Guard.NotEmpty(connectionString, nameof(connectionString));
 
             _containerNameBuilder = containerNameBuilder ?? new DefaultContainerNameBuilder();
             _createContainerIfNotExists = createIfNotExists;
+            _serializerSettings = serializerSettings;
 
             Client = new BlobServiceClient(connectionString);
         }
@@ -40,6 +45,46 @@
         #endregion
 
         #region Private Methods
+
+        private JsonSerializer GetJsonSerializer()
+        {
+            var settings = _serializerSettings ?? new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                ContractResolver = new DefaultJsonSerializeContractResolver(),
+                PreserveReferencesHandling = PreserveReferencesHandling.None
+            };
+
+            return JsonSerializer.Create(settings);
+        }
+
+        private Stream Serialize<TEntity>(TEntity entity)
+        {
+            var serializer = GetJsonSerializer();
+            var stream = new MemoryStream();
+
+            using (var sw = new StreamWriter(stream: stream, encoding: Encoding.UTF8, bufferSize: 4096, leaveOpen: true))
+            using (var jsonTextWriter = new JsonTextWriter(sw))
+            {
+                serializer.Serialize(jsonTextWriter, entity);
+
+                sw.Flush();
+                stream.Seek(0, SeekOrigin.Begin);
+
+                return stream;
+            }
+        }
+
+        private TEntity Deserialize<TEntity>(Stream stream)
+        {
+            var serializer = GetJsonSerializer();
+
+            using (var sr = new StreamReader(stream))
+            using (var jsonTextReader = new JsonTextReader(sr))
+            {
+                return serializer.Deserialize<TEntity>(jsonTextReader);
+            }
+        }
 
         private BlobContainerClient GetBlobContainer<TEntity>()
         {
@@ -72,7 +117,8 @@
             {
                 var blob = blobContainer.GetBlobClient(blobName);
                 var contentResult = blob.DownloadContent();
-                var result = contentResult.Value.Content.ToObjectFromJson<TEntity>();
+                var contentStream = contentResult.Value.Content.ToStream();
+                var result = Deserialize<TEntity>(contentStream);
 
                 return result;
             }
@@ -117,7 +163,8 @@
             {
                 var blob = blobContainer.GetBlobClient(blobName);
                 var contentResult = await blob.DownloadContentAsync(cancellationToken);
-                var result = contentResult.Value.Content.ToObjectFromJson<TEntity>();
+                var contentStream = contentResult.Value.Content.ToStream();
+                var result = Deserialize<TEntity>(contentStream);
 
                 return result;
             }
@@ -139,17 +186,23 @@
         private void UploadEntity<TEntity>(TEntity entity) where TEntity : class
         {
             var blob = GetBlobClient(entity);
-            var binaryData = BinaryData.FromObjectAsJson<TEntity>(entity);
+            using (var stream = Serialize<TEntity>(entity))
+            {
+                var binaryData = BinaryData.FromStream(stream);
 
-            blob.Upload(binaryData, overwrite: true);
+                blob.Upload(binaryData, overwrite: true);
+            }
         }
 
         private async Task UploadEntityAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             var blob = await GetBlobClientAsync(entity);
-            var binaryData = BinaryData.FromObjectAsJson<TEntity>(entity);
+            using (var stream = Serialize<TEntity>(entity))
+            {
+                var binaryData = await BinaryData.FromStreamAsync(stream, cancellationToken);
 
-            await blob.UploadAsync(binaryData, overwrite: true, cancellationToken);
+                await blob.UploadAsync(binaryData, overwrite: true, cancellationToken);
+            }
         }
 
         #endregion
