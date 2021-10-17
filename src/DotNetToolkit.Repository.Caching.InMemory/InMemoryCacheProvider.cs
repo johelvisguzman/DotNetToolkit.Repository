@@ -3,54 +3,29 @@
     using Configuration.Caching;
     using JetBrains.Annotations;
     using Microsoft.Extensions.Caching.Memory;
+    using Microsoft.Extensions.Internal;
     using System;
     using Utility;
 
-    /// <summary>
-    /// An implementation of <see cref="ICacheProvider{TCache}" />.
-    /// </summary>
-    public class InMemoryCacheProvider : CacheProviderBase<InMemoryCache>
+    internal class InMemoryCacheProvider : ICacheProvider
     {
+        #region Properties
+
+        public IMemoryCache Cache { get; }
+        public TimeSpan? Expiry { get; set; }
+
+        #endregion
+
         #region Constructors
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryCacheProvider" /> class.
-        /// </summary>
-        public InMemoryCacheProvider() : this((TimeSpan?)null) { }
+        public InMemoryCacheProvider() : this(null, null, null) { }
+        
+        public InMemoryCacheProvider(ISystemClock clock, TimeSpan? expirationScanFrequency, TimeSpan? expiry) 
+            : this (GetMemoryCacheOptions(clock, expirationScanFrequency), expiry) { }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryCacheProvider" /> class.
-        /// </summary>
-        /// <param name="expiry">The caching expiration time.</param>
-        public InMemoryCacheProvider([CanBeNull] TimeSpan? expiry) : this(new MemoryCache(new MemoryCacheOptions()), expiry) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryCacheProvider" /> class.
-        /// </summary>
-        /// <param name="optionsAction">The configuration options action.</param>
-        public InMemoryCacheProvider([NotNull] Action<MemoryCacheOptions> optionsAction) : this(optionsAction, (TimeSpan?)null) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryCacheProvider" /> class.
-        /// </summary>
-        /// <param name="optionsAction">The configuration options action.</param>
-        /// <param name="expiry">The caching expiration time.</param>
-        public InMemoryCacheProvider([NotNull] Action<MemoryCacheOptions> optionsAction, [CanBeNull] TimeSpan? expiry) : this(new MemoryCache(GetConfigurationOptions(optionsAction)), expiry) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryCacheProvider" /> class.
-        /// </summary>
-        /// <param name="cache">The underlying caching storage.</param>
-        public InMemoryCacheProvider([NotNull] IMemoryCache cache) : this(cache, (TimeSpan?)null) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InMemoryCacheProvider" /> class.
-        /// </summary>
-        /// <param name="cache">The underlying caching storage.</param>
-        /// <param name="expiry">The caching expiration time.</param>
-        public InMemoryCacheProvider([NotNull] IMemoryCache cache, [CanBeNull] TimeSpan? expiry)
+        private InMemoryCacheProvider(MemoryCacheOptions options, TimeSpan? expiry)
         {
-            Cache = new InMemoryCache(Guard.NotNull(cache, nameof(cache)));
+            Cache = new MemoryCache(Guard.NotNull(options, nameof(options)));
             Expiry = expiry;
         }
 
@@ -58,15 +33,79 @@
 
         #region Private Methods
 
-        private static MemoryCacheOptions GetConfigurationOptions(Action<MemoryCacheOptions> optionsAction)
+        private static MemoryCacheOptions GetMemoryCacheOptions(ISystemClock clock, TimeSpan? expirationScanFrequency)
         {
-            Guard.NotNull(optionsAction, nameof(optionsAction));
-
             var options = new MemoryCacheOptions();
 
-            optionsAction(options);
+            options.Clock = clock;
+
+            if (expirationScanFrequency.HasValue)
+            {
+                options.ExpirationScanFrequency = expirationScanFrequency.Value;
+            }
 
             return options;
+        }
+
+        private void Set<T>(string key, T value, CacheItemPriority priority, TimeSpan? expiry, Action<string> cacheRemovedCallback = null)
+        {
+            Guard.NotEmpty(key, nameof(key));
+
+            var policy = new MemoryCacheEntryOptions();
+
+            if (cacheRemovedCallback != null)
+            {
+                policy.PostEvictionCallbacks.Add(new PostEvictionCallbackRegistration
+                {
+                    EvictionCallback = (o, val, reason, state) =>
+                    {
+                        cacheRemovedCallback(reason.ToString());
+                    }
+                });
+            }
+
+            if (expiry.HasValue && expiry.Value != TimeSpan.Zero)
+                policy.AbsoluteExpiration = DateTimeOffset.Now.Add(expiry.Value);
+
+            if (expiry.HasValue && expiry.Value == TimeSpan.Zero && priority != CacheItemPriority.NeverRemove)
+                policy.Priority = CacheItemPriority.NeverRemove;
+            else
+                policy.Priority = priority;
+
+            Cache.Set<T>(key, value, policy);
+        }
+
+        #endregion
+
+        #region Implementation of ICacheProvider
+
+        public void Set<T>([NotNull] string key, T value, TimeSpan? expiry = null, Action<string> cacheRemovedCallback = null)
+        {
+            Set<T>(key, value, CacheItemPriority.Normal, expiry ?? Expiry, cacheRemovedCallback);
+        }
+
+        public void Remove([NotNull] string key)
+        {
+            Cache.Remove(Guard.NotEmpty(key, nameof(key)));
+        }
+
+        public bool TryGetValue<T>([NotNull] string key, out T value)
+        {
+            return Cache.TryGetValue<T>(Guard.NotEmpty(key, nameof(key)), out value);
+        }
+
+        public int Increment([NotNull] string key, int defaultValue, int incrementValue)
+        {
+            Guard.NotEmpty(key, nameof(key));
+
+            if (!TryGetValue<int>(key, out var current))
+                current = defaultValue;
+
+            var value = current + incrementValue;
+
+            Set<int>(key, value, CacheItemPriority.NeverRemove, expiry: null);
+
+            return value;
         }
 
         #endregion
