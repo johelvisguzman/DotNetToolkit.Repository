@@ -28,12 +28,17 @@ namespace DotNetToolkit.Repository.Integration.Test
 
     public abstract class TestBase
     {
+        protected ILoggerProvider TestXUnitLoggerProvider { get; }
+
         protected TestBase(ITestOutputHelper testOutputHelper)
         {
             TestXUnitLoggerProvider = new TestXUnitLoggerProvider(testOutputHelper);
         }
 
-        protected ILoggerProvider TestXUnitLoggerProvider { get; }
+        protected virtual void BeforeTest(CachingProviderType cachingProvider) { }
+        protected virtual void AfterTest(CachingProviderType cachingProvider) { }
+        protected virtual void BeforeTest(ContextProviderType contextProvider) { }
+        protected virtual void AfterTest(ContextProviderType contextProvider) { }
 
         protected void ForRepositoryFactoryWithAllCachingProviders(ContextProviderType contextProvider, Action<IRepositoryFactory, CachingProviderType> action)
             => CachingProviders()
@@ -42,9 +47,13 @@ namespace DotNetToolkit.Repository.Integration.Test
                 {
                     var builder = GetRepositoryOptionsBuilder(contextProvider);
 
+                    BeforeTest(cachingProvider);
+
                     ApplyCachingProvider(cachingProvider, builder);
 
                     action(new RepositoryFactory(builder.Options), cachingProvider);
+
+                    AfterTest(cachingProvider);
                 });
 
         protected void ForRepositoryFactoryWithAllCachingProviders(ContextProviderType contextProvider, Action<IRepositoryFactory> action)
@@ -57,11 +66,13 @@ namespace DotNetToolkit.Repository.Integration.Test
                 {
                     var builder = GetRepositoryOptionsBuilder(contextProvider);
 
+                    BeforeTest(cachingProvider);
+
                     ApplyCachingProvider(cachingProvider, builder);
 
-                    await HandleExceptionAsync(() => action(
-                        new RepositoryFactory(builder.Options),
-                        cachingProvider));
+                    await HandleExceptionAsync(() => action(new RepositoryFactory(builder.Options), cachingProvider));
+
+                    AfterTest(cachingProvider);
                 });
 
         protected void ForRepositoryFactoryWithAllCachingProvidersAsync(ContextProviderType contextProvider, Func<IRepositoryFactory, Task> action)
@@ -75,7 +86,11 @@ namespace DotNetToolkit.Repository.Integration.Test
                     if (exclude != null && exclude.Contains(x))
                         return;
 
+                    BeforeTest(x);
+
                     action(new RepositoryFactory(BuildOptions(x)), x);
+
+                    AfterTest(x);
                 });
 
         protected void ForAllRepositoryFactories(Action<IRepositoryFactory> action, params ContextProviderType[] exclude)
@@ -89,8 +104,11 @@ namespace DotNetToolkit.Repository.Integration.Test
                     if (exclude != null && exclude.Contains(x))
                         return;
 
-                    await HandleExceptionAsync(() => action(
-                        new RepositoryFactory(BuildOptions(x)), x));
+                    BeforeTest(x);
+
+                    await HandleExceptionAsync(() => action(new RepositoryFactory(BuildOptions(x)), x));
+
+                    AfterTest(x);
                 });
 
         protected void ForAllRepositoryFactoriesAsync(Func<IRepositoryFactory, Task> action, params ContextProviderType[] exclude)
@@ -105,7 +123,11 @@ namespace DotNetToolkit.Repository.Integration.Test
                     if (exclude != null && exclude.Contains(x))
                         return;
 
+                    BeforeTest(x);
+
                     action(new ServiceFactory(new UnitOfWorkFactory(BuildOptions(x))), x);
+
+                    AfterTest(x);
                 });
 
         protected void ForAllServiceFactories(Action<IServiceFactory> action, params ContextProviderType[] exclude)
@@ -120,10 +142,11 @@ namespace DotNetToolkit.Repository.Integration.Test
                     if (exclude != null && exclude.Contains(x))
                         return;
 
-                    await HandleExceptionAsync(() => action(
-                        new ServiceFactory(
-                            new UnitOfWorkFactory(
-                                BuildOptions(x))), x));
+                    BeforeTest(x);
+
+                    await HandleExceptionAsync(() => action(new ServiceFactory(new UnitOfWorkFactory(BuildOptions(x))), x));
+
+                    AfterTest(x);
                 });
 
         protected void ForAllServiceFactoriesAsync(Func<IServiceFactory, Task> action, params ContextProviderType[] exclude)
@@ -133,7 +156,14 @@ namespace DotNetToolkit.Repository.Integration.Test
             => ContextProviders()
                 .Where(SupportsTransactions)
                 .ToList()
-                .ForEach(x => action(new UnitOfWorkFactory(BuildOptions(x)), x));
+                .ForEach(x =>
+                {
+                    BeforeTest(x);
+                    
+                    action(new UnitOfWorkFactory(BuildOptions(x)), x);
+                    
+                    AfterTest(x);
+                });
 
         protected void ForAllUnitOfWorkFactories(Action<IUnitOfWorkFactory> action)
             => ForAllUnitOfWorkFactories((factory, type) => action(factory));
@@ -208,41 +238,42 @@ namespace DotNetToolkit.Repository.Integration.Test
             {
                 case CachingProviderType.MicrosoftInMemory:
                     {
-                        builder.UseCachingProvider(new InMemoryCacheProvider());
+                        builder.UseInMemoryCache();
+
                         break;
                     }
                 case CachingProviderType.Redis:
                     {
-                        var provider = new RedisCacheProvider(allowAdmin: true, defaultDatabase: 0, expiry: null);
-
-                        provider.Cache.Server.FlushAllDatabases();
-
-                        builder.UseCachingProvider(provider);
+                        builder.UseRedis(options =>
+                        {
+                            options
+                                .WithEndPoint("localhost")
+                                .WithDefaultDatabase(0);
+                        });
 
                         break;
                     }
 #if NETFULL
                 case CachingProviderType.Memcached:
                     {
-                        var provider = new MemcachedCacheProvider("127.0.0.1", 11211);
-
-                        provider.Cache.Client.FlushAll();
-
-                        builder.UseCachingProvider(provider);
+                        builder.UseMemcached(options =>
+                        {
+                            options.WithEndPoint("127.0.0.1", 11211);
+                        });
 
                         break;
                     }
 #endif
                 case CachingProviderType.Couchbase:
                     {
-                        var provider = new CouchbaseCacheProvider("http://localhost:8091", "default", "password");
-
-                        using (var bucket = provider.Cache.Cluster.OpenBucket())
+                        builder.UseCouchbase(options =>
                         {
-                            bucket.CreateManager("default", "password").Flush();
-                        }
-
-                        builder.UseCachingProvider(provider);
+                            options
+                                .WithEndPoint("http://localhost:8091")
+                                .WithBucketName("default")
+                                .WithUsername("default")
+                                .WithPassword("password");
+                        });
 
                         break;
                     }
@@ -258,7 +289,7 @@ namespace DotNetToolkit.Repository.Integration.Test
             => new[]
             {
                 ContextProviderType.InMemory,
-		        ContextProviderType.EntityFrameworkCore,  
+                ContextProviderType.EntityFrameworkCore,
             };
 
         protected static ContextProviderType[] SqlServerContextProviders()
@@ -293,7 +324,7 @@ namespace DotNetToolkit.Repository.Integration.Test
                 //TODO: Cannot test when Appveyor is running tests.
                 //I am not able to find the pre-built binaries so that I can manually run
                 //the server (similar to redis and memcached). I am going to comment out testing couchbase for now
-                //CachingProviderType.Couchbase,
+                // CachingProviderType.Couchbase,
             };
 
         private static ContextProviderType[] ContextProviders()
