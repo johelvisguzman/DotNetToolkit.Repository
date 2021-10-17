@@ -2,7 +2,7 @@
 
 ```csharp
 var options = new RepositoryOptionsBuilder()
-     .UseCachingProvider(new InMemoryCacheProvider())
+     .UseInMemoryCache(...) // for microsoft in-memory cache
      .Options;
 
 var repo = new Repository<Customer>(options);
