@@ -6,6 +6,9 @@
     {
         public DbSet<Customer> Customers { get; set; }
 
-        public EfCoreDbContext(DbContextOptions options) : base(options) { }
+        public EfCoreDbContext(DbContextOptions options) : base(options)
+        {
+            Database.EnsureCreated();
+        }
     }
 }

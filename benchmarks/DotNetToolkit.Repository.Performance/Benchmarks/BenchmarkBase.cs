@@ -3,21 +3,17 @@
     using System;
     using System.Collections.Generic;
     using System.Configuration;
-
-#if NETFULL
-    using System.Data.SqlClient;
-#endif
     using BenchmarkDotNet.Attributes;
     using Configuration.Options;
     using Data;
-#if NETFULL
-    using EntityFramework;
-#endif
-    using EntityFrameworkCore;
     using InMemory;
-    using Microsoft.EntityFrameworkCore;
-#if NETCORE
+#if NETFULL
+    using System.Data.SqlClient;
+    using EntityFramework;
+#else
     using AzureStorageBlob;  
+    using EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore;
 #endif
 
     public abstract class BenchmarkBase
@@ -25,13 +21,13 @@
 #if NETFULL
         private SqlConnection _connection;
 #endif
-        public static string ConnectionString { get; } = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString; 
+        public static string ConnectionString { get; } = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
 
         protected void BaseSetup()
         {
 #if NETFULL
             _connection = new SqlConnection(ConnectionString);
-            _connection.Open(); 
+            _connection.Open();
 #endif
         }
 
@@ -46,19 +42,18 @@
                         builder.UseInMemoryDatabase(Guid.NewGuid().ToString());
                         break;
                     }
-                case ContextProviderType.EntityFrameworkCore:
-                    {
-                        builder.UseEntityFrameworkCore<EfCoreDbContext>(x => x.UseSqlServer(ConnectionString));
-                        break;
-                    }
 #if NETFULL
                 case ContextProviderType.EntityFramework:
                     {
                         builder.UseEntityFramework<EfDbContext>(_connection);
                         break;
                     }
-#endif
-#if NETCORE
+#else
+                case ContextProviderType.EntityFrameworkCore:
+                    {
+                        builder.UseEntityFrameworkCore<EfCoreDbContext>(x => x.UseSqlServer(ConnectionString));
+                        break;
+                    }               
                 case ContextProviderType.AzureStorageBlob:
                     {
                         builder.UseAzureStorageBlob(
@@ -67,7 +62,7 @@
                         break;
                     } 
 #endif
-                default: 
+                default:
                     throw new ArgumentOutOfRangeException(nameof(provider));
             }
 
@@ -78,12 +73,11 @@
         {
             return new[]
             {
+                ContextProviderType.InMemory,
 #if NETFULL
                 ContextProviderType.EntityFramework,
-#endif
-                ContextProviderType.InMemory,
+#else
                 ContextProviderType.EntityFrameworkCore,
-#if NETCORE
 		        ContextProviderType.AzureStorageBlob,
 #endif
             };
