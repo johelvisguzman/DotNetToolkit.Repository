@@ -29,7 +29,6 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile.Json
         private const string InterceptorCollectionSectionKey = "interceptors";
         private const string ParameterCollectionSectionKey = "parameters";
         private const string TypeKey = "type";
-        private const string ExpiryKey = "expiry";
 
         private readonly IConfigurationSection _root;
 
@@ -77,13 +76,7 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile.Json
             if (section != null)
             {
                 var value = GetTypedValue<ICacheProvider>(section);
-                var expiry = ExtractExpiry(section);
-
-                if (expiry != null)
-                {
-                    value.Expiry = expiry;
-                }
-
+                
                 return value;
             }
 
@@ -142,20 +135,6 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile.Json
                 value = "System.String";
 
             return Type.GetType(value, throwOnError: true);
-        }
-
-        private static TimeSpan? ExtractExpiry([NotNull] IConfigurationSection section)
-        {
-            Guard.NotNull(section, nameof(section));
-
-            var keyValues = ExtractParameters(section);
-
-            if (keyValues.ContainsKey(ExpiryKey))
-            {
-                return TimeSpan.Parse(keyValues[ExpiryKey]);
-            }
-
-            return null;
         }
 
         private static KeyValuePair<string, string> ExtractKeyValue([NotNull] IConfigurationSection section)

@@ -2,7 +2,7 @@
 
 ```csharp
 var options = new RepositoryOptionsBuilder()
-     .UseCachingProvider(new CouchbaseCacheProvider())
+     .UseCouchbase(...)
      .Options;
 
 var repo = new Repository<Customer>(options);

@@ -2,7 +2,7 @@
 
 ```csharp
 var options = new RepositoryOptionsBuilder()
-     .UseCachingProvider(new MemcachedCacheProvider())
+     .UseMemcached(...)
      .Options;
 
 var repo = new Repository<Customer>(options);

@@ -8,31 +8,37 @@
     public interface ICacheProvider
     {
         /// <summary>
-        /// Gets the cache key transformer.
+        /// Create or overwrite an entry in the cache.
         /// </summary>
-        ICacheKeyTransformer KeyTransformer { get; }
+        /// <typeparam name="T">The type of the cache value.</typeparam>
+        /// <param name="key">An object identifying the entry.</param>
+        /// <param name="value">The value to cache.</param>
+        /// <param name="expiry">The cache expiration time.</param>
+        /// <param name="cacheRemovedCallback">A callback function for a value is removed from the cache.</param>
+        void Set<T>(string key, T value, TimeSpan? expiry = null, Action<string> cacheRemovedCallback = null);
 
         /// <summary>
-        /// Gets or sets the caching expiration time.
+        /// Removes the object associated with the given key.
         /// </summary>
-        TimeSpan? Expiry { get; set; }
+        /// <param name="key">An object identifying the entry.</param>
+        void Remove(string key);
 
         /// <summary>
-        /// Gets the cache.
+        /// Gets the item associated with this key if present.
         /// </summary>
-        ICache Cache { get; }
-    }
+        /// <typeparam name="T">The type of the cache value.</typeparam>
+        /// <param name="key">An object identifying the requested entry.</param>
+        /// <param name="value">The object found in the cache.</param>
+        /// <returns>c<c>true</c> if the an object was found with the specified key; otherwise, <c>false</c>.</returns>
+        bool TryGetValue<T>(string key, out T value);
 
-    /// <summary>
-    /// Represents a caching provider for caching query data within the repositories.
-    /// </summary>
-    /// <typeparam name="TCache">The type of the cache.</typeparam>
-    /// <seealso cref="ICacheProvider" />
-    public interface ICacheProvider<out TCache> : ICacheProvider where TCache : ICache
-    {
         /// <summary>
-        /// Gets the cache.
+        /// Increments the number stored at key by one
         /// </summary>
-        new TCache Cache { get; }
+        /// <param name="key">The key.</param>
+        /// <param name="defaultValue">The default value.</param>
+        /// <param name="incrementValue">The increment value.</param>
+        /// <returns>The value of key after the increment.</returns>
+        int Increment(string key, int defaultValue, int incrementValue);
     }
 }

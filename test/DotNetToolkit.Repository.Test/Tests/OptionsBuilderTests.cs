@@ -220,7 +220,7 @@
 
             // caching provider
             Assert.NotNull(optionsBuilder.Options.CachingProvider);
-            Assert.Equal(optionsBuilder.Options.CachingProvider.Expiry, TimeSpan.FromSeconds(30));
+            Assert.Equal(((TestCacheProvider)optionsBuilder.Options.CachingProvider).Expiry, TimeSpan.FromSeconds(30));
 
             // interceptor
             Assert.Single(optionsBuilder.Options.Interceptors);

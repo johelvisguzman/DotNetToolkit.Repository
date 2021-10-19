@@ -3,6 +3,7 @@
     using Caching.InMemory;
     using Configuration.Caching.Internal;
     using Data;
+    using DotNetToolkit.Repository.Integration.Test.Helpers;
     using Fixtures;
     using Query;
     using System.Threading.Tasks;
@@ -22,11 +23,21 @@
 #endif
         }
 
+        protected override void BeforeTest(CachingProviderType cachingProvider)
+        {
+            ClearCacheProvider(cachingProvider);
+        }
+
+        protected override void AfterTest(CachingProviderType cachingProvider)
+        {
+            ClearCacheProvider(cachingProvider);
+        }
+
         [Fact]
         public void CacheEnabled()
         {
             var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
+                .UseInMemoryCache()
                 .Options;
 
             var repo = new Repository<Customer>(options);
@@ -57,7 +68,7 @@
         public void ClearCache()
         {
             var options = GetRepositoryOptionsBuilder(ContextProviderType.InMemory)
-                .UseCachingProvider(new InMemoryCacheProvider())
+                .UseInMemoryCache()
                 .Options;
 
             var customerRepo = new Repository<Customer>(options);
@@ -1067,6 +1078,25 @@ WHERE NewCustomers.Id = @p0",
             Assert.NotEmpty((await repo.GroupByAsync(queryOptions, x => x.Id, z => z.Key)).Result);
 
             Assert.False(repo.CacheUsed);
+        }
+
+        private static void ClearCacheProvider(CachingProviderType cachingProvider)
+        {
+#if NETFULL
+            if (cachingProvider == CachingProviderType.Memcached)
+            {
+                MemcachedHelper.ClearDatabase("127.0.0.1", 11211);
+            }
+#endif
+            if (cachingProvider == CachingProviderType.Redis)
+            {
+                RedisHelper.ClearDatabase("localhost", 0);
+            }
+
+            if (cachingProvider == CachingProviderType.Couchbase)
+            {
+                CouchbaseHelper.ClearDatabase("http://localhost:8091", "default", "password", "default");
+            }
         }
     }
 }

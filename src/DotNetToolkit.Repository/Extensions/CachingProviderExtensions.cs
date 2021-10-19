@@ -54,11 +54,9 @@
 
             if (cacheProvider.TryGetValue<TResult>(hashedKey, logger, out var value) == false)
             {
-                var expiry = cacheProvider.Expiry;
-
                 value = getter();
 
-                cacheProvider.SetValue<TResult>(hashedKey, key, value, expiry, logger);
+                cacheProvider.SetValue<TResult>(hashedKey, key, value, logger);
             }
             else
             {
@@ -94,11 +92,9 @@
 
             if (cacheProvider.TryGetValue<PagedQueryResult<TResult>>(hashedKey, logger, out var value) == false)
             {
-                var expiry = cacheProvider.Expiry;
-
                 value = getter();
 
-                cacheProvider.SetValue<PagedQueryResult<TResult>>(hashedKey, key, value, expiry, logger);
+                cacheProvider.SetValue<PagedQueryResult<TResult>>(hashedKey, key, value, logger);
             }
             else
             {
@@ -134,11 +130,9 @@
 
             if (cacheProvider.TryGetValue<TResult>(hashedKey, logger, out var value) == false)
             {
-                var expiry = cacheProvider.Expiry;
-
                 value = await getter();
 
-                cacheProvider.SetValue<TResult>(hashedKey, key, value, expiry, logger);
+                cacheProvider.SetValue<TResult>(hashedKey, key, value, logger);
             }
             else
             {
@@ -174,11 +168,9 @@
 
             if (cacheProvider.TryGetValue<PagedQueryResult<TResult>>(hashedKey, logger, out var value) == false)
             {
-                var expiry = cacheProvider.Expiry;
-
                 value = await getter();
 
-                cacheProvider.SetValue<PagedQueryResult<TResult>>(hashedKey, key, value, expiry, logger);
+                cacheProvider.SetValue<PagedQueryResult<TResult>>(hashedKey, key, value, logger);
             }
             else
             {
@@ -416,11 +408,10 @@
         internal static void IncrementCounter<T>([NotNull] this ICacheProvider cacheProvider)
         {
             Guard.NotNull(cacheProvider, nameof(cacheProvider));
-            Guard.EnsureNotNull(cacheProvider.Cache, "The caching cannot be null.");
 
             lock (_syncRoot)
             {
-                cacheProvider.Cache.Increment(FormatCachePrefixCounterKey<T>(), 1, 1);
+                cacheProvider.Increment(FormatCachePrefixCounterKey<T>(), 1, 1);
             }
         }
 
@@ -429,28 +420,24 @@
             [NotNull] string hashedKey,
             [NotNull] string key,
             [NotNull] T value,
-            [CanBeNull] TimeSpan? expiry,
             [NotNull] ILogger logger)
         {
             Guard.NotNull(cacheProvider, nameof(cacheProvider));
             Guard.NotEmpty(hashedKey, nameof(hashedKey));
             Guard.NotEmpty(key, nameof(key));
             Guard.NotNull(logger, nameof(logger));
-            Guard.EnsureNotNull(cacheProvider.Cache, "The caching cannot be null.");
 
             lock (_syncRoot)
             {
                 try
                 {
-                    cacheProvider.Cache.Set<T>(
+                    logger.Debug($"Setting up cache for '{hashedKey}'");
+
+                    cacheProvider.Set<T>(
                         hashedKey,
                         value,
-                        expiry,
+                        expiry: null,
                         reason => logger.Debug($"Cache for '{hashedKey}' has expired. Evicting from cache for '{reason}'"));
-
-                    logger.Debug(expiry.HasValue
-                        ? $"Setting up cache for '{hashedKey}' expire handling in {expiry.Value.TotalSeconds} seconds"
-                        : $"Setting up cache for '{hashedKey}'");
                 }
                 catch (Exception ex)
                 {
@@ -462,7 +449,6 @@
         private static bool? TryGetValue<T>([NotNull] this ICacheProvider cacheProvider, [NotNull] string key, [NotNull] ILogger logger, out T value)
         {
             Guard.NotNull(cacheProvider, nameof(cacheProvider));
-            Guard.EnsureNotNull(cacheProvider.Cache, "The caching cannot be null.");
             Guard.NotEmpty(key, nameof(key));
             Guard.NotNull(logger, nameof(logger));
 
@@ -473,7 +459,7 @@
 
                 try
                 {
-                    result = cacheProvider.Cache.TryGetValue<T>(key, out value);
+                    result = cacheProvider.TryGetValue<T>(key, out value);
                 }
                 catch (Exception ex)
                 {
@@ -506,7 +492,7 @@
             Guard.NotEmpty(key, nameof(key));
             Guard.NotNull(logger, nameof(logger));
 
-            var cacheKeyTransformer = cacheProvider.KeyTransformer ?? new DefaultCacheKeyTransformer();
+            var cacheKeyTransformer = new DefaultCacheKeyTransformer();
 
             return string.Format("{1}{0}{2}{0}{3}",
                 CachePrefixGlue,

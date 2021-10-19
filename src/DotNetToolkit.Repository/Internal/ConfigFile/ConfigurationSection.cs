@@ -85,20 +85,9 @@ namespace DotNetToolkit.Repository.Internal.ConfigFile
 
     class CachingProviderElement : TypedConfigurationElementBase<ICacheProvider>
     {
-        private const string ExpiryKey = "expiry";
-
-        [ConfigurationProperty(ExpiryKey)]
-        public ExpiryElement Expiry
-        {
-            get { return (ExpiryElement)this[ExpiryKey]; }
-        }
-
         public override ICacheProvider GetTypedValue()
         {
             var provider = base.GetTypedValue();
-
-            if (provider != null && Expiry != null)
-                provider.Expiry = Expiry.Value;
 
             return provider;
         }
