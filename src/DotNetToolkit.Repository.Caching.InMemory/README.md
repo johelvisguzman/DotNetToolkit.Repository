@@ -7,3 +7,11 @@ var options = new RepositoryOptionsBuilder()
 
 var repo = new Repository<Customer>(options);
 ```
+
+# Configuration Options
+
+|Action|Description|
+|------|-----------|
+|WithClock|System clock|
+|WithExpirationScanFrequency|Minimum length of time between successive scans for expired items|
+|WithExpiry|Expiration time|

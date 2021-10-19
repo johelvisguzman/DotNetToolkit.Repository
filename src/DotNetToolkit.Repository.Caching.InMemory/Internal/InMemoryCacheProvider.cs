@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Caching.InMemory
+﻿namespace DotNetToolkit.Repository.Caching.InMemory.Internal
 {
     using Configuration.Caching;
     using JetBrains.Annotations;

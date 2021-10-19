@@ -55,7 +55,7 @@
         public JsonSerializerSettings SerializerSettings { get { return _serializerSettings; } }
 
         /// <summary>
-        /// Adds the giving password to the options.
+        /// Adds the giving username to the options.
         /// </summary>
         /// <param name="username">The user name to be added.</param>
         public MemcachedCacheOptions WithUserName([NotNull] string username)
@@ -79,7 +79,7 @@
         /// <summary>
         /// Adds the giving endpoint to the options.
         /// </summary>
-        /// <param name="host">The host name to be added.</param>
+        /// <param name="host">The host name or IP address of the server to be added.</param>
         /// <param name="port">The port to be added.</param>
         public MemcachedCacheOptions WithEndPoint([NotNull] string host, int port)
         {
@@ -93,7 +93,7 @@
         /// <summary>
         /// Adds the giving endpoint to the options.
         /// </summary>
-        /// <param name="hostAndPort">The host and port to be added.</param>
+        /// <param name="hostAndPort">The address and the port of the server in the format 'host:port' to be added.</param>
         public MemcachedCacheOptions WithEndPoint([NotNull] string hostAndPort)
         {
             _host = Guard.NotEmpty(hostAndPort, nameof(hostAndPort));
@@ -137,7 +137,6 @@
         /// Adds the giving json serializer settings to the options.
         /// </summary>
         /// <param name="serializerSettings">The json srialzer settings to be added.</param>
-        /// <returns>The new options instance with the given json serializer settings added.</returns>
         public MemcachedCacheOptions WithJsonSerializerSettings([NotNull] JsonSerializerSettings serializerSettings)
         {
             _serializerSettings = Guard.NotNull(serializerSettings, nameof(serializerSettings));

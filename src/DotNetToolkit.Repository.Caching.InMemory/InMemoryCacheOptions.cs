@@ -41,7 +41,7 @@
         }
 
         /// <summary>
-        /// Adds the giving system clock vaue to the options.
+        /// Adds the minimum length of time between successive scans for expired items vaue to the options.
         /// </summary>
         /// <param name="expirationScanFrequency">The minimum length of time between successive scans for expired items to be added.</param>
         public InMemoryCacheOptions WithExpirationScanFrequency([NotNull] TimeSpan expirationScanFrequency)
