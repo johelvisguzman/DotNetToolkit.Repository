@@ -1,8 +1,10 @@
-﻿namespace DotNetToolkit.Repository.Caching.Couchbase
+﻿namespace DotNetToolkit.Repository.Caching.Couchbase.Internal
 {
     using Configuration.Caching;
     using global::Couchbase;
     using global::Couchbase.Configuration.Client;
+    using global::Couchbase.Core.Serialization;
+    using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;
     using Utility;
@@ -24,8 +26,8 @@
 
         #region Constructors
 
-        public CouchbaseCacheProvider(string host, string bucketName, string username, string password, TimeSpan? expiry)
-            : this(GetConfigurationOptions(host, bucketName, username, password), expiry) { }
+        public CouchbaseCacheProvider(string host, string bucketName, string username, string password, TimeSpan? expiry, Func<ITypeSerializer> serializer)
+            : this(GetConfigurationOptions(host, bucketName, username, password, serializer), expiry) { }
 
         private CouchbaseCacheProvider(ClientConfiguration config, TimeSpan? expiry)
         {
@@ -37,7 +39,7 @@
 
         #region Private Methods
 
-        private static ClientConfiguration GetConfigurationOptions(string host, string username, string password, string bucketName)
+        private static ClientConfiguration GetConfigurationOptions(string host, string username, string password, string bucketName, Func<ITypeSerializer> serializer)
         {
             var config = new ClientConfiguration();
             var bucket = !string.IsNullOrEmpty(bucketName) ? bucketName : DefaultBucketName;
@@ -60,6 +62,11 @@
                     }
                 }
             };
+
+            if (serializer != null)
+            {
+                config.Serializer = serializer;
+            }
 
             return config;
         }

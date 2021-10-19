@@ -2,6 +2,7 @@
 {
     using Enyim.Caching.Memcached;
     using JetBrains.Annotations;
+    using Newtonsoft.Json;
     using System;
     using Utility;
 
@@ -16,6 +17,7 @@
         private MemcachedProtocol _protocal;
         private Type _authType;
         private TimeSpan? _expiry;
+        private JsonSerializerSettings _serializerSettings;
 
         /// <summary>
         /// Gets the host.
@@ -48,7 +50,12 @@
         public TimeSpan? Expiry { get { return _expiry; } }
 
         /// <summary>
-        /// Adds the giving password to the options.
+        /// Gets the json serializer settings.
+        /// </summary>
+        public JsonSerializerSettings SerializerSettings { get { return _serializerSettings; } }
+
+        /// <summary>
+        /// Adds the giving username to the options.
         /// </summary>
         /// <param name="username">The user name to be added.</param>
         public MemcachedCacheOptions WithUserName([NotNull] string username)
@@ -72,7 +79,7 @@
         /// <summary>
         /// Adds the giving endpoint to the options.
         /// </summary>
-        /// <param name="host">The host name to be added.</param>
+        /// <param name="host">The host name or IP address of the server to be added.</param>
         /// <param name="port">The port to be added.</param>
         public MemcachedCacheOptions WithEndPoint([NotNull] string host, int port)
         {
@@ -86,7 +93,7 @@
         /// <summary>
         /// Adds the giving endpoint to the options.
         /// </summary>
-        /// <param name="hostAndPort">The host and port to be added.</param>
+        /// <param name="hostAndPort">The address and the port of the server in the format 'host:port' to be added.</param>
         public MemcachedCacheOptions WithEndPoint([NotNull] string hostAndPort)
         {
             _host = Guard.NotEmpty(hostAndPort, nameof(hostAndPort));
@@ -122,6 +129,17 @@
         public MemcachedCacheOptions WithExpiry([NotNull] TimeSpan expiry)
         {
             _expiry = Guard.NotNull(expiry, nameof(expiry));
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds the giving json serializer settings to the options.
+        /// </summary>
+        /// <param name="serializerSettings">The json srialzer settings to be added.</param>
+        public MemcachedCacheOptions WithJsonSerializerSettings([NotNull] JsonSerializerSettings serializerSettings)
+        {
+            _serializerSettings = Guard.NotNull(serializerSettings, nameof(serializerSettings));
 
             return this;
         }

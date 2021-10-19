@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Caching.Redis
 {
     using Configuration.Options;
+    using Internal;
     using JetBrains.Annotations;
     using System;
     using Utility;
@@ -47,7 +48,8 @@
                 options.Ssl,
                 options.AllowAdmin,
                 options.DefaultDatabase,
-                options.Expiry);
+                options.Expiry,
+                options.SerializerSettings);
 
             source.UseCachingProvider(provider);
 

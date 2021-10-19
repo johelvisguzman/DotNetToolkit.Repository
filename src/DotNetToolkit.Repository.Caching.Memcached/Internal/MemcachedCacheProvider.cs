@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Caching.Memcached
+﻿namespace DotNetToolkit.Repository.Caching.Memcached.Internal
 {
     using Configuration.Caching;
     using Enyim.Caching;
@@ -11,6 +11,12 @@
 
     internal class MemcachedCacheProvider : ICacheProvider
     {
+        #region Fields
+
+        private readonly JsonSerializerSettings _serializerSettings;
+
+        #endregion
+
         #region Properties
 
         public IMemcachedClient Client { get; }
@@ -20,11 +26,13 @@
 
         #region Constructors
 
-        public MemcachedCacheProvider(string host, string username, string password, MemcachedProtocol protocol, Type authType, TimeSpan? expiry)
-            : this(GetClientConfiguration(host, username, password, protocol, authType), expiry) { }
+        public MemcachedCacheProvider(string host, string username, string password, MemcachedProtocol protocol, Type authType, TimeSpan? expiry, JsonSerializerSettings serializerSettings)
+            : this(GetClientConfiguration(host, username, password, protocol, authType), expiry, serializerSettings) { }
 
-        private MemcachedCacheProvider(IMemcachedClientConfiguration config, TimeSpan? expiry)
+        private MemcachedCacheProvider(IMemcachedClientConfiguration config, TimeSpan? expiry, JsonSerializerSettings serializerSettings = null)
         {
+            _serializerSettings = serializerSettings;
+
             Client = new MemcachedClient(Guard.NotNull(config, nameof(config)));
             Expiry = expiry;
         }
@@ -33,20 +41,20 @@
 
         #region Private Methods
 
-        private static string Serialize(object o)
+        private string Serialize(object o)
         {
             if (o == null)
                 return null;
 
-            return JsonConvert.SerializeObject(o);
+            return JsonConvert.SerializeObject(o, _serializerSettings);
         }
 
-        private static T Deserialize<T>(string v)
+        private T Deserialize<T>(string v)
         {
             if (string.IsNullOrEmpty(v))
                 return default(T);
 
-            return JsonConvert.DeserializeObject<T>(v);
+            return JsonConvert.DeserializeObject<T>(v, _serializerSettings);
         }
 
         private static IMemcachedClientConfiguration GetClientConfiguration(string host, string username, string password, MemcachedProtocol protocol, Type authType = null)

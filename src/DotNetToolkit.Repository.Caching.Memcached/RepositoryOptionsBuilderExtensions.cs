@@ -1,9 +1,10 @@
 ﻿namespace DotNetToolkit.Repository.Caching.Memcached
 {
     using Configuration.Options;
-    using Utility;
+    using Internal;
     using JetBrains.Annotations;
     using System;
+    using Utility;
 
     /// <summary>
     /// Contains various extension methods for <see cref="RepositoryOptionsBuilder" />
@@ -31,7 +32,8 @@
                 options.Password,
                 options.Protocal,
                 options.AuthenticationType,
-                options.Expiry);
+                options.Expiry,
+                options.SerializerSettings);
 
             source.UseCachingProvider(provider);
 

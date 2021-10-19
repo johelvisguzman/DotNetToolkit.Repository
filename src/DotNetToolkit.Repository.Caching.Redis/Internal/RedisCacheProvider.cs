@@ -1,4 +1,4 @@
-﻿namespace DotNetToolkit.Repository.Caching.Redis
+﻿namespace DotNetToolkit.Repository.Caching.Redis.Internal
 {
     using Configuration.Caching;
     using Newtonsoft.Json;
@@ -12,6 +12,9 @@
 
         private IDatabase _redis;
         private readonly Lazy<ConnectionMultiplexer> _lazyConnection;
+        private readonly JsonSerializerSettings _serializerSettings;
+
+        private const string DefaultHost = "localhost";
 
         #endregion
 
@@ -25,17 +28,18 @@
 
         #region Constructors
 
-        public RedisCacheProvider()
-            : this("localhost", null, null, false, false, null, null) { }
+        public RedisCacheProvider(JsonSerializerSettings serializerSettings = null)
+            : this(DefaultHost, null, null, false, false, null, null, serializerSettings) { }
 
-        public RedisCacheProvider(string host, string username, string password, bool ssl, bool allowAdmin, int? defaultDatabase, TimeSpan? expiry)
-            : this(GetConfigurationOptions(host, username, password, ssl, allowAdmin, defaultDatabase), expiry) { }
+        public RedisCacheProvider(string host, string username, string password, bool ssl, bool allowAdmin, int? defaultDatabase, TimeSpan? expiry, JsonSerializerSettings serializerSettings)
+            : this(GetConfigurationOptions(host, username, password, ssl, allowAdmin, defaultDatabase), expiry, serializerSettings) { }
 
-        private RedisCacheProvider(ConfigurationOptions options, TimeSpan? expiry)
+        private RedisCacheProvider(ConfigurationOptions options, TimeSpan? expiry, JsonSerializerSettings serializerSettings = null)
         {
             Guard.NotNull(options, nameof(options));
 
             _lazyConnection = new Lazy<ConnectionMultiplexer>(() => ConnectionMultiplexer.Connect(options));
+            _serializerSettings = serializerSettings;
 
             Expiry = expiry;
         }
@@ -44,20 +48,20 @@
 
         #region Private Methods
 
-        private static string Serialize(object o)
+        private string Serialize(object o)
         {
             if (o == null)
                 return null;
 
-            return JsonConvert.SerializeObject(o);
+            return JsonConvert.SerializeObject(o, _serializerSettings);
         }
 
-        private static T Deserialize<T>(string v)
+        private T Deserialize<T>(string v)
         {
             if (string.IsNullOrEmpty(v))
                 return default(T);
 
-            return JsonConvert.DeserializeObject<T>(v);
+            return JsonConvert.DeserializeObject<T>(v, _serializerSettings);
         }
 
         private static ConfigurationOptions GetConfigurationOptions(string host, string username, string password, bool ssl, bool allowAdmin, int? defaultDatabase)
