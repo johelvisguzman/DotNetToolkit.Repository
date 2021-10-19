@@ -51,14 +51,7 @@
 
         private JsonSerializer GetJsonSerializer()
         {
-            var settings = _serializerSettings ?? new JsonSerializerSettings
-            {
-                Formatting = Formatting.Indented,
-                ContractResolver = new DefaultJsonSerializeContractResolver(),
-                PreserveReferencesHandling = PreserveReferencesHandling.None
-            };
-
-            return JsonSerializer.Create(settings);
+            return JsonSerializer.Create(_serializerSettings);
         }
 
         private Stream Serialize<TEntity>(TEntity entity)
