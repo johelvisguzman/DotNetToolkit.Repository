@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Caching.Couchbase
 {
     using Configuration.Options;
+    using Internal;
     using JetBrains.Annotations;
     using System;
     using Utility;
@@ -30,7 +31,8 @@
                 options.BucketName,
                 options.Username,
                 options.Password,
-                options.Expiry);
+                options.Expiry,
+                options.Serializer);
 
             source.UseCachingProvider(provider);
 

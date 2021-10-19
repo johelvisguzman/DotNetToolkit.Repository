@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Caching.Couchbase
 {
+    using global::Couchbase.Core.Serialization;
     using JetBrains.Annotations;
     using System;
     using Utility;
@@ -14,6 +15,7 @@
         private string _username;
         private string _password;
         private TimeSpan? _expiry;
+        private Func<ITypeSerializer> _serializer;
 
         /// <summary>
         /// Gets the host.
@@ -39,6 +41,11 @@
         /// Gets the expiration time.
         /// </summary>
         public TimeSpan? Expiry { get { return _expiry; } }
+
+        /// <summary>
+        /// Gets the serializer.
+        /// </summary>
+        public Func<ITypeSerializer> Serializer { get { return _serializer; } }
 
         /// <summary>
         /// Adds the giving bucketname to the options.
@@ -90,7 +97,7 @@
         /// <summary>
         /// Adds the giving endpoint to the options.
         /// </summary>
-        /// <param name="hostAndPort">The host and port to be added.</param>
+        /// <param name="hostAndPort">The address and the port of the server in the format 'host:port' to be added.</param>
         public CouchbaseCacheOptions WithEndPoint([NotNull] string hostAndPort)
         {
             _host = Guard.NotEmpty(hostAndPort, nameof(hostAndPort));
@@ -105,6 +112,18 @@
         public CouchbaseCacheOptions WithExpiry([NotNull] TimeSpan expiry)
         {
             _expiry = Guard.NotNull(expiry, nameof(expiry));
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds the giving json serializer settings to the options.
+        /// </summary>
+        /// <param name="serializer">The serializer to be added.</param>
+        /// <returns>The new options instance with the given json serializer settings added.</returns>
+        public CouchbaseCacheOptions WithSerializer([NotNull] Func<ITypeSerializer> serializer)
+        {
+            _serializer = Guard.NotNull(serializer, nameof(serializer));
 
             return this;
         }
