@@ -1,6 +1,7 @@
 ﻿namespace DotNetToolkit.Repository.Caching.Redis
 {
     using JetBrains.Annotations;
+    using Newtonsoft.Json;
     using System;
     using Utility;
 
@@ -16,6 +17,7 @@
         private bool _allowAdmin;
         private int? _defaultDatabase;
         private TimeSpan? _expiry;
+        private JsonSerializerSettings _serializerSettings;
 
         /// <summary>
         /// Gets the host.
@@ -51,6 +53,11 @@
         /// Gets the expiration time.
         /// </summary>
         public TimeSpan? Expiry { get { return _expiry; } }
+
+        /// <summary>
+        /// Gets the json serializer settings.
+        /// </summary>
+        public JsonSerializerSettings SerializerSettings {  get { return _serializerSettings; } }
 
         /// <summary>
         /// Adds the giving password to the options.
@@ -141,6 +148,18 @@
         public RedisCacheOptions WithExpiry([NotNull] TimeSpan expiry)
         {
             _expiry = Guard.NotNull(expiry, nameof(expiry));
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds the giving json serializer settings to the options.
+        /// </summary>
+        /// <param name="serializerSettings">The json srialzer settings to be added.</param>
+        /// <returns>The new options instance with the given json serializer settings added.</returns>
+        public RedisCacheOptions WithJsonSerializerSettings([NotNull] JsonSerializerSettings serializerSettings)
+        {
+            _serializerSettings = Guard.NotNull(serializerSettings, nameof(serializerSettings));
 
             return this;
         }
