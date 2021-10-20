@@ -96,7 +96,7 @@ deploy:
 - provider: NuGet
   name: production
   api_key:
-    secure: uSU6YGrWfh7Ruar11vqDFOtauPZXzKYFHUp8WoK86wDjT5ahRJXpLqPfusF+oKFd
+    secure: oy2dwcc3pn7f3nrey2fqw55olhj7birejfpt6tn3w2wcye
   skip_symbols: true
   on:
     branch: master                   # release from master branch only
