@@ -128,13 +128,10 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(key1, nameof(key1));
-                Guard.NotNull(key2, nameof(key2));
-                Guard.NotNull(key3, nameof(key3));
-                Guard.NotNull(paths, nameof(paths));
-            });
+            Guard.NotNull(key1, nameof(key1));
+            Guard.NotNull(key2, nameof(key2));
+            Guard.NotNull(key3, nameof(key3));
+            Guard.NotNull(paths, nameof(paths));
 
             var result = Find(key1, key2, key3, paths.ToFetchQueryStrategy<TEntity>());
 
@@ -155,13 +152,10 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(key1, nameof(key1));
-                Guard.NotNull(key2, nameof(key2));
-                Guard.NotNull(key3, nameof(key3));
-                Guard.NotNull(paths, nameof(paths));
-            });
+            Guard.NotNull(key1, nameof(key1));
+            Guard.NotNull(key2, nameof(key2));
+            Guard.NotNull(key3, nameof(key3));
+            Guard.NotNull(paths, nameof(paths));
 
             var result = Find(key1, key2, key3, paths.ToFetchQueryStrategy<TEntity>());
 
@@ -182,12 +176,9 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(key1, nameof(key1));
-                Guard.NotNull(key2, nameof(key2));
-                Guard.NotNull(key3, nameof(key3));
-            });
+            Guard.NotNull(key1, nameof(key1));
+            Guard.NotNull(key2, nameof(key2));
+            Guard.NotNull(key3, nameof(key3));
 
             TEntity Getter() =>
                 UseContext<TEntity>(
@@ -290,13 +281,10 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(key1, nameof(key1));
-                Guard.NotNull(key2, nameof(key2));
-                Guard.NotNull(key3, nameof(key3));
-                Guard.NotNull(paths, nameof(paths));
-            });
+            Guard.NotNull(key1, nameof(key1));
+            Guard.NotNull(key2, nameof(key2));
+            Guard.NotNull(key3, nameof(key3));
+            Guard.NotNull(paths, nameof(paths));
 
             var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
             var result = await FindAsync(key1, key2, key3, fetchStrategy, cancellationToken).ConfigureAwait(false);
@@ -332,13 +320,10 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(key1, nameof(key1));
-                Guard.NotNull(key2, nameof(key2));
-                Guard.NotNull(key3, nameof(key3));
-                Guard.NotNull(paths, nameof(paths));
-            });
+            Guard.NotNull(key1, nameof(key1));
+            Guard.NotNull(key2, nameof(key2));
+            Guard.NotNull(key3, nameof(key3));
+            Guard.NotNull(paths, nameof(paths));
 
             var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
             var result = await FindAsync(key1, key2, key3, fetchStrategy, cancellationToken).ConfigureAwait(false);
@@ -361,12 +346,9 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(key1, nameof(key1));
-                Guard.NotNull(key2, nameof(key2));
-                Guard.NotNull(key3, nameof(key3));
-            });
+            Guard.NotNull(key1, nameof(key1));
+            Guard.NotNull(key2, nameof(key2));
+            Guard.NotNull(key3, nameof(key3));
 
             Task<TEntity> Getter() =>
                 UseContextAsync<TEntity>(
@@ -539,12 +521,9 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(key1, nameof(key1));
-                Guard.NotNull(key2, nameof(key2));
-                Guard.NotNull(paths, nameof(paths));
-            });
+            Guard.NotNull(key1, nameof(key1));
+            Guard.NotNull(key2, nameof(key2));
+            Guard.NotNull(paths, nameof(paths));
 
             var result = Find(key1, key2, paths.ToFetchQueryStrategy<TEntity>());
 
@@ -564,12 +543,9 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(key1, nameof(key1));
-                Guard.NotNull(key2, nameof(key2));
-                Guard.NotNull(paths, nameof(paths));
-            });
+            Guard.NotNull(key1, nameof(key1));
+            Guard.NotNull(key2, nameof(key2));
+            Guard.NotNull(paths, nameof(paths));
 
             var result = Find(key1, key2, paths.ToFetchQueryStrategy<TEntity>());
 
@@ -589,11 +565,8 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(key1, nameof(key1));
-                Guard.NotNull(key2, nameof(key2));
-            });
+            Guard.NotNull(key1, nameof(key1));
+            Guard.NotNull(key2, nameof(key2));
 
             TEntity Getter() =>
                 UseContext<TEntity>(
@@ -691,12 +664,9 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(key1, nameof(key1));
-                Guard.NotNull(key2, nameof(key2));
-                Guard.NotNull(paths, nameof(paths));
-            });
+            Guard.NotNull(key1, nameof(key1));
+            Guard.NotNull(key2, nameof(key2));
+            Guard.NotNull(paths, nameof(paths));
 
             var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
             var result = await FindAsync(key1, key2, fetchStrategy, cancellationToken).ConfigureAwait(false);
@@ -730,12 +700,9 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(key1, nameof(key1));
-                Guard.NotNull(key2, nameof(key2));
-                Guard.NotNull(paths, nameof(paths));
-            });
+            Guard.NotNull(key1, nameof(key1));
+            Guard.NotNull(key2, nameof(key2));
+            Guard.NotNull(paths, nameof(paths));
 
             var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
             var result = await FindAsync(key1, key2, fetchStrategy, cancellationToken).ConfigureAwait(false);
@@ -757,11 +724,8 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(key1, nameof(key1));
-                Guard.NotNull(key2, nameof(key2));
-            });
+            Guard.NotNull(key1, nameof(key1));
+            Guard.NotNull(key2, nameof(key2));
 
             Task<TEntity> Getter() =>
                 UseContextAsync<TEntity>(
@@ -927,11 +891,8 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(key, nameof(key));
-                Guard.NotNull(paths, nameof(paths));
-            });
+            Guard.NotNull(key, nameof(key));
+            Guard.NotNull(paths, nameof(paths));
 
             var result = Find(key, paths.ToFetchQueryStrategy<TEntity>());
 
@@ -950,11 +911,8 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(key, nameof(key));
-                Guard.NotNull(paths, nameof(paths));
-            });
+            Guard.NotNull(key, nameof(key));
+            Guard.NotNull(paths, nameof(paths));
 
             var result = Find(key, paths.ToFetchQueryStrategy<TEntity>());
 
@@ -973,7 +931,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(key, nameof(key)));
+            Guard.NotNull(key, nameof(key));
 
             TEntity Getter() =>
                 UseContext<TEntity>(
@@ -1066,11 +1024,8 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(key, nameof(key));
-                Guard.NotNull(paths, nameof(paths));
-            });
+            Guard.NotNull(key, nameof(key));
+            Guard.NotNull(paths, nameof(paths));
 
             var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
             var result = await FindAsync(key, fetchStrategy, cancellationToken).ConfigureAwait(false);
@@ -1102,11 +1057,8 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(key, nameof(key));
-                Guard.NotNull(paths, nameof(paths));
-            });
+            Guard.NotNull(key, nameof(key));
+            Guard.NotNull(paths, nameof(paths));
 
             var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
             var result = await FindAsync(key, fetchStrategy, cancellationToken).ConfigureAwait(false);
@@ -1127,7 +1079,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(key, nameof(key)));
+            Guard.NotNull(key, nameof(key));
 
             Task<TEntity> Getter() =>
                 UseContextAsync<TEntity>(
@@ -1311,11 +1263,8 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotEmpty(sql, nameof(sql));
-                Guard.NotNull(projector, nameof(projector));
-            });
+            Guard.NotEmpty(sql, nameof(sql));
+            Guard.NotNull(projector, nameof(projector));
 
             var parametersDict = ConvertToParametersDictionary(parameters);
 
@@ -1378,7 +1327,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotEmpty(sql, nameof(sql)));
+            Guard.NotEmpty(sql, nameof(sql));
 
             var parametersDict = ConvertToParametersDictionary(parameters);
 
@@ -1438,7 +1387,7 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() => Guard.NotNull(entity, nameof(entity)));
+            Guard.NotNull(entity, nameof(entity));
 
             UseContext(context =>
             {
@@ -1462,7 +1411,7 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() => Guard.NotNull(entities, nameof(entities)));
+            Guard.NotNull(entities, nameof(entities));
 
             UseContext(context =>
             {
@@ -1490,7 +1439,7 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() => Guard.NotNull(entity, nameof(entity)));
+            Guard.NotNull(entity, nameof(entity));
 
             UseContext(context =>
             {
@@ -1514,7 +1463,7 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() => Guard.NotNull(entities, nameof(entities)));
+            Guard.NotNull(entities, nameof(entities));
 
             UseContext(context =>
             {
@@ -1542,7 +1491,7 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() => Guard.NotNull(entity, nameof(entity)));
+            Guard.NotNull(entity, nameof(entity));
 
             UseContext(context =>
             {
@@ -1566,7 +1515,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(predicate, nameof(predicate)));
+            Guard.NotNull(predicate, nameof(predicate));
 
             Delete(predicate.ToQueryOptions<TEntity>());
 
@@ -1581,11 +1530,8 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(options, nameof(options));
-                Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
-            });
+            Guard.NotNull(options, nameof(options));
+            Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
 
             Delete(FindAll(options).Result);
 
@@ -1600,7 +1546,7 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() => Guard.NotNull(entities, nameof(entities)));
+            Guard.NotNull(entities, nameof(entities));
 
             UseContext(context =>
             {
@@ -1650,11 +1596,8 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(predicate, nameof(predicate));
-                Guard.NotNull(selector, nameof(selector));
-            });
+            Guard.NotNull(predicate, nameof(predicate));
+            Guard.NotNull(selector, nameof(selector));
 
             var result = Find<TResult>(predicate.ToQueryOptions<TEntity>(), selector);
 
@@ -1673,11 +1616,8 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(selector, nameof(selector));
-                Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
-            });
+            Guard.NotNull(selector, nameof(selector));
+            Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
 
             TResult Getter() =>
                 UseContext<TResult>(
@@ -1753,11 +1693,8 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(predicate, nameof(predicate));
-                Guard.NotNull(selector, nameof(selector));
-            });
+            Guard.NotNull(predicate, nameof(predicate));
+            Guard.NotNull(selector, nameof(selector));
 
             var result = FindAll<TResult>(predicate.ToQueryOptions<TEntity>(), selector).Result;
 
@@ -1776,7 +1713,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(selector, nameof(selector)));
+            Guard.NotNull(selector, nameof(selector));
 
             PagedQueryResult<IEnumerable<TResult>> Getter() =>
                 UseContext<PagedQueryResult<IEnumerable<TResult>>>(
@@ -1812,7 +1749,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(predicate, nameof(predicate)));
+            Guard.NotNull(predicate, nameof(predicate));
 
             var result = Exists(predicate.ToQueryOptions<TEntity>());
 
@@ -1830,11 +1767,8 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(options, nameof(options));
-                Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
-            });
+            Guard.NotNull(options, nameof(options));
+            Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
 
             var result = Find(options) != null;
 
@@ -1861,7 +1795,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(predicate, nameof(predicate)));
+            Guard.NotNull(predicate, nameof(predicate));
 
             var result = Count(predicate.ToQueryOptions<TEntity>());
 
@@ -1953,11 +1887,8 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(keySelector, nameof(keySelector));
-                Guard.NotNull(elementSelector, nameof(elementSelector));
-            });
+            Guard.NotNull(keySelector, nameof(keySelector));
+            Guard.NotNull(elementSelector, nameof(elementSelector));
 
             PagedQueryResult<Dictionary<TDictionaryKey, TElement>> Getter() =>
                 UseContext<PagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
@@ -2010,11 +1941,8 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(keySelector, nameof(keySelector));
-                Guard.NotNull(resultSelector, nameof(resultSelector));
-            });
+            Guard.NotNull(keySelector, nameof(keySelector));
+            Guard.NotNull(resultSelector, nameof(resultSelector));
 
             PagedQueryResult<IEnumerable<TResult>> Getter() =>
                 UseContext<PagedQueryResult<IEnumerable<TResult>>>(
@@ -2054,11 +1982,8 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotEmpty(sql, nameof(sql));
-                Guard.NotNull(projector, nameof(projector));
-            });
+            Guard.NotEmpty(sql, nameof(sql));
+            Guard.NotNull(projector, nameof(projector));
 
             var parametersDict = ConvertToParametersDictionary(parameters);
 
@@ -2125,7 +2050,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotEmpty(sql, nameof(sql)));
+            Guard.NotEmpty(sql, nameof(sql));
 
             var parametersDict = ConvertToParametersDictionary(parameters);
 
@@ -2190,12 +2115,9 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(entity, nameof(entity));
+            Guard.NotNull(entity, nameof(entity));
 
-                cancellationToken.ThrowIfCancellationRequested();
-            });
+            cancellationToken.ThrowIfCancellationRequested();
 
             await UseContextAsync(async context =>
             {
@@ -2223,12 +2145,9 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(entities, nameof(entities));
+            Guard.NotNull(entities, nameof(entities));
 
-                cancellationToken.ThrowIfCancellationRequested();
-            });
+            cancellationToken.ThrowIfCancellationRequested();
 
             await UseContextAsync(async context =>
             {
@@ -2260,12 +2179,9 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(entity, nameof(entity));
+            Guard.NotNull(entity, nameof(entity));
 
-                cancellationToken.ThrowIfCancellationRequested();
-            });
+            cancellationToken.ThrowIfCancellationRequested();
 
             await UseContextAsync(async context =>
             {
@@ -2293,12 +2209,9 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(entities, nameof(entities));
+            Guard.NotNull(entities, nameof(entities));
 
-                cancellationToken.ThrowIfCancellationRequested();
-            });
+            cancellationToken.ThrowIfCancellationRequested();
 
             await UseContextAsync(async context =>
             {
@@ -2330,12 +2243,9 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(entity, nameof(entity));
+            Guard.NotNull(entity, nameof(entity));
 
-                cancellationToken.ThrowIfCancellationRequested();
-            });
+            cancellationToken.ThrowIfCancellationRequested();
 
             await UseContextAsync(async context =>
             {
@@ -2363,7 +2273,7 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() => Guard.NotNull(predicate, nameof(predicate)));
+            Guard.NotNull(predicate, nameof(predicate));
 
             await DeleteAsync(predicate.ToQueryOptions<TEntity>(), cancellationToken).ConfigureAwait(false);
 
@@ -2380,11 +2290,8 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(options, nameof(options));
-                Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
-            });
+            Guard.NotNull(options, nameof(options));
+            Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
 
             var entitiesInDb = (await FindAllAsync(options, cancellationToken).ConfigureAwait(false)).Result;
 
@@ -2403,12 +2310,9 @@
         {
             LogExecutingMethod(false);
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(entities, nameof(entities));
+            Guard.NotNull(entities, nameof(entities));
 
-                cancellationToken.ThrowIfCancellationRequested();
-            });
+            cancellationToken.ThrowIfCancellationRequested();
 
             await UseContextAsync(async context =>
             {
@@ -2463,7 +2367,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(predicate, nameof(predicate)));
+            Guard.NotNull(predicate, nameof(predicate));
 
             var result = FindAsync<TResult>(predicate.ToQueryOptions<TEntity>(), selector, cancellationToken);
 
@@ -2483,11 +2387,8 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(selector, nameof(selector));
-                Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
-            });
+            Guard.NotNull(selector, nameof(selector));
+            Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
 
             Task<TResult> Getter() =>
                 UseContextAsync<TResult>(
@@ -2569,7 +2470,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(predicate, nameof(predicate)));
+            Guard.NotNull(predicate, nameof(predicate));
 
             var result = (await FindAllAsync<TResult>(predicate.ToQueryOptions<TEntity>(), selector, cancellationToken).ConfigureAwait(false)).Result;
 
@@ -2589,7 +2490,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(selector, nameof(selector)));
+            Guard.NotNull(selector, nameof(selector));
 
             Task<PagedQueryResult<IEnumerable<TResult>>> Getter() =>
                 UseContextAsync<PagedQueryResult<IEnumerable<TResult>>>(
@@ -2627,7 +2528,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(predicate, nameof(predicate)));
+            Guard.NotNull(predicate, nameof(predicate));
 
             var result = ExistsAsync(predicate.ToQueryOptions<TEntity>(), cancellationToken);
 
@@ -2646,11 +2547,8 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(options, nameof(options));
-                Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
-            });
+            Guard.NotNull(options, nameof(options));
+            Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
 
             var result = await FindAsync(options, cancellationToken).ConfigureAwait(false) != null;
 
@@ -2679,7 +2577,7 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() => Guard.NotNull(predicate, nameof(predicate)));
+            Guard.NotNull(predicate, nameof(predicate));
 
             var result = CountAsync(predicate.ToQueryOptions<TEntity>(), cancellationToken);
 
@@ -2777,11 +2675,8 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(keySelector, nameof(keySelector));
-                Guard.NotNull(elementSelector, nameof(elementSelector));
-            });
+            Guard.NotNull(keySelector, nameof(keySelector));
+            Guard.NotNull(elementSelector, nameof(elementSelector));
 
             Task<PagedQueryResult<Dictionary<TDictionaryKey, TElement>>> Getter() =>
                 UseContextAsync<PagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
@@ -2838,11 +2733,8 @@
         {
             LogExecutingMethod();
 
-            InterceptError(() =>
-            {
-                Guard.NotNull(keySelector, nameof(keySelector));
-                Guard.NotNull(resultSelector, nameof(resultSelector));
-            });
+            Guard.NotNull(keySelector, nameof(keySelector));
+            Guard.NotNull(resultSelector, nameof(resultSelector));
 
             Task<PagedQueryResult<IEnumerable<TResult>>> Getter() =>
                 UseContextAsync<PagedQueryResult<IEnumerable<TResult>>>(
@@ -2986,7 +2878,7 @@
         protected Task<T> UseContextAsync<T>([NotNull] Func<IRepositoryContextAsync, Task<T>> action)
         {
             Guard.NotNull(action, nameof(action));
-            
+
             return InterceptErrorAsync<T>(async () =>
             {
                 var context = GetContext().AsAsync();
