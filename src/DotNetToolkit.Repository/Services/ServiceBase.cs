@@ -683,7 +683,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey1, TKey2, TKey3>().AddAsync(entity, cancellationToken);
+                await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .AddAsync(entity, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -698,7 +700,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey1, TKey2, TKey3>().AddAsync(entities, cancellationToken);
+                await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .AddAsync(entities, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -715,7 +719,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().TryDeleteAsync(key1, key2, key3, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .TryDeleteAsync(key1, key2, key3, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -735,7 +741,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey1, TKey2, TKey3>().DeleteAsync(key1, key2, key3, cancellationToken);
+                await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .DeleteAsync(key1, key2, key3, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -750,7 +758,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey1, TKey2, TKey3>().DeleteAsync(entity, cancellationToken);
+                await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .DeleteAsync(entity, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -765,7 +775,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey1, TKey2, TKey3>().DeleteAsync(predicate, cancellationToken);
+                await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .DeleteAsync(predicate, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -780,7 +792,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey1, TKey2, TKey3>().DeleteAsync(options, cancellationToken);
+                await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .DeleteAsync(options, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -795,7 +809,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey1, TKey2, TKey3>().DeleteAsync(entities, cancellationToken);
+                await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .DeleteAsync(entities, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -810,7 +826,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey1, TKey2, TKey3>().UpdateAsync(entity, cancellationToken);
+                await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .UpdateAsync(entity, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -825,7 +843,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey1, TKey2, TKey3>().UpdateAsync(entities, cancellationToken);
+                await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .UpdateAsync(entities, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -842,7 +862,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync(key1, key2, key3, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .FindAsync(key1, key2, key3, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -862,7 +884,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync(key1, key2, key3, paths);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .FindAsync(key1, key2, key3, paths)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -883,7 +907,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync(key1, key2, key3, paths, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .FindAsync(key1, key2, key3, paths, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -903,7 +929,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync(key1, key2, key3, paths);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .FindAsync(key1, key2, key3, paths)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -924,7 +952,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync(key1, key2, key3, paths, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .FindAsync(key1, key2, key3, paths, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -945,7 +975,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync(key1, key2, key3, fetchStrategy, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .FindAsync(key1, key2, key3, fetchStrategy, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -963,7 +995,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync(predicate, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .FindAsync(predicate, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -981,7 +1015,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .FindAsync(options, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -1000,7 +1036,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync<TResult>(predicate, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .FindAsync<TResult>(predicate, selector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -1019,7 +1057,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAsync<TResult>(options, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .FindAsync<TResult>(options, selector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -1036,7 +1076,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAllAsync(cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .FindAllAsync(cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -1054,7 +1096,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAllAsync(cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .FindAllAsync(cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -1072,7 +1116,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAllAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .FindAllAsync(options, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -1090,7 +1136,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAllAsync<TResult>(selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .FindAllAsync<TResult>(selector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -1109,7 +1157,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAllAsync<TResult>(predicate, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .FindAllAsync<TResult>(predicate, selector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -1128,7 +1178,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().FindAllAsync<TResult>(options, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .FindAllAsync<TResult>(options, selector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -1148,7 +1200,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().ExistsAsync(key1, key2, key3, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .ExistsAsync(key1, key2, key3, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -1166,7 +1220,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().ExistsAsync(predicate, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .ExistsAsync(predicate, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -1184,7 +1240,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().ExistsAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .ExistsAsync(options, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -1201,7 +1259,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().CountAsync(cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .CountAsync(cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -1219,7 +1279,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().CountAsync(predicate, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .CountAsync(predicate, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -1237,7 +1299,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().CountAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .CountAsync(options, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -1256,7 +1320,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().ToDictionaryAsync<TDictionaryKey>(keySelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .ToDictionaryAsync<TDictionaryKey>(keySelector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -1276,7 +1342,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().ToDictionaryAsync<TDictionaryKey>(options, keySelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .ToDictionaryAsync<TDictionaryKey>(options, keySelector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -1297,7 +1365,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().ToDictionaryAsync<TDictionaryKey, TElement>(keySelector, elementSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .ToDictionaryAsync<TDictionaryKey, TElement>(keySelector, elementSelector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -1319,7 +1389,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().ToDictionaryAsync<TDictionaryKey, TElement>(options, keySelector, elementSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .ToDictionaryAsync<TDictionaryKey, TElement>(options, keySelector, elementSelector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -1340,7 +1412,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().GroupByAsync<TGroupKey, TResult>(keySelector, resultSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .GroupByAsync<TGroupKey, TResult>(keySelector, resultSelector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -1362,7 +1436,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>().GroupByAsync<TGroupKey, TResult>(options, keySelector, resultSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2, TKey3>()
+                    .GroupByAsync<TGroupKey, TResult>(options, keySelector, resultSelector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2035,7 +2111,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey1, TKey2>().AddAsync(entity, cancellationToken);
+                await uow.Create<TEntity, TKey1, TKey2>()
+                    .AddAsync(entity, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -2050,7 +2128,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey1, TKey2>().AddAsync(entities, cancellationToken);
+                await uow.Create<TEntity, TKey1, TKey2>()
+                    .AddAsync(entities, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -2066,7 +2146,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().TryDeleteAsync(key1, key2, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .TryDeleteAsync(key1, key2, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2085,7 +2167,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey1, TKey2>().DeleteAsync(key1, key2, cancellationToken);
+                await uow.Create<TEntity, TKey1, TKey2>()
+                    .DeleteAsync(key1, key2, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -2100,7 +2184,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey1, TKey2>().DeleteAsync(entity, cancellationToken);
+                await uow.Create<TEntity, TKey1, TKey2>()
+                    .DeleteAsync(entity, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -2115,7 +2201,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey1, TKey2>().DeleteAsync(predicate, cancellationToken);
+                await uow.Create<TEntity, TKey1, TKey2>()
+                    .DeleteAsync(predicate, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -2130,7 +2218,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey1, TKey2>().DeleteAsync(options, cancellationToken);
+                await uow.Create<TEntity, TKey1, TKey2>()
+                    .DeleteAsync(options, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -2145,7 +2235,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey1, TKey2>().DeleteAsync(entities, cancellationToken);
+                await uow.Create<TEntity, TKey1, TKey2>()
+                    .DeleteAsync(entities, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -2160,7 +2252,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey1, TKey2>().UpdateAsync(entity, cancellationToken);
+                await uow.Create<TEntity, TKey1, TKey2>()
+                    .UpdateAsync(entity, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -2175,7 +2269,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey1, TKey2>().UpdateAsync(entities, cancellationToken);
+                await uow.Create<TEntity, TKey1, TKey2>()
+                    .UpdateAsync(entities, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -2191,7 +2287,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAsync(key1, key2, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .FindAsync(key1, key2, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2210,7 +2308,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAsync(key1, key2, paths);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .FindAsync(key1, key2, paths)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2230,7 +2330,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAsync(key1, key2, paths, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .FindAsync(key1, key2, paths, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2249,7 +2351,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAsync(key1, key2, paths);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .FindAsync(key1, key2, paths)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2269,7 +2373,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAsync(key1, key2, paths, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .FindAsync(key1, key2, paths, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2289,7 +2395,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAsync(key1, key2, fetchStrategy, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .FindAsync(key1, key2, fetchStrategy, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2307,7 +2415,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAsync(predicate, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .FindAsync(predicate, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2325,7 +2435,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .FindAsync(options, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2344,7 +2456,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAsync<TResult>(predicate, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .FindAsync<TResult>(predicate, selector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2363,7 +2477,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAsync<TResult>(options, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .FindAsync<TResult>(options, selector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2380,7 +2496,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAllAsync(cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .FindAllAsync(cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2398,7 +2516,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAllAsync(cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .FindAllAsync(cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2416,7 +2536,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAllAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .FindAllAsync(options, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2434,7 +2556,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAllAsync<TResult>(selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .FindAllAsync<TResult>(selector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2453,7 +2577,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAllAsync<TResult>(predicate, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .FindAllAsync<TResult>(predicate, selector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2472,7 +2598,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().FindAllAsync<TResult>(options, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .FindAllAsync<TResult>(options, selector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2491,7 +2619,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().ExistsAsync(key1, key2, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .ExistsAsync(key1, key2, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2509,7 +2639,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().ExistsAsync(predicate, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .ExistsAsync(predicate, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2527,7 +2659,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().ExistsAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .ExistsAsync(options, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2544,7 +2678,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().CountAsync(cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .CountAsync(cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2562,7 +2698,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().CountAsync(predicate, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .CountAsync(predicate, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2580,7 +2718,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().CountAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .CountAsync(options, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2599,7 +2739,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().ToDictionaryAsync<TDictionaryKey>(keySelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .ToDictionaryAsync<TDictionaryKey>(keySelector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2619,7 +2761,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().ToDictionaryAsync<TDictionaryKey>(options, keySelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .ToDictionaryAsync<TDictionaryKey>(options, keySelector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2640,7 +2784,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().ToDictionaryAsync<TDictionaryKey, TElement>(keySelector, elementSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .ToDictionaryAsync<TDictionaryKey, TElement>(keySelector, elementSelector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2662,7 +2808,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().ToDictionaryAsync<TDictionaryKey, TElement>(options, keySelector, elementSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .ToDictionaryAsync<TDictionaryKey, TElement>(options, keySelector, elementSelector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2683,7 +2831,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().GroupByAsync<TGroupKey, TResult>(keySelector, resultSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .GroupByAsync<TGroupKey, TResult>(keySelector, resultSelector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -2705,7 +2855,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey1, TKey2>().GroupByAsync<TGroupKey, TResult>(options, keySelector, resultSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey1, TKey2>()
+                    .GroupByAsync<TGroupKey, TResult>(options, keySelector, resultSelector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3370,7 +3522,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey>().AddAsync(entity, cancellationToken);
+                await uow.Create<TEntity, TKey>()
+                    .AddAsync(entity, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -3385,7 +3539,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey>().AddAsync(entities, cancellationToken);
+                await uow.Create<TEntity, TKey>()
+                    .AddAsync(entities, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -3400,7 +3556,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey>().DeleteAsync(entity, cancellationToken);
+                await uow.Create<TEntity, TKey>()
+                    .DeleteAsync(entity, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -3415,7 +3573,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().TryDeleteAsync(key, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .TryDeleteAsync(key, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3433,7 +3593,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey>().DeleteAsync(key, cancellationToken);
+                await uow.Create<TEntity, TKey>()
+                    .DeleteAsync(key, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -3448,7 +3610,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey>().DeleteAsync(predicate, cancellationToken);
+                await uow.Create<TEntity, TKey>()
+                    .DeleteAsync(predicate, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -3463,7 +3627,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey>().DeleteAsync(options, cancellationToken);
+                await uow.Create<TEntity, TKey>()
+                    .DeleteAsync(options, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -3478,7 +3644,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey>().DeleteAsync(entities, cancellationToken);
+                await uow.Create<TEntity, TKey>()
+                    .DeleteAsync(entities, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -3493,7 +3661,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey>().UpdateAsync(entity, cancellationToken);
+                await uow.Create<TEntity, TKey>()
+                    .UpdateAsync(entity, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -3508,7 +3678,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                await uow.Create<TEntity, TKey>().UpdateAsync(entities, cancellationToken);
+                await uow.Create<TEntity, TKey>()
+                    .UpdateAsync(entities, cancellationToken)
+                    .ConfigureAwait(false);
                 uow.Commit();
             }
         }
@@ -3523,7 +3695,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().FindAsync(key, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .FindAsync(key, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3541,7 +3715,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().FindAsync(key, paths);
+                var result = await uow.Create<TEntity, TKey>()
+                    .FindAsync(key, paths)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3560,7 +3736,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().FindAsync(key, paths, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .FindAsync(key, paths, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3578,7 +3756,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().FindAsync(key, paths);
+                var result = await uow.Create<TEntity, TKey>()
+                    .FindAsync(key, paths)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3597,7 +3777,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().FindAsync(key, paths, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .FindAsync(key, paths, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3616,7 +3798,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().FindAsync(key, fetchStrategy, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .FindAsync(key, fetchStrategy, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3634,7 +3818,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().FindAsync(predicate, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .FindAsync(predicate, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3652,7 +3838,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().FindAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .FindAsync(options, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3671,7 +3859,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().FindAsync<TResult>(predicate, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .FindAsync<TResult>(predicate, selector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3690,7 +3880,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().FindAsync<TResult>(options, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .FindAsync<TResult>(options, selector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3707,7 +3899,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().FindAllAsync(cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .FindAllAsync(cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3725,7 +3919,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().FindAllAsync(cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .FindAllAsync(cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3743,7 +3939,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().FindAllAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .FindAllAsync(options, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3761,7 +3959,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().FindAllAsync<TResult>(selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .FindAllAsync<TResult>(selector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3780,7 +3980,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().FindAllAsync<TResult>(predicate, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .FindAllAsync<TResult>(predicate, selector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3799,7 +4001,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().FindAllAsync<TResult>(options, selector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .FindAllAsync<TResult>(options, selector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3817,7 +4021,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().ExistsAsync(key, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .ExistsAsync(key, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3835,7 +4041,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().ExistsAsync(predicate, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .ExistsAsync(predicate, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3853,7 +4061,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().ExistsAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .ExistsAsync(options, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3870,7 +4080,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().CountAsync(cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .CountAsync(cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3888,7 +4100,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().CountAsync(predicate, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .CountAsync(predicate, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3906,7 +4120,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().CountAsync(options, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .CountAsync(options, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3925,7 +4141,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().ToDictionaryAsync<TDictionaryKey>(keySelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .ToDictionaryAsync<TDictionaryKey>(keySelector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3945,7 +4163,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().ToDictionaryAsync<TDictionaryKey>(options, keySelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .ToDictionaryAsync<TDictionaryKey>(options, keySelector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3966,7 +4186,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().ToDictionaryAsync<TDictionaryKey, TElement>(keySelector, elementSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .ToDictionaryAsync<TDictionaryKey, TElement>(keySelector, elementSelector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -3988,7 +4210,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().ToDictionaryAsync<TDictionaryKey, TElement>(options, keySelector, elementSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .ToDictionaryAsync<TDictionaryKey, TElement>(options, keySelector, elementSelector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -4009,7 +4233,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().GroupByAsync<TGroupKey, TResult>(keySelector, resultSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .GroupByAsync<TGroupKey, TResult>(keySelector, resultSelector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 
@@ -4031,7 +4257,9 @@
         {
             using (var uow = UnitOfWorkFactory.Create())
             {
-                var result = await uow.Create<TEntity, TKey>().GroupByAsync<TGroupKey, TResult>(options, keySelector, resultSelector, cancellationToken);
+                var result = await uow.Create<TEntity, TKey>()
+                    .GroupByAsync<TGroupKey, TResult>(options, keySelector, resultSelector, cancellationToken)
+                    .ConfigureAwait(false);
 
                 uow.Commit();
 

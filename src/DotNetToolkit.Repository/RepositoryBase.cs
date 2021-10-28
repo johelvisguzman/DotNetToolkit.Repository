@@ -244,7 +244,7 @@
         {
             LogExecutingMethod();
 
-            var result = await FindAsync(key1, key2, key3, cancellationToken) != null;
+            var result = await FindAsync(key1, key2, key3, cancellationToken).ConfigureAwait(false) != null;
 
             LogExecutedMethod();
 
@@ -298,7 +298,8 @@
                 Guard.NotNull(paths, nameof(paths));
             });
 
-            var result = await FindAsync(key1, key2, key3, paths.ToFetchQueryStrategy<TEntity>(), cancellationToken);
+            var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
+            var result = await FindAsync(key1, key2, key3, fetchStrategy, cancellationToken).ConfigureAwait(false);
 
             LogExecutedMethod();
 
@@ -339,7 +340,8 @@
                 Guard.NotNull(paths, nameof(paths));
             });
 
-            var result = await FindAsync(key1, key2, key3, paths.ToFetchQueryStrategy<TEntity>(), cancellationToken);
+            var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
+            var result = await FindAsync(key1, key2, key3, fetchStrategy, cancellationToken).ConfigureAwait(false);
 
             LogExecutedMethod();
 
@@ -375,14 +377,15 @@
             if (CacheEnabled)
             {
                 var cacheResult = await InterceptErrorAsync<CacheQueryResult<TEntity>>(
-                    () => CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy, Getter, Logger));
+                        () => CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key1, key2, key3 }, fetchStrategy, Getter, Logger))
+                    .ConfigureAwait(false);
 
                 result = cacheResult.Result;
                 CacheUsed = cacheResult.CacheUsed;
             }
             else
             {
-                result = await Getter();
+                result = await Getter().ConfigureAwait(false);
                 CacheUsed = false;
             }
 
@@ -403,7 +406,7 @@
         {
             LogExecutingMethod(false);
 
-            if (!await TryDeleteAsync(key1, key2, key3, cancellationToken))
+            if (!await TryDeleteAsync(key1, key2, key3, cancellationToken).ConfigureAwait(false))
             {
                 InterceptError(() => throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3)));
             }
@@ -425,7 +428,7 @@
 
             InterceptError(cancellationToken.ThrowIfCancellationRequested);
 
-            var entity = await FindAsync(key1, key2, key3, cancellationToken);
+            var entity = await FindAsync(key1, key2, key3, cancellationToken).ConfigureAwait(false);
 
             if (entity == null)
                 return false;
@@ -645,7 +648,7 @@
         {
             LogExecutingMethod();
 
-            var result = await FindAsync(key1, key2, cancellationToken) != null;
+            var result = await FindAsync(key1, key2, cancellationToken).ConfigureAwait(false) != null;
 
             LogExecutedMethod();
 
@@ -695,7 +698,8 @@
                 Guard.NotNull(paths, nameof(paths));
             });
 
-            var result = await FindAsync(key1, key2, paths.ToFetchQueryStrategy<TEntity>(), cancellationToken);
+            var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
+            var result = await FindAsync(key1, key2, fetchStrategy, cancellationToken).ConfigureAwait(false);
 
             LogExecutedMethod();
 
@@ -733,7 +737,8 @@
                 Guard.NotNull(paths, nameof(paths));
             });
 
-            var result = await FindAsync(key1, key2, paths.ToFetchQueryStrategy<TEntity>(), cancellationToken);
+            var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
+            var result = await FindAsync(key1, key2, fetchStrategy, cancellationToken).ConfigureAwait(false);
 
             LogExecutedMethod();
 
@@ -767,14 +772,15 @@
             if (CacheEnabled)
             {
                 var cacheResult = await InterceptErrorAsync<CacheQueryResult<TEntity>>(
-                    () => CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key1, key2 }, fetchStrategy, Getter, Logger));
+                        () => CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key1, key2 }, fetchStrategy, Getter, Logger))
+                    .ConfigureAwait(false);
 
                 result = cacheResult.Result;
                 CacheUsed = cacheResult.CacheUsed;
             }
             else
             {
-                result = await Getter();
+                result = await Getter().ConfigureAwait(false);
                 CacheUsed = false;
             }
 
@@ -815,7 +821,7 @@
 
             InterceptError(cancellationToken.ThrowIfCancellationRequested);
 
-            var entity = await FindAsync(key1, key2, cancellationToken);
+            var entity = await FindAsync(key1, key2, cancellationToken).ConfigureAwait(false);
 
             if (entity == null)
                 return false;
@@ -1020,7 +1026,7 @@
         {
             LogExecutingMethod();
 
-            var result = await FindAsync(key, cancellationToken) != null;
+            var result = await FindAsync(key, cancellationToken).ConfigureAwait(false) != null;
 
             LogExecutedMethod();
 
@@ -1066,7 +1072,8 @@
                 Guard.NotNull(paths, nameof(paths));
             });
 
-            var result = await FindAsync(key, paths.ToFetchQueryStrategy<TEntity>(), cancellationToken);
+            var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
+            var result = await FindAsync(key, fetchStrategy, cancellationToken).ConfigureAwait(false);
 
             LogExecutedMethod();
 
@@ -1101,7 +1108,8 @@
                 Guard.NotNull(paths, nameof(paths));
             });
 
-            var result = await FindAsync(key, paths.ToFetchQueryStrategy<TEntity>(), cancellationToken);
+            var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
+            var result = await FindAsync(key, fetchStrategy, cancellationToken).ConfigureAwait(false);
 
             LogExecutedMethod();
 
@@ -1130,14 +1138,15 @@
             if (CacheEnabled)
             {
                 var cacheResult = await InterceptErrorAsync<CacheQueryResult<TEntity>>(
-                    () => CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key }, fetchStrategy, Getter, Logger));
+                        () => CacheProvider.GetOrSetFindAsync<TEntity>(new object[] { key }, fetchStrategy, Getter, Logger))
+                    .ConfigureAwait(false);
 
                 result = cacheResult.Result;
                 CacheUsed = cacheResult.CacheUsed;
             }
             else
             {
-                result = await Getter();
+                result = await Getter().ConfigureAwait(false);
                 CacheUsed = false;
             }
 
@@ -1156,7 +1165,7 @@
         {
             LogExecutingMethod(false);
 
-            if (!await TryDeleteAsync(key, cancellationToken))
+            if (!await TryDeleteAsync(key, cancellationToken).ConfigureAwait(false))
             {
                 InterceptError(() => throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key)));
             }
@@ -1176,7 +1185,7 @@
 
             InterceptError(cancellationToken.ThrowIfCancellationRequested);
 
-            var entity = await FindAsync(key, cancellationToken);
+            var entity = await FindAsync(key, cancellationToken).ConfigureAwait(false);
 
             if (entity == null)
                 return false;
@@ -2062,14 +2071,15 @@
             if (CacheEnabled)
             {
                 var cacheResult = await InterceptErrorAsync<CacheQueryResult<IEnumerable<TEntity>>>(
-                    () => CacheProvider.GetOrSetExecuteSqlQueryAsync<TEntity>(sql, cmdType, parametersDict, projector, Getter, Logger));
+                        () => CacheProvider.GetOrSetExecuteSqlQueryAsync<TEntity>(sql, cmdType, parametersDict, projector, Getter, Logger))
+                    .ConfigureAwait(false);
 
                 result = cacheResult.Result;
                 CacheUsed = cacheResult.CacheUsed;
             }
             else
             {
-                result = await Getter();
+                result = await Getter().ConfigureAwait(false);
                 CacheUsed = false;
             }
 
@@ -2128,14 +2138,15 @@
             if (CacheEnabled)
             {
                 var cacheResult = await InterceptErrorAsync<CacheQueryResult<int>>(
-                    () => CacheProvider.GetOrSetExecuteSqlCommandAsync<TEntity>(sql, cmdType, parametersDict, Getter, Logger));
+                        () => CacheProvider.GetOrSetExecuteSqlCommandAsync<TEntity>(sql, cmdType, parametersDict, Getter, Logger))
+                    .ConfigureAwait(false);
 
                 result = cacheResult.Result;
                 CacheUsed = cacheResult.CacheUsed;
             }
             else
             {
-                result = await Getter();
+                result = await Getter().ConfigureAwait(false);
                 CacheUsed = false;
             }
 
@@ -2190,10 +2201,11 @@
             {
                 await InterceptAsync(x => x.AddExecutingAsync(
                     new RepositoryInterceptionContext<TEntity>(entity, context),
-                    cancellationToken));
+                    cancellationToken))
+                .ConfigureAwait(false);
 
-                await context.AddAsync(entity, cancellationToken);
-                await context.SaveChangesAsync(cancellationToken);
+                await context.AddAsync(entity, cancellationToken).ConfigureAwait(false);
+                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             });
 
             ClearCache();
@@ -2224,12 +2236,13 @@
                 {
                     await InterceptAsync(x => x.AddExecutingAsync(
                         new RepositoryInterceptionContext<TEntity>(entity, context),
-                        cancellationToken));
+                        cancellationToken))
+                    .ConfigureAwait(false);
 
-                    await context.AddAsync(entity, cancellationToken);
+                    await context.AddAsync(entity, cancellationToken).ConfigureAwait(false);
                 }
 
-                await context.SaveChangesAsync(cancellationToken);
+                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             });
 
             ClearCache();
@@ -2258,10 +2271,11 @@
             {
                 await InterceptAsync(x => x.UpdateExecutingAsync(
                     new RepositoryInterceptionContext<TEntity>(entity, context),
-                    cancellationToken));
+                    cancellationToken))
+                .ConfigureAwait(false);
 
-                await context.UpdateAsync(entity, cancellationToken);
-                await context.SaveChangesAsync(cancellationToken);
+                await context.UpdateAsync(entity, cancellationToken).ConfigureAwait(false);
+                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             });
 
             ClearCache();
@@ -2292,12 +2306,13 @@
                 {
                     await InterceptAsync(x => x.UpdateExecutingAsync(
                         new RepositoryInterceptionContext<TEntity>(entity, context),
-                        cancellationToken));
+                        cancellationToken))
+                    .ConfigureAwait(false);
 
-                    await context.UpdateAsync(entity, cancellationToken);
+                    await context.UpdateAsync(entity, cancellationToken).ConfigureAwait(false);
                 }
 
-                await context.SaveChangesAsync(cancellationToken);
+                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             });
 
             ClearCache();
@@ -2326,10 +2341,11 @@
             {
                 await InterceptAsync(x => x.DeleteExecutingAsync(
                     new RepositoryInterceptionContext<TEntity>(entity, context),
-                    cancellationToken));
+                    cancellationToken))
+                .ConfigureAwait(false);
 
-                await context.RemoveAsync(entity, cancellationToken);
-                await context.SaveChangesAsync(cancellationToken);
+                await context.RemoveAsync(entity, cancellationToken).ConfigureAwait(false);
+                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             });
 
             ClearCache();
@@ -2349,7 +2365,7 @@
 
             InterceptError(() => Guard.NotNull(predicate, nameof(predicate)));
 
-            await DeleteAsync(predicate.ToQueryOptions<TEntity>(), cancellationToken);
+            await DeleteAsync(predicate.ToQueryOptions<TEntity>(), cancellationToken).ConfigureAwait(false);
 
             LogExecutedMethod(false);
         }
@@ -2370,9 +2386,9 @@
                 Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
             });
 
-            var entitiesInDb = (await FindAllAsync(options, cancellationToken)).Result;
+            var entitiesInDb = (await FindAllAsync(options, cancellationToken).ConfigureAwait(false)).Result;
 
-            await DeleteAsync(entitiesInDb, cancellationToken);
+            await DeleteAsync(entitiesInDb, cancellationToken).ConfigureAwait(false);
 
             LogExecutedMethod(false);
         }
@@ -2400,12 +2416,13 @@
                 {
                     await InterceptAsync(x => x.DeleteExecutingAsync(
                         new RepositoryInterceptionContext<TEntity>(entity, context),
-                        cancellationToken));
+                        cancellationToken))
+                    .ConfigureAwait(false);
 
-                    await context.RemoveAsync(entity, cancellationToken);
+                    await context.RemoveAsync(entity, cancellationToken).ConfigureAwait(false);
                 }
 
-                await context.SaveChangesAsync(cancellationToken);
+                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             });
 
             ClearCache();
@@ -2481,14 +2498,15 @@
             if (CacheEnabled)
             {
                 var cacheResult = await InterceptErrorAsync<CacheQueryResult<TResult>>(
-                    () => CacheProvider.GetOrSetFindAsync<TEntity, TResult>(options, selector, Getter, Logger));
+                        () => CacheProvider.GetOrSetFindAsync<TEntity, TResult>(options, selector, Getter, Logger))
+                    .ConfigureAwait(false);
 
                 result = cacheResult.Result;
                 CacheUsed = cacheResult.CacheUsed;
             }
             else
             {
-                result = await Getter();
+                result = await Getter().ConfigureAwait(false);
                 CacheUsed = false;
             }
 
@@ -2537,7 +2555,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository.</returns>
         public async Task<IEnumerable<TResult>> FindAllAsync<TResult>([NotNull] Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return (await FindAllAsync<TResult>((IQueryOptions<TEntity>)null, selector, cancellationToken)).Result;
+            return (await FindAllAsync<TResult>((IQueryOptions<TEntity>)null, selector, cancellationToken).ConfigureAwait(false)).Result;
         }
 
         /// <summary>
@@ -2553,7 +2571,7 @@
 
             InterceptError(() => Guard.NotNull(predicate, nameof(predicate)));
 
-            var result = (await FindAllAsync<TResult>(predicate.ToQueryOptions<TEntity>(), selector, cancellationToken)).Result;
+            var result = (await FindAllAsync<TResult>(predicate.ToQueryOptions<TEntity>(), selector, cancellationToken).ConfigureAwait(false)).Result;
 
             LogExecutedMethod();
 
@@ -2582,14 +2600,15 @@
             if (CacheEnabled)
             {
                 var cacheResult = await InterceptErrorAsync<CachePagedQueryResult<IEnumerable<TResult>>>(
-                    () => CacheProvider.GetOrSetFindAllAsync<TEntity, TResult>(options, selector, Getter, Logger));
+                        () => CacheProvider.GetOrSetFindAllAsync<TEntity, TResult>(options, selector, Getter, Logger))
+                    .ConfigureAwait(false);
 
                 result = cacheResult.Result;
                 CacheUsed = cacheResult.CacheUsed;
             }
             else
             {
-                result = await Getter();
+                result = await Getter().ConfigureAwait(false);
                 CacheUsed = false;
             }
 
@@ -2633,7 +2652,7 @@
                 Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
             });
 
-            var result = await FindAsync(options, cancellationToken) != null;
+            var result = await FindAsync(options, cancellationToken).ConfigureAwait(false) != null;
 
             LogExecutedMethod();
 
@@ -2688,14 +2707,15 @@
             if (CacheEnabled)
             {
                 var cacheResult = await InterceptErrorAsync<CacheQueryResult<int>>(
-                    () => CacheProvider.GetOrSetCountAsync<TEntity>(options, Getter, Logger));
+                        () => CacheProvider.GetOrSetCountAsync<TEntity>(options, Getter, Logger))
+                    .ConfigureAwait(false);
 
                 result = cacheResult.Result;
                 CacheUsed = cacheResult.CacheUsed;
             }
             else
             {
-                result = await Getter();
+                result = await Getter().ConfigureAwait(false);
                 CacheUsed = false;
             }
 
@@ -2713,7 +2733,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
         public async Task<Dictionary<TDictionaryKey, TEntity>> ToDictionaryAsync<TDictionaryKey>([NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return (await ToDictionaryAsync<TDictionaryKey>((IQueryOptions<TEntity>)null, keySelector, cancellationToken)).Result;
+            return (await ToDictionaryAsync<TDictionaryKey>((IQueryOptions<TEntity>)null, keySelector, cancellationToken).ConfigureAwait(false)).Result;
         }
 
         /// <summary>
@@ -2740,7 +2760,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values.</returns>
         public async Task<Dictionary<TDictionaryKey, TElement>> ToDictionaryAsync<TDictionaryKey, TElement>([NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector, [NotNull] Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return (await ToDictionaryAsync<TDictionaryKey, TElement>((IQueryOptions<TEntity>)null, keySelector, elementSelector, cancellationToken)).Result;
+            return (await ToDictionaryAsync<TDictionaryKey, TElement>((IQueryOptions<TEntity>)null, keySelector, elementSelector, cancellationToken).ConfigureAwait(false)).Result;
         }
 
         /// <summary>
@@ -2772,14 +2792,15 @@
             if (CacheEnabled)
             {
                 var cacheResult = await InterceptErrorAsync<CachePagedQueryResult<Dictionary<TDictionaryKey, TElement>>>(
-                    () => CacheProvider.GetOrSetDictionaryAsync<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector, Getter, Logger));
+                        () => CacheProvider.GetOrSetDictionaryAsync<TEntity, TDictionaryKey, TElement>(options, keySelector, elementSelector, Getter, Logger))
+                    .ConfigureAwait(false);
 
                 result = cacheResult.Result;
                 CacheUsed = cacheResult.CacheUsed;
             }
             else
             {
-                result = await Getter();
+                result = await Getter().ConfigureAwait(false);
                 CacheUsed = false;
             }
 
@@ -2800,7 +2821,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains the grouped result.</returns>
         public async Task<IEnumerable<TResult>> GroupByAsync<TGroupKey, TResult>([NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            return (await GroupByAsync<TGroupKey, TResult>((IQueryOptions<TEntity>)null, keySelector, resultSelector, cancellationToken)).Result;
+            return (await GroupByAsync<TGroupKey, TResult>((IQueryOptions<TEntity>)null, keySelector, resultSelector, cancellationToken).ConfigureAwait(false)).Result;
         }
 
         /// <summary>
@@ -2832,14 +2853,15 @@
             if (CacheEnabled)
             {
                 var cacheResult = await InterceptErrorAsync<CachePagedQueryResult<IEnumerable<TResult>>>(
-                    () => CacheProvider.GetOrSetGroupAsync<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector, Getter, Logger));
+                        () => CacheProvider.GetOrSetGroupAsync<TEntity, TGroupKey, TResult>(options, keySelector, resultSelector, Getter, Logger))
+                    .ConfigureAwait(false);
 
                 result = cacheResult.Result;
                 CacheUsed = cacheResult.CacheUsed;
             }
             else
             {
-                result = await Getter();
+                result = await Getter().ConfigureAwait(false);
                 CacheUsed = false;
             }
 
@@ -2937,15 +2959,15 @@
         /// </summary>
         protected Task UseContextAsync([NotNull] Func<IRepositoryContextAsync, Task> action)
         {
+            Guard.NotNull(action, nameof(action));
+
             return InterceptErrorAsync(async () =>
             {
-                Guard.NotNull(action, nameof(action));
-
                 var context = GetContext().AsAsync();
 
                 try
                 {
-                    await action(context);
+                    await action(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -2963,15 +2985,15 @@
         /// </summary>
         protected Task<T> UseContextAsync<T>([NotNull] Func<IRepositoryContextAsync, Task<T>> action)
         {
+            Guard.NotNull(action, nameof(action));
+            
             return InterceptErrorAsync<T>(async () =>
             {
-                Guard.NotNull(action, nameof(action));
-
                 var context = GetContext().AsAsync();
 
                 try
                 {
-                    return await action(context);
+                    return await action(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -3031,7 +3053,7 @@
         {
             try
             {
-                return await Guard.NotNull(action, nameof(action))();
+                return await Guard.NotNull(action, nameof(action))().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -3050,7 +3072,7 @@
         {
             try
             {
-                await Guard.NotNull(action, nameof(action))();
+                await Guard.NotNull(action, nameof(action))().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -3101,7 +3123,8 @@
                 var isEnabled = !InterceptorTypesDisabled.ContainsKey(interceptorType) ||
                     !InterceptorTypesDisabled[interceptorType];
 
-                if (isEnabled) action(interceptor);
+                if (isEnabled)
+                    action(interceptor);
             }
         }
 
@@ -3118,7 +3141,8 @@
                 var isEnabled = !InterceptorTypesDisabled.ContainsKey(interceptorType) ||
                     !InterceptorTypesDisabled[interceptorType];
 
-                if (isEnabled) await action(interceptor);
+                if (isEnabled)
+                    await action(interceptor).ConfigureAwait(false);
             }
         }
 

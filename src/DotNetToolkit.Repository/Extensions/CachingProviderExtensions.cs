@@ -130,7 +130,7 @@
 
             if (cacheProvider.TryGetValue<TResult>(hashedKey, logger, out var value) == false)
             {
-                value = await getter();
+                value = await getter().ConfigureAwait(false);
 
                 cacheProvider.SetValue<TResult>(hashedKey, key, value, logger);
             }
@@ -168,7 +168,7 @@
 
             if (cacheProvider.TryGetValue<PagedQueryResult<TResult>>(hashedKey, logger, out var value) == false)
             {
-                value = await getter();
+                value = await getter().ConfigureAwait(false);
 
                 cacheProvider.SetValue<PagedQueryResult<TResult>>(hashedKey, key, value, logger);
             }
