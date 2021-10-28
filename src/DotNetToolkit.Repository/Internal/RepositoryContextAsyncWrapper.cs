@@ -41,12 +41,24 @@
 
         #region Private Methods
 
-        private Task<TResult> RunAsync<TResult>(Func<TResult> function, CancellationToken cancellationToken)
+        private Task<TResult> RunAsync<TResult>(Func<TResult> action, CancellationToken cancellationToken)
         {
-            if (function == null)
-                throw new ArgumentNullException(nameof(function));
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
 
-            return Task.FromResult<TResult>(function());
+            try
+            {
+                var result = action();
+                return Task.FromResult<TResult>(result);
+            }
+            catch (Exception e)
+            {
+#if NET451
+                return FromExAsync<TResult>(e);
+#else
+                return Task.FromException<TResult>(e);
+#endif
+            }
         }
 
         private Task RunAsync(Action action, CancellationToken cancellationToken)
@@ -54,9 +66,36 @@
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
 
-            action();
-            return Task.FromResult(0);
+            try
+            {
+                action();
+                return Task.FromResult(0);
+            }
+            catch (Exception e)
+            {
+#if NET451
+                return FromExAsync(e);
+#else
+                return Task.FromException(e);
+#endif
+            }
         }
+
+#if NET451
+        private static Task<T> FromExAsync<T>(Exception ex)
+        {
+            var task = new Task<T>(() => { throw ex; });
+            task.RunSynchronously();
+            return task;
+        }
+
+        private static Task FromExAsync(Exception ex)
+        {
+            var task = new Task(() => { throw ex; });
+            task.RunSynchronously();
+            return task;
+        } 
+#endif
 
         #endregion
 

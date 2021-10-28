@@ -213,7 +213,7 @@
             {
                 var keyValues = Conventions.GetPrimaryKeyValues(entity);
 
-                var entityInDb = await _context.Set<TEntity>().FindAsync(cancellationToken, keyValues);
+                var entityInDb = await _context.Set<TEntity>().FindAsync(cancellationToken, keyValues).ConfigureAwait(false);
 
                 if (entityInDb != null)
                 {
@@ -234,7 +234,7 @@
             {
                 var keyValues = Conventions.GetPrimaryKeyValues(entity);
 
-                var entityInDb = await _context.Set<TEntity>().FindAsync(cancellationToken, keyValues);
+                var entityInDb = await _context.Set<TEntity>().FindAsync(cancellationToken, keyValues).ConfigureAwait(false);
 
                 if (entityInDb != null)
                 {
@@ -247,9 +247,9 @@
             }
         }
 
-        public Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
-            return _context.SaveChangesAsync(cancellationToken);
+            return await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync<TEntity>(string sql, CommandType cmdType, Dictionary<string, object> parameters, Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
@@ -262,18 +262,18 @@
             var shouldOpenConnection = connection.State != ConnectionState.Open;
 
             if (shouldOpenConnection)
-                await connection.OpenAsync(cancellationToken);
+                await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
             command.CommandText = sql;
             command.CommandType = cmdType;
             command.Parameters.Clear();
             command.AddParameters(parameters);
 
-            using (var reader = await command.ExecuteReaderAsync(shouldOpenConnection ? CommandBehavior.CloseConnection : CommandBehavior.Default, cancellationToken))
+            using (var reader = await command.ExecuteReaderAsync(shouldOpenConnection ? CommandBehavior.CloseConnection : CommandBehavior.Default, cancellationToken).ConfigureAwait(false))
             {
                 var list = new List<TEntity>();
 
-                while (await reader.ReadAsync(cancellationToken))
+                while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
                 {
                     list.Add(projector(reader));
                 }
@@ -294,14 +294,14 @@
                 using (var command = connection.CreateCommand())
                 {
                     if (shouldOpenConnection)
-                        await connection.OpenAsync(cancellationToken);
+                        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
 
                     command.CommandText = sql;
                     command.CommandType = cmdType;
                     command.Parameters.Clear();
                     command.AddParameters(parameters);
 
-                    return await command.ExecuteNonQueryAsync(cancellationToken);
+                    return await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
             finally
@@ -318,7 +318,7 @@
 
             if (fetchStrategy == null)
             {
-                return await _context.Set<TEntity>().FindAsync(cancellationToken, keyValues);
+                return await _context.Set<TEntity>().FindAsync(cancellationToken, keyValues).ConfigureAwait(false);
             }
 
             var options = new QueryOptions<TEntity>()
@@ -328,21 +328,23 @@
 
             var result = await query
                 .ApplySpecificationOptions(options)
-                .FirstOrDefaultAsync(cancellationToken);
+                .FirstOrDefaultAsync(cancellationToken)
+                .ConfigureAwait(false);
 
             return result;
         }
 
-        public Task<TResult> FindAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public async Task<TResult> FindAsync<TEntity, TResult>(IQueryOptions<TEntity> options, Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             Guard.NotNull(selector, nameof(selector));
 
-            var result = AsQueryable(options?.FetchStrategy)
+            var result = await AsQueryable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
                 .Select(selector)
-                .FirstOrDefaultAsync(cancellationToken);
+                .FirstOrDefaultAsync(cancellationToken)
+                .ConfigureAwait(false);
 
             return result;
         }
@@ -355,12 +357,13 @@
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options);
 
-            var total = await query.CountAsync(cancellationToken);
+            var total = await query.CountAsync(cancellationToken).ConfigureAwait(false);
 
             var result = await query
                 .ApplyPagingOptions(options)
                 .Select(selector)
-                .ToListAsync(cancellationToken);
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
 
             return new PagedQueryResult<IEnumerable<TResult>>(result, total);
         }
@@ -376,15 +379,16 @@
             return result;
         }
 
-        public Task<bool> ExistsAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
+        public async Task<bool> ExistsAsync<TEntity>(IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
             Guard.NotNull(options, nameof(options));
 
-            var result = AsQueryable(options?.FetchStrategy)
+            var result = await AsQueryable(options?.FetchStrategy)
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
-                .AnyAsync(cancellationToken);
+                .AnyAsync(cancellationToken)
+                .ConfigureAwait(false);
 
             return result;
         }
@@ -406,16 +410,17 @@
 
             if (options != null && options.PageSize != -1)
             {
-                total = await query.CountAsync(cancellationToken);
+                total = await query.CountAsync(cancellationToken).ConfigureAwait(false);
 
                 result = await query
                     .ApplyPagingOptions(options)
-                    .ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken);
+                    .ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken)
+                    .ConfigureAwait(false);
             }
             else
             {
                 // Gets the total count from memory
-                result = await query.ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken);
+                result = await query.ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken).ConfigureAwait(false);
                 total = result.Count;
             }
 
@@ -435,14 +440,15 @@
                 throw new InvalidOperationException(Resources.GroupBySortingNotSupported);
             }
 
-            var total = await query.CountAsync(cancellationToken);
+            var total = await query.CountAsync(cancellationToken).ConfigureAwait(false);
 
             var result = await query
                 .ApplyPagingOptions(options)
                 .GroupBy(keySelector)
                 .OrderBy(x => x.Key)
                 .Select(resultSelector)
-                .ToListAsync(cancellationToken);
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
 
             return new PagedQueryResult<IEnumerable<TResult>>(result, total);
         }

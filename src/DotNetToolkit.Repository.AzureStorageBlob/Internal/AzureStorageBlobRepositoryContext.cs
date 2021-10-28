@@ -118,7 +118,8 @@
                 var key = await AsAsyncEnumerable<TEntity>()
                     .Select(func)
                     .OrderByDescending(x => x)
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync()
+                    .ConfigureAwait(false);
 
                 newKey = Convert.ToInt32(key) + 1;
             }
@@ -195,7 +196,7 @@
             var blobContainer = Client.GetBlobContainerClient(container);
 
             if (_createContainerIfNotExists)
-                await blobContainer.CreateIfNotExistsAsync();
+                await blobContainer.CreateIfNotExistsAsync().ConfigureAwait(false);
 
             return blobContainer;
         }
@@ -204,7 +205,7 @@
         {
             var keyValues = Conventions.GetPrimaryKeyValues(entity);
             var key = string.Join(":", keyValues);
-            var blobContainer = await GetBlobContainerAsync<TEntity>();
+            var blobContainer = await GetBlobContainerAsync<TEntity>().ConfigureAwait(false);
 
             return blobContainer.GetBlobClient(key);
         }
@@ -214,7 +215,7 @@
             try
             {
                 var blob = blobContainer.GetBlobClient(blobName);
-                var contentResult = await blob.DownloadContentAsync(cancellationToken);
+                var contentResult = await blob.DownloadContentAsync(cancellationToken).ConfigureAwait(false);
                 var contentStream = contentResult.Value.Content.ToStream();
                 var result = Deserialize<TEntity>(contentStream);
 
@@ -228,10 +229,10 @@
 
         private async IAsyncEnumerable<TEntity> DownloadEntitiesAsync<TEntity>() where TEntity : class
         {
-            var blobContainer = await GetBlobContainerAsync<TEntity>();
-            await foreach (var blobItem in blobContainer.GetBlobsAsync())
+            var blobContainer = await GetBlobContainerAsync<TEntity>().ConfigureAwait(false);
+            await foreach (var blobItem in blobContainer.GetBlobsAsync().ConfigureAwait(false))
             {
-                yield return await DownloadEntityAsync<TEntity>(blobContainer, blobItem.Name);
+                yield return await DownloadEntityAsync<TEntity>(blobContainer, blobItem.Name).ConfigureAwait(false);
             }
         }
 
@@ -251,15 +252,15 @@
 
         private async Task UploadEntityAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken()) where TEntity : class
         {
-            var blob = await GetBlobClientAsync(entity);
+            var blob = await GetBlobClientAsync(entity).ConfigureAwait(false);
 
-            await TryGeneratePrimaryKeyAsync(entity);
+            await TryGeneratePrimaryKeyAsync(entity).ConfigureAwait(false);
 
             using (var stream = Serialize<TEntity>(entity))
             {
-                var binaryData = await BinaryData.FromStreamAsync(stream, cancellationToken);
+                var binaryData = await BinaryData.FromStreamAsync(stream, cancellationToken).ConfigureAwait(false);
 
-                await blob.UploadAsync(binaryData, overwrite: true, cancellationToken);
+                await blob.UploadAsync(binaryData, overwrite: true, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -354,8 +355,8 @@
             Guard.NotEmpty(keyValues, nameof(keyValues));
 
             var key = string.Join(":", keyValues);
-            var blobContainer = await GetBlobContainerAsync<TEntity>();
-            var result = await DownloadEntityAsync<TEntity>(blobContainer, key, cancellationToken);
+            var blobContainer = await GetBlobContainerAsync<TEntity>().ConfigureAwait(false);
+            var result = await DownloadEntityAsync<TEntity>(blobContainer, key, cancellationToken).ConfigureAwait(false);
 
             return result;
         }
@@ -371,7 +372,8 @@
                 .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
                 .Select(selectorFunc)
-                .FirstOrDefaultAsync(cancellationToken);
+                .FirstOrDefaultAsync(cancellationToken)
+                .ConfigureAwait(false);
 
             return result;
         }
@@ -386,12 +388,13 @@
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options);
 
-            var total = await query.CountAsync(cancellationToken);
+            var total = await query.CountAsync(cancellationToken).ConfigureAwait(false);
 
             var result = await query
                 .ApplyPagingOptions(options)
                 .Select(selectorFunc)
-                .ToListAsync(cancellationToken);
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
 
             return new PagedQueryResult<IEnumerable<TResult>>(result, total);
         }
@@ -402,7 +405,8 @@
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
-                .CountAsync(cancellationToken);
+                .CountAsync(cancellationToken)
+                .ConfigureAwait(false);
 
             return result;
         }
@@ -415,7 +419,8 @@
                 .ApplySpecificationOptions(options)
                 .ApplySortingOptions(Conventions, options)
                 .ApplyPagingOptions(options)
-                .AnyAsync(cancellationToken);
+                .AnyAsync(cancellationToken)
+                .ConfigureAwait(false);
 
             return result;
         }
@@ -437,16 +442,17 @@
 
             if (options != null && options.PageSize != -1)
             {
-                total = await query.CountAsync(cancellationToken);
+                total = await query.CountAsync(cancellationToken).ConfigureAwait(false);
 
                 result = await query
                     .ApplyPagingOptions(options)
-                    .ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken);
+                    .ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken)
+                    .ConfigureAwait(false);
             }
             else
             {
                 // Gets the total count from memory
-                result = await query.ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken);
+                result = await query.ToDictionaryAsync(keySelectFunc, elementSelectorFunc, cancellationToken).ConfigureAwait(false);
                 total = result.Count;
             }
 
