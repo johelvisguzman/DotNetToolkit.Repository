@@ -71,14 +71,11 @@
         /// <param name="key3">The value of the third part of the composite primary key used to match entities against.</param>
         public void Delete([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3)
         {
-            LogExecutingMethod(false);
-
             if (!TryDelete(key1, key2, key3))
             {
-                InterceptError(() => new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3)));
+                InterceptError(() => new InvalidOperationException(
+                    string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3)));
             }
-
-            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -90,16 +87,12 @@
         /// <returns><c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
         public bool TryDelete([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3)
         {
-            LogExecutingMethod(false);
-
             var entity = Find(key1, key2, key3);
 
             if (entity == null)
                 return false;
 
             Delete(entity);
-
-            LogExecutedMethod(false);
 
             return true;
         }
@@ -126,18 +119,11 @@
         /// <return>The entity found.</return>
         public TEntity Find([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] params string[] paths)
         {
-            LogExecutingMethod();
-
-            Guard.NotNull(key1, nameof(key1));
-            Guard.NotNull(key2, nameof(key2));
-            Guard.NotNull(key3, nameof(key3));
             Guard.NotNull(paths, nameof(paths));
 
-            var result = Find(key1, key2, key3, paths.ToFetchQueryStrategy<TEntity>());
+            var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
 
-            LogExecutedMethod();
-
-            return result;
+            return Find(key1, key2, key3, fetchStrategy);
         }
 
         /// <summary>
@@ -150,18 +136,11 @@
         /// <return>The entity found.</return>
         public TEntity Find([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] params Expression<Func<TEntity, object>>[] paths)
         {
-            LogExecutingMethod();
-
-            Guard.NotNull(key1, nameof(key1));
-            Guard.NotNull(key2, nameof(key2));
-            Guard.NotNull(key3, nameof(key3));
             Guard.NotNull(paths, nameof(paths));
 
-            var result = Find(key1, key2, key3, paths.ToFetchQueryStrategy<TEntity>());
+            var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
 
-            LogExecutedMethod();
-
-            return result;
+            return Find(key1, key2, key3, fetchStrategy);
         }
 
         /// <summary>
@@ -174,8 +153,6 @@
         /// <return>The entity found.</return>
         public TEntity Find([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy)
         {
-            LogExecutingMethod();
-
             Guard.NotNull(key1, nameof(key1));
             Guard.NotNull(key2, nameof(key2));
             Guard.NotNull(key3, nameof(key3));
@@ -200,8 +177,6 @@
                 CacheUsed = false;
             }
 
-            LogExecutedMethod();
-
             return result;
         }
 
@@ -214,13 +189,7 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public bool Exists([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3)
         {
-            LogExecutingMethod();
-
-            var result = Find(key1, key2, key3) != null;
-
-            LogExecutedMethod();
-
-            return result;
+            return Find(key1, key2, key3) != null;
         }
 
         /// <summary>
@@ -233,13 +202,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public async Task<bool> ExistsAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod();
-
-            var result = await FindAsync(key1, key2, key3, cancellationToken).ConfigureAwait(false) != null;
-
-            LogExecutedMethod();
-
-            return result;
+            return await FindAsync(key1, key2, key3, cancellationToken).ConfigureAwait(false) != null;
         }
 
         /// <summary>
@@ -277,21 +240,13 @@
         /// <param name="paths">The dot-separated list of related objects to return in the query results.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        public async Task<TEntity> FindAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] string[] paths, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] string[] paths, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod();
-
-            Guard.NotNull(key1, nameof(key1));
-            Guard.NotNull(key2, nameof(key2));
-            Guard.NotNull(key3, nameof(key3));
             Guard.NotNull(paths, nameof(paths));
 
             var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
-            var result = await FindAsync(key1, key2, key3, fetchStrategy, cancellationToken).ConfigureAwait(false);
 
-            LogExecutedMethod();
-
-            return result;
+            return FindAsync(key1, key2, key3, fetchStrategy, cancellationToken);
         }
 
         /// <summary>
@@ -316,21 +271,13 @@
         /// <param name="paths">A collection of lambda expressions representing the paths to include.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        public async Task<TEntity> FindAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken = new CancellationToken())
+        public Task<TEntity> FindAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [NotNull] Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod();
-
-            Guard.NotNull(key1, nameof(key1));
-            Guard.NotNull(key2, nameof(key2));
-            Guard.NotNull(key3, nameof(key3));
             Guard.NotNull(paths, nameof(paths));
 
             var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
-            var result = await FindAsync(key1, key2, key3, fetchStrategy, cancellationToken).ConfigureAwait(false);
 
-            LogExecutedMethod();
-
-            return result;
+            return FindAsync(key1, key2, key3, fetchStrategy, cancellationToken);
         }
 
         /// <summary>
@@ -344,8 +291,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         public async Task<TEntity> FindAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, [CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod();
-
             Guard.NotNull(key1, nameof(key1));
             Guard.NotNull(key2, nameof(key2));
             Guard.NotNull(key3, nameof(key3));
@@ -371,8 +316,6 @@
                 CacheUsed = false;
             }
 
-            LogExecutedMethod();
-
             return result;
         }
 
@@ -386,14 +329,11 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod(false);
-
             if (!await TryDeleteAsync(key1, key2, key3, cancellationToken).ConfigureAwait(false))
             {
-                InterceptError(() => throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3)));
+                InterceptError(() => throw new InvalidOperationException(
+                    string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2 + ", " + key3)));
             }
-
-            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -406,18 +346,14 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
         public async Task<bool> TryDeleteAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] TKey3 key3, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod(false);
-
-            InterceptError(cancellationToken.ThrowIfCancellationRequested);
+            cancellationToken.ThrowIfCancellationRequested();
 
             var entity = await FindAsync(key1, key2, key3, cancellationToken).ConfigureAwait(false);
 
             if (entity == null)
                 return false;
 
-            await DeleteAsync(entity, cancellationToken);
-
-            LogExecutedMethod(false);
+            await DeleteAsync(entity, cancellationToken).ConfigureAwait(false);
 
             return true;
         }
@@ -467,14 +403,11 @@
         /// <param name="key2">The value of the second part of the composite primary key used to match entities against.</param>
         public void Delete([NotNull] TKey1 key1, [NotNull] TKey2 key2)
         {
-            LogExecutingMethod(false);
-
             if (!TryDelete(key1, key2))
             {
-                InterceptError(() => throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2)));
+                InterceptError(() => throw new InvalidOperationException(
+                    string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2)));
             }
-
-            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -485,16 +418,12 @@
         /// <returns><c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
         public bool TryDelete([NotNull] TKey1 key1, [NotNull] TKey2 key2)
         {
-            LogExecutingMethod(false);
-
             var entity = Find(key1, key2);
 
             if (entity == null)
                 return false;
 
             Delete(entity);
-
-            LogExecutedMethod(false);
 
             return true;
         }
@@ -519,17 +448,11 @@
         /// <return>The entity found.</return>
         public TEntity Find([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] params string[] paths)
         {
-            LogExecutingMethod();
-
-            Guard.NotNull(key1, nameof(key1));
-            Guard.NotNull(key2, nameof(key2));
             Guard.NotNull(paths, nameof(paths));
 
-            var result = Find(key1, key2, paths.ToFetchQueryStrategy<TEntity>());
+            var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
 
-            LogExecutedMethod();
-
-            return result;
+            return Find(key1, key2, fetchStrategy);
         }
 
         /// <summary>
@@ -541,17 +464,11 @@
         /// <return>The entity found.</return>
         public TEntity Find([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] params Expression<Func<TEntity, object>>[] paths)
         {
-            LogExecutingMethod();
-
-            Guard.NotNull(key1, nameof(key1));
-            Guard.NotNull(key2, nameof(key2));
             Guard.NotNull(paths, nameof(paths));
 
-            var result = Find(key1, key2, paths.ToFetchQueryStrategy<TEntity>());
+            var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
 
-            LogExecutedMethod();
-
-            return result;
+            return Find(key1, key2, fetchStrategy);
         }
 
         /// <summary>
@@ -563,8 +480,6 @@
         /// <return>The entity found.</return>
         public TEntity Find([NotNull] TKey1 key1, [NotNull] TKey2 key2, [CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy)
         {
-            LogExecutingMethod();
-
             Guard.NotNull(key1, nameof(key1));
             Guard.NotNull(key2, nameof(key2));
 
@@ -588,8 +503,6 @@
                 CacheUsed = false;
             }
 
-            LogExecutedMethod();
-
             return result;
         }
 
@@ -601,13 +514,7 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public bool Exists([NotNull] TKey1 key1, [NotNull] TKey2 key2)
         {
-            LogExecutingMethod();
-
-            var result = Find(key1, key2) != null;
-
-            LogExecutedMethod();
-
-            return result;
+            return Find(key1, key2) != null;
         }
 
         /// <summary>
@@ -619,13 +526,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public async Task<bool> ExistsAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod();
-
-            var result = await FindAsync(key1, key2, cancellationToken).ConfigureAwait(false) != null;
-
-            LogExecutedMethod();
-
-            return result;
+            return await FindAsync(key1, key2, cancellationToken).ConfigureAwait(false) != null;
         }
 
         /// <summary>
@@ -660,20 +561,13 @@
         /// <param name="paths">The dot-separated list of related objects to return in the query results.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        public async Task<TEntity> FindAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] string[] paths, CancellationToken cancellationToken)
+        public Task<TEntity> FindAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] string[] paths, CancellationToken cancellationToken)
         {
-            LogExecutingMethod();
-
-            Guard.NotNull(key1, nameof(key1));
-            Guard.NotNull(key2, nameof(key2));
             Guard.NotNull(paths, nameof(paths));
 
             var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
-            var result = await FindAsync(key1, key2, fetchStrategy, cancellationToken).ConfigureAwait(false);
 
-            LogExecutedMethod();
-
-            return result;
+            return FindAsync(key1, key2, fetchStrategy, cancellationToken);
         }
 
         /// <summary>
@@ -696,20 +590,13 @@
         /// <param name="paths">A collection of lambda expressions representing the paths to include.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        public async Task<TEntity> FindAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken)
+        public Task<TEntity> FindAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [NotNull] Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken)
         {
-            LogExecutingMethod();
-
-            Guard.NotNull(key1, nameof(key1));
-            Guard.NotNull(key2, nameof(key2));
             Guard.NotNull(paths, nameof(paths));
 
             var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
-            var result = await FindAsync(key1, key2, fetchStrategy, cancellationToken).ConfigureAwait(false);
 
-            LogExecutedMethod();
-
-            return result;
+            return FindAsync(key1, key2, fetchStrategy, cancellationToken);
         }
 
         /// <summary>
@@ -722,8 +609,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         public async Task<TEntity> FindAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, [CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod();
-
             Guard.NotNull(key1, nameof(key1));
             Guard.NotNull(key2, nameof(key2));
 
@@ -748,8 +633,6 @@
                 CacheUsed = false;
             }
 
-            LogExecutedMethod();
-
             return result;
         }
 
@@ -762,14 +645,11 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod(false);
-
             if (!await TryDeleteAsync(key1, key2, cancellationToken))
             {
-                InterceptError(() => throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2)));
+                InterceptError(() => throw new InvalidOperationException(
+                    string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key1 + ", " + key2)));
             }
-
-            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -781,18 +661,14 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given composite primary key values; otherwise, <c>false</c>.</returns>
         public async Task<bool> TryDeleteAsync([NotNull] TKey1 key1, [NotNull] TKey2 key2, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod(false);
-
-            InterceptError(cancellationToken.ThrowIfCancellationRequested);
+            cancellationToken.ThrowIfCancellationRequested();
 
             var entity = await FindAsync(key1, key2, cancellationToken).ConfigureAwait(false);
 
             if (entity == null)
                 return false;
 
-            await DeleteAsync(entity, cancellationToken);
-
-            LogExecutedMethod(false);
+            await DeleteAsync(entity, cancellationToken).ConfigureAwait(false);
 
             return true;
         }
@@ -840,14 +716,11 @@
         /// <param name="key">The value of the primary key used to match entities against.</param>
         public void Delete([NotNull] TKey key)
         {
-            LogExecutingMethod(false);
-
             if (!TryDelete(key))
             {
-                InterceptError(() => throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key)));
+                InterceptError(() => throw new InvalidOperationException(
+                    string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key)));
             }
-
-            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -857,16 +730,12 @@
         /// <returns><c>true</c> is able to successfully delete an entity with the given primary key; otherwise, <c>false</c>.</returns>
         public bool TryDelete([NotNull] TKey key)
         {
-            LogExecutingMethod(false);
-
             var entity = Find(key);
 
             if (entity == null)
                 return false;
 
             Delete(entity);
-
-            LogExecutedMethod(false);
 
             return true;
         }
@@ -889,16 +758,11 @@
         /// <return>The entity found.</return>
         public TEntity Find([NotNull] TKey key, [NotNull] params string[] paths)
         {
-            LogExecutingMethod();
-
-            Guard.NotNull(key, nameof(key));
             Guard.NotNull(paths, nameof(paths));
 
-            var result = Find(key, paths.ToFetchQueryStrategy<TEntity>());
+            var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
 
-            LogExecutedMethod();
-
-            return result;
+            return Find(key, fetchStrategy);
         }
 
         /// <summary>
@@ -909,16 +773,11 @@
         /// <return>The entity found.</return>
         public TEntity Find([NotNull] TKey key, [NotNull] params Expression<Func<TEntity, object>>[] paths)
         {
-            LogExecutingMethod();
-
-            Guard.NotNull(key, nameof(key));
             Guard.NotNull(paths, nameof(paths));
 
-            var result = Find(key, paths.ToFetchQueryStrategy<TEntity>());
+            var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
 
-            LogExecutedMethod();
-
-            return result;
+            return Find(key, fetchStrategy);
         }
 
         /// <summary>
@@ -929,8 +788,6 @@
         /// <return>The entity found.</return>
         public TEntity Find([NotNull] TKey key, [CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy)
         {
-            LogExecutingMethod();
-
             Guard.NotNull(key, nameof(key));
 
             TEntity Getter() =>
@@ -953,8 +810,6 @@
                 CacheUsed = false;
             }
 
-            LogExecutedMethod();
-
             return result;
         }
 
@@ -965,13 +820,7 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public bool Exists([NotNull] TKey key)
         {
-            LogExecutingMethod();
-
-            var result = Find(key) != null;
-
-            LogExecutedMethod();
-
-            return result;
+            return Find(key) != null;
         }
 
         /// <summary>
@@ -982,13 +831,7 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the given primary key value; otherwise, <c>false</c>.</returns>
         public async Task<bool> ExistsAsync([NotNull] TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod();
-
-            var result = await FindAsync(key, cancellationToken).ConfigureAwait(false) != null;
-
-            LogExecutedMethod();
-
-            return result;
+            return await FindAsync(key, cancellationToken).ConfigureAwait(false) != null;
         }
 
         /// <summary>
@@ -1020,19 +863,13 @@
         /// <param name="paths">The dot-separated list of related objects to return in the query results.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        public async Task<TEntity> FindAsync([NotNull] TKey key, [NotNull] string[] paths, CancellationToken cancellationToken)
+        public Task<TEntity> FindAsync([NotNull] TKey key, [NotNull] string[] paths, CancellationToken cancellationToken)
         {
-            LogExecutingMethod();
-
-            Guard.NotNull(key, nameof(key));
             Guard.NotNull(paths, nameof(paths));
 
             var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
-            var result = await FindAsync(key, fetchStrategy, cancellationToken).ConfigureAwait(false);
 
-            LogExecutedMethod();
-
-            return result;
+            return FindAsync(key, fetchStrategy, cancellationToken);
         }
 
         /// <summary>
@@ -1053,19 +890,13 @@
         /// <param name="paths">A collection of lambda expressions representing the paths to include.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
-        public async Task<TEntity> FindAsync([NotNull] TKey key, [NotNull] Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken)
+        public Task<TEntity> FindAsync([NotNull] TKey key, [NotNull] Expression<Func<TEntity, object>>[] paths, CancellationToken cancellationToken)
         {
-            LogExecutingMethod();
-
-            Guard.NotNull(key, nameof(key));
             Guard.NotNull(paths, nameof(paths));
 
             var fetchStrategy = paths.ToFetchQueryStrategy<TEntity>();
-            var result = await FindAsync(key, fetchStrategy, cancellationToken).ConfigureAwait(false);
 
-            LogExecutedMethod();
-
-            return result;
+            return FindAsync(key, fetchStrategy, cancellationToken);
         }
 
         /// <summary>
@@ -1077,8 +908,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the entity found.</returns>
         public async Task<TEntity> FindAsync([NotNull] TKey key, [CanBeNull] IFetchQueryStrategy<TEntity> fetchStrategy, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod();
-
             Guard.NotNull(key, nameof(key));
 
             Task<TEntity> Getter() =>
@@ -1102,8 +931,6 @@
                 CacheUsed = false;
             }
 
-            LogExecutedMethod();
-
             return result;
         }
 
@@ -1115,14 +942,11 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync([NotNull] TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod(false);
-
             if (!await TryDeleteAsync(key, cancellationToken).ConfigureAwait(false))
             {
-                InterceptError(() => throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key)));
+                InterceptError(() => throw new InvalidOperationException(
+                    string.Format(CultureInfo.CurrentCulture, Resources.EntityKeyNotFound, key)));
             }
-
-            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1133,18 +957,14 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> is able to successfully delete an entity with the given primary key; otherwise, <c>false</c>.</returns>
         public async Task<bool> TryDeleteAsync([NotNull] TKey key, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod(false);
-
-            InterceptError(cancellationToken.ThrowIfCancellationRequested);
+            cancellationToken.ThrowIfCancellationRequested();
 
             var entity = await FindAsync(key, cancellationToken).ConfigureAwait(false);
 
             if (entity == null)
                 return false;
 
-            await DeleteAsync(entity, cancellationToken);
-
-            LogExecutedMethod(false);
+            await DeleteAsync(entity, cancellationToken).ConfigureAwait(false);
 
             return true;
         }
@@ -1261,8 +1081,6 @@
         /// <returns>A list which each entity has been projected into a new form.</returns>
         public IEnumerable<TEntity> ExecuteSqlQuery([NotNull] string sql, CommandType cmdType, [CanBeNull] object[] parameters, [NotNull] Func<IDataReader, TEntity> projector)
         {
-            LogExecutingMethod();
-
             Guard.NotEmpty(sql, nameof(sql));
             Guard.NotNull(projector, nameof(projector));
 
@@ -1287,8 +1105,6 @@
                 result = Getter();
                 CacheUsed = false;
             }
-
-            LogExecutedMethod();
 
             return result;
         }
@@ -1325,8 +1141,6 @@
         /// <returns>The number of rows affected.</returns>
         public int ExecuteSqlCommand([NotNull] string sql, CommandType cmdType, [CanBeNull] object[] parameters)
         {
-            LogExecutingMethod();
-
             Guard.NotEmpty(sql, nameof(sql));
 
             var parametersDict = ConvertToParametersDictionary(parameters);
@@ -1352,8 +1166,6 @@
             }
 
             ClearCache(sql);
-
-            LogExecutedMethod();
 
             return result;
         }
@@ -1385,8 +1197,6 @@
         /// <param name="entity">The entity to add.</param>
         public void Add([NotNull] TEntity entity)
         {
-            LogExecutingMethod(false);
-
             Guard.NotNull(entity, nameof(entity));
 
             UseContext(context =>
@@ -1399,8 +1209,6 @@
             });
 
             ClearCache();
-
-            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1409,8 +1217,6 @@
         /// <param name="entities">The collection of entities to add.</param>
         public void Add([NotNull] IEnumerable<TEntity> entities)
         {
-            LogExecutingMethod(false);
-
             Guard.NotNull(entities, nameof(entities));
 
             UseContext(context =>
@@ -1427,8 +1233,6 @@
             });
 
             ClearCache();
-
-            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1437,8 +1241,6 @@
         /// <param name="entity">The entity to update.</param>
         public void Update([NotNull] TEntity entity)
         {
-            LogExecutingMethod(false);
-
             Guard.NotNull(entity, nameof(entity));
 
             UseContext(context =>
@@ -1451,8 +1253,6 @@
             });
 
             ClearCache();
-
-            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1461,8 +1261,6 @@
         /// <param name="entities">The collection of entities to update.</param>
         public void Update([NotNull] IEnumerable<TEntity> entities)
         {
-            LogExecutingMethod(false);
-
             Guard.NotNull(entities, nameof(entities));
 
             UseContext(context =>
@@ -1479,8 +1277,6 @@
             });
 
             ClearCache();
-
-            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1489,8 +1285,6 @@
         /// <param name="entity">The entity to delete.</param>
         public void Delete([NotNull] TEntity entity)
         {
-            LogExecutingMethod(false);
-
             Guard.NotNull(entity, nameof(entity));
 
             UseContext(context =>
@@ -1503,8 +1297,6 @@
             });
 
             ClearCache();
-
-            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1513,13 +1305,9 @@
         /// <param name="predicate">A function to filter each entity.</param>
         public void Delete([NotNull] Expression<Func<TEntity, bool>> predicate)
         {
-            LogExecutingMethod();
-
             Guard.NotNull(predicate, nameof(predicate));
 
             Delete(predicate.ToQueryOptions<TEntity>());
-
-            LogExecutedMethod();
         }
 
         /// <summary>
@@ -1528,14 +1316,12 @@
         /// <param name="options">The options to apply to the query.</param>
         public void Delete([NotNull] IQueryOptions<TEntity> options)
         {
-            LogExecutingMethod(false);
-
             Guard.NotNull(options, nameof(options));
             Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
 
-            Delete(FindAll(options).Result);
+            var result = FindAll(options).Result;
 
-            LogExecutedMethod(false);
+            Delete(result);
         }
 
         /// <summary>
@@ -1544,8 +1330,6 @@
         /// <param name="entities">The collection of entities to delete.</param>
         public void Delete([NotNull] IEnumerable<TEntity> entities)
         {
-            LogExecutingMethod(false);
-
             Guard.NotNull(entities, nameof(entities));
 
             UseContext(context =>
@@ -1562,8 +1346,6 @@
             });
 
             ClearCache();
-
-            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -1594,16 +1376,12 @@
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public TResult Find<TResult>([NotNull] Expression<Func<TEntity, bool>> predicate, [NotNull] Expression<Func<TEntity, TResult>> selector)
         {
-            LogExecutingMethod();
-
             Guard.NotNull(predicate, nameof(predicate));
             Guard.NotNull(selector, nameof(selector));
 
-            var result = Find<TResult>(predicate.ToQueryOptions<TEntity>(), selector);
+            var options = predicate.ToQueryOptions<TEntity>();
 
-            LogExecutedMethod();
-
-            return result;
+            return Find<TResult>(options, selector);
         }
 
         /// <summary>
@@ -1614,8 +1392,6 @@
         /// <returns>The projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public TResult Find<TResult>(IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TResult>> selector)
         {
-            LogExecutingMethod();
-
             Guard.NotNull(selector, nameof(selector));
             Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
 
@@ -1638,8 +1414,6 @@
                 result = Getter();
                 CacheUsed = false;
             }
-
-            LogExecutedMethod();
 
             return result;
         }
@@ -1691,16 +1465,12 @@
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
         public IEnumerable<TResult> FindAll<TResult>([NotNull] Expression<Func<TEntity, bool>> predicate, [NotNull] Expression<Func<TEntity, TResult>> selector)
         {
-            LogExecutingMethod();
-
             Guard.NotNull(predicate, nameof(predicate));
             Guard.NotNull(selector, nameof(selector));
 
-            var result = FindAll<TResult>(predicate.ToQueryOptions<TEntity>(), selector).Result;
+            var options = predicate.ToQueryOptions<TEntity>();
 
-            LogExecutedMethod();
-
-            return result;
+            return FindAll<TResult>(options, selector).Result;
         }
 
         /// <summary>
@@ -1711,8 +1481,6 @@
         /// <returns>The collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public PagedQueryResult<IEnumerable<TResult>> FindAll<TResult>(IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TResult>> selector)
         {
-            LogExecutingMethod();
-
             Guard.NotNull(selector, nameof(selector));
 
             PagedQueryResult<IEnumerable<TResult>> Getter() =>
@@ -1735,8 +1503,6 @@
                 CacheUsed = false;
             }
 
-            LogExecutedMethod();
-
             return result;
         }
 
@@ -1747,15 +1513,11 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified predicate; otherwise, <c>false</c>.</returns>
         public bool Exists([NotNull] Expression<Func<TEntity, bool>> predicate)
         {
-            LogExecutingMethod();
-
             Guard.NotNull(predicate, nameof(predicate));
 
-            var result = Exists(predicate.ToQueryOptions<TEntity>());
+            var options = predicate.ToQueryOptions<TEntity>();
 
-            LogExecutedMethod();
-
-            return result;
+            return Exists(options);
         }
 
         /// <summary>
@@ -1765,16 +1527,10 @@
         /// <returns><c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
         public bool Exists([NotNull] IQueryOptions<TEntity> options)
         {
-            LogExecutingMethod();
-
             Guard.NotNull(options, nameof(options));
             Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
 
-            var result = Find(options) != null;
-
-            LogExecutedMethod();
-
-            return result;
+            return Find(options) != null;
         }
 
         /// <summary>
@@ -1793,15 +1549,11 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
         public int Count([NotNull] Expression<Func<TEntity, bool>> predicate)
         {
-            LogExecutingMethod();
-
             Guard.NotNull(predicate, nameof(predicate));
 
-            var result = Count(predicate.ToQueryOptions<TEntity>());
-
-            LogExecutedMethod();
-
-            return result;
+            var options = predicate.ToQueryOptions<TEntity>();
+            
+            return Count(options);
         }
 
         /// <summary>
@@ -1811,8 +1563,6 @@
         /// <returns>The number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public int Count([CanBeNull] IQueryOptions<TEntity> options)
         {
-            LogExecutingMethod();
-
             int Getter() =>
                 UseContext<int>(
                     context => context.Count<TEntity>(options));
@@ -1832,8 +1582,6 @@
                 result = Getter();
                 CacheUsed = false;
             }
-
-            LogExecutedMethod();
 
             return result;
         }
@@ -1885,8 +1633,6 @@
         /// <returns>A new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public PagedQueryResult<Dictionary<TDictionaryKey, TElement>> ToDictionary<TDictionaryKey, TElement>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector, [NotNull] Expression<Func<TEntity, TElement>> elementSelector)
         {
-            LogExecutingMethod();
-
             Guard.NotNull(keySelector, nameof(keySelector));
             Guard.NotNull(elementSelector, nameof(elementSelector));
 
@@ -1909,8 +1655,6 @@
                 result = Getter();
                 CacheUsed = false;
             }
-
-            LogExecutedMethod();
 
             return result;
         }
@@ -1939,8 +1683,6 @@
         /// <returns>A new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public PagedQueryResult<IEnumerable<TResult>> GroupBy<TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector)
         {
-            LogExecutingMethod();
-
             Guard.NotNull(keySelector, nameof(keySelector));
             Guard.NotNull(resultSelector, nameof(resultSelector));
 
@@ -1964,8 +1706,6 @@
                 CacheUsed = false;
             }
 
-            LogExecutedMethod();
-
             return result;
         }
 
@@ -1980,8 +1720,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a list which each entity has been projected into a new form.</returns> 
         public async Task<IEnumerable<TEntity>> ExecuteSqlQueryAsync([NotNull] string sql, CommandType cmdType, [CanBeNull] object[] parameters, [NotNull] Func<IDataReader, TEntity> projector, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod();
-
             Guard.NotEmpty(sql, nameof(sql));
             Guard.NotNull(projector, nameof(projector));
 
@@ -2007,8 +1745,6 @@
                 result = await Getter().ConfigureAwait(false);
                 CacheUsed = false;
             }
-
-            LogExecutedMethod();
 
             return result;
         }
@@ -2048,8 +1784,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of rows affected.</returns>
         public async Task<int> ExecuteSqlCommandAsync([NotNull] string sql, CommandType cmdType, [CanBeNull] object[] parameters, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod();
-
             Guard.NotEmpty(sql, nameof(sql));
 
             var parametersDict = ConvertToParametersDictionary(parameters);
@@ -2076,8 +1810,6 @@
             }
 
             ClearCache(sql);
-
-            LogExecutedMethod();
 
             return result;
         }
@@ -2113,8 +1845,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task AddAsync([NotNull] TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod(false);
-
             Guard.NotNull(entity, nameof(entity));
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -2131,8 +1861,6 @@
             });
 
             ClearCache();
-
-            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -2143,8 +1871,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task AddAsync([NotNull] IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod(false);
-
             Guard.NotNull(entities, nameof(entities));
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -2165,8 +1891,6 @@
             });
 
             ClearCache();
-
-            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -2177,8 +1901,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task UpdateAsync([NotNull] TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod(false);
-
             Guard.NotNull(entity, nameof(entity));
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -2195,8 +1917,6 @@
             });
 
             ClearCache();
-
-            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -2207,8 +1927,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task UpdateAsync([NotNull] IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod(false);
-
             Guard.NotNull(entities, nameof(entities));
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -2229,8 +1947,6 @@
             });
 
             ClearCache();
-
-            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -2241,8 +1957,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync([NotNull] TEntity entity, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod(false);
-
             Guard.NotNull(entity, nameof(entity));
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -2259,8 +1973,6 @@
             });
 
             ClearCache();
-
-            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -2269,15 +1981,13 @@
         /// <param name="predicate">A function to filter each entity.</param>
         /// <param name="cancellationToken">A <see cref="System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
-        public async Task DeleteAsync([NotNull] Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
+        public Task DeleteAsync([NotNull] Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod(false);
-
             Guard.NotNull(predicate, nameof(predicate));
 
-            await DeleteAsync(predicate.ToQueryOptions<TEntity>(), cancellationToken).ConfigureAwait(false);
+            var options = predicate.ToQueryOptions<TEntity>();
 
-            LogExecutedMethod(false);
+            return DeleteAsync(options, cancellationToken);
         }
 
         /// <summary>
@@ -2288,16 +1998,12 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync([NotNull] IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod(false);
-
             Guard.NotNull(options, nameof(options));
             Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
 
             var entitiesInDb = (await FindAllAsync(options, cancellationToken).ConfigureAwait(false)).Result;
 
             await DeleteAsync(entitiesInDb, cancellationToken).ConfigureAwait(false);
-
-            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -2308,8 +2014,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation.</returns>
         public async Task DeleteAsync([NotNull] IEnumerable<TEntity> entities, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod(false);
-
             Guard.NotNull(entities, nameof(entities));
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -2330,8 +2034,6 @@
             });
 
             ClearCache();
-
-            LogExecutedMethod(false);
         }
 
         /// <summary>
@@ -2365,15 +2067,11 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public Task<TResult> FindAsync<TResult>([NotNull] Expression<Func<TEntity, bool>> predicate, [NotNull] Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod();
-
             Guard.NotNull(predicate, nameof(predicate));
 
-            var result = FindAsync<TResult>(predicate.ToQueryOptions<TEntity>(), selector, cancellationToken);
+            var options = predicate.ToQueryOptions<TEntity>();
 
-            LogExecutedMethod();
-
-            return result;
+            return FindAsync<TResult>(options, selector, cancellationToken);
         }
 
         /// <summary>
@@ -2385,8 +2083,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the projected entity result that satisfied the criteria specified by the <paramref name="selector" /> in the repository.</returns>
         public async Task<TResult> FindAsync<TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod();
-
             Guard.NotNull(selector, nameof(selector));
             Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
 
@@ -2410,8 +2106,6 @@
                 result = await Getter().ConfigureAwait(false);
                 CacheUsed = false;
             }
-
-            LogExecutedMethod();
 
             return result;
         }
@@ -2468,15 +2162,11 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="predicate" />.</returns>
         public async Task<IEnumerable<TResult>> FindAllAsync<TResult>([NotNull] Expression<Func<TEntity, bool>> predicate, [NotNull] Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod();
-
             Guard.NotNull(predicate, nameof(predicate));
 
-            var result = (await FindAllAsync<TResult>(predicate.ToQueryOptions<TEntity>(), selector, cancellationToken).ConfigureAwait(false)).Result;
+            var options = predicate.ToQueryOptions<TEntity>();
 
-            LogExecutedMethod();
-
-            return result;
+            return (await FindAllAsync<TResult>(options, selector, cancellationToken).ConfigureAwait(false)).Result;
         }
 
         /// <summary>
@@ -2488,8 +2178,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the collection of projected entity results in the repository that satisfied the criteria specified by the <paramref name="options" />.</returns>
         public async Task<PagedQueryResult<IEnumerable<TResult>>> FindAllAsync<TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TResult>> selector, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod();
-
             Guard.NotNull(selector, nameof(selector));
 
             Task<PagedQueryResult<IEnumerable<TResult>>> Getter() =>
@@ -2513,8 +2201,6 @@
                 CacheUsed = false;
             }
 
-            LogExecutedMethod();
-
             return result;
         }
 
@@ -2526,15 +2212,11 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified predicate; otherwise, <c>false</c>.</returns>
         public Task<bool> ExistsAsync([NotNull] Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod();
-
             Guard.NotNull(predicate, nameof(predicate));
 
-            var result = ExistsAsync(predicate.ToQueryOptions<TEntity>(), cancellationToken);
+            var options = predicate.ToQueryOptions<TEntity>();
 
-            LogExecutedMethod();
-
-            return result;
+            return ExistsAsync(options, cancellationToken);
         }
 
         /// <summary>
@@ -2545,16 +2227,10 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a value indicating <c>true</c> if the repository contains one or more elements that match the conditions defined by the specified criteria; otherwise, <c>false</c>.</returns>
         public async Task<bool> ExistsAsync([NotNull] IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod();
-
             Guard.NotNull(options, nameof(options));
             Guard.EnsureNotNull(options.SpecificationStrategy, Resources.SpecificationMissingFromQueryOptions);
 
-            var result = await FindAsync(options, cancellationToken).ConfigureAwait(false) != null;
-
-            LogExecutedMethod();
-
-            return result;
+            return await FindAsync(options, cancellationToken).ConfigureAwait(false) != null;
         }
 
         /// <summary>
@@ -2575,15 +2251,11 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="predicate" /> in the repository.</returns>
         public Task<int> CountAsync([NotNull] Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod();
-
             Guard.NotNull(predicate, nameof(predicate));
 
-            var result = CountAsync(predicate.ToQueryOptions<TEntity>(), cancellationToken);
+            var options = predicate.ToQueryOptions<TEntity>();
 
-            LogExecutedMethod();
-
-            return result;
+            return CountAsync(options, cancellationToken);
         }
 
         /// <summary>
@@ -2594,8 +2266,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing the number of entities that satisfied the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public async Task<int> CountAsync([CanBeNull] IQueryOptions<TEntity> options, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod();
-
             Task<int> Getter() =>
                 UseContextAsync<int>(
                     context => context.CountAsync<TEntity>(options, cancellationToken));
@@ -2616,8 +2286,6 @@
                 result = await Getter().ConfigureAwait(false);
                 CacheUsed = false;
             }
-
-            LogExecutedMethod();
 
             return result;
         }
@@ -2673,8 +2341,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="Dictionary{TDictionaryKey, TEntity}" /> that contains keys and values that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public async Task<PagedQueryResult<Dictionary<TDictionaryKey, TElement>>> ToDictionaryAsync<TDictionaryKey, TElement>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TDictionaryKey>> keySelector, [NotNull] Expression<Func<TEntity, TElement>> elementSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod();
-
             Guard.NotNull(keySelector, nameof(keySelector));
             Guard.NotNull(elementSelector, nameof(elementSelector));
 
@@ -2698,8 +2364,6 @@
                 result = await Getter().ConfigureAwait(false);
                 CacheUsed = false;
             }
-
-            LogExecutedMethod();
 
             return result;
 
@@ -2731,8 +2395,6 @@
         /// <returns>The <see cref="System.Threading.Tasks.Task" /> that represents the asynchronous operation, containing a new <see cref="IEnumerable{TResult}" /> that contains the grouped result that satisfies the criteria specified by the <paramref name="options" /> in the repository.</returns>
         public async Task<PagedQueryResult<IEnumerable<TResult>>> GroupByAsync<TGroupKey, TResult>([CanBeNull] IQueryOptions<TEntity> options, [NotNull] Expression<Func<TEntity, TGroupKey>> keySelector, [NotNull] Expression<Func<IGrouping<TGroupKey, TEntity>, TResult>> resultSelector, CancellationToken cancellationToken = new CancellationToken())
         {
-            LogExecutingMethod();
-
             Guard.NotNull(keySelector, nameof(keySelector));
             Guard.NotNull(resultSelector, nameof(resultSelector));
 
@@ -2756,8 +2418,6 @@
                 result = await Getter().ConfigureAwait(false);
                 CacheUsed = false;
             }
-
-            LogExecutedMethod();
 
             return result;
         }
@@ -2977,30 +2637,6 @@
         #endregion
 
         #region Internal Methods
-
-        internal void LogExecutingMethod(bool appendCachingDetails = true, [CallerMemberName] string method = null)
-        {
-            if (!string.IsNullOrEmpty(_currentExecutingLoggingMethod))
-                return;
-
-            _currentExecutingLoggingMethod = method;
-
-            Logger.Debug(appendCachingDetails
-                ? $"Executing [ Method = {method}, CacheEnabled = {CacheEnabled} ]"
-                : $"Executing [ Method = {method} ]");
-        }
-
-        internal void LogExecutedMethod(bool appendCachingDetails = true, [CallerMemberName] string method = null)
-        {
-            if (string.IsNullOrEmpty(_currentExecutingLoggingMethod) || !_currentExecutingLoggingMethod.Equals(method))
-                return;
-
-            _currentExecutingLoggingMethod = null;
-
-            Logger.Debug(appendCachingDetails
-                ? $"Executed [ Method = {method}, CacheUsed = {CacheUsed} ]"
-                : $"Executed [ Method = {method} ]");
-        }
 
         internal void Intercept([NotNull] Action<IRepositoryInterceptor> action)
         {
