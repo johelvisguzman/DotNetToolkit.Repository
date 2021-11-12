@@ -1049,10 +1049,15 @@
 
             Logger = _loggerProvider.Create($"DotNetToolkit.Repository<{typeof(TEntity).Name}>");
 
-            CacheProvider = _options.CachingProvider ?? NullCacheProvider.Instance;
-
-            if (CacheProvider.GetType() != typeof(NullCacheProvider))
+            if (_options.CachingProvider != null)
+            {
+                CacheProvider = _options.CachingProvider;
                 CacheEnabled = true;
+            }
+            else
+            {
+                CacheProvider = NullCacheProvider.Instance;
+            }
 
             InterceptorsEnabled = true;
             InterceptorTypesDisabled = new Dictionary<Type, bool>();
