@@ -2,10 +2,9 @@
 {
     using Configuration.Interceptors;
     using Configuration.Logging;
-    using Configuration.Options;
-    using Configuration.Options.Internal;
     using global::Microsoft.Extensions.DependencyInjection;
     using JetBrains.Annotations;
+    using Repository.Internal;
     using System;
     using System.Linq;
     using System.Reflection;

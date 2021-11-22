@@ -2,15 +2,12 @@
 {
     using Configuration.Interceptors;
     using Configuration.Logging;
-    using Configuration.Options;
-    using Configuration.Options.Internal;
     using global::Ninject;
     using JetBrains.Annotations;
-    using Services;
+    using Repository.Internal;
     using System;
     using System.Linq;
     using System.Reflection;
-    using Transactions;
     using Utility;
 
     /// <summary>

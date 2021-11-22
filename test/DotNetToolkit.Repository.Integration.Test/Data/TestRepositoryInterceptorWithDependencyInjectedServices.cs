@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Data
 {
     using Configuration.Interceptors;
-    using Configuration.Options;
     using System;
     using Transactions;
 

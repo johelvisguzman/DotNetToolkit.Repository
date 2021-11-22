@@ -1,9 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.Transactions
 {
     using Configuration;
-    using Configuration.Options;
-    using Configuration.Options.Internal;
     using JetBrains.Annotations;
+    using Repository.Internal;
     using System;
     using Utility;
 

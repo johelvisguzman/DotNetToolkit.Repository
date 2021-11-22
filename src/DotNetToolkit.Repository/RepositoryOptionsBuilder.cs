@@ -1,11 +1,12 @@
-﻿namespace DotNetToolkit.Repository.Configuration.Options
+﻿namespace DotNetToolkit.Repository
 {
-    using Caching;
-    using Conventions;
-    using Interceptors;
+    using Configuration;
+    using Configuration.Caching;
+    using Configuration.Conventions;
+    using Configuration.Interceptors;
+    using Configuration.Logging;
     using Internal;
     using JetBrains.Annotations;
-    using Logging;
     using Properties;
     using System;
     using System.Linq;
@@ -133,7 +134,7 @@
             UseConfiguration(config);
 
             return this;
-        } 
+        }
 #endif
 
         /// <summary>

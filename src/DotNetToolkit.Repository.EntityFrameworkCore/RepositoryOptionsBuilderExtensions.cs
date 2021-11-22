@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.EntityFrameworkCore
 {
-    using Configuration.Options;
     using Internal;
     using JetBrains.Annotations;
     using Microsoft.EntityFrameworkCore;

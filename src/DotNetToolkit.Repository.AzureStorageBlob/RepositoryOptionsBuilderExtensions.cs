@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.AzureStorageBlob
 {
-    using Configuration.Options;
     using Internal;
     using JetBrains.Annotations;
     using Newtonsoft.Json;

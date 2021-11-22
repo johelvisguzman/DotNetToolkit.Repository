@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository
 {
-    using Configuration.Options;
     using JetBrains.Annotations;
     using System;
     using Utility;

@@ -6,7 +6,6 @@
     using Configuration.Conventions;
     using Configuration.Interceptors;
     using Configuration.Logging;
-    using Configuration.Options;
     using Extensions;
     using Extensions.Internal;
     using Internal;
@@ -21,7 +20,6 @@
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
-    using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Threading.Tasks;
@@ -987,7 +985,6 @@
         private readonly IRepositoryOptions _options;
         private readonly IRepositoryContextFactory _contextFactory;
         private IEnumerable<IRepositoryInterceptor> _interceptors;
-        private string _currentExecutingLoggingMethod;
         private readonly ILoggerProvider _loggerProvider;
 
         #endregion

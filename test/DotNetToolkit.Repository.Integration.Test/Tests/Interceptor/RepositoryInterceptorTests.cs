@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Interceptor
 {
     using Configuration.Interceptors;
-    using Configuration.Options;
     using Data;
     using InMemory;
     using Moq;

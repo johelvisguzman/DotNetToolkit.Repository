@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Caching.Memcached
 {
-    using Configuration.Options;
     using Internal;
     using JetBrains.Annotations;
     using System;

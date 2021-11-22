@@ -2,16 +2,13 @@
 {
     using Configuration.Interceptors;
     using Configuration.Logging;
-    using Configuration.Options;
-    using Configuration.Options.Internal;
+    using DotNetToolkit.Repository.Internal;
     using global::Unity;
     using global::Unity.Lifetime;
     using JetBrains.Annotations;
-    using Services;
     using System;
     using System.Linq;
     using System.Reflection;
-    using Transactions;
     using Utility;
 
     /// <summary>

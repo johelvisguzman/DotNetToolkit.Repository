@@ -2,7 +2,6 @@
 {
     using Configuration;
     using Microsoft.EntityFrameworkCore;
-    using System;
     using Utility;
 
     /// <summary>

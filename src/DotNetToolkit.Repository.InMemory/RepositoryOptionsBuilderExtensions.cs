@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.InMemory
 {
-    using Configuration.Options;
     using Internal;
     using JetBrains.Annotations;
     using Utility;
