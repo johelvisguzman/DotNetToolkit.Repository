@@ -1,9 +1,10 @@
-﻿namespace DotNetToolkit.Repository.Configuration.Options
+﻿namespace DotNetToolkit.Repository
 {
-    using Caching;
-    using Conventions;
-    using Interceptors;
-    using Logging;
+    using Configuration;
+    using Configuration.Caching;
+    using Configuration.Conventions;
+    using Configuration.Interceptors;
+    using Configuration.Logging;
     using System;
     using System.Collections.Generic;
 

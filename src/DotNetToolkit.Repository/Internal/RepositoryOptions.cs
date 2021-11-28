@@ -1,10 +1,11 @@
-﻿namespace DotNetToolkit.Repository.Configuration.Options.Internal
+﻿namespace DotNetToolkit.Repository.Internal
 {
-    using Caching;
-    using Conventions;
-    using Interceptors;
+    using Configuration;
+    using Configuration.Caching;
+    using Configuration.Conventions;
+    using Configuration.Interceptors;
     using JetBrains.Annotations;
-    using Logging;
+    using Configuration.Logging;
     using System;
     using System.Collections.Generic;
     using System.Linq;

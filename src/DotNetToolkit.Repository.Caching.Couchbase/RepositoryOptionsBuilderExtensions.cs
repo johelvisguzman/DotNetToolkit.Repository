@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Caching.Couchbase
 {
-    using Configuration.Options;
     using Internal;
     using JetBrains.Annotations;
     using System;

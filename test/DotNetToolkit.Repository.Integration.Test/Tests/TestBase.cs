@@ -11,7 +11,6 @@ namespace DotNetToolkit.Repository.Integration.Test
     using Caching.InMemory;
     using Caching.Redis;
     using Configuration.Logging;
-    using Configuration.Options;
     using EntityFrameworkCore;
     using InMemory;
     using Microsoft.EntityFrameworkCore;

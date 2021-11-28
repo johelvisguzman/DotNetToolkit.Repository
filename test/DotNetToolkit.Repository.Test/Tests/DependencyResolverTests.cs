@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Test
 {
-    using Configuration.Options;
     using Data;
     using Repository;
     using Services;

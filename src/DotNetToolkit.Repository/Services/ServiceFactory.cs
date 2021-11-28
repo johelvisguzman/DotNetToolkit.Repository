@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Services
 {
     using JetBrains.Annotations;
-    using System;
     using Transactions;
     using Utility;
 

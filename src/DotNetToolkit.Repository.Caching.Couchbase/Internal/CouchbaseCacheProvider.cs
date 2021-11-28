@@ -4,7 +4,6 @@
     using global::Couchbase;
     using global::Couchbase.Configuration.Client;
     using global::Couchbase.Core.Serialization;
-    using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;
     using Utility;

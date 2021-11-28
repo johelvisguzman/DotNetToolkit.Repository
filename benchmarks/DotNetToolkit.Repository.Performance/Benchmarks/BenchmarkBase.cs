@@ -4,14 +4,13 @@
     using System.Collections.Generic;
     using System.Configuration;
     using BenchmarkDotNet.Attributes;
-    using Configuration.Options;
     using Data;
     using InMemory;
 #if NETFULL
     using System.Data.SqlClient;
     using EntityFramework;
 #else
-    using AzureStorageBlob;  
+    using AzureStorageBlob;
     using EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
 #endif

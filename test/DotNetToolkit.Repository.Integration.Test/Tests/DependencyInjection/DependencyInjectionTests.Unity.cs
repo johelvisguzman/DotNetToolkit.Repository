@@ -1,9 +1,8 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.DependencyInjection
 {
     using Configuration.Interceptors;
-    using Configuration.Options;
-    using Configuration.Options.Internal;
     using Data;
+    using DotNetToolkit.Repository.Internal;
     using Extensions.Unity;
     using InMemory;
     using Services;

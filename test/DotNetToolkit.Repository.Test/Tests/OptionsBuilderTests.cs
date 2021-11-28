@@ -1,7 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Test
 {
     using Configuration.Logging;
-    using Configuration.Options;
     using Data;
     using InMemory;
     using System;

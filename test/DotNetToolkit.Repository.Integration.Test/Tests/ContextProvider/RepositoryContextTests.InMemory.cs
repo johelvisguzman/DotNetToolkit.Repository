@@ -1,6 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.ContextProvider
 {
-    using Configuration.Options;
     using Data;
     using InMemory;
     using Query;

@@ -2,7 +2,6 @@
 {
     using DotNetToolkit.Wpf.Mvvm;
     using Extensions.Unity;
-    using InMemory;
     using Services;
     using System.Windows;
     using Unity;

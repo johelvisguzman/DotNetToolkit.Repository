@@ -1,7 +1,5 @@
 ﻿namespace DotNetToolkit.Repository.Integration.Test.Data
 {
-    using Configuration.Options;
-
     public interface ITestCustomerRepository : IRepository<Customer> { }
 
     public class TestCustomerRepository : RepositoryBase<Customer, int>, ITestCustomerRepository
