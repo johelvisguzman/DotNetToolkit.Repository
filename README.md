@@ -109,7 +109,7 @@ If you want to use DotNetToolkit.Repository for the first time, the [Getting Sta
 
 ## Features
 
-The DotNetToolkit.Repository includes basic repository objects for handling the data access layer, and it is able to support [fetch strategies, specification strategies](https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Query-Options-&-Results), [services and transactions (Unit Of Work)](https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Services), and [caching](https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Caching). The ability for [executing raw SQL queries](https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Execute-Raw-Sql-Queries) is even allowed.
+The DotNetToolkit.Repository includes basic repository objects for handling the data access layer, and it is able to support [fetch strategies, specification strategies](https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Query-Options-&-Results), [services, transactions (Unit Of Work)](https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Services), and [caching](https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Caching). The ability for [executing raw SQL queries](https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Execute-Raw-Sql-Queries) is even allowed.
 
 ## Project Wiki
 
