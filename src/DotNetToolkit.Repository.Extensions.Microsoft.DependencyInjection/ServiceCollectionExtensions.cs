@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Extensions.Microsoft.DependencyInjection
 {
+    using Configuration.Caching;
     using Configuration.Interceptors;
     using Configuration.Logging;
     using global::Microsoft.Extensions.DependencyInjection;
@@ -99,19 +100,29 @@
 
                     foreach (var interceptorType in scanResults.OfType<IRepositoryInterceptor>())
                     {
-                        if (!optionsBuilder.Options.Interceptors.ContainsKey(interceptorType))
+                        if (!options.Interceptors.ContainsKey(interceptorType))
                         {
                             options = options.With(interceptorType, () => (IRepositoryInterceptor)sp.GetService(interceptorType));
                         }
                     }
 
-                    if (optionsBuilder.Options.LoggerProvider == null)
+                    if (options.LoggerProvider == null)
                     {
                         var loggerProviderType = scanResults.OfType<ILoggerProvider>().FirstOrDefault();
 
                         if (loggerProviderType != null)
                         {
                             options = options.With((ILoggerProvider)sp.GetService(loggerProviderType));
+                        }
+                    }
+
+                    if (options.CachingProvider == null)
+                    {
+                        var cacheProviderType = scanResults.OfType<ICacheProvider>().FirstOrDefault();
+
+                        if (cacheProviderType != null)
+                        {
+                            options = options.With((ICacheProvider)sp.GetService(cacheProviderType));
                         }
                     }
 
