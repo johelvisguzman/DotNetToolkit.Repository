@@ -9,7 +9,7 @@
   
   <Product>DotNetToolkit.Repository</Product>
   <Description>.NET Development Toolkit</Description>
-  <Copyright>Copyright (c) 2021 Johelvis Guzman</Copyright>
+  <Copyright>Copyright (c) 2022 Johelvis Guzman</Copyright>
   <Authors>Johelvis Guzman</Authors>
   <PackageIconUrl>https://raw.githubusercontent.com/johelvisguzman/DotNetToolkit.Repository/master/Toolkit.png</PackageIconUrl>
   <PackageProjectUrl>https://github.com/johelvisguzman/DotNetToolkit.Repository</PackageProjectUrl>
