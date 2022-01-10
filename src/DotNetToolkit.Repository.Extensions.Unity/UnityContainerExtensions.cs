@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Extensions.Unity
 {
+    using Configuration.Caching;
     using Configuration.Interceptors;
     using Configuration.Logging;
     using DotNetToolkit.Repository.Internal;
@@ -97,19 +98,29 @@
 
                 foreach (var interceptorType in scanResults.OfType<IRepositoryInterceptor>())
                 {
-                    if (!optionsBuilder.Options.Interceptors.ContainsKey(interceptorType))
+                    if (!options.Interceptors.ContainsKey(interceptorType))
                     {
                         options = options.With(interceptorType, () => (IRepositoryInterceptor)c.Resolve(interceptorType));
                     }
                 }
 
-                if (optionsBuilder.Options.LoggerProvider == null)
+                if (options.LoggerProvider == null)
                 {
                     var loggerProviderType = scanResults.OfType<ILoggerProvider>().FirstOrDefault();
 
                     if (loggerProviderType != null)
                     {
                         options = options.With((ILoggerProvider)c.Resolve(loggerProviderType));
+                    }
+                }
+
+                if (options.CachingProvider == null)
+                {
+                    var cacheProviderType = scanResults.OfType<ICacheProvider>().FirstOrDefault();
+
+                    if (cacheProviderType != null)
+                    {
+                        options = options.With((ICacheProvider)c.Resolve(cacheProviderType));
                     }
                 }
 

@@ -29,6 +29,7 @@
 
             Assert.NotNull(container.Resolve<TestRepositoryInterceptorWithDependencyInjectedServices>());
             Assert.NotNull(container.Resolve<TestLoggerProvider>());
+            Assert.NotNull(container.Resolve<TestCachingProvider>());
             Assert.NotNull(container.Resolve<TestRepositoryTimeStampInterceptor>());
             Assert.NotNull(container.Resolve<TestRepositoryInterceptor>());
             Assert.Equal(3, container.ResolveAll<IRepositoryInterceptor>().Count());
@@ -138,7 +139,7 @@
         }
 
         [Fact]
-        public void DependencyInjectionCanConfigureRepositoriesWithScannedInterceptors()
+        public void DependencyInjectionCanConfigureRepositoryOptionsWithScannedInterceptors()
         {
             var container = new UnityContainer();
 
@@ -158,7 +159,7 @@
         }
 
         [Fact]
-        public void DependencyInjectionCanConfigureLogginProviderWithScannedLogger()
+        public void DependencyInjectionCanConfigureRepositoryOptionsWithScannedScannedLoggerProvider()
         {
             var container = new UnityContainer();
 
@@ -171,12 +172,22 @@
             var repoOptions = container.Resolve<IRepositoryOptions>();
 
             Assert.Equal(typeof(TestXUnitLoggerProvider), repoOptions.LoggerProvider.GetType());
+        }
 
-            Assert.Equal(3, repoOptions.Interceptors.Count());
-            Assert.Equal(3, container.ResolveAll<IRepositoryInterceptor>().Count());
-            Assert.NotNull(container.Resolve<TestRepositoryInterceptorWithDependencyInjectedServices>());
-            Assert.NotNull(container.Resolve<TestRepositoryTimeStampInterceptor>());
-            Assert.NotNull(container.Resolve<TestRepositoryInterceptor>());
+        [Fact]
+        public void DependencyInjectionCanConfigureRepositoryOptionsWithScannedScannedCachingProvider()
+        {
+            var container = new UnityContainer();
+
+            container.RegisterRepositories<MicrosoftDependencyInjectionTests>(options =>
+            {
+                options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
+                options.UseCachingProvider(new TestCachingProvider());
+            });
+
+            var repoOptions = container.Resolve<IRepositoryOptions>();
+
+            Assert.Equal(typeof(TestCachingProvider), repoOptions.CachingProvider.GetType());
         }
     }
 }

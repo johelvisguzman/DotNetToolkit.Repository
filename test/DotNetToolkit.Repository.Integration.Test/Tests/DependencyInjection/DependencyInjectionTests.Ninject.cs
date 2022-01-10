@@ -30,6 +30,8 @@
             });
 
             Assert.NotNull(kernel.Get<TestRepositoryInterceptorWithDependencyInjectedServices>());
+            Assert.NotNull(kernel.Get<TestLoggerProvider>());
+            Assert.NotNull(kernel.Get<TestCachingProvider>());
             Assert.NotNull(kernel.Get<TestRepositoryTimeStampInterceptor>());
             Assert.NotNull(kernel.Get<TestRepositoryInterceptor>());
             Assert.Equal(3, kernel.GetAll<IRepositoryInterceptor>().Count());
@@ -139,7 +141,7 @@
         }
 
         [Fact]
-        public void DependencyInjectionCanConfigureRepositoriesWithScannedInterceptors()
+        public void DependencyInjectionCanConfigureRepositoryOptionsWithScannedInterceptors()
         {
             var kernel = new StandardKernel();
 
@@ -159,7 +161,7 @@
         }
 
         [Fact]
-        public void DependencyInjectionCanConfigureLogginProviderWithScannedLogger()
+        public void DependencyInjectionCanConfigureRepositoryOptionsWithScannedScannedLoggerProvider()
         {
             var kernel = new StandardKernel();
 
@@ -172,12 +174,22 @@
             var repoOptions = kernel.Get<IRepositoryOptions>();
 
             Assert.Equal(typeof(TestXUnitLoggerProvider), repoOptions.LoggerProvider.GetType());
+        }
 
-            Assert.Equal(3, repoOptions.Interceptors.Count());
-            Assert.Equal(3, kernel.GetAll<IRepositoryInterceptor>().Count());
-            Assert.NotNull(kernel.Get<TestRepositoryInterceptorWithDependencyInjectedServices>());
-            Assert.NotNull(kernel.Get<TestRepositoryTimeStampInterceptor>());
-            Assert.NotNull(kernel.Get<TestRepositoryInterceptor>());
+        [Fact]
+        public void DependencyInjectionCanConfigureRepositoryOptionsWithScannedScannedCachingProvider()
+        {
+            var kernel = new StandardKernel();
+
+            kernel.BindRepositories<MicrosoftDependencyInjectionTests>(options =>
+            {
+                options.UseInMemoryDatabase(Guid.NewGuid().ToString(), ignoreTransactionWarning: true);
+                options.UseCachingProvider(new TestCachingProvider());
+            });
+
+            var repoOptions = kernel.Get<IRepositoryOptions>();
+
+            Assert.Equal(typeof(TestCachingProvider), repoOptions.CachingProvider.GetType());
         }
     }
 }
