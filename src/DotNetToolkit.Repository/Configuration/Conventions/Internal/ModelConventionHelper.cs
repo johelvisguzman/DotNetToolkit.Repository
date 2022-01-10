@@ -5,6 +5,8 @@
     using JetBrains.Annotations;
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
     using System.Reflection;
@@ -157,6 +159,37 @@
             }
 
             return databaseGeneratedAttribute.DatabaseGeneratedOption == DatabaseGeneratedOption.Identity;
+        }
+
+        public static bool TryValidate<T>(T entity, out string[] errors)
+        {
+            var entityType = typeof(T);
+            var validationContext = new ValidationContext(entity, null, null);
+            var validationResults = new List<ValidationResult>();
+
+            if (!Validator.TryValidateObject(entity, validationContext, validationResults, true))
+            {
+                // Remove error associated to complex properties
+                validationResults.RemoveAll(x =>
+                {
+                    var member = x.MemberNames.First();
+                    var pi = entityType.GetProperty(member);
+
+                    return pi.IsComplex();
+                });
+            }
+
+            errors = validationResults.Select(x => x.ErrorMessage).ToArray();
+
+            return errors.Length <= 0;
+        }
+
+        public static void Validate<T>(T entity)
+        {
+            if (!TryValidate<T>(entity, out var errors))
+            {
+                throw new InvalidOperationException(errors[0]);
+            }
         }
     }
 }

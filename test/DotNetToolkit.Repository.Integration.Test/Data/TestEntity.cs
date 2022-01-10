@@ -156,6 +156,15 @@
         public CustomerWithMultipleAddresses Customer { get; set; }
     }
 
+    public class CustomerWithRequiredName
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+        [Required]
+        public string Name { get; set; }
+    }
+
     public interface IHaveTimeStamp
     {
         DateTime? CreateTime { get; set; }

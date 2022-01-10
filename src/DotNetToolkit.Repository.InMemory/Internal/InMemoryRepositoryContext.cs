@@ -2,6 +2,7 @@
 {
     using Configuration;
     using Configuration.Conventions;
+    using Configuration.Conventions.Internal;
     using Extensions;
     using InMemory.Properties;
     using Query.Strategies;
@@ -84,6 +85,8 @@
         {
             Guard.NotNull(entity, nameof(entity));
 
+            ModelConventionHelper.Validate<TEntity>(entity);
+
             var entityType = typeof(TEntity);
             var keyValues = Conventions.GetPrimaryKeyValues(entity);
 
@@ -110,6 +113,8 @@
         {
             Guard.NotNull(entity, nameof(entity));
 
+            ModelConventionHelper.Validate<TEntity>(entity);
+
             var keyValues = Conventions.GetPrimaryKeyValues(entity);
 
             if (!_db.TryFind<TEntity>(keyValues, out object _))
@@ -123,6 +128,8 @@
         public override void Remove<TEntity>(TEntity entity)
         {
             Guard.NotNull(entity, nameof(entity));
+
+            ModelConventionHelper.Validate<TEntity>(entity);
 
             var keyValues = Conventions.GetPrimaryKeyValues(entity);
 

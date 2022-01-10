@@ -54,6 +54,29 @@
         }
 
         [Fact]
+        public void CanValidateOnCrudOperations()
+        {
+            const string requiredNameError = "The Name field is required.";
+
+            var options = new RepositoryOptionsBuilder()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .UseLoggerProvider(TestXUnitLoggerProvider)
+                .Options;
+
+            var repo = new Repository<CustomerWithRequiredName>(options);
+            var entity = new CustomerWithRequiredName();
+
+            var ex = Assert.Throws<InvalidOperationException>(() => repo.Add(entity));
+            Assert.Equal(requiredNameError, ex.Message);
+
+            ex = Assert.Throws<InvalidOperationException>(() => repo.Update(entity));
+            Assert.Equal(requiredNameError, ex.Message);
+
+            ex = Assert.Throws<InvalidOperationException>(() => repo.Delete(entity));
+            Assert.Equal(requiredNameError, ex.Message);
+        }
+
+        [Fact]
         public void CanBeginNullTransactionWhenWarningIgnored()
         {
             var options = new RepositoryOptionsBuilder()
