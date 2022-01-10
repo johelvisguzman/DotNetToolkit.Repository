@@ -1,5 +1,6 @@
 ﻿namespace DotNetToolkit.Repository.Utility
 {
+    using Configuration.Caching;
     using Configuration.Interceptors;
     using Configuration.Logging;
     using Extensions.Internal;
@@ -20,7 +21,33 @@
         #region Fields
 
         private readonly IEnumerable<Type> _types;
-        private readonly Type[] _interfaceTypesToScan;
+        
+        private readonly Type[] DefaultInterfaceTypesToScan = new[]
+        {
+            typeof(IService<>),
+            typeof(IService<,>),
+            typeof(IService<,,>),
+            typeof(IService<,,,>),
+            typeof(IRepository<>),
+            typeof(IRepository<,>),
+            typeof(IRepository<,,>),
+            typeof(IRepository<,,,>),
+            typeof(IReadOnlyService<>),
+            typeof(IReadOnlyService<,>),
+            typeof(IReadOnlyService<,,>),
+            typeof(IReadOnlyService<,,,>),
+            typeof(IReadOnlyRepository<>),
+            typeof(IReadOnlyRepository<,>),
+            typeof(IReadOnlyRepository<,,>),
+            typeof(IReadOnlyRepository<,,,>),
+            typeof(IRepositoryInterceptor),
+            typeof(ILoggerProvider),
+            typeof(ICacheProvider),
+            typeof(IRepositoryFactory),
+            typeof(IServiceFactory),
+            typeof(IUnitOfWork),
+            typeof(IUnitOfWorkFactory),
+        };
 
         #endregion
 
@@ -32,31 +59,6 @@
         private AssemblyScanner([NotNull] IEnumerable<Type> types)
         {
             _types = Guard.NotNull(types, nameof(types));
-            _interfaceTypesToScan = new[]
-            {
-                typeof(IService<>),
-                typeof(IService<,>),
-                typeof(IService<,,>),
-                typeof(IService<,,,>),
-                typeof(IRepository<>),
-                typeof(IRepository<,>),
-                typeof(IRepository<,,>),
-                typeof(IRepository<,,,>),
-                typeof(IReadOnlyService<>),
-                typeof(IReadOnlyService<,>),
-                typeof(IReadOnlyService<,,>),
-                typeof(IReadOnlyService<,,,>),
-                typeof(IReadOnlyRepository<>),
-                typeof(IReadOnlyRepository<,>),
-                typeof(IReadOnlyRepository<,,>),
-                typeof(IReadOnlyRepository<,,,>),
-                typeof(IRepositoryInterceptor),
-                typeof(ILoggerProvider),
-                typeof(IRepositoryFactory),
-                typeof(IServiceFactory),
-                typeof(IUnitOfWork),
-                typeof(IUnitOfWorkFactory),
-            };
         }
 
         #endregion
@@ -116,7 +118,7 @@
 
         private IEnumerable<AssemblyScanResult> ScanResults()
         {
-            var interfaceTypes = _interfaceTypesToScan
+            var interfaceTypes = DefaultInterfaceTypesToScan
                 .SelectMany(interfaceType => _types.Where(x => !x.GetTypeInfo().IsClass && x.ImplementsInterface(interfaceType)))
                 .Distinct();
 
