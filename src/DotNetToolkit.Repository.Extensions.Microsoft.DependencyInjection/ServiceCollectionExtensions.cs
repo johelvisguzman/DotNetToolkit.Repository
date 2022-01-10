@@ -131,7 +131,8 @@
                 serviceLifetime));
 
             // Register resolver
-            RepositoryDependencyResolver.SetResolver(type => services.BuildServiceProvider().GetService(type));
+            var serviceProvider = services.BuildServiceProvider();
+            RepositoryDependencyResolver.SetResolver(type => serviceProvider.GetService(type));
 
             services.AddSingleton<IRepositoryDependencyResolver>(sp => RepositoryDependencyResolver.Current);
 
