@@ -58,6 +58,15 @@
             Assert.NotNull(uowFactory.CreateInstance<UnitOfWork>());
         }
 
+        [Fact]
+        public void ThrowsIfContextProviderNotConfiguered()
+        {
+            var options = new RepositoryOptionsBuilder().Options;
+            var ex = Assert.Throws<InvalidOperationException>(() => new UnitOfWork(options));
+
+            Assert.Equal("No context provider has been configured. For more information on DotNetToolkit.Repository options configuration, visit the https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Repository-Options-Configuration.", ex.Message);
+        }
+
         private static void TestDisposeRollBackUnCommittedChanges(IUnitOfWorkFactory uowFactory)
         {
             using (var uow = uowFactory.Create())

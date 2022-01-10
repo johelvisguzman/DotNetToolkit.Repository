@@ -61,6 +61,15 @@ namespace DotNetToolkit.Repository.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No context provider has been configured. For more information on DotNetToolkit.Repository options configuration, visit the https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Repository-Options-Configuration..
+        /// </summary>
+        internal static string ContextProviderNotConfiguered {
+            get {
+                return ResourceManager.GetString("ContextProviderNotConfiguered", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The instance of entity type &apos;{0}&apos; cannot be added to the store because another instance of this type with the same key is already being tracked..
         /// </summary>
         internal static string EntityAlreadyBeingTrackedInStore {
