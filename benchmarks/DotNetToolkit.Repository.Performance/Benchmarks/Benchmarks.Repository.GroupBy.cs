@@ -18,9 +18,9 @@
             BaseSetup();
 
             _defaultOptions = new QueryOptions<Customer>()
-                .SatisfyBy(x => x.Name.Equals("Random Name"));
+                .WithFilter(x => x.Name.Equals("Random Name"));
 
-            _pagingOptions = _defaultOptions.Page(1, 10);
+            _pagingOptions = _defaultOptions.WithPage(1, 10);
 
             _customer = new Customer { Id = new System.Random().Next(), Name = "Random Name" };
 

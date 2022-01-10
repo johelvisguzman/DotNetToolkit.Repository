@@ -342,7 +342,7 @@
             }
 
             var options = new QueryOptions<TEntity>()
-                .Include(Conventions.GetByPrimaryKeySpecification<TEntity>(keyValues));
+                .WithFilter(Conventions.GetByPrimaryKeySpecification<TEntity>(keyValues));
 
             var query = AsQueryable(fetchStrategy);
 

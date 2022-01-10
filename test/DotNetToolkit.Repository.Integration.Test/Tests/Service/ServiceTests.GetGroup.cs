@@ -66,7 +66,7 @@
         {
             var service = serviceFactory.Create<Customer>();
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Id);
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Id);
 
             var ex = Assert.Throws<InvalidOperationException>(() => service.GetGroupBy(options, y => y.Name, z => z.Key));
 
@@ -104,7 +104,7 @@
         {
             var service = serviceFactory.Create<Customer>();
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Id);
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Id);
 
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => service.GetGroupByAsync(options, y => y.Name, z => z.Key));
 

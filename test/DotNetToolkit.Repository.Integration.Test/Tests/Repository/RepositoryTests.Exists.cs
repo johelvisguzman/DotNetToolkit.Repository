@@ -49,7 +49,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Name.Equals(name));
+            var options = new QueryOptions<Customer>().WithFilter(x => x.Name.Equals(name));
             var entity = new Customer { Id = 1, Name = name };
 
             Assert.False(repo.Exists(x => x.Name.Equals(name)));
@@ -104,13 +104,13 @@
                 address.Customer = entity;
             }
 
-            Assert.False(customerRepo.Exists(queryOptions.SatisfyBy(x => x.Id == entity.Id && (x.Address != null && x.Address.Street.Equals(address.Street)))));
+            Assert.False(customerRepo.Exists(queryOptions.WithFilter(x => x.Id == entity.Id && (x.Address != null && x.Address.Street.Equals(address.Street)))));
             Assert.False(customerRepo.Exists(x => x.Id == entity.Id && (x.Address != null && x.Address.Street.Equals(address.Street))));
 
             addressRepo.Add(address);
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
-            Assert.True(customerRepo.Exists(queryOptions.SatisfyBy(x => x.Id == entity.Id && (x.Address != null && x.Address.Street.Equals(address.Street)))));
+            Assert.True(customerRepo.Exists(queryOptions.WithFilter(x => x.Id == entity.Id && (x.Address != null && x.Address.Street.Equals(address.Street)))));
             Assert.True(customerRepo.Exists(x => x.Id == entity.Id && (x.Address != null && x.Address.Street.Equals(address.Street))));
         }
 
@@ -120,7 +120,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Name.Equals(name));
+            var options = new QueryOptions<Customer>().WithFilter(x => x.Name.Equals(name));
             var entity = new Customer { Id = 1, Name = name };
 
             Assert.False(await repo.ExistsAsync(x => x.Name.Equals(name)));
@@ -175,13 +175,13 @@
                 address.Customer = entity;
             }
 
-            Assert.False(await customerRepo.ExistsAsync(queryOptions.SatisfyBy(x => x.Id == entity.Id && (x.Address != null && x.Address.Street.Equals(address.Street)))));
+            Assert.False(await customerRepo.ExistsAsync(queryOptions.WithFilter(x => x.Id == entity.Id && (x.Address != null && x.Address.Street.Equals(address.Street)))));
             Assert.False(await customerRepo.ExistsAsync(x => x.Id == entity.Id && (x.Address != null && x.Address.Street.Equals(address.Street))));
 
             await addressRepo.AddAsync(address);
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
-            Assert.True(await customerRepo.ExistsAsync(queryOptions.SatisfyBy(x => x.Id == entity.Id && (x.Address != null && x.Address.Street.Equals(address.Street)))));
+            Assert.True(await customerRepo.ExistsAsync(queryOptions.WithFilter(x => x.Id == entity.Id && (x.Address != null && x.Address.Street.Equals(address.Street)))));
             Assert.True(await customerRepo.ExistsAsync(x => x.Id == entity.Id && (x.Address != null && x.Address.Street.Equals(address.Street))));
         }
     }

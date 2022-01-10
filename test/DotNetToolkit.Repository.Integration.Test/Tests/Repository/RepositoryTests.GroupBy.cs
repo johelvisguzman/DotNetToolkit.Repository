@@ -61,7 +61,7 @@
         {
             var repo = repoFactory.Create<Customer>();
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Id);
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Id);
 
             var ex = Assert.Throws<InvalidOperationException>(() => repo.GroupBy(options, y => y.Name, z => z.Key));
 
@@ -96,7 +96,7 @@
         {
             var repo = repoFactory.Create<Customer>();
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Id);
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Id);
 
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => repo.GroupByAsync(options, y => y.Name, z => z.Key));
 

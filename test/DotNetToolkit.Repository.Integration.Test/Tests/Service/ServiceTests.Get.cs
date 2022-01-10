@@ -149,7 +149,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Name.Equals(name)); ;
+            var options = new QueryOptions<Customer>().WithFilter(x => x.Name.Equals(name)); ;
             var entity = new Customer {Name = name};
 
             Assert.Null(service.Get(x => x.Name.Equals(name)));
@@ -175,7 +175,7 @@
                 new Customer {Name = "Random Name 1"}
             };
 
-            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name).SatisfyBy(x => x.Name.Contains("Random Name"));
+            var options = new QueryOptions<Customer>().WithSortByDescending(x => x.Name).WithFilter(x => x.Name.Contains("Random Name"));
 
             Assert.Null(service.Get(x => x.Name.Contains("Random Name"))?.Name);
             Assert.Null(service.Get(options)?.Name);
@@ -200,7 +200,7 @@
                 new Customer {Name = "Random Name 1"}
             };
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Name).SatisfyBy(x => x.Name.Contains("Random Name"));
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Name).WithFilter(x => x.Name.Contains("Random Name"));
 
             Assert.Null(service.Get(x => x.Name.Contains("Random Name"))?.Name);
             Assert.Null(service.Get(options)?.Name);
@@ -221,7 +221,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Name);
             var entity = new Customer {Name = name};
 
             Assert.Empty(service.GetAll());
@@ -252,7 +252,7 @@
                 new Customer {Id = 3, Name = "Random Name 2"}
             };
 
-            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
+            var options = new QueryOptions<Customer>().WithSortByDescending(x => x.Name);
 
             Assert.Null(service.GetAll().FirstOrDefault()?.Name);
             Assert.Null(service.GetAll(options).Result.FirstOrDefault()?.Name);
@@ -271,7 +271,7 @@
             Assert.Equal(1, service.GetAll<int>(x => x.Id).First());
             Assert.Equal(1, service.GetAll<int>(options, x => x.Id).Result.First());
 
-            options = new QueryOptions<Customer>().OrderByDescending(x => x.Name).OrderByDescending(x => x.Id);
+            options = new QueryOptions<Customer>().WithSortByDescending(x => x.Name).WithSortByDescending(x => x.Id);
 
             Assert.Equal("Random Name 2", service.GetAll().First().Name);
             Assert.Equal("Random Name 2", service.GetAll(options).Result.First().Name);
@@ -294,7 +294,7 @@
                 new Customer {Name = "Random Name 1"}
             };
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Name);
 
             Assert.Null(service.GetAll().FirstOrDefault()?.Name);
             Assert.Null(service.GetAll(options).Result.FirstOrDefault()?.Name);
@@ -308,7 +308,7 @@
             Assert.Equal("Random Name 2", service.GetAll<string>(x => x.Name).First());
             Assert.Equal("Random Name 1", service.GetAll<string>(options, x => x.Name).Result.First());
 
-            options = new QueryOptions<Customer>().OrderBy(x => x.Name).OrderBy(x => x.Id);
+            options = new QueryOptions<Customer>().WithSortBy(x => x.Name).WithSortBy(x => x.Id);
 
             Assert.Equal("Random Name 2", service.GetAll().First().Name);
             Assert.Equal("Random Name 1", service.GetAll(options).Result.First().Name);
@@ -329,7 +329,7 @@
 
             service.Create(entities);
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Id).WithPage(1, 5);
             var queryResult = service.GetAll(options);
 
             Assert.Equal(21, queryResult.Total);
@@ -343,7 +343,7 @@
             Assert.Equal("Random Name 3", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 4", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(2);
+            options = options.WithPage(2);
 
             entitiesInDb = service.GetAll(options).Result;
 
@@ -354,7 +354,7 @@
             Assert.Equal("Random Name 8", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 9", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(3);
+            options = options.WithPage(3);
 
             entitiesInDb = service.GetAll(options).Result;
 
@@ -365,7 +365,7 @@
             Assert.Equal("Random Name 13", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 14", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(4);
+            options = options.WithPage(4);
 
             entitiesInDb = service.GetAll(options).Result;
 
@@ -376,7 +376,7 @@
             Assert.Equal("Random Name 18", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 19", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(5);
+            options = options.WithPage(5);
 
             entitiesInDb = service.GetAll(options).Result;
 
@@ -397,7 +397,7 @@
 
             service.Create(entities);
 
-            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().WithSortByDescending(x => x.Id).WithPage(1, 5);
             var queryResult = service.GetAll(options);
 
             Assert.Equal(21, queryResult.Total);
@@ -411,7 +411,7 @@
             Assert.Equal("Random Name 17", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 16", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(2);
+            options = options.WithPage(2);
 
             entitiesInDb = service.GetAll(options).Result;
 
@@ -422,7 +422,7 @@
             Assert.Equal("Random Name 12", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 11", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(3);
+            options = options.WithPage(3);
 
             entitiesInDb = service.GetAll(options).Result;
 
@@ -433,7 +433,7 @@
             Assert.Equal("Random Name 7", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 6", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(4);
+            options = options.WithPage(4);
 
             entitiesInDb = service.GetAll(options).Result;
 
@@ -444,7 +444,7 @@
             Assert.Equal("Random Name 2", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 1", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(5);
+            options = options.WithPage(5);
 
             entitiesInDb = service.GetAll(options).Result;
 
@@ -523,7 +523,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Name.Equals(name));
+            var options = new QueryOptions<Customer>().WithFilter(x => x.Name.Equals(name));
             var entity = new Customer {Name = name};
 
             Assert.Null(await service.GetAsync(x => x.Name.Equals(name)));
@@ -549,7 +549,7 @@
                 new Customer {Name = "Random Name 1"}
             };
 
-            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name).SatisfyBy(x => x.Name.Contains("Random Name"));
+            var options = new QueryOptions<Customer>().WithSortByDescending(x => x.Name).WithFilter(x => x.Name.Contains("Random Name"));
 
             Assert.Null((await service.GetAsync(x => x.Name.Contains("Random Name")))?.Name);
             Assert.Null((await service.GetAsync(options))?.Name);
@@ -575,7 +575,7 @@
                 new Customer {Name = "Random Name 1"}
             };
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Name).SatisfyBy(x => x.Name.Contains("Random Name"));
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Name).WithFilter(x => x.Name.Contains("Random Name"));
 
             Assert.Null((await service.GetAsync(x => x.Name.Contains("Random Name")))?.Name);
             Assert.Null((await service.GetAsync(options))?.Name);
@@ -597,7 +597,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Name);
             var entity = new Customer {Name = name};
 
             Assert.Empty(await service.GetAllAsync());
@@ -628,7 +628,7 @@
                 new Customer {Id = 3, Name = "Random Name 2"}
             };
 
-            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
+            var options = new QueryOptions<Customer>().WithSortByDescending(x => x.Name);
 
             Assert.Null((await service.GetAllAsync()).FirstOrDefault()?.Name);
             Assert.Null((await service.GetAllAsync(options)).Result.FirstOrDefault()?.Name);
@@ -647,7 +647,7 @@
             Assert.Equal(1, (await service.GetAllAsync<int>(x => x.Id)).First());
             Assert.Equal(1, (await service.GetAllAsync<int>(options, x => x.Id)).Result.First());
 
-            options = new QueryOptions<Customer>().OrderByDescending(x => x.Name).OrderByDescending(x => x.Id);
+            options = new QueryOptions<Customer>().WithSortByDescending(x => x.Name).WithSortByDescending(x => x.Id);
 
             Assert.Equal("Random Name 2", (await service.GetAllAsync()).First().Name);
             Assert.Equal("Random Name 2", (await service.GetAllAsync(options)).Result.First().Name);
@@ -670,7 +670,7 @@
                 new Customer {Name = "Random Name 1"}
             };
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Name);
 
             Assert.Null((await service.GetAllAsync()).FirstOrDefault()?.Name);
             Assert.Null((await service.GetAllAsync(options)).Result.FirstOrDefault()?.Name);
@@ -684,7 +684,7 @@
             Assert.Equal("Random Name 2", (await service.GetAllAsync<string>(x => x.Name)).First());
             Assert.Equal("Random Name 1", (await service.GetAllAsync<string>(options, x => x.Name)).Result.First());
 
-            options = new QueryOptions<Customer>().OrderBy(x => x.Name).OrderBy(x => x.Id);
+            options = new QueryOptions<Customer>().WithSortBy(x => x.Name).WithSortBy(x => x.Id);
 
             Assert.Equal("Random Name 2", (await service.GetAllAsync()).First().Name);
             Assert.Equal("Random Name 1", (await service.GetAllAsync(options)).Result.First().Name);
@@ -705,7 +705,7 @@
 
             await service.CreateAsync(entities);
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Id).WithPage(1, 5);
             var queryResult = await service.GetAllAsync(options);
 
             Assert.Equal(21, queryResult.Total);
@@ -719,7 +719,7 @@
             Assert.Equal("Random Name 3", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 4", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(2);
+            options = options.WithPage(2);
 
             entitiesInDb = (await service.GetAllAsync(options)).Result;
 
@@ -730,7 +730,7 @@
             Assert.Equal("Random Name 8", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 9", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(3);
+            options = options.WithPage(3);
 
             entitiesInDb = (await service.GetAllAsync(options)).Result;
 
@@ -741,7 +741,7 @@
             Assert.Equal("Random Name 13", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 14", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(4);
+            options = options.WithPage(4);
 
             entitiesInDb = (await service.GetAllAsync(options)).Result;
 
@@ -752,7 +752,7 @@
             Assert.Equal("Random Name 18", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 19", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(5);
+            options = options.WithPage(5);
 
             entitiesInDb = (await service.GetAllAsync(options)).Result;
 
@@ -773,7 +773,7 @@
 
             await service.CreateAsync(entities);
 
-            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().WithSortByDescending(x => x.Id).WithPage(1, 5);
             var queryResult = await service.GetAllAsync(options);
 
             Assert.Equal(21, queryResult.Total);
@@ -787,7 +787,7 @@
             Assert.Equal("Random Name 17", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 16", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(2);
+            options = options.WithPage(2);
 
             entitiesInDb = (await service.GetAllAsync(options)).Result;
 
@@ -798,7 +798,7 @@
             Assert.Equal("Random Name 12", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 11", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(3);
+            options = options.WithPage(3);
 
             entitiesInDb = (await service.GetAllAsync(options)).Result;
 
@@ -809,7 +809,7 @@
             Assert.Equal("Random Name 7", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 6", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(4);
+            options = options.WithPage(4);
 
             entitiesInDb = (await service.GetAllAsync(options)).Result;
 
@@ -820,7 +820,7 @@
             Assert.Equal("Random Name 2", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 1", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(5);
+            options = options.WithPage(5);
 
             entitiesInDb = (await service.GetAllAsync(options)).Result;
 
