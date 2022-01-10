@@ -168,4 +168,7 @@
   <data name="GroupBySortingNotSupported" xml:space="preserve">
     <value>This context provider does not support groupby operation with sorting.</value>
   </data>
+  <data name="ContextProviderNotConfiguered" xml:space="preserve">
+    <value>No context provider has been configured. For more information on DotNetToolkit.Repository options configuration, visit the https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Repository-Options-Configuration.</value>
+  </data>
 </root>

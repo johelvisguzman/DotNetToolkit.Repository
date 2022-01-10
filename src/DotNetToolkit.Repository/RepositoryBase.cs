@@ -1039,7 +1039,7 @@
 
             _options = optionsBuilder.Options;
 
-            _contextFactory = Guard.EnsureNotNull(_options.ContextFactory, "No context provider has been configured for this repository.");
+            _contextFactory = Guard.EnsureNotNull(_options.ContextFactory, Resources.ContextProviderNotConfiguered);
 
             // Sets the default logger provider (prints all messages levels)
             _loggerProvider = _options.LoggerProvider ?? new ConsoleLoggerProvider(LogLevel.Debug);

@@ -2,6 +2,7 @@
 {
     using Configuration;
     using JetBrains.Annotations;
+    using Properties;
     using Repository.Internal;
     using System;
     using Utility;
@@ -80,7 +81,7 @@
         {
             Guard.NotNull(options, nameof(options));
 
-            var contextFactory = Guard.EnsureNotNull(options.ContextFactory, "No context provider has been configured for this unit of work.");
+            var contextFactory = Guard.EnsureNotNull(options.ContextFactory, Resources.ContextProviderNotConfiguered);
 
             _context = contextFactory.Create();
             _transactionManager = _context.BeginTransaction();

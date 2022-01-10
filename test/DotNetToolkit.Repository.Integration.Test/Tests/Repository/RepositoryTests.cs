@@ -48,6 +48,15 @@
             ForAllRepositoryFactories(TestThrowsIfEntityHasNoIdOnContextCreation);
         }
 
+        [Fact]
+        public void ThrowsIfContextProviderNotConfiguered()
+        {
+            var options = new RepositoryOptionsBuilder().Options;
+            var ex = Assert.Throws<InvalidOperationException>(() => new Repository<Customer>(options));
+
+            Assert.Equal("No context provider has been configured. For more information on DotNetToolkit.Repository options configuration, visit the https://github.com/johelvisguzman/DotNetToolkit.Repository/wiki/Repository-Options-Configuration.", ex.Message);
+        }
+
         private static void TestFactoryCreate(IRepositoryFactory repoFactory)
         {
             Assert.NotNull(repoFactory.Create<Customer>());
