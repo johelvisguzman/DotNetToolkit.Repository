@@ -401,7 +401,7 @@ WHERE NewCustomers.Id = @p0",
 
             repo.Add(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
+            var queryOptions = new QueryOptions<Customer>().WithFilter(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -453,7 +453,7 @@ WHERE NewCustomers.Id = @p0",
 
             repo.Add(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
+            var queryOptions = new QueryOptions<Customer>().WithFilter(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -505,7 +505,7 @@ WHERE NewCustomers.Id = @p0",
 
             repo.Add(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
+            var queryOptions = new QueryOptions<Customer>().WithFilter(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -557,7 +557,7 @@ WHERE NewCustomers.Id = @p0",
 
             repo.Add(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
+            var queryOptions = new QueryOptions<Customer>().WithFilter(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -609,7 +609,7 @@ WHERE NewCustomers.Id = @p0",
 
             repo.Add(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
+            var queryOptions = new QueryOptions<Customer>().WithFilter(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -661,7 +661,7 @@ WHERE NewCustomers.Id = @p0",
 
             repo.Add(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
+            var queryOptions = new QueryOptions<Customer>().WithFilter(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -800,7 +800,7 @@ WHERE NewCustomers.Id = @p0",
 
             await repo.AddAsync(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
+            var queryOptions = new QueryOptions<Customer>().WithFilter(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -852,7 +852,7 @@ WHERE NewCustomers.Id = @p0",
 
             await repo.AddAsync(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
+            var queryOptions = new QueryOptions<Customer>().WithFilter(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -904,7 +904,7 @@ WHERE NewCustomers.Id = @p0",
 
             await repo.AddAsync(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
+            var queryOptions = new QueryOptions<Customer>().WithFilter(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -956,7 +956,7 @@ WHERE NewCustomers.Id = @p0",
 
             await repo.AddAsync(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
+            var queryOptions = new QueryOptions<Customer>().WithFilter(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -1008,7 +1008,7 @@ WHERE NewCustomers.Id = @p0",
 
             await repo.AddAsync(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
+            var queryOptions = new QueryOptions<Customer>().WithFilter(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);
@@ -1060,7 +1060,7 @@ WHERE NewCustomers.Id = @p0",
 
             await repo.AddAsync(customer);
 
-            var queryOptions = new QueryOptions<Customer>().SatisfyBy(x => x.Id == customer.Id);
+            var queryOptions = new QueryOptions<Customer>().WithFilter(x => x.Id == customer.Id);
 
             Assert.True(repo.CacheEnabled);
             Assert.False(repo.CacheUsed);

@@ -54,15 +54,15 @@
         {
             var copy = new QueryOptions<T>();
 
-            if (this._fetchStrategy != null)
-                copy.Include(this._fetchStrategy);
+            if (_fetchStrategy != null)
+                copy.WithFetch(_fetchStrategy);
 
-            if (this._specificationStrategy != null)
-                copy.Include(this._specificationStrategy);
+            if (_specificationStrategy != null)
+                copy.WithFilter(_specificationStrategy);
 
-            copy._sortingPropertiesMapping = this._sortingPropertiesMapping.ToDictionary(x => x.Key, x => x.Value);
-            copy._pageIndex = this._pageIndex;
-            copy._pageSize = this._pageSize;
+            copy._sortingPropertiesMapping = _sortingPropertiesMapping.ToDictionary(x => x.Key, x => x.Value);
+            copy._pageIndex = _pageIndex;
+            copy._pageSize = _pageSize;
 
             return copy;
         }
@@ -72,7 +72,7 @@
         /// </summary>
         /// <param name="propertyName">The name of the property.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> OrderBy([NotNull] string propertyName)
+        public QueryOptions<T> WithSortBy([NotNull] string propertyName)
         {
             Guard.NotEmpty(propertyName, nameof(propertyName));
 
@@ -89,7 +89,7 @@
         /// </summary>
         /// <param name="propertyName">The name of the property.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> OrderByDescending([NotNull] string propertyName)
+        public QueryOptions<T> WithSortByDescending([NotNull] string propertyName)
         {
             Guard.NotEmpty(propertyName, nameof(propertyName));
 
@@ -106,9 +106,9 @@
         /// </summary>
         /// <param name="property">The sorting property expression.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> OrderBy([NotNull] Expression<Func<T, object>> property)
+        public QueryOptions<T> WithSortBy([NotNull] Expression<Func<T, object>> property)
         {
-            return OrderBy(ExpressionHelper.GetPropertyPath(Guard.NotNull(property, nameof(property))));
+            return WithSortBy(ExpressionHelper.GetPropertyPath(Guard.NotNull(property, nameof(property))));
         }
 
         /// <summary>
@@ -116,9 +116,9 @@
         /// </summary>
         /// <param name="property">The sorting property expression.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> OrderByDescending([NotNull] Expression<Func<T, object>> property)
+        public QueryOptions<T> WithSortByDescending([NotNull] Expression<Func<T, object>> property)
         {
-            return OrderByDescending(ExpressionHelper.GetPropertyPath(Guard.NotNull(property, nameof(property))));
+            return WithSortByDescending(ExpressionHelper.GetPropertyPath(Guard.NotNull(property, nameof(property))));
         }
 
         /// <summary>
@@ -127,7 +127,7 @@
         /// <param name="pageIndex">The zero-based index of the data page to retrieve.</param>
         /// <param name="pageSize">The number of rows of the data page to retrieve.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> Page(int pageIndex, int pageSize)
+        public QueryOptions<T> WithPage(int pageIndex, int pageSize)
         {
             if (pageIndex < 1)
                 throw new ArgumentOutOfRangeException(nameof(pageIndex), "Cannot be lower than 1.");
@@ -146,11 +146,11 @@
         /// </summary>
         /// <param name="pageIndex">The zero-based index of the data page to retrieve.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> Page(int pageIndex)
+        public QueryOptions<T> WithPage(int pageIndex)
         {
             var pageSize = _pageSize == -1 ? DefaultPageSize : _pageSize;
 
-            return Page(pageIndex, pageSize);
+            return WithPage(pageIndex, pageSize);
         }
 
         /// <summary>
@@ -158,7 +158,7 @@
         /// </summary>
         /// <param name="criteria">The specification criteria that is used for matching entities against.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> Include([NotNull] ISpecificationQueryStrategy<T> criteria)
+        public QueryOptions<T> WithFilter([NotNull] ISpecificationQueryStrategy<T> criteria)
         {
             Guard.NotNull(criteria, nameof(criteria));
 
@@ -174,7 +174,7 @@
         /// </summary>
         /// <param name="predicate">A function to filter each entity.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> SatisfyBy([NotNull] Expression<Func<T, bool>> predicate)
+        public QueryOptions<T> WithFilter([NotNull] Expression<Func<T, bool>> predicate)
         {
             Guard.NotNull(predicate, nameof(predicate));
 
@@ -190,11 +190,11 @@
         /// </summary>
         /// <param name="fetchStrategy">Defines the child objects that should be retrieved when loading the entity.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> Include([NotNull] IFetchQueryStrategy<T> fetchStrategy)
+        public QueryOptions<T> WithFetch([NotNull] IFetchQueryStrategy<T> fetchStrategy)
         {
             Guard.NotNull(fetchStrategy, nameof(fetchStrategy));
 
-            var paths = _fetchStrategy != null ? ((IFetchQueryStrategy<T>)_fetchStrategy).PropertyPaths : new List<string>();
+            var paths = _fetchStrategy != null ? _fetchStrategy.PropertyPaths : new List<string>();
             var mergedPaths = paths.Union(fetchStrategy.PropertyPaths).ToList();
 
             _fetchStrategy = _fetchStrategy ?? new FetchQueryStrategy<T>();
@@ -209,7 +209,7 @@
         /// </summary>
         /// <param name="path">The dot-separated list of related objects to return in the query results.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> Fetch([NotNull] string path)
+        public QueryOptions<T> WithFetch([NotNull] string path)
         {
             Guard.NotEmpty(path, nameof(path));
 
@@ -225,9 +225,9 @@
         /// </summary>
         /// <param name="path">A lambda expression representing the path to include.</param>
         /// <returns>The current instance.</returns>
-        public QueryOptions<T> Fetch([NotNull] Expression<Func<T, object>> path)
+        public QueryOptions<T> WithFetch([NotNull] Expression<Func<T, object>> path)
         {
-            return Fetch(Guard.NotNull(path, nameof(path)).ToIncludeString());
+            return WithFetch(Guard.NotNull(path, nameof(path)).ToIncludeString());
         }
 
         #endregion

@@ -182,10 +182,10 @@
             repoD.Add(d);
 
             var queryOptions = new QueryOptions<TableA>()
-                .Fetch(x => x.TableB)
-                .Fetch(x => x.TableB.TableC)
-                .Fetch(x => x.TableB.TableC.TableD)
-                .SatisfyBy(x => x.Id == a.Id);
+                .WithFetch(x => x.TableB)
+                .WithFetch(x => x.TableB.TableC)
+                .WithFetch(x => x.TableB.TableC.TableD)
+                .WithFilter(x => x.Id == a.Id);
 
             var result = repoA.Find(queryOptions);
 
@@ -235,10 +235,10 @@
             repoE.Add(eList);
 
             var queryOptions = new QueryOptions<TableA>()
-                .Fetch(x => x.TableB)
-                .Fetch(x => x.TableE)
-                .Fetch(x => x.TableE.Select(y => y.TableF))
-                .SatisfyBy(x => x.Id == a.Id);
+                .WithFetch(x => x.TableB)
+                .WithFetch(x => x.TableE)
+                .WithFetch(x => x.TableE.Select(y => y.TableF))
+                .WithFilter(x => x.Id == a.Id);
 
             var result = repoA.Find(queryOptions);
 
@@ -279,10 +279,10 @@
             repoG.Add(g);
 
             var queryOptions = new QueryOptions<TableG>()
-                .Fetch(x => x.TableH)
-                .Fetch(x => x.TableH.TableI)
-                .Fetch(x => x.TableH.TableI.TableJ)
-                .SatisfyBy(x => x.Id == g.Id);
+                .WithFetch(x => x.TableH)
+                .WithFetch(x => x.TableH.TableI)
+                .WithFetch(x => x.TableH.TableI.TableJ)
+                .WithFilter(x => x.Id == g.Id);
 
             var result = repoG.Find(queryOptions);
 

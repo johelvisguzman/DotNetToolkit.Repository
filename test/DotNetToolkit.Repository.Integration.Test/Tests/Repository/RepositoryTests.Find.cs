@@ -225,7 +225,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Name.Equals(name));
+            var options = new QueryOptions<Customer>().WithFilter(x => x.Name.Equals(name));
             var entity = new Customer { Id = 1, Name = name };
 
             Assert.Null(repo.Find(x => x.Name.Equals(name)));
@@ -266,7 +266,7 @@
                 new Customer { Id = 2, Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name).SatisfyBy(x => x.Name.Contains("Random Name"));
+            var options = new QueryOptions<Customer>().WithSortByDescending(x => x.Name).WithFilter(x => x.Name.Contains("Random Name"));
 
             Assert.Null(repo.Find(x => x.Name.Contains("Random Name"))?.Name);
             Assert.Null(repo.Find(options)?.Name);
@@ -291,7 +291,7 @@
                 new Customer { Id = 2, Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Name).SatisfyBy(x => x.Name.Contains("Random Name"));
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Name).WithFilter(x => x.Name.Contains("Random Name"));
 
             Assert.Null(repo.Find(x => x.Name.Contains("Random Name"))?.Name);
             Assert.Null(repo.Find(options)?.Name);
@@ -312,7 +312,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Name);
             var entity = new Customer { Id = 1, Name = name };
 
             Assert.Empty(repo.FindAll());
@@ -343,7 +343,7 @@
                 new Customer { Id = 3, Name = "Random Name 2" }
             };
 
-            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
+            var options = new QueryOptions<Customer>().WithSortByDescending(x => x.Name);
 
             Assert.Null(repo.FindAll().FirstOrDefault()?.Name);
             Assert.Null(repo.FindAll(options).Result.FirstOrDefault()?.Name);
@@ -362,7 +362,7 @@
             Assert.Equal(1, repo.FindAll<int>(x => x.Id).First());
             Assert.Equal(1, repo.FindAll<int>(options, x => x.Id).Result.First());
 
-            options = new QueryOptions<Customer>().OrderByDescending(x => x.Name).OrderByDescending(x => x.Id);
+            options = new QueryOptions<Customer>().WithSortByDescending(x => x.Name).WithSortByDescending(x => x.Id);
 
             Assert.Equal("Random Name 2", repo.FindAll().First().Name);
             Assert.Equal("Random Name 2", repo.FindAll(options).Result.First().Name);
@@ -385,7 +385,7 @@
                 new Customer { Id = 2, Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Name);
 
             Assert.Null(repo.FindAll().FirstOrDefault()?.Name);
             Assert.Null(repo.FindAll(options).Result.FirstOrDefault()?.Name);
@@ -399,7 +399,7 @@
             Assert.Equal("Random Name 2", repo.FindAll<string>(x => x.Name).First());
             Assert.Equal("Random Name 1", repo.FindAll<string>(options, x => x.Name).Result.First());
 
-            options = new QueryOptions<Customer>().OrderBy(x => x.Name).OrderBy(x => x.Id);
+            options = new QueryOptions<Customer>().WithSortBy(x => x.Name).WithSortBy(x => x.Id);
 
             Assert.Equal("Random Name 2", repo.FindAll().First().Name);
             Assert.Equal("Random Name 1", repo.FindAll(options).Result.First().Name);
@@ -420,7 +420,7 @@
 
             repo.Add(entities);
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Id).WithPage(1, 5);
             var queryResult = repo.FindAll(options);
 
             Assert.Equal(21, queryResult.Total);
@@ -434,7 +434,7 @@
             Assert.Equal("Random Name 3", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 4", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(2);
+            options = options.WithPage(2);
 
             entitiesInDb = repo.FindAll(options).Result;
 
@@ -445,7 +445,7 @@
             Assert.Equal("Random Name 8", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 9", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(3);
+            options = options.WithPage(3);
 
             entitiesInDb = repo.FindAll(options).Result;
 
@@ -456,7 +456,7 @@
             Assert.Equal("Random Name 13", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 14", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(4);
+            options = options.WithPage(4);
 
             entitiesInDb = repo.FindAll(options).Result;
 
@@ -467,7 +467,7 @@
             Assert.Equal("Random Name 18", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 19", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(5);
+            options = options.WithPage(5);
 
             entitiesInDb = repo.FindAll(options).Result;
 
@@ -488,7 +488,7 @@
 
             repo.Add(entities);
 
-            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().WithSortByDescending(x => x.Id).WithPage(1, 5);
             var queryResult = repo.FindAll(options);
 
             Assert.Equal(21, queryResult.Total);
@@ -502,7 +502,7 @@
             Assert.Equal("Random Name 17", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 16", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(2);
+            options = options.WithPage(2);
 
             entitiesInDb = repo.FindAll(options).Result;
 
@@ -513,7 +513,7 @@
             Assert.Equal("Random Name 12", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 11", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(3);
+            options = options.WithPage(3);
 
             entitiesInDb = repo.FindAll(options).Result;
 
@@ -524,7 +524,7 @@
             Assert.Equal("Random Name 7", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 6", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(4);
+            options = options.WithPage(4);
 
             entitiesInDb = repo.FindAll(options).Result;
 
@@ -535,7 +535,7 @@
             Assert.Equal("Random Name 2", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 1", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(5);
+            options = options.WithPage(5);
 
             entitiesInDb = repo.FindAll(options).Result;
 
@@ -656,7 +656,7 @@
             };
 
             Assert.Null(customerRepo.FindAll(x => x.Id == entity.Id)?.FirstOrDefault()?.Address);
-            Assert.Null(customerRepo.FindAll(queryOptions.SatisfyBy(x => x.Id == entity.Id)).Result?.FirstOrDefault()?.Address);
+            Assert.Null(customerRepo.FindAll(queryOptions.WithFilter(x => x.Id == entity.Id)).Result?.FirstOrDefault()?.Address);
 
             // The customer is required here, otherwise it will throw an exception for entity framework
             if (providerType == ContextProviderType.EntityFramework)
@@ -675,7 +675,7 @@
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(address, customerRepo.FindAll(x => x.Id == entity.Id)?.FirstOrDefault()?.Address);
-            TestCustomerAddress(address, customerRepo.FindAll(queryOptions.SatisfyBy(x => x.Id == entity.Id)).Result?.FirstOrDefault()?.Address);
+            TestCustomerAddress(address, customerRepo.FindAll(queryOptions.WithFilter(x => x.Id == entity.Id)).Result?.FirstOrDefault()?.Address);
         }
 
         private static void TestFindWithNavigationPropertyByCompositeKey_OneToOneRelationship(IRepositoryFactory repoFactory, ContextProviderType providerType)
@@ -728,7 +728,7 @@
             var customerRepo = repoFactory.Create<CustomerWithMultipleAddresses>();
             var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
             var queryOptions = new QueryOptions<CustomerWithMultipleAddresses>();
-            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
+            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().WithFetch(customerFetchStrategy);
 
             var entity = new CustomerWithMultipleAddresses
             {
@@ -752,9 +752,9 @@
             }
 
             Assert.Empty(customerRepo.Find(entity.Id)?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
-            Assert.Empty(customerRepo.Find(queryOptions.SatisfyBy(x => x.Id == entity.Id))?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+            Assert.Empty(customerRepo.Find(queryOptions.WithFilter(x => x.Id == entity.Id))?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
             Assert.Empty(customerRepo.Find(entity.Id, customerFetchStrategy)?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
-            Assert.Empty(customerRepo.Find(optionsWithFetchStrategy.SatisfyBy(x => x.Id == entity.Id))?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+            Assert.Empty(customerRepo.Find(optionsWithFetchStrategy.WithFilter(x => x.Id == entity.Id))?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
 
             addressRepo.Add(addresses);
 
@@ -764,10 +764,10 @@
             }
 
             Assert.Empty(customerRepo.Find(entity.Id)?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
-            Assert.Empty(customerRepo.Find(queryOptions.SatisfyBy(x => x.Id == entity.Id))?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+            Assert.Empty(customerRepo.Find(queryOptions.WithFilter(x => x.Id == entity.Id))?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
 
             TestCustomerAddress(addresses, customerRepo.Find(entity.Id, customerFetchStrategy).Addresses);
-            TestCustomerAddress(addresses, customerRepo.Find(optionsWithFetchStrategy.SatisfyBy(x => x.Id == entity.Id)).Addresses);
+            TestCustomerAddress(addresses, customerRepo.Find(optionsWithFetchStrategy.WithFilter(x => x.Id == entity.Id)).Addresses);
         }
 
         private static void TestFindAllWithNavigationProperty_OneToManyRelationship(IRepositoryFactory repoFactory)
@@ -776,7 +776,7 @@
             var customerRepo = repoFactory.Create<CustomerWithMultipleAddresses>();
             var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
             var queryOptions = new QueryOptions<CustomerWithMultipleAddresses>();
-            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
+            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().WithFetch(customerFetchStrategy);
 
             var entity = new CustomerWithMultipleAddresses
             {
@@ -799,8 +799,8 @@
                 });
             }
 
-            Assert.Empty(customerRepo.FindAll(queryOptions.SatisfyBy(x => x.Id == entity.Id)).Result?.FirstOrDefault()?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
-            Assert.Empty(customerRepo.FindAll(optionsWithFetchStrategy.SatisfyBy(x => x.Id == entity.Id)).Result.FirstOrDefault().Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+            Assert.Empty(customerRepo.FindAll(queryOptions.WithFilter(x => x.Id == entity.Id)).Result?.FirstOrDefault()?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+            Assert.Empty(customerRepo.FindAll(optionsWithFetchStrategy.WithFilter(x => x.Id == entity.Id)).Result.FirstOrDefault().Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
 
             addressRepo.Add(addresses);
 
@@ -809,9 +809,9 @@
                 address.Customer = entity;
             }
 
-            Assert.Empty(customerRepo.FindAll(queryOptions.SatisfyBy(x => x.Id == entity.Id)).Result?.FirstOrDefault()?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+            Assert.Empty(customerRepo.FindAll(queryOptions.WithFilter(x => x.Id == entity.Id)).Result?.FirstOrDefault()?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
 
-            TestCustomerAddress(addresses, customerRepo.FindAll(optionsWithFetchStrategy.SatisfyBy(x => x.Id == entity.Id)).Result.FirstOrDefault().Addresses);
+            TestCustomerAddress(addresses, customerRepo.FindAll(optionsWithFetchStrategy.WithFilter(x => x.Id == entity.Id)).Result.FirstOrDefault().Addresses);
         }
 
         private static async Task TestFindAsync(IRepositoryFactory repoFactory)
@@ -820,7 +820,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>().SatisfyBy(x => x.Name.Equals(name));
+            var options = new QueryOptions<Customer>().WithFilter(x => x.Name.Equals(name));
             var entity = new Customer { Id = 1, Name = name };
 
             Assert.Null(await repo.FindAsync(x => x.Name.Equals(name)));
@@ -861,7 +861,7 @@
                 new Customer { Id = 2, Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name).SatisfyBy(x => x.Name.Contains("Random Name"));
+            var options = new QueryOptions<Customer>().WithSortByDescending(x => x.Name).WithFilter(x => x.Name.Contains("Random Name"));
 
             Assert.Null((await repo.FindAsync(x => x.Name.Contains("Random Name")))?.Name);
             Assert.Null((await repo.FindAsync(options))?.Name);
@@ -886,7 +886,7 @@
                 new Customer { Id = 2, Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Name).SatisfyBy(x => x.Name.Contains("Random Name"));
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Name).WithFilter(x => x.Name.Contains("Random Name"));
 
             Assert.Null((await repo.FindAsync(x => x.Name.Contains("Random Name")))?.Name);
             Assert.Null((await repo.FindAsync(options))?.Name);
@@ -907,7 +907,7 @@
 
             const string name = "Random Name";
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Name);
             var entity = new Customer { Id = 1, Name = name };
 
             Assert.Empty(await repo.FindAllAsync());
@@ -938,7 +938,7 @@
                 new Customer { Id = 3, Name = "Random Name 2" }
             };
 
-            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Name);
+            var options = new QueryOptions<Customer>().WithSortByDescending(x => x.Name);
 
             Assert.Null((await repo.FindAllAsync()).FirstOrDefault()?.Name);
             Assert.Null((await repo.FindAllAsync(options)).Result.FirstOrDefault()?.Name);
@@ -957,7 +957,7 @@
             Assert.Equal(1, (await repo.FindAllAsync<int>(x => x.Id)).First());
             Assert.Equal(1, (await repo.FindAllAsync<int>(options, x => x.Id)).Result.First());
 
-            options = new QueryOptions<Customer>().OrderByDescending(x => x.Name).OrderByDescending(x => x.Id);
+            options = new QueryOptions<Customer>().WithSortByDescending(x => x.Name).WithSortByDescending(x => x.Id);
 
             Assert.Equal("Random Name 2", (await repo.FindAllAsync()).First().Name);
             Assert.Equal("Random Name 2", (await repo.FindAllAsync(options)).Result.First().Name);
@@ -980,7 +980,7 @@
                 new Customer { Id = 2, Name = "Random Name 1" }
             };
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Name);
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Name);
 
             Assert.Null((await repo.FindAllAsync()).FirstOrDefault()?.Name);
             Assert.Null((await repo.FindAllAsync(options)).Result.FirstOrDefault()?.Name);
@@ -994,7 +994,7 @@
             Assert.Equal("Random Name 2", (await repo.FindAllAsync<string>(x => x.Name)).First());
             Assert.Equal("Random Name 1", (await repo.FindAllAsync<string>(options, x => x.Name)).Result.First());
 
-            options = new QueryOptions<Customer>().OrderBy(x => x.Name).OrderBy(x => x.Id);
+            options = new QueryOptions<Customer>().WithSortBy(x => x.Name).WithSortBy(x => x.Id);
 
             Assert.Equal("Random Name 2", (await repo.FindAllAsync()).First().Name);
             Assert.Equal("Random Name 1", (await repo.FindAllAsync(options)).Result.First().Name);
@@ -1015,7 +1015,7 @@
 
             await repo.AddAsync(entities);
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Id).WithPage(1, 5);
             var queryResult = await repo.FindAllAsync(options);
 
             Assert.Equal(21, queryResult.Total);
@@ -1029,7 +1029,7 @@
             Assert.Equal("Random Name 3", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 4", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(2);
+            options = options.WithPage(2);
 
             entitiesInDb = (await repo.FindAllAsync(options)).Result;
 
@@ -1040,7 +1040,7 @@
             Assert.Equal("Random Name 8", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 9", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(3);
+            options = options.WithPage(3);
 
             entitiesInDb = (await repo.FindAllAsync(options)).Result;
 
@@ -1051,7 +1051,7 @@
             Assert.Equal("Random Name 13", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 14", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(4);
+            options = options.WithPage(4);
 
             entitiesInDb = (await repo.FindAllAsync(options)).Result;
 
@@ -1062,7 +1062,7 @@
             Assert.Equal("Random Name 18", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 19", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(5);
+            options = options.WithPage(5);
 
             entitiesInDb = (await repo.FindAllAsync(options)).Result;
 
@@ -1083,7 +1083,7 @@
 
             await repo.AddAsync(entities);
 
-            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().WithSortByDescending(x => x.Id).WithPage(1, 5);
             var queryResult = await repo.FindAllAsync(options);
 
             Assert.Equal(21, queryResult.Total);
@@ -1097,7 +1097,7 @@
             Assert.Equal("Random Name 17", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 16", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(2);
+            options = options.WithPage(2);
 
             entitiesInDb = (await repo.FindAllAsync(options)).Result;
 
@@ -1108,7 +1108,7 @@
             Assert.Equal("Random Name 12", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 11", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(3);
+            options = options.WithPage(3);
 
             entitiesInDb = (await repo.FindAllAsync(options)).Result;
 
@@ -1119,7 +1119,7 @@
             Assert.Equal("Random Name 7", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 6", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(4);
+            options = options.WithPage(4);
 
             entitiesInDb = (await repo.FindAllAsync(options)).Result;
 
@@ -1130,7 +1130,7 @@
             Assert.Equal("Random Name 2", entitiesInDb.ElementAt(3).Name);
             Assert.Equal("Random Name 1", entitiesInDb.ElementAt(4).Name);
 
-            options = options.Page(5);
+            options = options.WithPage(5);
 
             entitiesInDb = (await repo.FindAllAsync(options)).Result;
 
@@ -1246,7 +1246,7 @@
             };
 
             Assert.Null(customerRepo.Find(x => x.Id == entity.Id).Address);
-            Assert.Null(customerRepo.Find(queryOptions.SatisfyBy(x => x.Id == entity.Id)).Address);
+            Assert.Null(customerRepo.Find(queryOptions.WithFilter(x => x.Id == entity.Id)).Address);
 
             // The customer is required here, otherwise it will throw an exception for entity framework
             if (providerType == ContextProviderType.EntityFramework)
@@ -1265,7 +1265,7 @@
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(address, customerRepo.Find(x => x.Id == entity.Id).Address);
-            TestCustomerAddress(address, customerRepo.Find(queryOptions.SatisfyBy(x => x.Id == entity.Id)).Address);
+            TestCustomerAddress(address, customerRepo.Find(queryOptions.WithFilter(x => x.Id == entity.Id)).Address);
         }
 
         private static async Task TestFindWithNavigationPropertyAsync_OneToOneRelationship(IRepositoryFactory repoFactory, ContextProviderType providerType)
@@ -1291,7 +1291,7 @@
             };
 
             Assert.Null((await customerRepo.FindAsync(x => x.Id == entity.Id)).Address);
-            Assert.Null((await customerRepo.FindAsync(queryOptions.SatisfyBy(x => x.Id == entity.Id))).Address);
+            Assert.Null((await customerRepo.FindAsync(queryOptions.WithFilter(x => x.Id == entity.Id))).Address);
 
             // The customer is required here, otherwise it will throw an exception for entity framework
             if (providerType == ContextProviderType.EntityFramework)
@@ -1310,7 +1310,7 @@
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(address, (await customerRepo.FindAsync(x => x.Id == entity.Id)).Address);
-            TestCustomerAddress(address, (await customerRepo.FindAsync(queryOptions.SatisfyBy(x => x.Id == entity.Id))).Address);
+            TestCustomerAddress(address, (await customerRepo.FindAsync(queryOptions.WithFilter(x => x.Id == entity.Id))).Address);
         }
 
         private static async Task TestFindAllWithNavigationPropertyAsync_OneToOneRelationship(IRepositoryFactory repoFactory, ContextProviderType providerType)
@@ -1336,7 +1336,7 @@
             };
 
             Assert.Null((await customerRepo.FindAllAsync(x => x.Id == entity.Id))?.FirstOrDefault()?.Address);
-            Assert.Null((await customerRepo.FindAllAsync(queryOptions.SatisfyBy(x => x.Id == entity.Id))).Result?.FirstOrDefault()?.Address);
+            Assert.Null((await customerRepo.FindAllAsync(queryOptions.WithFilter(x => x.Id == entity.Id))).Result?.FirstOrDefault()?.Address);
 
             // The customer is required here, otherwise it will throw an exception for entity framework
             if (providerType == ContextProviderType.EntityFramework)
@@ -1350,7 +1350,7 @@
 
             // for one to one, the navigation properties will be included automatically (no need to fetch)
             TestCustomerAddress(address, (await customerRepo.FindAllAsync(x => x.Id == entity.Id))?.FirstOrDefault()?.Address);
-            TestCustomerAddress(address, (await customerRepo.FindAllAsync(queryOptions.SatisfyBy(x => x.Id == entity.Id))).Result?.FirstOrDefault()?.Address);
+            TestCustomerAddress(address, (await customerRepo.FindAllAsync(queryOptions.WithFilter(x => x.Id == entity.Id))).Result?.FirstOrDefault()?.Address);
         }
 
         private static async Task TestFindWithNavigationPropertyAsync_OneToManyRelationship(IRepositoryFactory repoFactory)
@@ -1359,7 +1359,7 @@
             var customerRepo = repoFactory.Create<CustomerWithMultipleAddresses>();
             var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
             var queryOptions = new QueryOptions<CustomerWithMultipleAddresses>();
-            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
+            var optionsWithFetchStrategy = new QueryOptions<CustomerWithMultipleAddresses>().WithFetch(customerFetchStrategy);
 
             var entity = new CustomerWithMultipleAddresses
             {
@@ -1383,9 +1383,9 @@
             }
 
             Assert.Empty((await customerRepo.FindAsync(entity.Id))?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
-            Assert.Empty((await customerRepo.FindAsync(queryOptions.SatisfyBy(x => x.Id == entity.Id)))?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+            Assert.Empty((await customerRepo.FindAsync(queryOptions.WithFilter(x => x.Id == entity.Id)))?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
             Assert.Empty((await customerRepo.FindAsync(entity.Id, customerFetchStrategy))?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
-            Assert.Empty((await customerRepo.FindAsync(optionsWithFetchStrategy.SatisfyBy(x => x.Id == entity.Id)))?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+            Assert.Empty((await customerRepo.FindAsync(optionsWithFetchStrategy.WithFilter(x => x.Id == entity.Id)))?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
 
             await addressRepo.AddAsync(addresses);
 
@@ -1395,10 +1395,10 @@
             }
 
             Assert.Empty((await customerRepo.FindAsync(entity.Id)).Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
-            Assert.Empty((await customerRepo.FindAsync(queryOptions.SatisfyBy(x => x.Id == entity.Id))).Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+            Assert.Empty((await customerRepo.FindAsync(queryOptions.WithFilter(x => x.Id == entity.Id))).Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
 
             TestCustomerAddress(addresses, (await customerRepo.FindAsync(entity.Id, customerFetchStrategy)).Addresses);
-            TestCustomerAddress(addresses, (await customerRepo.FindAsync(optionsWithFetchStrategy.SatisfyBy(x => x.Id == entity.Id))).Addresses);
+            TestCustomerAddress(addresses, (await customerRepo.FindAsync(optionsWithFetchStrategy.WithFilter(x => x.Id == entity.Id))).Addresses);
         }
 
         private static async Task TestFindAllWithNavigationPropertyAsync_OneToManyRelationship(IRepositoryFactory repoFactory)
@@ -1407,7 +1407,7 @@
             var customerRepo = repoFactory.Create<CustomerWithMultipleAddresses>();
             var customerFetchStrategy = new FetchQueryStrategy<CustomerWithMultipleAddresses>().Fetch(x => x.Addresses);
             var queryOptions = new QueryOptions<CustomerWithMultipleAddresses>();
-            var optionsWithStrategies = new QueryOptions<CustomerWithMultipleAddresses>().Include(customerFetchStrategy);
+            var optionsWithStrategies = new QueryOptions<CustomerWithMultipleAddresses>().WithFetch(customerFetchStrategy);
 
             var entity = new CustomerWithMultipleAddresses
             {
@@ -1430,8 +1430,8 @@
                 });
             }
 
-            Assert.Empty((await customerRepo.FindAllAsync(queryOptions.SatisfyBy(x => x.Id == entity.Id))).Result?.FirstOrDefault()?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
-            Assert.Empty((await customerRepo.FindAllAsync(optionsWithStrategies.SatisfyBy(x => x.Id == entity.Id))).Result?.FirstOrDefault()?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+            Assert.Empty((await customerRepo.FindAllAsync(queryOptions.WithFilter(x => x.Id == entity.Id))).Result?.FirstOrDefault()?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
+            Assert.Empty((await customerRepo.FindAllAsync(optionsWithStrategies.WithFilter(x => x.Id == entity.Id))).Result?.FirstOrDefault()?.Addresses ?? Enumerable.Empty<CustomerAddressWithMultipleAddresses>());
 
             await addressRepo.AddAsync(addresses);
 
@@ -1440,9 +1440,9 @@
                 address.Customer = entity;
             }
 
-            Assert.Null((await customerRepo.FindAllAsync(queryOptions.SatisfyBy(x => x.Id == entity.Id))).Result?.FirstOrDefault()?.Addresses);
+            Assert.Null((await customerRepo.FindAllAsync(queryOptions.WithFilter(x => x.Id == entity.Id))).Result?.FirstOrDefault()?.Addresses);
 
-            TestCustomerAddress(addresses, (await customerRepo.FindAllAsync(optionsWithStrategies.SatisfyBy(x => x.Id == entity.Id))).Result?.FirstOrDefault()?.Addresses);
+            TestCustomerAddress(addresses, (await customerRepo.FindAllAsync(optionsWithStrategies.WithFilter(x => x.Id == entity.Id))).Result?.FirstOrDefault()?.Addresses);
         }
 
         private static void TestCustomerAddress(CustomerAddress expected, CustomerAddress actual)

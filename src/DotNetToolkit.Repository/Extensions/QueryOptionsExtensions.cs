@@ -38,7 +38,7 @@
         /// <returns>The new query options instance.</returns>
         public static IQueryOptions<T> ToQueryOptions<T>([NotNull] this Expression<Func<T, bool>> predicate)
         {
-            return new QueryOptions<T>().SatisfyBy(Guard.NotNull(predicate, nameof(predicate)));
+            return new QueryOptions<T>().WithFilter(Guard.NotNull(predicate, nameof(predicate)));
         }
     }
 }

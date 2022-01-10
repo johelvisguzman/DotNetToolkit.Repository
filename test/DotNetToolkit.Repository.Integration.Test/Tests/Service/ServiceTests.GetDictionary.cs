@@ -90,7 +90,7 @@
                 entities.Add(new Customer {Id = i + 1, Name = "Random Name " + i});
             }
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Id).WithPage(1, 5);
             var expectedDictionary = entities.ToDictionary(x => x.Id);
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
 
@@ -139,7 +139,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x =>
                 service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
 
-            options = options.Page(2);
+            options = options.WithPage(2);
 
             queryResult = service.GetDictionary(options, x => x.Id);
 
@@ -176,7 +176,7 @@
             Assert.False(expectedDictionaryByElementSelector.All(x =>
                 service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
 
-            options = options.Page(3);
+            options = options.WithPage(3);
 
             queryResult = service.GetDictionary(options, x => x.Id);
 
@@ -213,7 +213,7 @@
             Assert.False(expectedDictionaryByElementSelector.All(x =>
                 service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
 
-            options = options.Page(4);
+            options = options.WithPage(4);
 
             queryResult = service.GetDictionary(options, x => x.Id);
 
@@ -250,7 +250,7 @@
             Assert.False(expectedDictionaryByElementSelector.All(x =>
                 service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
 
-            options = options.Page(5);
+            options = options.WithPage(5);
 
             queryResult = service.GetDictionary(options, x => x.Id);
 
@@ -287,7 +287,7 @@
                 entities.Add(new Customer {Id = i + 1, Name = "Random Name " + i});
             }
 
-            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().WithSortByDescending(x => x.Id).WithPage(1, 5);
 
             var expectedDictionary = entities.ToDictionary(x => x.Id);
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
@@ -337,7 +337,7 @@
             Assert.False(expectedDictionaryByElementSelector.All(x =>
                 service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
 
-            options = options.Page(2);
+            options = options.WithPage(2);
 
             queryResult = service.GetDictionary(options, x => x.Id);
 
@@ -374,7 +374,7 @@
             Assert.False(expectedDictionaryByElementSelector.All(x =>
                 service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
 
-            options = options.Page(3);
+            options = options.WithPage(3);
 
             queryResult = service.GetDictionary(options, x => x.Id);
 
@@ -411,7 +411,7 @@
             Assert.False(expectedDictionaryByElementSelector.All(x =>
                 service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
 
-            options = options.Page(4);
+            options = options.WithPage(4);
 
             queryResult = service.GetDictionary(options, x => x.Id);
 
@@ -448,7 +448,7 @@
             Assert.False(expectedDictionaryByElementSelector.All(x =>
                 service.GetDictionary(options, y => y.Id, y => y.Name).Result.Contains(x)));
 
-            options = options.Page(5);
+            options = options.WithPage(5);
 
             queryResult = service.GetDictionary(options, x => x.Id);
 
@@ -518,7 +518,7 @@
                 entities.Add(new Customer {Id = i + 1, Name = "Random Name " + i});
             }
 
-            var options = new QueryOptions<Customer>().OrderBy(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().WithSortBy(x => x.Id).WithPage(1, 5);
             var expectedDictionary = entities.ToDictionary(x => x.Id);
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
 
@@ -567,7 +567,7 @@
             Assert.True(expectedDictionaryByElementSelector.All(x =>
                 service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
 
-            options = options.Page(2);
+            options = options.WithPage(2);
 
             queryResult = await service.GetDictionaryAsync(options, x => x.Id);
 
@@ -604,7 +604,7 @@
             Assert.False(expectedDictionaryByElementSelector.All(x =>
                 service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
 
-            options = options.Page(3);
+            options = options.WithPage(3);
 
             queryResult = await service.GetDictionaryAsync(options, x => x.Id);
 
@@ -641,7 +641,7 @@
             Assert.False(expectedDictionaryByElementSelector.All(x =>
                 service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
 
-            options = options.Page(4);
+            options = options.WithPage(4);
 
             queryResult = await service.GetDictionaryAsync(options, x => x.Id);
 
@@ -678,7 +678,7 @@
             Assert.False(expectedDictionaryByElementSelector.All(x =>
                 service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
 
-            options = options.Page(5);
+            options = options.WithPage(5);
 
             queryResult = await service.GetDictionaryAsync(options, x => x.Id);
 
@@ -715,7 +715,7 @@
                 entities.Add(new Customer {Id = i + 1, Name = "Random Name " + i});
             }
 
-            var options = new QueryOptions<Customer>().OrderByDescending(x => x.Id).Page(1, 5);
+            var options = new QueryOptions<Customer>().WithSortByDescending(x => x.Id).WithPage(1, 5);
 
             var expectedDictionary = entities.ToDictionary(x => x.Id);
             var expectedDictionaryByElementSelector = entities.ToDictionary(x => x.Id, y => y.Name);
@@ -765,7 +765,7 @@
             Assert.False(expectedDictionaryByElementSelector.All(x =>
                 service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
 
-            options = options.Page(2);
+            options = options.WithPage(2);
 
             queryResult = await service.GetDictionaryAsync(options, x => x.Id);
 
@@ -802,7 +802,7 @@
             Assert.False(expectedDictionaryByElementSelector.All(x =>
                 service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
 
-            options = options.Page(3);
+            options = options.WithPage(3);
 
             queryResult = await service.GetDictionaryAsync(options, x => x.Id);
 
@@ -839,7 +839,7 @@
             Assert.False(expectedDictionaryByElementSelector.All(x =>
                 service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
 
-            options = options.Page(4);
+            options = options.WithPage(4);
 
             queryResult = await service.GetDictionaryAsync(options, x => x.Id);
 
@@ -876,7 +876,7 @@
             Assert.False(expectedDictionaryByElementSelector.All(x =>
                 service.GetDictionaryAsync(options, y => y.Id, y => y.Name).Result.Result.Contains(x)));
 
-            options = options.Page(5);
+            options = options.WithPage(5);
 
             queryResult = await service.GetDictionaryAsync(options, x => x.Id);
 
