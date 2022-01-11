@@ -105,7 +105,7 @@ deploy:
 # Deploy to GitHub Releases
 - provider: GitHub
   auth_token:
-      secure: kFfqkCNCS405n1FfAo/51sC5Mff9UR9QBjFfTLHJudNGhhj4X1luHRb6hJEksmQI
+      secure: QSvl6FxTkzzCoy4Coqm5eb9nt13K9Brh3HJrR9n90T9V9+TcZZuZQlxb4vqfL42T
   draft: false
   prerelease: false
   on:
